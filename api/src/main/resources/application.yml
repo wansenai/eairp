@@ -1,0 +1,26 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /
+
+spring:
+  profiles:
+    active: dev
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 100MB
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: always
+    property-naming-strategy: SNAKE_CASE
+
+logging:
+  config: classpath:logback-spring.xml
