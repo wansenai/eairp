@@ -1,2 +1,3 @@
-# WanSen CAD
-The next generation of intelligent ergonomic design CAD products
+# WanSen ERP
+
+Next generation intelligent ERP system
