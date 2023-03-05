@@ -21,11 +21,6 @@ import com.wansentech.entity.User;
 import com.wansentech.mappers.UserMapper;
 import org.springframework.stereotype.Service;
 
-/**
- *
- * @author James Zow
- * @create 2023/3/5
- */
 @Service
 public class UserAggregateImpl extends ServiceImpl<UserMapper, User> implements UserAggregate{
 

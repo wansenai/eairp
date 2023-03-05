@@ -17,11 +17,6 @@ package com.wansentech.entity;
 
 import lombok.Data;
 
-/**
- *
- * @author James Zow
- * @create 2023/3/5
- */
 @Data
 public class User {
 

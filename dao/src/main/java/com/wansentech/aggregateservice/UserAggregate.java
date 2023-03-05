@@ -18,10 +18,5 @@ package com.wansentech.aggregateservice;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansentech.entity.User;
 
-/**
- *
- * @author James Zow
- * @create 2023/3/5
- */
 public interface UserAggregate extends IService<User> {
 }

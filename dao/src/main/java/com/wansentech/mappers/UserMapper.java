@@ -18,10 +18,5 @@ package com.wansentech.mappers;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wansentech.entity.User;
 
-/**
- *
- * @author James Zow
- * @create 2023/3/5
- */
 public interface UserMapper extends BaseMapper<User> {
 }
