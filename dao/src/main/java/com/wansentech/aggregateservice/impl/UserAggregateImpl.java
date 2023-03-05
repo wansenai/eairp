@@ -17,11 +17,28 @@ package com.wansentech.aggregateservice.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansentech.aggregateservice.UserAggregate;
-import com.wansentech.entity.User;
+import com.wansentech.dao.entity.User;
+import com.wansentech.dao.po.UserRegisterPo;
 import com.wansentech.mappers.UserMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserAggregateImpl extends ServiceImpl<UserMapper, User> implements UserAggregate{
 
+    @Override
+    public boolean insertUser(UserRegisterPo userRegisterPo) {
+
+        User user = new User();
+        user.setId(userRegisterPo.getId());
+        user.setName(userRegisterPo.getName());
+        user.setUserName(userRegisterPo.getUserName());
+        user.setPassword(userRegisterPo.getPassword());
+        user.setEmail(userRegisterPo.getEmail());
+        user.setPhoneNumber(userRegisterPo.getPhoneNumber());
+        user.setStatus(0);
+        user.setRemark(userRegisterPo.getRemark());
+        user.setTenantId(0L);
+
+        return save(user);
+    }
 }

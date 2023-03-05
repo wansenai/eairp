@@ -16,7 +16,10 @@
 package com.wansentech.mappers;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.wansentech.entity.User;
 
+import com.wansentech.dao.entity.User;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
 public interface UserMapper extends BaseMapper<User> {
 }
