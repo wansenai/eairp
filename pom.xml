@@ -18,12 +18,12 @@
 		<java.version>17</java.version>
 	</properties>
     <modules>
-        <module>service</module>
+        <module>domain</module>
         <module>utils</module>
         <module>plugs</module>
-        <module>api</module>
+        <module>service</module>
         <module>dao</module>
-        <module>domain</module>
+        <module>api</module>
     </modules>
 	<dependencies>
 		<dependency>
@@ -59,6 +59,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+                    <skip>true</skip>
                     <finalName>${project.artifactId}</finalName>
                     <mainClass>com.wansentech.Application</mainClass>
 					<excludes>
