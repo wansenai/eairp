@@ -19,7 +19,19 @@
     <dependencies>
         <dependency>
             <groupId>wansentech</groupId>
+            <artifactId>domain</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>wansentech</groupId>
             <artifactId>plugs</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>wansentech</groupId>
+            <artifactId>dao</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
