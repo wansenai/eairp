@@ -1,4 +1,4 @@
-/*
+package com.wansentech;/*
  * Copyright 2023 wansentech.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wansentech;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+/**
+ *
+ * @author James Zow
+ * @create 2023/3/5
+ */
+@SpringBootTest(classes = Application.class)
+public class UserSampleTest {
 
-@SpringBootApplication
-@MapperScan("wansentech.dao.mappers")
-@EnableScheduling
-public class Application {
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+    @Test
+    public void testSelect() {
+        System.out.println(("----- selectAll method test ------"));
     }
 }
