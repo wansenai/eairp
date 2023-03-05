@@ -8,7 +8,7 @@
 		<version>3.0.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.wansentech</groupId>
+	<groupId>wansentech</groupId>
 	<artifactId>wansnenerp</artifactId>
     <packaging>pom</packaging>
 	<version>0.0.1-SNAPSHOT</version>
@@ -19,7 +19,7 @@
 	</properties>
     <modules>
         <module>service</module>
-        <module>configuration</module>
+        <module>utils</module>
         <module>plugs</module>
         <module>api</module>
         <module>dao</module>
@@ -49,6 +49,19 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.32</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
+            <version>3.4.1</version>
         </dependency>
 	</dependencies>
 
