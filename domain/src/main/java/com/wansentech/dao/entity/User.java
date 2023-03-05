@@ -13,38 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wansentech.entity;
+package com.wansentech.dao.entity;
 
 import lombok.Data;
 
-@Data
-public class User {
+import java.io.Serializable;
 
+/**
+ * @author jameszow
+ */
+@Data
+public class User implements Serializable {
+
+    private static final long serialVersionUID = -7992197375083373335L;
+    
     private Long id;
 
-    private String username;
+    private String name;
 
-    private String loginName;
+    private String userName;
 
     private String password;
 
-    private String leaderFlag;
-
-    private String position;
-
-    private String department;
-
     private String email;
 
-    private String phonenum;
+    private String phoneNumber;
 
-    private Byte ismanager;
-
-    private Byte isystem;
-
-    private Byte status;
-
-    private String description;
+    private int status;
 
     private String remark;
 
