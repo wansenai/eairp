@@ -20,6 +20,6 @@
  * dto: Data Transfer Object
  * vo: View Object
  *
- * package com.wansentech.entity;
+ * package wansentech.entity;
  */
 package com.wansentech.entity;

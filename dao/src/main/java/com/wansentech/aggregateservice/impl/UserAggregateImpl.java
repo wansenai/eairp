@@ -13,18 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wansentech;
+package com.wansentech.aggregateservice.impl;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansentech.aggregateservice.UserAggregate;
+import com.wansentech.entity.User;
+import com.wansentech.mappers.UserMapper;
+import org.springframework.stereotype.Service;
 
-@SpringBootApplication
-@MapperScan("wansentech.dao.mappers")
-@EnableScheduling
-public class Application {
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
+/**
+ *
+ * @author James Zow
+ * @create 2023/3/5
+ */
+@Service
+public class UserAggregateImpl extends ServiceImpl<UserMapper, User> implements UserAggregate{
+
 }

@@ -4,11 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>wansnenerp</artifactId>
-        <groupId>com.wansentech</groupId>
+        <groupId>wansentech</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
+    <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>configuration</artifactId>
+    <artifactId>utils</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -16,10 +17,23 @@
     </properties>
 
     <dependencies>
+        <!-- datasource object use-->
         <dependency>
-            <groupId>com.wansentech</groupId>
-            <artifactId>plugs</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.5.1</version>
+        </dependency>
+
+        <!-- mail -->
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.5.3</version>
         </dependency>
     </dependencies>
 

@@ -147,7 +147,7 @@
     </appender>
 
     <springProfile name="dev">
-        <logger name="com.wansentech" level="debug"/>
+        <logger name="wansentech" level="debug"/>
     </springProfile>
 
     <root level="info">

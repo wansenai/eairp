@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wansentech;
+package com.wansentech.mappers;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.wansentech.entity.User;
 
-@SpringBootApplication
-@MapperScan("wansentech.dao.mappers")
-@EnableScheduling
-public class Application {
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
+/**
+ *
+ * @author James Zow
+ * @create 2023/3/5
+ */
+public interface UserMapper extends BaseMapper<User> {
 }
