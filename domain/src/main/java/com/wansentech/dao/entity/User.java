@@ -13,13 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wansentech.aggregateservice;
+package com.wansentech.dao.entity;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansentech.dao.entity.User;
-import com.wansentech.dao.po.UserRegisterPo;
+import lombok.Data;
 
-public interface UserAggregate extends IService<User> {
+import java.io.Serializable;
 
-    boolean insertUser(UserRegisterPo userRegisterPo);
+/**
+ * @author jameszow
+ */
+@Data
+public class User implements Serializable {
+
+    private static final long serialVersionUID = -7992197375083373335L;
+    
+    private Long id;
+
+    private String name;
+
+    private String userName;
+
+    private String password;
+
+    private String email;
+
+    private String phoneNumber;
+
+    private int status;
+
+    private String remark;
+
+    private Long tenantId;
+
 }

@@ -13,46 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wansentech.entity;
-
-import lombok.Data;
 
 /**
+ * package wansentech.entity;
  *
- * @author James Zow
- * @create 2023/3/5
+ * This package store data object, Note: Naming specification (datatable field name, Po)
+ *
+ * entity: Directly corresponding to database native fields And database field 1 to 1
+ * po: Persistence layer object, do not operate the database directly
+ *
  */
-@Data
-public class User {
-
-    private Long id;
-
-    private String username;
-
-    private String loginName;
-
-    private String password;
-
-    private String leaderFlag;
-
-    private String position;
-
-    private String department;
-
-    private String email;
-
-    private String phonenum;
-
-    private Byte ismanager;
-
-    private Byte isystem;
-
-    private Byte status;
-
-    private String description;
-
-    private String remark;
-
-    private Long tenantId;
-
-}
+package com.wansentech.dao;

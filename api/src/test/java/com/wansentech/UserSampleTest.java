@@ -16,11 +16,6 @@ package com.wansentech;/*
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-/**
- *
- * @author James Zow
- * @create 2023/3/5
- */
 @SpringBootTest(classes = Application.class)
 public class UserSampleTest {
 

@@ -13,13 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wansentech.aggregateservice;
+package com.wansentech.dao.po;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansentech.dao.entity.User;
-import com.wansentech.dao.po.UserRegisterPo;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface UserAggregate extends IService<User> {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserRegisterPo {
 
-    boolean insertUser(UserRegisterPo userRegisterPo);
+    private Long id;
+
+    private String name;
+
+    private String userName;
+
+    private String password;
+
+    private String email;
+
+    private String phoneNumber;
+
+    private int status;
+
+    private String remark;
+
+    private Long tenantId;
 }

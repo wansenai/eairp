@@ -18,21 +18,14 @@
 		<java.version>17</java.version>
 	</properties>
     <modules>
-        <module>service</module>
+        <module>domain</module>
         <module>utils</module>
         <module>plugs</module>
-        <module>api</module>
+        <module>service</module>
         <module>dao</module>
+        <module>api</module>
     </modules>
 	<dependencies>
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-data-jdbc</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-data-jpa</artifactId>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -58,11 +51,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
-            <version>3.4.1</version>
-        </dependency>
 	</dependencies>
 
 	<build>
@@ -71,6 +59,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+                    <skip>true</skip>
                     <finalName>${project.artifactId}</finalName>
                     <mainClass>com.wansentech.Application</mainClass>
 					<excludes>

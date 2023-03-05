@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.wansentech.api.dto;
 
-/**
- * This package store data object, Note: Naming specification (Dto, Vo)
- *
- * dto: Data Transfer Object
- * vo: View Object
- *
- * package wansentech.entity;
- */
-package com.wansentech.entity;
+import lombok.Data;
+
+@Data
+public class UserRegisterDto {
+
+    private String userName;
+
+    private String password;
+
+    private String email;
+
+    private String phoneNumber;
+}

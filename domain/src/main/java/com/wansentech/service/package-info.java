@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wansentech.aggregateservice;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansentech.dao.entity.User;
-import com.wansentech.dao.po.UserRegisterPo;
-
-public interface UserAggregate extends IService<User> {
-
-    boolean insertUser(UserRegisterPo userRegisterPo);
-}
+/**
+ * package wansentech.entity;
+ *
+ * This package store data object, Note: Naming specification (Bo, do)
+ *
+ * bo: Business Object, Assembly of multiple persistence layer objects.
+ * do: Domain Object, The corresponding entity of the receiving database has some mapping relationship with the database
+ *
+ * Note: Currently, the domain object has not been used, which does not mean that it will not be used later
+ */
+package com.wansentech.service;

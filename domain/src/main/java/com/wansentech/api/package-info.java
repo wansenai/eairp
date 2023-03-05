@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wansentech.aggregateservice;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansentech.dao.entity.User;
-import com.wansentech.dao.po.UserRegisterPo;
-
-public interface UserAggregate extends IService<User> {
-
-    boolean insertUser(UserRegisterPo userRegisterPo);
-}
+/**
+ * package wansentech.entity;
+ *
+ * This package store data object, Note: Naming specification (Dto, Vo)
+ *
+ * dto: Data Transfer Object
+ * vo: View Object
+ *
+ */
+package com.wansentech.api;

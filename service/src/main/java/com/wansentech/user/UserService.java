@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wansentech.aggregateservice;
+package com.wansentech.user;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansentech.dao.entity.User;
-import com.wansentech.dao.po.UserRegisterPo;
+import com.wansentech.service.bo.UserRegisterBo;
 
-public interface UserAggregate extends IService<User> {
+public interface UserService {
 
-    boolean insertUser(UserRegisterPo userRegisterPo);
+    int addUser(UserRegisterBo userRegisterBo);
 }

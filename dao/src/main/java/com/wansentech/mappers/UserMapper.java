@@ -16,12 +16,10 @@
 package com.wansentech.mappers;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.wansentech.entity.User;
 
-/**
- *
- * @author James Zow
- * @create 2023/3/5
- */
+import com.wansentech.dao.entity.User;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
 public interface UserMapper extends BaseMapper<User> {
 }
