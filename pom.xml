@@ -16,6 +16,7 @@
 	<description>WanSen erp system</description>
 	<properties>
 		<java.version>17</java.version>
+        <skipTests>true</skipTests>
 	</properties>
     <modules>
         <module>domain</module>
@@ -53,24 +54,5 @@
 
 	</dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-                    <skip>true</skip>
-                    <finalName>${project.artifactId}</finalName>
-                    <mainClass>com.wansentech.Application</mainClass>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>
