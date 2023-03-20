@@ -15,7 +15,9 @@
  */
 package com.wansentech.controller;
 
+import com.wansentech.Response;
 import com.wansentech.api.dto.UserRegisterDto;
+import com.wansentech.enums.CodeEnum;
 import com.wansentech.service.bo.UserRegisterBo;
 import com.wansentech.user.UserService;
 import jakarta.annotation.Resource;
@@ -26,17 +28,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    @PostMapping("/insert")
-    public int UserRegister(@RequestBody UserRegisterDto userRegisterDto){
+    @PostMapping("/register")
+    public Response<String> UserRegister(@RequestBody UserRegisterDto userRegisterDto){
         var userRegisterBo = UserRegisterBo.builder()
                 .name(userRegisterDto.getUserName())
                 .userName(userRegisterDto.getUserName())
@@ -44,8 +46,6 @@ public class UserController {
                 .email(userRegisterDto.getEmail())
                 .phoneNumber(userRegisterDto.getPhoneNumber()).build();
 
-        int result = userService.addUser(userRegisterBo);
-        System.out.println(result);
-        return result;
+        return userService.addUser(userRegisterBo);
     }
 }

@@ -15,6 +15,8 @@
  */
 package com.wansentech.aggregateservice.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansentech.aggregateservice.UserAggregate;
 import com.wansentech.dao.entity.User;
@@ -24,6 +26,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserAggregateImpl extends ServiceImpl<UserMapper, User> implements UserAggregate{
+
+    private UserMapper userMapper;
+
+    public UserAggregateImpl(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
 
     @Override
     public boolean insertUser(UserRegisterPo userRegisterPo) {
@@ -40,5 +48,13 @@ public class UserAggregateImpl extends ServiceImpl<UserMapper, User> implements 
         user.setTenantId(0L);
 
         return save(user);
+    }
+
+    @Override
+    public boolean existUser(String userName) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUserName, userName);
+
+        return userMapper.exists(queryWrapper);
     }
 }

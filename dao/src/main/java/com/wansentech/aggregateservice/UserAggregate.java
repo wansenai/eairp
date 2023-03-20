@@ -16,10 +16,13 @@
 package com.wansentech.aggregateservice;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansentech.Response;
 import com.wansentech.dao.entity.User;
 import com.wansentech.dao.po.UserRegisterPo;
 
 public interface UserAggregate extends IService<User> {
 
     boolean insertUser(UserRegisterPo userRegisterPo);
+
+    boolean existUser(String userName);
 }
