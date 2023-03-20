@@ -15,9 +15,10 @@
  */
 package com.wansentech.user;
 
+import com.wansentech.Response;
 import com.wansentech.service.bo.UserRegisterBo;
 
 public interface UserService {
 
-    int addUser(UserRegisterBo userRegisterBo);
+    Response<String> addUser(UserRegisterBo userRegisterBo);
 }

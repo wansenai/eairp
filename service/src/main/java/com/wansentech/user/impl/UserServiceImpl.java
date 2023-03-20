@@ -15,13 +15,16 @@
  */
 package com.wansentech.user.impl;
 
+import com.wansentech.Response;
 import com.wansentech.SnowflakeIdUtil;
 import com.wansentech.aggregateservice.UserAggregate;
 import com.wansentech.dao.po.UserRegisterPo;
+import com.wansentech.enums.CodeEnum;
 import com.wansentech.mappers.UserMapper;
 import com.wansentech.service.bo.UserRegisterBo;
 import com.wansentech.user.UserService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +34,8 @@ import org.springframework.stereotype.Service;
  * user interface (Service layer)
  */
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
-
-    private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserMapper userMapper;
     private final UserAggregate userAggregate;
@@ -44,7 +46,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public int addUser(UserRegisterBo userRegisterBo) {
+    public Response<String> addUser(UserRegisterBo userRegisterBo) {
+        // check exist user
+        boolean existUserName = userAggregate.existUser(userRegisterBo.getUserName());
+        if (existUserName) {
+            return Response.responseMsg(CodeEnum.USER_EXISTS);
+        }
+
         UserRegisterPo userRegisterPo = UserRegisterPo.builder()
                 .id(SnowflakeIdUtil.nextId())
                 .name(userRegisterBo.getName())
@@ -57,6 +65,10 @@ public class UserServiceImpl implements UserService {
                 tenantId(userRegisterBo.getTenantId()).build();
 
         boolean result = userAggregate.insertUser(userRegisterPo);
-        return 0;
+        if (result) {
+            return Response.responseMsg(CodeEnum.REGISTER_SUCCESS);
+        }
+
+        return Response.fail();
     }
 }
