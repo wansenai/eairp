@@ -17,29 +17,33 @@ package com.wansentech.enums;
 public enum CodeEnum {
 
     // 基本状态码
-    SUCCESS("200", "成功"),
-    ERROR("500", "失败，服务器错误");
+    SUCCESS(200, "成功"),
+    ERROR(500, "失败，服务器错误"),
+
+    // 用户类代码
+    REGISTER_SUCCESS(20001, "用户注册成功"),
+    USER_EXISTS(20002, "用户名已存在");
 
     /**
      * 响应状态码
      */
-    private String code;
+    private Integer code;
 
     /**
      * 响应提示
      */
     private String msg;
 
-    CodeEnum(String code, String msg) {
+    CodeEnum(int code, String msg) {
         this.code = code;
         this.msg = msg;
     }
 
-    public String getCode() {
+    public int getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(int code) {
         this.code = code;
     }
 

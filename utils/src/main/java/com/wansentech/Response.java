@@ -18,31 +18,35 @@ package com.wansentech;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.wansentech.enums.CodeEnum;
 
+import java.io.Serializable;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Response<T> {
+public class Response<T> implements Serializable {
+
+    private static final long serialVersionUID = 793034041048451317L;
 
     private String msg;
 
-    private String code;
+    private Integer code;
 
     private T data;
 
     public static <T> Response<T> success() {
-        return response(CodeEnum.SUCCESS);
+        return responseMsg(CodeEnum.SUCCESS);
     }
 
-    public static <T> Response<T> error() {
-        return response(CodeEnum.ERROR);
+    public static <T> Response<T> fail() {
+        return responseMsg(CodeEnum.ERROR);
     }
 
-    public static <T> Response<T> response(CodeEnum codeEnum) {
+    public static <T> Response<T> responseMsg(CodeEnum codeEnum) {
         Response<T> baseResponse = new Response<T>();
         baseResponse.setCode(codeEnum.getCode());
         baseResponse.setMsg(codeEnum.getMsg());
         return baseResponse;
     }
 
-    public static <T> Response<T> response(String code, String msg) {
+    public static <T> Response<T> responseMsg(int code, String msg) {
         Response<T> baseResponse = new Response<T>();
         baseResponse.setCode(code);
         baseResponse.setMsg(msg);
@@ -56,7 +60,7 @@ public class Response<T> {
         return baseResponse;
     }
 
-    public static <T> Response<T> responseData(String code, T data) {
+    public static <T> Response<T> responseData(int code, T data) {
         Response<T> baseResponse = new Response<T>();
         baseResponse.setCode(code);
         baseResponse.setData(data);
@@ -71,11 +75,11 @@ public class Response<T> {
         this.msg = msg;
     }
 
-    public String getCode() {
+    public int getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(int code) {
         this.code = code;
     }
 
