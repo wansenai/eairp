@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.DepotMapper">
-  <resultMap id="BaseResultMap" type="com.wansensoft.erp.datasource.entities.Depot">
+<mapper namespace="com.wansensoft.datasource.mappers.DepotMapper">
+  <resultMap id="BaseResultMap" type="com.wansensoft.datasource.entities.Depot">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="address" jdbcType="VARCHAR" property="address" />
@@ -78,7 +78,7 @@
     id, name, address, warehousing, truckage, type, sort, remark, principal, enabled, 
     tenant_id, delete_Flag, is_default
   </sql>
-  <select id="selectByExample" parameterType="com.wansensoft.erp.datasource.entities.DepotExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="com.wansensoft.datasource.entities.DepotExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -102,13 +102,13 @@
     delete from jsh_depot
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.wansensoft.erp.datasource.entities.DepotExample">
+  <delete id="deleteByExample" parameterType="com.wansensoft.datasource.entities.DepotExample">
     delete from jsh_depot
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.erp.datasource.entities.Depot">
+  <insert id="insert" parameterType="com.wansensoft.datasource.entities.Depot">
     insert into jsh_depot (id, name, address, 
       warehousing, truckage, type, 
       sort, remark, principal, 
@@ -120,7 +120,7 @@
       #{enabled,jdbcType=BIT}, #{tenantId,jdbcType=BIGINT}, #{deleteFlag,jdbcType=VARCHAR}, 
       #{isDefault,jdbcType=BIT})
   </insert>
-  <insert id="insertSelective" parameterType="com.wansensoft.erp.datasource.entities.Depot">
+  <insert id="insertSelective" parameterType="com.wansensoft.datasource.entities.Depot">
     insert into jsh_depot
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -205,7 +205,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.wansensoft.erp.datasource.entities.DepotExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="com.wansensoft.datasource.entities.DepotExample" resultType="java.lang.Long">
     select count(*) from jsh_depot
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -277,7 +277,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.erp.datasource.entities.Depot">
+  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.datasource.entities.Depot">
     update jsh_depot
     <set>
       <if test="name != null">
@@ -319,7 +319,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.wansensoft.erp.datasource.entities.Depot">
+  <update id="updateByPrimaryKey" parameterType="com.wansensoft.datasource.entities.Depot">
     update jsh_depot
     set name = #{name,jdbcType=VARCHAR},
       address = #{address,jdbcType=VARCHAR},

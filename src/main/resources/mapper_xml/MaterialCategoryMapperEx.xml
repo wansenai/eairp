@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.MaterialCategoryMapperEx">
-    <select id="selectByConditionMaterialCategory" parameterType="com.wansensoft.erp.datasource.entities.MaterialCategoryExample" resultMap="com.wansensoft.erp.datasource.mappers.MaterialCategoryMapper.BaseResultMap">
+<mapper namespace="com.wansensoft.datasource.mappers.MaterialCategoryMapperEx">
+    <select id="selectByConditionMaterialCategory" parameterType="com.wansensoft.datasource.entities.MaterialCategoryExample" resultMap="com.wansensoft.datasource.mappers.MaterialCategoryMapper.BaseResultMap">
         select *
         FROM jsh_material_category
         where 1=1
@@ -34,25 +34,25 @@
         and Id !=1
     </select>
 
-    <resultMap id="BaseTreeResultMap" type="com.wansensoft.erp.datasource.vo.TreeNode">
+    <resultMap id="BaseTreeResultMap" type="com.wansensoft.datasource.vo.TreeNode">
         <result column="id" property="id"/>
         <result column="id" property="key"/>
         <result column="id" property="value"/>
         <result column="name" property="title"/>
         <collection column="{currentId=currentId,id=id}" property="children" javaType="java.util.ArrayList"
-                    ofType="com.wansensoft.erp.datasource.vo.TreeNode" select="getNextNodeTree"/>
+                    ofType="com.wansensoft.datasource.vo.TreeNode" select="getNextNodeTree"/>
     </resultMap>
 
-    <resultMap id="NextTreeResultMap" type="com.wansensoft.erp.datasource.vo.TreeNode">
+    <resultMap id="NextTreeResultMap" type="com.wansensoft.datasource.vo.TreeNode">
         <result column="id" property="id"/>
         <result column="id" property="key"/>
         <result column="id" property="value"/>
         <result column="name" property="title"/>
         <collection column="{currentId=currentId,id=id}" property="children" javaType="java.util.ArrayList"
-                    ofType="com.wansensoft.erp.datasource.vo.TreeNode" select="getNextNodeTree"/>
+                    ofType="com.wansensoft.datasource.vo.TreeNode" select="getNextNodeTree"/>
     </resultMap>
 
-    <resultMap id="ResultCategoryMapList" type="com.wansensoft.erp.datasource.entities.MaterialCategory">
+    <resultMap id="ResultCategoryMapList" type="com.wansensoft.datasource.entities.MaterialCategory">
         <result column="id" jdbcType="BIGINT" property="id" />
     </resultMap>
 
@@ -83,7 +83,7 @@
         </if>
         order by sort asc
     </select>
-    <insert id="addMaterialCategory" parameterType="com.wansensoft.erp.datasource.entities.MaterialCategory"
+    <insert id="addMaterialCategory" parameterType="com.wansensoft.datasource.entities.MaterialCategory"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
        insert into jsh_material_category
         (name, category_level, parent_id, sort,status,serial_no,remark,
@@ -109,9 +109,9 @@
         name=#{name},remark=#{remark}
        where id =#{id}
     </update>
-    <select  id="getMaterialCategoryBySerialNo" resultMap="com.wansensoft.erp.datasource.mappers.MaterialCategoryMapper.BaseResultMap">
+    <select  id="getMaterialCategoryBySerialNo" resultMap="com.wansensoft.datasource.mappers.MaterialCategoryMapper.BaseResultMap">
         select
-        <include refid="com.wansensoft.erp.datasource.mappers.MaterialCategoryMapper.Base_Column_List"/>
+        <include refid="com.wansensoft.datasource.mappers.MaterialCategoryMapper.Base_Column_List"/>
         FROM jsh_material_category
         where 1=1
         and serial_no=#{serialNo}
@@ -120,9 +120,9 @@
         </if>
         and ifnull(delete_flag,'0') !='1'
     </select>
-    <select id="getMaterialCategoryListByCategoryIds"  resultMap="com.wansensoft.erp.datasource.mappers.MaterialCategoryMapper.BaseResultMap">
+    <select id="getMaterialCategoryListByCategoryIds"  resultMap="com.wansensoft.datasource.mappers.MaterialCategoryMapper.BaseResultMap">
         select
-        <include refid="com.wansensoft.erp.datasource.mappers.MaterialCategoryMapper.Base_Column_List" />
+        <include refid="com.wansensoft.datasource.mappers.MaterialCategoryMapper.Base_Column_List" />
         from jsh_material_category
         where 1=1
         and parent_id in (

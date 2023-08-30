@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper  namespace="com.wansensoft.erp.datasource.mappers.DepotItemMapperEx">
+<mapper  namespace="com.wansensoft.datasource.mappers.DepotItemMapperEx">
 
-    <resultMap id="DetailByTypeAndMIdResultMap" type="com.wansensoft.erp.datasource.entities.DepotItemVo4DetailByTypeAndMId">
+    <resultMap id="DetailByTypeAndMIdResultMap" type="com.wansensoft.datasource.entities.DepotItemVo4DetailByTypeAndMId">
         <result column="number" jdbcType="VARCHAR" property="number" />
         <result column="bar_code" jdbcType="VARCHAR" property="barCode" />
         <result column="material_name" jdbcType="VARCHAR" property="materialName" />
@@ -13,12 +13,12 @@
         <result column="oTime" jdbcType="TIMESTAMP" property="otime" />
     </resultMap>
 
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.DepotItemMapper.BaseResultMap" id="ResultAndMaterialMap" type="com.wansensoft.erp.datasource.entities.DepotItemVo4Material">
+    <resultMap extends="com.wansensoft.datasource.mappers.DepotItemMapper.BaseResultMap" id="ResultAndMaterialMap" type="com.wansensoft.datasource.entities.DepotItemVo4Material">
         <result column="mName" jdbcType="VARCHAR" property="mname" />
         <result column="mModel" jdbcType="VARCHAR" property="mmodel" />
     </resultMap>
 
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.DepotItemMapper.BaseResultMap" id="ResultWithInfoExMap" type="com.wansensoft.erp.datasource.entities.DepotItemVo4WithInfoEx">
+    <resultMap extends="com.wansensoft.datasource.mappers.DepotItemMapper.BaseResultMap" id="ResultWithInfoExMap" type="com.wansensoft.datasource.entities.DepotItemVo4WithInfoEx">
         <result column="MName" jdbcType="VARCHAR" property="MName" />
         <result column="MModel" jdbcType="VARCHAR" property="MModel" />
         <result column="MaterialUnit" jdbcType="VARCHAR" property="MaterialUnit" />
@@ -38,7 +38,7 @@
         <result column="purchase_decimal" jdbcType="DECIMAL" property="purchaseDecimal" />
     </resultMap>
 
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.DepotItemMapper.BaseResultMap" id="ResultByMaterial" type="com.wansensoft.erp.datasource.entities.DepotItemVo4WithInfoEx">
+    <resultMap extends="com.wansensoft.datasource.mappers.DepotItemMapper.BaseResultMap" id="ResultByMaterial" type="com.wansensoft.datasource.entities.DepotItemVo4WithInfoEx">
         <result column="MId" jdbcType="VARCHAR" property="MId" />
         <result column="bar_code" jdbcType="VARCHAR" property="barCode" />
         <result column="MName" jdbcType="VARCHAR" property="MName" />
@@ -55,7 +55,7 @@
         <result column="purchase_decimal" jdbcType="DECIMAL" property="purchaseDecimal" />
     </resultMap>
 
-    <resultMap id="ResultStockWarningCount" type="com.wansensoft.erp.datasource.vo.DepotItemStockWarningCount">
+    <resultMap id="ResultStockWarningCount" type="com.wansensoft.datasource.vo.DepotItemStockWarningCount">
         <result column="MId" jdbcType="VARCHAR" property="MId" />
         <result column="bar_code" jdbcType="VARCHAR" property="barCode" />
         <result column="MName" jdbcType="VARCHAR" property="MName" />
@@ -72,7 +72,7 @@
         <result column="high_safe_stock" jdbcType="DECIMAL" property="highSafeStock" />
     </resultMap>
 
-    <resultMap id="stockMap" type="com.wansensoft.erp.datasource.vo.DepotItemVo4Stock">
+    <resultMap id="stockMap" type="com.wansensoft.datasource.vo.DepotItemVo4Stock">
         <result column="inTotal" jdbcType="DECIMAL" property="inTotal" />
         <result column="outTotal" jdbcType="DECIMAL" property="outTotal" />
         <result column="transfInTotal" jdbcType="DECIMAL" property="transfInTotal" />
@@ -83,7 +83,7 @@
         <result column="disAssemOutTotal" jdbcType="DECIMAL" property="disAssemOutTotal" />
     </resultMap>
 
-    <resultMap id="batchNumberListMap" type="com.wansensoft.erp.datasource.vo.DepotItemVoBatchNumberList">
+    <resultMap id="batchNumberListMap" type="com.wansensoft.datasource.vo.DepotItemVoBatchNumberList">
         <result column="id" jdbcType="VARCHAR" property="id" />
         <result column="bar_code" jdbcType="VARCHAR" property="barCode" />
         <result column="name" jdbcType="VARCHAR" property="name" />
@@ -96,12 +96,12 @@
         <result column="total_num" jdbcType="VARCHAR" property="totalNum" />
     </resultMap>
 
-    <resultMap id="materialSumMap" type="com.wansensoft.erp.datasource.entities.DepotItemVo4MaterialAndSum">
+    <resultMap id="materialSumMap" type="com.wansensoft.datasource.entities.DepotItemVo4MaterialAndSum">
         <result column="material_extend_id" jdbcType="VARCHAR" property="materialExtendId" />
         <result column="oper_number" jdbcType="VARCHAR" property="operNumber" />
     </resultMap>
 
-    <select id="selectByConditionDepotItem" parameterType="com.wansensoft.erp.datasource.entities.DepotItemExample" resultMap="com.wansensoft.erp.datasource.mappers.DepotItemMapper.BaseResultMap">
+    <select id="selectByConditionDepotItem" parameterType="com.wansensoft.datasource.entities.DepotItemExample" resultMap="com.wansensoft.datasource.mappers.DepotItemMapper.BaseResultMap">
         select *
         FROM jsh_depot_item
         where 1=1
@@ -141,7 +141,7 @@
         and ifnull(delete_flag,'0') !='1'
     </select>
 
-    <select id="findDetailByDepotIdsAndMaterialIdList" parameterType="com.wansensoft.erp.datasource.entities.DepotItemExample" resultMap="DetailByTypeAndMIdResultMap">
+    <select id="findDetailByDepotIdsAndMaterialIdList" parameterType="com.wansensoft.datasource.entities.DepotItemExample" resultMap="DetailByTypeAndMIdResultMap">
         select tb.* from
         (select dh.number,me.bar_code,m.name material_name,dh.type,dh.sub_type,
         case
@@ -301,7 +301,7 @@
         and ifnull(dh.delete_flag,'0') !='1') tb
     </select>
 
-    <select id="getDetailList" parameterType="com.wansensoft.erp.datasource.entities.DepotItemExample" resultMap="ResultWithInfoExMap">
+    <select id="getDetailList" parameterType="com.wansensoft.datasource.entities.DepotItemExample" resultMap="ResultWithInfoExMap">
         select di.*,m.name MName,m.model MModel,m.unit MaterialUnit,m.color MColor,m.standard MStandard,m.mfrs MMfrs,m.weight, m.img_name,
         m.other_field1 MOtherField1,m.other_field2 MOtherField2,m.other_field3 MOtherField3,m.enable_serial_number, m.enable_batch_number,
         dp1.name DepotName,dp2.name AnotherDepotName, me.bar_code barCode, me.purchase_decimal
@@ -315,7 +315,7 @@
         order by di.id asc
     </select>
 
-    <select id="findByAll" parameterType="com.wansensoft.erp.datasource.entities.DepotItemExample" resultMap="ResultByMaterial">
+    <select id="findByAll" parameterType="com.wansensoft.datasource.entities.DepotItemExample" resultMap="ResultByMaterial">
         select m.id MId, me.bar_code, m.name MName, m.mfrs MMfrs, m.model MModel, m.standard MStandard,
         m.other_field1 MOtherField1,m.other_field2 MOtherField2,m.other_field3 MOtherField3,
         concat_ws('', m.unit, u.basic_unit) MaterialUnit, m.color MColor, m.unit_id, u.name unit_name, ifnull(me.purchase_decimal,0) purchase_decimal
@@ -370,7 +370,7 @@
         group by m.id) cc
     </select>
 
-    <select id="getListWithBugOrSale" parameterType="com.wansensoft.erp.datasource.entities.DepotItemExample" resultMap="ResultByMaterial">
+    <select id="getListWithBugOrSale" parameterType="com.wansensoft.datasource.entities.DepotItemExample" resultMap="ResultByMaterial">
         select m.id MId, me.bar_code, m.name MName, m.mfrs MMfrs, m.model MModel, m.standard MStandard,
         m.other_field1 MOtherField1,m.other_field2 MOtherField2,m.other_field3 MOtherField3,
         concat_ws('', m.unit, u.basic_unit) MaterialUnit, m.color MColor, u.name unit_name
@@ -728,7 +728,7 @@
         </if>
     </sql>
 
-    <select id="findDepotItemListBydepotheadId"  resultType="com.wansensoft.erp.datasource.entities.DepotItem">
+    <select id="findDepotItemListBydepotheadId"  resultType="com.wansensoft.datasource.entities.DepotItem">
         select
         dep.id,dep.header_id,dep.material_id,dep.material_unit,dep.oper_number,
         dep.basic_number,dep.unit_price,dep.tax_unit_price,dep.all_price,dep.remark,
@@ -770,9 +770,9 @@
         )
     </update>
 
-    <select id="getDepotItemListListByDepotIds" resultMap="com.wansensoft.erp.datasource.mappers.DepotItemMapper.BaseResultMap">
+    <select id="getDepotItemListListByDepotIds" resultMap="com.wansensoft.datasource.mappers.DepotItemMapper.BaseResultMap">
         select
-        <include refid="com.wansensoft.erp.datasource.mappers.DepotItemMapper.Base_Column_List" />
+        <include refid="com.wansensoft.datasource.mappers.DepotItemMapper.Base_Column_List" />
         from jsh_depot_item
         where 1=1
         and depot_id in (
@@ -783,9 +783,9 @@
         and ifnull(delete_flag,'0') !='1'
     </select>
 
-    <select id="getDepotItemListListByMaterialIds" resultMap="com.wansensoft.erp.datasource.mappers.DepotItemMapper.BaseResultMap">
+    <select id="getDepotItemListListByMaterialIds" resultMap="com.wansensoft.datasource.mappers.DepotItemMapper.BaseResultMap">
         select
-        <include refid="com.wansensoft.erp.datasource.mappers.DepotItemMapper.Base_Column_List" />
+        <include refid="com.wansensoft.datasource.mappers.DepotItemMapper.Base_Column_List" />
         from jsh_depot_item
         where 1=1
         and material_id in (
@@ -796,7 +796,7 @@
         and ifnull(delete_flag,'0') !='1'
     </select>
 
-    <select id="findStockWarningCount" parameterType="com.wansensoft.erp.datasource.entities.DepotItemExample" resultMap="ResultStockWarningCount">
+    <select id="findStockWarningCount" parameterType="com.wansensoft.datasource.entities.DepotItemExample" resultMap="ResultStockWarningCount">
         select m.id MId, m.name MName, me.bar_code, m.mfrs MMfrs, m.model MModel, m.standard MStandard,m.color MColor,
         m.other_field1 MOtherField1,m.other_field2 MOtherField2,m.other_field3 MOtherField3,d.name depotName,
         m.unit MaterialUnit, u.basic_unit unit_name,mcs.current_number,
@@ -956,7 +956,7 @@
         and di.batch_number=#{batchNumber}
     </select>
 
-    <select id="getDepotItemByBatchNumber" resultType="com.wansensoft.erp.datasource.entities.DepotItem">
+    <select id="getDepotItemByBatchNumber" resultType="com.wansensoft.datasource.entities.DepotItem">
         select di.* from jsh_depot_head dh
         left join jsh_depot_item di on dh.id=di.header_id and ifnull(di.delete_flag,'0') !='1'
         where 1=1
@@ -965,7 +965,7 @@
         and dh.type = '入库'
     </select>
 
-    <select id="getBillItemByParam" resultType="com.wansensoft.erp.datasource.entities.MaterialVo4Unit">
+    <select id="getBillItemByParam" resultType="com.wansensoft.datasource.entities.MaterialVo4Unit">
         select m.id, m.name, m.standard, m.model, me.id meId,me.commodity_unit commodityUnit,
         me.purchase_decimal purchaseDecimal, me.wholesale_decimal wholesaleDecimal, me.bar_code mBarCode, me.sku
         from jsh_material m

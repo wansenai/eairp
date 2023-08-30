@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.SystemConfigMapper">
-  <resultMap id="BaseResultMap" type="com.wansensoft.erp.datasource.entities.SystemConfig">
+<mapper namespace="com.wansensoft.datasource.mappers.SystemConfigMapper">
+  <resultMap id="BaseResultMap" type="com.wansensoft.datasource.entities.SystemConfig">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="company_name" jdbcType="VARCHAR" property="companyName" />
     <result column="company_contacts" jdbcType="VARCHAR" property="companyContacts" />
@@ -86,7 +86,7 @@
     multi_level_approval_flag, multi_bill_type, force_approval_flag, update_unit_price_flag, 
     over_link_bill_flag, tenant_id, delete_flag
   </sql>
-  <select id="selectByExample" parameterType="com.wansensoft.erp.datasource.entities.SystemConfigExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="com.wansensoft.datasource.entities.SystemConfigExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -110,13 +110,13 @@
     delete from jsh_system_config
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.wansensoft.erp.datasource.entities.SystemConfigExample">
+  <delete id="deleteByExample" parameterType="com.wansensoft.datasource.entities.SystemConfigExample">
     delete from jsh_system_config
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.erp.datasource.entities.SystemConfig">
+  <insert id="insert" parameterType="com.wansensoft.datasource.entities.SystemConfig">
     insert into jsh_system_config (id, company_name, company_contacts, 
       company_address, company_tel, company_fax, 
       company_post_code, sale_agreement, depot_flag, 
@@ -134,7 +134,7 @@
       #{overLinkBillFlag,jdbcType=VARCHAR}, #{tenantId,jdbcType=BIGINT}, #{deleteFlag,jdbcType=VARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.wansensoft.erp.datasource.entities.SystemConfig">
+  <insert id="insertSelective" parameterType="com.wansensoft.datasource.entities.SystemConfig">
     insert into jsh_system_config
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -255,7 +255,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.wansensoft.erp.datasource.entities.SystemConfigExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="com.wansensoft.datasource.entities.SystemConfigExample" resultType="java.lang.Long">
     select count(*) from jsh_system_config
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -351,7 +351,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.erp.datasource.entities.SystemConfig">
+  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.datasource.entities.SystemConfig">
     update jsh_system_config
     <set>
       <if test="companyName != null">
@@ -411,7 +411,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.wansensoft.erp.datasource.entities.SystemConfig">
+  <update id="updateByPrimaryKey" parameterType="com.wansensoft.datasource.entities.SystemConfig">
     update jsh_system_config
     set company_name = #{companyName,jdbcType=VARCHAR},
       company_contacts = #{companyContacts,jdbcType=VARCHAR},

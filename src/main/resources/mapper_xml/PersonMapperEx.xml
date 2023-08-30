@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.PersonMapperEx">
-    <select id="selectByConditionPerson" parameterType="com.wansensoft.erp.datasource.entities.PersonExample" resultMap="com.wansensoft.erp.datasource.mappers.PersonMapper.BaseResultMap">
+<mapper namespace="com.wansensoft.datasource.mappers.PersonMapperEx">
+    <select id="selectByConditionPerson" parameterType="com.wansensoft.datasource.entities.PersonExample" resultMap="com.wansensoft.datasource.mappers.PersonMapper.BaseResultMap">
         select *
         FROM jsh_person
         where 1=1

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.MaterialCategoryMapper">
-  <resultMap id="BaseResultMap" type="com.wansensoft.erp.datasource.entities.MaterialCategory">
+<mapper namespace="com.wansensoft.datasource.mappers.MaterialCategoryMapper">
+  <resultMap id="BaseResultMap" type="com.wansensoft.datasource.entities.MaterialCategory">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="category_level" jdbcType="SMALLINT" property="categoryLevel" />
@@ -76,7 +76,7 @@
     id, name, category_level, parent_id, sort, serial_no, remark, create_time, update_time, 
     tenant_id, delete_flag
   </sql>
-  <select id="selectByExample" parameterType="com.wansensoft.erp.datasource.entities.MaterialCategoryExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="com.wansensoft.datasource.entities.MaterialCategoryExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -100,13 +100,13 @@
     delete from jsh_material_category
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.wansensoft.erp.datasource.entities.MaterialCategoryExample">
+  <delete id="deleteByExample" parameterType="com.wansensoft.datasource.entities.MaterialCategoryExample">
     delete from jsh_material_category
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.erp.datasource.entities.MaterialCategory">
+  <insert id="insert" parameterType="com.wansensoft.datasource.entities.MaterialCategory">
     insert into jsh_material_category (id, name, category_level, 
       parent_id, sort, serial_no, 
       remark, create_time, update_time, 
@@ -116,7 +116,7 @@
       #{remark,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
       #{tenantId,jdbcType=BIGINT}, #{deleteFlag,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.wansensoft.erp.datasource.entities.MaterialCategory">
+  <insert id="insertSelective" parameterType="com.wansensoft.datasource.entities.MaterialCategory">
     insert into jsh_material_category
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -189,7 +189,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.wansensoft.erp.datasource.entities.MaterialCategoryExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="com.wansensoft.datasource.entities.MaterialCategoryExample" resultType="java.lang.Long">
     select count(*) from jsh_material_category
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -253,7 +253,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.erp.datasource.entities.MaterialCategory">
+  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.datasource.entities.MaterialCategory">
     update jsh_material_category
     <set>
       <if test="name != null">
@@ -289,7 +289,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.wansensoft.erp.datasource.entities.MaterialCategory">
+  <update id="updateByPrimaryKey" parameterType="com.wansensoft.datasource.entities.MaterialCategory">
     update jsh_material_category
     set name = #{name,jdbcType=VARCHAR},
       category_level = #{categoryLevel,jdbcType=SMALLINT},

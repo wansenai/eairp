@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.MaterialCurrentStockMapper">
-  <resultMap id="BaseResultMap" type="com.wansensoft.erp.datasource.entities.MaterialCurrentStock">
+<mapper namespace="com.wansensoft.datasource.mappers.MaterialCurrentStockMapper">
+  <resultMap id="BaseResultMap" type="com.wansensoft.datasource.entities.MaterialCurrentStock">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="material_id" jdbcType="BIGINT" property="materialId" />
     <result column="depot_id" jdbcType="BIGINT" property="depotId" />
@@ -70,7 +70,7 @@
   <sql id="Base_Column_List">
     id, material_id, depot_id, current_number, tenant_id, delete_flag
   </sql>
-  <select id="selectByExample" parameterType="com.wansensoft.erp.datasource.entities.MaterialCurrentStockExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="com.wansensoft.datasource.entities.MaterialCurrentStockExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -94,13 +94,13 @@
     delete from jsh_material_current_stock
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.wansensoft.erp.datasource.entities.MaterialCurrentStockExample">
+  <delete id="deleteByExample" parameterType="com.wansensoft.datasource.entities.MaterialCurrentStockExample">
     delete from jsh_material_current_stock
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.erp.datasource.entities.MaterialCurrentStock">
+  <insert id="insert" parameterType="com.wansensoft.datasource.entities.MaterialCurrentStock">
     insert into jsh_material_current_stock (id, material_id, depot_id, 
       current_number, tenant_id, delete_flag
       )
@@ -108,7 +108,7 @@
       #{currentNumber,jdbcType=DECIMAL}, #{tenantId,jdbcType=BIGINT}, #{deleteFlag,jdbcType=VARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.wansensoft.erp.datasource.entities.MaterialCurrentStock">
+  <insert id="insertSelective" parameterType="com.wansensoft.datasource.entities.MaterialCurrentStock">
     insert into jsh_material_current_stock
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -151,7 +151,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.wansensoft.erp.datasource.entities.MaterialCurrentStockExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="com.wansensoft.datasource.entities.MaterialCurrentStockExample" resultType="java.lang.Long">
     select count(*) from jsh_material_current_stock
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -195,7 +195,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.erp.datasource.entities.MaterialCurrentStock">
+  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.datasource.entities.MaterialCurrentStock">
     update jsh_material_current_stock
     <set>
       <if test="materialId != null">
@@ -216,7 +216,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.wansensoft.erp.datasource.entities.MaterialCurrentStock">
+  <update id="updateByPrimaryKey" parameterType="com.wansensoft.datasource.entities.MaterialCurrentStock">
     update jsh_material_current_stock
     set material_id = #{materialId,jdbcType=BIGINT},
       depot_id = #{depotId,jdbcType=BIGINT},

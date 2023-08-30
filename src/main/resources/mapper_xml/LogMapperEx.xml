@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.LogMapperEx">
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.LogMapper.BaseResultMap" id="ResultExMap" type="com.wansensoft.erp.datasource.vo.LogVo4List">
+<mapper namespace="com.wansensoft.datasource.mappers.LogMapperEx">
+    <resultMap extends="com.wansensoft.datasource.mappers.LogMapper.BaseResultMap" id="ResultExMap" type="com.wansensoft.datasource.vo.LogVo4List">
         <result column="userName" jdbcType="VARCHAR" property="userName" />
         <result column="login_name" jdbcType="VARCHAR" property="loginName" />
     </resultMap>
 
-    <select id="selectByConditionLog" parameterType="com.wansensoft.erp.datasource.entities.LogExample" resultMap="ResultExMap">
+    <select id="selectByConditionLog" parameterType="com.wansensoft.datasource.entities.LogExample" resultMap="ResultExMap">
         select l.*,u.login_name,u.username userName
         FROM jsh_log l
         left join jsh_user u on l.user_id = u.id and ifnull(u.Status,'0') !='1'
@@ -79,7 +79,7 @@
         where user_id=#{userId} and operation=#{moduleName} and client_ip=#{clientIp} and create_time=#{createTime}
     </select>
 
-    <insert id="insertLogWithUserId" parameterType="com.wansensoft.erp.datasource.entities.Log">
+    <insert id="insertLogWithUserId" parameterType="com.wansensoft.datasource.entities.Log">
         insert into jsh_log (user_id, operation,
                              client_ip, create_time, status,
                              content, tenant_id)

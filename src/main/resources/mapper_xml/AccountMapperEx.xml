@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.AccountMapperEx">
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.AccountMapper.BaseResultMap" id="ResultListMap" type="com.wansensoft.erp.datasource.vo.AccountVo4List">
+<mapper namespace="com.wansensoft.datasource.mappers.AccountMapperEx">
+    <resultMap extends="com.wansensoft.datasource.mappers.AccountMapper.BaseResultMap" id="ResultListMap" type="com.wansensoft.datasource.vo.AccountVo4List">
         <result column="thisMonthAmount" jdbcType="VARCHAR" property="thisMonthAmount" />
     </resultMap>
 
-    <resultMap id="ResultInOutList" type="com.wansensoft.erp.datasource.vo.AccountVo4InOutList">
+    <resultMap id="ResultInOutList" type="com.wansensoft.datasource.vo.AccountVo4InOutList">
         <result column="Number" jdbcType="VARCHAR" property="number" />
         <result column="newType" jdbcType="VARCHAR" property="type" />
         <result column="fromType" jdbcType="VARCHAR" property="fromType" />
@@ -16,7 +16,7 @@
         <result column="AMList" jdbcType="VARCHAR" property="amList" />
     </resultMap>
 
-    <select id="getAccountByParam" resultType="com.wansensoft.erp.datasource.entities.Account">
+    <select id="getAccountByParam" resultType="com.wansensoft.datasource.entities.Account">
         select *
         FROM jsh_account
         where 1=1
@@ -31,7 +31,7 @@
         and ifnull(delete_flag,'0') !='1'
     </select>
 
-    <select id="selectByConditionAccount" parameterType="com.wansensoft.erp.datasource.entities.AccountExample" resultMap="ResultListMap">
+    <select id="selectByConditionAccount" parameterType="com.wansensoft.datasource.entities.AccountExample" resultMap="ResultListMap">
         select *
         FROM jsh_account
         where 1=1
@@ -74,7 +74,7 @@
         and ifnull(delete_flag,'0') !='1'
     </select>
 
-    <select id="findAccountInOutList" parameterType="com.wansensoft.erp.datasource.entities.AccountExample" resultMap="ResultInOutList">
+    <select id="findAccountInOutList" parameterType="com.wansensoft.datasource.entities.AccountExample" resultMap="ResultInOutList">
         <!--主表出入库涉及的账户 -->
         select dh.number,concat(dh.sub_type,dh.type) as newType, 'bill' as fromType, s.supplier,dh.change_amount,date_format(dh.oper_time,'%Y-%m-%d %H:%i:%S') as oTime,'' as AList,'' as AMList
         from jsh_depot_head dh left join jsh_supplier s on dh.organ_id = s.id and ifnull(s.delete_flag,'0') !='1'

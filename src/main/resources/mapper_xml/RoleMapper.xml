@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.RoleMapper">
-  <resultMap id="BaseResultMap" type="com.wansensoft.erp.datasource.entities.Role">
+<mapper namespace="com.wansensoft.datasource.mappers.RoleMapper">
+  <resultMap id="BaseResultMap" type="com.wansensoft.datasource.entities.Role">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="type" jdbcType="VARCHAR" property="type" />
@@ -74,7 +74,7 @@
   <sql id="Base_Column_List">
     id, name, type, price_limit, value, description, enabled, sort, tenant_id, delete_flag
   </sql>
-  <select id="selectByExample" parameterType="com.wansensoft.erp.datasource.entities.RoleExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="com.wansensoft.datasource.entities.RoleExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -98,13 +98,13 @@
     delete from jsh_role
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.wansensoft.erp.datasource.entities.RoleExample">
+  <delete id="deleteByExample" parameterType="com.wansensoft.datasource.entities.RoleExample">
     delete from jsh_role
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.erp.datasource.entities.Role">
+  <insert id="insert" parameterType="com.wansensoft.datasource.entities.Role">
     insert into jsh_role (id, name, type, 
       price_limit, value, description, 
       enabled, sort, tenant_id, 
@@ -114,7 +114,7 @@
       #{enabled,jdbcType=BIT}, #{sort,jdbcType=VARCHAR}, #{tenantId,jdbcType=BIGINT}, 
       #{deleteFlag,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.wansensoft.erp.datasource.entities.Role">
+  <insert id="insertSelective" parameterType="com.wansensoft.datasource.entities.Role">
     insert into jsh_role
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -181,7 +181,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.wansensoft.erp.datasource.entities.RoleExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="com.wansensoft.datasource.entities.RoleExample" resultType="java.lang.Long">
     select count(*) from jsh_role
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -241,7 +241,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.erp.datasource.entities.Role">
+  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.datasource.entities.Role">
     update jsh_role
     <set>
       <if test="name != null">
@@ -274,7 +274,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.wansensoft.erp.datasource.entities.Role">
+  <update id="updateByPrimaryKey" parameterType="com.wansensoft.datasource.entities.Role">
     update jsh_role
     set name = #{name,jdbcType=VARCHAR},
       type = #{type,jdbcType=VARCHAR},

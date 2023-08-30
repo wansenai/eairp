@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.MsgMapperEx">
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.MsgMapper.BaseResultMap" id="ResultExMap" type="com.wansensoft.erp.datasource.entities.MsgEx">
+<mapper namespace="com.wansensoft.datasource.mappers.MsgMapperEx">
+    <resultMap extends="com.wansensoft.datasource.mappers.MsgMapper.BaseResultMap" id="ResultExMap" type="com.wansensoft.datasource.entities.MsgEx">
     </resultMap>
-    <select id="selectByConditionMsg" parameterType="com.wansensoft.erp.datasource.entities.MsgExample" resultMap="ResultExMap">
+    <select id="selectByConditionMsg" parameterType="com.wansensoft.datasource.entities.MsgExample" resultMap="ResultExMap">
         SELECT *
         FROM jsh_msg
         WHERE 1=1

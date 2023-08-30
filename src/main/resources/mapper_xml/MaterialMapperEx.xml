@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.MaterialMapperEx">
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.MaterialMapper.BaseResultMap" id="ResultMapList" type="com.wansensoft.erp.datasource.entities.MaterialVo4Unit">
+<mapper namespace="com.wansensoft.datasource.mappers.MaterialMapperEx">
+    <resultMap extends="com.wansensoft.datasource.mappers.MaterialMapper.BaseResultMap" id="ResultMapList" type="com.wansensoft.datasource.entities.MaterialVo4Unit">
         <result column="unitName" jdbcType="VARCHAR" property="unitName" />
         <result column="ratio" jdbcType="DECIMAL" property="ratio" />
         <result column="categoryName" jdbcType="VARCHAR" property="categoryName" />
@@ -14,7 +14,7 @@
         <result column="sku" jdbcType="VARCHAR" property="sku" />
     </resultMap>
 
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.MaterialMapper.BaseResultMap" id="ResultMapListWithStock" type="com.wansensoft.erp.datasource.entities.MaterialVo4Unit">
+    <resultMap extends="com.wansensoft.datasource.mappers.MaterialMapper.BaseResultMap" id="ResultMapListWithStock" type="com.wansensoft.datasource.entities.MaterialVo4Unit">
         <result column="unitName" jdbcType="VARCHAR" property="unitName" />
         <result column="categoryName" jdbcType="VARCHAR" property="categoryName" />
         <result column="bar_code" jdbcType="VARCHAR" property="mBarCode" />
@@ -26,18 +26,18 @@
         <result column="currentWeight" jdbcType="DECIMAL" property="currentWeight" />
     </resultMap>
 
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.MaterialMapper.BaseResultMap" id="ResultAndUnitMap" type="com.wansensoft.erp.datasource.entities.MaterialVo4Unit">
+    <resultMap extends="com.wansensoft.datasource.mappers.MaterialMapper.BaseResultMap" id="ResultAndUnitMap" type="com.wansensoft.datasource.entities.MaterialVo4Unit">
         <result column="meId" jdbcType="BIGINT" property="meId" />
         <result column="unit_name" jdbcType="VARCHAR" property="unitName" />
         <result column="sku" jdbcType="VARCHAR" property="sku" />
     </resultMap>
 
-    <resultMap id="InitialStockWithMaterialMap" type="com.wansensoft.erp.datasource.entities.MaterialInitialStockWithMaterial">
+    <resultMap id="InitialStockWithMaterialMap" type="com.wansensoft.datasource.entities.MaterialInitialStockWithMaterial">
         <result column="material_id" jdbcType="BIGINT" property="materialId" />
         <result column="number" jdbcType="DECIMAL" property="number" />
     </resultMap>
 
-    <select id="selectByConditionMaterial" parameterType="com.wansensoft.erp.datasource.entities.MaterialExample" resultMap="ResultMapList">
+    <select id="selectByConditionMaterial" parameterType="com.wansensoft.datasource.entities.MaterialExample" resultMap="ResultMapList">
         select m.*,u.name unitName, mc.name categoryName, me.bar_code,
         me.purchase_decimal, me.commodity_decimal, me.wholesale_decimal,me.low_decimal,me.sku
         FROM jsh_material m
@@ -149,7 +149,7 @@
         and ifnull(m.delete_flag,'0') !='1'
     </select>
 
-    <insert id="insertSelectiveEx" parameterType="com.wansensoft.erp.datasource.entities.Material" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertSelectiveEx" parameterType="com.wansensoft.datasource.entities.Material" useGeneratedKeys="true" keyProperty="id">
         insert into jsh_material
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -289,21 +289,21 @@
         </trim>
     </insert>
 
-    <select id="findUnitList" resultType="com.wansensoft.erp.datasource.entities.Unit">
+    <select id="findUnitList" resultType="com.wansensoft.datasource.entities.Unit">
         select u.* from jsh_unit u
         left join jsh_material m on m.unit_id=u.id and ifnull(m.delete_flag,'0') !='1'
         where m.id = #{mId}
         and ifnull(u.delete_flag,'0') !='1'
     </select>
 
-    <select id="findById" parameterType="com.wansensoft.erp.datasource.entities.MaterialExample" resultMap="ResultAndUnitMap">
+    <select id="findById" parameterType="com.wansensoft.datasource.entities.MaterialExample" resultMap="ResultAndUnitMap">
         select m.*,u.name unit_name from jsh_material m
         left join jsh_unit u on m.unit_id=u.id and ifnull(u.delete_flag,'0') !='1'
         where m.id = #{id}
         and ifnull(m.delete_flag,'0') !='1'
     </select>
 
-    <select id="findByIdWithBarCode" parameterType="com.wansensoft.erp.datasource.entities.MaterialExample" resultMap="ResultAndUnitMap">
+    <select id="findByIdWithBarCode" parameterType="com.wansensoft.datasource.entities.MaterialExample" resultMap="ResultAndUnitMap">
         select m.*,u.name unit_name,me.bar_code m_bar_code, me.commodity_unit, me.purchase_decimal, me.commodity_decimal,
         me.wholesale_decimal, me.low_decimal
         from jsh_material m
@@ -313,7 +313,7 @@
         and ifnull(m.delete_flag,'0') !='1'
     </select>
 
-    <select id="getMaterialByParam" resultType="com.wansensoft.erp.datasource.vo.MaterialVoSearch">
+    <select id="getMaterialByParam" resultType="com.wansensoft.datasource.vo.MaterialVoSearch">
         select me.bar_code, m.name, m.standard, m.model, m.color, me.commodity_unit unit
         from jsh_material m
         left join jsh_material_extend me on m.id = me.material_id and ifnull(me.delete_Flag,'0') !='1'
@@ -327,7 +327,7 @@
         limit 0,20
     </select>
 
-    <select id="findBySelectWithBarCode" parameterType="com.wansensoft.erp.datasource.entities.MaterialExample" resultMap="ResultAndUnitMap">
+    <select id="findBySelectWithBarCode" parameterType="com.wansensoft.datasource.entities.MaterialExample" resultMap="ResultAndUnitMap">
         select m.*,u.name unit_name,mc.name categoryName,me.bar_code m_bar_code,me.id meId,me.commodity_unit,me.sku from jsh_material m
         left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
         left join jsh_unit u on m.unit_id=u.id and ifnull(u.delete_Flag,'0') !='1'
@@ -380,7 +380,7 @@
         and ifnull(m.delete_flag,'0') !='1'
     </select>
 
-    <select id="exportExcel" parameterType="com.wansensoft.erp.datasource.entities.MaterialExample" resultMap="ResultMapList">
+    <select id="exportExcel" parameterType="com.wansensoft.datasource.entities.MaterialExample" resultMap="ResultMapList">
         select m.*,u.name unitName, u.ratio, mc.name categoryName,me.bar_code,me.commodity_unit,me.purchase_decimal, me.commodity_decimal,
         me.wholesale_decimal, me.low_decimal, me.sku
         from jsh_material m
@@ -431,14 +431,14 @@
         order by m.id desc, me.default_flag desc, me.id asc
     </select>
 
-    <select id="getOtherMaterialList" resultType="com.wansensoft.erp.datasource.entities.MaterialExtend">
+    <select id="getOtherMaterialList" resultType="com.wansensoft.datasource.entities.MaterialExtend">
         select me.material_id, me.bar_code, me.commodity_unit from jsh_material_extend me
         where me.default_flag=0 and (me.sku='' or me.sku is null)
         and ifnull(me.delete_Flag,'0') !='1'
         group by me.material_id
     </select>
 
-    <select id="findByMaterialName"  resultType="com.wansensoft.erp.datasource.entities.Material">
+    <select id="findByMaterialName"  resultType="com.wansensoft.datasource.entities.Material">
         select m.*
         FROM jsh_material m
         where 1=1
@@ -489,9 +489,9 @@
         </foreach>
         )
     </update>
-    <select id="getMaterialListByCategoryIds"  resultMap="com.wansensoft.erp.datasource.mappers.MaterialMapper.BaseResultMap">
+    <select id="getMaterialListByCategoryIds"  resultMap="com.wansensoft.datasource.mappers.MaterialMapper.BaseResultMap">
         select
-        <include refid="com.wansensoft.erp.datasource.mappers.MaterialMapper.Base_Column_List" />
+        <include refid="com.wansensoft.datasource.mappers.MaterialMapper.Base_Column_List" />
         from jsh_material
         where 1=1
         and category_id in (
@@ -501,9 +501,9 @@
         )
         and ifnull(delete_flag,'0') !='1'
     </select>
-    <select id="getMaterialListByUnitIds"  resultMap="com.wansensoft.erp.datasource.mappers.MaterialMapper.BaseResultMap">
+    <select id="getMaterialListByUnitIds"  resultMap="com.wansensoft.datasource.mappers.MaterialMapper.BaseResultMap">
         select
-        <include refid="com.wansensoft.erp.datasource.mappers.MaterialMapper.Base_Column_List" />
+        <include refid="com.wansensoft.datasource.mappers.MaterialMapper.Base_Column_List" />
         from jsh_material
         where 1=1
         and unit_id in (
@@ -520,7 +520,7 @@
         and ifnull(me.delete_Flag,'0') !='1'
     </select>
 
-    <select id="getMaterialByMeId" parameterType="com.wansensoft.erp.datasource.entities.MaterialExample" resultMap="ResultMapList">
+    <select id="getMaterialByMeId" parameterType="com.wansensoft.datasource.entities.MaterialExample" resultMap="ResultMapList">
         select m.*,me.bar_code,u.name unitName, mc.name categoryName
         FROM jsh_material m
         left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
@@ -540,7 +540,7 @@
         order by m.name asc
     </select>
 
-    <select id="getMaterialByBarCode" parameterType="com.wansensoft.erp.datasource.entities.MaterialExample" resultMap="ResultAndUnitMap">
+    <select id="getMaterialByBarCode" parameterType="com.wansensoft.datasource.entities.MaterialExample" resultMap="ResultAndUnitMap">
         select m.*,u.name unit_name, me.id meId,me.bar_code m_bar_code, me.commodity_unit, me.purchase_decimal, me.commodity_decimal,
         me.wholesale_decimal, me.low_decimal, me.sku
         from jsh_material m
@@ -556,7 +556,7 @@
         order by m.id desc, me.default_flag desc, me.id asc
     </select>
 
-    <select id="getMaterialByBarCodeAndWithOutMId" parameterType="com.wansensoft.erp.datasource.entities.MaterialExample" resultMap="ResultAndUnitMap">
+    <select id="getMaterialByBarCodeAndWithOutMId" parameterType="com.wansensoft.datasource.entities.MaterialExample" resultMap="ResultAndUnitMap">
         select m.*,u.name unit_name, me.id meId,me.bar_code m_bar_code, me.commodity_unit, me.purchase_decimal, me.commodity_decimal,
         me.wholesale_decimal, me.low_decimal, me.sku
         from jsh_material m
@@ -688,7 +688,7 @@
         ) tb
     </select>
 
-    <select id="getTotalStockAndPrice" resultType="com.wansensoft.erp.datasource.entities.MaterialVo4Unit">
+    <select id="getTotalStockAndPrice" resultType="com.wansensoft.datasource.entities.MaterialVo4Unit">
         select
         ifnull(sum(mcs.current_number),0) currentStock,
         sum(ifnull(me.purchase_decimal,0)*ifnull(mcs.current_number,0)) currentStockPrice,
@@ -761,7 +761,7 @@
         </if>
     </select>
 
-    <select id="getMaterialExtendBySerialNumber" resultType="com.wansensoft.erp.datasource.entities.MaterialExtend">
+    <select id="getMaterialExtendBySerialNumber" resultType="com.wansensoft.datasource.entities.MaterialExtend">
         select me.bar_code
         from jsh_material m
         left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_flag,'0') !='1'

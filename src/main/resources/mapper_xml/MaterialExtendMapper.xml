@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.MaterialExtendMapper">
-  <resultMap id="BaseResultMap" type="com.wansensoft.erp.datasource.entities.MaterialExtend">
+<mapper namespace="com.wansensoft.datasource.mappers.MaterialExtendMapper">
+  <resultMap id="BaseResultMap" type="com.wansensoft.datasource.entities.MaterialExtend">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="material_id" jdbcType="BIGINT" property="materialId" />
     <result column="bar_code" jdbcType="VARCHAR" property="barCode" />
@@ -82,7 +82,7 @@
     wholesale_decimal, low_decimal, default_flag, create_time, create_serial, update_serial, 
     update_time, tenant_id, delete_Flag
   </sql>
-  <select id="selectByExample" parameterType="com.wansensoft.erp.datasource.entities.MaterialExtendExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="com.wansensoft.datasource.entities.MaterialExtendExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -106,13 +106,13 @@
     delete from jsh_material_extend
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.wansensoft.erp.datasource.entities.MaterialExtendExample">
+  <delete id="deleteByExample" parameterType="com.wansensoft.datasource.entities.MaterialExtendExample">
     delete from jsh_material_extend
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.erp.datasource.entities.MaterialExtend">
+  <insert id="insert" parameterType="com.wansensoft.datasource.entities.MaterialExtend">
     insert into jsh_material_extend (id, material_id, bar_code, 
       commodity_unit, sku, purchase_decimal, 
       commodity_decimal, wholesale_decimal, low_decimal, 
@@ -126,7 +126,7 @@
       #{updateSerial,jdbcType=VARCHAR}, #{updateTime,jdbcType=BIGINT}, #{tenantId,jdbcType=BIGINT}, 
       #{deleteFlag,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.wansensoft.erp.datasource.entities.MaterialExtend">
+  <insert id="insertSelective" parameterType="com.wansensoft.datasource.entities.MaterialExtend">
     insert into jsh_material_extend
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -229,7 +229,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.wansensoft.erp.datasource.entities.MaterialExtendExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="com.wansensoft.datasource.entities.MaterialExtendExample" resultType="java.lang.Long">
     select count(*) from jsh_material_extend
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -313,7 +313,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.erp.datasource.entities.MaterialExtend">
+  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.datasource.entities.MaterialExtend">
     update jsh_material_extend
     <set>
       <if test="materialId != null">
@@ -364,7 +364,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.wansensoft.erp.datasource.entities.MaterialExtend">
+  <update id="updateByPrimaryKey" parameterType="com.wansensoft.datasource.entities.MaterialExtend">
     update jsh_material_extend
     set material_id = #{materialId,jdbcType=BIGINT},
       bar_code = #{barCode,jdbcType=VARCHAR},

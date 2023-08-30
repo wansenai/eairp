@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.MaterialAttributeMapperEx">
+<mapper namespace="com.wansensoft.datasource.mappers.MaterialAttributeMapperEx">
 
-    <select id="selectByConditionMaterialAttribute" resultType="com.wansensoft.erp.datasource.entities.MaterialAttribute">
+    <select id="selectByConditionMaterialAttribute" resultType="com.wansensoft.datasource.entities.MaterialAttribute">
         select * from jsh_material_attribute ma
         where 1=1
         <if test="attributeName != null">

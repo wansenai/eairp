@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.MaterialCurrentStockMapperEx">
+<mapper namespace="com.wansensoft.datasource.mappers.MaterialCurrentStockMapperEx">
 
     <insert id="batchInsert" parameterType="java.util.List">
         insert into jsh_material_current_stock (material_id, depot_id, current_number)
@@ -10,7 +10,7 @@
         </foreach >
     </insert>
 
-    <select id="getCurrentStockMapByIdList" resultType="com.wansensoft.erp.datasource.entities.MaterialCurrentStock">
+    <select id="getCurrentStockMapByIdList" resultType="com.wansensoft.datasource.entities.MaterialCurrentStock">
         select material_id, sum(current_number) current_number from jsh_material_current_stock
         where 1=1
         and ifnull(delete_flag,'0') !='1'

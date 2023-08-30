@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.LogMapper">
-  <resultMap id="BaseResultMap" type="com.wansensoft.erp.datasource.entities.Log">
+<mapper namespace="com.wansensoft.datasource.mappers.LogMapper">
+  <resultMap id="BaseResultMap" type="com.wansensoft.datasource.entities.Log">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="user_id" jdbcType="BIGINT" property="userId" />
     <result column="operation" jdbcType="VARCHAR" property="operation" />
@@ -72,7 +72,7 @@
   <sql id="Base_Column_List">
     id, user_id, operation, client_ip, create_time, status, content, tenant_id
   </sql>
-  <select id="selectByExample" parameterType="com.wansensoft.erp.datasource.entities.LogExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="com.wansensoft.datasource.entities.LogExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -96,13 +96,13 @@
     delete from jsh_log
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.wansensoft.erp.datasource.entities.LogExample">
+  <delete id="deleteByExample" parameterType="com.wansensoft.datasource.entities.LogExample">
     delete from jsh_log
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.erp.datasource.entities.Log">
+  <insert id="insert" parameterType="com.wansensoft.datasource.entities.Log">
     insert into jsh_log (id, user_id, operation, 
       client_ip, create_time, status, 
       content, tenant_id)
@@ -110,7 +110,7 @@
       #{clientIp,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{status,jdbcType=TINYINT}, 
       #{content,jdbcType=VARCHAR}, #{tenantId,jdbcType=BIGINT})
   </insert>
-  <insert id="insertSelective" parameterType="com.wansensoft.erp.datasource.entities.Log">
+  <insert id="insertSelective" parameterType="com.wansensoft.datasource.entities.Log">
     insert into jsh_log
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -165,7 +165,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.wansensoft.erp.datasource.entities.LogExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="com.wansensoft.datasource.entities.LogExample" resultType="java.lang.Long">
     select count(*) from jsh_log
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -217,7 +217,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.erp.datasource.entities.Log">
+  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.datasource.entities.Log">
     update jsh_log
     <set>
       <if test="userId != null">
@@ -244,7 +244,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.wansensoft.erp.datasource.entities.Log">
+  <update id="updateByPrimaryKey" parameterType="com.wansensoft.datasource.entities.Log">
     update jsh_log
     set user_id = #{userId,jdbcType=BIGINT},
       operation = #{operation,jdbcType=VARCHAR},

@@ -138,7 +138,7 @@
 							<goal>repackage</goal>
 						</goals>
 						<configuration>
-							<mainClass>com.wansensoft.erp.ErpApplication</mainClass>
+							<mainClass>com.wansensoft.ErpApplication</mainClass>
 						</configuration>
 					</execution>
 				</executions>

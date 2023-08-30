@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.AccountHeadMapper">
-  <resultMap id="BaseResultMap" type="com.wansensoft.erp.datasource.entities.AccountHead">
+<mapper namespace="com.wansensoft.datasource.mappers.AccountHeadMapper">
+  <resultMap id="BaseResultMap" type="com.wansensoft.datasource.entities.AccountHead">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="type" jdbcType="VARCHAR" property="type" />
     <result column="organ_id" jdbcType="BIGINT" property="organId" />
@@ -82,7 +82,7 @@
     id, type, organ_id, hands_person_id, creator, change_amount, discount_money, total_price, 
     account_id, bill_no, bill_time, remark, file_name, status, source, tenant_id, delete_flag
   </sql>
-  <select id="selectByExample" parameterType="com.wansensoft.erp.datasource.entities.AccountHeadExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="com.wansensoft.datasource.entities.AccountHeadExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -106,13 +106,13 @@
     delete from jsh_account_head
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.wansensoft.erp.datasource.entities.AccountHeadExample">
+  <delete id="deleteByExample" parameterType="com.wansensoft.datasource.entities.AccountHeadExample">
     delete from jsh_account_head
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.erp.datasource.entities.AccountHead">
+  <insert id="insert" parameterType="com.wansensoft.datasource.entities.AccountHead">
     insert into jsh_account_head (id, type, organ_id, 
       hands_person_id, creator, change_amount, 
       discount_money, total_price, account_id, 
@@ -126,7 +126,7 @@
       #{fileName,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{source,jdbcType=VARCHAR}, 
       #{tenantId,jdbcType=BIGINT}, #{deleteFlag,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.wansensoft.erp.datasource.entities.AccountHead">
+  <insert id="insertSelective" parameterType="com.wansensoft.datasource.entities.AccountHead">
     insert into jsh_account_head
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -235,7 +235,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.wansensoft.erp.datasource.entities.AccountHeadExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="com.wansensoft.datasource.entities.AccountHeadExample" resultType="java.lang.Long">
     select count(*) from jsh_account_head
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -323,7 +323,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.erp.datasource.entities.AccountHead">
+  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.datasource.entities.AccountHead">
     update jsh_account_head
     <set>
       <if test="type != null">
@@ -377,7 +377,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.wansensoft.erp.datasource.entities.AccountHead">
+  <update id="updateByPrimaryKey" parameterType="com.wansensoft.datasource.entities.AccountHead">
     update jsh_account_head
     set type = #{type,jdbcType=VARCHAR},
       organ_id = #{organId,jdbcType=BIGINT},

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.SupplierMapper">
-  <resultMap id="BaseResultMap" type="com.wansensoft.erp.datasource.entities.Supplier">
+<mapper namespace="com.wansensoft.datasource.mappers.SupplierMapper">
+  <resultMap id="BaseResultMap" type="com.wansensoft.datasource.entities.Supplier">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="supplier" jdbcType="VARCHAR" property="supplier" />
     <result column="contacts" jdbcType="VARCHAR" property="contacts" />
@@ -91,7 +91,7 @@
     begin_need_get, begin_need_pay, all_need_get, all_need_pay, fax, telephone, address, 
     tax_num, bank_name, account_number, tax_rate, sort, creator, tenant_id, delete_flag
   </sql>
-  <select id="selectByExample" parameterType="com.wansensoft.erp.datasource.entities.SupplierExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="com.wansensoft.datasource.entities.SupplierExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -115,13 +115,13 @@
     delete from jsh_supplier
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.wansensoft.erp.datasource.entities.SupplierExample">
+  <delete id="deleteByExample" parameterType="com.wansensoft.datasource.entities.SupplierExample">
     delete from jsh_supplier
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.erp.datasource.entities.Supplier">
+  <insert id="insert" parameterType="com.wansensoft.datasource.entities.Supplier">
     insert into jsh_supplier (id, supplier, contacts, 
       phone_num, email, description, 
       isystem, type, enabled, 
@@ -141,7 +141,7 @@
       #{sort,jdbcType=VARCHAR}, #{creator,jdbcType=BIGINT}, #{tenantId,jdbcType=BIGINT}, 
       #{deleteFlag,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.wansensoft.erp.datasource.entities.Supplier">
+  <insert id="insertSelective" parameterType="com.wansensoft.datasource.entities.Supplier">
     insert into jsh_supplier
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -298,7 +298,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.wansensoft.erp.datasource.entities.SupplierExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="com.wansensoft.datasource.entities.SupplierExample" resultType="java.lang.Long">
     select count(*) from jsh_supplier
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -418,7 +418,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.erp.datasource.entities.Supplier">
+  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.datasource.entities.Supplier">
     update jsh_supplier
     <set>
       <if test="supplier != null">
@@ -496,7 +496,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.wansensoft.erp.datasource.entities.Supplier">
+  <update id="updateByPrimaryKey" parameterType="com.wansensoft.datasource.entities.Supplier">
     update jsh_supplier
     set supplier = #{supplier,jdbcType=VARCHAR},
       contacts = #{contacts,jdbcType=VARCHAR},

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.DepotMapperEx">
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.DepotMapper.BaseResultMap" id="ResultMapEx" type="com.wansensoft.erp.datasource.entities.DepotEx">
+<mapper namespace="com.wansensoft.datasource.mappers.DepotMapperEx">
+    <resultMap extends="com.wansensoft.datasource.mappers.DepotMapper.BaseResultMap" id="ResultMapEx" type="com.wansensoft.datasource.entities.DepotEx">
         <result column="principalName" jdbcType="VARCHAR" property="principalName" />
     </resultMap>
 
-    <select id="selectByConditionDepot" parameterType="com.wansensoft.erp.datasource.entities.DepotExample" resultMap="ResultMapEx">
+    <select id="selectByConditionDepot" parameterType="com.wansensoft.datasource.entities.DepotExample" resultMap="ResultMapEx">
         select dep.*,usr.username as principalName
         FROM jsh_depot dep
         left join jsh_user usr on usr.id=dep.principal and ifnull(usr.status,'0') not in('1','2')

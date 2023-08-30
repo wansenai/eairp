@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.UserMapperEx">
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.UserMapper.BaseResultMap" id="ResultMapEx" type="com.wansensoft.erp.datasource.entities.UserEx">
+<mapper namespace="com.wansensoft.datasource.mappers.UserMapperEx">
+    <resultMap extends="com.wansensoft.datasource.mappers.UserMapper.BaseResultMap" id="ResultMapEx" type="com.wansensoft.datasource.entities.UserEx">
         <result column="orgaId" jdbcType="BIGINT" property="orgaId" />
         <result column="org_abr" jdbcType="VARCHAR" property="orgAbr" />
         <result column="user_blng_orga_dspl_seq" jdbcType="VARCHAR" property="userBlngOrgaDsplSeq" />
@@ -10,7 +10,7 @@
         <result column="roleName" jdbcType="VARCHAR" property="roleName" />
     </resultMap>
 
-    <select id="selectByConditionUser" parameterType="com.wansensoft.erp.datasource.entities.UserExample" resultMap="ResultMapEx">
+    <select id="selectByConditionUser" parameterType="com.wansensoft.datasource.entities.UserExample" resultMap="ResultMapEx">
         select tb.*,
         (select r.id from jsh_user_business ub
         left join jsh_role r on ub.value=concat("[",r.id,"]") and ifnull(r.delete_flag,'0') !='1'
@@ -55,7 +55,7 @@
             and user.login_name like #{bindLoginName}
         </if>
     </select>
-    <select id="getUserListByUserNameOrLoginName" resultMap="com.wansensoft.erp.datasource.mappers.UserMapper.BaseResultMap">
+    <select id="getUserListByUserNameOrLoginName" resultMap="com.wansensoft.datasource.mappers.UserMapper.BaseResultMap">
         select user.id, user.username, user.login_name, user.position, user.email, user.phonenum,
         user.description, user.remark,user.isystem
         FROM jsh_user user
@@ -79,27 +79,27 @@
         )
     </update>
 
-    <resultMap id="BaseTreeResultMap" type="com.wansensoft.erp.datasource.vo.TreeNodeEx">
+    <resultMap id="BaseTreeResultMap" type="com.wansensoft.datasource.vo.TreeNodeEx">
         <result column="id" property="id"/>
         <result column="text" property="text"/>
-        <association property="attributes" javaType="com.wansensoft.erp.datasource.vo.NodeAttributes">
+        <association property="attributes" javaType="com.wansensoft.datasource.vo.NodeAttributes">
             <id column="orgNo" property="no"></id>
             <result column="type" property="type"></result>
         </association>
         <collection column="{orgId=id,orgNo=orgNo}" property="children" javaType="java.util.ArrayList"
-                    ofType="com.wansensoft.erp.datasource.vo.TreeNode" select="getNextNodeTree"/>
+                    ofType="com.wansensoft.datasource.vo.TreeNode" select="getNextNodeTree"/>
     </resultMap>
 
-    <resultMap id="NextTreeResultMap" type="com.wansensoft.erp.datasource.vo.TreeNodeEx">
+    <resultMap id="NextTreeResultMap" type="com.wansensoft.datasource.vo.TreeNodeEx">
         <result column="id" property="id"/>
         <result column="text" property="text"/>
         <result column="iconCls" property="iconCls"/>
-        <association property="attributes" javaType="com.wansensoft.erp.datasource.vo.NodeAttributes">
+        <association property="attributes" javaType="com.wansensoft.datasource.vo.NodeAttributes">
             <id column="orgNo" property="no"></id>
             <result column="type" property="type"></result>
         </association>
         <collection column="{orgId=id,orgNo=orgNo}" property="children" javaType="java.util.ArrayList"
-                    ofType="com.wansensoft.erp.datasource.vo.TreeNode" select="getNextNodeTree"/>
+                    ofType="com.wansensoft.datasource.vo.TreeNode" select="getNextNodeTree"/>
     </resultMap>
 
     <select id="getNextNodeTree" resultMap="NextTreeResultMap">
@@ -137,7 +137,7 @@
         where tenant_id=#{tenantId} and id!=#{tenantId} and Status!='1'
     </update>
 
-    <select id="getListByOrgaId" resultType="com.wansensoft.erp.datasource.entities.User">
+    <select id="getListByOrgaId" resultType="com.wansensoft.datasource.entities.User">
         select u.*,our.orga_id from jsh_user u
         left join jsh_orga_user_rel our on u.id=our.user_id
         where u.leader_flag='1' and orga_id= #{orgaId}
@@ -146,7 +146,7 @@
         </if>
     </select>
 
-    <select id="getUserByWeixinOpenId" resultType="com.wansensoft.erp.datasource.entities.User">
+    <select id="getUserByWeixinOpenId" resultType="com.wansensoft.datasource.entities.User">
         select u.* from jsh_user u
         where u.weixin_open_id = #{weixinOpenId}
         and ifnull(u.status,'0') not in('1','2')

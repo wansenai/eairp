@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.erp.datasource.mappers.AccountHeadMapperEx">
+<mapper namespace="com.wansensoft.datasource.mappers.AccountHeadMapperEx">
 
-    <resultMap extends="com.wansensoft.erp.datasource.mappers.AccountHeadMapper.BaseResultMap" id="ResultMapEx" type="com.wansensoft.erp.datasource.entities.AccountHeadVo4ListEx">
+    <resultMap extends="com.wansensoft.datasource.mappers.AccountHeadMapper.BaseResultMap" id="ResultMapEx" type="com.wansensoft.datasource.entities.AccountHeadVo4ListEx">
         <result column="OrganName" jdbcType="VARCHAR" property="organName" />
         <result column="HandsPersonName" jdbcType="VARCHAR" property="handsPersonName" />
         <result column="userName" jdbcType="VARCHAR" property="userName" />
         <result column="AccountName" jdbcType="VARCHAR" property="accountName" />
     </resultMap>
 
-    <select id="selectByConditionAccountHead" parameterType="com.wansensoft.erp.datasource.entities.AccountHeadExample" resultMap="ResultMapEx">
+    <select id="selectByConditionAccountHead" parameterType="com.wansensoft.datasource.entities.AccountHeadExample" resultMap="ResultMapEx">
         select distinct ah.*, s.supplier OrganName, p.Name HandsPersonName, u.username userName, a.Name AccountName
         from jsh_account_head ah
         left join jsh_account_item ai on ah.id=ai.header_id and ifnull(ai.delete_flag,'0') !='1'
@@ -133,7 +133,7 @@
         and ifnull(ah.delete_flag,'0') !='1') tb
     </select>
 
-    <select id="getDetailByNumber" parameterType="com.wansensoft.erp.datasource.entities.AccountHeadExample" resultMap="ResultMapEx">
+    <select id="getDetailByNumber" parameterType="com.wansensoft.datasource.entities.AccountHeadExample" resultMap="ResultMapEx">
         select ah.*, s.supplier OrganName, p.Name HandsPersonName, a.Name AccountName
         from jsh_account_head ah
         left join jsh_supplier s on ah.organ_id=s.id and ifnull(s.delete_Flag,'0') !='1'
@@ -155,9 +155,9 @@
         </foreach>
         )
     </update>
-    <select id="getAccountHeadListByAccountIds"  resultMap="com.wansensoft.erp.datasource.mappers.AccountHeadMapper.BaseResultMap">
+    <select id="getAccountHeadListByAccountIds"  resultMap="com.wansensoft.datasource.mappers.AccountHeadMapper.BaseResultMap">
         select
-        <include refid="com.wansensoft.erp.datasource.mappers.AccountHeadMapper.Base_Column_List" />
+        <include refid="com.wansensoft.datasource.mappers.AccountHeadMapper.Base_Column_List" />
         from jsh_account_head
         where 1=1
         and account_id in (
@@ -167,9 +167,9 @@
         )
         and ifnull(delete_flag,'0') !='1'
     </select>
-    <select id="getAccountHeadListByOrganIds"  resultMap="com.wansensoft.erp.datasource.mappers.AccountHeadMapper.BaseResultMap">
+    <select id="getAccountHeadListByOrganIds"  resultMap="com.wansensoft.datasource.mappers.AccountHeadMapper.BaseResultMap">
         select
-        <include refid="com.wansensoft.erp.datasource.mappers.AccountHeadMapper.Base_Column_List" />
+        <include refid="com.wansensoft.datasource.mappers.AccountHeadMapper.Base_Column_List" />
         from jsh_account_head
         where 1=1
         and organ_id in (
@@ -179,9 +179,9 @@
         )
         and ifnull(delete_flag,'0') !='1'
     </select>
-    <select id="getAccountHeadListByHandsPersonIds"  resultMap="com.wansensoft.erp.datasource.mappers.AccountHeadMapper.BaseResultMap">
+    <select id="getAccountHeadListByHandsPersonIds"  resultMap="com.wansensoft.datasource.mappers.AccountHeadMapper.BaseResultMap">
         select
-        <include refid="com.wansensoft.erp.datasource.mappers.AccountHeadMapper.Base_Column_List" />
+        <include refid="com.wansensoft.datasource.mappers.AccountHeadMapper.Base_Column_List" />
         from jsh_account_head
         where 1=1
         and hands_person_id in (
@@ -192,7 +192,7 @@
         and ifnull(delete_flag,'0') !='1'
     </select>
 
-    <select id="getFinancialBillNoByBillIdList" resultType="com.wansensoft.erp.datasource.entities.AccountItem">
+    <select id="getFinancialBillNoByBillIdList" resultType="com.wansensoft.datasource.entities.AccountItem">
         select ai.bill_id from jsh_account_head ah
         left join jsh_account_item ai on ah.id=ai.header_id and ifnull(ai.delete_flag,'0') !='1'
         where 1=1
@@ -205,7 +205,7 @@
         and ifnull(ah.delete_flag,'0') !='1'
     </select>
 
-    <select id="getFinancialBillNoByBillId" resultType="com.wansensoft.erp.datasource.entities.AccountHead">
+    <select id="getFinancialBillNoByBillId" resultType="com.wansensoft.datasource.entities.AccountHead">
         select ah.bill_no from jsh_account_head ah
         left join jsh_account_item ai on ah.id=ai.header_id and ifnull(ai.delete_flag,'0') !='1'
         where ai.bill_id=#{billId}
