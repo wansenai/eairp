@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wansensoft.datasource.mappers.UnitMapperEx">
+    <select id="selectByConditionUnit" parameterType="com.wansensoft.datasource.entities.UnitExample" resultMap="com.wansensoft.datasource.mappers.UnitMapper.BaseResultMap">
+        select *
+        FROM jsh_unit
+        where 1=1
+        <if test="name != null">
+            <bind name="bindName" value="'%'+name+'%'"/>
+            and name like #{bindName}
+        </if>
+        and ifnull(delete_flag,'0') !='1'
+        order by id desc
+        <if test="offset != null and rows != null">
+            limit #{offset},#{rows}
+        </if>
+    </select>
+    <select id="countsByUnit" resultType="java.lang.Long">
+        SELECT
+        COUNT(id)
+        FROM jsh_unit
+        WHERE 1=1
+        <if test="name != null">
+            <bind name="bindName" value="'%'+name+'%'"/>
+            and name like #{bindName}
+        </if>
+        and ifnull(delete_flag,'0') !='1'
+    </select>
+    <update id="batchDeleteUnitByIds">
+        update jsh_unit
+        set delete_flag='1'
+        where 1=1
+        and id in (
+        <foreach collection="ids" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </update>
+    <update id="updateRatioTwoById">
+        update jsh_unit
+        set ratio_two=null
+        where id=#{id}
+    </update>
+    <update id="updateRatioThreeById">
+        update jsh_unit
+        set ratio_three=null
+        where id=#{id}
+    </update>
+</mapper>
