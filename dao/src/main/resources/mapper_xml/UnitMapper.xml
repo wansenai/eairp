@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wansensoft.mappers.unit.UnitMapper">
+  <resultMap id="BaseResultMap" type="com.wansensoft.entities.unit.Unit">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="basic_unit" jdbcType="VARCHAR" property="basicUnit" />
+    <result column="other_unit" jdbcType="VARCHAR" property="otherUnit" />
+    <result column="other_unit_two" jdbcType="VARCHAR" property="otherUnitTwo" />
+    <result column="other_unit_three" jdbcType="VARCHAR" property="otherUnitThree" />
+    <result column="ratio" jdbcType="DECIMAL" property="ratio" />
+    <result column="ratio_two" jdbcType="DECIMAL" property="ratioTwo" />
+    <result column="ratio_three" jdbcType="DECIMAL" property="ratioThree" />
+    <result column="enabled" jdbcType="BIT" property="enabled" />
+    <result column="tenant_id" jdbcType="BIGINT" property="tenantId" />
+    <result column="delete_flag" jdbcType="VARCHAR" property="deleteFlag" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, name, basic_unit, other_unit, other_unit_two, other_unit_three, ratio, ratio_two, 
+    ratio_three, enabled, tenant_id, delete_flag
+  </sql>
+  <select id="selectByExample" parameterType="com.wansensoft.entities.unit.UnitExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from jsh_unit
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from jsh_unit
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from jsh_unit
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.wansensoft.entities.unit.UnitExample">
+    delete from jsh_unit
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.wansensoft.entities.unit.Unit">
+    insert into jsh_unit (id, name, basic_unit, 
+      other_unit, other_unit_two, other_unit_three, 
+      ratio, ratio_two, ratio_three, 
+      enabled, tenant_id, delete_flag
+      )
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{basicUnit,jdbcType=VARCHAR}, 
+      #{otherUnit,jdbcType=VARCHAR}, #{otherUnitTwo,jdbcType=VARCHAR}, #{otherUnitThree,jdbcType=VARCHAR}, 
+      #{ratio,jdbcType=DECIMAL}, #{ratioTwo,jdbcType=DECIMAL}, #{ratioThree,jdbcType=DECIMAL}, 
+      #{enabled,jdbcType=BIT}, #{tenantId,jdbcType=BIGINT}, #{deleteFlag,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.wansensoft.entities.unit.Unit">
+    insert into jsh_unit
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="basicUnit != null">
+        basic_unit,
+      </if>
+      <if test="otherUnit != null">
+        other_unit,
+      </if>
+      <if test="otherUnitTwo != null">
+        other_unit_two,
+      </if>
+      <if test="otherUnitThree != null">
+        other_unit_three,
+      </if>
+      <if test="ratio != null">
+        ratio,
+      </if>
+      <if test="ratioTwo != null">
+        ratio_two,
+      </if>
+      <if test="ratioThree != null">
+        ratio_three,
+      </if>
+      <if test="enabled != null">
+        enabled,
+      </if>
+      <if test="tenantId != null">
+        tenant_id,
+      </if>
+      <if test="deleteFlag != null">
+        delete_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="basicUnit != null">
+        #{basicUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="otherUnit != null">
+        #{otherUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="otherUnitTwo != null">
+        #{otherUnitTwo,jdbcType=VARCHAR},
+      </if>
+      <if test="otherUnitThree != null">
+        #{otherUnitThree,jdbcType=VARCHAR},
+      </if>
+      <if test="ratio != null">
+        #{ratio,jdbcType=DECIMAL},
+      </if>
+      <if test="ratioTwo != null">
+        #{ratioTwo,jdbcType=DECIMAL},
+      </if>
+      <if test="ratioThree != null">
+        #{ratioThree,jdbcType=DECIMAL},
+      </if>
+      <if test="enabled != null">
+        #{enabled,jdbcType=BIT},
+      </if>
+      <if test="tenantId != null">
+        #{tenantId,jdbcType=BIGINT},
+      </if>
+      <if test="deleteFlag != null">
+        #{deleteFlag,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.wansensoft.entities.unit.UnitExample" resultType="java.lang.Long">
+    select count(*) from jsh_unit
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update jsh_unit
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null">
+        name = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.basicUnit != null">
+        basic_unit = #{record.basicUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="record.otherUnit != null">
+        other_unit = #{record.otherUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="record.otherUnitTwo != null">
+        other_unit_two = #{record.otherUnitTwo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.otherUnitThree != null">
+        other_unit_three = #{record.otherUnitThree,jdbcType=VARCHAR},
+      </if>
+      <if test="record.ratio != null">
+        ratio = #{record.ratio,jdbcType=DECIMAL},
+      </if>
+      <if test="record.ratioTwo != null">
+        ratio_two = #{record.ratioTwo,jdbcType=DECIMAL},
+      </if>
+      <if test="record.ratioThree != null">
+        ratio_three = #{record.ratioThree,jdbcType=DECIMAL},
+      </if>
+      <if test="record.enabled != null">
+        enabled = #{record.enabled,jdbcType=BIT},
+      </if>
+      <if test="record.tenantId != null">
+        tenant_id = #{record.tenantId,jdbcType=BIGINT},
+      </if>
+      <if test="record.deleteFlag != null">
+        delete_flag = #{record.deleteFlag,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update jsh_unit
+    set id = #{record.id,jdbcType=BIGINT},
+      name = #{record.name,jdbcType=VARCHAR},
+      basic_unit = #{record.basicUnit,jdbcType=VARCHAR},
+      other_unit = #{record.otherUnit,jdbcType=VARCHAR},
+      other_unit_two = #{record.otherUnitTwo,jdbcType=VARCHAR},
+      other_unit_three = #{record.otherUnitThree,jdbcType=VARCHAR},
+      ratio = #{record.ratio,jdbcType=DECIMAL},
+      ratio_two = #{record.ratioTwo,jdbcType=DECIMAL},
+      ratio_three = #{record.ratioThree,jdbcType=DECIMAL},
+      enabled = #{record.enabled,jdbcType=BIT},
+      tenant_id = #{record.tenantId,jdbcType=BIGINT},
+      delete_flag = #{record.deleteFlag,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.wansensoft.entities.unit.Unit">
+    update jsh_unit
+    <set>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="basicUnit != null">
+        basic_unit = #{basicUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="otherUnit != null">
+        other_unit = #{otherUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="otherUnitTwo != null">
+        other_unit_two = #{otherUnitTwo,jdbcType=VARCHAR},
+      </if>
+      <if test="otherUnitThree != null">
+        other_unit_three = #{otherUnitThree,jdbcType=VARCHAR},
+      </if>
+      <if test="ratio != null">
+        ratio = #{ratio,jdbcType=DECIMAL},
+      </if>
+      <if test="ratioTwo != null">
+        ratio_two = #{ratioTwo,jdbcType=DECIMAL},
+      </if>
+      <if test="ratioThree != null">
+        ratio_three = #{ratioThree,jdbcType=DECIMAL},
+      </if>
+      <if test="enabled != null">
+        enabled = #{enabled,jdbcType=BIT},
+      </if>
+      <if test="tenantId != null">
+        tenant_id = #{tenantId,jdbcType=BIGINT},
+      </if>
+      <if test="deleteFlag != null">
+        delete_flag = #{deleteFlag,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.wansensoft.entities.unit.Unit">
+    update jsh_unit
+    set name = #{name,jdbcType=VARCHAR},
+      basic_unit = #{basicUnit,jdbcType=VARCHAR},
+      other_unit = #{otherUnit,jdbcType=VARCHAR},
+      other_unit_two = #{otherUnitTwo,jdbcType=VARCHAR},
+      other_unit_three = #{otherUnitThree,jdbcType=VARCHAR},
+      ratio = #{ratio,jdbcType=DECIMAL},
+      ratio_two = #{ratioTwo,jdbcType=DECIMAL},
+      ratio_three = #{ratioThree,jdbcType=DECIMAL},
+      enabled = #{enabled,jdbcType=BIT},
+      tenant_id = #{tenantId,jdbcType=BIGINT},
+      delete_flag = #{deleteFlag,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

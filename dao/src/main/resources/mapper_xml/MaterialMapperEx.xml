@@ -1,0 +1,774 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wansensoft.mappers.material.MaterialMapperEx">
+    <resultMap extends="com.wansensoft.mappers.material.MaterialMapper.BaseResultMap" id="ResultMapList" type="com.wansensoft.entities.material.MaterialVo4Unit">
+        <result column="unitName" jdbcType="VARCHAR" property="unitName" />
+        <result column="ratio" jdbcType="DECIMAL" property="ratio" />
+        <result column="categoryName" jdbcType="VARCHAR" property="categoryName" />
+        <result column="bar_code" jdbcType="VARCHAR" property="mBarCode" />
+        <result column="commodity_unit" jdbcType="VARCHAR" property="commodityUnit" />
+        <result column="purchase_decimal" jdbcType="VARCHAR" property="purchaseDecimal" />
+        <result column="commodity_decimal" jdbcType="VARCHAR" property="commodityDecimal" />
+        <result column="wholesale_decimal" jdbcType="VARCHAR" property="wholesaleDecimal" />
+        <result column="low_decimal" jdbcType="VARCHAR" property="lowDecimal" />
+        <result column="sku" jdbcType="VARCHAR" property="sku" />
+    </resultMap>
+
+    <resultMap extends="com.wansensoft.mappers.material.MaterialMapper.BaseResultMap" id="ResultMapListWithStock" type="com.wansensoft.entities.material.MaterialVo4Unit">
+        <result column="unitName" jdbcType="VARCHAR" property="unitName" />
+        <result column="categoryName" jdbcType="VARCHAR" property="categoryName" />
+        <result column="bar_code" jdbcType="VARCHAR" property="mBarCode" />
+        <result column="commodity_unit" jdbcType="VARCHAR" property="commodityUnit" />
+        <result column="purchase_decimal" jdbcType="VARCHAR" property="purchaseDecimal" />
+        <result column="initialStock" jdbcType="DECIMAL" property="initialStock" />
+        <result column="currentStock" jdbcType="DECIMAL" property="currentStock" />
+        <result column="currentStockPrice" jdbcType="DECIMAL" property="currentStockPrice" />
+        <result column="currentWeight" jdbcType="DECIMAL" property="currentWeight" />
+    </resultMap>
+
+    <resultMap extends="com.wansensoft.mappers.material.MaterialMapper.BaseResultMap" id="ResultAndUnitMap" type="com.wansensoft.entities.material.MaterialVo4Unit">
+        <result column="meId" jdbcType="BIGINT" property="meId" />
+        <result column="unit_name" jdbcType="VARCHAR" property="unitName" />
+        <result column="sku" jdbcType="VARCHAR" property="sku" />
+    </resultMap>
+
+    <resultMap id="InitialStockWithMaterialMap" type="com.wansensoft.entities.material.MaterialInitialStockWithMaterial">
+        <result column="material_id" jdbcType="BIGINT" property="materialId" />
+        <result column="number" jdbcType="DECIMAL" property="number" />
+    </resultMap>
+
+    <select id="selectByConditionMaterial" parameterType="com.wansensoft.entities.material.MaterialExample" resultMap="ResultMapList">
+        select m.*,u.name unitName, mc.name categoryName, me.bar_code,
+        me.purchase_decimal, me.commodity_decimal, me.wholesale_decimal,me.low_decimal,me.sku
+        FROM jsh_material m
+        left JOIN jsh_material_extend me on m.id = me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left JOIN jsh_unit u on m.unit_id = u.id and ifnull(u.delete_Flag,'0') !='1'
+        left JOIN jsh_material_category mc on m.category_id = mc.id and ifnull(mc.delete_Flag,'0') !='1'
+        where 1=1
+        <if test="materialParam != null and materialParam !=''">
+            <bind name="bindKey" value="'%'+materialParam+'%'"/>
+            and (me.bar_code like #{bindKey} or m.name like #{bindKey} or m.standard like #{bindKey} or m.model like #{bindKey})
+        </if>
+        <if test="color != null and color !=''">
+            <bind name="bindColor" value="'%'+color+'%'"/>
+            and m.color like #{bindColor}
+        </if>
+        <if test="materialOther != null and materialOther !=''">
+            <bind name="bindOther" value="'%'+materialOther+'%'"/>
+            and (m.mfrs like #{bindOther} or m.other_field1 like #{bindOther}
+                or m.other_field2 like #{bindOther} or m.other_field3 like #{bindOther})
+        </if>
+        <if test="weight != null and weight !=''">
+            and m.weight = #{weight}
+        </if>
+        <if test="expiryNum != null and expiryNum !=''">
+            and m.expiry_num = #{expiryNum}
+        </if>
+        <if test="enableSerialNumber != null and enableSerialNumber !=''">
+            and m.enable_serial_number = #{enableSerialNumber}
+        </if>
+        <if test="enableBatchNumber != null and enableBatchNumber !=''">
+            and m.enable_batch_number = #{enableBatchNumber}
+        </if>
+        <if test="position != null and position !=''">
+            <bind name="bindPosition" value="'%'+position+'%'"/>
+            and m.position like #{bindPosition}
+        </if>
+        <if test="enabled != null and enabled !=''">
+            and m.enabled = #{enabled}
+        </if>
+        <if test="remark != null and remark !=''">
+            <bind name="bindRemark" value="'%'+remark+'%'"/>
+            and m.remark like #{bindRemark}
+        </if>
+        <if test="idList.size()>0">
+            and m.category_id in
+            <foreach collection="idList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+        group by m.id
+        order by m.id desc
+        <if test="offset != null and rows != null">
+            limit #{offset},#{rows}
+        </if>
+    </select>
+
+    <select id="countsByMaterial" resultType="java.lang.Long">
+        SELECT
+        COUNT(m.id)
+        FROM jsh_material m
+        left JOIN jsh_material_extend me on m.id = me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left JOIN jsh_unit u on m.unit_id = u.id and ifnull(u.delete_Flag,'0') !='1'
+        left JOIN jsh_material_category mc on m.category_id = mc.id and ifnull(mc.delete_Flag,'0') !='1'
+        WHERE 1=1
+        and me.default_flag=1
+        <if test="materialParam != null and materialParam !=''">
+            <bind name="bindKey" value="'%'+materialParam+'%'"/>
+            and (me.bar_code like #{bindKey} or m.name like #{bindKey} or m.standard like #{bindKey} or m.model like #{bindKey})
+        </if>
+        <if test="color != null and color !=''">
+            <bind name="bindColor" value="'%'+color+'%'"/>
+            and m.color like #{bindColor}
+        </if>
+        <if test="materialOther != null and materialOther !=''">
+            <bind name="bindOther" value="'%'+materialOther+'%'"/>
+            and (m.mfrs like #{bindOther} or m.other_field1 like #{bindOther}
+            or m.other_field2 like #{bindOther} or m.other_field3 like #{bindOther})
+        </if>
+        <if test="weight != null and weight !=''">
+            and m.weight = #{weight}
+        </if>
+        <if test="expiryNum != null and expiryNum !=''">
+            and m.expiry_num = #{expiryNum}
+        </if>
+        <if test="enableSerialNumber != null and enableSerialNumber !=''">
+            and m.enable_serial_number = #{enableSerialNumber}
+        </if>
+        <if test="enableBatchNumber != null and enableBatchNumber !=''">
+            and m.enable_batch_number = #{enableBatchNumber}
+        </if>
+        <if test="position != null and position !=''">
+            <bind name="bindPosition" value="'%'+position+'%'"/>
+            and m.position like #{bindPosition}
+        </if>
+        <if test="enabled != null and enabled !=''">
+            and m.enabled = #{enabled}
+        </if>
+        <if test="remark != null and remark !=''">
+            <bind name="bindRemark" value="'%'+remark+'%'"/>
+            and m.remark like #{bindRemark}
+        </if>
+        <if test="idList.size()>0">
+            and m.category_id in
+            <foreach collection="idList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+    </select>
+
+    <insert id="insertSelectiveEx" parameterType="com.wansensoft.entities.material.Material" useGeneratedKeys="true" keyProperty="id">
+        insert into jsh_material
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="categoryId != null">
+                category_id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="mfrs != null">
+                mfrs,
+            </if>
+            <if test="model != null">
+                model,
+            </if>
+            <if test="standard != null">
+                standard,
+            </if>
+            <if test="color != null">
+                color,
+            </if>
+            <if test="unit != null">
+                unit,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="imgName != null">
+                img_name,
+            </if>
+            <if test="unitId != null">
+                unit_id,
+            </if>
+            <if test="expiryNum != null">
+                expiry_num,
+            </if>
+            <if test="weight != null">
+                weight,
+            </if>
+            <if test="enabled != null">
+                enabled,
+            </if>
+            <if test="otherField1 != null">
+                other_field1,
+            </if>
+            <if test="otherField2 != null">
+                other_field2,
+            </if>
+            <if test="otherField3 != null">
+                other_field3,
+            </if>
+            <if test="enableSerialNumber != null">
+                enable_serial_number,
+            </if>
+            <if test="enableBatchNumber != null">
+                enable_batch_number,
+            </if>
+            <if test="position != null">
+                position,
+            </if>
+            <if test="tenantId != null">
+                tenant_id,
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="categoryId != null">
+                #{categoryId,jdbcType=BIGINT},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="mfrs != null">
+                #{mfrs,jdbcType=VARCHAR},
+            </if>
+            <if test="model != null">
+                #{model,jdbcType=VARCHAR},
+            </if>
+            <if test="standard != null">
+                #{standard,jdbcType=VARCHAR},
+            </if>
+            <if test="color != null">
+                #{color,jdbcType=VARCHAR},
+            </if>
+            <if test="unit != null">
+                #{unit,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="imgName != null">
+                #{imgName,jdbcType=VARCHAR},
+            </if>
+            <if test="unitId != null">
+                #{unitId,jdbcType=BIGINT},
+            </if>
+            <if test="expiryNum != null">
+                #{expiryNum,jdbcType=INTEGER},
+            </if>
+            <if test="weight != null">
+                #{weight,jdbcType=DECIMAL},
+            </if>
+            <if test="enabled != null">
+                #{enabled,jdbcType=BIT},
+            </if>
+            <if test="otherField1 != null">
+                #{otherField1,jdbcType=VARCHAR},
+            </if>
+            <if test="otherField2 != null">
+                #{otherField2,jdbcType=VARCHAR},
+            </if>
+            <if test="otherField3 != null">
+                #{otherField3,jdbcType=VARCHAR},
+            </if>
+            <if test="enableSerialNumber != null">
+                #{enableSerialNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="enableBatchNumber != null">
+                #{enableBatchNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="position != null">
+                #{position,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="findUnitList" resultType="com.wansensoft.entities.unit.Unit">
+        select u.* from jsh_unit u
+        left join jsh_material m on m.unit_id=u.id and ifnull(m.delete_flag,'0') !='1'
+        where m.id = #{mId}
+        and ifnull(u.delete_flag,'0') !='1'
+    </select>
+
+    <select id="findById" parameterType="com.wansensoft.entities.material.MaterialExample" resultMap="ResultAndUnitMap">
+        select m.*,u.name unit_name from jsh_material m
+        left join jsh_unit u on m.unit_id=u.id and ifnull(u.delete_flag,'0') !='1'
+        where m.id = #{id}
+        and ifnull(m.delete_flag,'0') !='1'
+    </select>
+
+    <select id="findByIdWithBarCode" parameterType="com.wansensoft.entities.material.MaterialExample" resultMap="ResultAndUnitMap">
+        select m.*,u.name unit_name,me.bar_code m_bar_code, me.commodity_unit, me.purchase_decimal, me.commodity_decimal,
+        me.wholesale_decimal, me.low_decimal
+        from jsh_material m
+        left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left join jsh_unit u on m.unit_id=u.id and ifnull(u.delete_Flag,'0') !='1'
+        where me.id = #{meId}
+        and ifnull(m.delete_flag,'0') !='1'
+    </select>
+
+    <select id="getMaterialByParam" resultType="com.wansensoft.vo.MaterialVoSearch">
+        select me.bar_code, m.name, m.standard, m.model, m.color, me.commodity_unit unit
+        from jsh_material m
+        left join jsh_material_extend me on m.id = me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        where m.enabled=1 and me.id is not null
+        <if test="materialParam != null and materialParam !=''">
+            <bind name="bindKey" value="'%'+materialParam+'%'"/>
+            and (me.bar_code like #{bindKey} or m.name like #{bindKey} or m.standard like #{bindKey} or m.model like #{bindKey})
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+        order by m.id desc, me.default_flag desc, me.id asc
+        limit 0,20
+    </select>
+
+    <select id="findBySelectWithBarCode" parameterType="com.wansensoft.entities.material.MaterialExample" resultMap="ResultAndUnitMap">
+        select m.*,u.name unit_name,mc.name categoryName,me.bar_code m_bar_code,me.id meId,me.commodity_unit,me.sku from jsh_material m
+        left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left join jsh_unit u on m.unit_id=u.id and ifnull(u.delete_Flag,'0') !='1'
+        left JOIN jsh_material_category mc on m.category_id = mc.id and ifnull(mc.delete_Flag,'0') !='1'
+        where m.enabled=1 and me.id is not null
+        <if test="q != null and q !=''">
+            <bind name="bindKey" value="'%'+q+'%'"/>
+            and (me.bar_code like #{bindKey} or m.name like #{bindKey} or m.standard like #{bindKey} or m.model like #{bindKey} or m.color like #{bindKey})
+        </if>
+        <if test="idList.size()>0">
+            and m.category_id in
+            <foreach collection="idList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="enableSerialNumber != null and enableSerialNumber !=''">
+            and m.enable_serial_number = #{enableSerialNumber}
+        </if>
+        <if test="enableBatchNumber != null and enableBatchNumber !=''">
+            and m.enable_batch_number = #{enableBatchNumber}
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+        ORDER BY m.id desc, me.default_flag desc, me.id asc
+        <if test="offset != null and rows != null">
+            limit #{offset},#{rows}
+        </if>
+    </select>
+
+    <select id="findBySelectWithBarCodeCount" resultType="java.lang.Integer">
+        select count(1) from jsh_material m
+        left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left join jsh_unit u on m.unit_id=u.id and ifnull(u.delete_Flag,'0') !='1'
+        where m.enabled=1 and me.id is not null
+        <if test="q != null">
+            <bind name="bindKey" value="'%'+q+'%'"/>
+            and (me.bar_code like #{bindKey} or m.name like #{bindKey} or m.standard like #{bindKey} or m.model like #{bindKey})
+        </if>
+        <if test="idList.size()>0">
+            and m.category_id in
+            <foreach collection="idList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="enableSerialNumber != null and enableSerialNumber !=''">
+            and m.enable_serial_number = #{enableSerialNumber}
+        </if>
+        <if test="enableBatchNumber != null and enableBatchNumber !=''">
+            and m.enable_batch_number = #{enableBatchNumber}
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+    </select>
+
+    <select id="exportExcel" parameterType="com.wansensoft.entities.material.MaterialExample" resultMap="ResultMapList">
+        select m.*,u.name unitName, u.ratio, mc.name categoryName,me.bar_code,me.commodity_unit,me.purchase_decimal, me.commodity_decimal,
+        me.wholesale_decimal, me.low_decimal, me.sku
+        from jsh_material m
+        left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left JOIN jsh_unit u on m.unit_id = u.id and ifnull(u.delete_Flag,'0') !='1'
+        left JOIN jsh_material_category mc on m.category_id = mc.id and ifnull(mc.delete_Flag,'0') !='1'
+        where 1=1
+        and (me.default_flag=1 or (me.sku is not null and me.sku!=''))
+        <if test="materialParam != null and materialParam !=''">
+            <bind name="bindKey" value="'%'+materialParam+'%'"/>
+            and (me.bar_code like #{bindKey} or m.name like #{bindKey} or m.standard like #{bindKey} or m.model like #{bindKey})
+        </if>
+        <if test="color != null and color !=''">
+            <bind name="bindColor" value="'%'+color+'%'"/>
+            and m.color like #{bindColor}
+        </if>
+        <if test="materialOther != null and materialOther !=''">
+            <bind name="bindOther" value="'%'+materialOther+'%'"/>
+            and (m.mfrs like #{bindOther} or m.other_field1 like #{bindOther}
+            or m.other_field2 like #{bindOther} or m.other_field3 like #{bindOther})
+        </if>
+        <if test="weight != null and weight !=''">
+            and m.weight = #{weight}
+        </if>
+        <if test="expiryNum != null and expiryNum !=''">
+            and m.expiry_num = #{expiryNum}
+        </if>
+        <if test="enabled != null and enabled !=''">
+            and m.enabled = #{enabled}
+        </if>
+        <if test="enableSerialNumber != null and enableSerialNumber !=''">
+            and m.enable_serial_number = #{enableSerialNumber}
+        </if>
+        <if test="enableBatchNumber != null and enableBatchNumber !=''">
+            and m.enable_batch_number = #{enableBatchNumber}
+        </if>
+        <if test="remark != null and remark !=''">
+            <bind name="bindRemark" value="'%'+remark+'%'"/>
+            and m.remark like #{bindRemark}
+        </if>
+        <if test="idList.size()>0">
+            and m.category_id in
+            <foreach collection="idList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+        order by m.id desc, me.default_flag desc, me.id asc
+    </select>
+
+    <select id="getOtherMaterialList" resultType="com.wansensoft.entities.material.MaterialExtend">
+        select me.material_id, me.bar_code, me.commodity_unit from jsh_material_extend me
+        where me.default_flag=0 and (me.sku='' or me.sku is null)
+        and ifnull(me.delete_Flag,'0') !='1'
+        group by me.material_id
+    </select>
+
+    <select id="findByMaterialName"  resultType="com.wansensoft.entities.material.Material">
+        select m.*
+        FROM jsh_material m
+        where 1=1
+        <if test="name != null">
+            and m.name =#{name}
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+    </select>
+
+    <select id="getMaterialEnableSerialNumberList" parameterType="java.util.Map" resultMap="ResultAndUnitMap">
+        select m.*,me.bar_code m_bar_code from jsh_material m
+        left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        where 1=1
+        and m.enabled=1
+        and m.enable_serial_number ='1'
+        <if test="q != null and q !=''">
+            <bind name="bindKey" value="'%'+q+'%'"/>
+            and (me.bar_code like #{bindKey} or m.name like #{bindKey} or m.standard like #{bindKey} or m.model like #{bindKey})
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+        order by m.id desc
+        <if test="offset != null and rows != null">
+            limit #{offset},#{rows}
+        </if>
+    </select>
+
+    <select id="getMaterialEnableSerialNumberCount" resultType="java.lang.Long">
+        select count(me.id) from jsh_material m
+        left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        where 1=1
+        and m.enabled ='1'
+        and m.enable_serial_number ='1'
+        <if test="q != null and q !=''">
+            <bind name="bindKey" value="'%'+q+'%'"/>
+            and (me.bar_code like #{bindKey} or m.name like #{bindKey} or m.standard like #{bindKey} or m.model like #{bindKey})
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+    </select>
+
+    <update id="batchDeleteMaterialByIds">
+        update jsh_material
+        set delete_flag='1'
+        where 1=1
+        and ifnull(delete_flag,'0') !='1'
+        and id in (
+        <foreach collection="ids" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </update>
+    <select id="getMaterialListByCategoryIds"  resultMap="com.wansensoft.mappers.material.MaterialMapper.BaseResultMap">
+        select
+        <include refid="com.wansensoft.mappers.material.MaterialMapper.Base_Column_List" />
+        from jsh_material
+        where 1=1
+        and category_id in (
+        <foreach collection="categoryIds" item="categoryId" separator=",">
+            #{categoryId}
+        </foreach>
+        )
+        and ifnull(delete_flag,'0') !='1'
+    </select>
+    <select id="getMaterialListByUnitIds"  resultMap="com.wansensoft.mappers.material.MaterialMapper.BaseResultMap">
+        select
+        <include refid="com.wansensoft.mappers.material.MaterialMapper.Base_Column_List" />
+        from jsh_material
+        where 1=1
+        and unit_id in (
+        <foreach collection="unitIds" item="unitId" separator=",">
+            #{unitId}
+        </foreach>
+        )
+        and ifnull(delete_flag,'0') !='1'
+    </select>
+
+    <select id="getMaxBarCode" resultType="java.lang.String">
+        select max(CAST(me.bar_code AS SIGNED)) bar_code from jsh_material_extend me
+        where 1=1
+        and ifnull(me.delete_Flag,'0') !='1'
+    </select>
+
+    <select id="getMaterialByMeId" parameterType="com.wansensoft.entities.material.MaterialExample" resultMap="ResultMapList">
+        select m.*,me.bar_code,u.name unitName, mc.name categoryName
+        FROM jsh_material m
+        left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left JOIN jsh_unit u on m.unit_id = u.id and ifnull(u.delete_flag,'0') !='1'
+        left JOIN jsh_material_category mc on m.category_id = mc.id and ifnull(mc.delete_Flag,'0') !='1'
+        where 1=1
+        <if test="meId != null">
+            and me.id = #{meId}
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+    </select>
+
+    <select id="getMaterialNameList" resultType="java.lang.String">
+        select m.name from jsh_material m
+        where m.name is not null and m.name !='' and ifnull(m.delete_flag,'0') !='1'
+        group by m.name
+        order by m.name asc
+    </select>
+
+    <select id="getMaterialByBarCode" parameterType="com.wansensoft.entities.material.MaterialExample" resultMap="ResultAndUnitMap">
+        select m.*,u.name unit_name, me.id meId,me.bar_code m_bar_code, me.commodity_unit, me.purchase_decimal, me.commodity_decimal,
+        me.wholesale_decimal, me.low_decimal, me.sku
+        from jsh_material m
+        left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left join jsh_unit u on m.unit_id=u.id and ifnull(u.delete_Flag,'0') !='1'
+        where
+        me.bar_code in (
+        <foreach collection="barCodeArray" item="barCode" separator=",">
+            #{barCode}
+        </foreach>
+        )
+        and ifnull(m.delete_flag,'0') !='1'
+        order by m.id desc, me.default_flag desc, me.id asc
+    </select>
+
+    <select id="getMaterialByBarCodeAndWithOutMId" parameterType="com.wansensoft.entities.material.MaterialExample" resultMap="ResultAndUnitMap">
+        select m.*,u.name unit_name, me.id meId,me.bar_code m_bar_code, me.commodity_unit, me.purchase_decimal, me.commodity_decimal,
+        me.wholesale_decimal, me.low_decimal, me.sku
+        from jsh_material m
+        left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left join jsh_unit u on m.unit_id=u.id and ifnull(u.delete_Flag,'0') !='1'
+        where
+        me.bar_code in (
+        <foreach collection="barCodeArray" item="barCode" separator=",">
+            #{barCode}
+        </foreach>
+        )
+        and me.material_id!=#{mId}
+        and ifnull(m.delete_flag,'0') !='1'
+        order by me.id desc
+    </select>
+
+    <update id="setUnitIdToNull">
+        update jsh_material
+        set unit_id = null
+        where 1=1
+        and ifnull(delete_flag,'0') !='1'
+        and id = #{id}
+    </update>
+
+    <update id="setExpiryNumToNull">
+        update jsh_material
+        set expiry_num = null
+        where 1=1
+        and ifnull(delete_flag,'0') !='1'
+        and id = #{id}
+    </update>
+
+    <select id="getInitialStockWithMaterial" resultMap="InitialStockWithMaterialMap">
+        select material_id, ifnull(sum(mis.number),0) number
+        from jsh_material_initial_stock mis
+        where 1=1
+        <if test="depotList.size()>0">
+            and mis.depot_id in
+            <foreach collection="depotList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        group by mis.material_id
+    </select>
+
+    <select id="getListWithStock" resultMap="ResultMapListWithStock">
+        select m.*, me.commodity_unit unitName, mc.name categoryName, me.bar_code,
+        ifnull(me.purchase_decimal,0) purchase_decimal,
+        ifnull(sum(mcs.current_number),0) currentStock,
+        sum(ifnull(me.purchase_decimal, 0) * ifnull(mcs.current_number, 0)) currentStockPrice,
+        sum(ifnull(m.weight, 0) * ifnull(mcs.current_number, 0)) currentWeight
+        FROM jsh_material m
+        left JOIN jsh_material_extend me on m.id = me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left join jsh_material_current_stock mcs on m.id = mcs.material_id and ifnull(mcs.delete_flag,'0') !='1'
+        left JOIN jsh_unit u on m.unit_id = u.id and ifnull(u.delete_Flag,'0') !='1'
+        left JOIN jsh_material_category mc on m.category_id = mc.id and ifnull(mc.delete_Flag,'0') !='1'
+        where 1=1
+        and me.default_flag=1
+        <if test="depotList.size()>0">
+            and mcs.depot_id in
+            <foreach collection="depotList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="idList.size()>0">
+            and m.category_id in
+            <foreach collection="idList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="position != null and position !=''">
+            <bind name="bindPosition" value="'%'+position+'%'"/>
+            and m.position like #{bindPosition}
+        </if>
+        <if test="materialParam != null">
+            <bind name="bindParam" value="'%'+materialParam+'%'"/>
+            and (me.bar_code like #{bindParam} or m.name like #{bindParam} or m.standard like #{bindParam} or m.model like #{bindParam} or m.color like #{bindParam})
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+        group by m.id
+        <if test="zeroStock == 0">
+            having currentStock!=0
+        </if>
+        <if test="column == 'createTime'">
+            order by m.id desc
+        </if>
+        <if test="column != 'createTime'">
+            order by ${column} ${order}
+        </if>
+        <if test="offset != null and rows != null">
+            limit #{offset},#{rows}
+        </if>
+    </select>
+
+    <select id="getListWithStockCount" resultType="java.lang.Integer">
+        select count(tb.id) from
+        (select m.id, ifnull(sum(mcs.current_number),0) currentStock from jsh_material m
+        left JOIN jsh_material_extend me on m.id = me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left join jsh_material_current_stock mcs on m.id = mcs.material_id and ifnull(mcs.delete_flag,'0') !='1'
+        left JOIN jsh_unit u on m.unit_id = u.id and ifnull(u.delete_Flag,'0') !='1'
+        left JOIN jsh_material_category mc on m.category_id = mc.id and ifnull(mc.delete_Flag,'0') !='1'
+        where 1=1
+        and me.default_flag=1
+        <if test="depotList.size()>0">
+            and mcs.depot_id in
+            <foreach collection="depotList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="idList.size()>0">
+            and m.category_id in
+            <foreach collection="idList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="position != null and position !=''">
+            <bind name="bindPosition" value="'%'+position+'%'"/>
+            and m.position like #{bindPosition}
+        </if>
+        <if test="materialParam != null">
+            <bind name="bindParam" value="'%'+materialParam+'%'"/>
+            and (me.bar_code like #{bindParam} or m.name like #{bindParam} or m.standard like #{bindParam} or m.model like #{bindParam} or m.color like #{bindParam})
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+        group by m.id
+        <if test="zeroStock == 0">
+            having currentStock!=0
+        </if>
+        ) tb
+    </select>
+
+    <select id="getTotalStockAndPrice" resultType="com.wansensoft.entities.material.MaterialVo4Unit">
+        select
+        ifnull(sum(mcs.current_number),0) currentStock,
+        sum(ifnull(me.purchase_decimal,0)*ifnull(mcs.current_number,0)) currentStockPrice,
+        sum(ifnull(m.weight,0)*ifnull(mcs.current_number,0)) currentWeight
+        from jsh_material m
+        left JOIN jsh_material_extend me on m.id = me.material_id and ifnull(me.delete_Flag,'0') !='1'
+        left join jsh_material_current_stock mcs on m.id = mcs.material_id and ifnull(mcs.delete_flag,'0') !='1'
+        left JOIN jsh_unit u on m.unit_id = u.id and ifnull(u.delete_Flag,'0') !='1'
+        left JOIN jsh_material_category mc on m.category_id = mc.id and ifnull(mc.delete_Flag,'0') !='1'
+        where 1=1
+        and me.default_flag=1
+        <if test="depotList.size()>0">
+            and mcs.depot_id in
+            <foreach collection="depotList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="idList.size()>0">
+            and m.category_id in
+            <foreach collection="idList" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="position != null and position !=''">
+            <bind name="bindPosition" value="'%'+position+'%'"/>
+            and m.position like #{bindPosition}
+        </if>
+        <if test="materialParam != null">
+            <bind name="bindParam" value="'%'+materialParam+'%'"/>
+            and (me.bar_code like #{bindParam} or m.name like #{bindParam} or m.standard like #{bindParam} or m.model like #{bindParam})
+        </if>
+        and ifnull(m.delete_flag,'0') !='1'
+    </select>
+
+    <select id="checkIsExist" resultType="java.lang.Integer">
+        select count(1) from jsh_material m
+        where ifnull(m.delete_flag,'0') !='1'
+        <if test="name != null">
+            and m.name = #{name}
+        </if>
+        <if test="model != null">
+            and m.model = #{model}
+        </if>
+        <if test="color != null">
+            and m.color = #{color}
+        </if>
+        <if test="standard != null">
+            and m.standard = #{standard}
+        </if>
+        <if test="mfrs != null">
+            and m.mfrs = #{mfrs}
+        </if>
+        <if test="otherField1 != null">
+            and m.other_field1 = #{otherField1}
+        </if>
+        <if test="otherField2 != null">
+            and m.other_field2 = #{otherField2}
+        </if>
+        <if test="otherField3 != null">
+            and m.other_field3 = #{otherField3}
+        </if>
+        <if test="unit != null">
+            and m.unit = #{unit}
+        </if>
+        <if test="unitId != null">
+            and m.unit_id = #{unitId}
+        </if>
+        <if test="id != null">
+            and m.id != #{id}
+        </if>
+    </select>
+
+    <select id="getMaterialExtendBySerialNumber" resultType="com.wansensoft.entities.material.MaterialExtend">
+        select me.bar_code
+        from jsh_material m
+        left join jsh_material_extend me on m.id=me.material_id and ifnull(me.delete_flag,'0') !='1'
+        left join jsh_serial_number sn on sn.material_id=m.id and ifnull(sn.delete_flag,'0') !='1'
+        where sn.serial_number = #{serialNumber}
+        and me.default_flag=1
+        and ifnull(m.delete_flag,'0') !='1'
+        limit 0,1
+    </select>
+</mapper>
