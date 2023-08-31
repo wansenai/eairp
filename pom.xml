@@ -10,13 +10,13 @@
 	<description>万森ERP</description>
 
     <modules>
-        <module>api</module>
+		<module>utils</module>
+		<module>domain</module>
+		<module>plugins</module>
+		<module>middleware</module>
 		<module>service</module>
 		<module>dao</module>
-		<module>plugins</module>
-		<module>utils</module>
-		<module>middleware</module>
-		<module>domain</module>
+		<module>api</module>
 	</modules>
 
     <parent>
@@ -65,40 +65,42 @@
 
 	<build>
 		<finalName>WanSenERP</finalName>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>build-info</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>build-info</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>repackage</id>
-						<phase>package</phase>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-						<configuration>
-							<mainClass>com.wansensoft.api.ErpApplication</mainClass>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.mybatis.generator</groupId>
-				<artifactId>mybatis-generator-maven-plugin</artifactId>
-				<version>1.4.0</version>
 				<configuration>
-					<configurationFile>${basedir}/src/test/resources/generatorConfig.xml</configurationFile>
-					<verbose>true</verbose>
-					<overwrite>true</overwrite>
+					<finalName>wansenerp</finalName>
+					<mainClass>com.wansensoft.api.ErpApplication</mainClass>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
+<!--			<plugin>-->
+<!--				<groupId>org.mybatis.generator</groupId>-->
+<!--				<artifactId>mybatis-generator-maven-plugin</artifactId>-->
+<!--				<version>1.4.0</version>-->
+<!--				<configuration>-->
+<!--					<configurationFile>${basedir}/src/test/resources/generatorConfig.xml</configurationFile>-->
+<!--					<verbose>true</verbose>-->
+<!--					<overwrite>true</overwrite>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
 		</plugins>
 	</build>
 </project>
