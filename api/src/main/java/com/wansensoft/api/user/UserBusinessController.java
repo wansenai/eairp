@@ -2,8 +2,8 @@ package com.wansensoft.api.user;
 
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.user.UserBusiness;
-import com.wansensoft.service.user.UserService;
-import com.wansensoft.service.userBusiness.UserBusinessService;
+import com.wansensoft.service.user.UserServiceImpl;
+import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ResponseJsonUtil;
@@ -26,9 +26,9 @@ public class UserBusinessController {
     private Logger logger = LoggerFactory.getLogger(UserBusinessController.class);
 
     @Resource
-    private UserBusinessService userBusinessService;
+    private UserBusinessServiceImpl userBusinessServiceImpl;
     @Resource
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     /**
      * 获取信息
@@ -45,7 +45,7 @@ public class UserBusinessController {
                                          HttpServletRequest request)throws Exception {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            List<UserBusiness> list = userBusinessService.getBasicData(keyId, type);
+            List<UserBusiness> list = userBusinessServiceImpl.getBasicData(keyId, type);
             Map<String, List> mapData = new HashMap<String, List>();
             mapData.put("userBusinessList", list);
             res.code = 200;
@@ -72,7 +72,7 @@ public class UserBusinessController {
                                    @RequestParam(value ="keyId", required = false) String keyId,
                                    HttpServletRequest request)throws Exception {
         Map<String, Object> objectMap = new HashMap<String, Object>();
-        Long id = userBusinessService.checkIsValueExist(type, keyId);
+        Long id = userBusinessServiceImpl.checkIsValueExist(type, keyId);
         if(id != null) {
             objectMap.put("id", id);
         } else {
@@ -97,7 +97,7 @@ public class UserBusinessController {
             String btnStr = jsonObject.getString("btnStr");
             String keyId = roleId;
             String type = "RoleFunctions";
-            int back = userBusinessService.updateBtnStr(keyId, type, btnStr);
+            int back = userBusinessServiceImpl.updateBtnStr(keyId, type, btnStr);
             if(back > 0) {
                 res.code = 200;
                 res.data = "成功";

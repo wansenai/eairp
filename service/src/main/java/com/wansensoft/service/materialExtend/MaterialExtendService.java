@@ -8,13 +8,12 @@ import com.wansensoft.entities.material.MaterialExtendExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.material.MaterialExtendMapper;
 import com.wansensoft.mappers.material.MaterialExtendMapperEx;
+import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.redis.RedisService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.vo.MaterialExtendVo4List;
 import org.slf4j.Logger;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,18 +32,18 @@ import java.util.List;
 @Service
 public class MaterialExtendService {
     private Logger logger = LoggerFactory.getLogger(MaterialExtendService.class);
+    private final MaterialExtendMapper materialExtendMapper;
+    private final MaterialExtendMapperEx materialExtendMapperEx;
+    private final UserServiceImpl userServiceImpl;
+    private final RedisService redisService;
 
-    @Resource
-    private MaterialExtendMapper materialExtendMapper;
-    @Resource
-    private MaterialExtendMapperEx materialExtendMapperEx;
-    @Resource
-    private LogService logService;
-    @Resource
-    private UserService userService;
-    @Resource
-    private RedisService redisService;
-    
+    public MaterialExtendService(MaterialExtendMapper materialExtendMapper, MaterialExtendMapperEx materialExtendMapperEx, UserServiceImpl userServiceImpl, RedisService redisService) {
+        this.materialExtendMapper = materialExtendMapper;
+        this.materialExtendMapperEx = materialExtendMapperEx;
+        this.userServiceImpl = userServiceImpl;
+        this.redisService = redisService;
+    }
+
     public MaterialExtend getMaterialExtend(long id)throws Exception {
         MaterialExtend result=null;
         try{
@@ -223,7 +221,7 @@ public class MaterialExtendService {
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int insertMaterialExtend(MaterialExtend materialExtend)throws Exception {
-        User user = userService.getCurrentUser();
+        User user = userServiceImpl.getCurrentUser();
         materialExtend.setDeleteFlag(BusinessConstants.DELETE_FLAG_EXISTS);
         materialExtend.setCreateTime(new Date());
         materialExtend.setUpdateTime(new Date().getTime());
@@ -239,8 +237,8 @@ public class MaterialExtendService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateMaterialExtend(MaterialExtend materialExtend) throws Exception{
-        User user = userService.getCurrentUser();
+    public int updateMaterialExtend(MaterialExtend materialExtend) {
+        User user = userServiceImpl.getCurrentUser();
         materialExtend.setUpdateTime(System.currentTimeMillis());
         materialExtend.setUpdateSerial(user.getLoginName());
         int res =0;
@@ -277,7 +275,7 @@ public class MaterialExtendService {
         materialExtend.setId(id);
         materialExtend.setDeleteFlag(BusinessConstants.DELETE_FLAG_DELETED);
         Long userId = Long.parseLong(redisService.getObjectFromSessionByKey(request,"userId").toString());
-        User user = userService.getUser(userId);
+        User user = userServiceImpl.getUser(userId);
         materialExtend.setUpdateTime(new Date().getTime());
         materialExtend.setUpdateSerial(user.getLoginName());
         try{
@@ -374,13 +372,13 @@ public class MaterialExtendService {
         return materialExtendMapper.selectByExample(example);
     }
 
-    public MaterialExtend getInfoByBarCode(String barCode)throws Exception {
+    public MaterialExtend getInfoByBarCode(String barCode) {
         MaterialExtend materialExtend = new MaterialExtend();
         MaterialExtendExample example = new MaterialExtendExample();
         example.createCriteria().andBarCodeEqualTo(barCode)
                 .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<MaterialExtend> list = materialExtendMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             return list.get(0);
         } else {
             return null;

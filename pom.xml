@@ -84,7 +84,7 @@
 							<goal>repackage</goal>
 						</goals>
 						<configuration>
-							<mainClass>com.wansensoft.mappers.ErpApplication</mainClass>
+							<mainClass>com.wansensoft.api.ErpApplication</mainClass>
 						</configuration>
 					</execution>
 				</executions>

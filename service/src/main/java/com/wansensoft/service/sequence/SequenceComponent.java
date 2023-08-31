@@ -7,7 +7,6 @@ import com.wansensoft.utils.QueryUtils;
 import com.wansensoft.utils.StringUtil;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +14,14 @@ import java.util.Map;
 /**
  * Description
  */
-@Service(value = "sequence_component")
+@Service
 @SequenceResource
 public class SequenceComponent implements ICommonQuery {
-    @Resource
-    private SequenceService sequenceService;
+    private final SequenceService sequenceService;
+
+    public SequenceComponent(SequenceService sequenceService) {
+        this.sequenceService = sequenceService;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {

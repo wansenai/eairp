@@ -7,21 +7,23 @@ import com.wansensoft.utils.QueryUtils;
 import com.wansensoft.utils.StringUtil;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-@Service(value = "tenant_component")
+@Service
 @TenantResource
 public class TenantComponent implements ICommonQuery {
 
-    @Resource
-    private TenantService tenantService;
+    private final TenantServiceImpl tenantServiceImpl;
+
+    public TenantComponent(TenantServiceImpl tenantServiceImpl) {
+        this.tenantServiceImpl = tenantServiceImpl;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return tenantService.getTenant(id);
+        return tenantServiceImpl.getTenant(id);
     }
 
     @Override
@@ -35,7 +37,7 @@ public class TenantComponent implements ICommonQuery {
         String type = StringUtil.getInfo(search, "type");
         String enabled = StringUtil.getInfo(search, "enabled");
         String remark = StringUtil.getInfo(search, "remark");
-        return tenantService.select(loginName, type, enabled, remark, QueryUtils.offset(map), QueryUtils.rows(map));
+        return tenantServiceImpl.select(loginName, type, enabled, remark, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
     @Override
@@ -45,32 +47,32 @@ public class TenantComponent implements ICommonQuery {
         String type = StringUtil.getInfo(search, "type");
         String enabled = StringUtil.getInfo(search, "enabled");
         String remark = StringUtil.getInfo(search, "remark");
-        return tenantService.countTenant(loginName, type, enabled, remark);
+        return tenantServiceImpl.countTenant(loginName, type, enabled, remark);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request)throws Exception {
-        return tenantService.insertTenant(obj, request);
+        return tenantServiceImpl.insertTenant(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return tenantService.updateTenant(obj, request);
+        return tenantServiceImpl.updateTenant(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return tenantService.deleteTenant(id, request);
+        return tenantServiceImpl.deleteTenant(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return tenantService.batchDeleteTenant(ids, request);
+        return tenantServiceImpl.batchDeleteTenant(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return tenantService.checkIsNameExist(id, name);
+        return tenantServiceImpl.checkIsNameExist(id, name);
     }
 
 }

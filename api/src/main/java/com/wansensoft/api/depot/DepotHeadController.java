@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.depot.DepotHead;
 import com.wansensoft.entities.depot.DepotHeadVo4Body;
+import com.wansensoft.service.depotHead.DepotHeadServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
-import com.wansensoft.service.depot.DepotService;
-import com.wansensoft.service.depotHead.DepotHeadService;
+import com.wansensoft.service.depot.DepotServiceImpl;
 import com.wansensoft.service.redis.RedisService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
 import com.wansensoft.utils.*;
@@ -39,10 +39,10 @@ public class DepotHeadController {
     private Logger logger = LoggerFactory.getLogger(DepotHeadController.class);
 
     @Resource
-    private DepotHeadService depotHeadService;
+    private DepotHeadServiceImpl depotHeadServiceImpl;
 
     @Resource
-    private DepotService depotService;
+    private DepotServiceImpl depotServiceImpl;
 
     @Resource
     private SystemConfigService systemConfigService;
@@ -63,7 +63,7 @@ public class DepotHeadController {
         Map<String, Object> objectMap = new HashMap<>();
         String status = jsonObject.getString("status");
         String ids = jsonObject.getString("ids");
-        int res = depotHeadService.batchSetStatus(status, ids);
+        int res = depotHeadServiceImpl.batchSetStatus(status, ids);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
@@ -108,22 +108,22 @@ public class DepotHeadController {
                 depotList.add(depotId);
             } else {
                 //未选择仓库时默认为当前用户有权限的仓库
-                JSONArray depotArr = depotService.findDepotByCurrentUser();
+                JSONArray depotArr = depotServiceImpl.findDepotByCurrentUser();
                 for(Object obj: depotArr) {
                     JSONObject object = JSONObject.parseObject(obj.toString());
                     depotList.add(object.getLong("id"));
                 }
             }
             List<DepotHeadVo4InDetail> resList = new ArrayList<DepotHeadVo4InDetail>();
-            String [] creatorArray = depotHeadService.getCreatorArray(roleType);
+            String [] creatorArray = depotHeadServiceImpl.getCreatorArray(roleType);
             String subType = "出库".equals(type)? "销售" : "";
-            String [] organArray = depotHeadService.getOrganArray(subType, "");
+            String [] organArray = depotHeadServiceImpl.getOrganArray(subType, "");
             beginTime = Tools.parseDayToTime(beginTime, BusinessConstants.DAY_FIRST_TIME);
             endTime = Tools.parseDayToTime(endTime,BusinessConstants.DAY_LAST_TIME);
             Boolean forceFlag = systemConfigService.getForceApprovalFlag();
-            List<DepotHeadVo4InDetail> list = depotHeadService.findInOutDetail(beginTime, endTime, type, creatorArray, organArray, forceFlag,
+            List<DepotHeadVo4InDetail> list = depotHeadServiceImpl.findInOutDetail(beginTime, endTime, type, creatorArray, organArray, forceFlag,
                     StringUtil.toNull(materialParam), depotList, oId, StringUtil.toNull(number), creator, remark, (currentPage-1)*pageSize, pageSize);
-            int total = depotHeadService.findInOutDetailCount(beginTime, endTime, type, creatorArray, organArray, forceFlag,
+            int total = depotHeadServiceImpl.findInOutDetailCount(beginTime, endTime, type, creatorArray, organArray, forceFlag,
                     StringUtil.toNull(materialParam), depotList, oId, StringUtil.toNull(number), creator, remark);
             map.put("total", total);
             //存放数据json数组
@@ -176,7 +176,7 @@ public class DepotHeadController {
                 depotList.add(depotId);
             } else {
                 //未选择仓库时默认为当前用户有权限的仓库
-                JSONArray depotArr = depotService.findDepotByCurrentUser();
+                JSONArray depotArr = depotServiceImpl.findDepotByCurrentUser();
                 for(Object obj: depotArr) {
                     JSONObject object = JSONObject.parseObject(obj.toString());
                     depotList.add(object.getLong("id"));
@@ -185,9 +185,9 @@ public class DepotHeadController {
             beginTime = Tools.parseDayToTime(beginTime,BusinessConstants.DAY_FIRST_TIME);
             endTime = Tools.parseDayToTime(endTime,BusinessConstants.DAY_LAST_TIME);
             Boolean forceFlag = systemConfigService.getForceApprovalFlag();
-            List<DepotHeadVo4InOutMCount> list = depotHeadService.findInOutMaterialCount(beginTime, endTime, type, forceFlag, StringUtil.toNull(materialParam),
+            List<DepotHeadVo4InOutMCount> list = depotHeadServiceImpl.findInOutMaterialCount(beginTime, endTime, type, forceFlag, StringUtil.toNull(materialParam),
                     depotList, oId, roleType, (currentPage-1)*pageSize, pageSize);
-            int total = depotHeadService.findInOutMaterialCountTotal(beginTime, endTime, type, forceFlag, StringUtil.toNull(materialParam),
+            int total = depotHeadServiceImpl.findInOutMaterialCountTotal(beginTime, endTime, type, forceFlag, StringUtil.toNull(materialParam),
                     depotList, oId, roleType);
             map.put("total", total);
             map.put("rows", list);
@@ -238,7 +238,7 @@ public class DepotHeadController {
                 depotList.add(depotId);
             } else {
                 //未选择仓库时默认为当前用户有权限的仓库
-                JSONArray depotArr = depotService.findDepotByCurrentUser();
+                JSONArray depotArr = depotServiceImpl.findDepotByCurrentUser();
                 for(Object obj: depotArr) {
                     JSONObject object = JSONObject.parseObject(obj.toString());
                     depotList.add(object.getLong("id"));
@@ -248,19 +248,19 @@ public class DepotHeadController {
                 depotFList.add(depotIdF);
             } else {
                 //未选择仓库时默认为当前用户有权限的仓库
-                JSONArray depotArr = depotService.findDepotByCurrentUser();
+                JSONArray depotArr = depotServiceImpl.findDepotByCurrentUser();
                 for(Object obj: depotArr) {
                     JSONObject object = JSONObject.parseObject(obj.toString());
                     depotFList.add(object.getLong("id"));
                 }
             }
-            String [] creatorArray = depotHeadService.getCreatorArray(roleType);
+            String [] creatorArray = depotHeadServiceImpl.getCreatorArray(roleType);
             beginTime = Tools.parseDayToTime(beginTime, BusinessConstants.DAY_FIRST_TIME);
             endTime = Tools.parseDayToTime(endTime,BusinessConstants.DAY_LAST_TIME);
             Boolean forceFlag = systemConfigService.getForceApprovalFlag();
-            List<DepotHeadVo4InDetail> list = depotHeadService.findAllocationDetail(beginTime, endTime, subType, StringUtil.toNull(number),
+            List<DepotHeadVo4InDetail> list = depotHeadServiceImpl.findAllocationDetail(beginTime, endTime, subType, StringUtil.toNull(number),
                     creatorArray, forceFlag, StringUtil.toNull(materialParam), depotList, depotFList, remark, (currentPage-1)*pageSize, pageSize);
-            int total = depotHeadService.findAllocationDetailCount(beginTime, endTime, subType, StringUtil.toNull(number),
+            int total = depotHeadServiceImpl.findAllocationDetailCount(beginTime, endTime, subType, StringUtil.toNull(number),
                     creatorArray, forceFlag, StringUtil.toNull(materialParam), depotList, depotFList, remark);
             map.put("rows", list);
             map.put("total", total);
@@ -315,12 +315,12 @@ public class DepotHeadController {
                 subTypeBack = "销售退货";
                 billType = "收款";
             }
-            String [] organArray = depotHeadService.getOrganArray(subType, "");
+            String [] organArray = depotHeadServiceImpl.getOrganArray(subType, "");
             beginTime = Tools.parseDayToTime(beginTime,BusinessConstants.DAY_FIRST_TIME);
             endTime = Tools.parseDayToTime(endTime,BusinessConstants.DAY_LAST_TIME);
-            List<DepotHeadVo4StatementAccount> list = depotHeadService.getStatementAccount(beginTime, endTime, organId, organArray,
+            List<DepotHeadVo4StatementAccount> list = depotHeadServiceImpl.getStatementAccount(beginTime, endTime, organId, organArray,
                     supplierType, type, subType,typeBack, subTypeBack, billType, (currentPage-1)*pageSize, pageSize);
-            int total = depotHeadService.getStatementAccountCount(beginTime, endTime, organId, organArray,
+            int total = depotHeadServiceImpl.getStatementAccountCount(beginTime, endTime, organId, organArray,
                     supplierType, type, subType,typeBack, subTypeBack, billType);
             for(DepotHeadVo4StatementAccount item: list) {
                 //期初 = 起始期初金额+上期欠款金额-上期退货的欠款金额-上期收付款
@@ -335,7 +335,7 @@ public class DepotHeadController {
             }
             map.put("rows", list);
             map.put("total", total);
-            List<DepotHeadVo4StatementAccount> totalPayList = depotHeadService.getStatementAccountTotalPay(beginTime, endTime, organId, organArray,
+            List<DepotHeadVo4StatementAccount> totalPayList = depotHeadServiceImpl.getStatementAccountTotalPay(beginTime, endTime, organId, organArray,
                     supplierType, type, subType, typeBack, subTypeBack, billType);
             if(totalPayList.size()>0) {
                 DepotHeadVo4StatementAccount totalPayItem = totalPayList.get(0);
@@ -373,7 +373,7 @@ public class DepotHeadController {
         BaseResponseInfo res = new BaseResponseInfo();
         DepotHeadVo4List dhl = new DepotHeadVo4List();
         try {
-            List<DepotHeadVo4List> list = depotHeadService.getDetailByNumber(number, request);
+            List<DepotHeadVo4List> list = depotHeadServiceImpl.getDetailByNumber(number, request);
             if(list.size()>0) {
                 dhl = list.get(0);
             }
@@ -400,7 +400,7 @@ public class DepotHeadController {
         BaseResponseInfo res = new BaseResponseInfo();
         DepotHead dh = new DepotHead();
         try {
-            List<DepotHead> list = depotHeadService.getBillListByLinkNumber(number);
+            List<DepotHead> list = depotHeadServiceImpl.getBillListByLinkNumber(number);
             res.code = 200;
             res.data = list;
         } catch(Exception e){
@@ -424,7 +424,7 @@ public class DepotHeadController {
         JSONObject result = ExceptionConstants.standardSuccess();
         String beanJson = body.getInfo();
         String rows = body.getRows();
-        depotHeadService.addDepotHeadAndDetail(beanJson, rows, request);
+        depotHeadServiceImpl.addDepotHeadAndDetail(beanJson, rows, request);
         return result;
     }
 
@@ -441,7 +441,7 @@ public class DepotHeadController {
         JSONObject result = ExceptionConstants.standardSuccess();
         String beanJson = body.getInfo();
         String rows = body.getRows();
-        depotHeadService.updateDepotHeadAndDetail(beanJson,rows,request);
+        depotHeadServiceImpl.updateDepotHeadAndDetail(beanJson,rows,request);
         return result;
     }
 
@@ -462,7 +462,7 @@ public class DepotHeadController {
             String yesterdayEnd = Tools.getYesterday() + BusinessConstants.DAY_LAST_TIME;
             String yearBegin = Tools.getYearBegin() + BusinessConstants.DAY_FIRST_TIME;
             String yearEnd = Tools.getYearEnd() + BusinessConstants.DAY_LAST_TIME;
-            Map<String, Object> map = depotHeadService.getBuyAndSaleStatistics(today, monthFirstDay,
+            Map<String, Object> map = depotHeadServiceImpl.getBuyAndSaleStatistics(today, monthFirstDay,
                     yesterdayBegin, yesterdayEnd, yearBegin, yearEnd, roleType, request);
             res.code = 200;
             res.data = map;
@@ -489,7 +489,7 @@ public class DepotHeadController {
             String creator = "";
             String roleType = redisService.getObjectFromSessionByKey(request,"roleType").toString();
             if(StringUtil.isNotEmpty(roleType)) {
-                creator = depotHeadService.getCreatorByRoleType(roleType);
+                creator = depotHeadServiceImpl.getCreatorByRoleType(roleType);
             }
             res.code = 200;
             res.data = creator;
@@ -523,9 +523,9 @@ public class DepotHeadController {
         String endTime = StringUtil.getInfo(search, "endTime");
         String roleType = StringUtil.getInfo(search, "roleType");
         String status = StringUtil.getInfo(search, "status");
-        List<DepotHeadVo4List> list = depotHeadService.debtList(organId, materialParam, number, beginTime, endTime, roleType,
+        List<DepotHeadVo4List> list = depotHeadServiceImpl.debtList(organId, materialParam, number, beginTime, endTime, roleType,
                 status, (currentPage-1)*pageSize, pageSize);
-        int total = depotHeadService.debtListCount(organId, materialParam, number, beginTime, endTime, roleType, status);
+        int total = depotHeadServiceImpl.debtListCount(organId, materialParam, number, beginTime, endTime, roleType, status);
         if (list != null) {
             objectMap.put("rows", list);
             objectMap.put("total", total);

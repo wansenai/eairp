@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.service.ICommonQuery;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -12,11 +11,14 @@ import java.util.Map;
 /**
  * Description
  */
-@Service(value = "orgaUserRel_component")
+@Service
 @OrgaUserRelResource
 public class OrgaUserRelComponent implements ICommonQuery {
-    @Resource
-    private OrgaUserRelService orgaUserRelService;
+    private final OrgaUserRelService orgaUserRelService;
+
+    public OrgaUserRelComponent(OrgaUserRelService orgaUserRelService) {
+        this.orgaUserRelService = orgaUserRelService;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {

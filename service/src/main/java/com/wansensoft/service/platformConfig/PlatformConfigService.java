@@ -1,196 +1,33 @@
 package com.wansensoft.service.platformConfig;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.entities.platformConfig.PlatformConfig;
-import com.wansensoft.entities.platformConfig.PlatformConfigExample;
-import com.wansensoft.utils.constants.BusinessConstants;
-import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.mappers.platformConfig.PlatformConfigMapper;
-import com.wansensoft.mappers.platformConfig.PlatformConfigMapperEx;
-import com.wansensoft.service.user.UserService;
-import com.wansensoft.utils.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.List;
 
-@Service
-public class PlatformConfigService {
-    private Logger logger = LoggerFactory.getLogger(PlatformConfigService.class);
+public interface PlatformConfigService extends IService<PlatformConfig> {
 
-    @Resource
-    private UserService userService;
+    PlatformConfig getPlatformConfig(long id);
 
-    @Resource
-    private PlatformConfigMapper platformConfigMapper;
+    List<PlatformConfig> getPlatformConfig();
 
-    @Resource
-    private PlatformConfigMapperEx platformConfigMapperEx;
+    List<PlatformConfig> select(String platformKey, int offset, int rows);
 
-    public PlatformConfig getPlatformConfig(long id)throws Exception {
-        PlatformConfig result=null;
-        try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
-                result = platformConfigMapper.selectByPrimaryKey(id);
-            }
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return result;
-    }
+    Long countPlatformConfig(String platformKey);
 
-    public List<PlatformConfig> getPlatformConfig()throws Exception {
-        PlatformConfigExample example = new PlatformConfigExample();
-        example.createCriteria();
-        List<PlatformConfig> list=null;
-        try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
-                list = platformConfigMapper.selectByExample(example);
-            }
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return list;
-    }
+    int insertPlatformConfig(JSONObject obj, HttpServletRequest request);
 
-    public List<PlatformConfig> select(String platformKey, int offset, int rows)throws Exception {
-        List<PlatformConfig> list=null;
-        try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
-                list = platformConfigMapperEx.selectByConditionPlatformConfig(platformKey, offset, rows);
-            }
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return list;
-    }
+    int updatePlatformConfig(JSONObject obj, HttpServletRequest request);
 
-    public Long countPlatformConfig(String platformKey)throws Exception {
-        Long result=null;
-        try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
-                result = platformConfigMapperEx.countsByPlatformConfig(platformKey);
-            }
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return result;
-    }
+    int deletePlatformConfig(Long id, HttpServletRequest request);
 
-    @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertPlatformConfig(JSONObject obj, HttpServletRequest request) throws Exception{
-        PlatformConfig platformConfig = JSONObject.parseObject(obj.toJSONString(), PlatformConfig.class);
-        int result=0;
-        try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
-                result = platformConfigMapper.insertSelective(platformConfig);
-            }
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-        return result;
-    }
+    int batchDeletePlatformConfig(String ids, HttpServletRequest request);
 
-    @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updatePlatformConfig(JSONObject obj, HttpServletRequest request) throws Exception{
-        PlatformConfig platformConfig = JSONObject.parseObject(obj.toJSONString(), PlatformConfig.class);
-        int result=0;
-        try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
-                result = platformConfigMapper.updateByPrimaryKeySelective(platformConfig);
-            }
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-        return result;
-    }
+    int updatePlatformConfigByKey(String platformKey, String platformValue);
 
-    @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deletePlatformConfig(Long id, HttpServletRequest request)throws Exception {
-        int result=0;
-        try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
-                result = platformConfigMapper.deleteByPrimaryKey(id);
-            }
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-        return result;
-    }
+    PlatformConfig getInfoByKey(String platformKey);
 
-    @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeletePlatformConfig(String ids, HttpServletRequest request)throws Exception {
-        List<Long> idList = StringUtil.strToLongList(ids);
-        PlatformConfigExample example = new PlatformConfigExample();
-        example.createCriteria().andIdIn(idList);
-        int result=0;
-        try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
-                result = platformConfigMapper.deleteByExample(example);
-            }
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-        return result;
-    }
-
-    public int updatePlatformConfigByKey(String platformKey, String platformValue)throws Exception {
-        int result=0;
-        try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
-                PlatformConfig platformConfig = new PlatformConfig();
-                platformConfig.setPlatformValue(platformValue);
-                PlatformConfigExample example = new PlatformConfigExample();
-                example.createCriteria().andPlatformKeyEqualTo(platformKey);
-                result = platformConfigMapper.updateByExampleSelective(platformConfig, example);
-            }
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-        return result;
-    }
-
-    public PlatformConfig getInfoByKey(String platformKey)throws Exception {
-        PlatformConfig platformConfig = new PlatformConfig();
-        try{
-            if(platformKey.contains("aliOss") || platformKey.contains("weixin")) {
-                platformConfig = null;
-            } else {
-                PlatformConfigExample example = new PlatformConfigExample();
-                example.createCriteria().andPlatformKeyEqualTo(platformKey);
-                List<PlatformConfig> list=platformConfigMapper.selectByExample(example);
-                if(list!=null && list.size()>0){
-                    platformConfig = list.get(0);
-                }
-            }
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return platformConfig;
-    }
-
-    /**
-     * 根据key查询平台信息-内部专用方法
-     * @param platformKey
-     * @return
-     * @throws Exception
-     */
-    public PlatformConfig getPlatformConfigByKey(String platformKey)throws Exception {
-        PlatformConfig platformConfig = new PlatformConfig();
-        try{
-            PlatformConfigExample example = new PlatformConfigExample();
-            example.createCriteria().andPlatformKeyEqualTo(platformKey);
-            List<PlatformConfig> list=platformConfigMapper.selectByExample(example);
-            if(list!=null && list.size()>0){
-                platformConfig = list.get(0);
-            }
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return platformConfig;
-    }
+    PlatformConfig getPlatformConfigByKey(String platformKey);
 }

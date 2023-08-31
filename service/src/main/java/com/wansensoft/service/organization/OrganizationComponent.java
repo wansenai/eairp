@@ -4,22 +4,22 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.service.ICommonQuery;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Description
- *
- * @Author: cjl
- * @Date: 2019/3/6 15:09
  */
-@Service(value = "organization_component")
+@Service
 @OrganizationResource
 public class OrganizationComponent implements ICommonQuery {
-    @Resource
-    private OrganizationService organizationService;
+
+    private final OrganizationService organizationService;
+
+    public OrganizationComponent(OrganizationService organizationService) {
+        this.organizationService = organizationService;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {

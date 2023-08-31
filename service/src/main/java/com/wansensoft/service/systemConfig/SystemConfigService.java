@@ -11,11 +11,11 @@ import com.wansensoft.entities.system.SystemConfigExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.system.SystemConfigMapper;
 import com.wansensoft.mappers.system.SystemConfigMapperEx;
+import com.wansensoft.service.log.LogServiceImpl;
+import com.wansensoft.service.platformConfig.PlatformConfigServiceImpl;
+import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.platformConfig.PlatformConfigService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.FileUtils;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
@@ -29,7 +29,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,19 +44,22 @@ import java.util.List;
 public class SystemConfigService {
     private Logger logger = LoggerFactory.getLogger(SystemConfigService.class);
 
-    @Resource
-    private SystemConfigMapper systemConfigMapper;
-    @Resource
-    private SystemConfigMapperEx systemConfigMapperEx;
-    @Resource
-    private PlatformConfigService platformConfigService;
-    @Resource
-    private UserService userService;
-    @Resource
-    private LogService logService;
+    private final SystemConfigMapper systemConfigMapper;
+    private final SystemConfigMapperEx systemConfigMapperEx;
+    private final PlatformConfigServiceImpl platformConfigServiceImpl;
+    private final UserServiceImpl userServiceImpl;
+    private final LogServiceImpl logServiceImpl;
 
     @Value(value="${file.path}")
     private String filePath;
+
+    public SystemConfigService(SystemConfigMapper systemConfigMapper, SystemConfigMapperEx systemConfigMapperEx, PlatformConfigServiceImpl platformConfigServiceImpl, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl) {
+        this.systemConfigMapper = systemConfigMapper;
+        this.systemConfigMapperEx = systemConfigMapperEx;
+        this.platformConfigServiceImpl = platformConfigServiceImpl;
+        this.userServiceImpl = userServiceImpl;
+        this.logServiceImpl = logServiceImpl;
+    }
 
     public SystemConfig getSystemConfig(long id)throws Exception {
         SystemConfig result=null;
@@ -69,7 +71,7 @@ public class SystemConfigService {
         return result;
     }
 
-    public List<SystemConfig> getSystemConfig()throws Exception {
+    public List<SystemConfig> getSystemConfig() {
         SystemConfigExample example = new SystemConfigExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<SystemConfig> list=null;
@@ -106,7 +108,7 @@ public class SystemConfigService {
         int result=0;
         try{
             result=systemConfigMapper.insertSelective(systemConfig);
-            logService.insertLog("系统配置",
+            logServiceImpl.insertLog("系统配置",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(systemConfig.getCompanyName()).toString(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -120,7 +122,7 @@ public class SystemConfigService {
         int result=0;
         try{
             result = systemConfigMapper.updateByPrimaryKeySelective(systemConfig);
-            logService.insertLog("系统配置",
+            logServiceImpl.insertLog("系统配置",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(systemConfig.getCompanyName()).toString(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -140,10 +142,10 @@ public class SystemConfigService {
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int batchDeleteSystemConfigByIds(String ids)throws Exception {
-        logService.insertLog("系统配置",
+        logServiceImpl.insertLog("系统配置",
                 new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_DELETE).append(ids).toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userServiceImpl.getCurrentUser();
         String [] idArray=ids.split(",");
         int result=0;
         try{
@@ -242,10 +244,10 @@ public class SystemConfigService {
         String token = request.getHeader("X-Access-Token");
         Long tenantId = Tools.getTenantIdByToken(token);
         bizPath = bizPath + "/" + tenantId;
-        String endpoint = platformConfigService.getPlatformConfigByKey("aliOss_endpoint").getPlatformValue();
-        String accessKeyId = platformConfigService.getPlatformConfigByKey("aliOss_accessKeyId").getPlatformValue();
-        String accessKeySecret = platformConfigService.getPlatformConfigByKey("aliOss_accessKeySecret").getPlatformValue();
-        String bucketName = platformConfigService.getPlatformConfigByKey("aliOss_bucketName").getPlatformValue();
+        String endpoint = platformConfigServiceImpl.getPlatformConfigByKey("aliOss_endpoint").getPlatformValue();
+        String accessKeyId = platformConfigServiceImpl.getPlatformConfigByKey("aliOss_accessKeyId").getPlatformValue();
+        String accessKeySecret = platformConfigServiceImpl.getPlatformConfigByKey("aliOss_accessKeySecret").getPlatformValue();
+        String bucketName = platformConfigServiceImpl.getPlatformConfigByKey("aliOss_bucketName").getPlatformValue();
         // 填写Object完整路径，完整路径中不能包含Bucket名称，例如exampledir/exampleobject.txt。
         String fileName = "";
         String orgName = mf.getOriginalFilename();// 获取文件名
@@ -319,7 +321,7 @@ public class SystemConfigService {
     }
 
     public String getFileUrlAliOss(String imgPath) throws Exception {
-        String linkUrl = platformConfigService.getPlatformConfigByKey("aliOss_linkUrl").getPlatformValue();
+        String linkUrl = platformConfigServiceImpl.getPlatformConfigByKey("aliOss_linkUrl").getPlatformValue();
         return linkUrl + filePath + "/" + imgPath;
     }
 
@@ -350,10 +352,10 @@ public class SystemConfigService {
      * @return
      * @throws Exception
      */
-    public boolean getDepotFlag() throws Exception {
+    public boolean getDepotFlag() {
         boolean depotFlag = false;
         List<SystemConfig> list = getSystemConfig();
-        if(list.size()>0) {
+        if(!list.isEmpty()) {
             String flag = list.get(0).getDepotFlag();
             if(("1").equals(flag)) {
                 depotFlag = true;
@@ -367,7 +369,7 @@ public class SystemConfigService {
      * @return
      * @throws Exception
      */
-    public boolean getCustomerFlag() throws Exception {
+    public boolean getCustomerFlag() {
         boolean customerFlag = false;
         List<SystemConfig> list = getSystemConfig();
         if(list.size()>0) {
@@ -384,7 +386,7 @@ public class SystemConfigService {
      * @return
      * @throws Exception
      */
-    public boolean getMinusStockFlag() throws Exception {
+    public boolean getMinusStockFlag() {
         boolean minusStockFlag = false;
         List<SystemConfig> list = getSystemConfig();
         if(list.size()>0) {
@@ -401,10 +403,10 @@ public class SystemConfigService {
      * @return
      * @throws Exception
      */
-    public boolean getUpdateUnitPriceFlag() throws Exception {
+    public boolean getUpdateUnitPriceFlag() {
         boolean updateUnitPriceFlag = true;
         List<SystemConfig> list = getSystemConfig();
-        if(list.size()>0) {
+        if(!list.isEmpty()) {
             String flag = list.get(0).getUpdateUnitPriceFlag();
             if(("0").equals(flag)) {
                 updateUnitPriceFlag = false;
@@ -418,10 +420,10 @@ public class SystemConfigService {
      * @return
      * @throws Exception
      */
-    public boolean getOverLinkBillFlag() throws Exception {
+    public boolean getOverLinkBillFlag() {
         boolean overLinkBillFlag = false;
         List<SystemConfig> list = getSystemConfig();
-        if(list.size()>0) {
+        if(!list.isEmpty()) {
             String flag = list.get(0).getOverLinkBillFlag();
             if(("1").equals(flag)) {
                 overLinkBillFlag = true;
@@ -435,7 +437,7 @@ public class SystemConfigService {
      * @return
      * @throws Exception
      */
-    public boolean getForceApprovalFlag() throws Exception {
+    public boolean getForceApprovalFlag() {
         boolean forceApprovalFlag = false;
         List<SystemConfig> list = getSystemConfig();
         if(list.size()>0) {

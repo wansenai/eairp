@@ -3,11 +3,9 @@ package com.wansensoft.service;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.constants.BusinessConstants;
-import com.wansensoft.service.log.LogService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +14,10 @@ import java.util.Map;
 @Service
 public class CommonQueryManager {
 
-    @Resource
-    private InterfaceContainer container;
-
-    @Resource
-    private LogService logService;
+    private final InterfaceContainer container;
+    public CommonQueryManager(InterfaceContainer container) {
+        this.container = container;
+    }
 
     /**
      * 查询单条

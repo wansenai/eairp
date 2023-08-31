@@ -3,8 +3,8 @@ package com.wansensoft.api.serialNumber;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.depot.DepotItem;
 import com.wansensoft.entities.serialNumber.SerialNumberEx;
-import com.wansensoft.service.depotHead.DepotHeadService;
-import com.wansensoft.service.depotItem.DepotItemService;
+import com.wansensoft.service.depotHead.DepotHeadServiceImpl;
+import com.wansensoft.service.depotItem.DepotItemServiceImpl;
 import com.wansensoft.service.serialNumber.SerialNumberService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
@@ -31,9 +31,9 @@ public class SerialNumberController {
     @Resource
     private SerialNumberService serialNumberService;
     @Resource
-    private DepotHeadService depotHeadService;
+    private DepotHeadServiceImpl depotHeadServiceImpl;
     @Resource
-    private DepotItemService depotItemService;
+    private DepotItemServiceImpl depotItemServiceImpl;
 
     /**
      * description:
@@ -87,8 +87,8 @@ public class SerialNumberController {
         try {
             String number = "";
             if(depotItemId != null) {
-                DepotItem depotItem = depotItemService.getDepotItem(depotItemId);
-                number = depotHeadService.getDepotHead(depotItem.getHeaderId()).getNumber();
+                DepotItem depotItem = depotItemServiceImpl.getDepotItem(depotItemId);
+                number = depotHeadServiceImpl.getDepotHead(depotItem.getHeaderId()).getNumber();
             }
             List<SerialNumberEx> list = serialNumberService.getEnableSerialNumberList(number, name, depotId, barCode, (currentPage-1)*pageSize, pageSize);
             for(SerialNumberEx serialNumberEx: list) {

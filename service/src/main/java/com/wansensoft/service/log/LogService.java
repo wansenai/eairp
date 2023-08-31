@@ -1,189 +1,33 @@
 package com.wansensoft.service.log;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.entities.log.Log;
-import com.wansensoft.entities.log.LogExample;
-import com.wansensoft.utils.constants.BusinessConstants;
-import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.mappers.log.LogMapper;
-import com.wansensoft.mappers.log.LogMapperEx;
-import com.wansensoft.service.redis.RedisService;
-import com.wansensoft.service.user.UserService;
-import com.wansensoft.utils.StringUtil;
-import com.wansensoft.utils.Tools;
 import com.wansensoft.vo.LogVo4List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Date;
+
 import java.util.List;
 
-import static com.wansensoft.utils.Tools.getLocalIp;
+public interface LogService extends IService<Log> {
+    Log getLog(long id);
 
-@Service
-public class LogService {
-    private Logger logger = LoggerFactory.getLogger(LogService.class);
-    @Resource
-    private LogMapper logMapper;
+    List<Log> getLog();
 
-    @Resource
-    private LogMapperEx logMapperEx;
+    List<LogVo4List> select(String operation, String userInfo, String clientIp, Integer status, String beginTime, String endTime,
+                            String content, int offset, int rows);
 
-    @Resource
-    private UserService userService;
+    Long countLog(String operation, String userInfo, String clientIp, Integer status, String beginTime, String endTime,
+                  String content);
 
-    @Resource
-    private RedisService redisService;
+    int insertLog(JSONObject obj, HttpServletRequest request);
 
-    public Log getLog(long id)throws Exception {
-        Log result=null;
-        try{
-            result=logMapper.selectByPrimaryKey(id);
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return result;
-    }
+    int updateLog(JSONObject obj, HttpServletRequest request);
 
-    public List<Log> getLog()throws Exception {
-        LogExample example = new LogExample();
-        List<Log> list=null;
-        try{
-            list=logMapper.selectByExample(example);
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return list;
-    }
+    int deleteLog(Long id, HttpServletRequest request);
 
-    public List<LogVo4List> select(String operation, String userInfo, String clientIp, Integer status, String beginTime, String endTime,
-                                   String content, int offset, int rows)throws Exception {
-        List<LogVo4List> list=null;
-        try{
-            beginTime = Tools.parseDayToTime(beginTime,BusinessConstants.DAY_FIRST_TIME);
-            endTime = Tools.parseDayToTime(endTime,BusinessConstants.DAY_LAST_TIME);
-            list=logMapperEx.selectByConditionLog(operation, userInfo, clientIp, status, beginTime, endTime,
-                    content, offset, rows);
-            if (null != list) {
-                for (LogVo4List log : list) {
-                    log.setCreateTimeStr(Tools.getCenternTime(log.getCreateTime()));
-                }
-            }
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return list;
-    }
+    int batchDeleteLog(String ids, HttpServletRequest request);
 
-    public Long countLog(String operation, String userInfo, String clientIp, Integer status, String beginTime, String endTime,
-                        String content)throws Exception {
-        Long result=null;
-        try{
-            beginTime = Tools.parseDayToTime(beginTime,BusinessConstants.DAY_FIRST_TIME);
-            endTime = Tools.parseDayToTime(endTime,BusinessConstants.DAY_LAST_TIME);
-            result=logMapperEx.countsByLog(operation, userInfo, clientIp, status, beginTime, endTime, content);
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return result;
-    }
+    void insertLog(String moduleName, String content, HttpServletRequest request);
 
-    @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertLog(JSONObject obj, HttpServletRequest request) throws Exception{
-        Log log = JSONObject.parseObject(obj.toJSONString(), Log.class);
-        int result=0;
-        try{
-            result=logMapper.insertSelective(log);
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-        return result;
-    }
-
-    @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateLog(JSONObject obj, HttpServletRequest request)throws Exception {
-        Log log = JSONObject.parseObject(obj.toJSONString(), Log.class);
-        int result=0;
-        try{
-            result=logMapper.updateByPrimaryKeySelective(log);
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-        return result;
-    }
-
-    @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteLog(Long id, HttpServletRequest request)throws Exception {
-        int result=0;
-        try{
-            result=logMapper.deleteByPrimaryKey(id);
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-        return result;
-    }
-
-    @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteLog(String ids, HttpServletRequest request)throws Exception {
-        List<Long> idList = StringUtil.strToLongList(ids);
-        LogExample example = new LogExample();
-        example.createCriteria().andIdIn(idList);
-        int result=0;
-        try{
-            result=logMapper.deleteByExample(example);
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-        return result;
-    }
-
-    public void insertLog(String moduleName, String content, HttpServletRequest request)throws Exception{
-        try{
-            Long userId = userService.getUserId(request);
-            if(userId!=null) {
-                String clientIp = getLocalIp(request);
-                String createTime = Tools.getNow3();
-                Long count = logMapperEx.getCountByIpAndDate(userId, moduleName, clientIp, createTime);
-                if(count > 0) {
-                    //如果某个用户某个IP在同1秒内连续操作两遍，此时需要删除该redis记录，使其退出，防止恶意攻击
-                    redisService.deleteObjectByUserAndIp(userId, clientIp);
-                } else {
-                    Log log = new Log();
-                    log.setUserId(userId);
-                    log.setOperation(moduleName);
-                    log.setClientIp(getLocalIp(request));
-                    log.setCreateTime(new Date());
-                    Byte status = 0;
-                    log.setStatus(status);
-                    log.setContent(content);
-                    logMapper.insertSelective(log);
-                }
-            }
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-    }
-
-    public void insertLogWithUserId(Long userId, Long tenantId, String moduleName, String content, HttpServletRequest request)throws Exception{
-        try{
-            if(userId!=null) {
-                Log log = new Log();
-                log.setUserId(userId);
-                log.setOperation(moduleName);
-                log.setClientIp(getLocalIp(request));
-                log.setCreateTime(new Date());
-                Byte status = 0;
-                log.setStatus(status);
-                log.setContent(content);
-                log.setTenantId(tenantId);
-                logMapperEx.insertLogWithUserId(log);
-            }
-        }catch(Exception e){
-            JshException.writeFail(logger, e);
-        }
-    }
+    void insertLogWithUserId(Long userId, Long tenantId, String moduleName, String content, HttpServletRequest request);
 }

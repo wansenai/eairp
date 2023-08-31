@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.role.Role;
 import com.wansensoft.service.role.RoleService;
-import com.wansensoft.service.userBusiness.UserBusinessService;
+import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
@@ -29,7 +29,7 @@ public class RoleController {
     private RoleService roleService;
 
     @Resource
-    private UserBusinessService userBusinessService;
+    private UserBusinessServiceImpl userBusinessServiceImpl;
 
     /**
      * 角色对应应用显示
@@ -43,7 +43,7 @@ public class RoleController {
         JSONArray arr = new JSONArray();
         try {
             //获取权限信息
-            String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, keyId);
+            String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, keyId);
             List<Role> dataList = roleService.findUserRole();
             if (null != dataList) {
                 for (Role role : dataList) {

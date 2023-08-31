@@ -7,17 +7,19 @@ import com.wansensoft.utils.QueryUtils;
 import com.wansensoft.utils.StringUtil;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-@Service(value = "materialProperty_component")
+@Service
 @MaterialPropertyResource
 public class MaterialPropertyComponent implements ICommonQuery {
 
-    @Resource
-    private MaterialPropertyService materialPropertyService;
+    private final MaterialPropertyService materialPropertyService;
+
+    public MaterialPropertyComponent(MaterialPropertyService materialPropertyService) {
+        this.materialPropertyService = materialPropertyService;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {

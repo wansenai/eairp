@@ -8,12 +8,12 @@ import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.material.MaterialCategoryMapper;
 import com.wansensoft.mappers.material.MaterialCategoryMapperEx;
 import com.wansensoft.mappers.material.MaterialMapperEx;
+import com.wansensoft.service.log.LogServiceImpl;
+import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.vo.TreeNode;
 import org.slf4j.Logger;
@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,16 +32,19 @@ import java.util.List;
 public class MaterialCategoryService {
     private Logger logger = LoggerFactory.getLogger(MaterialCategoryService.class);
 
-    @Resource
-    private MaterialCategoryMapper materialCategoryMapper;
-    @Resource
-    private MaterialCategoryMapperEx materialCategoryMapperEx;
-    @Resource
-    private UserService userService;
-    @Resource
-    private LogService logService;
-    @Resource
-    private MaterialMapperEx materialMapperEx;
+    private final MaterialCategoryMapper materialCategoryMapper;
+    private final MaterialCategoryMapperEx materialCategoryMapperEx;
+    private final UserServiceImpl userServiceImpl;
+    private final LogServiceImpl logServiceImpl;
+    private final MaterialMapperEx materialMapperEx;
+
+    public MaterialCategoryService(MaterialCategoryMapper materialCategoryMapper, MaterialCategoryMapperEx materialCategoryMapperEx, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl, MaterialMapperEx materialMapperEx) {
+        this.materialCategoryMapper = materialCategoryMapper;
+        this.materialCategoryMapperEx = materialCategoryMapperEx;
+        this.userServiceImpl = userServiceImpl;
+        this.logServiceImpl = logServiceImpl;
+        this.materialMapperEx = materialMapperEx;
+    }
 
     public MaterialCategory getMaterialCategory(long id)throws Exception {
         MaterialCategory result=null;
@@ -135,7 +137,7 @@ public class MaterialCategoryService {
         int result=0;
         try{
             result=materialCategoryMapper.insertSelective(materialCategory);
-            logService.insertLog("商品类型",
+            logServiceImpl.insertLog("商品类型",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(materialCategory.getName()).toString(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -150,7 +152,7 @@ public class MaterialCategoryService {
         int result=0;
         try{
             result=materialCategoryMapper.updateByPrimaryKeySelective(materialCategory);
-            logService.insertLog("商品类型",
+            logServiceImpl.insertLog("商品类型",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(materialCategory.getName()).toString(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -191,12 +193,12 @@ public class MaterialCategoryService {
         for(MaterialCategory materialCategory: list){
             sb.append("[").append(materialCategory.getName()).append("]");
         }
-        logService.insertLog("商品类型", sb.toString(),
+        logServiceImpl.insertLog("商品类型", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         //更新时间
         Date updateDate =new Date();
         //更新人
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userServiceImpl.getCurrentUser();
         Long updater=userInfo==null?null:userInfo.getId();
         String strArray[]=ids.split(",");
         if(strArray.length<1){
@@ -262,7 +264,7 @@ public class MaterialCategoryService {
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int addMaterialCategory(MaterialCategory mc) throws Exception {
-        logService.insertLog("商品类型",
+        logServiceImpl.insertLog("商品类型",
                 new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(mc.getName()).toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         if(mc==null){
@@ -276,7 +278,7 @@ public class MaterialCategoryService {
         checkMaterialCategorySerialNo(mc);
         //数据状态新增时默认设置为启用
         Date date=new Date();
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userServiceImpl.getCurrentUser();
         //创建时间
         mc.setCreateTime(date);
         //更新时间
@@ -292,7 +294,7 @@ public class MaterialCategoryService {
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int editMaterialCategory(MaterialCategory mc) throws Exception{
-        logService.insertLog("商品类型",
+        logServiceImpl.insertLog("商品类型",
                 new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(mc.getName()).toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         if(mc.getParentId()==null){
@@ -304,7 +306,7 @@ public class MaterialCategoryService {
         //更新时间
         mc.setUpdateTime(new Date());
         //更新人
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userServiceImpl.getCurrentUser();
         int result=0;
         try{
             result= materialCategoryMapperEx.editMaterialCategory(mc);

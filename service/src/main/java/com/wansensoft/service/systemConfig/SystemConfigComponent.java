@@ -7,17 +7,19 @@ import com.wansensoft.utils.QueryUtils;
 import com.wansensoft.utils.StringUtil;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-@Service(value = "systemConfig_component")
+@Service
 @SystemConfigResource
 public class SystemConfigComponent implements ICommonQuery {
 
-    @Resource
-    private SystemConfigService systemConfigService;
+    private final SystemConfigService systemConfigService;
+
+    public SystemConfigComponent(SystemConfigService systemConfigService) {
+        this.systemConfigService = systemConfigService;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {

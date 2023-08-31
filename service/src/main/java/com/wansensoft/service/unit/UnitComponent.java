@@ -7,17 +7,19 @@ import com.wansensoft.utils.QueryUtils;
 import com.wansensoft.utils.StringUtil;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-@Service(value = "unit_component")
+@Service
 @UnitResource
 public class UnitComponent implements ICommonQuery {
 
-    @Resource
-    private UnitService unitService;
+    private final UnitService unitService;
+
+    public UnitComponent(UnitService unitService) {
+        this.unitService = unitService;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {

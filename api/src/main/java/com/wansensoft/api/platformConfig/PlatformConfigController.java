@@ -2,7 +2,7 @@ package com.wansensoft.api.platformConfig;
 
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.platformConfig.PlatformConfig;
-import com.wansensoft.service.platformConfig.PlatformConfigService;
+import com.wansensoft.service.platformConfig.PlatformConfigServiceImpl;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ResponseJsonUtil;
@@ -24,7 +24,7 @@ public class PlatformConfigController {
     private Logger logger = LoggerFactory.getLogger(PlatformConfigController.class);
 
     @Resource
-    private PlatformConfigService platformConfigService;
+    private PlatformConfigServiceImpl platformConfigServiceImpl;
 
     /**
      * 获取平台名称
@@ -37,7 +37,7 @@ public class PlatformConfigController {
         String res;
         try {
             String platformKey = "platform_name";
-            PlatformConfig platformConfig = platformConfigService.getInfoByKey(platformKey);
+            PlatformConfig platformConfig = platformConfigServiceImpl.getInfoByKey(platformKey);
             res = platformConfig.getPlatformValue();
         } catch(Exception e){
             e.printStackTrace();
@@ -57,7 +57,7 @@ public class PlatformConfigController {
         String res;
         try {
             String platformKey = "platform_url";
-            PlatformConfig platformConfig = platformConfigService.getInfoByKey(platformKey);
+            PlatformConfig platformConfig = platformConfigServiceImpl.getInfoByKey(platformKey);
             res = platformConfig.getPlatformValue();
         } catch(Exception e){
             e.printStackTrace();
@@ -77,7 +77,7 @@ public class PlatformConfigController {
         String res;
         try {
             String platformKey = "register_flag";
-            PlatformConfig platformConfig = platformConfigService.getInfoByKey(platformKey);
+            PlatformConfig platformConfig = platformConfigServiceImpl.getInfoByKey(platformKey);
             res = platformConfig.getPlatformValue();
         } catch(Exception e){
             e.printStackTrace();
@@ -99,7 +99,7 @@ public class PlatformConfigController {
         Map<String, Object> objectMap = new HashMap<>();
         String platformKey = object.getString("platformKey");
         String platformValue = object.getString("platformValue");
-        int res = platformConfigService.updatePlatformConfigByKey(platformKey, platformValue);
+        int res = platformConfigServiceImpl.updatePlatformConfigByKey(platformKey, platformValue);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
@@ -119,7 +119,7 @@ public class PlatformConfigController {
                                          HttpServletRequest request)throws Exception {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            PlatformConfig platformConfig = platformConfigService.getInfoByKey(platformKey);
+            PlatformConfig platformConfig = platformConfigServiceImpl.getInfoByKey(platformKey);
             res.code = 200;
             res.data = platformConfig;
         } catch(Exception e){

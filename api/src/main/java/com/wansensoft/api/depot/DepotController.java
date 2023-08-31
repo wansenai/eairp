@@ -5,9 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.depot.Depot;
 import com.wansensoft.entities.depot.DepotEx;
 import com.wansensoft.entities.material.MaterialInitialStock;
-import com.wansensoft.service.depot.DepotService;
-import com.wansensoft.service.material.MaterialService;
-import com.wansensoft.service.userBusiness.UserBusinessService;
+import com.wansensoft.service.depot.DepotServiceImpl;
+import com.wansensoft.service.material.MaterialServiceImpl;
+import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ResponseJsonUtil;
@@ -32,13 +32,13 @@ public class DepotController {
     private Logger logger = LoggerFactory.getLogger(DepotController.class);
 
     @Resource
-    private DepotService depotService;
+    private DepotServiceImpl depotServiceImpl;
 
     @Resource
-    private UserBusinessService userBusinessService;
+    private UserBusinessServiceImpl userBusinessServiceImpl;
 
     @Resource
-    private MaterialService materialService;
+    private MaterialServiceImpl materialServiceImpl;
 
     /**
      * 仓库列表
@@ -51,7 +51,7 @@ public class DepotController {
     public BaseResponseInfo getAllList(HttpServletRequest request) throws Exception{
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            List<Depot> depotList = depotService.getAllList();
+            List<Depot> depotList = depotServiceImpl.getAllList();
             res.code = 200;
             res.data = depotList;
         } catch(Exception e){
@@ -76,8 +76,8 @@ public class DepotController {
         JSONArray arr = new JSONArray();
         try {
             //获取权限信息
-            String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, keyId);
-            List<Depot> dataList = depotService.findUserDepot();
+            String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, keyId);
+            List<Depot> dataList = depotServiceImpl.findUserDepot();
             //开始拼接json数据
             JSONObject outer = new JSONObject();
             outer.put("id", 0);
@@ -121,7 +121,7 @@ public class DepotController {
     public BaseResponseInfo findDepotByCurrentUser(HttpServletRequest request) throws Exception{
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            JSONArray arr = depotService.findDepotByCurrentUser();
+            JSONArray arr = depotServiceImpl.findDepotByCurrentUser();
             res.code = 200;
             res.data = arr;
         } catch (Exception e) {
@@ -145,7 +145,7 @@ public class DepotController {
                                        HttpServletRequest request) throws Exception{
         Long depotId = object.getLong("id");
         Map<String, Object> objectMap = new HashMap<>();
-        int res = depotService.updateIsDefault(depotId);
+        int res = depotServiceImpl.updateIsDefault(depotId);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
@@ -165,16 +165,16 @@ public class DepotController {
                                        HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            List<Depot> list = depotService.getAllList();
+            List<Depot> list = depotServiceImpl.getAllList();
             List<DepotEx> depotList = new ArrayList<DepotEx>();
             for(Depot depot: list) {
                 DepotEx de = new DepotEx();
                 if(mId!=0) {
-                    BigDecimal initStock = materialService.getInitStock(mId, depot.getId());
-                    BigDecimal currentStock = materialService.getCurrentStockByMaterialIdAndDepotId(mId, depot.getId());
+                    BigDecimal initStock = materialServiceImpl.getInitStock(mId, depot.getId());
+                    BigDecimal currentStock = materialServiceImpl.getCurrentStockByMaterialIdAndDepotId(mId, depot.getId());
                     de.setInitStock(initStock);
                     de.setCurrentStock(currentStock);
-                    MaterialInitialStock materialInitialStock = materialService.getSafeStock(mId, depot.getId());
+                    MaterialInitialStock materialInitialStock = materialServiceImpl.getSafeStock(mId, depot.getId());
                     de.setLowSafeStock(materialInitialStock.getLowSafeStock());
                     de.setHighSafeStock(materialInitialStock.getHighSafeStock());
                 } else {
@@ -208,7 +208,7 @@ public class DepotController {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
-        int res = depotService.batchSetStatus(status, ids);
+        int res = depotServiceImpl.batchSetStatus(status, ids);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {

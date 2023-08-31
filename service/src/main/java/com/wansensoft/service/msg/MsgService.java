@@ -5,14 +5,13 @@ import com.wansensoft.entities.msg.Msg;
 import com.wansensoft.entities.msg.MsgEx;
 import com.wansensoft.entities.msg.MsgExample;
 import com.wansensoft.entities.user.User;
+import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.mappers.msg.MsgMapper;
 import com.wansensoft.mappers.msg.MsgMapperEx;
-import com.wansensoft.service.depotHead.DepotHeadService;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.log.LogServiceImpl;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
 import org.slf4j.Logger;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,20 +31,18 @@ import static com.wansensoft.utils.Tools.getCenternTime;
 @Service
 public class MsgService {
     private Logger logger = LoggerFactory.getLogger(MsgService.class);
-    @Resource
-    private MsgMapper msgMapper;
 
-    @Resource
-    private MsgMapperEx msgMapperEx;
+    private final MsgMapper msgMapper;
+    private final MsgMapperEx msgMapperEx;
+    private final UserServiceImpl userServiceImpl;
+    private final LogServiceImpl logServiceImpl;
 
-    @Resource
-    private DepotHeadService depotHeadService;
-
-    @Resource
-    private UserService userService;
-
-    @Resource
-    private LogService logService;
+    public MsgService(MsgMapper msgMapper, MsgMapperEx msgMapperEx, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl) {
+        this.msgMapper = msgMapper;
+        this.msgMapperEx = msgMapperEx;
+        this.userServiceImpl = userServiceImpl;
+        this.logServiceImpl = logServiceImpl;
+    }
 
     public Msg getMsg(long id)throws Exception {
         Msg result=null;
@@ -79,7 +75,7 @@ public class MsgService {
     public List<MsgEx> select(String name, int offset, int rows)throws Exception {
         List<MsgEx> list=null;
         try{
-            User userInfo = userService.getCurrentUser();
+            User userInfo = userServiceImpl.getCurrentUser();
             if(!BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
                 list = msgMapperEx.selectByConditionMsg(userInfo.getId(), name, offset, rows);
                 if (null != list) {
@@ -102,7 +98,7 @@ public class MsgService {
     public Long countMsg(String name)throws Exception {
         Long result=null;
         try{
-            User userInfo = userService.getCurrentUser();
+            User userInfo = userServiceImpl.getCurrentUser();
             if(!BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
                 result = msgMapperEx.countsByMsg(userInfo.getId(), name);
             }
@@ -120,12 +116,12 @@ public class MsgService {
         Msg msg = JSONObject.parseObject(obj.toJSONString(), Msg.class);
         int result=0;
         try{
-            User userInfo = userService.getCurrentUser();
+            User userInfo = userServiceImpl.getCurrentUser();
             if(!BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
                 msg.setCreateTime(new Date());
                 msg.setStatus("1");
                 result=msgMapper.insertSelective(msg);
-                logService.insertLog("消息",
+                logServiceImpl.insertLog("消息",
                         new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(msg.getMsgTitle()).toString(), request);
             }
         }catch(Exception e){
@@ -143,7 +139,7 @@ public class MsgService {
         int result=0;
         try{
             result=msgMapper.updateByPrimaryKeySelective(msg);
-            logService.insertLog("消息",
+            logServiceImpl.insertLog("消息",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(msg.getMsgTitle()).toString(), request);
         }catch(Exception e){
             logger.error("异常码[{}],异常提示[{}],异常[{}]",
@@ -159,7 +155,7 @@ public class MsgService {
         int result=0;
         try{
             result=msgMapper.deleteByPrimaryKey(id);
-            logService.insertLog("消息",
+            logServiceImpl.insertLog("消息",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_DELETE).append(id).toString(), request);
         }catch(Exception e){
             logger.error("异常码[{}],异常提示[{}],异常[{}]",
@@ -178,7 +174,7 @@ public class MsgService {
         int result=0;
         try{
             result=msgMapper.deleteByExample(example);
-            logService.insertLog("消息", "批量删除,id集:" + ids, request);
+            logServiceImpl.insertLog("消息", "批量删除,id集:" + ids, request);
         }catch(Exception e){
             logger.error("异常码[{}],异常提示[{}],异常[{}]",
                     ExceptionConstants.DATA_WRITE_FAIL_CODE, ExceptionConstants.DATA_WRITE_FAIL_MSG,e);
@@ -212,7 +208,7 @@ public class MsgService {
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int batchDeleteMsgByIds(String ids) throws Exception{
-        logService.insertLog("序列号",
+        logServiceImpl.insertLog("序列号",
                 new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_DELETE).append(ids).toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         String [] idArray=ids.split(",");
@@ -231,7 +227,7 @@ public class MsgService {
     public List<MsgEx> getMsgByStatus(String status)throws Exception {
         List<MsgEx> resList=new ArrayList<>();
         try{
-            User userInfo = userService.getCurrentUser();
+            User userInfo = userServiceImpl.getCurrentUser();
             if(!BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
                 MsgExample example = new MsgExample();
                 example.createCriteria().andStatusEqualTo(status).andUserIdEqualTo(userInfo.getId())
@@ -282,7 +278,7 @@ public class MsgService {
     public Long getMsgCountByStatus(String status)throws Exception {
         Long result=null;
         try{
-            User userInfo=userService.getCurrentUser();
+            User userInfo= userServiceImpl.getCurrentUser();
             if(!BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
                 result = msgMapperEx.getMsgCountByStatus(status, userInfo.getId());
             }
@@ -298,7 +294,7 @@ public class MsgService {
     public Integer getMsgCountByType(String type)throws Exception {
         int msgCount = 0;
         try{
-            User userInfo = userService.getCurrentUser();
+            User userInfo = userServiceImpl.getCurrentUser();
             if(!BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
                 MsgExample example = new MsgExample();
                 example.createCriteria().andTypeEqualTo(type).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
@@ -317,7 +313,7 @@ public class MsgService {
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public void readAllMsg() throws Exception{
         try{
-            User userInfo = userService.getCurrentUser();
+            User userInfo = userServiceImpl.getCurrentUser();
             if(!BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
                 Msg msg = new Msg();
                 msg.setStatus("2");

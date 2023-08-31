@@ -7,21 +7,23 @@ import com.wansensoft.utils.QueryUtils;
 import com.wansensoft.utils.StringUtil;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-@Service(value = "depotHead_component")
+@Service
 @DepotHeadResource
 public class DepotHeadComponent implements ICommonQuery {
 
-    @Resource
-    private DepotHeadService depotHeadService;
+    private final DepotHeadServiceImpl depotHeadServiceImpl;
+
+    public DepotHeadComponent(DepotHeadServiceImpl depotHeadServiceImpl) {
+        this.depotHeadServiceImpl = depotHeadServiceImpl;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return depotHeadService.getDepotHead(id);
+        return depotHeadServiceImpl.getDepotHead(id);
     }
 
     @Override
@@ -47,7 +49,7 @@ public class DepotHeadComponent implements ICommonQuery {
         Long depotId = StringUtil.parseStrLong(StringUtil.getInfo(search, "depotId"));
         Long accountId = StringUtil.parseStrLong(StringUtil.getInfo(search, "accountId"));
         String remark = StringUtil.getInfo(search, "remark");
-        return depotHeadService.select(type, subType, roleType, hasDebt, status, purchaseStatus, number, linkNumber,
+        return depotHeadServiceImpl.select(type, subType, roleType, hasDebt, status, purchaseStatus, number, linkNumber,
                 beginTime, endTime, materialParam, organId, creator, depotId, accountId, remark, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
@@ -70,28 +72,28 @@ public class DepotHeadComponent implements ICommonQuery {
         Long depotId = StringUtil.parseStrLong(StringUtil.getInfo(search, "depotId"));
         Long accountId = StringUtil.parseStrLong(StringUtil.getInfo(search, "accountId"));
         String remark = StringUtil.getInfo(search, "remark");
-        return depotHeadService.countDepotHead(type, subType, roleType, hasDebt, status, purchaseStatus, number, linkNumber,
+        return depotHeadServiceImpl.countDepotHead(type, subType, roleType, hasDebt, status, purchaseStatus, number, linkNumber,
                 beginTime, endTime, materialParam, organId, creator, depotId, accountId, remark);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request) throws Exception{
-        return depotHeadService.insertDepotHead(obj, request);
+        return depotHeadServiceImpl.insertDepotHead(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return depotHeadService.updateDepotHead(obj, request);
+        return depotHeadServiceImpl.updateDepotHead(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return depotHeadService.deleteDepotHead(id, request);
+        return depotHeadServiceImpl.deleteDepotHead(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return depotHeadService.batchDeleteDepotHead(ids, request);
+        return depotHeadServiceImpl.batchDeleteDepotHead(ids, request);
     }
 
     @Override

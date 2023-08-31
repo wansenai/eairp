@@ -9,9 +9,6 @@ spring:
   profiles:
     active: dev
 
-  main:
-    allow-circular-references: true
-
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -25,7 +22,6 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
     default-property-inclusion: always
-    property-naming-strategy: SNAKE_CASE
 
 logging:
   config: classpath:logback-spring.xml
@@ -35,8 +31,6 @@ mybatis-plus:
   type-aliases-package: com.wansensoft.entity
   global-config:
     id-type: 0
-    #驼峰下划线转换
-    db-column-underline: true
     #刷新mapper 调试神器
     refresh-mapper: true
   configuration:

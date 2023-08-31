@@ -1,7 +1,7 @@
 package com.wansensoft.api.tenant;
 
 import com.alibaba.fastjson.JSONObject;
-import com.wansensoft.service.tenant.TenantService;
+import com.wansensoft.service.tenant.TenantServiceImpl;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
@@ -22,7 +22,7 @@ public class TenantController {
     private Logger logger = LoggerFactory.getLogger(TenantController.class);
 
     @Resource
-    private TenantService tenantService;
+    private TenantServiceImpl tenantServiceImpl;
 
     /**
      * 批量设置状态-启用或者禁用
@@ -37,7 +37,7 @@ public class TenantController {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
-        int res = tenantService.batchSetStatus(status, ids);
+        int res = tenantServiceImpl.batchSetStatus(status, ids);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
