@@ -112,7 +112,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.material.MaterialExtend">
+  <insert id="insertMaterialExtend" parameterType="com.wansensoft.entities.material.MaterialExtend">
     insert into jsh_material_extend (id, material_id, bar_code, 
       commodity_unit, sku, purchase_decimal, 
       commodity_decimal, wholesale_decimal, low_decimal, 

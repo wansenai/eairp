@@ -116,7 +116,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.system.SystemConfig">
+  <insert id="insertSystemConfig" parameterType="com.wansensoft.entities.system.SystemConfig">
     insert into jsh_system_config (id, company_name, company_contacts, 
       company_address, company_tel, company_fax, 
       company_post_code, sale_agreement, depot_flag, 

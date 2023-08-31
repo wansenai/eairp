@@ -17,7 +17,7 @@ public interface UserBusinessMapper extends BaseMapper<UserBusiness> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(UserBusiness record);
+    int insertUserBusiness(UserBusiness record);
 
     int insertSelective(UserBusiness record);
 

@@ -101,7 +101,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.person.Person">
+  <insert id="insertPerson" parameterType="com.wansensoft.entities.person.Person">
     insert into jsh_person (id, type, name, 
       enabled, sort, tenant_id, 
       delete_flag)

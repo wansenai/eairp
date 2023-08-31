@@ -17,7 +17,7 @@ public interface MaterialPropertyMapper extends BaseMapper<MaterialProperty> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(MaterialProperty record);
+    int insertMaterialProperty(MaterialProperty record);
 
     int insertSelective(MaterialProperty record);
 

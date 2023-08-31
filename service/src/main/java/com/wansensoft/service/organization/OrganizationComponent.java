@@ -15,15 +15,15 @@ import java.util.Map;
 @OrganizationResource
 public class OrganizationComponent implements ICommonQuery {
 
-    private final OrganizationService organizationService;
+    private final OrganizationServiceImpl organizationServiceImpl;
 
-    public OrganizationComponent(OrganizationService organizationService) {
-        this.organizationService = organizationService;
+    public OrganizationComponent(OrganizationServiceImpl organizationServiceImpl) {
+        this.organizationServiceImpl = organizationServiceImpl;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return organizationService.getOrganization(id);
+        return organizationServiceImpl.getOrganization(id);
     }
 
     @Override
@@ -40,26 +40,26 @@ public class OrganizationComponent implements ICommonQuery {
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request)throws Exception {
-        return organizationService.insertOrganization(obj,request);
+        return organizationServiceImpl.insertOrganization(obj,request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return organizationService.updateOrganization(obj, request);
+        return organizationServiceImpl.updateOrganization(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return organizationService.deleteOrganization(id, request);
+        return organizationServiceImpl.deleteOrganization(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return organizationService.batchDeleteOrganization(ids, request);
+        return organizationServiceImpl.batchDeleteOrganization(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return organizationService.checkIsNameExist(id, name);
+        return organizationServiceImpl.checkIsNameExist(id, name);
     }
 }

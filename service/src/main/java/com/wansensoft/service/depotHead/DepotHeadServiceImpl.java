@@ -17,6 +17,7 @@ import com.wansensoft.service.account.AccountService;
 import com.wansensoft.service.accountHead.AccountHeadServiceImpl;
 import com.wansensoft.service.depot.DepotService;
 import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.orgaUserRel.OrgaUserRelServiceImpl;
 import com.wansensoft.service.user.UserService;
 import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.constants.BusinessConstants;
@@ -25,9 +26,8 @@ import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.service.accountItem.AccountItemService;
 import com.wansensoft.service.depotItem.DepotItemServiceImpl;
-import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
 import com.wansensoft.service.person.PersonService;
-import com.wansensoft.service.role.RoleService;
+import com.wansensoft.service.role.RoleServiceImpl;
 import com.wansensoft.service.serialNumber.SerialNumberService;
 import com.wansensoft.service.supplier.SupplierService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
@@ -52,14 +52,14 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
     private final DepotHeadMapper depotHeadMapper;
     private final DepotHeadMapperEx depotHeadMapperEx;
     private final UserService userService;
-    private final RoleService roleService;
+    private final RoleServiceImpl roleServiceImpl;
     private final DepotService depotService;
     private final DepotItemServiceImpl depotItemServiceImpl;
     private final SupplierService supplierService;
     private final UserBusinessService userBusinessService;
     private final SystemConfigService systemConfigService;
     private final SerialNumberService serialNumberService;
-    private final OrgaUserRelService orgaUserRelService;
+    private final OrgaUserRelServiceImpl orgaUserRelServiceImpl;
     private final PersonService personService;
     private final AccountService accountService;
     private final AccountHeadServiceImpl accountHeadServiceImpl;
@@ -67,18 +67,18 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
     private final DepotItemMapperEx depotItemMapperEx;
     private final LogService logService;
 
-    public DepotHeadServiceImpl(DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, UserService userService, RoleService roleService, DepotService depotService, DepotItemServiceImpl depotItemServiceImpl, SupplierService supplierService, UserBusinessService userBusinessService, SystemConfigService systemConfigService, SerialNumberService serialNumberService, OrgaUserRelService orgaUserRelService, PersonService personService, AccountService accountService, AccountHeadServiceImpl accountHeadServiceImpl, AccountItemService accountItemService, DepotItemMapperEx depotItemMapperEx, LogService logService) {
+    public DepotHeadServiceImpl(DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, UserService userService, RoleServiceImpl roleServiceImpl, DepotService depotService, DepotItemServiceImpl depotItemServiceImpl, SupplierService supplierService, UserBusinessService userBusinessService, SystemConfigService systemConfigService, SerialNumberService serialNumberService, OrgaUserRelServiceImpl orgaUserRelServiceImpl, PersonService personService, AccountService accountService, AccountHeadServiceImpl accountHeadServiceImpl, AccountItemService accountItemService, DepotItemMapperEx depotItemMapperEx, LogService logService) {
         this.depotHeadMapper = depotHeadMapper;
         this.depotHeadMapperEx = depotHeadMapperEx;
         this.userService = userService;
-        this.roleService = roleService;
+        this.roleServiceImpl = roleServiceImpl;
         this.depotService = depotService;
         this.depotItemServiceImpl = depotItemServiceImpl;
         this.supplierService = supplierService;
         this.userBusinessService = userBusinessService;
         this.systemConfigService = systemConfigService;
         this.serialNumberService = serialNumberService;
-        this.orgaUserRelService = orgaUserRelService;
+        this.orgaUserRelServiceImpl = orgaUserRelServiceImpl;
         this.personService = personService;
         this.accountService = accountService;
         this.accountHeadServiceImpl = accountHeadServiceImpl;
@@ -155,33 +155,33 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                         dh.setAccountMoneyList(accountmoneylistStr);
                     }
                     if(dh.getChangeAmount() != null) {
-                        dh.setChangeAmount(roleService.parseBillPriceByLimit(dh.getChangeAmount().abs(), billCategory, priceLimit, request));
+                        dh.setChangeAmount(roleServiceImpl.parseBillPriceByLimit(dh.getChangeAmount().abs(), billCategory, priceLimit, request));
                     } else {
                         dh.setChangeAmount(BigDecimal.ZERO);
                     }
                     if(dh.getTotalPrice() != null) {
-                        dh.setTotalPrice(roleService.parseBillPriceByLimit(dh.getTotalPrice().abs(), billCategory, priceLimit, request));
+                        dh.setTotalPrice(roleServiceImpl.parseBillPriceByLimit(dh.getTotalPrice().abs(), billCategory, priceLimit, request));
                     }
                     BigDecimal discountLastMoney = dh.getDiscountLastMoney()!=null?dh.getDiscountLastMoney():BigDecimal.ZERO;
-                    dh.setDiscountLastMoney(roleService.parseBillPriceByLimit(discountLastMoney, billCategory, priceLimit, request));
+                    dh.setDiscountLastMoney(roleServiceImpl.parseBillPriceByLimit(discountLastMoney, billCategory, priceLimit, request));
                     BigDecimal backAmount = dh.getBackAmount()!=null?dh.getBackAmount():BigDecimal.ZERO;
-                    dh.setBackAmount(roleService.parseBillPriceByLimit(backAmount, billCategory, priceLimit, request));
+                    dh.setBackAmount(roleServiceImpl.parseBillPriceByLimit(backAmount, billCategory, priceLimit, request));
                     if(dh.getDeposit() == null) {
                         dh.setDeposit(BigDecimal.ZERO);
                     } else {
-                        dh.setDeposit(roleService.parseBillPriceByLimit(dh.getDeposit(), billCategory, priceLimit, request));
+                        dh.setDeposit(roleServiceImpl.parseBillPriceByLimit(dh.getDeposit(), billCategory, priceLimit, request));
                     }
                     //已经完成的欠款
                     if(finishDepositMap!=null) {
                         BigDecimal finishDeposit = finishDepositMap.get(dh.getNumber()) != null ? finishDepositMap.get(dh.getNumber()) : BigDecimal.ZERO;
-                        dh.setFinishDeposit(roleService.parseBillPriceByLimit(finishDeposit, billCategory, priceLimit, request));
+                        dh.setFinishDeposit(roleServiceImpl.parseBillPriceByLimit(finishDeposit, billCategory, priceLimit, request));
                     }
                     //欠款计算
                     BigDecimal otherMoney = dh.getOtherMoney()!=null?dh.getOtherMoney():BigDecimal.ZERO;
                     BigDecimal deposit = dh.getDeposit()!=null?dh.getDeposit():BigDecimal.ZERO;
                     BigDecimal changeAmount = dh.getChangeAmount()!=null?dh.getChangeAmount():BigDecimal.ZERO;
                     BigDecimal debt = discountLastMoney.add(otherMoney).subtract((deposit.add(changeAmount)));
-                    dh.setDebt(roleService.parseBillPriceByLimit(debt, billCategory, priceLimit, request));
+                    dh.setDebt(roleServiceImpl.parseBillPriceByLimit(debt, billCategory, priceLimit, request));
                     //是否有付款单或收款单
                     if(financialBillNoMap!=null) {
                         Integer financialBillNoSize = financialBillNoMap.get(dh.getId());
@@ -319,7 +319,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         if(BusinessConstants.ROLE_TYPE_PRIVATE.equals(roleType)) {
             creator = user.getId().toString();
         } else if(BusinessConstants.ROLE_TYPE_THIS_ORG.equals(roleType)) {
-            creator = orgaUserRelService.getUserIdListByUserId(user.getId());
+            creator = orgaUserRelServiceImpl.getUserIdListByUserId(user.getId());
         }
         return creator;
     }
@@ -792,28 +792,28 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                     dh.setAccountMoneyList(accountmoneylistStr);
                 }
                 if(dh.getChangeAmount() != null) {
-                    dh.setChangeAmount(roleService.parseBillPriceByLimit(dh.getChangeAmount().abs(), billCategory, priceLimit, request));
+                    dh.setChangeAmount(roleServiceImpl.parseBillPriceByLimit(dh.getChangeAmount().abs(), billCategory, priceLimit, request));
                 } else {
                     dh.setChangeAmount(BigDecimal.ZERO);
                 }
                 if(dh.getTotalPrice() != null) {
-                    dh.setTotalPrice(roleService.parseBillPriceByLimit(dh.getTotalPrice().abs(), billCategory, priceLimit, request));
+                    dh.setTotalPrice(roleServiceImpl.parseBillPriceByLimit(dh.getTotalPrice().abs(), billCategory, priceLimit, request));
                 }
                 BigDecimal discountLastMoney = dh.getDiscountLastMoney()!=null?dh.getDiscountLastMoney():BigDecimal.ZERO;
-                dh.setDiscountLastMoney(roleService.parseBillPriceByLimit(discountLastMoney, billCategory, priceLimit, request));
+                dh.setDiscountLastMoney(roleServiceImpl.parseBillPriceByLimit(discountLastMoney, billCategory, priceLimit, request));
                 BigDecimal backAmount = dh.getBackAmount()!=null?dh.getBackAmount():BigDecimal.ZERO;
-                dh.setBackAmount(roleService.parseBillPriceByLimit(backAmount, billCategory, priceLimit, request));
+                dh.setBackAmount(roleServiceImpl.parseBillPriceByLimit(backAmount, billCategory, priceLimit, request));
                 if(dh.getDeposit() == null) {
                     dh.setDeposit(BigDecimal.ZERO);
                 } else {
-                    dh.setDeposit(roleService.parseBillPriceByLimit(dh.getDeposit(), billCategory, priceLimit, request));
+                    dh.setDeposit(roleServiceImpl.parseBillPriceByLimit(dh.getDeposit(), billCategory, priceLimit, request));
                 }
                 //欠款计算
                 BigDecimal otherMoney = dh.getOtherMoney()!=null?dh.getOtherMoney():BigDecimal.ZERO;
                 BigDecimal deposit = dh.getDeposit()!=null?dh.getDeposit():BigDecimal.ZERO;
                 BigDecimal changeAmount = dh.getChangeAmount()!=null?dh.getChangeAmount():BigDecimal.ZERO;
                 BigDecimal debt = discountLastMoney.add(otherMoney).subtract((deposit.add(changeAmount)));
-                dh.setDebt(roleService.parseBillPriceByLimit(debt, billCategory, priceLimit, request));
+                dh.setDebt(roleServiceImpl.parseBillPriceByLimit(debt, billCategory, priceLimit, request));
                 //是否有付款单或收款单
                 if(financialBillNoMap!=null) {
                     Integer financialBillNoSize = financialBillNoMap.get(dh.getId());
@@ -1181,18 +1181,18 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                 yearBegin, yearEnd, creatorArray); //今年零售出库
         BigDecimal yearRetailSaleBack = getBuyAndSaleRetailStatistics("入库", "零售退货",
                 yearBegin, yearEnd, creatorArray); //今年零售退货
-        map.put("todayBuy", roleService.parseHomePriceByLimit(todayBuy.subtract(todayBuyBack), "buy", priceLimit, "***", request));
-        map.put("todaySale", roleService.parseHomePriceByLimit(todaySale.subtract(todaySaleBack), "sale", priceLimit, "***", request));
-        map.put("todayRetailSale", roleService.parseHomePriceByLimit(todayRetailSale.subtract(todayRetailSaleBack), "retail", priceLimit, "***", request));
-        map.put("monthBuy", roleService.parseHomePriceByLimit(monthBuy.subtract(monthBuyBack), "buy", priceLimit, "***", request));
-        map.put("monthSale", roleService.parseHomePriceByLimit(monthSale.subtract(monthSaleBack), "sale", priceLimit, "***", request));
-        map.put("monthRetailSale", roleService.parseHomePriceByLimit(monthRetailSale.subtract(monthRetailSaleBack), "retail", priceLimit, "***", request));
-        map.put("yesterdayBuy", roleService.parseHomePriceByLimit(yesterdayBuy.subtract(yesterdayBuyBack), "buy", priceLimit, "***", request));
-        map.put("yesterdaySale", roleService.parseHomePriceByLimit(yesterdaySale.subtract(yesterdaySaleBack), "sale", priceLimit, "***", request));
-        map.put("yesterdayRetailSale", roleService.parseHomePriceByLimit(yesterdayRetailSale.subtract(yesterdayRetailSaleBack), "retail", priceLimit, "***", request));
-        map.put("yearBuy", roleService.parseHomePriceByLimit(yearBuy.subtract(yearBuyBack), "buy", priceLimit, "***", request));
-        map.put("yearSale", roleService.parseHomePriceByLimit(yearSale.subtract(yearSaleBack), "sale", priceLimit, "***", request));
-        map.put("yearRetailSale", roleService.parseHomePriceByLimit(yearRetailSale.subtract(yearRetailSaleBack), "retail", priceLimit, "***", request));
+        map.put("todayBuy", roleServiceImpl.parseHomePriceByLimit(todayBuy.subtract(todayBuyBack), "buy", priceLimit, "***", request));
+        map.put("todaySale", roleServiceImpl.parseHomePriceByLimit(todaySale.subtract(todaySaleBack), "sale", priceLimit, "***", request));
+        map.put("todayRetailSale", roleServiceImpl.parseHomePriceByLimit(todayRetailSale.subtract(todayRetailSaleBack), "retail", priceLimit, "***", request));
+        map.put("monthBuy", roleServiceImpl.parseHomePriceByLimit(monthBuy.subtract(monthBuyBack), "buy", priceLimit, "***", request));
+        map.put("monthSale", roleServiceImpl.parseHomePriceByLimit(monthSale.subtract(monthSaleBack), "sale", priceLimit, "***", request));
+        map.put("monthRetailSale", roleServiceImpl.parseHomePriceByLimit(monthRetailSale.subtract(monthRetailSaleBack), "retail", priceLimit, "***", request));
+        map.put("yesterdayBuy", roleServiceImpl.parseHomePriceByLimit(yesterdayBuy.subtract(yesterdayBuyBack), "buy", priceLimit, "***", request));
+        map.put("yesterdaySale", roleServiceImpl.parseHomePriceByLimit(yesterdaySale.subtract(yesterdaySaleBack), "sale", priceLimit, "***", request));
+        map.put("yesterdayRetailSale", roleServiceImpl.parseHomePriceByLimit(yesterdayRetailSale.subtract(yesterdayRetailSaleBack), "retail", priceLimit, "***", request));
+        map.put("yearBuy", roleServiceImpl.parseHomePriceByLimit(yearBuy.subtract(yearBuyBack), "buy", priceLimit, "***", request));
+        map.put("yearSale", roleServiceImpl.parseHomePriceByLimit(yearSale.subtract(yearSaleBack), "sale", priceLimit, "***", request));
+        map.put("yearRetailSale", roleServiceImpl.parseHomePriceByLimit(yearRetailSale.subtract(yearRetailSaleBack), "retail", priceLimit, "***", request));
         return map;
     }
 

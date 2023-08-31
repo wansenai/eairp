@@ -1,6 +1,7 @@
 package com.wansensoft.service.role;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.role.Role;
 import com.wansensoft.entities.role.RoleEx;
 import com.wansensoft.entities.role.RoleExample;
@@ -26,15 +27,15 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class RoleService {
-    private Logger logger = LoggerFactory.getLogger(RoleService.class);
+public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService{
+    private Logger logger = LoggerFactory.getLogger(RoleServiceImpl.class);
 
     private final RoleMapper roleMapper;
     private final RoleMapperEx roleMapperEx;
     private final LogService logService;
     private final UserService userService;
 
-    public RoleService(RoleMapper roleMapper, RoleMapperEx roleMapperEx, LogService logService, UserService userService) {
+    public RoleServiceImpl(RoleMapper roleMapper, RoleMapperEx roleMapperEx, LogService logService, UserService userService) {
         this.roleMapper = roleMapper;
         this.roleMapperEx = roleMapperEx;
         this.logService = logService;
@@ -77,7 +78,7 @@ public class RoleService {
         return list;
     }
 
-    public List<RoleEx> select(String name, String description, int offset, int rows)throws Exception {
+    public List<RoleEx> select(String name, String description, int offset, int rows) {
         List<RoleEx> list=null;
         try{
             list=roleMapperEx.selectByConditionRole(name, description, offset, rows);
@@ -100,7 +101,7 @@ public class RoleService {
         return list;
     }
 
-    public Long countRole(String name, String description)throws Exception {
+    public Long countRole(String name, String description) {
         Long result=null;
         try{
             result=roleMapperEx.countsByRole(name, description);
@@ -111,7 +112,7 @@ public class RoleService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertRole(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertRole(JSONObject obj, HttpServletRequest request) {
         Role role = JSONObject.parseObject(obj.toJSONString(), Role.class);
         int result=0;
         try{
@@ -149,7 +150,7 @@ public class RoleService {
         return batchDeleteRoleByIds(ids);
     }
 
-    public int checkIsNameExist(Long id, String name) throws Exception{
+    public int checkIsNameExist(Long id, String name) {
         RoleExample example = new RoleExample();
         example.createCriteria().andIdNotEqualTo(id).andNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<Role> list =null;
@@ -161,7 +162,7 @@ public class RoleService {
         return list==null?0:list.size();
     }
 
-    public List<Role> findUserRole()throws Exception{
+    public List<Role> findUserRole() {
         RoleExample example = new RoleExample();
         example.setOrderByClause("Id");
         example.createCriteria().andEnabledEqualTo(true).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
@@ -204,7 +205,7 @@ public class RoleService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchSetStatus(Boolean status, String ids)throws Exception {
+    public int batchSetStatus(Boolean status, String ids) {
         logService.insertLog("角色",
                 BusinessConstants.LOG_OPERATION_TYPE_ENABLED,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());

@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.organization.Organization;
+import com.wansensoft.service.organization.OrganizationServiceImpl;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
-import com.wansensoft.service.organization.OrganizationService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.vo.TreeNode;
 import io.swagger.annotations.Api;
@@ -28,7 +28,7 @@ public class OrganizationController {
     private Logger logger = LoggerFactory.getLogger(OrganizationController.class);
 
     @Resource
-    private OrganizationService organizationService;
+    private OrganizationServiceImpl organizationServiceImpl;
     /**
      * 根据id来查询机构信息
      * @param id
@@ -41,14 +41,14 @@ public class OrganizationController {
         BaseResponseInfo res = new BaseResponseInfo();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
-            List<Organization> dataList = organizationService.findById(id);
+            List<Organization> dataList = organizationServiceImpl.findById(id);
             JSONObject outer = new JSONObject();
             if (null != dataList) {
                 for (Organization org : dataList) {
                     outer.put("id", org.getId());
                     outer.put("orgAbr", org.getOrgAbr());
                     outer.put("parentId", org.getParentId());
-                    List<Organization> dataParentList = organizationService.findByParentId(org.getParentId());
+                    List<Organization> dataParentList = organizationServiceImpl.findByParentId(org.getParentId());
                     if(dataParentList!=null&&dataParentList.size()>0){
                         //父级机构名称显示简称
                         outer.put("orgParentName", dataParentList.get(0).getOrgAbr());
@@ -78,7 +78,7 @@ public class OrganizationController {
     @ApiOperation(value = "获取机构树数据")
     public JSONArray getOrganizationTree(@RequestParam("id") Long id) throws Exception{
        JSONArray arr=new JSONArray();
-       List<TreeNode> organizationTree= organizationService.getOrganizationTree(id);
+       List<TreeNode> organizationTree= organizationServiceImpl.getOrganizationTree(id);
        if(organizationTree!=null&&organizationTree.size()>0){
            for(TreeNode node:organizationTree){
                String str=JSON.toJSONString(node);
@@ -99,7 +99,7 @@ public class OrganizationController {
     public Object addOrganization(@RequestParam("info") String beanJson) throws Exception {
         JSONObject result = ExceptionConstants.standardSuccess();
         Organization org= JSON.parseObject(beanJson, Organization.class);
-        int i= organizationService.addOrganization(org);
+        int i= organizationServiceImpl.addOrganization(org);
         if(i<1){
             throw new BusinessRunTimeException(ExceptionConstants.ORGANIZATION_ADD_FAILED_CODE,
                     ExceptionConstants.ORGANIZATION_ADD_FAILED_MSG);
@@ -117,7 +117,7 @@ public class OrganizationController {
     public Object editOrganization(@RequestParam("info") String beanJson) throws Exception {
         JSONObject result = ExceptionConstants.standardSuccess();
         Organization org= JSON.parseObject(beanJson, Organization.class);
-        int i= organizationService.editOrganization(org);
+        int i= organizationServiceImpl.editOrganization(org);
         if(i<1){
             throw new BusinessRunTimeException(ExceptionConstants.ORGANIZATION_EDIT_FAILED_CODE,
                     ExceptionConstants.ORGANIZATION_EDIT_FAILED_MSG);

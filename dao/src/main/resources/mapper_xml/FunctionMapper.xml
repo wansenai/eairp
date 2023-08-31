@@ -108,7 +108,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.function.Function">
+  <insert id="insertFunction" parameterType="com.wansensoft.entities.function.Function">
     insert into jsh_function (id, number, name, 
       parent_number, url, component, 
       state, sort, enabled, type, 

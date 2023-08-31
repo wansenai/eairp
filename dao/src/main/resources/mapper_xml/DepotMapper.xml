@@ -108,7 +108,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.depot.Depot">
+  <insert id="insertDepot" parameterType="com.wansensoft.entities.depot.Depot">
     insert into jsh_depot (id, name, address, 
       warehousing, truckage, type, 
       sort, remark, principal, 

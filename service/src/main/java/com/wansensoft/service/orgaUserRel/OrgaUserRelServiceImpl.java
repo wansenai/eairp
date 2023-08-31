@@ -1,16 +1,18 @@
 package com.wansensoft.service.orgaUserRel;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.organization.OrgaUserRel;
 import com.wansensoft.entities.organization.OrgaUserRelExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.organization.OrgaUserRelMapper;
 import com.wansensoft.mappers.organization.OrgaUserRelMapperEx;
 import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.organization.OrganizationService;
+import com.wansensoft.service.organization.OrganizationServiceImpl;
 import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.organization.OrganizationService;
 import com.wansensoft.service.redis.RedisService;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
@@ -28,8 +30,8 @@ import java.util.List;
  * Description
  */
 @Service
-public class OrgaUserRelService {
-    private Logger logger = LoggerFactory.getLogger(OrganizationService.class);
+public class OrgaUserRelServiceImpl extends ServiceImpl<OrgaUserRelMapper, OrgaUserRel> implements OrgaUserRelService{
+    private Logger logger = LoggerFactory.getLogger(OrganizationServiceImpl.class);
 
     private final OrgaUserRelMapper orgaUserRelMapper;
     private final OrgaUserRelMapperEx orgaUserRelMapperEx;
@@ -38,7 +40,7 @@ public class OrgaUserRelService {
     private final LogService logService;
     private final UserService userService;
 
-    public OrgaUserRelService(OrgaUserRelMapper orgaUserRelMapper, OrgaUserRelMapperEx orgaUserRelMapperEx, RedisService redisService, OrganizationService organizationService, LogService logService, UserService userService) {
+    public OrgaUserRelServiceImpl(OrgaUserRelMapper orgaUserRelMapper, OrgaUserRelMapperEx orgaUserRelMapperEx, RedisService redisService, OrganizationService organizationService, LogService logService, UserService userService) {
         this.orgaUserRelMapper = orgaUserRelMapper;
         this.orgaUserRelMapperEx = orgaUserRelMapperEx;
         this.redisService = redisService;
@@ -47,12 +49,12 @@ public class OrgaUserRelService {
         this.userService = userService;
     }
 
-    public OrgaUserRel getOrgaUserRel(long id) throws Exception{
+    public OrgaUserRel getOrgaUserRel(long id) {
         return orgaUserRelMapper.selectByPrimaryKey(id);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertOrgaUserRel(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int insertOrgaUserRel(JSONObject obj, HttpServletRequest request) {
         OrgaUserRel orgaUserRel = JSONObject.parseObject(obj.toJSONString(), OrgaUserRel.class);
         int result=0;
         try{
@@ -64,7 +66,7 @@ public class OrgaUserRelService {
         return result;
     }
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateOrgaUserRel(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateOrgaUserRel(JSONObject obj, HttpServletRequest request) {
         OrgaUserRel orgaUserRel = JSONObject.parseObject(obj.toJSONString(), OrgaUserRel.class);
         int result=0;
         try{
@@ -77,7 +79,7 @@ public class OrgaUserRelService {
         return result;
     }
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteOrgaUserRel(Long id, HttpServletRequest request)throws Exception {
+    public int deleteOrgaUserRel(Long id, HttpServletRequest request) {
         int result=0;
         try{
             result=orgaUserRelMapper.deleteByPrimaryKey(id);
@@ -89,7 +91,7 @@ public class OrgaUserRelService {
         return result;
     }
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteOrgaUserRel(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteOrgaUserRel(String ids, HttpServletRequest request) {
         List<Long> idList = StringUtil.strToLongList(ids);
         OrgaUserRelExample example = new OrgaUserRelExample();
         example.createCriteria().andIdIn(idList);
@@ -203,13 +205,13 @@ public class OrgaUserRelService {
         List<Long> orgIdList = organizationService.getOrgIdByParentId(orgId);
         List<Long> userIdList = new ArrayList<Long>();
         OrgaUserRelExample example = new OrgaUserRelExample();
-        if(orgIdList!=null && orgIdList.size()>0) {
+        if(orgIdList!=null && !orgIdList.isEmpty()) {
             example.createCriteria().andOrgaIdIn(orgIdList).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         } else {
             example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         }
         List<OrgaUserRel> list = orgaUserRelMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             for(OrgaUserRel our: list) {
                 userIdList.add(our.getUserId());
             }

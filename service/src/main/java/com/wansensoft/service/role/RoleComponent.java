@@ -15,15 +15,15 @@ import java.util.Map;
 @RoleResource
 public class RoleComponent implements ICommonQuery {
 
-    private final RoleService roleService;
+    private final RoleServiceImpl roleServiceImpl;
 
-    public RoleComponent(RoleService roleService) {
-        this.roleService = roleService;
+    public RoleComponent(RoleServiceImpl roleServiceImpl) {
+        this.roleServiceImpl = roleServiceImpl;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return roleService.getRole(id);
+        return roleServiceImpl.getRole(id);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class RoleComponent implements ICommonQuery {
         String search = map.get(Constants.SEARCH);
         String name = StringUtil.getInfo(search, "name");
         String description = StringUtil.getInfo(search, "description");
-        return roleService.select(name, description, QueryUtils.offset(map), QueryUtils.rows(map));
+        return roleServiceImpl.select(name, description, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
     @Override
@@ -43,32 +43,32 @@ public class RoleComponent implements ICommonQuery {
         String search = map.get(Constants.SEARCH);
         String name = StringUtil.getInfo(search, "name");
         String description = StringUtil.getInfo(search, "description");
-        return roleService.countRole(name, description);
+        return roleServiceImpl.countRole(name, description);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request)throws Exception {
-        return roleService.insertRole(obj, request);
+        return roleServiceImpl.insertRole(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return roleService.updateRole(obj, request);
+        return roleServiceImpl.updateRole(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return roleService.deleteRole(id, request);
+        return roleServiceImpl.deleteRole(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return roleService.batchDeleteRole(ids, request);
+        return roleServiceImpl.batchDeleteRole(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return roleService.checkIsNameExist(id, name);
+        return roleServiceImpl.checkIsNameExist(id, name);
     }
 
 }

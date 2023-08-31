@@ -17,7 +17,7 @@ public interface SupplierMapper extends BaseMapper<Supplier> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(Supplier record);
+    int insertSupplier(Supplier record);
 
     int insertSelective(Supplier record);
 

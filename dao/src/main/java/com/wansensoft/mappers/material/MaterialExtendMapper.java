@@ -17,7 +17,7 @@ public interface MaterialExtendMapper extends BaseMapper<MaterialExtend> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(MaterialExtend record);
+    int insertMaterialExtend(MaterialExtend record);
 
     int insertSelective(MaterialExtend record);
 

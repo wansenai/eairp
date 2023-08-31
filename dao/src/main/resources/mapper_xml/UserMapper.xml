@@ -111,7 +111,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.user.User">
+  <insert id="insertUser" parameterType="com.wansensoft.entities.user.User">
     insert into jsh_user (id, username, login_name, 
       password, leader_flag, position, 
       department, email, phonenum, 

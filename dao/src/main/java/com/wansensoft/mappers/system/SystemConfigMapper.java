@@ -17,7 +17,7 @@ public interface SystemConfigMapper extends BaseMapper<SystemConfig> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(SystemConfig record);
+    int insertSystemConfig(SystemConfig record);
 
     int insertSelective(SystemConfig record);
 

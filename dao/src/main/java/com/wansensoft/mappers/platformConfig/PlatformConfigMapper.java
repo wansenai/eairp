@@ -17,7 +17,7 @@ public interface PlatformConfigMapper extends BaseMapper<PlatformConfig> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(PlatformConfig record);
+    int insertPlatformConfig(PlatformConfig record);
 
     int insertSelective(PlatformConfig record);
 

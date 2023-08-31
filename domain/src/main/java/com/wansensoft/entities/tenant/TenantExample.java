@@ -1,9 +1,12 @@
 package com.wansensoft.entities.tenant;
 
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Data
 public class TenantExample {
     protected String orderByClause;
 
@@ -19,20 +22,8 @@ public class TenantExample {
         this.orderByClause = orderByClause;
     }
 
-    public String getOrderByClause() {
-        return orderByClause;
-    }
-
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
-    }
-
-    public boolean isDistinct() {
-        return distinct;
-    }
-
-    public List<Criteria> getOredCriteria() {
-        return oredCriteria;
     }
 
     public void or(Criteria criteria) {

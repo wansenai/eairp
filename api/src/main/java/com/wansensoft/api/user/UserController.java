@@ -11,7 +11,7 @@ import com.wansensoft.service.tenant.TenantServiceImpl;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessParamCheckingException;
 import com.wansensoft.service.redis.RedisService;
-import com.wansensoft.service.role.RoleService;
+import com.wansensoft.service.role.RoleServiceImpl;
 import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.*;
 import com.wansensoft.vo.TreeNodeEx;
@@ -40,7 +40,7 @@ public class UserController {
     private UserServiceImpl userServiceImpl;
 
     @Resource
-    private RoleService roleService;
+    private RoleServiceImpl roleServiceImpl;
 
     @Resource
     private TenantServiceImpl tenantServiceImpl;
@@ -335,7 +335,7 @@ public class UserController {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             Map<String, Object> data = new HashMap<>();
-            String priceLimit = roleService.getCurrentPriceLimit(request);
+            String priceLimit = roleServiceImpl.getCurrentPriceLimit(request);
             data.put("priceLimit", priceLimit);
             res.code = 200;
             res.data = data;

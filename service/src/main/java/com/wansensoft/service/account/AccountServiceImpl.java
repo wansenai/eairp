@@ -10,7 +10,7 @@ import com.wansensoft.mappers.account.*;
 import com.wansensoft.mappers.depot.DepotHeadMapper;
 import com.wansensoft.mappers.depot.DepotHeadMapperEx;
 import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserServiceImpl;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.utils.StringUtil;
@@ -46,10 +46,10 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     private final AccountItemMapper accountItemMapper;
     private final AccountItemMapperEx accountItemMapperEx;
     private final LogService logService;
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
     private final SystemConfigService systemConfigService;
 
-    public AccountServiceImpl(AccountMapper accountMapper, AccountMapperEx accountMapperEx, DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, AccountHeadMapper accountHeadMapper, AccountHeadMapperEx accountHeadMapperEx, AccountItemMapper accountItemMapper, AccountItemMapperEx accountItemMapperEx, LogService logService, UserServiceImpl userServiceImpl, SystemConfigService systemConfigService) {
+    public AccountServiceImpl(AccountMapper accountMapper, AccountMapperEx accountMapperEx, DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, AccountHeadMapper accountHeadMapper, AccountHeadMapperEx accountHeadMapperEx, AccountItemMapper accountItemMapper, AccountItemMapperEx accountItemMapperEx, LogService logService, UserService userService, SystemConfigService systemConfigService) {
         this.accountMapper = accountMapper;
         this.accountMapperEx = accountMapperEx;
         this.depotHeadMapper = depotHeadMapper;
@@ -59,7 +59,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         this.accountItemMapper = accountItemMapper;
         this.accountItemMapperEx = accountItemMapperEx;
         this.logService = logService;
-        this.userServiceImpl = userServiceImpl;
+        this.userService = userService;
         this.systemConfigService = systemConfigService;
     }
 
@@ -242,7 +242,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         }
         logService.insertLog("账户", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo= userServiceImpl.getCurrentUser();
+        User userInfo = userService.getCurrentUser();
         //校验通过执行删除操作
         try{
             result = accountMapperEx.batchDeleteAccountByIds(new Date(),userInfo==null?null:userInfo.getId(),idArray);

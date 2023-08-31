@@ -99,7 +99,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.material.MaterialAttribute">
+  <insert id="insertMaterialAttribute" parameterType="com.wansensoft.entities.material.MaterialAttribute">
     insert into jsh_material_attribute (id, attribute_name, attribute_value, 
       tenant_id, delete_flag)
     values (#{id,jdbcType=BIGINT}, #{attributeName,jdbcType=VARCHAR}, #{attributeValue,jdbcType=VARCHAR}, 

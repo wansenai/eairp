@@ -100,7 +100,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.material.MaterialProperty">
+  <insert id="insertMaterialProperty" parameterType="com.wansensoft.entities.material.MaterialProperty">
     insert into jsh_material_property (id, native_name, enabled, 
       sort, another_name, delete_flag
       )

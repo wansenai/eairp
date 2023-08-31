@@ -107,7 +107,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.unit.Unit">
+  <insert id="insertUnit" parameterType="com.wansensoft.entities.unit.Unit">
     insert into jsh_unit (id, name, basic_unit, 
       other_unit, other_unit_two, other_unit_three, 
       ratio, ratio_two, ratio_three, 

@@ -102,7 +102,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.material.MaterialInitialStock">
+  <insert id="insertMaterialInitialStock" parameterType="com.wansensoft.entities.material.MaterialInitialStock">
     insert into jsh_material_initial_stock (id, material_id, depot_id, 
       number, low_safe_stock, high_safe_stock, 
       tenant_id, delete_flag)

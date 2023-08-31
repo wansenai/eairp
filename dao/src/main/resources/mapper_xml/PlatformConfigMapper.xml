@@ -98,7 +98,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.platformConfig.PlatformConfig">
+  <insert id="insertPlatformConfig" parameterType="com.wansensoft.entities.platformConfig.PlatformConfig">
     insert into jsh_platform_config (id, platform_key, platform_key_info, 
       platform_value)
     values (#{id,jdbcType=BIGINT}, #{platformKey,jdbcType=VARCHAR}, #{platformKeyInfo,jdbcType=VARCHAR}, 
