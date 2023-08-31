@@ -27,7 +27,7 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="TIME_FILE"/>
     </root>
-    <logger name="com.jsh" additivity="false" level="DEBUG">
+    <logger name="com.wansensoft" additivity="false" level="DEBUG">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="TIME_FILE"/>
     </logger>

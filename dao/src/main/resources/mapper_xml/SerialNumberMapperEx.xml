@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wansensoft.mappers.serialNumber.SerialNumberMapperEx">
+    <resultMap extends="com.wansensoft.mappers.serialNumber.SerialNumberMapper.BaseResultMap" id="SerialNumberExBaseResultMap" type="com.wansensoft.entities.serialNumber.SerialNumberEx">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="materialCode" jdbcType="VARCHAR" property="materialCode" />
+        <result column="materialName" jdbcType="VARCHAR" property="materialName" />
+        <result column="creatorName" jdbcType="VARCHAR" property="creatorName" />
+        <result column="updaterName" jdbcType="VARCHAR" property="updaterName" />
+        <result column="depotHeadNumber" jdbcType="VARCHAR" property="depotHeadNumber" />
+        <result column="depotHeadType" jdbcType="VARCHAR" property="depotHeadType" />
+        <result column="depotName" jdbcType="VARCHAR" property="depotName" />
+    </resultMap>
+    <insert id="addSerialNumber" parameterType="com.wansensoft.entities.serialNumber.SerialNumberEx"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+       insert into jsh_serial_number
+        (material_id, serial_number, is_sell, remark,delete_flag,
+        create_time, creator,update_time, updater,in_bill_no, out_bill_no)
+        values
+        (#{materialId},#{serialNumber},#{isSell},#{remark},#{deleteFlag},
+        #{createTime},#{creator},#{updateTime},#{updater},#{inBillNo},#{outBillNo}
+        )
+    </insert>
+    <update id="updateSerialNumber" parameterType="com.wansensoft.entities.serialNumber.SerialNumberEx">
+        update jsh_serial_number
+        <set>
+            <if test="materialId != null">
+                material_id = #{materialId,jdbcType=BIGINT},
+            </if>
+            <if test="serialNumber != null">
+                serial_number = #{serialNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="isSell != null">
+                is_sell = #{isSell,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag = #{deleteFlag,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updater != null">
+                updater = #{updater,jdbcType=BIGINT},
+            </if>
+            <if test="inBillNo != null">
+                in_bill_no = #{inBillNo,jdbcType=VARCHAR},
+            </if>
+            <if test="outBillNo != null">
+                out_bill_no = #{outBillNo,jdbcType=VARCHAR}
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findSerialNumberByMaterialId" resultType="java.lang.Integer">
+        SELECT
+        count(ser.id)
+        FROM jsh_serial_number ser
+        where 1=1
+        <if test="materialId != null">
+            and ser.material_Id=#{materialId}
+        </if>
+        and ifnull(ser.delete_flag,'0') !='1'
+        and ser.is_sell !='1'
+    </select>
+    <update id="sellSerialNumber">
+        update jsh_serial_number
+        <set>
+            is_sell = '1',
+            <if test="outBillNo !=null ">
+                out_bill_no = #{outBillNo},
+            </if>
+            <if test="updateTime !=null ">
+                update_time = #{updateTime},
+            </if>
+            <if test="updater != null">
+                updater = #{updater},
+            </if>
+        </set>
+        where 1=1
+        <if test="materialId != null">
+            and material_id = #{materialId}
+        </if>
+            and is_sell != '1'
+            and ifnull(delete_flag,'0') !='1'
+        <if test="snArray != null">
+            and serial_number
+            in (
+            <foreach collection="snArray" item="sn" separator=",">
+                #{sn}
+            </foreach>
+            )
+        </if>
+
+    </update>
+
+    <update id="cancelSerialNumber">
+        update jsh_serial_number
+        <set>
+                is_sell = '0', out_bill_no=null,
+            <if test="updateTime !=null ">
+                update_time = #{updateTime},
+            </if>
+            <if test="updater != null">
+                updater = #{updater},
+            </if>
+        </set>
+        where 1=1
+        <if test="materialId != null">
+            and material_id = #{materialId}
+        </if>
+        <if test="outBillNo !=null ">
+            and out_bill_no = #{outBillNo,jdbcType=VARCHAR}
+        </if>
+            and is_sell != '0'
+            and ifnull(delete_flag,'0') !='1'
+        <if test="count != null">
+            and id in
+            ( select batchSN.id from
+            ( select selFrom.id from jsh_serial_number selFrom
+            where 1=1
+            <if test="materialId != null">
+                and selFrom.material_id = #{materialId}
+            </if>
+            <if test="outBillNo !=null ">
+                and selFrom.out_bill_no = #{outBillNo,jdbcType=VARCHAR}
+            </if>
+                and selFrom.is_sell !='0'
+                and ifnull(selFrom.delete_flag,'0') !='1'
+            limit 0,#{count}
+            ) batchSN
+            )
+        </if>
+    </update>
+    <insert id="batAddSerialNumber"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+       insert into jsh_serial_number
+        (material_id, serial_number, is_sell, remark,delete_flag,
+        create_time, creator,update_time, updater)
+        values
+        <foreach collection='list' item='each' separator=','>
+        (#{each.materialId},#{each.serialNumber},'0',#{each.remark},'0',
+        #{each.createTime},#{each.creator},#{each.updateTime},#{each.updater}
+        )
+        </foreach>
+    </insert>
+    <update id="batchDeleteSerialNumberByIds">
+        update jsh_serial_number
+        set update_time=#{updateTime},updater=#{updater},delete_flag='1'
+        where 1=1
+        and id in (
+        <foreach collection="ids" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </update>
+
+    <select id="getEnableSerialNumberList" resultType="com.wansensoft.entities.serialNumber.SerialNumberEx">
+        select
+        ser.id, ser.serial_number, ser.in_bill_no, ser.create_time, ser.update_time
+        FROM jsh_serial_number ser
+        left join jsh_material m on m.id=ser.material_id and ifnull(m.delete_flag, '0') != '1'
+        left join jsh_material_extend me on me.material_id=m.id and ifnull(me.delete_flag,'0') !='1'
+        where 1=1 and me.default_flag=1
+        <if test="name != null">
+            <bind name="bindName" value="'%'+name+'%'"/>
+            and ser.serial_number like #{bindName}
+        </if>
+        <if test="depotId != null">
+            and ser.depot_id = #{depotId}
+        </if>
+        <if test="barCode != null">
+            and me.bar_code= #{barCode}
+        </if>
+        and (ser.is_sell = '0'
+        <if test="number != null">
+            or ser.out_bill_no = #{number}
+        </if>
+        )
+        and ifnull(ser.delete_flag,'0') !='1'
+        order by ser.id desc
+        <if test="offset != null and rows != null">
+            limit #{offset},#{rows}
+        </if>
+    </select>
+    <select id="getEnableSerialNumberCount" resultType="java.lang.Long">
+        select
+        count(1)
+        FROM jsh_serial_number ser
+        left join jsh_material m on m.id=ser.material_id and ifnull(m.delete_flag, '0') != '1'
+        left join jsh_material_extend me on me.material_id=m.id and ifnull(me.delete_flag,'0') !='1'
+        where 1=1 and me.default_flag=1
+        <if test="name != null">
+            <bind name="bindName" value="'%'+name+'%'"/>
+            and ser.serial_number like #{bindName}
+        </if>
+        <if test="depotId != null">
+            and ser.depot_id = #{depotId}
+        </if>
+        <if test="barCode != null">
+            and me.bar_code= #{barCode}
+        </if>
+        and (ser.is_sell = '0'
+        <if test="number != null">
+            or ser.out_bill_no = #{number}
+        </if>
+        )
+        and ifnull(ser.delete_flag,'0') !='1'
+    </select>
+</mapper>

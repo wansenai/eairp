@@ -13,9 +13,8 @@
         <module>api</module>
 		<module>service</module>
 		<module>dao</module>
-		<module>plugs</module>
+		<module>plugins</module>
 		<module>utils</module>
-		<module>middleware</module>
 		<module>middleware</module>
 		<module>domain</module>
 	</modules>
@@ -85,7 +84,7 @@
 							<goal>repackage</goal>
 						</goals>
 						<configuration>
-							<mainClass>com.wansensoft.ErpApplication</mainClass>
+							<mainClass>com.wansensoft.mappers.ErpApplication</mainClass>
 						</configuration>
 					</execution>
 				</executions>
