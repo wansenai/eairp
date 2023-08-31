@@ -10,18 +10,16 @@ import com.wansensoft.entities.user.UserBusiness;
 import com.wansensoft.mappers.account.AccountHeadMapperEx;
 import com.wansensoft.mappers.account.AccountItemMapperEx;
 import com.wansensoft.mappers.depot.DepotHeadMapperEx;
+import com.wansensoft.service.depotHead.DepotHeadService;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.supplier.SupplierMapper;
 import com.wansensoft.mappers.supplier.SupplierMapperEx;
-import com.wansensoft.service.accountHead.AccountHeadService;
-import com.wansensoft.service.depotHead.DepotHeadService;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.user.UserService;
-import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ExcelUtils;
 import com.wansensoft.utils.StringUtil;
@@ -37,7 +35,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.math.BigDecimal;
@@ -48,31 +45,29 @@ import java.util.*;
 public class SupplierService {
     private Logger logger = LoggerFactory.getLogger(SupplierService.class);
 
-    @Resource
-    private SupplierMapper supplierMapper;
+    private final SupplierMapper supplierMapper;
+    private final SupplierMapperEx supplierMapperEx;
+    private final LogService logService;
+    private final UserService userService;
+    private final AccountHeadMapperEx accountHeadMapperEx;
+    private final DepotHeadMapperEx depotHeadMapperEx;
+    private final AccountItemMapperEx accountItemMapperEx;
+    private final DepotHeadService depotHeadService;
+    private final UserBusinessService userBusinessService;
 
-    @Resource
-    private SupplierMapperEx supplierMapperEx;
-    @Resource
-    private LogService logService;
-    @Resource
-    private UserService userService;
-    @Resource
-    private AccountHeadMapperEx accountHeadMapperEx;
-    @Resource
-    private DepotHeadMapperEx depotHeadMapperEx;
-    @Resource
-    private AccountItemMapperEx accountItemMapperEx;
-    @Resource
-    private DepotHeadService depotHeadService;
-    @Resource
-    private AccountHeadService accountHeadService;
-    @Resource
-    private SystemConfigService systemConfigService;
-    @Resource
-    private UserBusinessService userBusinessService;
+    public SupplierService(SupplierMapper supplierMapper, SupplierMapperEx supplierMapperEx, LogService logService, UserService userService, AccountHeadMapperEx accountHeadMapperEx, DepotHeadMapperEx depotHeadMapperEx, AccountItemMapperEx accountItemMapperEx, DepotHeadService depotHeadService, UserBusinessService userBusinessService) {
+        this.supplierMapper = supplierMapper;
+        this.supplierMapperEx = supplierMapperEx;
+        this.logService = logService;
+        this.userService = userService;
+        this.accountHeadMapperEx = accountHeadMapperEx;
+        this.depotHeadMapperEx = depotHeadMapperEx;
+        this.accountItemMapperEx = accountItemMapperEx;
+        this.depotHeadService = depotHeadService;
+        this.userBusinessService = userBusinessService;
+    }
 
-    public Supplier getSupplier(long id)throws Exception {
+    public Supplier getSupplier(long id) {
         Supplier result=null;
         try{
             result=supplierMapper.selectByPrimaryKey(id);
@@ -82,7 +77,7 @@ public class SupplierService {
         return result;
     }
 
-    public List<Supplier> getSupplierListByIds(String ids)throws Exception {
+    public List<Supplier> getSupplierListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<Supplier> list = new ArrayList<>();
         try{
@@ -95,7 +90,7 @@ public class SupplierService {
         return list;
     }
 
-    public List<Supplier> getSupplier()throws Exception {
+    public List<Supplier> getSupplier() {
         SupplierExample example = new SupplierExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<Supplier> list=null;
@@ -107,7 +102,7 @@ public class SupplierService {
         return list;
     }
 
-    public List<Supplier> select(String supplier, String type, String phonenum, String telephone, String roleType, int offset, int rows) throws Exception{
+    public List<Supplier> select(String supplier, String type, String phonenum, String telephone, String roleType, int offset, int rows) {
         List<Supplier> resList = new ArrayList<Supplier>();
         try{
             String [] creatorArray = depotHeadService.getCreatorArray(roleType);
@@ -163,7 +158,7 @@ public class SupplierService {
         return resList;
     }
 
-    public Long countSupplier(String supplier, String type, String phonenum, String telephone, String roleType) throws Exception{
+    public Long countSupplier(String supplier, String type, String phonenum, String telephone, String roleType) {
         Long result=null;
         try{
             String [] creatorArray = depotHeadService.getCreatorArray(roleType);
@@ -175,12 +170,12 @@ public class SupplierService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertSupplier(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertSupplier(JSONObject obj, HttpServletRequest request) {
         Supplier supplier = JSONObject.parseObject(obj.toJSONString(), Supplier.class);
         int result=0;
         try{
             supplier.setEnabled(true);
-            User userInfo=userService.getCurrentUser();
+            User userInfo= userService.getCurrentUser();
             supplier.setCreator(userInfo==null?null:userInfo.getId());
             result=supplierMapper.insertSelective(supplier);
             //新增客户时给当前用户自动授权
@@ -189,7 +184,7 @@ public class SupplierService {
                 Supplier sInfo = supplierMapperEx.getSupplierByNameAndType(supplier.getSupplier(), supplier.getType());
                 String ubKey = "[" + sInfo.getId() + "]";
                 List<UserBusiness> ubList = userBusinessService.getBasicData(userId.toString(), "UserCustomer");
-                if(ubList ==null || ubList.size() == 0) {
+                if(ubList ==null || ubList.isEmpty()) {
                     JSONObject ubObj = new JSONObject();
                     ubObj.put("type", "UserCustomer");
                     ubObj.put("keyId", userId);
@@ -206,7 +201,7 @@ public class SupplierService {
                 }
             }
             logService.insertLog("商家",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(supplier.getSupplier()).toString(),request);
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + supplier.getSupplier(),request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -214,7 +209,7 @@ public class SupplierService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateSupplier(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int updateSupplier(JSONObject obj, HttpServletRequest request) {
         Supplier supplier = JSONObject.parseObject(obj.toJSONString(), Supplier.class);
         if(supplier.getBeginNeedPay() == null) {
             supplier.setBeginNeedPay(BigDecimal.ZERO);
@@ -226,7 +221,7 @@ public class SupplierService {
         try{
             result=supplierMapper.updateByPrimaryKeySelective(supplier);
             logService.insertLog("商家",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(supplier.getSupplier()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + supplier.getSupplier(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -234,17 +229,17 @@ public class SupplierService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteSupplier(Long id, HttpServletRequest request)throws Exception {
+    public int deleteSupplier(Long id, HttpServletRequest request) {
         return batchDeleteSupplierByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteSupplier(String ids, HttpServletRequest request) throws Exception{
+    public int batchDeleteSupplier(String ids, HttpServletRequest request) {
         return batchDeleteSupplierByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteSupplierByIds(String ids)throws Exception {
+    public int batchDeleteSupplierByIds(String ids) {
         int result=0;
         String [] idArray=ids.split(",");
         //校验财务主表	jsh_accounthead
@@ -254,7 +249,7 @@ public class SupplierService {
         }catch(Exception e){
             JshException.readFail(logger, e);
         }
-        if(accountHeadList!=null&&accountHeadList.size()>0){
+        if(accountHeadList!=null&& !accountHeadList.isEmpty()){
             logger.error("异常码[{}],异常提示[{}],参数,OrganIds[{}]",
                     ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,ExceptionConstants.DELETE_FORCE_CONFIRM_MSG,ids);
             throw new BusinessRunTimeException(ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,
@@ -282,7 +277,7 @@ public class SupplierService {
         }
         logService.insertLog("商家", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userService.getCurrentUser();
         //校验通过执行删除操作
         try{
             result = supplierMapperEx.batchDeleteSupplierByIds(new Date(),userInfo==null?null:userInfo.getId(),idArray);
@@ -319,7 +314,7 @@ public class SupplierService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateAdvanceIn(Long supplierId, BigDecimal advanceIn)throws Exception{
+    public int updateAdvanceIn(Long supplierId, BigDecimal advanceIn) {
         Supplier supplier=null;
         try{
             supplier = supplierMapper.selectByPrimaryKey(supplierId);
@@ -338,7 +333,7 @@ public class SupplierService {
         return result;
     }
 
-    public List<Supplier> findBySelectCus()throws Exception {
+    public List<Supplier> findBySelectCus() {
         SupplierExample example = new SupplierExample();
         example.createCriteria().andTypeLike("客户").andEnabledEqualTo(true).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         example.setOrderByClause("sort asc, id desc");
@@ -351,7 +346,7 @@ public class SupplierService {
         return list;
     }
 
-    public List<Supplier> findBySelectSup()throws Exception {
+    public List<Supplier> findBySelectSup() {
         SupplierExample example = new SupplierExample();
         example.createCriteria().andTypeLike("供应商").andEnabledEqualTo(true)
                 .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
@@ -396,7 +391,7 @@ public class SupplierService {
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int batchSetStatus(Boolean status, String ids)throws Exception {
         logService.insertLog("商家",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ENABLED).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_ENABLED,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         List<Long> supplierIds = StringUtil.strToLongList(ids);
         Supplier supplier = new Supplier();
@@ -554,7 +549,7 @@ public class SupplierService {
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public BaseResponseInfo importExcel(List<Supplier> mList, String type) throws Exception {
         logService.insertLog(type,
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_IMPORT).append(mList.size()).append(BusinessConstants.LOG_DATA_UNIT).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_IMPORT + mList.size() + BusinessConstants.LOG_DATA_UNIT,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         BaseResponseInfo info = new BaseResponseInfo();
         Map<String, Object> data = new HashMap<>();
@@ -574,7 +569,6 @@ public class SupplierService {
             info.code = 200;
             data.put("message", "成功");
         } catch (Exception e) {
-            e.printStackTrace();
             info.code = 500;
             data.put("message", e.getMessage());
         }

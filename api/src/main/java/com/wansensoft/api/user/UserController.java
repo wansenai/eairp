@@ -6,13 +6,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.tenant.Tenant;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.entities.user.UserEx;
+import com.wansensoft.service.log.LogServiceImpl;
+import com.wansensoft.service.tenant.TenantServiceImpl;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessParamCheckingException;
-import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.redis.RedisService;
 import com.wansensoft.service.role.RoleService;
-import com.wansensoft.service.tenant.TenantService;
-import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.*;
 import com.wansensoft.vo.TreeNodeEx;
 import io.swagger.annotations.Api;
@@ -37,16 +37,16 @@ public class UserController {
     private Integer manageRoleId;
 
     @Resource
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @Resource
     private RoleService roleService;
 
     @Resource
-    private TenantService tenantService;
+    private TenantServiceImpl tenantServiceImpl;
 
     @Resource
-    private LogService logService;
+    private LogServiceImpl logServiceImpl;
 
     @Resource
     private RedisService redisService;
@@ -60,7 +60,7 @@ public class UserController {
                                   HttpServletRequest request)throws Exception {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            Map<String, Object> data = userService.login(userParam, request);
+            Map<String, Object> data = userServiceImpl.login(userParam, request);
             res.code = 200;
             res.data = data;
         } catch(Exception e){
@@ -79,12 +79,12 @@ public class UserController {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             String weixinCode = jsonObject.getString("weixinCode");
-            User user = userService.getUserByWeixinCode(weixinCode);
+            User user = userServiceImpl.getUserByWeixinCode(weixinCode);
             if(user == null) {
                 res.code = 501;
                 res.data = "微信未绑定";
             } else {
-                Map<String, Object> data = userService.login(user, request);
+                Map<String, Object> data = userServiceImpl.login(user, request);
                 res.code = 200;
                 res.data = data;
             }
@@ -105,7 +105,7 @@ public class UserController {
         String loginName = jsonObject.getString("loginName");
         String password = jsonObject.getString("password");
         String weixinCode = jsonObject.getString("weixinCode");
-        int res = userService.weixinBind(loginName, password, weixinCode);
+        int res = userServiceImpl.weixinBind(loginName, password, weixinCode);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
@@ -120,7 +120,7 @@ public class UserController {
         try {
             Map<String, Object> data = new HashMap<>();
             Long userId = Long.parseLong(redisService.getObjectFromSessionByKey(request,"userId").toString());
-            User user = userService.getUser(userId);
+            User user = userServiceImpl.getUser(userId);
             user.setPassword(null);
             data.put("user", user);
             res.code = 200;
@@ -157,7 +157,7 @@ public class UserController {
         Long id = jsonObject.getLong("id");
         String password = "123456";
         String md5Pwd = Tools.md5Encryp(password);
-        int update = userService.resetPwd(md5Pwd, id);
+        int update = userServiceImpl.resetPwd(md5Pwd, id);
         if(update > 0) {
             return ResponseJsonUtil.returnJson(objectMap, SUCCESS, ErpInfo.OK.code);
         } else {
@@ -175,11 +175,11 @@ public class UserController {
             Long userId = jsonObject.getLong("userId");
             String oldpwd = jsonObject.getString("oldpassword");
             String password = jsonObject.getString("password");
-            User user = userService.getUser(userId);
+            User user = userServiceImpl.getUser(userId);
             //必须和原始密码一致才可以更新密码
             if (oldpwd.equalsIgnoreCase(user.getPassword())) {
                 user.setPassword(password);
-                flag = userService.updateUserByObj(user); //1-成功
+                flag = userServiceImpl.updateUserByObj(user); //1-成功
                 info = "修改成功";
             } else {
                 flag = 2; //原始密码输入错误
@@ -210,7 +210,7 @@ public class UserController {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             Map<String, Object> data = new HashMap<String, Object>();
-            List<User> dataList = userService.getUser();
+            List<User> dataList = userServiceImpl.getUser();
             if(dataList!=null) {
                 data.put("userList", dataList);
             }
@@ -235,7 +235,7 @@ public class UserController {
     public JSONArray getUserList(HttpServletRequest request)throws Exception {
         JSONArray dataArray = new JSONArray();
         try {
-            List<User> dataList = userService.getUser();
+            List<User> dataList = userServiceImpl.getUser();
             if (null != dataList) {
                 for (User user : dataList) {
                     JSONObject item = new JSONObject();
@@ -261,16 +261,16 @@ public class UserController {
     @ResponseBody
     public Object addUser(@RequestBody JSONObject obj, HttpServletRequest request)throws Exception{
         JSONObject result = ExceptionConstants.standardSuccess();
-        User userInfo = userService.getCurrentUser();
-        Tenant tenant = tenantService.getTenantByTenantId(userInfo.getTenantId());
-        Long count = userService.countUser(null,null);
+        User userInfo = userServiceImpl.getCurrentUser();
+        Tenant tenant = tenantServiceImpl.getTenantByTenantId(userInfo.getTenantId());
+        Long count = userServiceImpl.countUser(null,null);
         if(tenant!=null) {
             if(count>= tenant.getUserNumLimit()) {
                 throw new BusinessParamCheckingException(ExceptionConstants.USER_OVER_LIMIT_FAILED_CODE,
                         ExceptionConstants.USER_OVER_LIMIT_FAILED_MSG);
             } else {
                 UserEx ue= JSONObject.parseObject(obj.toJSONString(), UserEx.class);
-                userService.addUserAndOrgUserRel(ue, request);
+                userServiceImpl.addUserAndOrgUserRel(ue, request);
             }
         }
         return result;
@@ -288,7 +288,7 @@ public class UserController {
     public Object updateUser(@RequestBody JSONObject obj, HttpServletRequest request)throws Exception{
         JSONObject result = ExceptionConstants.standardSuccess();
         UserEx ue= JSONObject.parseObject(obj.toJSONString(), UserEx.class);
-        userService.updateUserAndOrgUserRel(ue, request);
+        userServiceImpl.updateUserAndOrgUserRel(ue, request);
         return result;
     }
 
@@ -304,8 +304,8 @@ public class UserController {
                                HttpServletRequest request)throws Exception{
         JSONObject result = ExceptionConstants.standardSuccess();
         ue.setUsername(ue.getLoginName());
-        userService.checkLoginName(ue); //检查登录名
-        ue = userService.registerUser(ue,manageRoleId,request);
+        userServiceImpl.checkLoginName(ue); //检查登录名
+        ue = userServiceImpl.registerUser(ue,manageRoleId,request);
         return result;
     }
 
@@ -318,7 +318,7 @@ public class UserController {
     @ApiOperation(value = "获取机构用户树")
     public JSONArray getOrganizationUserTree()throws Exception{
         JSONArray arr=new JSONArray();
-        List<TreeNodeEx> organizationUserTree= userService.getOrganizationUserTree();
+        List<TreeNodeEx> organizationUserTree= userServiceImpl.getOrganizationUserTree();
         if(organizationUserTree!=null&&organizationUserTree.size()>0){
             for(TreeNodeEx node:organizationUserTree){
                 String str=JSON.toJSONString(node);
@@ -409,7 +409,7 @@ public class UserController {
         Byte status = jsonObject.getByte("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
-        int res = userService.batchSetStatus(status, ids, request);
+        int res = userServiceImpl.batchSetStatus(status, ids, request);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
@@ -429,10 +429,10 @@ public class UserController {
         try {
             Map<String, Object> data = new HashMap<>();
             Long userId = Long.parseLong(redisService.getObjectFromSessionByKey(request,"userId").toString());
-            User user = userService.getUser(userId);
+            User user = userServiceImpl.getUser(userId);
             //获取当前用户数
-            int userCurrentNum = userService.getUser().size();
-            Tenant tenant = tenantService.getTenantByTenantId(user.getTenantId());
+            int userCurrentNum = userServiceImpl.getUser().size();
+            Tenant tenant = tenantServiceImpl.getTenantByTenantId(user.getTenantId());
             data.put("type", tenant.getType()); //租户类型，0免费租户，1付费租户
             data.put("expireTime", Tools.parseDateToStr(tenant.getExpireTime()));
             data.put("userCurrentNum", userCurrentNum);

@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.vo.AccountItemVo4List;
 import com.wansensoft.utils.constants.BusinessConstants;
-import com.wansensoft.service.accountHead.AccountHeadService;
+import com.wansensoft.service.accountHead.AccountHeadServiceImpl;
 import com.wansensoft.service.accountItem.AccountItemService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.StringUtil;
@@ -36,7 +36,7 @@ public class AccountItemController {
     private AccountItemService accountItemService;
 
     @Resource
-    private AccountHeadService accountHeadService;
+    private AccountHeadServiceImpl accountHeadServiceImpl;
 
     @GetMapping(value = "/getDetailList")
     @ApiOperation(value = "明细列表")
@@ -48,7 +48,7 @@ public class AccountItemController {
             List<AccountItemVo4List> dataList = new ArrayList<>();
             if(headerId != 0) {
                 dataList = accountItemService.getDetailList(headerId);
-                type = accountHeadService.getAccountHead(headerId).getType();
+                type = accountHeadServiceImpl.getAccountHead(headerId).getType();
             }
             JSONObject outer = new JSONObject();
             outer.put("total", dataList.size());

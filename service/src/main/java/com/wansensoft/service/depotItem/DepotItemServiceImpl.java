@@ -2,6 +2,7 @@ package com.wansensoft.service.depotItem;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.depot.*;
 import com.wansensoft.entities.material.*;
 import com.wansensoft.entities.serialNumber.SerialNumberExample;
@@ -11,20 +12,18 @@ import com.wansensoft.mappers.depot.DepotHeadMapper;
 import com.wansensoft.mappers.depot.DepotItemMapper;
 import com.wansensoft.mappers.depot.DepotItemMapperEx;
 import com.wansensoft.mappers.material.MaterialCurrentStockMapper;
-import com.wansensoft.mappers.serialNumber.SerialNumberMapperEx;
+import com.wansensoft.service.depot.DepotService;
+import com.wansensoft.service.depotHead.DepotHeadService;
+import com.wansensoft.service.material.MaterialService;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.depot.DepotService;
-import com.wansensoft.service.depotHead.DepotHeadService;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.material.MaterialService;
 import com.wansensoft.service.materialExtend.MaterialExtendService;
 import com.wansensoft.service.serialNumber.SerialNumberService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
 import com.wansensoft.service.unit.UnitService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
 import com.wansensoft.vo.DepotItemStockWarningCount;
@@ -35,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -44,44 +42,43 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class DepotItemService {
-    private Logger logger = LoggerFactory.getLogger(DepotItemService.class);
+public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem> implements DepotItemService{
+    private Logger logger = LoggerFactory.getLogger(DepotItemServiceImpl.class);
 
     private final static String TYPE = "入库";
     private final static String SUM_TYPE = "number";
     private final static String IN = "in";
     private final static String OUT = "out";
 
-    @Resource
-    private DepotItemMapper depotItemMapper;
-    @Resource
-    private DepotItemMapperEx depotItemMapperEx;
-    @Resource
-    private MaterialService materialService;
-    @Resource
-    private MaterialExtendService materialExtendService;
-    @Resource
-    private SerialNumberMapperEx serialNumberMapperEx;
-    @Resource
-    private DepotHeadService depotHeadService;
-    @Resource
-    private DepotHeadMapper depotHeadMapper;
-    @Resource
-    private SerialNumberService serialNumberService;
-    @Resource
-    private UserService userService;
-    @Resource
-    private SystemConfigService systemConfigService;
-    @Resource
-    private DepotService depotService;
-    @Resource
-    private UnitService unitService;
-    @Resource
-    private MaterialCurrentStockMapper materialCurrentStockMapper;
-    @Resource
-    private LogService logService;
+    private final DepotItemMapper depotItemMapper;
+    private final DepotItemMapperEx depotItemMapperEx;
+    private final MaterialService materialService;
+    private final MaterialExtendService materialExtendService;
+    private final DepotHeadService depotHeadService;
+    private final DepotHeadMapper depotHeadMapper;
+    private final SerialNumberService serialNumberService;
+    private final UserService userService;
+    private final SystemConfigService systemConfigService;
+    private final DepotService depotService;
+    private final UnitService unitService;
+    private final MaterialCurrentStockMapper materialCurrentStockMapper;
 
-    public DepotItem getDepotItem(long id)throws Exception {
+    public DepotItemServiceImpl(DepotItemMapper depotItemMapper, DepotItemMapperEx depotItemMapperEx, MaterialService materialService, MaterialExtendService materialExtendService, DepotHeadService depotHeadService, DepotHeadMapper depotHeadMapper, SerialNumberService serialNumberService, UserService userService, SystemConfigService systemConfigService, DepotService depotService, UnitService unitService, MaterialCurrentStockMapper materialCurrentStockMapper) {
+        this.depotItemMapper = depotItemMapper;
+        this.depotItemMapperEx = depotItemMapperEx;
+        this.materialService = materialService;
+        this.materialExtendService = materialExtendService;
+        this.depotHeadService = depotHeadService;
+        this.depotHeadMapper = depotHeadMapper;
+        this.serialNumberService = serialNumberService;
+        this.userService = userService;
+        this.systemConfigService = systemConfigService;
+        this.depotService = depotService;
+        this.unitService = unitService;
+        this.materialCurrentStockMapper = materialCurrentStockMapper;
+    }
+
+    public DepotItem getDepotItem(long id) {
         DepotItem result=null;
         try{
             result=depotItemMapper.selectByPrimaryKey(id);
@@ -91,7 +88,7 @@ public class DepotItemService {
         return result;
     }
 
-    public List<DepotItem> getDepotItem()throws Exception {
+    public List<DepotItem> getDepotItem() {
         DepotItemExample example = new DepotItemExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<DepotItem> list=null;
@@ -103,7 +100,7 @@ public class DepotItemService {
         return list;
     }
 
-    public List<DepotItem> select(String name, Integer type, String remark, int offset, int rows)throws Exception {
+    public List<DepotItem> select(String name, Integer type, String remark, int offset, int rows) {
         List<DepotItem> list=null;
         try{
             list=depotItemMapperEx.selectByConditionDepotItem(name, type, remark, offset, rows);
@@ -113,7 +110,7 @@ public class DepotItemService {
         return list;
     }
 
-    public Long countDepotItem(String name, Integer type, String remark) throws Exception{
+    public Long countDepotItem(String name, Integer type, String remark) {
         Long result =null;
         try{
             result=depotItemMapperEx.countsByDepotItem(name, type, remark);
@@ -124,7 +121,7 @@ public class DepotItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertDepotItem(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertDepotItem(JSONObject obj, HttpServletRequest request) {
         DepotItem depotItem = JSONObject.parseObject(obj.toJSONString(), DepotItem.class);
         int result =0;
         try{
@@ -136,7 +133,7 @@ public class DepotItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateDepotItem(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int updateDepotItem(JSONObject obj, HttpServletRequest request) {
         DepotItem depotItem = JSONObject.parseObject(obj.toJSONString(), DepotItem.class);
         int result =0;
         try{
@@ -148,7 +145,7 @@ public class DepotItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteDepotItem(Long id, HttpServletRequest request)throws Exception {
+    public int deleteDepotItem(Long id, HttpServletRequest request) {
         int result =0;
         try{
             result=depotItemMapper.deleteByPrimaryKey(id);
@@ -159,7 +156,7 @@ public class DepotItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteDepotItem(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteDepotItem(String ids, HttpServletRequest request) {
         List<Long> idList = StringUtil.strToLongList(ids);
         DepotItemExample example = new DepotItemExample();
         example.createCriteria().andIdIn(idList);
@@ -172,7 +169,7 @@ public class DepotItemService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         DepotItemExample example = new DepotItemExample();
         example.createCriteria().andIdNotEqualTo(id).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<DepotItem> list =null;
@@ -185,7 +182,7 @@ public class DepotItemService {
     }
 
     public List<DepotItemVo4DetailByTypeAndMId> findDetailByDepotIdsAndMaterialIdList(String depotIds, Boolean forceFlag, String sku, String batchNumber,
-                                                                                      String number, String beginTime, String endTime, Long mId, int offset, int rows)throws Exception {
+                                                                                      String number, String beginTime, String endTime, Long mId, int offset, int rows) {
         Long depotId = null;
         if(StringUtil.isNotEmpty(depotIds)) {
             depotId = Long.parseLong(depotIds);
@@ -202,7 +199,7 @@ public class DepotItemService {
     }
 
     public Long findDetailByDepotIdsAndMaterialIdCount(String depotIds, Boolean forceFlag, String sku, String batchNumber,
-                                                       String number, String beginTime, String endTime, Long mId)throws Exception {
+                                                       String number, String beginTime, String endTime, Long mId) {
         Long depotId = null;
         if(StringUtil.isNotEmpty(depotIds)) {
             depotId = Long.parseLong(depotIds);
@@ -219,7 +216,7 @@ public class DepotItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertDepotItemWithObj(DepotItem depotItem)throws Exception {
+    public int insertDepotItemWithObj(DepotItem depotItem) {
         int result =0;
         try{
             result = depotItemMapper.insertSelective(depotItem);
@@ -230,7 +227,7 @@ public class DepotItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateDepotItemWithObj(DepotItem depotItem)throws Exception {
+    public int updateDepotItemWithObj(DepotItem depotItem) {
         int result =0;
         try{
             result = depotItemMapper.updateByPrimaryKeySelective(depotItem);
@@ -240,7 +237,7 @@ public class DepotItemService {
         return result;
     }
 
-    public List<DepotItem> getListByHeaderId(Long headerId)throws Exception {
+    public List<DepotItem> getListByHeaderId(Long headerId) {
         List<DepotItem> list =null;
         try{
             DepotItemExample example = new DepotItemExample();
@@ -259,7 +256,7 @@ public class DepotItemService {
      * @return
      * @throws Exception
      */
-    public DepotItem getItemByHeaderIdAndMaterial(Long headerId, Long meId)throws Exception {
+    public DepotItem getItemByHeaderIdAndMaterial(Long headerId, Long meId) {
         DepotItem depotItem = new DepotItem();
         try{
             DepotItemExample example = new DepotItemExample();
@@ -281,7 +278,7 @@ public class DepotItemService {
      * @return
      * @throws Exception
      */
-    public DepotItem getPreItemByHeaderIdAndMaterial(String linkNumber, Long meId, Long linkId)throws Exception {
+    public DepotItem getPreItemByHeaderIdAndMaterial(String linkNumber, Long meId, Long linkId) {
         DepotItem depotItem = new DepotItem();
         try{
             DepotHead depotHead = depotHeadService.getDepotHead(linkNumber);
@@ -297,7 +294,7 @@ public class DepotItemService {
         return depotItem;
     }
 
-    public List<DepotItemVo4WithInfoEx> getDetailList(Long headerId)throws Exception {
+    public List<DepotItemVo4WithInfoEx> getDetailList(Long headerId) {
         List<DepotItemVo4WithInfoEx> list =null;
         try{
             list = depotItemMapperEx.getDetailList(headerId);
@@ -307,7 +304,7 @@ public class DepotItemService {
         return list;
     }
 
-    public List<DepotItemVo4WithInfoEx> findByAll(String materialParam, List<Long> categoryIdList, String endTime, Integer offset, Integer rows)throws Exception {
+    public List<DepotItemVo4WithInfoEx> findByAll(String materialParam, List<Long> categoryIdList, String endTime, Integer offset, Integer rows) {
         List<DepotItemVo4WithInfoEx> list =null;
         try{
             list = depotItemMapperEx.findByAll(materialParam, categoryIdList, endTime, offset, rows);
@@ -317,7 +314,7 @@ public class DepotItemService {
         return list;
     }
 
-    public int findByAllCount(String materialParam, List<Long> categoryIdList, String endTime)throws Exception {
+    public int findByAllCount(String materialParam, List<Long> categoryIdList, String endTime) {
         int result=0;
         try{
             result = depotItemMapperEx.findByAllCount(materialParam, categoryIdList, endTime);
@@ -328,7 +325,7 @@ public class DepotItemService {
     }
 
     public List<DepotItemVo4WithInfoEx> getListWithBugOrSale(String materialParam, String billType,
-                     String beginTime, String endTime, String[] creatorArray, Long organId, String [] organArray, List<Long> depotList, Boolean forceFlag, Integer offset, Integer rows)throws Exception {
+                     String beginTime, String endTime, String[] creatorArray, Long organId, String [] organArray, List<Long> depotList, Boolean forceFlag, Integer offset, Integer rows) {
         List<DepotItemVo4WithInfoEx> list =null;
         try{
             list = depotItemMapperEx.getListWithBugOrSale(materialParam, billType, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, offset, rows);
@@ -339,7 +336,7 @@ public class DepotItemService {
     }
 
     public int getListWithBugOrSaleCount(String materialParam, String billType,
-                     String beginTime, String endTime, String[] creatorArray, Long organId, String [] organArray, List<Long> depotList, Boolean forceFlag)throws Exception {
+                     String beginTime, String endTime, String[] creatorArray, Long organId, String [] organArray, List<Long> depotList, Boolean forceFlag) {
         int result=0;
         try{
             result = depotItemMapperEx.getListWithBugOrSaleCount(materialParam, billType, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag);
@@ -350,7 +347,7 @@ public class DepotItemService {
     }
 
     public BigDecimal buyOrSale(String type, String subType, Long MId, String beginTime, String endTime,
-                                String[] creatorArray, Long organId, String [] organArray, List<Long> depotList, Boolean forceFlag, String sumType) throws Exception{
+                                String[] creatorArray, Long organId, String [] organArray, List<Long> depotList, Boolean forceFlag, String sumType) {
         BigDecimal result= BigDecimal.ZERO;
         try{
             if (SUM_TYPE.equals(sumType)) {
@@ -373,7 +370,7 @@ public class DepotItemService {
      * @return
      * @throws Exception
      */
-    public BigDecimal inOrOutPrice(String type, String subType, String month, String roleType) throws Exception{
+    public BigDecimal inOrOutPrice(String type, String subType, String month, String roleType) {
         BigDecimal result= BigDecimal.ZERO;
         try{
             String [] creatorArray = depotHeadService.getCreatorArray(roleType);
@@ -395,7 +392,7 @@ public class DepotItemService {
      * @return
      * @throws Exception
      */
-    public BigDecimal inOrOutRetailPrice(String type, String subType, String month, String roleType) throws Exception{
+    public BigDecimal inOrOutRetailPrice(String type, String subType, String month, String roleType) {
         BigDecimal result= BigDecimal.ZERO;
         try{
             String [] creatorArray = depotHeadService.getCreatorArray(roleType);
@@ -411,7 +408,7 @@ public class DepotItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void saveDetials(String rows, Long headerId, String actionType, HttpServletRequest request) throws Exception{
+    public void saveDetials(String rows, Long headerId, String actionType, HttpServletRequest request) {
         //查询单据主表信息
         DepotHead depotHead =depotHeadMapper.selectByPrimaryKey(headerId);
         //删除序列号和回收序列号
@@ -419,7 +416,7 @@ public class DepotItemService {
         //删除单据的明细
         deleteDepotItemHeadId(headerId);
         JSONArray rowArr = JSONArray.parseArray(rows);
-        if (null != rowArr && rowArr.size()>0) {
+        if (null != rowArr && !rowArr.isEmpty()) {
             //针对组装单、拆卸单校验是否存在组合件和普通子件
             checkAssembleWithMaterialType(rowArr, depotHead.getSubType());
             for (int i = 0; i < rowArr.size(); i++) {
@@ -638,7 +635,7 @@ public class DepotItemService {
                         //判断商品是否开启序列号，开启的售出序列号，未开启的跳过
                         if(BusinessConstants.ENABLE_SERIAL_NUMBER_ENABLED.equals(material.getEnableSerialNumber())) {
                             //售出序列号，获得当前操作人
-                            User userInfo=userService.getCurrentUser();
+                            User userInfo= userService.getCurrentUser();
                             serialNumberService.checkAndUpdateSerialNumber(depotItem, depotHead.getNumber(), userInfo, StringUtil.toNull(depotItem.getSnList()));
                         }
                     }
@@ -764,7 +761,7 @@ public class DepotItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void deleteDepotItemHeadId(Long headerId)throws Exception {
+    public void deleteDepotItemHeadId(Long headerId) {
         try{
             //1、查询删除前的单据明细
             List<DepotItem> depotItemList = getListByHeaderId(headerId);
@@ -787,7 +784,7 @@ public class DepotItemService {
      * @throws Exception
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void deleteOrCancelSerialNumber(String actionType, DepotHead depotHead, Long headerId) throws Exception {
+    public void deleteOrCancelSerialNumber(String actionType, DepotHead depotHead, Long headerId) {
         if(actionType.equals("update")) {
             User userInfo = userService.getCurrentUser();
             if(BusinessConstants.DEPOTHEAD_TYPE_IN.equals(depotHead.getType())){
@@ -843,7 +840,7 @@ public class DepotItemService {
      * @param rowObj
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void updateMaterialExtendPrice(Long meId, String subType, JSONObject rowObj) throws Exception {
+    public void updateMaterialExtendPrice(Long meId, String subType, JSONObject rowObj) {
         if(systemConfigService.getUpdateUnitPriceFlag()) {
             if (StringUtil.isExist(rowObj.get("unitPrice"))) {
                 BigDecimal unitPrice = rowObj.getBigDecimal("unitPrice");
@@ -892,7 +889,7 @@ public class DepotItemService {
      * @param endTime
      * @return
      */
-    public BigDecimal getSkuStockByParam(Long depotId, Long meId, String beginTime, String endTime) throws Exception {
+    public BigDecimal getSkuStockByParam(Long depotId, Long meId, String beginTime, String endTime) {
         Boolean forceFlag = systemConfigService.getForceApprovalFlag();
         List<Long> depotList = depotService.parseDepotList(depotId);
         //盘点复盘后数量的变动
@@ -922,7 +919,7 @@ public class DepotItemService {
      * @param endTime
      * @return
      */
-    public BigDecimal getStockByParam(Long depotId, Long mId, String beginTime, String endTime) throws Exception {
+    public BigDecimal getStockByParam(Long depotId, Long mId, String beginTime, String endTime) {
         List<Long> depotList = depotService.parseDepotList(depotId);
         return getStockByParamWithDepotList(depotList, mId, beginTime, endTime);
     }
@@ -935,7 +932,7 @@ public class DepotItemService {
      * @param endTime
      * @return
      */
-    public BigDecimal getStockByParamWithDepotList(List<Long> depotList, Long mId, String beginTime, String endTime) throws Exception {
+    public BigDecimal getStockByParamWithDepotList(List<Long> depotList, Long mId, String beginTime, String endTime) {
         Boolean forceFlag = systemConfigService.getForceApprovalFlag();
         //初始库存
         BigDecimal initStock = materialService.getInitStockByMidAndDepotList(depotList, mId);
@@ -966,7 +963,7 @@ public class DepotItemService {
      * @param endTime
      * @return
      */
-    public Map<String, BigDecimal> getIntervalMapByParamWithDepotList(List<Long> depotList, Long mId, String beginTime, String endTime) throws Exception {
+    public Map<String, BigDecimal> getIntervalMapByParamWithDepotList(List<Long> depotList, Long mId, String beginTime, String endTime) {
         Boolean forceFlag = systemConfigService.getForceApprovalFlag();
         Map<String,BigDecimal> intervalMap = new HashMap<>();
         BigDecimal inSum = BigDecimal.ZERO;
@@ -1002,7 +999,7 @@ public class DepotItemService {
      * @param depotItem
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void updateCurrentStock(DepotItem depotItem) throws Exception {
+    public void updateCurrentStock(DepotItem depotItem) {
         updateCurrentStockFun(depotItem.getMaterialId(), depotItem.getDepotId());
         if(depotItem.getAnotherDepotId()!=null){
             updateCurrentStockFun(depotItem.getMaterialId(), depotItem.getAnotherDepotId());
@@ -1014,7 +1011,7 @@ public class DepotItemService {
      * @param mId
      * @param dId
      */
-    public void updateCurrentStockFun(Long mId, Long dId) throws Exception {
+    public void updateCurrentStockFun(Long mId, Long dId) {
         if(mId!=null && dId!=null) {
             MaterialCurrentStockExample example = new MaterialCurrentStockExample();
             example.createCriteria().andMaterialIdEqualTo(mId).andDepotIdEqualTo(dId)
@@ -1107,7 +1104,7 @@ public class DepotItemService {
         return count;
     }
 
-    public List<DepotItemVoBatchNumberList> getBatchNumberList(String number, String name, Long depotId, String barCode, String batchNumber) throws Exception {
+    public List<DepotItemVoBatchNumberList> getBatchNumberList(String number, String name, Long depotId, String barCode, String batchNumber) {
         List<DepotItemVoBatchNumberList> reslist = new ArrayList<>();
         List<DepotItemVoBatchNumberList> list =  depotItemMapperEx.getBatchNumberList(StringUtil.toNull(number), name, depotId, barCode, batchNumber);
         for(DepotItemVoBatchNumberList bn: list) {
@@ -1128,7 +1125,7 @@ public class DepotItemService {
         return depotItemMapperEx.getCountByMaterialAndDepot(mId, depotId);
     }
 
-    public JSONObject parseMapByExcelData(String barCodes, List<Map<String, String>> detailList, String prefixNo) throws Exception {
+    public JSONObject parseMapByExcelData(String barCodes, List<Map<String, String>> detailList, String prefixNo) {
         JSONObject map = new JSONObject();
         JSONArray arr = new JSONArray();
         List<MaterialVo4Unit> list = depotItemMapperEx.getBillItemByParam(barCodes);

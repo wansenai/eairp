@@ -13,7 +13,7 @@ import java.io.IOException;
 
 @SpringBootApplication
 @EnableScheduling
-@MapperScan("com.wansensoft.mappers")
+@MapperScan("com.wansensoft")
 @ComponentScan("com.wansensoft")
 public class ErpApplication {
 

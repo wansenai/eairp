@@ -5,12 +5,12 @@ import com.wansensoft.entities.role.Role;
 import com.wansensoft.entities.role.RoleEx;
 import com.wansensoft.entities.role.RoleExample;
 import com.wansensoft.entities.user.User;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.role.RoleMapper;
 import com.wansensoft.mappers.role.RoleMapperEx;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -29,17 +28,20 @@ import java.util.List;
 @Service
 public class RoleService {
     private Logger logger = LoggerFactory.getLogger(RoleService.class);
-    @Resource
-    private RoleMapper roleMapper;
 
-    @Resource
-    private RoleMapperEx roleMapperEx;
-    @Resource
-    private LogService logService;
-    @Resource
-    private UserService userService;
+    private final RoleMapper roleMapper;
+    private final RoleMapperEx roleMapperEx;
+    private final LogService logService;
+    private final UserService userService;
 
-    public Role getRole(long id)throws Exception {
+    public RoleService(RoleMapper roleMapper, RoleMapperEx roleMapperEx, LogService logService, UserService userService) {
+        this.roleMapper = roleMapper;
+        this.roleMapperEx = roleMapperEx;
+        this.logService = logService;
+        this.userService = userService;
+    }
+
+    public Role getRole(long id) {
         Role result=null;
         try{
             result=roleMapper.selectByPrimaryKey(id);
@@ -49,7 +51,7 @@ public class RoleService {
         return result;
     }
 
-    public List<Role> getRoleListByIds(String ids)throws Exception {
+    public List<Role> getRoleListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<Role> list = new ArrayList<>();
         try{
@@ -62,7 +64,7 @@ public class RoleService {
         return list;
     }
 
-    public List<Role> allList()throws Exception {
+    public List<Role> allList() {
         RoleExample example = new RoleExample();
         example.createCriteria().andEnabledEqualTo(true).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         example.setOrderByClause("sort asc, id desc");
@@ -116,7 +118,7 @@ public class RoleService {
             role.setEnabled(true);
             result=roleMapper.insertSelective(role);
             logService.insertLog("角色",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(role.getName()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + role.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -124,13 +126,13 @@ public class RoleService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateRole(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateRole(JSONObject obj, HttpServletRequest request) {
         Role role = JSONObject.parseObject(obj.toJSONString(), Role.class);
         int result=0;
         try{
             result=roleMapper.updateByPrimaryKeySelective(role);
             logService.insertLog("角色",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(role.getName()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + role.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -138,12 +140,12 @@ public class RoleService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteRole(Long id, HttpServletRequest request)throws Exception {
+    public int deleteRole(Long id, HttpServletRequest request) {
         return batchDeleteRoleByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteRole(String ids, HttpServletRequest request) throws Exception{
+    public int batchDeleteRole(String ids, HttpServletRequest request) {
         return batchDeleteRoleByIds(ids);
     }
 
@@ -177,7 +179,7 @@ public class RoleService {
      * @return int
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteRoleByIds(String ids) throws Exception{
+    public int batchDeleteRoleByIds(String ids) {
         StringBuffer sb = new StringBuffer();
         sb.append(BusinessConstants.LOG_OPERATION_TYPE_DELETE);
         List<Role> list = getRoleListByIds(ids);
@@ -186,7 +188,7 @@ public class RoleService {
         }
         logService.insertLog("角色", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo=userService.getCurrentUser();
+        User userInfo = userService.getCurrentUser();
         String [] idArray=ids.split(",");
         int result=0;
         try{
@@ -204,7 +206,7 @@ public class RoleService {
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int batchSetStatus(Boolean status, String ids)throws Exception {
         logService.insertLog("角色",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ENABLED).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_ENABLED,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         List<Long> roleIds = StringUtil.strToLongList(ids);
         Role role = new Role();
@@ -226,7 +228,7 @@ public class RoleService {
      * @param type
      * @return
      */
-    public Object parseHomePriceByLimit(BigDecimal price, String type, String priceLimit, String emptyInfo, HttpServletRequest request) throws Exception {
+    public Object parseHomePriceByLimit(BigDecimal price, String type, String priceLimit, String emptyInfo, HttpServletRequest request) {
         if(StringUtil.isNotEmpty(priceLimit)) {
             if("buy".equals(type) && priceLimit.contains("1")) {
                 return emptyInfo;
@@ -250,7 +252,7 @@ public class RoleService {
      * @return
      * @throws Exception
      */
-    public BigDecimal parseBillPriceByLimit(BigDecimal price, String billCategory, String priceLimit, HttpServletRequest request) throws Exception {
+    public BigDecimal parseBillPriceByLimit(BigDecimal price, String billCategory, String priceLimit, HttpServletRequest request) {
         if(StringUtil.isNotEmpty(priceLimit)) {
             if("buy".equals(billCategory) && priceLimit.contains("4")) {
                 return BigDecimal.ZERO;
@@ -271,7 +273,7 @@ public class RoleService {
      * @param type
      * @return
      */
-    public Object parseMaterialPriceByLimit(BigDecimal price, String type, String emptyInfo, HttpServletRequest request) throws Exception {
+    public Object parseMaterialPriceByLimit(BigDecimal price, String type, String emptyInfo, HttpServletRequest request) {
         Long userId = userService.getUserId(request);
         String priceLimit = userService.getRoleTypeByUserId(userId).getPriceLimit();
         if(StringUtil.isNotEmpty(priceLimit)) {
@@ -288,7 +290,7 @@ public class RoleService {
         return price;
     }
 
-    public String getCurrentPriceLimit(HttpServletRequest request) throws Exception {
+    public String getCurrentPriceLimit(HttpServletRequest request) {
         Long userId = userService.getUserId(request);
         return userService.getRoleTypeByUserId(userId).getPriceLimit();
     }

@@ -7,13 +7,13 @@ import com.wansensoft.entities.account.AccountItemExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.account.AccountItemMapper;
 import com.wansensoft.mappers.account.AccountItemMapperEx;
+import com.wansensoft.service.depotHead.DepotHeadService;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.depotHead.DepotHeadService;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.vo.AccountItemVo4List;
 import org.slf4j.Logger;
@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -33,16 +32,19 @@ import java.util.List;
 public class AccountItemService {
     private Logger logger = LoggerFactory.getLogger(AccountItemService.class);
 
-    @Resource
-    private AccountItemMapper accountItemMapper;
-    @Resource
-    private AccountItemMapperEx accountItemMapperEx;
-    @Resource
-    private LogService logService;
-    @Resource
-    private UserService userService;
-    @Resource
-    private DepotHeadService depotHeadService;
+    private final AccountItemMapper accountItemMapper;
+    private final AccountItemMapperEx accountItemMapperEx;
+    private final LogService logService;
+    private final UserService userService;
+    private final DepotHeadService depotHeadService;
+
+    public AccountItemService(AccountItemMapper accountItemMapper, AccountItemMapperEx accountItemMapperEx, LogService logService, UserService userService, DepotHeadService depotHeadService) {
+        this.accountItemMapper = accountItemMapper;
+        this.accountItemMapperEx = accountItemMapperEx;
+        this.logService = logService;
+        this.userService = userService;
+        this.depotHeadService = depotHeadService;
+    }
 
     public AccountItem getAccountItem(long id)throws Exception {
         AccountItem result=null;
@@ -106,7 +108,7 @@ public class AccountItemService {
         try{
             result = accountItemMapper.updateByPrimaryKeySelective(accountItem);
             logService.insertLog("财务明细",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(accountItem.getId()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + accountItem.getId(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -119,7 +121,7 @@ public class AccountItemService {
         try{
             result = accountItemMapper.deleteByPrimaryKey(id);
             logService.insertLog("财务明细",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_DELETE).append(id).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_DELETE + id, request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -154,7 +156,7 @@ public class AccountItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertAccountItemWithObj(AccountItem accountItem)throws Exception {
+    public int insertAccountItemWithObj(AccountItem accountItem) {
         int result=0;
         try{
             result = accountItemMapper.insertSelective(accountItem);
@@ -186,7 +188,7 @@ public class AccountItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void saveDetials(String rows, Long headerId, String type, HttpServletRequest request) throws Exception {
+    public void saveDetials(String rows, Long headerId, String type, HttpServletRequest request) {
         //删除单据的明细
         deleteAccountItemHeadId(headerId);
         JSONArray rowArr = JSONArray.parseArray(rows);
@@ -230,7 +232,7 @@ public class AccountItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void deleteAccountItemHeadId(Long headerId)throws Exception {
+    public void deleteAccountItemHeadId(Long headerId) {
         AccountItemExample example = new AccountItemExample();
         example.createCriteria().andHeaderIdEqualTo(headerId);
         try{
@@ -243,7 +245,7 @@ public class AccountItemService {
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int batchDeleteAccountItemByIds(String ids) throws Exception{
         logService.insertLog("财务明细",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_DELETE).append(ids).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_DELETE + ids,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         User userInfo = userService.getCurrentUser();
         String [] idArray=ids.split(",");

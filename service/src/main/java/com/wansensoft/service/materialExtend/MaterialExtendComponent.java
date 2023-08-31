@@ -4,17 +4,18 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.service.ICommonQuery;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-@Service(value = "material_extend")
+@Service
 @MaterialExtendResource
 public class MaterialExtendComponent implements ICommonQuery {
+    private final MaterialExtendService materialExtendService;
 
-    @Resource
-    private MaterialExtendService materialExtendService;
+    public MaterialExtendComponent(MaterialExtendService materialExtendService) {
+        this.materialExtendService = materialExtendService;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {

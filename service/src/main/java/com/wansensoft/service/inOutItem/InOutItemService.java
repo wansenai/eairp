@@ -6,14 +6,14 @@ import com.wansensoft.entities.inOutItem.InOutItem;
 import com.wansensoft.entities.inOutItem.InOutItemExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.account.AccountItemMapperEx;
+import com.wansensoft.service.log.LogServiceImpl;
+import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.inOutItem.InOutItemMapper;
 import com.wansensoft.mappers.inOutItem.InOutItemMapperEx;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,17 +31,19 @@ import java.util.List;
 public class InOutItemService {
     private Logger logger = LoggerFactory.getLogger(InOutItemService.class);
 
-    @Resource
-    private InOutItemMapper inOutItemMapper;
+    private final InOutItemMapper inOutItemMapper;
+    private final InOutItemMapperEx inOutItemMapperEx;
+    private final UserServiceImpl userServiceImpl;
+    private final LogServiceImpl logServiceImpl;
+    private final AccountItemMapperEx accountItemMapperEx;
 
-    @Resource
-    private InOutItemMapperEx inOutItemMapperEx;
-    @Resource
-    private UserService userService;
-    @Resource
-    private LogService logService;
-    @Resource
-    private AccountItemMapperEx accountItemMapperEx;
+    public InOutItemService(InOutItemMapper inOutItemMapper, InOutItemMapperEx inOutItemMapperEx, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl, AccountItemMapperEx accountItemMapperEx) {
+        this.inOutItemMapper = inOutItemMapper;
+        this.inOutItemMapperEx = inOutItemMapperEx;
+        this.userServiceImpl = userServiceImpl;
+        this.logServiceImpl = logServiceImpl;
+        this.accountItemMapperEx = accountItemMapperEx;
+    }
 
     public InOutItem getInOutItem(long id)throws Exception {
         InOutItem result=null;
@@ -106,7 +107,7 @@ public class InOutItemService {
         try{
             inOutItem.setEnabled(true);
             result=inOutItemMapper.insertSelective(inOutItem);
-            logService.insertLog("收支项目",
+            logServiceImpl.insertLog("收支项目",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(inOutItem.getName()).toString(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -120,7 +121,7 @@ public class InOutItemService {
         int result=0;
         try{
             result=inOutItemMapper.updateByPrimaryKeySelective(inOutItem);
-            logService.insertLog("收支项目",
+            logServiceImpl.insertLog("收支项目",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(inOutItem.getName()).toString(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -162,9 +163,9 @@ public class InOutItemService {
         for(InOutItem inOutItem: list){
             sb.append("[").append(inOutItem.getName()).append("]");
         }
-        logService.insertLog("收支项目", sb.toString(),
+        logServiceImpl.insertLog("收支项目", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userServiceImpl.getCurrentUser();
         try{
             result=inOutItemMapperEx.batchDeleteInOutItemByIds(new Date(),userInfo==null?null:userInfo.getId(),idArray);
         }catch(Exception e){
@@ -210,7 +211,7 @@ public class InOutItemService {
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int batchSetStatus(Boolean status, String ids)throws Exception {
-        logService.insertLog("收支项目",
+        logServiceImpl.insertLog("收支项目",
                 new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ENABLED).toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         List<Long> inOutItemIds = StringUtil.strToLongList(ids);

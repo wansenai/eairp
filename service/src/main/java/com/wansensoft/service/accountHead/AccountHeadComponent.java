@@ -7,21 +7,23 @@ import com.wansensoft.utils.QueryUtils;
 import com.wansensoft.utils.StringUtil;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-@Service(value = "accountHead_component")
+@Service
 @AccountHeadResource
 public class AccountHeadComponent implements ICommonQuery {
 
-    @Resource
-    private AccountHeadService accountHeadService;
+    private final AccountHeadServiceImpl accountHeadServiceImpl;
+
+    public AccountHeadComponent(AccountHeadServiceImpl accountHeadServiceImpl) {
+        this.accountHeadServiceImpl = accountHeadServiceImpl;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return accountHeadService.getAccountHead(id);
+        return accountHeadServiceImpl.getAccountHead(id);
     }
 
     @Override
@@ -43,7 +45,7 @@ public class AccountHeadComponent implements ICommonQuery {
         String status = StringUtil.getInfo(search, "status");
         String remark = StringUtil.getInfo(search, "remark");
         String number = StringUtil.getInfo(search, "number");
-        return accountHeadService.select(type, roleType, billNo, beginTime, endTime, organId, creator, handsPersonId,
+        return accountHeadServiceImpl.select(type, roleType, billNo, beginTime, endTime, organId, creator, handsPersonId,
                 accountId, status, remark, number, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
@@ -62,28 +64,28 @@ public class AccountHeadComponent implements ICommonQuery {
         String status = StringUtil.getInfo(search, "status");
         String remark = StringUtil.getInfo(search, "remark");
         String number = StringUtil.getInfo(search, "number");
-        return accountHeadService.countAccountHead(type, roleType, billNo, beginTime, endTime, organId, creator, handsPersonId,
+        return accountHeadServiceImpl.countAccountHead(type, roleType, billNo, beginTime, endTime, organId, creator, handsPersonId,
                 accountId, status, remark, number);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request) throws Exception{
-        return accountHeadService.insertAccountHead(obj, request);
+        return accountHeadServiceImpl.insertAccountHead(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return accountHeadService.updateAccountHead(obj, request);
+        return accountHeadServiceImpl.updateAccountHead(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return accountHeadService.deleteAccountHead(id, request);
+        return accountHeadServiceImpl.deleteAccountHead(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return accountHeadService.batchDeleteAccountHead(ids, request);
+        return accountHeadServiceImpl.batchDeleteAccountHead(ids, request);
     }
 
     @Override

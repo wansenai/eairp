@@ -13,8 +13,7 @@ import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.person.PersonMapper;
 import com.wansensoft.mappers.person.PersonMapperEx;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.log.LogServiceImpl;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,19 +32,19 @@ import java.util.Map;
 public class PersonService {
     private Logger logger = LoggerFactory.getLogger(PersonService.class);
 
-    @Resource
-    private PersonMapper personMapper;
+    private final PersonMapper personMapper;
+    private final PersonMapperEx personMapperEx;
+    private final LogServiceImpl logServiceImpl;
+    private final AccountHeadMapperEx accountHeadMapperEx;
+    private final DepotHeadMapperEx depotHeadMapperEx;
 
-    @Resource
-    private PersonMapperEx personMapperEx;
-    @Resource
-    private UserService userService;
-    @Resource
-    private LogService logService;
-    @Resource
-    private AccountHeadMapperEx accountHeadMapperEx;
-    @Resource
-    private DepotHeadMapperEx depotHeadMapperEx;
+    public PersonService(PersonMapper personMapper, PersonMapperEx personMapperEx, LogServiceImpl logServiceImpl, AccountHeadMapperEx accountHeadMapperEx, DepotHeadMapperEx depotHeadMapperEx) {
+        this.personMapper = personMapper;
+        this.personMapperEx = personMapperEx;
+        this.logServiceImpl = logServiceImpl;
+        this.accountHeadMapperEx = accountHeadMapperEx;
+        this.depotHeadMapperEx = depotHeadMapperEx;
+    }
 
     public Person getPerson(long id)throws Exception {
         Person result=null;
@@ -110,7 +108,7 @@ public class PersonService {
         try{
             person.setEnabled(true);
             result=personMapper.insertSelective(person);
-            logService.insertLog("经手人",
+            logServiceImpl.insertLog("经手人",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(person.getName()).toString(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -124,7 +122,7 @@ public class PersonService {
         int result=0;
         try{
             result=personMapper.updateByPrimaryKeySelective(person);
-            logService.insertLog("经手人",
+            logServiceImpl.insertLog("经手人",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(person.getName()).toString(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -179,7 +177,7 @@ public class PersonService {
         for(Person person: list){
             sb.append("[").append(person.getName()).append("]");
         }
-        logService.insertLog("经手人", sb.toString(),
+        logServiceImpl.insertLog("经手人", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         //删除经手人
         try{
@@ -236,7 +234,7 @@ public class PersonService {
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int batchSetStatus(Boolean status, String ids)throws Exception {
-        logService.insertLog("经手人",
+        logServiceImpl.insertLog("经手人",
                 new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ENABLED).toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         List<Long> personIds = StringUtil.strToLongList(ids);

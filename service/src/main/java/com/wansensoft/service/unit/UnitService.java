@@ -6,14 +6,14 @@ import com.wansensoft.entities.unit.Unit;
 import com.wansensoft.entities.unit.UnitExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.material.MaterialMapperEx;
+import com.wansensoft.service.log.LogServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.unit.UnitMapper;
 import com.wansensoft.mappers.unit.UnitMapperEx;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -33,19 +32,21 @@ import java.util.List;
 public class UnitService {
     private Logger logger = LoggerFactory.getLogger(UnitService.class);
 
-    @Resource
-    private UnitMapper unitMapper;
+    private final UnitMapper unitMapper;
+    private final UnitMapperEx unitMapperEx;
+    private final UserServiceImpl userServiceImpl;
+    private final LogServiceImpl logServiceImpl;
+    private final MaterialMapperEx materialMapperEx;
 
-    @Resource
-    private UnitMapperEx unitMapperEx;
-    @Resource
-    private UserService userService;
-    @Resource
-    private LogService logService;
-    @Resource
-    private MaterialMapperEx materialMapperEx;
+    public UnitService(UnitMapper unitMapper, UnitMapperEx unitMapperEx, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl, MaterialMapperEx materialMapperEx) {
+        this.unitMapper = unitMapper;
+        this.unitMapperEx = unitMapperEx;
+        this.userServiceImpl = userServiceImpl;
+        this.logServiceImpl = logServiceImpl;
+        this.materialMapperEx = materialMapperEx;
+    }
 
-    public Unit getUnit(long id)throws Exception {
+    public Unit getUnit(long id) {
         Unit result=null;
         try{
             result=unitMapper.selectByPrimaryKey(id);
@@ -108,7 +109,7 @@ public class UnitService {
             parseNameByUnit(unit);
             unit.setEnabled(true);
             result=unitMapper.insertSelective(unit);
-            logService.insertLog("计量单位",
+            logServiceImpl.insertLog("计量单位",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(unit.getName()).toString(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -129,7 +130,7 @@ public class UnitService {
             if(unit.getRatioThree()==null) {
                 unitMapperEx.updateRatioThreeById(unit.getId());
             }
-            logService.insertLog("计量单位",
+            logServiceImpl.insertLog("计量单位",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(unit.getName()).toString(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -186,9 +187,9 @@ public class UnitService {
         for(Unit unit: list){
             sb.append("[").append(unit.getName()).append("]");
         }
-        logService.insertLog("计量单位", sb.toString(),
+        logServiceImpl.insertLog("计量单位", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userServiceImpl.getCurrentUser();
         //校验通过执行删除操作
         try{
             result=unitMapperEx.batchDeleteUnitByIds(new Date(),userInfo==null?null:userInfo.getId(),idArray);
@@ -251,7 +252,7 @@ public class UnitService {
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int batchSetStatus(Boolean status, String ids)throws Exception {
-        logService.insertLog("计量单位",
+        logServiceImpl.insertLog("计量单位",
                 new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ENABLED).toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         List<Long> unitIds = StringUtil.strToLongList(ids);

@@ -9,14 +9,13 @@ import com.wansensoft.mappers.material.MaterialAttributeMapperEx;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.log.LogServiceImpl;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +24,15 @@ import java.util.List;
 public class MaterialAttributeService {
     private Logger logger = LoggerFactory.getLogger(MaterialAttributeService.class);
 
-    @Resource
-    private LogService logService;
+    private final LogServiceImpl logServiceImpl;
+    private final MaterialAttributeMapper materialAttributeMapper;
+    private final MaterialAttributeMapperEx materialAttributeMapperEx;
 
-    @Resource
-    private MaterialAttributeMapper materialAttributeMapper;
-
-    @Resource
-    private MaterialAttributeMapperEx materialAttributeMapperEx;
+    public MaterialAttributeService(LogServiceImpl logServiceImpl, MaterialAttributeMapper materialAttributeMapper, MaterialAttributeMapperEx materialAttributeMapperEx) {
+        this.logServiceImpl = logServiceImpl;
+        this.materialAttributeMapper = materialAttributeMapper;
+        this.materialAttributeMapperEx = materialAttributeMapperEx;
+    }
 
     public MaterialAttribute getMaterialAttribute(long id)throws Exception {
         MaterialAttribute result=null;
@@ -83,7 +83,7 @@ public class MaterialAttributeService {
         MaterialAttribute m = JSONObject.parseObject(obj.toJSONString(), MaterialAttribute.class);
         try{
             materialAttributeMapper.insertSelective(m);
-            logService.insertLog("商品属性",
+            logServiceImpl.insertLog("商品属性",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(m.getAttributeName()).toString(), request);
             return 1;
         }
@@ -101,7 +101,7 @@ public class MaterialAttributeService {
         MaterialAttribute materialAttribute = JSONObject.parseObject(obj.toJSONString(), MaterialAttribute.class);
         try{
             materialAttributeMapper.updateByPrimaryKeySelective(materialAttribute);
-            logService.insertLog("商品属性",
+            logServiceImpl.insertLog("商品属性",
                     new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(materialAttribute.getAttributeName()).toString(), request);
             return 1;
         }catch(Exception e){

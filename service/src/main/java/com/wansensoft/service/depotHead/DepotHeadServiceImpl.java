@@ -1,6 +1,7 @@
 package com.wansensoft.service.depotHead;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.account.AccountItem;
 import com.wansensoft.entities.depot.DepotHead;
 import com.wansensoft.entities.depot.DepotHeadExample;
@@ -12,24 +13,24 @@ import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.depot.DepotHeadMapper;
 import com.wansensoft.mappers.depot.DepotHeadMapperEx;
 import com.wansensoft.mappers.depot.DepotItemMapperEx;
+import com.wansensoft.service.account.AccountService;
+import com.wansensoft.service.accountHead.AccountHeadServiceImpl;
+import com.wansensoft.service.depot.DepotService;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.account.AccountService;
-import com.wansensoft.service.accountHead.AccountHeadService;
 import com.wansensoft.service.accountItem.AccountItemService;
-import com.wansensoft.service.depot.DepotService;
-import com.wansensoft.service.depotItem.DepotItemService;
-import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.depotItem.DepotItemServiceImpl;
 import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
 import com.wansensoft.service.person.PersonService;
 import com.wansensoft.service.role.RoleService;
 import com.wansensoft.service.serialNumber.SerialNumberService;
 import com.wansensoft.service.supplier.SupplierService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.user.UserService;
-import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
 import com.wansensoft.vo.*;
@@ -40,52 +41,53 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 
 @Service
-public class DepotHeadService {
-    private Logger logger = LoggerFactory.getLogger(DepotHeadService.class);
+public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead> implements DepotHeadService{
+    private Logger logger = LoggerFactory.getLogger(DepotHeadServiceImpl.class);
+    private final DepotHeadMapper depotHeadMapper;
+    private final DepotHeadMapperEx depotHeadMapperEx;
+    private final UserService userService;
+    private final RoleService roleService;
+    private final DepotService depotService;
+    private final DepotItemServiceImpl depotItemServiceImpl;
+    private final SupplierService supplierService;
+    private final UserBusinessService userBusinessService;
+    private final SystemConfigService systemConfigService;
+    private final SerialNumberService serialNumberService;
+    private final OrgaUserRelService orgaUserRelService;
+    private final PersonService personService;
+    private final AccountService accountService;
+    private final AccountHeadServiceImpl accountHeadServiceImpl;
+    private final AccountItemService accountItemService;
+    private final DepotItemMapperEx depotItemMapperEx;
+    private final LogService logService;
 
-    @Resource
-    private DepotHeadMapper depotHeadMapper;
-    @Resource
-    private DepotHeadMapperEx depotHeadMapperEx;
-    @Resource
-    private UserService userService;
-    @Resource
-    private RoleService roleService;
-    @Resource
-    private DepotService depotService;
-    @Resource
-    DepotItemService depotItemService;
-    @Resource
-    private SupplierService supplierService;
-    @Resource
-    private UserBusinessService userBusinessService;
-    @Resource
-    private SystemConfigService systemConfigService;
-    @Resource
-    private SerialNumberService serialNumberService;
-    @Resource
-    private OrgaUserRelService orgaUserRelService;
-    @Resource
-    private PersonService personService;
-    @Resource
-    private AccountService accountService;
-    @Resource
-    private AccountHeadService accountHeadService;
-    @Resource
-    private AccountItemService accountItemService;
-    @Resource
-    private DepotItemMapperEx depotItemMapperEx;
-    @Resource
-    private LogService logService;
+    public DepotHeadServiceImpl(DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, UserService userService, RoleService roleService, DepotService depotService, DepotItemServiceImpl depotItemServiceImpl, SupplierService supplierService, UserBusinessService userBusinessService, SystemConfigService systemConfigService, SerialNumberService serialNumberService, OrgaUserRelService orgaUserRelService, PersonService personService, AccountService accountService, AccountHeadServiceImpl accountHeadServiceImpl, AccountItemService accountItemService, DepotItemMapperEx depotItemMapperEx, LogService logService) {
+        this.depotHeadMapper = depotHeadMapper;
+        this.depotHeadMapperEx = depotHeadMapperEx;
+        this.userService = userService;
+        this.roleService = roleService;
+        this.depotService = depotService;
+        this.depotItemServiceImpl = depotItemServiceImpl;
+        this.supplierService = supplierService;
+        this.userBusinessService = userBusinessService;
+        this.systemConfigService = systemConfigService;
+        this.serialNumberService = serialNumberService;
+        this.orgaUserRelService = orgaUserRelService;
+        this.personService = personService;
+        this.accountService = accountService;
+        this.accountHeadServiceImpl = accountHeadServiceImpl;
+        this.accountItemService = accountItemService;
+        this.depotItemMapperEx = depotItemMapperEx;
+        this.logService = logService;
+    }
 
-    public DepotHead getDepotHead(long id)throws Exception {
+    public DepotHead getDepotHead(long id) {
         DepotHead result=null;
         try{
             result=depotHeadMapper.selectByPrimaryKey(id);
@@ -95,7 +97,7 @@ public class DepotHeadService {
         return result;
     }
 
-    public List<DepotHead> getDepotHead()throws Exception {
+    public List<DepotHead> getDepotHead() {
         DepotHeadExample example = new DepotHeadExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<DepotHead> list=null;
@@ -108,7 +110,7 @@ public class DepotHeadService {
     }
 
     public List<DepotHeadVo4List> select(String type, String subType, String roleType, String hasDebt, String status, String purchaseStatus, String number, String linkNumber,
-                                         String beginTime, String endTime, String materialParam, Long organId, Long creator, Long depotId, Long accountId, String remark, int offset, int rows) throws Exception {
+                                         String beginTime, String endTime, String materialParam, Long organId, Long creator, Long depotId, Long accountId, String remark, int offset, int rows) {
         List<DepotHeadVo4List> resList = new ArrayList<>();
         try{
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -220,7 +222,7 @@ public class DepotHeadService {
     }
 
     public Long countDepotHead(String type, String subType, String roleType, String hasDebt, String status, String purchaseStatus, String number, String linkNumber,
-           String beginTime, String endTime, String materialParam, Long organId, Long creator, Long depotId, Long accountId, String remark) throws Exception{
+           String beginTime, String endTime, String materialParam, Long organId, Long creator, Long depotId, Long accountId, String remark) {
         Long result=null;
         try{
             String [] depotArray = getDepotArray(subType);
@@ -244,7 +246,7 @@ public class DepotHeadService {
      * @return
      * @throws Exception
      */
-    public String[] getDepotArray(String subType) throws Exception {
+    public String[] getDepotArray(String subType) {
         String [] depotArray = null;
         if(!BusinessConstants.SUB_TYPE_PURCHASE_ORDER.equals(subType) && !BusinessConstants.SUB_TYPE_SALES_ORDER.equals(subType)) {
             String depotIds = depotService.findDepotStrByCurrentUser();
@@ -259,7 +261,7 @@ public class DepotHeadService {
      * @return
      * @throws Exception
      */
-    public String[] getCreatorArray(String roleType) throws Exception {
+    public String[] getCreatorArray(String roleType) {
         String creator = getCreatorByRoleType(roleType);
         String [] creatorArray=null;
         if(StringUtil.isNotEmpty(creator)){
@@ -272,7 +274,7 @@ public class DepotHeadService {
      * 获取机构数组
      * @return
      */
-    public String[] getOrganArray(String subType, String purchaseStatus) throws Exception {
+    public String[] getOrganArray(String subType, String purchaseStatus) {
         String [] organArray = null;
         String type = "UserCustomer";
         Long userId = userService.getCurrentUser().getId();
@@ -283,7 +285,7 @@ public class DepotHeadService {
                 ||BusinessConstants.SUB_TYPE_SALES_RETURN.equals(subType) ) {
             //采购订单里面选择销售订单的时候不要过滤
             if(StringUtil.isEmpty(purchaseStatus)) {
-                if (null != supplierList && supplierList.size() > 0) {
+                if (null != supplierList && !supplierList.isEmpty()) {
                     boolean customerFlag = systemConfigService.getCustomerFlag();
                     List<String> organList = new ArrayList<>();
                     for (Supplier supplier : supplierList) {
@@ -292,7 +294,7 @@ public class DepotHeadService {
                             organList.add(supplier.getId().toString());
                         }
                     }
-                    if(organList.size() > 0) {
+                    if(!organList.isEmpty()) {
                         organArray = StringUtil.listToStringArray(organList);
                     }
                 }
@@ -307,7 +309,7 @@ public class DepotHeadService {
      * @return
      * @throws Exception
      */
-    public String getCreatorByRoleType(String roleType) throws Exception {
+    public String getCreatorByRoleType(String roleType) {
         String creator = "";
         User user = userService.getCurrentUser();
         //再从后端获取一次角色类型，防止前端关闭了缓存功能
@@ -337,7 +339,7 @@ public class DepotHeadService {
         return finishDepositMap;
     }
 
-    public Map<String, Integer> getBillSizeMapByLinkNumberList(List<String> numberList) throws Exception {
+    public Map<String, Integer> getBillSizeMapByLinkNumberList(List<String> numberList) {
         Map<String, Integer> billListMap = new HashMap<>();
         if(numberList.size()>0) {
             List<DepotHead> list = getBillListByLinkNumberList(numberList);
@@ -355,7 +357,7 @@ public class DepotHeadService {
     public Map<Long,Integer> getFinancialBillNoMapByBillIdList(List<Long> idList) {
         Map<Long, Integer> billListMap = new HashMap<>();
         if(idList.size()>0) {
-            List<AccountItem> list = accountHeadService.getFinancialBillNoByBillIdList(idList);
+            List<AccountItem> list = accountHeadServiceImpl.getFinancialBillNoByBillIdList(idList);
             if(list!=null && list.size()>0) {
                 for (AccountItem accountItem : list) {
                     if(accountItem!=null) {
@@ -368,7 +370,7 @@ public class DepotHeadService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertDepotHead(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertDepotHead(JSONObject obj, HttpServletRequest request) {
         DepotHead depotHead = JSONObject.parseObject(obj.toJSONString(), DepotHead.class);
         depotHead.setCreateTime(new Timestamp(System.currentTimeMillis()));
         depotHead.setStatus(BusinessConstants.BILLS_STATUS_UN_AUDIT);
@@ -383,7 +385,7 @@ public class DepotHeadService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateDepotHead(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateDepotHead(JSONObject obj, HttpServletRequest request) {
         DepotHead depotHead = JSONObject.parseObject(obj.toJSONString(), DepotHead.class);
         DepotHead dh=null;
         try{
@@ -397,7 +399,7 @@ public class DepotHeadService {
         try{
             result = depotHeadMapper.updateByPrimaryKey(depotHead);
             logService.insertLog("单据",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(depotHead.getId()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + depotHead.getId(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -405,17 +407,17 @@ public class DepotHeadService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteDepotHead(Long id, HttpServletRequest request)throws Exception {
+    public int deleteDepotHead(Long id, HttpServletRequest request) {
         return batchDeleteBillByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteDepotHead(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteDepotHead(String ids, HttpServletRequest request) {
         return batchDeleteBillByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteBillByIds(String ids)throws Exception {
+    public int batchDeleteBillByIds(String ids) {
         StringBuffer sb = new StringBuffer();
         sb.append(BusinessConstants.LOG_OPERATION_TYPE_DELETE);
         List<DepotHead> dhList = getDepotHeadListByIds(ids);
@@ -427,7 +429,7 @@ public class DepotHeadService {
                 //删除入库单据，先校验序列号是否出库，如果未出库则同时删除序列号，如果已出库则不能删除单据
                 if (BusinessConstants.DEPOTHEAD_TYPE_IN.equals(depotHead.getType())) {
                     List<DepotItem> depotItemList = depotItemMapperEx.findDepotItemListBydepotheadId(depotHead.getId(), BusinessConstants.ENABLE_SERIAL_NUMBER_ENABLED);
-                    if (depotItemList != null && depotItemList.size() > 0) {
+                    if (depotItemList != null && !depotItemList.isEmpty()) {
                         //单据明细里面存在序列号商品
                         int serialNumberSellCount = depotHeadMapperEx.getSerialNumberBySell(depotHead.getNumber());
                         if (serialNumberSellCount > 0) {
@@ -464,7 +466,7 @@ public class DepotHeadService {
                         }
                     }
                 }
-                List<DepotItem> list = depotItemService.getListByHeaderId(depotHead.getId());
+                List<DepotItem> list = depotItemServiceImpl.getListByHeaderId(depotHead.getId());
                 //删除单据子表数据
                 depotItemMapperEx.batchDeleteDepotItemByDepotHeadIds(new Long[]{depotHead.getId()});
                 //删除单据主表信息
@@ -509,7 +511,7 @@ public class DepotHeadService {
                 }
                 //更新当前库存
                 for (DepotItem depotItem : list) {
-                    depotItemService.updateCurrentStock(depotItem);
+                    depotItemServiceImpl.updateCurrentStock(depotItem);
                 }
             } else {
                 throw new BusinessRunTimeException(ExceptionConstants.DEPOT_HEAD_UN_AUDIT_DELETE_FAILED_CODE,
@@ -528,8 +530,8 @@ public class DepotHeadService {
      * @throws Exception
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteDepotHeadByIds(String ids)throws Exception {
-        User userInfo=userService.getCurrentUser();
+    public int batchDeleteDepotHeadByIds(String ids) {
+        User userInfo = userService.getCurrentUser();
         String [] idArray=ids.split(",");
         int result=0;
         try{
@@ -540,7 +542,7 @@ public class DepotHeadService {
         return result;
     }
 
-    public List<DepotHead> getDepotHeadListByIds(String ids)throws Exception {
+    public List<DepotHead> getDepotHeadListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<DepotHead> list = new ArrayList<>();
         try{
@@ -560,7 +562,7 @@ public class DepotHeadService {
      * @return
      * @throws Exception
      */
-    public int checkIsBillNumberExist(Long id, String number)throws Exception {
+    public int checkIsBillNumberExist(Long id, String number) {
         DepotHeadExample example = new DepotHeadExample();
         example.createCriteria().andIdNotEqualTo(id).andNumberEqualTo(number).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<DepotHead> list = null;
@@ -573,7 +575,7 @@ public class DepotHeadService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchSetStatus(String status, String depotHeadIDs)throws Exception {
+    public int batchSetStatus(String status, String depotHeadIDs) {
         int result = 0;
         List<Long> dhIds = new ArrayList<>();
         List<Long> ids = StringUtil.strToLongList(depotHeadIDs);
@@ -595,7 +597,7 @@ public class DepotHeadService {
                 }
             }
         }
-        if(dhIds.size()>0) {
+        if(!dhIds.isEmpty()) {
             DepotHead depotHead = new DepotHead();
             depotHead.setStatus(status);
             DepotHeadExample example = new DepotHeadExample();
@@ -604,9 +606,9 @@ public class DepotHeadService {
             //更新当前库存
             if(systemConfigService.getForceApprovalFlag()) {
                 for(Long dhId: dhIds) {
-                    List<DepotItem> list = depotItemService.getListByHeaderId(dhId);
+                    List<DepotItem> list = depotItemServiceImpl.getListByHeaderId(dhId);
                     for (DepotItem depotItem : list) {
-                        depotItemService.updateCurrentStock(depotItem);
+                        depotItemServiceImpl.updateCurrentStock(depotItem);
                     }
                 }
             }
@@ -614,9 +616,9 @@ public class DepotHeadService {
         return result;
     }
 
-    public Map<Long,String> findMaterialsListMapByHeaderIdList(List<Long> idList)throws Exception {
+    public Map<Long,String> findMaterialsListMapByHeaderIdList(List<Long> idList) {
         Map<Long,String> materialsListMap = new HashMap<>();
-        if(idList.size()>0) {
+        if(!idList.isEmpty()) {
             List<MaterialsListVo> list = depotHeadMapperEx.findMaterialsListMapByHeaderIdList(idList);
             for (MaterialsListVo materialsListVo : list) {
                 String materialsList = materialsListVo.getMaterialsList();
@@ -629,9 +631,9 @@ public class DepotHeadService {
         return materialsListMap;
     }
 
-    public Map<Long,BigDecimal> getMaterialCountListMapByHeaderIdList(List<Long> idList)throws Exception {
+    public Map<Long,BigDecimal> getMaterialCountListMapByHeaderIdList(List<Long> idList) {
         Map<Long,BigDecimal> materialCountListMap = new HashMap<>();
-        if(idList.size()>0) {
+        if(!idList.isEmpty()) {
             List<MaterialCountVo> list = depotHeadMapperEx.getMaterialCountListByHeaderIdList(idList);
             for(MaterialCountVo materialCountVo : list){
                 materialCountListMap.put(materialCountVo.getHeaderId(), materialCountVo.getMaterialCount());
@@ -642,7 +644,7 @@ public class DepotHeadService {
 
     public List<DepotHeadVo4InDetail> findInOutDetail(String beginTime, String endTime, String type, String [] creatorArray,
                                                       String [] organArray, Boolean forceFlag, String materialParam, List<Long> depotList, Integer oId, String number,
-                                                      Long creator, String remark, Integer offset, Integer rows) throws Exception{
+                                                      Long creator, String remark, Integer offset, Integer rows) {
         List<DepotHeadVo4InDetail> list = null;
         try{
             list =depotHeadMapperEx.findInOutDetail(beginTime, endTime, type, creatorArray, organArray, forceFlag,
@@ -655,7 +657,7 @@ public class DepotHeadService {
 
     public int findInOutDetailCount(String beginTime, String endTime, String type, String [] creatorArray,
                               String [] organArray, Boolean forceFlag, String materialParam, List<Long> depotList, Integer oId, String number,
-                              Long creator, String remark) throws Exception{
+                              Long creator, String remark) {
         int result = 0;
         try{
             result =depotHeadMapperEx.findInOutDetailCount(beginTime, endTime, type, creatorArray, organArray, forceFlag,
@@ -667,7 +669,7 @@ public class DepotHeadService {
     }
 
     public List<DepotHeadVo4InOutMCount> findInOutMaterialCount(String beginTime, String endTime, String type, Boolean forceFlag, String materialParam,
-                                                                List<Long> depotList, Integer oId, String roleType, Integer offset, Integer rows)throws Exception {
+                                                                List<Long> depotList, Integer oId, String roleType, Integer offset, Integer rows) {
         List<DepotHeadVo4InOutMCount> list = null;
         try{
             String [] creatorArray = getCreatorArray(roleType);
@@ -682,7 +684,7 @@ public class DepotHeadService {
     }
 
     public int findInOutMaterialCountTotal(String beginTime, String endTime, String type, Boolean forceFlag, String materialParam,
-                               List<Long> depotList, Integer oId, String roleType)throws Exception {
+                               List<Long> depotList, Integer oId, String roleType) {
         int result = 0;
         try{
             String [] creatorArray = getCreatorArray(roleType);
@@ -698,7 +700,7 @@ public class DepotHeadService {
 
     public List<DepotHeadVo4InDetail> findAllocationDetail(String beginTime, String endTime, String subType, String number,
                             String [] creatorArray, Boolean forceFlag, String materialParam, List<Long> depotList, List<Long> depotFList,
-                            String remark, Integer offset, Integer rows) throws Exception{
+                            String remark, Integer offset, Integer rows) {
         List<DepotHeadVo4InDetail> list = null;
         try{
             list =depotHeadMapperEx.findAllocationDetail(beginTime, endTime, subType, number, creatorArray, forceFlag,
@@ -711,7 +713,7 @@ public class DepotHeadService {
 
     public int findAllocationDetailCount(String beginTime, String endTime, String subType, String number,
                             String [] creatorArray, Boolean forceFlag, String materialParam, List<Long> depotList,  List<Long> depotFList,
-                            String remark) throws Exception{
+                            String remark) {
         int result = 0;
         try{
             result =depotHeadMapperEx.findAllocationDetailCount(beginTime, endTime, subType, number, creatorArray, forceFlag,
@@ -756,7 +758,7 @@ public class DepotHeadService {
         return list;
     }
 
-    public List<DepotHeadVo4List> getDetailByNumber(String number, HttpServletRequest request)throws Exception {
+    public List<DepotHeadVo4List> getDetailByNumber(String number, HttpServletRequest request) {
         List<DepotHeadVo4List> resList = new ArrayList<>();
         try{
             Long userId = userService.getUserId(request);
@@ -848,7 +850,7 @@ public class DepotHeadService {
      * @return
      * @throws Exception
      */
-    public List<DepotHead> getListByLinkNumberExceptCurrent(String linkNumber, String number, String type)throws Exception {
+    public List<DepotHead> getListByLinkNumberExceptCurrent(String linkNumber, String number, String type) {
         DepotHeadExample example = new DepotHeadExample();
         example.createCriteria().andLinkNumberEqualTo(linkNumber).andNumberNotEqualTo(number).andTypeEqualTo(type)
                 .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
@@ -861,8 +863,8 @@ public class DepotHeadService {
      * @return
      * @throws Exception
      */
-    public List<DepotHead> getBillListByLinkNumberList(List<String> linkNumberList)throws Exception {
-        if(linkNumberList!=null && linkNumberList.size()>0) {
+    public List<DepotHead> getBillListByLinkNumberList(List<String> linkNumberList) {
+        if(linkNumberList!=null && !linkNumberList.isEmpty()) {
             DepotHeadExample example = new DepotHeadExample();
             example.createCriteria().andLinkNumberIn(linkNumberList).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
             return depotHeadMapper.selectByExample(example);
@@ -877,7 +879,7 @@ public class DepotHeadService {
      * @return
      * @throws Exception
      */
-    public List<DepotHead> getBillListByLinkNumber(String linkNumber)throws Exception {
+    public List<DepotHead> getBillListByLinkNumber(String linkNumber) {
         DepotHeadExample example = new DepotHeadExample();
         example.createCriteria().andLinkNumberEqualTo(linkNumber).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         return depotHeadMapper.selectByExample(example);
@@ -889,7 +891,7 @@ public class DepotHeadService {
      * @return
      * @throws Exception
      */
-    public List<DepotHead> getBillListByLinkNumberExceptNumber(String linkNumber, String number)throws Exception {
+    public List<DepotHead> getBillListByLinkNumberExceptNumber(String linkNumber, String number) {
         DepotHeadExample example = new DepotHeadExample();
         example.createCriteria().andLinkNumberEqualTo(linkNumber).andNumberNotEqualTo(number).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         return depotHeadMapper.selectByExample(example);
@@ -904,7 +906,7 @@ public class DepotHeadService {
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public void addDepotHeadAndDetail(String beanJson, String rows,
-                                      HttpServletRequest request) throws Exception {
+                                      HttpServletRequest request) {
         /**处理单据主表数据*/
         DepotHead depotHead = JSONObject.parseObject(beanJson, DepotHead.class);
         //校验单号是否重复
@@ -921,7 +923,7 @@ public class DepotHeadService {
             }
         }
         //判断用户是否已经登录过，登录过不再处理
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userService.getCurrentUser();
         depotHead.setCreator(userInfo==null?null:userInfo.getId());
         depotHead.setCreateTime(new Timestamp(System.currentTimeMillis()));
         if(StringUtil.isEmpty(depotHead.getStatus())) {
@@ -988,10 +990,10 @@ public class DepotHeadService {
         if(list!=null) {
             Long headId = list.get(0).getId();
             /**入库和出库处理单据子表信息*/
-            depotItemService.saveDetials(rows,headId, "add",request);
+            depotItemServiceImpl.saveDetials(rows,headId, "add",request);
         }
         logService.insertLog("单据",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(depotHead.getNumber()).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_ADD + depotHead.getNumber(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
     }
 
@@ -1003,7 +1005,7 @@ public class DepotHeadService {
      * @throws Exception
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void updateDepotHeadAndDetail(String beanJson, String rows,HttpServletRequest request)throws Exception {
+    public void updateDepotHeadAndDetail(String beanJson, String rows,HttpServletRequest request) {
         /**更新单据主表信息*/
         DepotHead depotHead = JSONObject.parseObject(beanJson, DepotHead.class);
         //校验单号是否重复
@@ -1083,9 +1085,9 @@ public class DepotHeadService {
             }
         }
         /**入库和出库处理单据子表信息*/
-        depotItemService.saveDetials(rows,depotHead.getId(), "update",request);
+        depotItemServiceImpl.saveDetials(rows,depotHead.getId(), "update",request);
         logService.insertLog("单据",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(depotHead.getNumber()).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_EDIT + depotHead.getNumber(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
     }
 
@@ -1122,7 +1124,7 @@ public class DepotHeadService {
     }
 
     public Map<String, Object> getBuyAndSaleStatistics(String today, String monthFirstDay, String yesterdayBegin, String yesterdayEnd,
-                                                       String yearBegin, String yearEnd, String roleType, HttpServletRequest request) throws Exception {
+                                                       String yearBegin, String yearEnd, String roleType, HttpServletRequest request) {
         Long userId = userService.getUserId(request);
         String priceLimit = userService.getRoleTypeByUserId(userId).getPriceLimit();
         String [] creatorArray = getCreatorArray(roleType);
@@ -1195,18 +1197,18 @@ public class DepotHeadService {
     }
 
     public BigDecimal getBuyAndSaleBasicStatistics(String type, String subType, Integer hasSupplier,
-                                                   String beginTime, String endTime, String[] creatorArray) throws Exception {
+                                                   String beginTime, String endTime, String[] creatorArray) {
         Boolean forceFlag = systemConfigService.getForceApprovalFlag();
         return depotHeadMapperEx.getBuyAndSaleBasicStatistics(type, subType, hasSupplier, beginTime, endTime, creatorArray, forceFlag);
     }
 
     public BigDecimal getBuyAndSaleRetailStatistics(String type, String subType,
-                                                    String beginTime, String endTime, String[] creatorArray) throws Exception {
+                                                    String beginTime, String endTime, String[] creatorArray) {
         Boolean forceFlag = systemConfigService.getForceApprovalFlag();
         return depotHeadMapperEx.getBuyAndSaleRetailStatistics(type, subType, beginTime, endTime, creatorArray, forceFlag).abs();
     }
 
-    public DepotHead getDepotHead(String number)throws Exception {
+    public DepotHead getDepotHead(String number) {
         DepotHead depotHead = new DepotHead();
         try{
             DepotHeadExample example = new DepotHeadExample();

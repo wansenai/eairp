@@ -1,6 +1,7 @@
 package com.wansensoft.service.account;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.account.*;
 import com.wansensoft.entities.depot.DepotHead;
 import com.wansensoft.entities.depot.DepotHeadExample;
@@ -8,12 +9,12 @@ import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.account.*;
 import com.wansensoft.mappers.depot.DepotHeadMapper;
 import com.wansensoft.mappers.depot.DepotHeadMapperEx;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.vo.AccountVo4InOutList;
 import com.wansensoft.vo.AccountVo4List;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
@@ -33,29 +34,22 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 @Service
-public class AccountService {
-    private Logger logger = LoggerFactory.getLogger(AccountService.class);
+public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> implements AccountService {
+    private Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
 
     private final AccountMapper accountMapper;
-
     private final AccountMapperEx accountMapperEx;
-
     private final DepotHeadMapper depotHeadMapper;
     private final DepotHeadMapperEx depotHeadMapperEx;
-
     private final AccountHeadMapper accountHeadMapper;
     private final AccountHeadMapperEx accountHeadMapperEx;
-
     private final AccountItemMapper accountItemMapper;
     private final AccountItemMapperEx accountItemMapperEx;
-
     private final LogService logService;
-
-    private final UserService userService;
-
+    private final UserServiceImpl userServiceImpl;
     private final SystemConfigService systemConfigService;
 
-    public AccountService(AccountMapper accountMapper, AccountMapperEx accountMapperEx, DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, AccountHeadMapper accountHeadMapper, AccountHeadMapperEx accountHeadMapperEx, AccountItemMapper accountItemMapper, AccountItemMapperEx accountItemMapperEx, LogService logService, UserService userService, SystemConfigService systemConfigService) {
+    public AccountServiceImpl(AccountMapper accountMapper, AccountMapperEx accountMapperEx, DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, AccountHeadMapper accountHeadMapper, AccountHeadMapperEx accountHeadMapperEx, AccountItemMapper accountItemMapper, AccountItemMapperEx accountItemMapperEx, LogService logService, UserServiceImpl userServiceImpl, SystemConfigService systemConfigService) {
         this.accountMapper = accountMapper;
         this.accountMapperEx = accountMapperEx;
         this.depotHeadMapper = depotHeadMapper;
@@ -65,15 +59,15 @@ public class AccountService {
         this.accountItemMapper = accountItemMapper;
         this.accountItemMapperEx = accountItemMapperEx;
         this.logService = logService;
-        this.userService = userService;
+        this.userServiceImpl = userServiceImpl;
         this.systemConfigService = systemConfigService;
     }
 
-    public Account getAccount(long id) throws Exception{
+    public Account getAccount(long id) {
         return accountMapper.selectByPrimaryKey(id);
     }
 
-    public List<Account> getAccountListByIds(String ids)throws Exception {
+    public List<Account> getAccountListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<Account> list = new ArrayList<>();
         try{
@@ -86,7 +80,7 @@ public class AccountService {
         return list;
     }
 
-    public List<Account> getAccount() throws Exception{
+    public List<Account> getAccount() {
         List<Account> list=null;
         try{
             AccountExample example = new AccountExample();
@@ -99,7 +93,7 @@ public class AccountService {
         return list;
     }
 
-    public List<Account> getAccountByParam(String name, String serialNo) throws Exception{
+    public List<Account> getAccountByParam(String name, String serialNo) {
         List<Account> list=null;
         try{
             list=accountMapperEx.getAccountByParam(name, serialNo);
@@ -110,7 +104,7 @@ public class AccountService {
     }
 
     public List<AccountVo4List> select(String name, String serialNo, String remark, int offset, int rows) throws Exception{
-        List<AccountVo4List> resList = new ArrayList<AccountVo4List>();
+        List<AccountVo4List> resList = new ArrayList<>();
         List<AccountVo4List> list=null;
         try{
             list = accountMapperEx.selectByConditionAccount(name, serialNo, remark, offset, rows);
@@ -248,7 +242,7 @@ public class AccountService {
         }
         logService.insertLog("账户", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userServiceImpl.getCurrentUser();
         //校验通过执行删除操作
         try{
             result = accountMapperEx.batchDeleteAccountByIds(new Date(),userInfo==null?null:userInfo.getId(),idArray);
@@ -552,7 +546,7 @@ public class AccountService {
         return result;
     }
 
-    public Map<Long,String> getAccountMap() throws Exception {
+    public Map<Long,String> getAccountMap() {
         List<Account> accountList = getAccount();
         Map<Long,String> accountMap = new HashMap<>();
         for(Account account : accountList){
@@ -616,7 +610,7 @@ public class AccountService {
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int batchSetStatus(Boolean status, String ids)throws Exception {
         logService.insertLog("账户",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ENABLED).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_ENABLED,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         List<Long> accountIds = StringUtil.strToLongList(ids);
         Account account = new Account();

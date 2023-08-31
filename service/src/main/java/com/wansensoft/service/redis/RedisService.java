@@ -2,13 +2,9 @@ package com.wansensoft.service.redis;
 
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.StringUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -19,18 +15,11 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisService {
 
-    @Resource
-    public RedisTemplate redisTemplate;
+    public final RedisTemplate redisTemplate;
 
     public static final String ACCESS_TOKEN = "X-Access-Token";
 
-    @Autowired(required = false)
-    public void setRedisTemplate(RedisTemplate redisTemplate) {
-        RedisSerializer stringSerializer = new StringRedisSerializer();
-        redisTemplate.setKeySerializer(stringSerializer);
-        redisTemplate.setValueSerializer(stringSerializer);
-        redisTemplate.setHashKeySerializer(stringSerializer);
-        redisTemplate.setHashValueSerializer(stringSerializer);
+    public RedisService(RedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 

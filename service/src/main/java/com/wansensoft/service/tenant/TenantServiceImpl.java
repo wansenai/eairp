@@ -1,16 +1,17 @@
 package com.wansensoft.service.tenant;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.tenant.Tenant;
 import com.wansensoft.entities.tenant.TenantEx;
 import com.wansensoft.entities.tenant.TenantExample;
 import com.wansensoft.mappers.user.UserMapperEx;
+import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.tenant.TenantMapper;
 import com.wansensoft.mappers.tenant.TenantMapperEx;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.log.LogServiceImpl;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
 import org.slf4j.Logger;
@@ -21,28 +22,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Service
-public class TenantService {
-    private Logger logger = LoggerFactory.getLogger(TenantService.class);
+public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> implements TenantService{
+    private Logger logger = LoggerFactory.getLogger(TenantServiceImpl.class);
 
-    @Resource
-    private TenantMapper tenantMapper;
-
-    @Resource
-    private TenantMapperEx tenantMapperEx;
-
-    @Resource
-    private UserMapperEx userMapperEx;
-
-    @Resource
-    private UserService userService;
-
-    @Resource
-    private LogService logService;
+    private final TenantMapper tenantMapper;
+    private final TenantMapperEx tenantMapperEx;
+    private final UserMapperEx userMapperEx;
+    private final UserServiceImpl userServiceImpl;
+    private final LogServiceImpl logServiceImpl;
 
     @Value("${tenant.userNumLimit}")
     private Integer userNumLimit;
@@ -50,7 +41,15 @@ public class TenantService {
     @Value("${tenant.tryDayLimit}")
     private Integer tryDayLimit;
 
-    public Tenant getTenant(long id)throws Exception {
+    public TenantServiceImpl(TenantMapper tenantMapper, TenantMapperEx tenantMapperEx, UserMapperEx userMapperEx, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl) {
+        this.tenantMapper = tenantMapper;
+        this.tenantMapperEx = tenantMapperEx;
+        this.userMapperEx = userMapperEx;
+        this.userServiceImpl = userServiceImpl;
+        this.logServiceImpl = logServiceImpl;
+    }
+
+    public Tenant getTenant(long id) {
         Tenant result=null;
         try{
             result=tenantMapper.selectByPrimaryKey(id);
@@ -60,7 +59,7 @@ public class TenantService {
         return result;
     }
 
-    public List<Tenant> getTenant()throws Exception {
+    public List<Tenant> getTenant() {
         TenantExample example = new TenantExample();
         List<Tenant> list=null;
         try{
@@ -71,10 +70,10 @@ public class TenantService {
         return list;
     }
 
-    public List<TenantEx> select(String loginName, String type, String enabled, String remark, int offset, int rows)throws Exception {
+    public List<TenantEx> select(String loginName, String type, String enabled, String remark, int offset, int rows) {
         List<TenantEx> list= new ArrayList<>();
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
                 list = tenantMapperEx.selectByConditionTenant(loginName, type, enabled, remark, offset, rows);
                 if (null != list) {
                     for (TenantEx tenantEx : list) {
@@ -89,10 +88,10 @@ public class TenantService {
         return list;
     }
 
-    public Long countTenant(String loginName, String type, String enabled, String remark)throws Exception {
+    public Long countTenant(String loginName, String type, String enabled, String remark) {
         Long result=null;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
                 result = tenantMapperEx.countsByTenant(loginName, type, enabled, remark);
             }
         }catch(Exception e){
@@ -102,7 +101,7 @@ public class TenantService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertTenant(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertTenant(JSONObject obj, HttpServletRequest request) {
         Tenant tenant = JSONObject.parseObject(obj.toJSONString(), Tenant.class);
         int result=0;
         try{
@@ -121,11 +120,11 @@ public class TenantService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateTenant(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int updateTenant(JSONObject obj, HttpServletRequest request) {
         Tenant tenant = JSONObject.parseObject(obj.toJSONString(), Tenant.class);
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
                 //如果租户下的用户限制数量为1，则将该租户之外的用户全部禁用
                 if (1 == tenant.getUserNumLimit()) {
                     userMapperEx.disableUserByLimit(tenant.getTenantId());
@@ -139,10 +138,10 @@ public class TenantService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteTenant(Long id, HttpServletRequest request)throws Exception {
+    public int deleteTenant(Long id, HttpServletRequest request) {
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
                 result = tenantMapper.deleteByPrimaryKey(id);
             }
         }catch(Exception e){
@@ -152,13 +151,13 @@ public class TenantService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteTenant(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteTenant(String ids, HttpServletRequest request) {
         List<Long> idList = StringUtil.strToLongList(ids);
         TenantExample example = new TenantExample();
         example.createCriteria().andIdIn(idList);
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
                 result = tenantMapper.deleteByExample(example);
             }
         }catch(Exception e){
@@ -167,7 +166,7 @@ public class TenantService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         TenantExample example = new TenantExample();
         example.createCriteria().andIdNotEqualTo(id).andLoginNameEqualTo(name);
         List<Tenant> list=null;
@@ -184,23 +183,23 @@ public class TenantService {
         TenantExample example = new TenantExample();
         example.createCriteria().andTenantIdEqualTo(tenantId);
         List<Tenant> list = tenantMapper.selectByExample(example);
-        if(list.size()>0) {
+        if(!list.isEmpty()) {
             tenant = list.get(0);
         }
         return tenant;
     }
 
-    public int batchSetStatus(Boolean status, String ids)throws Exception {
+    public int batchSetStatus(Boolean status, String ids) {
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
                 String statusStr = "";
                 if (status) {
                     statusStr = "批量启用";
                 } else {
                     statusStr = "批量禁用";
                 }
-                logService.insertLog("用户",
+                logServiceImpl.insertLog("用户",
                         new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(ids).append("-").append(statusStr).toString(),
                         ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
                 List<Long> idList = StringUtil.strToLongList(ids);

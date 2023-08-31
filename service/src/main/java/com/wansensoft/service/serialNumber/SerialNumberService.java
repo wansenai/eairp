@@ -9,15 +9,15 @@ import com.wansensoft.entities.serialNumber.SerialNumberEx;
 import com.wansensoft.entities.serialNumber.SerialNumberExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.material.MaterialMapperEx;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.material.MaterialService;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.serialNumber.SerialNumberMapper;
 import com.wansensoft.mappers.serialNumber.SerialNumberMapperEx;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.material.MaterialService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,18 +38,21 @@ import java.util.List;
 public class SerialNumberService {
     private Logger logger = LoggerFactory.getLogger(SerialNumberService.class);
 
-    @Resource
-    private SerialNumberMapper serialNumberMapper;
-    @Resource
-    private SerialNumberMapperEx serialNumberMapperEx;
-    @Resource
-    private MaterialMapperEx materialMapperEx;
-    @Resource
-    private MaterialService materialService;
-    @Resource
-    private UserService userService;
-    @Resource
-    private LogService logService;
+    private final SerialNumberMapper serialNumberMapper;
+    private final SerialNumberMapperEx serialNumberMapperEx;
+    private final MaterialMapperEx materialMapperEx;
+    private final MaterialService materialService;
+    private final UserService userService;
+    private final LogService logService;
+
+    public SerialNumberService(SerialNumberMapper serialNumberMapper, SerialNumberMapperEx serialNumberMapperEx, MaterialMapperEx materialMapperEx, MaterialService materialService, UserService userService, LogService logService) {
+        this.serialNumberMapper = serialNumberMapper;
+        this.serialNumberMapperEx = serialNumberMapperEx;
+        this.materialMapperEx = materialMapperEx;
+        this.materialService = materialService;
+        this.userService = userService;
+        this.logService = logService;
+    }
 
 
     public SerialNumber getSerialNumber(long id)throws Exception {
@@ -110,7 +112,7 @@ public class SerialNumberService {
             Date date=new Date();
             serialNumberEx.setCreateTime(date);
             serialNumberEx.setUpdateTime(date);
-            User userInfo=userService.getCurrentUser();
+            User userInfo= userService.getCurrentUser();
             serialNumberEx.setCreator(userInfo==null?null:userInfo.getId());
             serialNumberEx.setUpdater(userInfo==null?null:userInfo.getId());
             result = serialNumberMapperEx.addSerialNumber(serialNumberEx);
@@ -130,11 +132,11 @@ public class SerialNumberService {
             serialNumberEx.setMaterialId(getSerialNumberMaterialIdByBarCode(serialNumberEx.getMaterialCode()));
             Date date=new Date();
             serialNumberEx.setUpdateTime(date);
-            User userInfo=userService.getCurrentUser();
+            User userInfo= userService.getCurrentUser();
             serialNumberEx.setUpdater(userInfo==null?null:userInfo.getId());
             result = serialNumberMapperEx.updateSerialNumber(serialNumberEx);
             logService.insertLog("序列号",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(serialNumberEx.getId()).toString(),
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + serialNumberEx.getId(),
                     ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -169,7 +171,7 @@ public class SerialNumberService {
         }
         logService.insertLog("序列号", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userService.getCurrentUser();
         String [] idArray=ids.split(",");
         int result=0;
         try{
@@ -232,9 +234,7 @@ public class SerialNumberService {
      *  1、根据商品名称必须查询到唯一的商品
      *  2、该商品必须已经启用序列号
      *  3、该商品已绑定序列号数量小于商品现有库存
-     *  2019-02-01
      *  用商品的库存去限制序列号的添加有点不合乎道理，去掉此限制
-     * create time: 2019/1/23 17:04
      * @Param: materialName
      * @return Long 满足使用条件的商品的id
      */
@@ -254,15 +254,13 @@ public class SerialNumberService {
     }
 
     /**
-     * create by: cjl
      * description:
      * 出库时判断序列号库存是否足够，
      * 同时将对应的序列号绑定单据
-     * create time: 2019/1/24 16:24
      * @Param: List<DepotItem>
      * @return void
      */
-    public void checkAndUpdateSerialNumber(DepotItem depotItem, String outBillNo, User userInfo, String snList) throws Exception{
+    public void checkAndUpdateSerialNumber(DepotItem depotItem, String outBillNo, User userInfo, String snList) {
         if(depotItem!=null){
             sellSerialNumber(depotItem.getMaterialId(), outBillNo, snList,userInfo);
         }
@@ -279,7 +277,7 @@ public class SerialNumberService {
      * @return com.jsh.erp.datasource.entities.SerialNumberEx
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int sellSerialNumber(Long materialId, String outBillNo, String snList, User user) throws Exception{
+    public int sellSerialNumber(Long materialId, String outBillNo, String snList, User user) {
         int result=0;
         try{
             //将中文的逗号批量替换为英文逗号
@@ -303,7 +301,7 @@ public class SerialNumberService {
      * @return com.jsh.erp.datasource.entities.SerialNumberEx
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int cancelSerialNumber(Long materialId, String outBillNo,int count,User user) throws Exception{
+    public int cancelSerialNumber(Long materialId, String outBillNo,int count,User user) {
         int result=0;
         try{
             result = serialNumberMapperEx.cancelSerialNumber(materialId,outBillNo,count,new Date(),user==null?null:user.getId());
@@ -316,7 +314,6 @@ public class SerialNumberService {
     /**
      * description:
      *批量添加序列号，最多500个
-     * create time: 2019/1/29 15:11
      * @Param: materialName
      * @Param: serialNumberPrefix
      * @Param: batAddTotal
@@ -358,7 +355,7 @@ public class SerialNumberService {
                 }
                 result = serialNumberMapperEx.batAddSerialNumber(list);
                 logService.insertLog("序列号",
-                        new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_BATCH_ADD).append(batAddTotal).append(BusinessConstants.LOG_DATA_UNIT).toString(),
+                        BusinessConstants.LOG_OPERATION_TYPE_BATCH_ADD + batAddTotal + BusinessConstants.LOG_DATA_UNIT,
                         ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
             }
         } catch (Exception e) {
@@ -387,7 +384,7 @@ public class SerialNumberService {
         return count;
     }
 
-    public void addSerialNumberByBill(String type, String subType, String inBillNo, Long materialId, Long depotId, String snList) throws Exception {
+    public void addSerialNumberByBill(String type, String subType, String inBillNo, Long materialId, Long depotId, String snList) {
         //录入序列号的时候不能重复
         if ((BusinessConstants.SUB_TYPE_PURCHASE.equals(subType) ||
                 BusinessConstants.SUB_TYPE_OTHER.equals(subType) ||

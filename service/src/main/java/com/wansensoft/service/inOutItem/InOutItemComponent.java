@@ -7,17 +7,19 @@ import com.wansensoft.utils.QueryUtils;
 import com.wansensoft.utils.StringUtil;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-@Service(value = "inOutItem_component")
+@Service
 @InOutItemResource
 public class InOutItemComponent implements ICommonQuery {
 
-    @Resource
-    private InOutItemService inOutItemService;
+    private final InOutItemService inOutItemService;
+
+    public InOutItemComponent(InOutItemService inOutItemService) {
+        this.inOutItemService = inOutItemService;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {

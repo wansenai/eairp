@@ -7,7 +7,6 @@ import com.wansensoft.utils.QueryUtils;
 import com.wansensoft.utils.StringUtil;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +14,15 @@ import java.util.Map;
 /**
  * Description
  */
-@Service(value = "serialNumber_component")
+@Service
 @SerialNumberResource
 public class SerialNumberComponent implements ICommonQuery {
-    @Resource
-    private SerialNumberService serialNumberService;
+
+    private final SerialNumberService serialNumberService;
+
+    public SerialNumberComponent(SerialNumberService serialNumberService) {
+        this.serialNumberService = serialNumberService;
+    }
 
     @Override
     public Object selectOne(Long id) throws Exception {

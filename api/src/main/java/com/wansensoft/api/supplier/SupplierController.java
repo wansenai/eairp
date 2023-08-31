@@ -5,8 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.supplier.Supplier;
 import com.wansensoft.service.supplier.SupplierService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.user.UserService;
-import com.wansensoft.service.userBusiness.UserBusinessService;
+import com.wansensoft.service.user.UserServiceImpl;
+import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ExcelUtils;
@@ -36,13 +36,13 @@ public class SupplierController {
     private SupplierService supplierService;
 
     @Resource
-    private UserBusinessService userBusinessService;
+    private UserBusinessServiceImpl userBusinessServiceImpl;
 
     @Resource
     private SystemConfigService systemConfigService;
 
     @Resource
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @GetMapping(value = "/checkIsNameAndTypeExist")
     @ApiOperation(value = "检查名称和类型是否存在")
@@ -71,9 +71,9 @@ public class SupplierController {
         JSONArray arr = new JSONArray();
         try {
             String type = "UserCustomer";
-            Long userId = userService.getUserId(request);
+            Long userId = userServiceImpl.getUserId(request);
             //获取权限信息
-            String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, userId.toString());
+            String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, userId.toString());
             List<Supplier> supplierList = supplierService.findBySelectCus();
             JSONArray dataArray = new JSONArray();
             if (null != supplierList) {
@@ -146,8 +146,8 @@ public class SupplierController {
             }
             //2、获取客户信息
             String type = "UserCustomer";
-            Long userId = userService.getUserId(request);
-            String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, userId.toString());
+            Long userId = userServiceImpl.getUserId(request);
+            String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, userId.toString());
             List<Supplier> customerList = supplierService.findBySelectCus();
             if (null != customerList) {
                 boolean customerFlag = systemConfigService.getCustomerFlag();
@@ -232,7 +232,7 @@ public class SupplierController {
         JSONArray arr = new JSONArray();
         try {
             //获取权限信息
-            String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, keyId);
+            String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, keyId);
             List<Supplier> dataList = supplierService.findUserCustomer();
             //开始拼接json数据
             JSONObject outer = new JSONObject();

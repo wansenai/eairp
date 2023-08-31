@@ -6,9 +6,10 @@ import com.wansensoft.entities.organization.OrgaUserRelExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.organization.OrgaUserRelMapper;
 import com.wansensoft.mappers.organization.OrgaUserRelMapperEx;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.organization.OrganizationService;
 import com.wansensoft.service.redis.RedisService;
 import com.wansensoft.utils.StringUtil;
@@ -17,15 +18,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Description
@@ -34,18 +31,21 @@ import java.util.Objects;
 public class OrgaUserRelService {
     private Logger logger = LoggerFactory.getLogger(OrganizationService.class);
 
-    @Resource
-    private OrgaUserRelMapper orgaUserRelMapper;
-    @Resource
-    private OrgaUserRelMapperEx orgaUserRelMapperEx;
-//    @Resource
-//    private UserMapper userMapper;
-    @Resource
-    private RedisService redisService;
-    @Resource
-    private OrganizationService organizationService;
-    @Resource
-    private LogService logService;
+    private final OrgaUserRelMapper orgaUserRelMapper;
+    private final OrgaUserRelMapperEx orgaUserRelMapperEx;
+    private final RedisService redisService;
+    private final OrganizationService organizationService;
+    private final LogService logService;
+    private final UserService userService;
+
+    public OrgaUserRelService(OrgaUserRelMapper orgaUserRelMapper, OrgaUserRelMapperEx orgaUserRelMapperEx, RedisService redisService, OrganizationService organizationService, LogService logService, UserService userService) {
+        this.orgaUserRelMapper = orgaUserRelMapper;
+        this.orgaUserRelMapperEx = orgaUserRelMapperEx;
+        this.redisService = redisService;
+        this.organizationService = organizationService;
+        this.logService = logService;
+        this.userService = userService;
+    }
 
     public OrgaUserRel getOrgaUserRel(long id) throws Exception{
         return orgaUserRelMapper.selectByPrimaryKey(id);
@@ -70,7 +70,7 @@ public class OrgaUserRelService {
         try{
             result=orgaUserRelMapper.updateByPrimaryKeySelective(orgaUserRel);
             logService.insertLog("用户与机构关系",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(orgaUserRel.getId()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + orgaUserRel.getId(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -82,7 +82,7 @@ public class OrgaUserRelService {
         try{
             result=orgaUserRelMapper.deleteByPrimaryKey(id);
             logService.insertLog("用户与机构关系",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_DELETE).append(id).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_DELETE + id, request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -109,9 +109,9 @@ public class OrgaUserRelService {
      * @return void
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public OrgaUserRel addOrgaUserRel(OrgaUserRel orgaUserRel) throws Exception{
+    public OrgaUserRel addOrgaUserRel(OrgaUserRel orgaUserRel) {
         Date date = new Date();
-        User userInfo = getCurrentUser();
+        User userInfo = userService.getCurrentUser();
         //创建时间
         if(orgaUserRel.getCreateTime()==null){
             orgaUserRel.setCreateTime(date);
@@ -141,31 +141,15 @@ public class OrgaUserRelService {
         return null;
     }
 
-    public User getCurrentUser()throws Exception{
-        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
-        Long userId = Long.parseLong(redisService.getObjectFromSessionByKey(request,"userId").toString());
-        return getUser(userId);
-    }
-
-    public User getUser(long id)throws Exception {
-        User result=null;
-        try{
-          //  result=userMapper.selectByPrimaryKey(id);
-        }catch(Exception e){
-            JshException.readFail(logger, e);
-        }
-        return result;
-    }
     /**
      * description:
      *  更新机构用户关联关系
-     * create time: 2019/3/12 9:40
      * @Param: orgaUserRel
      * @return void
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public OrgaUserRel updateOrgaUserRel(OrgaUserRel orgaUserRel) throws Exception{
-        User userInfo=getCurrentUser();
+    public OrgaUserRel updateOrgaUserRel(OrgaUserRel orgaUserRel) {
+        User userInfo = userService.getCurrentUser();
         //更新时间
         if(orgaUserRel.getUpdateTime()==null){
             orgaUserRel.setUpdateTime(new Date());
@@ -192,18 +176,18 @@ public class OrgaUserRelService {
      * @return
      * @throws Exception
      */
-    public String getUserIdListByUserId(Long userId) throws Exception{
+    public String getUserIdListByUserId(Long userId) {
         String users = "";
         OrgaUserRelExample example = new OrgaUserRelExample();
         example.createCriteria().andUserIdEqualTo(userId);
         List<OrgaUserRel> list = orgaUserRelMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             OrgaUserRel our = list.get(0);
             List<Long> userIdList = getUserIdListByOrgId(our.getOrgaId());
             for(Long u: userIdList){
                 users = users + u + ",";
             }
-            if(users.length()>0){
+            if(!users.isEmpty()){
                 users = users.substring(0,users.length()-1);
             }
         }

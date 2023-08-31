@@ -5,9 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.function.Function;
 import com.wansensoft.entities.system.SystemConfig;
 import com.wansensoft.entities.user.UserBusiness;
-import com.wansensoft.service.functions.FunctionService;
+import com.wansensoft.service.functions.FunctionServiceImpl;
 import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.userBusiness.UserBusinessService;
+import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.StringUtil;
@@ -34,10 +34,10 @@ public class FunctionController {
     private Logger logger = LoggerFactory.getLogger(FunctionController.class);
 
     @Resource
-    private FunctionService functionService;
+    private FunctionServiceImpl functionServiceImpl;
 
     @Resource
-    private UserBusinessService userBusinessService;
+    private UserBusinessServiceImpl userBusinessServiceImpl;
 
     @Resource
     private SystemConfigService systemConfigService;
@@ -48,7 +48,7 @@ public class FunctionController {
                                      @RequestParam(value ="number", required = false) String number,
                                      HttpServletRequest request)throws Exception {
         Map<String, Object> objectMap = new HashMap<String, Object>();
-        int exist = functionService.checkIsNumberExist(id, number);
+        int exist = functionServiceImpl.checkIsNumberExist(id, number);
         if(exist > 0) {
             objectMap.put("status", true);
         } else {
@@ -75,7 +75,7 @@ public class FunctionController {
         try {
             Long roleId = 0L;
             String fc = "";
-            List<UserBusiness> roleList = userBusinessService.getBasicData(userId, "UserRole");
+            List<UserBusiness> roleList = userBusinessServiceImpl.getBasicData(userId, "UserRole");
             if(roleList!=null && roleList.size()>0){
                 String value = roleList.get(0).getValue();
                 if(StringUtil.isNotEmpty(value)){
@@ -84,7 +84,7 @@ public class FunctionController {
                 }
             }
             //当前用户所拥有的功能列表，格式如：[1][2][5]
-            List<UserBusiness> funList = userBusinessService.getBasicData(roleId.toString(), "RoleFunctions");
+            List<UserBusiness> funList = userBusinessServiceImpl.getBasicData(roleId.toString(), "RoleFunctions");
             if(funList!=null && funList.size()>0){
                 fc = funList.get(0).getValue();
             }
@@ -94,7 +94,7 @@ public class FunctionController {
             if(list.size()>0) {
                 approvalFlag = list.get(0).getMultiLevelApprovalFlag();
             }
-            List<Function> dataList = functionService.getRoleFunction(pNumber);
+            List<Function> dataList = functionServiceImpl.getRoleFunction(pNumber);
             if (dataList.size() != 0) {
                 dataArray = getMenuByFunction(dataList, fc, approvalFlag);
                 //增加首页菜单项
@@ -120,7 +120,7 @@ public class FunctionController {
                 continue;
             }
             JSONObject item = new JSONObject();
-            List<Function> newList = functionService.getRoleFunction(function.getNumber());
+            List<Function> newList = functionServiceImpl.getRoleFunction(function.getNumber());
             item.put("id", function.getId());
             item.put("text", function.getName());
             item.put("icon", function.getIcon());
@@ -152,7 +152,7 @@ public class FunctionController {
                                  HttpServletRequest request)throws Exception {
         JSONArray arr = new JSONArray();
         try {
-            List<Function> dataListFun = functionService.findRoleFunction("0");
+            List<Function> dataListFun = functionServiceImpl.findRoleFunction("0");
             //开始拼接json数据
             JSONObject outer = new JSONObject();
             outer.put("id", 0);
@@ -190,7 +190,7 @@ public class FunctionController {
     public JSONArray getFunctionList(List<Function> dataList, String type, String keyId) throws Exception {
         JSONArray dataArray = new JSONArray();
         //获取权限信息
-        String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, keyId);
+        String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, keyId);
         if (null != dataList) {
             for (Function function : dataList) {
                 JSONObject item = new JSONObject();
@@ -199,7 +199,7 @@ public class FunctionController {
                 item.put("value", function.getId());
                 item.put("title", function.getName());
                 item.put("attributes", function.getName());
-                List<Function> funList = functionService.findRoleFunction(function.getNumber());
+                List<Function> funList = functionServiceImpl.findRoleFunction(function.getNumber());
                 if(funList.size()>0) {
                     JSONArray funArr = getFunctionList(funList, type, keyId);
                     item.put("children", funArr);
@@ -226,7 +226,7 @@ public class FunctionController {
                                       HttpServletRequest request)throws Exception {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            List<UserBusiness> list = userBusinessService.getBasicData(roleId.toString(), "RoleFunctions");
+            List<UserBusiness> list = userBusinessServiceImpl.getBasicData(roleId.toString(), "RoleFunctions");
             if(null!=list && list.size()>0) {
                 //按钮
                 Map<Long,String> btnMap = new HashMap<>();
@@ -244,7 +244,7 @@ public class FunctionController {
                 String funIds = list.get(0).getValue();
                 funIds = funIds.substring(1, funIds.length() - 1);
                 funIds = funIds.replace("][",",");
-                List<Function> dataList = functionService.findByIds(funIds);
+                List<Function> dataList = functionServiceImpl.findByIds(funIds);
                 JSONObject outer = new JSONObject();
                 outer.put("total", dataList.size());
                 //存放数据json数组

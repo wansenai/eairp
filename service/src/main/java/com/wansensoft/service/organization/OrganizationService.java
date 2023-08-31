@@ -4,13 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.organization.Organization;
 import com.wansensoft.entities.organization.OrganizationExample;
 import com.wansensoft.entities.user.User;
+import com.wansensoft.service.log.LogService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.organization.OrganizationMapper;
 import com.wansensoft.mappers.organization.OrganizationMapperEx;
-import com.wansensoft.service.log.LogService;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.vo.TreeNode;
 import org.slf4j.Logger;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,14 +32,15 @@ import java.util.List;
 public class OrganizationService {
     private Logger logger = LoggerFactory.getLogger(OrganizationService.class);
 
-    @Resource
-    private OrganizationMapper organizationMapper;
-    @Resource
-    private OrganizationMapperEx organizationMapperEx;
-//    @Resource
-//    private UserService userService;
-    @Resource
-    private LogService logService;
+    private final OrganizationMapper organizationMapper;
+    private final OrganizationMapperEx organizationMapperEx;
+    private final LogService logService;
+
+    public OrganizationService(OrganizationMapper organizationMapper, OrganizationMapperEx organizationMapperEx, LogService logService) {
+        this.organizationMapper = organizationMapper;
+        this.organizationMapperEx = organizationMapperEx;
+        this.logService = logService;
+    }
 
     public Organization getOrganization(long id) throws Exception {
         return organizationMapper.selectByPrimaryKey(id);
@@ -66,9 +66,10 @@ public class OrganizationService {
         organization.setUpdateTime(new Date());
         int result=0;
         try{
-            result=organizationMapper.insertSelective(organization);
+            result = organizationMapper.insertSelective(organization);
+
             logService.insertLog("机构",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(organization.getOrgAbr()).toString(),request);
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + organization.getOrgAbr(),request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -82,7 +83,7 @@ public class OrganizationService {
         try{
             result=organizationMapper.updateByPrimaryKeySelective(organization);
             logService.insertLog("机构",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(organization.getOrgAbr()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + organization.getOrgAbr(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -142,7 +143,7 @@ public class OrganizationService {
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int addOrganization(Organization org) throws Exception{
         logService.insertLog("机构",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(org.getOrgAbr()).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_ADD + org.getOrgAbr(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         //新增时间
         Date date=new Date();
@@ -174,7 +175,7 @@ public class OrganizationService {
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int editOrganization(Organization org)throws Exception {
         logService.insertLog("机构",
-               new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(org.getOrgAbr()).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_EDIT + org.getOrgAbr(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         //修改时间
         org.setUpdateTime(new Date());

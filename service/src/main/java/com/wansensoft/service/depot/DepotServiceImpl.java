@@ -2,24 +2,24 @@ package com.wansensoft.service.depot;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.depot.Depot;
 import com.wansensoft.entities.depot.DepotEx;
 import com.wansensoft.entities.depot.DepotExample;
 import com.wansensoft.entities.depot.DepotItem;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.entities.user.UserBusiness;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
-import com.wansensoft.mappers.depot.DepotHeadMapperEx;
 import com.wansensoft.mappers.depot.DepotItemMapperEx;
 import com.wansensoft.mappers.depot.DepotMapper;
 import com.wansensoft.mappers.depot.DepotMapperEx;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.user.UserService;
-import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,35 +28,34 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Service
-public class DepotService {
-    private Logger logger = LoggerFactory.getLogger(DepotService.class);
+public class DepotServiceImpl extends ServiceImpl<DepotMapper, Depot> implements DepotService{
+    private Logger logger = LoggerFactory.getLogger(DepotServiceImpl.class);
 
-    @Resource
-    private DepotMapper depotMapper;
+    private final DepotMapper depotMapper;
+    private final DepotMapperEx depotMapperEx;
+    private final UserService userService;
+    private final SystemConfigService systemConfigService;
+    private final UserBusinessService userBusinessService;
+    private final LogService logService;
+    private final DepotItemMapperEx depotItemMapperEx;
 
-    @Resource
-    private DepotMapperEx depotMapperEx;
-    @Resource
-    private UserService userService;
-    @Resource
-    private SystemConfigService systemConfigService;
-    @Resource
-    private UserBusinessService userBusinessService;
-    @Resource
-    private LogService logService;
-    @Resource
-    private DepotHeadMapperEx depotHeadMapperEx;
-    @Resource
-    private DepotItemMapperEx depotItemMapperEx;
+    public DepotServiceImpl(DepotMapper depotMapper, DepotMapperEx depotMapperEx, UserService userService, SystemConfigService systemConfigService, UserBusinessService userBusinessService, LogService logService, DepotItemMapperEx depotItemMapperEx) {
+        this.depotMapper = depotMapper;
+        this.depotMapperEx = depotMapperEx;
+        this.userService = userService;
+        this.systemConfigService = systemConfigService;
+        this.userBusinessService = userBusinessService;
+        this.logService = logService;
+        this.depotItemMapperEx = depotItemMapperEx;
+    }
 
-    public Depot getDepot(long id)throws Exception {
+    public Depot getDepot(long id) {
         Depot result=null;
         try{
             result=depotMapper.selectByPrimaryKey(id);
@@ -66,7 +65,7 @@ public class DepotService {
         return result;
     }
 
-    public List<Depot> getDepotListByIds(String ids)throws Exception {
+    public List<Depot> getDepotListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<Depot> list = new ArrayList<>();
         try{
@@ -79,7 +78,7 @@ public class DepotService {
         return list;
     }
 
-    public List<Depot> getDepot()throws Exception {
+    public List<Depot> getDepot() {
         DepotExample example = new DepotExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<Depot> list=null;
@@ -91,7 +90,7 @@ public class DepotService {
         return list;
     }
 
-    public List<Depot> getAllList()throws Exception {
+    public List<Depot> getAllList() {
         DepotExample example = new DepotExample();
         example.createCriteria().andEnabledEqualTo(true).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         example.setOrderByClause("sort asc, id desc");
@@ -104,7 +103,7 @@ public class DepotService {
         return list;
     }
 
-    public List<DepotEx> select(String name, Integer type, String remark, int offset, int rows)throws Exception {
+    public List<DepotEx> select(String name, Integer type, String remark, int offset, int rows) {
         List<DepotEx> list=null;
         try{
             list=depotMapperEx.selectByConditionDepot(name, type, remark, offset, rows);
@@ -114,7 +113,7 @@ public class DepotService {
         return list;
     }
 
-    public Long countDepot(String name, Integer type, String remark)throws Exception {
+    public Long countDepot(String name, Integer type, String remark) {
         Long result=null;
         try{
             result=depotMapperEx.countsByDepot(name, type, remark);
@@ -125,7 +124,7 @@ public class DepotService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertDepot(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertDepot(JSONObject obj, HttpServletRequest request) {
         Depot depot = JSONObject.parseObject(obj.toJSONString(), Depot.class);
         int result=0;
         try{
@@ -159,7 +158,7 @@ public class DepotService {
                 userBusinessService.updateUserBusiness(ubObj, request);
             }
             logService.insertLog("仓库",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(depot.getName()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + depot.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -167,13 +166,13 @@ public class DepotService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateDepot(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateDepot(JSONObject obj, HttpServletRequest request) {
         Depot depot = JSONObject.parseObject(obj.toJSONString(), Depot.class);
         int result=0;
         try{
             result= depotMapper.updateByPrimaryKeySelective(depot);
             logService.insertLog("仓库",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(depot.getName()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + depot.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -181,17 +180,17 @@ public class DepotService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteDepot(Long id, HttpServletRequest request)throws Exception {
+    public int deleteDepot(Long id, HttpServletRequest request) {
         return batchDeleteDepotByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteDepot(String ids, HttpServletRequest request) throws Exception{
+    public int batchDeleteDepot(String ids, HttpServletRequest request) {
         return batchDeleteDepotByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteDepotByIds(String ids)throws Exception {
+    public int batchDeleteDepotByIds(String ids) {
         int result=0;
         String [] idArray=ids.split(",");
         //校验单据子表	jsh_depot_item
@@ -216,7 +215,7 @@ public class DepotService {
         }
         logService.insertLog("仓库", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userService.getCurrentUser();
         //校验通过执行删除操作
         try{
             result = depotMapperEx.batchDeleteDepotByIds(new Date(),userInfo==null?null:userInfo.getId(),idArray);
@@ -226,7 +225,7 @@ public class DepotService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         DepotExample example = new DepotExample();
         example.createCriteria().andIdNotEqualTo(id).andNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<Depot> list=null;
@@ -238,7 +237,7 @@ public class DepotService {
         return list==null?0:list.size();
     }
 
-    public List<Depot> findUserDepot()throws Exception{
+    public List<Depot> findUserDepot() {
         DepotExample example = new DepotExample();
         example.createCriteria().andTypeEqualTo(0).andEnabledEqualTo(true)
                 .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
@@ -253,7 +252,7 @@ public class DepotService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateIsDefault(Long depotId) throws Exception{
+    public int updateIsDefault(Long depotId) {
         int result=0;
         try{
             //全部取消默认
@@ -281,7 +280,7 @@ public class DepotService {
      * 根据名称获取id
      * @param name
      */
-    public Long getIdByName(String name){
+    public Long getIdByName(String name) {
         Long id = 0L;
         DepotExample example = new DepotExample();
         example.createCriteria().andNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
@@ -292,7 +291,7 @@ public class DepotService {
         return id;
     }
 
-    public List<Long> parseDepotList(Long depotId) throws Exception {
+    public List<Long> parseDepotList(Long depotId) {
         List<Long> depotList = new ArrayList<>();
         if(depotId !=null) {
             depotList.add(depotId);
@@ -307,7 +306,7 @@ public class DepotService {
         return depotList;
     }
 
-    public JSONArray findDepotByCurrentUser() throws Exception {
+    public JSONArray findDepotByCurrentUser() {
         JSONArray arr = new JSONArray();
         String type = "UserDepot";
         Long userId = userService.getCurrentUser().getId();
@@ -317,7 +316,7 @@ public class DepotService {
             boolean depotFlag = systemConfigService.getDepotFlag();
             if(depotFlag) {
                 List<UserBusiness> list = userBusinessService.getBasicData(userId.toString(), type);
-                if(list!=null && list.size()>0) {
+                if(list!=null && !list.isEmpty()) {
                     String depotStr = list.get(0).getValue();
                     if(StringUtil.isNotEmpty(depotStr)){
                         depotStr = depotStr.replaceAll("\\[", "").replaceAll("]", ",");
@@ -353,7 +352,7 @@ public class DepotService {
      * @return
      * @throws Exception
      */
-    public String findDepotStrByCurrentUser() throws Exception {
+    public String findDepotStrByCurrentUser() {
         JSONArray arr =  findDepotByCurrentUser();
         StringBuffer sb = new StringBuffer();
         for(Object object: arr) {
@@ -368,9 +367,9 @@ public class DepotService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchSetStatus(Boolean status, String ids)throws Exception {
+    public int batchSetStatus(Boolean status, String ids) {
         logService.insertLog("仓库",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ENABLED).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_ENABLED,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         List<Long> depotIds = StringUtil.strToLongList(ids);
         Depot depot = new Depot();

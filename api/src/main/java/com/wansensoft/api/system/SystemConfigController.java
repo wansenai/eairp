@@ -1,10 +1,10 @@
 package com.wansensoft.api.system;
 
 import com.wansensoft.entities.system.SystemConfig;
-import com.wansensoft.service.depot.DepotService;
+import com.wansensoft.service.depot.DepotServiceImpl;
 import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.user.UserService;
-import com.wansensoft.service.userBusiness.UserBusinessService;
+import com.wansensoft.service.user.UserServiceImpl;
+import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.StringUtil;
 import io.swagger.annotations.Api;
@@ -38,13 +38,13 @@ public class SystemConfigController {
     private Logger logger = LoggerFactory.getLogger(SystemConfigController.class);
 
     @Resource
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @Resource
-    private DepotService depotService;
+    private DepotServiceImpl depotServiceImpl;
 
     @Resource
-    private UserBusinessService userBusinessService;
+    private UserBusinessServiceImpl userBusinessServiceImpl;
 
     @Resource
     private SystemConfigService systemConfigService;
@@ -55,10 +55,10 @@ public class SystemConfigController {
     @Value(value="${file.path}")
     private String filePath;
 
-    @Value(value="${spring.servlet.multipart.max-file-size}")
+    @Value(value="10485760")
     private Long maxFileSize;
 
-    @Value(value="${spring.servlet.multipart.max-request-size}")
+    @Value(value="10485760")
     private Long maxRequestSize;
 
     /**

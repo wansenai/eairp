@@ -3,24 +3,25 @@ package com.wansensoft.service.material;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.depot.Depot;
 import com.wansensoft.entities.depot.DepotItem;
 import com.wansensoft.entities.material.*;
 import com.wansensoft.entities.unit.Unit;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.depot.DepotItemMapperEx;
+import com.wansensoft.service.depotItem.DepotItemServiceImpl;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.material.*;
-import com.wansensoft.service.depot.DepotService;
-import com.wansensoft.service.depotItem.DepotItemService;
-import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.depot.DepotServiceImpl;
 import com.wansensoft.service.materialCategory.MaterialCategoryService;
 import com.wansensoft.service.materialExtend.MaterialExtendService;
 import com.wansensoft.service.unit.UnitService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ExcelUtils;
 import com.wansensoft.utils.StringUtil;
@@ -36,7 +37,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -44,48 +44,51 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Service
-public class MaterialService {
-    private Logger logger = LoggerFactory.getLogger(MaterialService.class);
+public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> implements MaterialService{
+    private Logger logger = LoggerFactory.getLogger(MaterialServiceImpl.class);
 
-    @Resource
-    private MaterialMapper materialMapper;
-    @Resource
-    private MaterialExtendMapper materialExtendMapper;
-    @Resource
-    private MaterialMapperEx materialMapperEx;
-    @Resource
-    private MaterialCategoryMapperEx materialCategoryMapperEx;
-    @Resource
-    private MaterialExtendMapperEx materialExtendMapperEx;
-    @Resource
-    private LogService logService;
-    @Resource
-    private UserService userService;
-    @Resource
-    private DepotItemMapperEx depotItemMapperEx;
-    @Resource
-    private DepotItemService depotItemService;
-    @Resource
-    private MaterialCategoryService materialCategoryService;
-    @Resource
-    private UnitService unitService;
-    @Resource
-    private MaterialInitialStockMapper materialInitialStockMapper;
-    @Resource
-    private MaterialInitialStockMapperEx materialInitialStockMapperEx;
-    @Resource
-    private MaterialCurrentStockMapper materialCurrentStockMapper;
-    @Resource
-    private MaterialCurrentStockMapperEx materialCurrentStockMapperEx;
-    @Resource
-    private DepotService depotService;
-    @Resource
-    private MaterialExtendService materialExtendService;
+    private final MaterialMapper materialMapper;
+    private final MaterialExtendMapper materialExtendMapper;
+    private final MaterialMapperEx materialMapperEx;
+    private final MaterialCategoryMapperEx materialCategoryMapperEx;
+    private final MaterialExtendMapperEx materialExtendMapperEx;
+    private final LogService logService;
+    private final UserService userService;
+    private final DepotItemMapperEx depotItemMapperEx;
+    private final DepotItemServiceImpl depotItemServiceImpl;
+    private final MaterialCategoryService materialCategoryService;
+    private final UnitService unitService;
+    private final MaterialInitialStockMapper materialInitialStockMapper;
+    private final MaterialInitialStockMapperEx materialInitialStockMapperEx;
+    private final MaterialCurrentStockMapper materialCurrentStockMapper;
+    private final MaterialCurrentStockMapperEx materialCurrentStockMapperEx;
+    private final DepotServiceImpl depotServiceImpl;
+    private final MaterialExtendService materialExtendService;
 
     @Value(value="${file.uploadType}")
     private Long fileUploadType;
 
-    public Material getMaterial(long id)throws Exception {
+    public MaterialServiceImpl(MaterialMapper materialMapper, MaterialExtendMapper materialExtendMapper, MaterialMapperEx materialMapperEx, MaterialCategoryMapperEx materialCategoryMapperEx, MaterialExtendMapperEx materialExtendMapperEx, LogService logService, UserService userService, DepotItemMapperEx depotItemMapperEx, DepotItemServiceImpl depotItemServiceImpl, MaterialCategoryService materialCategoryService, UnitService unitService, MaterialInitialStockMapper materialInitialStockMapper, MaterialInitialStockMapperEx materialInitialStockMapperEx, MaterialCurrentStockMapper materialCurrentStockMapper, MaterialCurrentStockMapperEx materialCurrentStockMapperEx, DepotServiceImpl depotServiceImpl, MaterialExtendService materialExtendService) {
+        this.materialMapper = materialMapper;
+        this.materialExtendMapper = materialExtendMapper;
+        this.materialMapperEx = materialMapperEx;
+        this.materialCategoryMapperEx = materialCategoryMapperEx;
+        this.materialExtendMapperEx = materialExtendMapperEx;
+        this.logService = logService;
+        this.userService = userService;
+        this.depotItemMapperEx = depotItemMapperEx;
+        this.depotItemServiceImpl = depotItemServiceImpl;
+        this.materialCategoryService = materialCategoryService;
+        this.unitService = unitService;
+        this.materialInitialStockMapper = materialInitialStockMapper;
+        this.materialInitialStockMapperEx = materialInitialStockMapperEx;
+        this.materialCurrentStockMapper = materialCurrentStockMapper;
+        this.materialCurrentStockMapperEx = materialCurrentStockMapperEx;
+        this.depotServiceImpl = depotServiceImpl;
+        this.materialExtendService = materialExtendService;
+    }
+
+    public Material getMaterial(long id) {
         Material result=null;
         try{
             result=materialMapper.selectByPrimaryKey(id);
@@ -95,7 +98,7 @@ public class MaterialService {
         return result;
     }
 
-    public List<Material> getMaterialListByIds(String ids)throws Exception {
+    public List<Material> getMaterialListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<Material> list = new ArrayList<>();
         try{
@@ -108,7 +111,7 @@ public class MaterialService {
         return list;
     }
 
-    public List<Material> getMaterial() throws Exception{
+    public List<Material> getMaterial() {
         MaterialExample example = new MaterialExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<Material> list=null;
@@ -122,8 +125,7 @@ public class MaterialService {
 
     public List<MaterialVo4Unit> select(String materialParam, String color, String materialOther, String weight, String expiryNum,
                                         String enableSerialNumber, String enableBatchNumber, String position, String enabled,
-                                        String remark, String categoryId, String mpList, int offset, int rows)
-            throws Exception{
+                                        String remark, String categoryId, String mpList, int offset, int rows) {
         String[] mpArr = new String[]{};
         if(StringUtil.isNotEmpty(mpList)){
             mpArr= mpList.split(",");
@@ -158,7 +160,7 @@ public class MaterialService {
 
     public Long countMaterial(String materialParam, String color, String materialOther, String weight, String expiryNum,
                               String enableSerialNumber, String enableBatchNumber, String position, String enabled,
-                              String remark, String categoryId,String mpList)throws Exception {
+                              String remark, String categoryId,String mpList) {
         Long result =null;
         try{
             List<Long> idList = new ArrayList<>();
@@ -174,7 +176,7 @@ public class MaterialService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertMaterial(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertMaterial(JSONObject obj, HttpServletRequest request) {
         Material m = JSONObject.parseObject(obj.toJSONString(), Material.class);
         m.setEnabled(true);
         try{
@@ -204,7 +206,7 @@ public class MaterialService {
                 }
             }
             logService.insertLog("商品",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(m.getName()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + m.getName(), request);
             return 1;
         }
         catch (BusinessRunTimeException ex) {
@@ -217,7 +219,7 @@ public class MaterialService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateMaterial(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateMaterial(JSONObject obj, HttpServletRequest request) {
         Material material = JSONObject.parseObject(obj.toJSONString(), Material.class);
         try{
             materialMapper.updateByPrimaryKeySelective(material);
@@ -251,12 +253,12 @@ public class MaterialService {
                             insertInitialStockByMaterialAndDepot(depotId, material.getId(), parseBigDecimalEx(number), lowSafeStock, highSafeStock);
                         }
                         //更新当前库存
-                        depotItemService.updateCurrentStockFun(material.getId(), depotId);
+                        depotItemServiceImpl.updateCurrentStockFun(material.getId(), depotId);
                     }
                 }
             }
             logService.insertLog("商品",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(material.getName()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + material.getName(), request);
             return 1;
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -265,17 +267,17 @@ public class MaterialService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteMaterial(Long id, HttpServletRequest request)throws Exception {
+    public int deleteMaterial(Long id, HttpServletRequest request) {
         return batchDeleteMaterialByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteMaterial(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteMaterial(String ids, HttpServletRequest request) {
         return batchDeleteMaterialByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteMaterialByIds(String ids) throws Exception{
+    public int batchDeleteMaterialByIds(String ids) {
         String [] idArray=ids.split(",");
         //校验单据子表	jsh_depot_item
         List<DepotItem> depotItemList =null;
@@ -299,7 +301,7 @@ public class MaterialService {
         }
         logService.insertLog("商品", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userService.getCurrentUser();
         //校验通过执行删除操作
         try{
             //逻辑删除商品
@@ -313,7 +315,7 @@ public class MaterialService {
         }
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         MaterialExample example = new MaterialExample();
         example.createCriteria().andIdNotEqualTo(id).andNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<Material> list =null;
@@ -326,15 +328,15 @@ public class MaterialService {
     }
 
     public int checkIsExist(Long id, String name, String model, String color, String standard, String mfrs,
-                            String otherField1, String otherField2, String otherField3, String unit, Long unitId)throws Exception {
+                            String otherField1, String otherField2, String otherField3, String unit, Long unitId) {
         return materialMapperEx.checkIsExist(id, name, model, color, standard, mfrs, otherField1,
                 otherField2, otherField3, unit, unitId);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchSetStatus(Boolean status, String ids)throws Exception {
+    public int batchSetStatus(Boolean status, String ids) {
         logService.insertLog("商品",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(ids).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_EDIT + ids,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         List<Long> materialIds = StringUtil.strToLongList(ids);
         Material material = new Material();
@@ -350,11 +352,11 @@ public class MaterialService {
         return result;
     }
 
-    public Unit findUnit(Long mId)throws Exception{
+    public Unit findUnit(Long mId){
         Unit unit = new Unit();
         try{
             List<Unit> list = materialMapperEx.findUnitList(mId);
-            if(list!=null && list.size()>0) {
+            if(list!=null && !list.isEmpty()) {
                 unit = list.get(0);
             }
         }catch(Exception e){
@@ -363,7 +365,7 @@ public class MaterialService {
         return unit;
     }
 
-    public List<MaterialVo4Unit> findById(Long id)throws Exception{
+    public List<MaterialVo4Unit> findById(Long id) {
         List<MaterialVo4Unit> list =null;
         try{
             list=  materialMapperEx.findById(id);
@@ -373,7 +375,7 @@ public class MaterialService {
         return list;
     }
 
-    public List<MaterialVo4Unit> findByIdWithBarCode(Long meId)throws Exception{
+    public List<MaterialVo4Unit> findByIdWithBarCode(Long meId) {
         List<MaterialVo4Unit> list =null;
         try{
             list=  materialMapperEx.findByIdWithBarCode(meId);
@@ -393,7 +395,7 @@ public class MaterialService {
         return idList;
     }
 
-    public List<Long> getIdListByParentId(List<Long> idList, Long parentId){
+    public List<Long> getIdListByParentId(List<Long> idList, Long parentId) {
         List<MaterialCategory> list = materialCategoryMapperEx.getListByParentId(parentId);
         if(list!=null && list.size()>0) {
             for(MaterialCategory mc : list){
@@ -432,7 +434,7 @@ public class MaterialService {
     }
 
     public List<MaterialVo4Unit> findBySelectWithBarCode(Long categoryId, String q, String enableSerialNumber,
-                                                         String enableBatchNumber, Integer offset, Integer rows)throws Exception{
+                                                         String enableBatchNumber, Integer offset, Integer rows) {
         List<MaterialVo4Unit> list =null;
         try{
             List<Long> idList = new ArrayList<>();
@@ -452,7 +454,7 @@ public class MaterialService {
     }
 
     public int findBySelectWithBarCodeCount(Long categoryId, String q, String enableSerialNumber,
-                                            String enableBatchNumber)throws Exception{
+                                            String enableBatchNumber) {
         int result=0;
         try{
             List<Long> idList = new ArrayList<>();
@@ -475,7 +477,7 @@ public class MaterialService {
 
     public void exportExcel(String categoryId, String materialParam, String color, String materialOther, String weight,
                                              String expiryNum, String enabled, String enableSerialNumber, String enableBatchNumber,
-                                             String remark, HttpServletResponse response)throws Exception {
+                                             String remark, HttpServletResponse response) {
         List<Long> idList = new ArrayList<>();
         if(StringUtil.isNotEmpty(categoryId)){
             idList = getListByParentId(Long.parseLong(categoryId));
@@ -493,7 +495,7 @@ public class MaterialService {
                 "采购价,零售价,销售价,最低售价,状态*,序列号,批号,仓位货架,制造商,自定义1,自定义2,自定义3,备注";
         List<String> nameList = StringUtil.strToStringList(nameStr);
         //仓库列表
-        List<Depot> depotList = depotService.getAllList();
+        List<Depot> depotList = depotServiceImpl.getAllList();
         if (nameList != null) {
             for(Depot depot: depotList) {
                 nameList.add(depot.getName());
@@ -549,12 +551,16 @@ public class MaterialService {
                 objects.add(objs);
             }
         }
-        File file = ExcelUtils.exportObjectsWithoutTitle(title, "*导入时本行内容请勿删除，切记！", names, title, objects);
-        ExcelUtils.downloadExcel(file, file.getName(), response);
+        try {
+            File file = ExcelUtils.exportObjectsWithoutTitle(title, "*导入时本行内容请勿删除，切记！", names, title, objects);
+            ExcelUtils.downloadExcel(file, file.getName(), response);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public BaseResponseInfo importExcel(MultipartFile file, HttpServletRequest request) throws Exception {
+    public BaseResponseInfo importExcel(MultipartFile file, HttpServletRequest request) {
         BaseResponseInfo info = new BaseResponseInfo();
         try {
             Long beginTime = System.currentTimeMillis();
@@ -571,7 +577,7 @@ public class MaterialService {
             Sheet src = workbook.getSheet(0);
             //获取真实的行数，剔除掉空白行
             int rightRows = ExcelUtils.getRightRows(src);
-            List<Depot> depotList= depotService.getDepot();
+            List<Depot> depotList= depotServiceImpl.getDepot();
             int depotCount = depotList.size();
             Map<String, Long> depotMap = parseDepotToMap(depotList);
             User user = userService.getCurrentUser();
@@ -787,7 +793,7 @@ public class MaterialService {
                         }
                     }
                     //新增或更新当前库存
-                    Long billCount = depotItemService.getCountByMaterialAndDepot(mId, depotId);
+                    Long billCount = depotItemServiceImpl.getCountByMaterialAndDepot(mId, depotId);
                     if(billCount == 0) {
                         if(stock!=null && stock.compareTo(BigDecimal.ZERO)!=0) {
                             if(materialDepotCurrentMap.get(materialDepotKey)==null) {
@@ -820,16 +826,16 @@ public class MaterialService {
                 }
             }
             //批量更新库存,先删除后新增
-            if(insertInitialStockMaterialList.size()>0) {
+            if(!insertInitialStockMaterialList.isEmpty()) {
                 batchDeleteInitialStockByMaterialList(deleteInitialStockMaterialIdList);
                 materialInitialStockMapperEx.batchInsert(insertInitialStockMaterialList);
             }
-            if(insertCurrentStockMaterialList.size()>0) {
+            if(!insertCurrentStockMaterialList.isEmpty()) {
                 batchDeleteCurrentStockByMaterialList(deleteCurrentStockMaterialIdList);
                 materialCurrentStockMapperEx.batchInsert(insertCurrentStockMaterialList);
             }
             logService.insertLog("商品",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_IMPORT).append(mList.size()).append(BusinessConstants.LOG_DATA_UNIT).toString(),
+                    BusinessConstants.LOG_OPERATION_TYPE_IMPORT + mList.size() + BusinessConstants.LOG_DATA_UNIT,
                     ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
             Long endTime = System.currentTimeMillis();
             logger.info("导入耗时：{}", endTime-beginTime);
@@ -839,7 +845,6 @@ public class MaterialService {
             info.code = e.getCode();
             info.data = e.getData().get("message");
         } catch (Exception e) {
-            e.printStackTrace();
             info.code = 500;
             info.data = "导入失败";
         }
@@ -863,7 +868,7 @@ public class MaterialService {
      * @return
      * @throws Exception
      */
-    private Map<Long, BigDecimal> getStockMapCache(Sheet src, int depotCount, Map<String, Long> depotMap, int i) throws Exception {
+    private Map<Long, BigDecimal> getStockMapCache(Sheet src, int depotCount, Map<String, Long> depotMap, int i) {
         Map<Long, BigDecimal> stockMap = new HashMap<>();
         for(int j = 1; j<= depotCount; j++) {
             int col = 25 + j;
@@ -951,7 +956,7 @@ public class MaterialService {
      * @param user
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void insertOrUpdateMaterialExtend(JSONObject materialExObj, String type, String defaultFlag, Long mId, User user) throws Exception {
+    public void insertOrUpdateMaterialExtend(JSONObject materialExObj, String type, String defaultFlag, Long mId, User user) {
         if(StringUtil.isExist(materialExObj.get(type))){
             String basicStr = materialExObj.getString(type);
             MaterialExtend materialExtend = JSONObject.parseObject(basicStr, MaterialExtend.class);
@@ -1006,7 +1011,7 @@ public class MaterialService {
      * @param unitId
      * @return
      */
-    private List<Material> getMaterialListByParam(String name, String standard, String model, String color, String unit, Long unitId, String basicBarCode) throws Exception {
+    private List<Material> getMaterialListByParam(String name, String standard, String model, String color, String unit, Long unitId, String basicBarCode) {
         List<Material> list = new ArrayList<>();
         MaterialExample example = new MaterialExample();
         MaterialExample.Criteria criteria = example.createCriteria();
@@ -1028,7 +1033,7 @@ public class MaterialService {
         }
         criteria.andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         list = materialMapper.selectByExample(example);
-        if(list.size()==0) {
+        if(list.isEmpty()) {
             //如果通过组合条件没有查到该商品，则通过条码再查一次
             MaterialExtend materialExtend = materialExtendService.getInfoByBarCode(basicBarCode);
             if(materialExtend != null && materialExtend.getMaterialId()!=null) {
@@ -1047,7 +1052,7 @@ public class MaterialService {
      * @param stock
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void insertInitialStockByMaterialAndDepot(Long depotId, Long mId, BigDecimal stock, BigDecimal lowSafeStock, BigDecimal highSafeStock){
+    public void insertInitialStockByMaterialAndDepot(Long depotId, Long mId, BigDecimal stock, BigDecimal lowSafeStock, BigDecimal highSafeStock) {
         MaterialInitialStock materialInitialStock = new MaterialInitialStock();
         materialInitialStock.setDepotId(depotId);
         materialInitialStock.setMaterialId(mId);
@@ -1069,7 +1074,7 @@ public class MaterialService {
      * @param stock
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void insertCurrentStockByMaterialAndDepot(Long depotId, Long mId, BigDecimal stock){
+    public void insertCurrentStockByMaterialAndDepot(Long depotId, Long mId, BigDecimal stock) {
         MaterialCurrentStock materialCurrentStock = new MaterialCurrentStock();
         materialCurrentStock.setDepotId(depotId);
         materialCurrentStock.setMaterialId(mId);
@@ -1082,7 +1087,7 @@ public class MaterialService {
      * @param mIdList
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void batchDeleteInitialStockByMaterialList(List<Long> mIdList){
+    public void batchDeleteInitialStockByMaterialList(List<Long> mIdList) {
         MaterialInitialStockExample example = new MaterialInitialStockExample();
         example.createCriteria().andMaterialIdIn(mIdList);
         materialInitialStockMapper.deleteByExample(example);
@@ -1093,13 +1098,13 @@ public class MaterialService {
      * @param mIdList
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void batchDeleteCurrentStockByMaterialList(List<Long> mIdList){
+    public void batchDeleteCurrentStockByMaterialList(List<Long> mIdList) {
         MaterialCurrentStockExample example = new MaterialCurrentStockExample();
         example.createCriteria().andMaterialIdIn(mIdList);
         materialCurrentStockMapper.deleteByExample(example);
     }
 
-    public List<MaterialVo4Unit> getMaterialEnableSerialNumberList(String q, Integer offset, Integer rows)throws Exception {
+    public List<MaterialVo4Unit> getMaterialEnableSerialNumberList(String q, Integer offset, Integer rows) {
         List<MaterialVo4Unit> list =null;
         try{
             list=  materialMapperEx.getMaterialEnableSerialNumberList(q, offset, rows);
@@ -1109,7 +1114,7 @@ public class MaterialService {
         return list;
     }
 
-    public Long getMaterialEnableSerialNumberCount(String q)throws Exception {
+    public Long getMaterialEnableSerialNumberCount(String q) {
         Long count =null;
         try{
             count=  materialMapperEx.getMaterialEnableSerialNumberCount(q);
@@ -1119,7 +1124,7 @@ public class MaterialService {
         return count;
     }
 
-    public BigDecimal parseBigDecimalEx(String str) throws Exception{
+    public BigDecimal parseBigDecimalEx(String str) {
         if(!StringUtil.isEmpty(str)) {
             return  new BigDecimal(str);
         } else {
@@ -1127,7 +1132,7 @@ public class MaterialService {
         }
     }
 
-    public BigDecimal parsePrice(String price, String ratio) throws Exception{
+    public BigDecimal parsePrice(String price, String ratio) {
         if(StringUtil.isEmpty(price) || StringUtil.isEmpty(ratio)) {
             return BigDecimal.ZERO;
         } else {
@@ -1278,7 +1283,7 @@ public class MaterialService {
     }
 
     public List<MaterialVo4Unit> getListWithStock(List<Long> depotList, List<Long> idList, String position, String materialParam, Integer zeroStock,
-                                                  String column, String order, Integer offset, Integer rows) throws Exception {
+                                                  String column, String order, Integer offset, Integer rows) {
         Map<Long, BigDecimal> initialStockMap = new HashMap<>();
         List<MaterialInitialStockWithMaterial> initialStockList = getInitialStockWithMaterial(depotList);
         for (MaterialInitialStockWithMaterial mism: initialStockList) {
@@ -1312,7 +1317,7 @@ public class MaterialService {
      * @return
      * @throws Exception
      */
-    public String getBigUnitStock(BigDecimal stock, Long unitId) throws Exception {
+    public String getBigUnitStock(BigDecimal stock, Long unitId) {
         String bigUnitStock = "";
         if(null!= unitId) {
             Unit unit = unitService.getUnit(unitId);
@@ -1349,13 +1354,13 @@ public class MaterialService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchSetMaterialCurrentStock(String ids) throws Exception {
+    public int batchSetMaterialCurrentStock(String ids) {
         int res = 0;
         List<Long> idList = StringUtil.strToLongList(ids);
-        List<Depot> depotList = depotService.getAllList();
+        List<Depot> depotList = depotServiceImpl.getAllList();
         for(Long mId: idList) {
             for(Depot depot: depotList) {
-                depotItemService.updateCurrentStockFun(mId, depot.getId());
+                depotItemServiceImpl.updateCurrentStockFun(mId, depot.getId());
                 res = 1;
             }
         }

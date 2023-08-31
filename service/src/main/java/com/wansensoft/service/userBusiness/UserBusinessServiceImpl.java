@@ -1,17 +1,16 @@
 package com.wansensoft.service.userBusiness;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.entities.user.UserBusiness;
 import com.wansensoft.entities.user.UserBusinessExample;
 import com.wansensoft.mappers.user.UserBusinessMapper;
 import com.wansensoft.mappers.user.UserBusinessMapperEx;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.CommonQueryManager;
-import com.wansensoft.service.functions.FunctionService;
-import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,30 +19,26 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Service
-public class UserBusinessService {
-    private Logger logger = LoggerFactory.getLogger(UserBusinessService.class);
+public class UserBusinessServiceImpl extends ServiceImpl<UserBusinessMapper, UserBusiness> implements UserBusinessService{
+    private Logger logger = LoggerFactory.getLogger(UserBusinessServiceImpl.class);
 
-    @Resource
-    private UserBusinessMapper userBusinessMapper;
-    @Resource
-    private UserBusinessMapperEx userBusinessMapperEx;
-    @Resource
-    private LogService logService;
-    @Resource
-    private UserService userService;
+    private final UserBusinessMapper userBusinessMapper;
+    private final UserBusinessMapperEx userBusinessMapperEx;
+    private final LogService logService;
+    private final UserServiceImpl userServiceImpl;
 
-    @Resource
-    private FunctionService functionService;
+    public UserBusinessServiceImpl(UserBusinessMapper userBusinessMapper, UserBusinessMapperEx userBusinessMapperEx, LogService logService, UserServiceImpl userServiceImpl) {
+        this.userBusinessMapper = userBusinessMapper;
+        this.userBusinessMapperEx = userBusinessMapperEx;
+        this.logService = logService;
+        this.userServiceImpl = userServiceImpl;
+    }
 
-    @Resource
-    private CommonQueryManager configResourceManager;
-
-    public UserBusiness getUserBusiness(long id)throws Exception {
+    public UserBusiness getUserBusiness(long id) {
         UserBusiness result=null;
         try{
             result=userBusinessMapper.selectByPrimaryKey(id);
@@ -53,7 +48,7 @@ public class UserBusinessService {
         return result;
     }
 
-    public List<UserBusiness> getUserBusiness()throws Exception {
+    public List<UserBusiness> getUserBusiness() {
         UserBusinessExample example = new UserBusinessExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<UserBusiness> list=null;
@@ -66,7 +61,7 @@ public class UserBusinessService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertUserBusiness(JSONObject obj, HttpServletRequest request) throws Exception {
+    public int insertUserBusiness(JSONObject obj, HttpServletRequest request) {
         UserBusiness userBusiness = JSONObject.parseObject(obj.toJSONString(), UserBusiness.class);
         int result=0;
         try{
@@ -91,7 +86,7 @@ public class UserBusinessService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateUserBusiness(JSONObject obj, HttpServletRequest request) throws Exception {
+    public int updateUserBusiness(JSONObject obj, HttpServletRequest request) {
         UserBusiness userBusiness = JSONObject.parseObject(obj.toJSONString(), UserBusiness.class);
         int result=0;
         try{
@@ -108,21 +103,21 @@ public class UserBusinessService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteUserBusiness(Long id, HttpServletRequest request)throws Exception {
+    public int deleteUserBusiness(Long id, HttpServletRequest request) {
         return batchDeleteUserBusinessByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteUserBusiness(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteUserBusiness(String ids, HttpServletRequest request) {
         return batchDeleteUserBusinessByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteUserBusinessByIds(String ids) throws Exception{
+    public int batchDeleteUserBusinessByIds(String ids) {
         logService.insertLog("关联关系",
                 new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_DELETE).append(ids).toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo=userService.getCurrentUser();
+        User userInfo= userServiceImpl.getCurrentUser();
         String [] idArray=ids.split(",");
         int result=0;
         try{
@@ -133,11 +128,11 @@ public class UserBusinessService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         return 1;
     }
 
-    public List<UserBusiness> getBasicData(String keyId, String type)throws Exception{
+    public List<UserBusiness> getBasicData(String keyId, String type) {
         List<UserBusiness> list=null;
         try{
             UserBusinessExample example = new UserBusinessExample();
@@ -150,7 +145,7 @@ public class UserBusinessService {
         return list;
     }
 
-    public List<UserBusiness> getListBy(String keyId, String type)throws Exception{
+    public List<UserBusiness> getListBy(String keyId, String type) {
         List<UserBusiness> list=null;
         try{
             UserBusinessExample example = new UserBusinessExample();
@@ -163,7 +158,7 @@ public class UserBusinessService {
         return list;
     }
 
-    public String getUBValueByTypeAndKeyId(String type, String keyId) throws Exception {
+    public String getUBValueByTypeAndKeyId(String type, String keyId) {
         String ubValue = "";
         List<UserBusiness> ubList = getBasicData(keyId, type);
         if(ubList!=null && ubList.size()>0) {
@@ -172,7 +167,7 @@ public class UserBusinessService {
         return ubValue;
     }
 
-    public Long checkIsValueExist(String type, String keyId)throws Exception {
+    public Long checkIsValueExist(String type, String keyId) {
         UserBusinessExample example = new UserBusinessExample();
         example.createCriteria().andTypeEqualTo(type).andKeyIdEqualTo(keyId)
                 .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
@@ -183,16 +178,16 @@ public class UserBusinessService {
             JshException.readFail(logger, e);
         }
         Long id = null;
-        if(list!=null&&list.size() > 0) {
+        if(list!=null&& !list.isEmpty()) {
             id = list.get(0).getId();
         }
         return id;
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateBtnStr(String keyId, String type, String btnStr) throws Exception{
+    public int updateBtnStr(String keyId, String type, String btnStr) {
         logService.insertLog("关联关系",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append("角色的按钮权限").toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_EDIT + "角色的按钮权限",
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         UserBusiness userBusiness = new UserBusiness();
         userBusiness.setBtnStr(btnStr);

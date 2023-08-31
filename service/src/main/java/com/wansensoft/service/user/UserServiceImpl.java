@@ -1,5 +1,6 @@
 package com.wansensoft.service.user;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.function.Function;
 import com.wansensoft.entities.organization.OrgaUserRel;
 import com.wansensoft.entities.role.Role;
@@ -8,16 +9,16 @@ import com.wansensoft.entities.user.User;
 import com.wansensoft.entities.user.UserBusiness;
 import com.wansensoft.entities.user.UserEx;
 import com.wansensoft.entities.user.UserExample;
-import com.wansensoft.plugins.exception.BusinessParamCheckingException;
 import com.wansensoft.mappers.user.UserMapper;
 import com.wansensoft.mappers.user.UserMapperEx;
 import com.wansensoft.service.functions.FunctionService;
+import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.platformConfig.PlatformConfigService;
 import com.wansensoft.service.redis.RedisService;
 import com.wansensoft.service.role.RoleService;
-import com.wansensoft.utils.HttpClient;
 import com.wansensoft.service.tenant.TenantService;
-import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.userBusiness.UserBusinessService;
+import com.wansensoft.utils.HttpClient;
 import com.wansensoft.utils.ExceptionCodeConstants;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
@@ -30,7 +31,6 @@ import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
-import com.wansensoft.service.userBusiness.UserBusinessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,38 +38,39 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 @Service
-public class UserService {
-    private Logger logger = LoggerFactory.getLogger(UserService.class);
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService{
+    private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    @Resource
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+    private final UserMapperEx userMapperEx;
+    private final OrgaUserRelService orgaUserRelService;
+    private final LogService logService;
+    private final TenantService tenantService;
+    private final UserBusinessService userBusinessService;
+    private final RoleService roleService;
+    private final FunctionService functionService;
+    private final PlatformConfigService platformConfigService;
+    private final RedisService redisService;
 
-    @Resource
-    private UserMapperEx userMapperEx;
-    @Resource
-    private OrgaUserRelService orgaUserRelService;
-    @Resource
-    private LogService logService;
-    @Resource
-    private TenantService tenantService;
-    @Resource
-    private UserBusinessService userBusinessService;
-    @Resource
-    private RoleService roleService;
-    @Resource
-    private FunctionService functionService;
-    @Resource
-    private PlatformConfigService platformConfigService;
-    @Resource
-    private RedisService redisService;
+    public UserServiceImpl(UserMapper userMapper, UserMapperEx userMapperEx, OrgaUserRelService orgaUserRelService, LogService logService, TenantService tenantService, UserBusinessService userBusinessService, RoleService roleService, FunctionService functionService, PlatformConfigService platformConfigService, RedisService redisService) {
+        this.userMapper = userMapper;
+        this.userMapperEx = userMapperEx;
+        this.orgaUserRelService = orgaUserRelService;
+        this.logService = logService;
+        this.tenantService = tenantService;
+        this.userBusinessService = userBusinessService;
+        this.roleService = roleService;
+        this.functionService = functionService;
+        this.platformConfigService = platformConfigService;
+        this.redisService = redisService;
+    }
 
-    public User getUser(long id)throws Exception {
+    public User getUser(long id) {
         User result=null;
         try{
             result=userMapper.selectByPrimaryKey(id);
@@ -79,7 +80,7 @@ public class UserService {
         return result;
     }
 
-    public List<User> getUserListByIds(String ids)throws Exception {
+    public List<User> getUserListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<User> list = new ArrayList<>();
         try{
@@ -92,7 +93,7 @@ public class UserService {
         return list;
     }
 
-    public List<User> getUser()throws Exception {
+    public List<User> getUser() {
         UserExample example = new UserExample();
         example.createCriteria().andStatusEqualTo(BusinessConstants.USER_STATUS_NORMAL);
         List<User> list=null;
@@ -104,7 +105,7 @@ public class UserService {
         return list;
     }
 
-    public List<UserEx> select(String userName, String loginName, int offset, int rows)throws Exception {
+    public List<UserEx> select(String userName, String loginName, int offset, int rows) {
         List<UserEx> list=null;
         try{
             list=userMapperEx.selectByConditionUser(userName, loginName, offset, rows);
@@ -133,7 +134,7 @@ public class UserService {
         return list;
     }
 
-    public Long countUser(String userName, String loginName)throws Exception {
+    public Long countUser(String userName, String loginName) {
         Long result=null;
         try{
             result=userMapperEx.countsByUser(userName, loginName);
@@ -143,16 +144,14 @@ public class UserService {
         return result;
     }
     /**
-     * create by: cjl
      * description:
      * 添加事务控制
-     * create time: 2019/1/11 14:30
      * @Param: beanJson
-     * @Param: request
+     * @Param: request
      * @return int
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertUser(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertUser(JSONObject obj, HttpServletRequest request) {
         User user = JSONObject.parseObject(obj.toJSONString(), User.class);
         String password = "123456";
         //因密码用MD5加密，需要对密码进行转化
@@ -167,46 +166,42 @@ public class UserService {
         try{
             result=userMapper.insertSelective(user);
             logService.insertLog("用户",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(user.getLoginName()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + user.getLoginName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
         return result;
     }
     /**
-     * create by: cjl
      * description:
      * 添加事务控制
-     * create time: 2019/1/11 14:31
      * @Param: beanJson
-     * @Param: id
+     * @Param: id
      * @return int
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateUser(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateUser(JSONObject obj, HttpServletRequest request) {
         User user = JSONObject.parseObject(obj.toJSONString(), User.class);
         int result=0;
         try{
             result=userMapper.updateByPrimaryKeySelective(user);
             logService.insertLog("用户",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(user.getLoginName()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + user.getLoginName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
         return result;
     }
     /**
-     * create by: cjl
      * description:
      * 添加事务控制
-     * create time: 2019/1/11 14:32
      * @Param: user
      * @return int
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateUserByObj(User user) throws Exception{
+    public int updateUserByObj(User user) {
         logService.insertLog("用户",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(user.getId()).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_EDIT + user.getId(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         int result=0;
         try{
@@ -217,19 +212,17 @@ public class UserService {
         return result;
     }
     /**
-     * create by: cjl
      * description:
      *  添加事务控制
-     * create time: 2019/1/11 14:33
      * @Param: md5Pwd
-     * @Param: id
+     * @Param: id
      * @return int
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int resetPwd(String md5Pwd, Long id) throws Exception{
+    public int resetPwd(String md5Pwd, Long id) {
         int result=0;
         logService.insertLog("用户",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(id).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_EDIT + id,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         User u = getUser(id);
         String loginName = u.getLoginName();
@@ -249,17 +242,17 @@ public class UserService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteUser(Long id, HttpServletRequest request)throws Exception {
+    public int deleteUser(Long id, HttpServletRequest request) {
         return batDeleteUser(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteUser(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteUser(String ids, HttpServletRequest request) {
         return batDeleteUser(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batDeleteUser(String ids) throws Exception{
+    public int batDeleteUser(String ids) {
         int result=0;
         StringBuffer sb = new StringBuffer();
         sb.append(BusinessConstants.LOG_OPERATION_TYPE_DELETE);
@@ -297,7 +290,7 @@ public class UserService {
      * @return
      * @throws Exception
      */
-    public Map<String, Object> login(User userParam, HttpServletRequest request) throws Exception {
+    public Map<String, Object> login(User userParam, HttpServletRequest request) {
         Map<String, Object> data = new HashMap<>();
         String msgTip = "";
         User user=null;
@@ -357,7 +350,7 @@ public class UserService {
             redisService.storageObjectBySession(token,"roleType",roleType);
             redisService.storageObjectBySession(token,"clientIp", Tools.getLocalIp(request));
             logService.insertLogWithUserId(user.getId(), user.getTenantId(), "用户",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_LOGIN).append(user.getLoginName()).toString(),
+                    BusinessConstants.LOG_OPERATION_TYPE_LOGIN + user.getLoginName(),
                     ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
             JSONArray btnStrArr = getBtnStrArrById(user.getId());
             data.put("token", token);
@@ -378,7 +371,7 @@ public class UserService {
             UserExample example = new UserExample();
             example.createCriteria().andLoginNameEqualTo(loginName).andStatusNotEqualTo(BusinessConstants.USER_STATUS_DELETE);
             list = userMapper.selectByExample(example);
-            if (null != list && list.size() == 0) {
+            if (null != list && list.isEmpty()) {
                 return ExceptionCodeConstants.UserExceptionCode.USER_NOT_EXIST;
             } else if(list.size() ==1) {
                 if(list.get(0).getStatus()!=0) {
@@ -414,7 +407,7 @@ public class UserService {
         return ExceptionCodeConstants.UserExceptionCode.USER_CONDITION_FIT;
     }
 
-    public User getUserByLoginName(String loginName)throws Exception {
+    public User getUserByLoginName(String loginName) {
         UserExample example = new UserExample();
         example.createCriteria().andLoginNameEqualTo(loginName).andStatusEqualTo(BusinessConstants.USER_STATUS_NORMAL);
         List<User> list=null;
@@ -430,7 +423,7 @@ public class UserService {
         return user;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         UserExample example = new UserExample();
         List <Byte> userStatus=new ArrayList<Byte>();
         userStatus.add(BusinessConstants.USER_STATUS_DELETE);
@@ -445,14 +438,12 @@ public class UserService {
         return list==null?0:list.size();
     }
     /**
-     * create by: cjl
      * description:
      *  获取当前用户信息
-     * create time: 2019/1/24 10:01
      * @Param:
      * @return com.jsh.erp.datasource.entities.User
      */
-    public User getCurrentUser()throws Exception{
+    public User getCurrentUser() {
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         Long userId = Long.parseLong(redisService.getObjectFromSessionByKey(request,"userId").toString());
         return getUser(userId);
@@ -475,7 +466,7 @@ public class UserService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void addUserAndOrgUserRel(UserEx ue, HttpServletRequest request) throws Exception{
+    public void addUserAndOrgUserRel(UserEx ue, HttpServletRequest request) {
         if(BusinessConstants.DEFAULT_MANAGER.equals(ue.getLoginName())) {
             throw new BusinessRunTimeException(ExceptionConstants.USER_NAME_LIMIT_USE_CODE,
                     ExceptionConstants.USER_NAME_LIMIT_USE_MSG);
@@ -531,7 +522,7 @@ public class UserService {
         }
     }
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public UserEx addUser(UserEx ue) throws Exception{
+    public UserEx addUser(UserEx ue) {
         /**
          * 新增用户默认设置
          * 1、密码默认123456
@@ -539,14 +530,14 @@ public class UserService {
          * 3是否管理者默认为员工
          * 4默认用户状态为正常
          * */
-        ue.setPassword(Tools.md5Encryp(BusinessConstants.USER_DEFAULT_PASSWORD));
-        ue.setIsystem(BusinessConstants.USER_NOT_SYSTEM);
         if(ue.getIsmanager()==null){
             ue.setIsmanager(BusinessConstants.USER_NOT_MANAGER);
         }
         ue.setStatus(BusinessConstants.USER_STATUS_NORMAL);
         int result=0;
         try{
+            ue.setPassword(Tools.md5Encryp(BusinessConstants.USER_DEFAULT_PASSWORD));
+            ue.setIsystem(BusinessConstants.USER_NOT_SYSTEM);
             result= userMapper.insertSelective(ue);
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -558,7 +549,7 @@ public class UserService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public UserEx registerUser(UserEx ue, Integer manageRoleId, HttpServletRequest request) throws Exception{
+    public UserEx registerUser(UserEx ue, Integer manageRoleId, HttpServletRequest request) {
         /**
          * create by: qiankunpingtai
          * create time: 2019/4/9 18:00
@@ -613,7 +604,7 @@ public class UserService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void updateUserTenant(User user) throws Exception{
+    public void updateUserTenant(User user) {
         UserExample example = new UserExample();
         example.createCriteria().andIdEqualTo(user.getId());
         try{
@@ -624,13 +615,13 @@ public class UserService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public void updateUserAndOrgUserRel(UserEx ue, HttpServletRequest request) throws Exception{
+    public void updateUserAndOrgUserRel(UserEx ue, HttpServletRequest request) {
         if(BusinessConstants.DEFAULT_MANAGER.equals(ue.getLoginName())) {
             throw new BusinessRunTimeException(ExceptionConstants.USER_NAME_LIMIT_USE_CODE,
                     ExceptionConstants.USER_NAME_LIMIT_USE_MSG);
         } else {
             logService.insertLog("用户",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(ue.getId()).toString(),
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + ue.getId(),
                     ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
             //检查用户名和登录名
             checkLoginName(ue);
@@ -693,7 +684,7 @@ public class UserService {
         }
     }
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public UserEx updateUser(UserEx ue)throws Exception{
+    public UserEx updateUser(UserEx ue) {
         int result =0;
         try{
             result=userMapper.updateByPrimaryKeySelective(ue);
@@ -707,11 +698,10 @@ public class UserService {
     }
     /**
      *  检查登录名不能重复
-     * create time: 2019/3/12 11:36
      * @Param: userEx
      * @return void
      */
-    public void checkLoginName(UserEx userEx)throws Exception{
+    public void checkLoginName(UserEx userEx) {
         List<User> list=null;
         if(userEx==null){
             return;
@@ -744,7 +734,7 @@ public class UserService {
     /**
      * 通过登录名获取用户列表
      * */
-    public List<User> getUserListByloginName(String loginName){
+    public List<User> getUserListByloginName(String loginName) {
         List<User> list =null;
         try{
             list=userMapperEx.getUserListByUserNameOrLoginName(null,loginName);
@@ -754,7 +744,7 @@ public class UserService {
         return list;
     }
 
-    public List<TreeNodeEx> getOrganizationUserTree()throws Exception {
+    public List<TreeNodeEx> getOrganizationUserTree() {
         List<TreeNodeEx> list =null;
         try{
             list=userMapperEx.getNodeTree();
@@ -770,7 +760,7 @@ public class UserService {
      * @return
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public Role getRoleTypeByUserId(long userId) throws Exception {
+    public Role getRoleTypeByUserId(long userId) {
         Role role = new Role();
         List<UserBusiness> list = userBusinessService.getBasicData(String.valueOf(userId), "UserRole");
         UserBusiness ub = null;
@@ -795,7 +785,7 @@ public class UserService {
      * @param request
      * @return
      */
-    public Long getUserId(HttpServletRequest request) throws Exception{
+    public Long getUserId(HttpServletRequest request) {
         Object userIdObj = redisService.getObjectFromSessionByKey(request,"userId");
         Long userId = null;
         if(userIdObj != null) {
@@ -810,15 +800,15 @@ public class UserService {
      * @return
      * @throws Exception
      */
-    public JSONArray getBtnStrArrById(Long userId) throws Exception {
+    public JSONArray getBtnStrArrById(Long userId) {
         JSONArray btnStrArr = new JSONArray();
         List<UserBusiness> userRoleList = userBusinessService.getBasicData(userId.toString(), "UserRole");
-        if(userRoleList!=null && userRoleList.size()>0) {
+        if(userRoleList!=null && !userRoleList.isEmpty()) {
             String roleValue = userRoleList.get(0).getValue();
-            if(StringUtil.isNotEmpty(roleValue) && roleValue.indexOf("[")>-1 && roleValue.indexOf("]")>-1){
+            if(StringUtil.isNotEmpty(roleValue) && roleValue.contains("[") && roleValue.contains("]")){
                 roleValue = roleValue.replace("[", "").replace("]", ""); //角色id-单个
                 List<UserBusiness> roleFunctionsList = userBusinessService.getBasicData(roleValue, "RoleFunctions");
-                if(roleFunctionsList!=null && roleFunctionsList.size()>0) {
+                if(roleFunctionsList!=null && !roleFunctionsList.isEmpty()) {
                     String btnStr = roleFunctionsList.get(0).getBtnStr();
                     if(StringUtil.isNotEmpty(btnStr)){
                         btnStrArr = JSONArray.parseArray(btnStr);
@@ -828,7 +818,7 @@ public class UserService {
         }
         //将数组中的funId转为url
         JSONArray btnStrWithUrlArr = new JSONArray();
-        if(btnStrArr.size()>0) {
+        if(!btnStrArr.isEmpty()) {
             List<Function> functionList = functionService.getFunction();
             Map<Long, String> functionMap = new HashMap<>();
             for (Function function: functionList) {
@@ -847,7 +837,7 @@ public class UserService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchSetStatus(Byte status, String ids, HttpServletRequest request)throws Exception {
+    public int batchSetStatus(Byte status, String ids, HttpServletRequest request) {
         int result=0;
         List<User> list = getUserListByIds(ids);
         //选中的用户的数量
@@ -858,8 +848,8 @@ public class UserService {
         Tenant tenant = tenantService.getTenantByTenantId(userInfo.getTenantId());
         if(tenant!=null) {
             if (selectUserSize + enableUserSize > tenant.getUserNumLimit() && status == 0) {
-                throw new BusinessParamCheckingException(ExceptionConstants.USER_ENABLE_OVER_LIMIT_FAILED_CODE,
-                        ExceptionConstants.USER_ENABLE_OVER_LIMIT_FAILED_MSG);
+//                throw new BusinessParamCheckingException(ExceptionConstants.USER_ENABLE_OVER_LIMIT_FAILED_CODE,
+//                        ExceptionConstants.USER_ENABLE_OVER_LIMIT_FAILED_MSG);
             }
         }
         StringBuilder userStr = new StringBuilder();
@@ -885,7 +875,7 @@ public class UserService {
             example.createCriteria().andIdIn(idList);
             result = userMapper.updateByExampleSelective(user, example);
             logService.insertLog("用户",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(userStr).append("-").append(statusStr).toString(),
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + userStr + "-" + statusStr,
                     ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         } else {
             result = 1;
@@ -893,7 +883,7 @@ public class UserService {
         return result;
     }
 
-    public User getUserByWeixinCode(String weixinCode) throws Exception {
+    public User getUserByWeixinCode(String weixinCode) {
         String weixinUrl = platformConfigService.getPlatformConfigByKey("weixinUrl").getPlatformValue();
         String weixinAppid = platformConfigService.getPlatformConfigByKey("weixinAppid").getPlatformValue();
         String weixinSecret = platformConfigService.getPlatformConfigByKey("weixinSecret").getPlatformValue();
@@ -909,7 +899,7 @@ public class UserService {
         return null;
     }
 
-    public int weixinBind(String loginName, String password, String weixinCode) throws Exception {
+    public int weixinBind(String loginName, String password, String weixinCode) {
         String weixinUrl = platformConfigService.getPlatformConfigByKey("weixinUrl").getPlatformValue();
         String weixinAppid = platformConfigService.getPlatformConfigByKey("weixinAppid").getPlatformValue();
         String weixinSecret = platformConfigService.getPlatformConfigByKey("weixinSecret").getPlatformValue();
