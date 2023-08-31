@@ -13,7 +13,7 @@
 hs_err_pid*
 
 .idea
-/target
+**/target
 /logs.home_IS_UNDEFINED
 
 **/*.iml
