@@ -11,10 +11,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.IOException;
 
+@MapperScan("com.wansensoft.mappers")
+@ComponentScan("com.wansensoft")
 @SpringBootApplication
 @EnableScheduling
-@MapperScan("com.wansensoft")
-@ComponentScan("com.wansensoft")
 public class ErpApplication {
 
     public static void main(String[] args) throws IOException {

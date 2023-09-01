@@ -5,8 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.supplier.Supplier;
 import com.wansensoft.service.supplier.SupplierService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.user.UserServiceImpl;
-import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
+import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ExcelUtils;
@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -30,19 +29,21 @@ import java.util.Map;
 @RequestMapping(value = "/supplier")
 @Api(tags = {"商家管理"})
 public class SupplierController {
-    private Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
-    @Resource
-    private SupplierService supplierService;
+    private final SupplierService supplierService;
 
-    @Resource
-    private UserBusinessServiceImpl userBusinessServiceImpl;
+    private final UserBusinessService userBusinessService;
 
-    @Resource
-    private SystemConfigService systemConfigService;
+    private final SystemConfigService systemConfigService;
 
-    @Resource
-    private UserServiceImpl userServiceImpl;
+    private final UserService userService;
+
+    public SupplierController(SupplierService supplierService, UserBusinessService userBusinessService, SystemConfigService systemConfigService, UserService userService) {
+        this.supplierService = supplierService;
+        this.userBusinessService = userBusinessService;
+        this.systemConfigService = systemConfigService;
+        this.userService = userService;
+    }
 
     @GetMapping(value = "/checkIsNameAndTypeExist")
     @ApiOperation(value = "检查名称和类型是否存在")
@@ -71,9 +72,9 @@ public class SupplierController {
         JSONArray arr = new JSONArray();
         try {
             String type = "UserCustomer";
-            Long userId = userServiceImpl.getUserId(request);
+            Long userId = userService.getUserId(request);
             //获取权限信息
-            String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, userId.toString());
+            String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, userId.toString());
             List<Supplier> supplierList = supplierService.findBySelectCus();
             JSONArray dataArray = new JSONArray();
             if (null != supplierList) {
@@ -102,7 +103,7 @@ public class SupplierController {
      */
     @PostMapping(value = "/findBySelect_sup")
     @ApiOperation(value = "查找供应商信息")
-    public JSONArray findBySelectSup(HttpServletRequest request) throws Exception{
+    public JSONArray findBySelectSup(HttpServletRequest request) {
         JSONArray arr = new JSONArray();
         try {
             List<Supplier> supplierList = supplierService.findBySelectSup();
@@ -130,7 +131,7 @@ public class SupplierController {
      */
     @PostMapping(value = "/findBySelect_organ")
     @ApiOperation(value = "查找往来单位，含供应商和客户信息")
-    public JSONArray findBySelectOrgan(HttpServletRequest request) throws Exception{
+    public JSONArray findBySelectOrgan(HttpServletRequest request) {
         JSONArray arr = new JSONArray();
         try {
             JSONArray dataArray = new JSONArray();
@@ -146,8 +147,8 @@ public class SupplierController {
             }
             //2、获取客户信息
             String type = "UserCustomer";
-            Long userId = userServiceImpl.getUserId(request);
-            String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, userId.toString());
+            Long userId = userService.getUserId(request);
+            String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, userId.toString());
             List<Supplier> customerList = supplierService.findBySelectCus();
             if (null != customerList) {
                 boolean customerFlag = systemConfigService.getCustomerFlag();
@@ -175,7 +176,7 @@ public class SupplierController {
      */
     @PostMapping(value = "/findBySelect_retail")
     @ApiOperation(value = "查找会员信息")
-    public JSONArray findBySelectRetail(HttpServletRequest request)throws Exception {
+    public JSONArray findBySelectRetail(HttpServletRequest request) {
         JSONArray arr = new JSONArray();
         try {
             List<Supplier> supplierList = supplierService.findBySelectRetail();
@@ -206,7 +207,7 @@ public class SupplierController {
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
     public String batchSetStatus(@RequestBody JSONObject jsonObject,
-                                 HttpServletRequest request)throws Exception {
+                                 HttpServletRequest request) {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
@@ -228,11 +229,11 @@ public class SupplierController {
     @GetMapping(value = "/findUserCustomer")
     @ApiOperation(value = "用户对应客户显示")
     public JSONArray findUserCustomer(@RequestParam("UBType") String type, @RequestParam("UBKeyId") String keyId,
-                                   HttpServletRequest request) throws Exception{
+                                   HttpServletRequest request) {
         JSONArray arr = new JSONArray();
         try {
             //获取权限信息
-            String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, keyId);
+            String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, keyId);
             List<Supplier> dataList = supplierService.findUserCustomer();
             //开始拼接json数据
             JSONObject outer = new JSONObject();
@@ -251,7 +252,7 @@ public class SupplierController {
                     item.put("value", supplier.getId());
                     item.put("title", supplier.getSupplier());
                     item.put("attributes", supplier.getSupplier());
-                    Boolean flag = ubValue.contains("[" + supplier.getId().toString() + "]");
+                    boolean flag = ubValue.contains("[" + supplier.getId().toString() + "]");
                     if (flag) {
                         item.put("checked", true);
                     }
@@ -283,7 +284,6 @@ public class SupplierController {
             res.code = 200;
             res.data = map;
         } catch (Exception e) {
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -300,14 +300,13 @@ public class SupplierController {
     @PostMapping(value = "/importVendor")
     @ApiOperation(value = "导入供应商")
     public BaseResponseInfo importVendor(MultipartFile file,
-                            HttpServletRequest request, HttpServletResponse response) throws Exception{
+                            HttpServletRequest request, HttpServletResponse response) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             supplierService.importVendor(file, request);
             res.code = 200;
             res.data = "导入成功";
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "导入失败";
         }
@@ -324,14 +323,13 @@ public class SupplierController {
     @PostMapping(value = "/importCustomer")
     @ApiOperation(value = "导入客户")
     public BaseResponseInfo importCustomer(MultipartFile file,
-                                        HttpServletRequest request, HttpServletResponse response) throws Exception{
+                                        HttpServletRequest request, HttpServletResponse response) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             supplierService.importCustomer(file, request);
             res.code = 200;
             res.data = "导入成功";
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "导入失败";
         }
@@ -348,14 +346,13 @@ public class SupplierController {
     @PostMapping(value = "/importMember")
     @ApiOperation(value = "导入会员")
     public BaseResponseInfo importMember(MultipartFile file,
-                                           HttpServletRequest request, HttpServletResponse response) throws Exception{
+                                           HttpServletRequest request, HttpServletResponse response) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             supplierService.importMember(file, request);
             res.code = 200;
             res.data = "导入成功";
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "导入失败";
         }

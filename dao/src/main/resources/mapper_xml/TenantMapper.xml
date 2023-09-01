@@ -74,7 +74,7 @@
     id, tenant_id, login_name, user_num_limit, type, enabled, create_time, expire_time, 
     remark
   </sql>
-  <select id="selectByExample" parameterType="com.wansensoft.entities.tenant.TenantExample" resultMap="BaseResultMap">
+  <select id="getTenantByTenantId" parameterType="com.wansensoft.entities.tenant.TenantExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct

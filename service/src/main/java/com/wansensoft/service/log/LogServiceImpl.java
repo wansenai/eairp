@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.log.Log;
 import com.wansensoft.entities.log.LogExample;
+import com.wansensoft.service.CommonService;
 import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
@@ -30,13 +31,13 @@ public class LogServiceImpl extends ServiceImpl<LogMapper, Log> implements LogSe
 
     private final LogMapper logMapper;
     private final LogMapperEx logMapperEx;
-    private final UserService userService;
+    private final CommonService commonService;
     private final RedisService redisService;
 
-    public LogServiceImpl(LogMapper logMapper, LogMapperEx logMapperEx, UserService userService, RedisService redisService) {
+    public LogServiceImpl(LogMapper logMapper, LogMapperEx logMapperEx, CommonService commonService, RedisService redisService) {
         this.logMapper = logMapper;
         this.logMapperEx = logMapperEx;
-        this.userService = userService;
+        this.commonService = commonService;
         this.redisService = redisService;
     }
 
@@ -144,7 +145,7 @@ public class LogServiceImpl extends ServiceImpl<LogMapper, Log> implements LogSe
 
     public void insertLog(String moduleName, String content, HttpServletRequest request) {
         try{
-            Long userId = userService.getUserId(request);
+            Long userId = commonService.getUserId(request);
             if(userId!=null) {
                 String clientIp = getLocalIp(request);
                 String createTime = Tools.getNow3();

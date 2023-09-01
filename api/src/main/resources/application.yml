@@ -27,8 +27,8 @@ logging:
   config: classpath:logback-spring.xml
 
 mybatis-plus:
-  mapper-locations: classpath*:./mapper_xml/*.xml
-  type-aliases-package: com.wansensoft.entity
+  mapper-locations: classpath*:/mapper_xml/**/*.xml
+  type-aliases-package: com.wansensoft.entities
   global-config:
     id-type: 0
     #刷新mapper 调试神器

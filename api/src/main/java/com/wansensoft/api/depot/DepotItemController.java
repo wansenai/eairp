@@ -7,17 +7,17 @@ import com.wansensoft.entities.depot.DepotItemVo4DetailByTypeAndMId;
 import com.wansensoft.entities.depot.DepotItemVo4WithInfoEx;
 import com.wansensoft.entities.material.MaterialVo4Unit;
 import com.wansensoft.entities.unit.Unit;
-import com.wansensoft.service.role.RoleServiceImpl;
-import com.wansensoft.service.user.UserServiceImpl;
+import com.wansensoft.service.depot.DepotService;
+import com.wansensoft.service.depotHead.DepotHeadService;
+import com.wansensoft.service.depotItem.DepotItemService;
+import com.wansensoft.service.material.MaterialService;
+import com.wansensoft.service.role.RoleService;
+import com.wansensoft.service.systemConfig.SystemConfigService;
+import com.wansensoft.service.unit.UnitService;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
-import com.wansensoft.service.depot.DepotServiceImpl;
-import com.wansensoft.service.depotHead.DepotHeadServiceImpl;
-import com.wansensoft.service.depotItem.DepotItemServiceImpl;
-import com.wansensoft.service.material.MaterialServiceImpl;
-import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.unit.UnitService;
 import com.wansensoft.utils.*;
 import com.wansensoft.vo.DepotItemStockWarningCount;
 import com.wansensoft.vo.DepotItemVoBatchNumberList;
@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
@@ -49,32 +48,35 @@ import java.util.Map;
 public class DepotItemController {
     private Logger logger = LoggerFactory.getLogger(DepotItemController.class);
 
-    @Resource
-    private DepotHeadServiceImpl depotHeadServiceImpl;
+    private final DepotHeadService depotHeadService;
 
-    @Resource
-    private DepotItemServiceImpl depotItemServiceImpl;
+    private final DepotItemService depotItemService;
 
-    @Resource
-    private MaterialServiceImpl materialServiceImpl;
+    private final MaterialService materialService;
 
-    @Resource
-    private UnitService unitService;
+    private final UnitService unitService;
 
-    @Resource
-    private DepotServiceImpl depotServiceImpl;
+    private final DepotService depotService;
 
-    @Resource
-    private RoleServiceImpl roleServiceImpl;
+    private final RoleService roleService;
 
-    @Resource
-    private UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
-    @Resource
-    private SystemConfigService systemConfigService;
+    private final SystemConfigService systemConfigService;
 
     @Value(value="${file.uploadType}")
     private Long fileUploadType;
+
+    public DepotItemController(DepotHeadService depotHeadService, DepotItemService depotItemService, MaterialService materialService, UnitService unitService, DepotService depotService, RoleService roleService, UserService userService, SystemConfigService systemConfigService) {
+        this.depotHeadService = depotHeadService;
+        this.depotItemService = depotItemService;
+        this.materialService = materialService;
+        this.unitService = unitService;
+        this.depotService = depotService;
+        this.roleService = roleService;
+        this.userService = userService;
+        this.systemConfigService = systemConfigService;
+    }
 
     /**
      * 根据仓库和商品查询单据列表
@@ -103,7 +105,7 @@ public class DepotItemController {
             endTime = endTime + BusinessConstants.DAY_LAST_TIME;
         }
         Boolean forceFlag = systemConfigService.getForceApprovalFlag();
-        List<DepotItemVo4DetailByTypeAndMId> list = depotItemServiceImpl.findDetailByDepotIdsAndMaterialIdList(depotIds, forceFlag, sku,
+        List<DepotItemVo4DetailByTypeAndMId> list = depotItemService.findDetailByDepotIdsAndMaterialIdList(depotIds, forceFlag, sku,
                 batchNumber, StringUtil.toNull(number), beginTime, endTime, mId, (currentPage-1)*pageSize, pageSize);
         JSONArray dataArray = new JSONArray();
         if (list != null) {
@@ -131,7 +133,7 @@ public class DepotItemController {
             return ResponseJsonUtil.returnJson(objectMap, "查找不到数据", ErpInfo.OK.code);
         }
         objectMap.put("rows", dataArray);
-        objectMap.put("total", depotItemServiceImpl.findDetailByDepotIdsAndMaterialIdCount(depotIds, forceFlag, sku,
+        objectMap.put("total", depotItemService.findDetailByDepotIdsAndMaterialIdCount(depotIds, forceFlag, sku,
                 batchNumber, StringUtil.toNull(number), beginTime, endTime, mId));
         return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
     }
@@ -154,13 +156,13 @@ public class DepotItemController {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             BigDecimal stock = BigDecimal.ZERO;
-            List<MaterialVo4Unit> list = materialServiceImpl.getMaterialByBarCode(barCode);
-            if(list!=null && list.size()>0) {
+            List<MaterialVo4Unit> list = materialService.getMaterialByBarCode(barCode);
+            if(list!=null && !list.isEmpty()) {
                 MaterialVo4Unit materialVo4Unit = list.get(0);
                 if(StringUtil.isNotEmpty(materialVo4Unit.getSku())){
-                    stock = depotItemServiceImpl.getSkuStockByParam(depotId,materialVo4Unit.getMeId(),null,null);
+                    stock = depotItemService.getSkuStockByParam(depotId,materialVo4Unit.getMeId(),null,null);
                 } else {
-                    stock = depotItemServiceImpl.getCurrentStockByParam(depotId, materialVo4Unit.getId());
+                    stock = depotItemService.getCurrentStockByParam(depotId, materialVo4Unit.getId());
                     if(materialVo4Unit.getUnitId()!=null) {
                         Unit unit = unitService.getUnit(materialVo4Unit.getUnitId());
                         String commodityUnit = materialVo4Unit.getCommodityUnit();
@@ -172,7 +174,6 @@ public class DepotItemController {
             res.code = 200;
             res.data = map;
         } catch (Exception e) {
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -196,102 +197,100 @@ public class DepotItemController {
                               HttpServletRequest request)throws Exception {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            Long userId = userServiceImpl.getUserId(request);
-            String priceLimit = userServiceImpl.getRoleTypeByUserId(userId).getPriceLimit();
+            Long userId = userService.getUserId(request);
+            String priceLimit = userService.getRoleTypeByUserId(userId).getPriceLimit();
             List<DepotItemVo4WithInfoEx> dataList = new ArrayList<>();
-            String billCategory = depotHeadServiceImpl.getBillCategory(depotHeadServiceImpl.getDepotHead(headerId).getSubType());
+            String billCategory = depotHeadService.getBillCategory(depotHeadService.getDepotHead(headerId).getSubType());
             if(headerId != 0) {
-                dataList = depotItemServiceImpl.getDetailList(headerId);
+                dataList = depotItemService.getDetailList(headerId);
             }
             String[] mpArr = mpList.split(",");
             JSONObject outer = new JSONObject();
             outer.put("total", dataList.size());
             //存放数据json数组
             JSONArray dataArray = new JSONArray();
-            if (null != dataList) {
-                BigDecimal totalOperNumber = BigDecimal.ZERO;
-                BigDecimal totalAllPrice = BigDecimal.ZERO;
-                BigDecimal totalTaxMoney = BigDecimal.ZERO;
-                BigDecimal totalTaxLastMoney = BigDecimal.ZERO;
-                BigDecimal totalWeight = BigDecimal.ZERO;
-                for (DepotItemVo4WithInfoEx diEx : dataList) {
-                    JSONObject item = new JSONObject();
-                    item.put("id", diEx.getId());
-                    item.put("materialExtendId", diEx.getMaterialExtendId() == null ? "" : diEx.getMaterialExtendId());
-                    item.put("barCode", diEx.getBarCode());
-                    item.put("name", diEx.getMName());
-                    item.put("standard", diEx.getMStandard());
-                    item.put("model", diEx.getMModel());
-                    item.put("color", diEx.getMColor());
-                    item.put("materialOther", getOtherInfo(mpArr, diEx));
-                    BigDecimal stock;
-                    Unit unitInfo = materialServiceImpl.findUnit(diEx.getMaterialId()); //查询计量单位信息
-                    String materialUnit = diEx.getMaterialUnit();
-                    if(StringUtil.isNotEmpty(diEx.getSku())){
-                        stock = depotItemServiceImpl.getSkuStockByParam(diEx.getDepotId(),diEx.getMaterialExtendId(),null,null);
-                    } else {
-                        stock = depotItemServiceImpl.getCurrentStockByParam(diEx.getDepotId(),diEx.getMaterialId());
-                        if (StringUtil.isNotEmpty(unitInfo.getName())) {
-                            stock = unitService.parseStockByUnit(stock, unitInfo, materialUnit);
-                        }
+            BigDecimal totalOperNumber = BigDecimal.ZERO;
+            BigDecimal totalAllPrice = BigDecimal.ZERO;
+            BigDecimal totalTaxMoney = BigDecimal.ZERO;
+            BigDecimal totalTaxLastMoney = BigDecimal.ZERO;
+            BigDecimal totalWeight = BigDecimal.ZERO;
+            for (DepotItemVo4WithInfoEx diEx : dataList) {
+                JSONObject item = new JSONObject();
+                item.put("id", diEx.getId());
+                item.put("materialExtendId", diEx.getMaterialExtendId() == null ? "" : diEx.getMaterialExtendId());
+                item.put("barCode", diEx.getBarCode());
+                item.put("name", diEx.getMName());
+                item.put("standard", diEx.getMStandard());
+                item.put("model", diEx.getMModel());
+                item.put("color", diEx.getMColor());
+                item.put("materialOther", getOtherInfo(mpArr, diEx));
+                BigDecimal stock;
+                Unit unitInfo = materialService.findUnit(diEx.getMaterialId()); //查询计量单位信息
+                String materialUnit = diEx.getMaterialUnit();
+                if(StringUtil.isNotEmpty(diEx.getSku())){
+                    stock = depotItemService.getSkuStockByParam(diEx.getDepotId(),diEx.getMaterialExtendId(),null,null);
+                } else {
+                    stock = depotItemService.getCurrentStockByParam(diEx.getDepotId(),diEx.getMaterialId());
+                    if (StringUtil.isNotEmpty(unitInfo.getName())) {
+                        stock = unitService.parseStockByUnit(stock, unitInfo, materialUnit);
                     }
-                    item.put("stock", stock);
-                    item.put("unit", diEx.getMaterialUnit());
-                    item.put("snList", diEx.getSnList());
-                    item.put("batchNumber", diEx.getBatchNumber());
-                    item.put("expirationDate", Tools.parseDateToStr(diEx.getExpirationDate()));
-                    item.put("sku", diEx.getSku());
-                    item.put("enableSerialNumber", diEx.getEnableSerialNumber());
-                    item.put("enableBatchNumber", diEx.getEnableBatchNumber());
-                    item.put("operNumber", diEx.getOperNumber());
-                    item.put("basicNumber", diEx.getBasicNumber());
-                    item.put("preNumber", diEx.getOperNumber()); //原数量
-                    item.put("finishNumber", depotItemServiceImpl.getFinishNumber(diEx.getMaterialExtendId(), diEx.getId(), diEx.getHeaderId(), unitInfo, materialUnit, linkType)); //已入库|已出库
-                    item.put("purchaseDecimal", roleServiceImpl.parseBillPriceByLimit(diEx.getPurchaseDecimal(), billCategory, priceLimit, request));  //采购价
-                    if("basic".equals(linkType)) {
-                        //正常情况显示金额，而以销定购的情况不能显示金额
-                        item.put("unitPrice", roleServiceImpl.parseBillPriceByLimit(diEx.getUnitPrice(), billCategory, priceLimit, request));
-                        item.put("taxUnitPrice", roleServiceImpl.parseBillPriceByLimit(diEx.getTaxUnitPrice(), billCategory, priceLimit, request));
-                        item.put("allPrice", roleServiceImpl.parseBillPriceByLimit(diEx.getAllPrice(), billCategory, priceLimit, request));
-                        item.put("taxRate", roleServiceImpl.parseBillPriceByLimit(diEx.getTaxRate(), billCategory, priceLimit, request));
-                        item.put("taxMoney", roleServiceImpl.parseBillPriceByLimit(diEx.getTaxMoney(), billCategory, priceLimit, request));
-                        item.put("taxLastMoney", roleServiceImpl.parseBillPriceByLimit(diEx.getTaxLastMoney(), billCategory, priceLimit, request));
-                    }
-                    BigDecimal allWeight = diEx.getBasicNumber()==null||diEx.getWeight()==null?BigDecimal.ZERO:diEx.getBasicNumber().multiply(diEx.getWeight());
-                    item.put("weight", allWeight);
-                    item.put("remark", diEx.getRemark());
-                    item.put("imgName", diEx.getImgName());
-                    if(fileUploadType == 2) {
-                        item.put("imgSmall", "small");
-                        item.put("imgLarge", "large");
-                    } else {
-                        item.put("imgSmall", "");
-                        item.put("imgLarge", "");
-                    }
-                    item.put("linkId", diEx.getLinkId());
-                    item.put("depotId", diEx.getDepotId() == null ? "" : diEx.getDepotId());
-                    item.put("depotName", diEx.getDepotId() == null ? "" : diEx.getDepotName());
-                    item.put("anotherDepotId", diEx.getAnotherDepotId() == null ? "" : diEx.getAnotherDepotId());
-                    item.put("anotherDepotName", diEx.getAnotherDepotId() == null ? "" : diEx.getAnotherDepotName());
-                    item.put("mType", diEx.getMaterialType());
-                    item.put("op", 1);
-                    dataArray.add(item);
-                    //合计数据汇总
-                    totalOperNumber = totalOperNumber.add(diEx.getOperNumber()==null?BigDecimal.ZERO:diEx.getOperNumber());
-                    totalAllPrice = totalAllPrice.add(diEx.getAllPrice()==null?BigDecimal.ZERO:diEx.getAllPrice());
-                    totalTaxMoney = totalTaxMoney.add(diEx.getTaxMoney()==null?BigDecimal.ZERO:diEx.getTaxMoney());
-                    totalTaxLastMoney = totalTaxLastMoney.add(diEx.getTaxLastMoney()==null?BigDecimal.ZERO:diEx.getTaxLastMoney());
-                    totalWeight = totalWeight.add(allWeight);
                 }
-                if(StringUtil.isNotEmpty(isReadOnly) && "1".equals(isReadOnly)) {
-                    JSONObject footItem = new JSONObject();
-                    footItem.put("operNumber", totalOperNumber);
-                    footItem.put("allPrice", roleServiceImpl.parseBillPriceByLimit(totalAllPrice, billCategory, priceLimit, request));
-                    footItem.put("taxMoney", roleServiceImpl.parseBillPriceByLimit(totalTaxMoney, billCategory, priceLimit, request));
-                    footItem.put("taxLastMoney", roleServiceImpl.parseBillPriceByLimit(totalTaxLastMoney, billCategory, priceLimit, request));
-                    footItem.put("weight", totalWeight);
-                    dataArray.add(footItem);
+                item.put("stock", stock);
+                item.put("unit", diEx.getMaterialUnit());
+                item.put("snList", diEx.getSnList());
+                item.put("batchNumber", diEx.getBatchNumber());
+                item.put("expirationDate", Tools.parseDateToStr(diEx.getExpirationDate()));
+                item.put("sku", diEx.getSku());
+                item.put("enableSerialNumber", diEx.getEnableSerialNumber());
+                item.put("enableBatchNumber", diEx.getEnableBatchNumber());
+                item.put("operNumber", diEx.getOperNumber());
+                item.put("basicNumber", diEx.getBasicNumber());
+                item.put("preNumber", diEx.getOperNumber()); //原数量
+                item.put("finishNumber", depotItemService.getFinishNumber(diEx.getMaterialExtendId(), diEx.getId(), diEx.getHeaderId(), unitInfo, materialUnit, linkType)); //已入库|已出库
+                item.put("purchaseDecimal", roleService.parseBillPriceByLimit(diEx.getPurchaseDecimal(), billCategory, priceLimit, request));  //采购价
+                if("basic".equals(linkType)) {
+                    //正常情况显示金额，而以销定购的情况不能显示金额
+                    item.put("unitPrice", roleService.parseBillPriceByLimit(diEx.getUnitPrice(), billCategory, priceLimit, request));
+                    item.put("taxUnitPrice", roleService.parseBillPriceByLimit(diEx.getTaxUnitPrice(), billCategory, priceLimit, request));
+                    item.put("allPrice", roleService.parseBillPriceByLimit(diEx.getAllPrice(), billCategory, priceLimit, request));
+                    item.put("taxRate", roleService.parseBillPriceByLimit(diEx.getTaxRate(), billCategory, priceLimit, request));
+                    item.put("taxMoney", roleService.parseBillPriceByLimit(diEx.getTaxMoney(), billCategory, priceLimit, request));
+                    item.put("taxLastMoney", roleService.parseBillPriceByLimit(diEx.getTaxLastMoney(), billCategory, priceLimit, request));
                 }
+                BigDecimal allWeight = diEx.getBasicNumber()==null||diEx.getWeight()==null?BigDecimal.ZERO:diEx.getBasicNumber().multiply(diEx.getWeight());
+                item.put("weight", allWeight);
+                item.put("remark", diEx.getRemark());
+                item.put("imgName", diEx.getImgName());
+                if(fileUploadType == 2) {
+                    item.put("imgSmall", "small");
+                    item.put("imgLarge", "large");
+                } else {
+                    item.put("imgSmall", "");
+                    item.put("imgLarge", "");
+                }
+                item.put("linkId", diEx.getLinkId());
+                item.put("depotId", diEx.getDepotId() == null ? "" : diEx.getDepotId());
+                item.put("depotName", diEx.getDepotId() == null ? "" : diEx.getDepotName());
+                item.put("anotherDepotId", diEx.getAnotherDepotId() == null ? "" : diEx.getAnotherDepotId());
+                item.put("anotherDepotName", diEx.getAnotherDepotId() == null ? "" : diEx.getAnotherDepotName());
+                item.put("mType", diEx.getMaterialType());
+                item.put("op", 1);
+                dataArray.add(item);
+                //合计数据汇总
+                totalOperNumber = totalOperNumber.add(diEx.getOperNumber()==null?BigDecimal.ZERO:diEx.getOperNumber());
+                totalAllPrice = totalAllPrice.add(diEx.getAllPrice()==null?BigDecimal.ZERO:diEx.getAllPrice());
+                totalTaxMoney = totalTaxMoney.add(diEx.getTaxMoney()==null?BigDecimal.ZERO:diEx.getTaxMoney());
+                totalTaxLastMoney = totalTaxLastMoney.add(diEx.getTaxLastMoney()==null?BigDecimal.ZERO:diEx.getTaxLastMoney());
+                totalWeight = totalWeight.add(allWeight);
+            }
+            if(StringUtil.isNotEmpty(isReadOnly) && "1".equals(isReadOnly)) {
+                JSONObject footItem = new JSONObject();
+                footItem.put("operNumber", totalOperNumber);
+                footItem.put("allPrice", roleService.parseBillPriceByLimit(totalAllPrice, billCategory, priceLimit, request));
+                footItem.put("taxMoney", roleService.parseBillPriceByLimit(totalTaxMoney, billCategory, priceLimit, request));
+                footItem.put("taxLastMoney", roleService.parseBillPriceByLimit(totalTaxLastMoney, billCategory, priceLimit, request));
+                footItem.put("weight", totalWeight);
+                dataArray.add(footItem);
             }
             outer.put("rows", dataArray);
             res.code = 200;
@@ -355,15 +354,15 @@ public class DepotItemController {
         try {
             List<Long> categoryIdList = new ArrayList<>();
             if(categoryId != null){
-                categoryIdList = materialServiceImpl.getListByParentId(categoryId);
+                categoryIdList = materialService.getListByParentId(categoryId);
             }
             String timeA = Tools.firstDayOfMonth(monthTime) + BusinessConstants.DAY_FIRST_TIME;
             String timeB = Tools.lastDayOfMonth(monthTime) + BusinessConstants.DAY_LAST_TIME;
             List<Long> depotList = parseListByDepotIds(depotIds);
-            List<DepotItemVo4WithInfoEx> dataList = depotItemServiceImpl.findByAll(StringUtil.toNull(materialParam),
+            List<DepotItemVo4WithInfoEx> dataList = depotItemService.findByAll(StringUtil.toNull(materialParam),
                     categoryIdList, timeB,(currentPage-1)*pageSize, pageSize);
             String[] mpArr = mpList.split(",");
-            int total = depotItemServiceImpl.findByAllCount(StringUtil.toNull(materialParam), categoryIdList, timeB);
+            int total = depotItemService.findByAllCount(StringUtil.toNull(materialParam), categoryIdList, timeB);
             map.put("total", total);
             //存放数据json数组
             JSONArray dataArray = new JSONArray();
@@ -381,8 +380,8 @@ public class DepotItemController {
                     item.put("materialColor", diEx.getMColor());
                     item.put("unitId", diEx.getUnitId());
                     item.put("unitName", null!=diEx.getUnitId() ? diEx.getMaterialUnit()+"[多单位]" : diEx.getMaterialUnit());
-                    BigDecimal prevSum = depotItemServiceImpl.getStockByParamWithDepotList(depotList,mId,null,timeA);
-                    Map<String,BigDecimal> intervalMap = depotItemServiceImpl.getIntervalMapByParamWithDepotList(depotList,mId,timeA,timeB);
+                    BigDecimal prevSum = depotItemService.getStockByParamWithDepotList(depotList,mId,null,timeA);
+                    Map<String,BigDecimal> intervalMap = depotItemService.getIntervalMapByParamWithDepotList(depotList,mId,timeA,timeB);
                     BigDecimal inSum = intervalMap.get("inSum");
                     BigDecimal outSum = intervalMap.get("outSum");
                     BigDecimal thisSum = prevSum.add(inSum).subtract(outSum);
@@ -391,7 +390,7 @@ public class DepotItemController {
                     item.put("outSum", outSum);
                     item.put("thisSum", thisSum);
                     //将小单位的库存换算为大单位的库存
-                    item.put("bigUnitStock", materialServiceImpl.getBigUnitStock(thisSum, diEx.getUnitId()));
+                    item.put("bigUnitStock", materialService.getBigUnitStock(thisSum, diEx.getUnitId()));
                     item.put("unitPrice", diEx.getPurchaseDecimal());
                     item.put("thisAllPrice", thisSum.multiply(diEx.getPurchaseDecimal()));
                     dataArray.add(item);
@@ -431,18 +430,18 @@ public class DepotItemController {
         try {
             List<Long> categoryIdList = new ArrayList<>();
             if(categoryId != null){
-                categoryIdList = materialServiceImpl.getListByParentId(categoryId);
+                categoryIdList = materialService.getListByParentId(categoryId);
             }
             String endTime = Tools.lastDayOfMonth(monthTime) + BusinessConstants.DAY_LAST_TIME;
             List<Long> depotList = parseListByDepotIds(depotIds);
-            List<DepotItemVo4WithInfoEx> dataList = depotItemServiceImpl.findByAll(StringUtil.toNull(materialParam),
+            List<DepotItemVo4WithInfoEx> dataList = depotItemService.findByAll(StringUtil.toNull(materialParam),
                     categoryIdList, endTime, null, null);
             BigDecimal thisAllStock = BigDecimal.ZERO;
             BigDecimal thisAllPrice = BigDecimal.ZERO;
             if (null != dataList) {
                 for (DepotItemVo4WithInfoEx diEx : dataList) {
                     Long mId = diEx.getMId();
-                    BigDecimal thisSum = depotItemServiceImpl.getStockByParamWithDepotList(depotList,mId,null,endTime);
+                    BigDecimal thisSum = depotItemService.getStockByParamWithDepotList(depotList,mId,null,endTime);
                     thisAllStock = thisAllStock.add(thisSum);
                     BigDecimal unitPrice = diEx.getPurchaseDecimal();
                     if(unitPrice == null) {
@@ -472,7 +471,7 @@ public class DepotItemController {
             depotList = StringUtil.strToLongList(depotIds);
         } else {
             //未选择仓库时默认为当前用户有权限的仓库
-            JSONArray depotArr = depotServiceImpl.findDepotByCurrentUser();
+            JSONArray depotArr = depotService.findDepotByCurrentUser();
             for(Object obj: depotArr) {
                 JSONObject object = JSONObject.parseObject(obj.toString());
                 depotList.add(object.getLong("id"));
@@ -514,14 +513,14 @@ public class DepotItemController {
         beginTime = Tools.parseDayToTime(beginTime, BusinessConstants.DAY_FIRST_TIME);
         endTime = Tools.parseDayToTime(endTime,BusinessConstants.DAY_LAST_TIME);
         try {
-            String [] creatorArray = depotHeadServiceImpl.getCreatorArray(roleType);
+            String [] creatorArray = depotHeadService.getCreatorArray(roleType);
             String [] organArray = null;
-            List<Long> depotList = depotServiceImpl.parseDepotList(depotId);
+            List<Long> depotList = depotService.parseDepotList(depotId);
             Boolean forceFlag = systemConfigService.getForceApprovalFlag();
-            List<DepotItemVo4WithInfoEx> dataList = depotItemServiceImpl.getListWithBugOrSale(StringUtil.toNull(materialParam),
+            List<DepotItemVo4WithInfoEx> dataList = depotItemService.getListWithBugOrSale(StringUtil.toNull(materialParam),
                     "buy", beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, (currentPage-1)*pageSize, pageSize);
             String[] mpArr = mpList.split(",");
-            int total = depotItemServiceImpl.getListWithBugOrSaleCount(StringUtil.toNull(materialParam),
+            int total = depotItemService.getListWithBugOrSaleCount(StringUtil.toNull(materialParam),
                     "buy", beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag);
             map.put("total", total);
             //存放数据json数组
@@ -529,10 +528,10 @@ public class DepotItemController {
             if (null != dataList) {
                 for (DepotItemVo4WithInfoEx diEx : dataList) {
                     JSONObject item = new JSONObject();
-                    BigDecimal InSum = depotItemServiceImpl.buyOrSale("入库", "采购", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
-                    BigDecimal OutSum = depotItemServiceImpl.buyOrSale("出库", "采购退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
-                    BigDecimal InSumPrice = depotItemServiceImpl.buyOrSale("入库", "采购", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
-                    BigDecimal OutSumPrice = depotItemServiceImpl.buyOrSale("出库", "采购退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+                    BigDecimal InSum = depotItemService.buyOrSale("入库", "采购", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
+                    BigDecimal OutSum = depotItemService.buyOrSale("出库", "采购退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
+                    BigDecimal InSumPrice = depotItemService.buyOrSale("入库", "采购", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+                    BigDecimal OutSumPrice = depotItemService.buyOrSale("出库", "采购退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
                     BigDecimal InOutSumPrice = InSumPrice.subtract(OutSumPrice);
                     item.put("barCode", diEx.getBarCode());
                     item.put("materialName", diEx.getMName());
@@ -552,8 +551,8 @@ public class DepotItemController {
                     dataArray.add(item);
                 }
             }
-            BigDecimal inSumPriceTotal = depotItemServiceImpl.buyOrSale("入库", "采购", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
-            BigDecimal outSumPriceTotal = depotItemServiceImpl.buyOrSale("出库", "采购退货", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+            BigDecimal inSumPriceTotal = depotItemService.buyOrSale("入库", "采购", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+            BigDecimal outSumPriceTotal = depotItemService.buyOrSale("出库", "采购退货", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
             BigDecimal realityPriceTotal = inSumPriceTotal.subtract(outSumPriceTotal);
             map.put("rows", dataArray);
             map.put("realityPriceTotal", realityPriceTotal);
@@ -595,14 +594,14 @@ public class DepotItemController {
         beginTime = Tools.parseDayToTime(beginTime, BusinessConstants.DAY_FIRST_TIME);
         endTime = Tools.parseDayToTime(endTime,BusinessConstants.DAY_LAST_TIME);
         try {
-            String [] creatorArray = depotHeadServiceImpl.getCreatorArray(roleType);
+            String [] creatorArray = depotHeadService.getCreatorArray(roleType);
             String [] organArray = null;
-            List<Long> depotList = depotServiceImpl.parseDepotList(depotId);
+            List<Long> depotList = depotService.parseDepotList(depotId);
             Boolean forceFlag = systemConfigService.getForceApprovalFlag();
-            List<DepotItemVo4WithInfoEx> dataList = depotItemServiceImpl.getListWithBugOrSale(StringUtil.toNull(materialParam),
+            List<DepotItemVo4WithInfoEx> dataList = depotItemService.getListWithBugOrSale(StringUtil.toNull(materialParam),
                     "sale", beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, (currentPage-1)*pageSize, pageSize);
             String[] mpArr = mpList.split(",");
-            int total = depotItemServiceImpl.getListWithBugOrSaleCount(StringUtil.toNull(materialParam),
+            int total = depotItemService.getListWithBugOrSaleCount(StringUtil.toNull(materialParam),
                     "sale", beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag);
             map.put("total", total);
             //存放数据json数组
@@ -610,10 +609,10 @@ public class DepotItemController {
             if (null != dataList) {
                 for (DepotItemVo4WithInfoEx diEx : dataList) {
                     JSONObject item = new JSONObject();
-                    BigDecimal OutSumRetail = depotItemServiceImpl.buyOrSale("出库", "零售", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
-                    BigDecimal InSumRetail = depotItemServiceImpl.buyOrSale("入库", "零售退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
-                    BigDecimal OutSumRetailPrice = depotItemServiceImpl.buyOrSale("出库", "零售", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
-                    BigDecimal InSumRetailPrice = depotItemServiceImpl.buyOrSale("入库", "零售退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+                    BigDecimal OutSumRetail = depotItemService.buyOrSale("出库", "零售", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
+                    BigDecimal InSumRetail = depotItemService.buyOrSale("入库", "零售退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
+                    BigDecimal OutSumRetailPrice = depotItemService.buyOrSale("出库", "零售", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+                    BigDecimal InSumRetailPrice = depotItemService.buyOrSale("入库", "零售退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
                     BigDecimal OutInSumPrice = OutSumRetailPrice.subtract(InSumRetailPrice);
                     item.put("barCode", diEx.getBarCode());
                     item.put("materialName", diEx.getMName());
@@ -633,8 +632,8 @@ public class DepotItemController {
                     dataArray.add(item);
                 }
             }
-            BigDecimal outSumPriceTotal = depotItemServiceImpl.buyOrSale("出库", "零售", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
-            BigDecimal inSumPriceTotal = depotItemServiceImpl.buyOrSale("入库", "零售退货", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+            BigDecimal outSumPriceTotal = depotItemService.buyOrSale("出库", "零售", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+            BigDecimal inSumPriceTotal = depotItemService.buyOrSale("入库", "零售退货", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
             BigDecimal realityPriceTotal = outSumPriceTotal.subtract(inSumPriceTotal);
             map.put("rows", dataArray);
             map.put("realityPriceTotal", realityPriceTotal);
@@ -677,14 +676,14 @@ public class DepotItemController {
         beginTime = Tools.parseDayToTime(beginTime, BusinessConstants.DAY_FIRST_TIME);
         endTime = Tools.parseDayToTime(endTime,BusinessConstants.DAY_LAST_TIME);
         try {
-            String [] creatorArray = depotHeadServiceImpl.getCreatorArray(roleType);
-            String [] organArray = depotHeadServiceImpl.getOrganArray("销售", "");
-            List<Long> depotList = depotServiceImpl.parseDepotList(depotId);
+            String [] creatorArray = depotHeadService.getCreatorArray(roleType);
+            String [] organArray = depotHeadService.getOrganArray("销售", "");
+            List<Long> depotList = depotService.parseDepotList(depotId);
             Boolean forceFlag = systemConfigService.getForceApprovalFlag();
-            List<DepotItemVo4WithInfoEx> dataList = depotItemServiceImpl.getListWithBugOrSale(StringUtil.toNull(materialParam),
+            List<DepotItemVo4WithInfoEx> dataList = depotItemService.getListWithBugOrSale(StringUtil.toNull(materialParam),
                     "sale", beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, (currentPage-1)*pageSize, pageSize);
             String[] mpArr = mpList.split(",");
-            int total = depotItemServiceImpl.getListWithBugOrSaleCount(StringUtil.toNull(materialParam),
+            int total = depotItemService.getListWithBugOrSaleCount(StringUtil.toNull(materialParam),
                     "sale", beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag);
             map.put("total", total);
             //存放数据json数组
@@ -692,10 +691,10 @@ public class DepotItemController {
             if (null != dataList) {
                 for (DepotItemVo4WithInfoEx diEx : dataList) {
                     JSONObject item = new JSONObject();
-                    BigDecimal OutSum = depotItemServiceImpl.buyOrSale("出库", "销售", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
-                    BigDecimal InSum = depotItemServiceImpl.buyOrSale("入库", "销售退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
-                    BigDecimal OutSumPrice = depotItemServiceImpl.buyOrSale("出库", "销售", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
-                    BigDecimal InSumPrice = depotItemServiceImpl.buyOrSale("入库", "销售退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+                    BigDecimal OutSum = depotItemService.buyOrSale("出库", "销售", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
+                    BigDecimal InSum = depotItemService.buyOrSale("入库", "销售退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "number");
+                    BigDecimal OutSumPrice = depotItemService.buyOrSale("出库", "销售", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+                    BigDecimal InSumPrice = depotItemService.buyOrSale("入库", "销售退货", diEx.getMId(), beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
                     BigDecimal OutInSumPrice = OutSumPrice.subtract(InSumPrice);
                     item.put("barCode", diEx.getBarCode());
                     item.put("materialName", diEx.getMName());
@@ -715,8 +714,8 @@ public class DepotItemController {
                     dataArray.add(item);
                 }
             }
-            BigDecimal outSumPriceTotal = depotItemServiceImpl.buyOrSale("出库", "销售", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
-            BigDecimal inSumPriceTotal = depotItemServiceImpl.buyOrSale("入库", "销售退货", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+            BigDecimal outSumPriceTotal = depotItemService.buyOrSale("出库", "销售", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
+            BigDecimal inSumPriceTotal = depotItemService.buyOrSale("入库", "销售退货", null, beginTime, endTime, creatorArray, organId, organArray, depotList, forceFlag, "price");
             BigDecimal realityPriceTotal = outSumPriceTotal.subtract(inSumPriceTotal);
             map.put("rows", dataArray);
             map.put("realityPriceTotal", realityPriceTotal);
@@ -767,14 +766,14 @@ public class DepotItemController {
                 depotList.add(depotId);
             } else {
                 //未选择仓库时默认为当前用户有权限的仓库
-                JSONArray depotArr = depotServiceImpl.findDepotByCurrentUser();
+                JSONArray depotArr = depotService.findDepotByCurrentUser();
                 for(Object obj: depotArr) {
                     JSONObject object = JSONObject.parseObject(obj.toString());
                     depotList.add(object.getLong("id"));
                 }
             }
             String[] mpArr = mpList.split(",");
-            List<DepotItemStockWarningCount> list = depotItemServiceImpl.findStockWarningCount((currentPage-1)*pageSize, pageSize, materialParam, depotList);
+            List<DepotItemStockWarningCount> list = depotItemService.findStockWarningCount((currentPage-1)*pageSize, pageSize, materialParam, depotList);
             //存放数据json数组
             if (null != list) {
                 for (DepotItemStockWarningCount disw : list) {
@@ -793,7 +792,7 @@ public class DepotItemController {
                     }
                 }
             }
-            int total = depotItemServiceImpl.findStockWarningCountTotal(materialParam, depotList);
+            int total = depotItemService.findStockWarningCountTotal(materialParam, depotList);
             map.put("total", total);
             map.put("rows", list);
             res.code = 200;
@@ -820,36 +819,36 @@ public class DepotItemController {
         BaseResponseInfo res = new BaseResponseInfo();
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            Long userId = userServiceImpl.getUserId(request);
-            String priceLimit = userServiceImpl.getRoleTypeByUserId(userId).getPriceLimit();
+            Long userId = userService.getUserId(request);
+            String priceLimit = userService.getRoleTypeByUserId(userId).getPriceLimit();
             List<String> list = Tools.getLastMonths(6);
             JSONArray buyPriceList = new JSONArray();
             for(String month: list) {
                 JSONObject obj = new JSONObject();
-                BigDecimal outPrice = depotItemServiceImpl.inOrOutPrice("入库", "采购", month, roleType);
-                BigDecimal inPrice = depotItemServiceImpl.inOrOutPrice("出库", "采购退货", month, roleType);
+                BigDecimal outPrice = depotItemService.inOrOutPrice("入库", "采购", month, roleType);
+                BigDecimal inPrice = depotItemService.inOrOutPrice("出库", "采购退货", month, roleType);
                 obj.put("x", month);
-                obj.put("y", roleServiceImpl.parseHomePriceByLimit(outPrice.subtract(inPrice), "buy", priceLimit, "***", request));
+                obj.put("y", roleService.parseHomePriceByLimit(outPrice.subtract(inPrice), "buy", priceLimit, "***", request));
                 buyPriceList.add(obj);
             }
             map.put("buyPriceList", buyPriceList);
             JSONArray salePriceList = new JSONArray();
             for(String month: list) {
                 JSONObject obj = new JSONObject();
-                BigDecimal outPrice = depotItemServiceImpl.inOrOutPrice("出库", "销售", month, roleType);
-                BigDecimal inPrice = depotItemServiceImpl.inOrOutPrice("入库", "销售退货", month, roleType);
+                BigDecimal outPrice = depotItemService.inOrOutPrice("出库", "销售", month, roleType);
+                BigDecimal inPrice = depotItemService.inOrOutPrice("入库", "销售退货", month, roleType);
                 obj.put("x", month);
-                obj.put("y", roleServiceImpl.parseHomePriceByLimit(outPrice.subtract(inPrice), "sale", priceLimit, "***", request));
+                obj.put("y", roleService.parseHomePriceByLimit(outPrice.subtract(inPrice), "sale", priceLimit, "***", request));
                 salePriceList.add(obj);
             }
             map.put("salePriceList", salePriceList);
             JSONArray retailPriceList = new JSONArray();
             for(String month: list) {
                 JSONObject obj = new JSONObject();
-                BigDecimal outPrice = depotItemServiceImpl.inOrOutRetailPrice("出库", "零售", month, roleType);
-                BigDecimal inPrice = depotItemServiceImpl.inOrOutRetailPrice("入库", "零售退货", month, roleType);
+                BigDecimal outPrice = depotItemService.inOrOutRetailPrice("出库", "零售", month, roleType);
+                BigDecimal inPrice = depotItemService.inOrOutRetailPrice("入库", "零售退货", month, roleType);
                 obj.put("x", month);
-                obj.put("y", roleServiceImpl.parseHomePriceByLimit(outPrice.subtract(inPrice), "retail", priceLimit, "***", request));
+                obj.put("y", roleService.parseHomePriceByLimit(outPrice.subtract(inPrice), "retail", priceLimit, "***", request));
                 retailPriceList.add(obj);
             }
             map.put("retailPriceList", retailPriceList);
@@ -881,16 +880,15 @@ public class DepotItemController {
         try {
             String number = "";
             if(depotItemId != null) {
-                DepotItem depotItem = depotItemServiceImpl.getDepotItem(depotItemId);
-                number = depotHeadServiceImpl.getDepotHead(depotItem.getHeaderId()).getNumber();
+                DepotItem depotItem = depotItemService.getDepotItem(depotItemId);
+                number = depotHeadService.getDepotHead(depotItem.getHeaderId()).getNumber();
             }
-            List<DepotItemVoBatchNumberList> list = depotItemServiceImpl.getBatchNumberList(number, name, depotId, barCode, batchNumber);
+            List<DepotItemVoBatchNumberList> list = depotItemService.getBatchNumberList(number, name, depotId, barCode, batchNumber);
             map.put("rows", list);
             map.put("total", list.size());
             res.code = 200;
             res.data = map;
         } catch (Exception e) {
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -949,7 +947,7 @@ public class DepotItemController {
                 if (StringUtil.isNotEmpty(barCodes)) {
                     barCodes = barCodes.substring(0, barCodes.length() - 1);
                 }
-                JSONObject map = depotItemServiceImpl.parseMapByExcelData(barCodes, detailList, prefixNo);
+                JSONObject map = depotItemService.parseMapByExcelData(barCodes, detailList, prefixNo);
                 if (map != null) {
                     res.code = 200;
                 } else {
@@ -962,7 +960,6 @@ public class DepotItemController {
             data.put("message", e.getData().get("message"));
             res.data = data;
         } catch (Exception e) {
-            e.printStackTrace();
             message = "导入失败，请检查表格内容";
             res.code = 500;
             data.put("message", message);

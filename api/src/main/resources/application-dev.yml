@@ -9,6 +9,19 @@ spring:
         initial-size: 5
         min-idle: 5
         max-active: 20
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 123456
+      jedis:
+        pool:
+          max-active: 20
+          max-wait: 100
+          max-idle: 20
+          min-idle: 5
+      timeout: 10000
+
 
 tenant:
   userNumLimit: 1000000

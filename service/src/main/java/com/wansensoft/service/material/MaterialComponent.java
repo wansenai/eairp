@@ -15,15 +15,15 @@ import java.util.Map;
 @MaterialResource
 public class MaterialComponent implements ICommonQuery {
 
-    private final MaterialServiceImpl materialServiceImpl;
+    private final MaterialService materialService;
 
-    public MaterialComponent(MaterialServiceImpl materialServiceImpl) {
-        this.materialServiceImpl = materialServiceImpl;
+    public MaterialComponent(MaterialService materialService) {
+        this.materialService = materialService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return materialServiceImpl.getMaterial(id);
+        return materialService.getMaterial(id);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class MaterialComponent implements ICommonQuery {
         String enabled = StringUtil.getInfo(search, "enabled");
         String remark = StringUtil.getInfo(search, "remark");
         String mpList = StringUtil.getInfo(search, "mpList");
-        return materialServiceImpl.select(materialParam, color, materialOther, weight, expiryNum,
+        return materialService.select(materialParam, color, materialOther, weight, expiryNum,
                 enableSerialNumber, enableBatchNumber, position, enabled, remark, categoryId, mpList, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
@@ -64,33 +64,33 @@ public class MaterialComponent implements ICommonQuery {
         String enabled = StringUtil.getInfo(search, "enabled");
         String remark = StringUtil.getInfo(search, "remark");
         String mpList = StringUtil.getInfo(search, "mpList");
-        return materialServiceImpl.countMaterial(materialParam, color, materialOther, weight, expiryNum,
+        return materialService.countMaterial(materialParam, color, materialOther, weight, expiryNum,
                 enableSerialNumber, enableBatchNumber, position, enabled, remark, categoryId, mpList);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request) throws Exception{
-        return materialServiceImpl.insertMaterial(obj, request);
+        return materialService.insertMaterial(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return materialServiceImpl.updateMaterial(obj, request);
+        return materialService.updateMaterial(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return materialServiceImpl.deleteMaterial(id, request);
+        return materialService.deleteMaterial(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return materialServiceImpl.batchDeleteMaterial(ids, request);
+        return materialService.batchDeleteMaterial(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return materialServiceImpl.checkIsNameExist(id, name);
+        return materialService.checkIsNameExist(id, name);
     }
 
 }

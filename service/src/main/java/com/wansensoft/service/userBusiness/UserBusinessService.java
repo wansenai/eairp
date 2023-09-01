@@ -32,4 +32,6 @@ public interface UserBusinessService extends IService<UserBusiness> {
     Long checkIsValueExist(String type, String keyId);
 
     int updateBtnStr(String keyId, String type, String btnStr);
+
+    int checkIsNameExist(Long id, String name);
 }

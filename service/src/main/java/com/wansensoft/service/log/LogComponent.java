@@ -15,15 +15,15 @@ import java.util.Map;
 @LogResource
 public class LogComponent implements ICommonQuery {
 
-    private final LogServiceImpl logServiceImpl;
+    private final LogService logService;
 
-    public LogComponent(LogServiceImpl logServiceImpl) {
-        this.logServiceImpl = logServiceImpl;
+    public LogComponent(LogService logService) {
+        this.logService = logService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return logServiceImpl.getLog(id);
+        return logService.getLog(id);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class LogComponent implements ICommonQuery {
         String beginTime = StringUtil.getInfo(search, "beginTime");
         String endTime = StringUtil.getInfo(search, "endTime");
         String content = StringUtil.getInfo(search, "content");
-        return logServiceImpl.select(operation, userInfo, clientIp, status, beginTime, endTime, content,
+        return logService.select(operation, userInfo, clientIp, status, beginTime, endTime, content,
                 QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
@@ -54,27 +54,27 @@ public class LogComponent implements ICommonQuery {
         String beginTime = StringUtil.getInfo(search, "beginTime");
         String endTime = StringUtil.getInfo(search, "endTime");
         String content = StringUtil.getInfo(search, "content");
-        return logServiceImpl.countLog(operation, userInfo, clientIp, status, beginTime, endTime, content);
+        return logService.countLog(operation, userInfo, clientIp, status, beginTime, endTime, content);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request)throws Exception {
-        return logServiceImpl.insertLog(obj, request);
+        return logService.insertLog(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return logServiceImpl.updateLog(obj, request);
+        return logService.updateLog(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return logServiceImpl.deleteLog(id, request);
+        return logService.deleteLog(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return logServiceImpl.batchDeleteLog(ids, request);
+        return logService.batchDeleteLog(ids, request);
     }
 
     @Override

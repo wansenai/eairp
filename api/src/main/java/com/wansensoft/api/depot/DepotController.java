@@ -5,9 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.depot.Depot;
 import com.wansensoft.entities.depot.DepotEx;
 import com.wansensoft.entities.material.MaterialInitialStock;
-import com.wansensoft.service.depot.DepotServiceImpl;
-import com.wansensoft.service.material.MaterialServiceImpl;
-import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
+import com.wansensoft.service.depot.DepotService;
+import com.wansensoft.service.material.MaterialService;
+import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ResponseJsonUtil;
@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
@@ -31,14 +30,18 @@ import java.util.*;
 public class DepotController {
     private Logger logger = LoggerFactory.getLogger(DepotController.class);
 
-    @Resource
-    private DepotServiceImpl depotServiceImpl;
 
-    @Resource
-    private UserBusinessServiceImpl userBusinessServiceImpl;
+    private final DepotService depotService;
 
-    @Resource
-    private MaterialServiceImpl materialServiceImpl;
+    private final UserBusinessService userBusinessService;
+
+    private final MaterialService materialService;
+
+    public DepotController(DepotService depotService, UserBusinessService userBusinessService, MaterialService materialService) {
+        this.depotService = depotService;
+        this.userBusinessService = userBusinessService;
+        this.materialService = materialService;
+    }
 
     /**
      * 仓库列表
@@ -51,11 +54,10 @@ public class DepotController {
     public BaseResponseInfo getAllList(HttpServletRequest request) throws Exception{
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            List<Depot> depotList = depotServiceImpl.getAllList();
+            List<Depot> depotList = depotService.getAllList();
             res.code = 200;
             res.data = depotList;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -76,8 +78,8 @@ public class DepotController {
         JSONArray arr = new JSONArray();
         try {
             //获取权限信息
-            String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, keyId);
-            List<Depot> dataList = depotServiceImpl.findUserDepot();
+            String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, keyId);
+            List<Depot> dataList = depotService.findUserDepot();
             //开始拼接json数据
             JSONObject outer = new JSONObject();
             outer.put("id", 0);
@@ -121,11 +123,10 @@ public class DepotController {
     public BaseResponseInfo findDepotByCurrentUser(HttpServletRequest request) throws Exception{
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            JSONArray arr = depotServiceImpl.findDepotByCurrentUser();
+            JSONArray arr = depotService.findDepotByCurrentUser();
             res.code = 200;
             res.data = arr;
         } catch (Exception e) {
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -145,7 +146,7 @@ public class DepotController {
                                        HttpServletRequest request) throws Exception{
         Long depotId = object.getLong("id");
         Map<String, Object> objectMap = new HashMap<>();
-        int res = depotServiceImpl.updateIsDefault(depotId);
+        int res = depotService.updateIsDefault(depotId);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
@@ -165,16 +166,16 @@ public class DepotController {
                                        HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            List<Depot> list = depotServiceImpl.getAllList();
+            List<Depot> list = depotService.getAllList();
             List<DepotEx> depotList = new ArrayList<DepotEx>();
             for(Depot depot: list) {
                 DepotEx de = new DepotEx();
                 if(mId!=0) {
-                    BigDecimal initStock = materialServiceImpl.getInitStock(mId, depot.getId());
-                    BigDecimal currentStock = materialServiceImpl.getCurrentStockByMaterialIdAndDepotId(mId, depot.getId());
+                    BigDecimal initStock = materialService.getInitStock(mId, depot.getId());
+                    BigDecimal currentStock = materialService.getCurrentStockByMaterialIdAndDepotId(mId, depot.getId());
                     de.setInitStock(initStock);
                     de.setCurrentStock(currentStock);
-                    MaterialInitialStock materialInitialStock = materialServiceImpl.getSafeStock(mId, depot.getId());
+                    MaterialInitialStock materialInitialStock = materialService.getSafeStock(mId, depot.getId());
                     de.setLowSafeStock(materialInitialStock.getLowSafeStock());
                     de.setHighSafeStock(materialInitialStock.getHighSafeStock());
                 } else {
@@ -188,7 +189,6 @@ public class DepotController {
             res.code = 200;
             res.data = depotList;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -208,7 +208,7 @@ public class DepotController {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
-        int res = depotServiceImpl.batchSetStatus(status, ids);
+        int res = depotService.batchSetStatus(status, ids);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {

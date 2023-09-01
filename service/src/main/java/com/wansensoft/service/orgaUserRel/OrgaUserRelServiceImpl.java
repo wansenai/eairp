@@ -7,13 +7,13 @@ import com.wansensoft.entities.organization.OrgaUserRelExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.organization.OrgaUserRelMapper;
 import com.wansensoft.mappers.organization.OrgaUserRelMapperEx;
+import com.wansensoft.service.CommonService;
 import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.organization.OrganizationService;
 import com.wansensoft.service.organization.OrganizationServiceImpl;
 import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.redis.RedisService;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,18 +35,16 @@ public class OrgaUserRelServiceImpl extends ServiceImpl<OrgaUserRelMapper, OrgaU
 
     private final OrgaUserRelMapper orgaUserRelMapper;
     private final OrgaUserRelMapperEx orgaUserRelMapperEx;
-    private final RedisService redisService;
     private final OrganizationService organizationService;
     private final LogService logService;
-    private final UserService userService;
+    private final CommonService commonService;
 
-    public OrgaUserRelServiceImpl(OrgaUserRelMapper orgaUserRelMapper, OrgaUserRelMapperEx orgaUserRelMapperEx, RedisService redisService, OrganizationService organizationService, LogService logService, UserService userService) {
+    public OrgaUserRelServiceImpl(OrgaUserRelMapper orgaUserRelMapper, OrgaUserRelMapperEx orgaUserRelMapperEx, OrganizationService organizationService, LogService logService, CommonService commonService) {
         this.orgaUserRelMapper = orgaUserRelMapper;
         this.orgaUserRelMapperEx = orgaUserRelMapperEx;
-        this.redisService = redisService;
         this.organizationService = organizationService;
         this.logService = logService;
-        this.userService = userService;
+        this.commonService = commonService;
     }
 
     public OrgaUserRel getOrgaUserRel(long id) {
@@ -113,7 +111,7 @@ public class OrgaUserRelServiceImpl extends ServiceImpl<OrgaUserRelMapper, OrgaU
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public OrgaUserRel addOrgaUserRel(OrgaUserRel orgaUserRel) {
         Date date = new Date();
-        User userInfo = userService.getCurrentUser();
+        User userInfo = commonService.getCurrentUser();
         //创建时间
         if(orgaUserRel.getCreateTime()==null){
             orgaUserRel.setCreateTime(date);
@@ -151,7 +149,7 @@ public class OrgaUserRelServiceImpl extends ServiceImpl<OrgaUserRelMapper, OrgaU
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public OrgaUserRel updateOrgaUserRel(OrgaUserRel orgaUserRel) {
-        User userInfo = userService.getCurrentUser();
+        User userInfo = commonService.getCurrentUser();
         //更新时间
         if(orgaUserRel.getUpdateTime()==null){
             orgaUserRel.setUpdateTime(new Date());

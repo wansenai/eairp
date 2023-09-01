@@ -15,15 +15,15 @@ import java.util.Map;
 @PlatformConfigResource
 public class PlatformConfigComponent implements ICommonQuery {
 
-    private final PlatformConfigServiceImpl platformConfigServiceImpl;
+    private final PlatformConfigService platformConfigService;
 
-    public PlatformConfigComponent(PlatformConfigServiceImpl platformConfigServiceImpl) {
-        this.platformConfigServiceImpl = platformConfigServiceImpl;
+    public PlatformConfigComponent(PlatformConfigService platformConfigService) {
+        this.platformConfigService = platformConfigService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return platformConfigServiceImpl.getPlatformConfig(id);
+        return platformConfigService.getPlatformConfig(id);
     }
 
     @Override
@@ -34,34 +34,34 @@ public class PlatformConfigComponent implements ICommonQuery {
     private List<?> getPlatformConfigList(Map<String, String> map)throws Exception {
         String search = map.get(Constants.SEARCH);
         String platformKey = StringUtil.getInfo(search, "platformKey");
-        return platformConfigServiceImpl.select(platformKey, QueryUtils.offset(map), QueryUtils.rows(map));
+        return platformConfigService.select(platformKey, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
     @Override
     public Long counts(Map<String, String> map)throws Exception {
         String search = map.get(Constants.SEARCH);
         String platformKey = StringUtil.getInfo(search, "platformKey");
-        return platformConfigServiceImpl.countPlatformConfig(platformKey);
+        return platformConfigService.countPlatformConfig(platformKey);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request)throws Exception {
-        return platformConfigServiceImpl.insertPlatformConfig(obj, request);
+        return platformConfigService.insertPlatformConfig(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return platformConfigServiceImpl.updatePlatformConfig(obj, request);
+        return platformConfigService.updatePlatformConfig(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return platformConfigServiceImpl.deletePlatformConfig(id, request);
+        return platformConfigService.deletePlatformConfig(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return platformConfigServiceImpl.batchDeletePlatformConfig(ids, request);
+        return platformConfigService.batchDeletePlatformConfig(ids, request);
     }
 
     @Override

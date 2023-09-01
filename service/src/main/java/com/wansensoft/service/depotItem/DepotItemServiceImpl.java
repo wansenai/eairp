@@ -12,18 +12,18 @@ import com.wansensoft.mappers.depot.DepotHeadMapper;
 import com.wansensoft.mappers.depot.DepotItemMapper;
 import com.wansensoft.mappers.depot.DepotItemMapperEx;
 import com.wansensoft.mappers.material.MaterialCurrentStockMapper;
+import com.wansensoft.service.CommonService;
 import com.wansensoft.service.depot.DepotService;
-import com.wansensoft.service.depotHead.DepotHeadService;
-import com.wansensoft.service.material.MaterialService;
+import com.wansensoft.service.materialExtend.MaterialExtendService;
+import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
+import com.wansensoft.service.serialNumber.SerialNumberService;
+import com.wansensoft.service.systemConfig.SystemConfigService;
+import com.wansensoft.service.unit.UnitService;
 import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.materialExtend.MaterialExtendService;
-import com.wansensoft.service.serialNumber.SerialNumberService;
-import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.unit.UnitService;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
 import com.wansensoft.vo.DepotItemStockWarningCount;
@@ -52,29 +52,29 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
 
     private final DepotItemMapper depotItemMapper;
     private final DepotItemMapperEx depotItemMapperEx;
-    private final MaterialService materialService;
+    private final CommonService commonService;
     private final MaterialExtendService materialExtendService;
-    private final DepotHeadService depotHeadService;
     private final DepotHeadMapper depotHeadMapper;
     private final SerialNumberService serialNumberService;
     private final UserService userService;
     private final SystemConfigService systemConfigService;
     private final DepotService depotService;
     private final UnitService unitService;
+    private final OrgaUserRelService orgaUserRelService;
     private final MaterialCurrentStockMapper materialCurrentStockMapper;
 
-    public DepotItemServiceImpl(DepotItemMapper depotItemMapper, DepotItemMapperEx depotItemMapperEx, MaterialService materialService, MaterialExtendService materialExtendService, DepotHeadService depotHeadService, DepotHeadMapper depotHeadMapper, SerialNumberService serialNumberService, UserService userService, SystemConfigService systemConfigService, DepotService depotService, UnitService unitService, MaterialCurrentStockMapper materialCurrentStockMapper) {
+    public DepotItemServiceImpl(DepotItemMapper depotItemMapper, DepotItemMapperEx depotItemMapperEx, CommonService commonService, MaterialExtendService materialExtendService, DepotHeadMapper depotHeadMapper, SerialNumberService serialNumberService, UserService userService, SystemConfigService systemConfigService, DepotService depotService, UnitService unitService, OrgaUserRelService orgaUserRelService, MaterialCurrentStockMapper materialCurrentStockMapper) {
         this.depotItemMapper = depotItemMapper;
         this.depotItemMapperEx = depotItemMapperEx;
-        this.materialService = materialService;
+        this.commonService = commonService;
         this.materialExtendService = materialExtendService;
-        this.depotHeadService = depotHeadService;
         this.depotHeadMapper = depotHeadMapper;
         this.serialNumberService = serialNumberService;
         this.userService = userService;
         this.systemConfigService = systemConfigService;
         this.depotService = depotService;
         this.unitService = unitService;
+        this.orgaUserRelService = orgaUserRelService;
         this.materialCurrentStockMapper = materialCurrentStockMapper;
     }
 
@@ -271,6 +271,21 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
         return depotItem;
     }
 
+    public DepotHead getDepotHead(String number) {
+        DepotHead depotHead = new DepotHead();
+        try{
+            DepotHeadExample example = new DepotHeadExample();
+            example.createCriteria().andNumberEqualTo(number).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
+            List<DepotHead> list = depotHeadMapper.selectByExample(example);
+            if(null!=list && !list.isEmpty()) {
+                depotHead = list.get(0);
+            }
+        }catch(Exception e){
+            JshException.readFail(logger, e);
+        }
+        return depotHead;
+    }
+
     /**
      * 查询被关联订单中指定商品的明细信息
      * @param linkNumber
@@ -281,7 +296,7 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
     public DepotItem getPreItemByHeaderIdAndMaterial(String linkNumber, Long meId, Long linkId) {
         DepotItem depotItem = new DepotItem();
         try{
-            DepotHead depotHead = depotHeadService.getDepotHead(linkNumber);
+            DepotHead depotHead = getDepotHead(linkNumber);
             DepotItemExample example = new DepotItemExample();
             example.createCriteria().andHeaderIdEqualTo(depotHead.getId()).andMaterialExtendIdEqualTo(meId).andIdEqualTo(linkId).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
             List<DepotItem> list = depotItemMapper.selectByExample(example);
@@ -362,6 +377,30 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
 
     }
 
+    public String[] getCreatorArray(String roleType) {
+        String creator = getCreatorByRoleType(roleType);
+        String [] creatorArray=null;
+        if(StringUtil.isNotEmpty(creator)){
+            creatorArray = creator.split(",");
+        }
+        return creatorArray;
+    }
+
+    public String getCreatorByRoleType(String roleType) {
+        String creator = "";
+        User user = userService.getCurrentUser();
+        //再从后端获取一次角色类型，防止前端关闭了缓存功能
+        if(StringUtil.isEmpty(roleType)) {
+            roleType = userService.getRoleTypeByUserId(user.getId()).getType(); //角色类型
+        }
+        if(BusinessConstants.ROLE_TYPE_PRIVATE.equals(roleType)) {
+            creator = user.getId().toString();
+        } else if(BusinessConstants.ROLE_TYPE_THIS_ORG.equals(roleType)) {
+            creator = orgaUserRelService.getUserIdListByUserId(user.getId());
+        }
+        return creator;
+    }
+
     /**
      * 统计采购或销售的总金额
      * @param type
@@ -373,7 +412,7 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
     public BigDecimal inOrOutPrice(String type, String subType, String month, String roleType) {
         BigDecimal result= BigDecimal.ZERO;
         try{
-            String [] creatorArray = depotHeadService.getCreatorArray(roleType);
+            String [] creatorArray = getCreatorArray(roleType);
             Boolean forceFlag = systemConfigService.getForceApprovalFlag();
             String beginTime = Tools.firstDayOfMonth(month) + BusinessConstants.DAY_FIRST_TIME;
             String endTime = Tools.lastDayOfMonth(month) + BusinessConstants.DAY_LAST_TIME;
@@ -395,7 +434,7 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
     public BigDecimal inOrOutRetailPrice(String type, String subType, String month, String roleType) {
         BigDecimal result= BigDecimal.ZERO;
         try{
-            String [] creatorArray = depotHeadService.getCreatorArray(roleType);
+            String [] creatorArray = getCreatorArray(roleType);
             Boolean forceFlag = systemConfigService.getForceApprovalFlag();
             String beginTime = Tools.firstDayOfMonth(month) + BusinessConstants.DAY_FIRST_TIME;
             String endTime = Tools.lastDayOfMonth(month) + BusinessConstants.DAY_LAST_TIME;
@@ -432,7 +471,7 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
                 depotItem.setMaterialId(materialExtend.getMaterialId());
                 depotItem.setMaterialExtendId(materialExtend.getId());
                 depotItem.setMaterialUnit(rowObj.getString("unit"));
-                Material material= materialService.getMaterial(depotItem.getMaterialId());
+                Material material= commonService.getMaterial(depotItem.getMaterialId());
                 if (BusinessConstants.ENABLE_SERIAL_NUMBER_ENABLED.equals(material.getEnableSerialNumber()) ||
                         BusinessConstants.ENABLE_BATCH_NUMBER_ENABLED.equals(material.getEnableBatchNumber())) {
                     //组装拆卸单不能选择批号或序列号商品
@@ -501,7 +540,7 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
                     depotItem.setLinkId(rowObj.getLong("linkId"));
                 }
                 //以下进行单位换算
-                Unit unitInfo = materialService.findUnit(materialExtend.getMaterialId()); //查询计量单位信息
+                Unit unitInfo = commonService.findUnit(materialExtend.getMaterialId()); //查询计量单位信息
                 if (StringUtil.isExist(rowObj.get("operNumber"))) {
                     depotItem.setOperNumber(rowObj.getBigDecimal("operNumber"));
                     String unit = rowObj.get("unit").toString();
@@ -539,7 +578,7 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
                         String currentSubType = depotHead.getSubType();
                         //在更新模式进行状态赋值
                         String unit = rowObj.get("unit").toString();
-                        Long preHeaderId = depotHeadService.getDepotHead(depotHead.getLinkNumber()).getId();
+                        Long preHeaderId = getDepotHead(depotHead.getLinkNumber()).getId();
                         //前一个单据的数量
                         BigDecimal preNumber = getPreItemByHeaderIdAndMaterial(depotHead.getLinkNumber(), depotItem.getMaterialExtendId(), depotItem.getLinkId()).getOperNumber();
                         //除去此单据之外的已入库|已出库
@@ -753,7 +792,7 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
      */
     public DepotItem getDepotItemByBatchNumber(String batchNumber) {
         List<DepotItem> depotItemList = depotItemMapperEx.getDepotItemByBatchNumber(batchNumber);
-        if(null != depotItemList && depotItemList.size() > 0){
+        if(null != depotItemList && !depotItemList.isEmpty()){
             return depotItemList.get(0);
         } else {
             return new DepotItem();
@@ -798,7 +837,7 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
                 DepotItemExample example = new DepotItemExample();
                 example.createCriteria().andHeaderIdEqualTo(headerId).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
                 List<DepotItem> depotItemList = depotItemMapper.selectByExample(example);
-                if(null != depotItemList && depotItemList.size() > 0){
+                if(null != depotItemList && !depotItemList.isEmpty()){
                     for (DepotItem depotItem : depotItemList){
                         if(StringUtil.isNotEmpty(depotItem.getSnList())){
                             serialNumberService.cancelSerialNumber(depotItem.getMaterialId(), depotHead.getNumber(), (depotItem.getBasicNumber() == null ? 0 : depotItem.getBasicNumber()).intValue(), userInfo);
@@ -935,7 +974,7 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
     public BigDecimal getStockByParamWithDepotList(List<Long> depotList, Long mId, String beginTime, String endTime) {
         Boolean forceFlag = systemConfigService.getForceApprovalFlag();
         //初始库存
-        BigDecimal initStock = materialService.getInitStockByMidAndDepotList(depotList, mId);
+        BigDecimal initStock = commonService.getInitStockByMidAndDepotList(depotList, mId);
         //盘点复盘后数量的变动
         BigDecimal stockCheckSum = depotItemMapperEx.getStockCheckSumByDepotList(depotList, mId, forceFlag, beginTime, endTime);
         DepotItemVo4Stock stockObj = depotItemMapperEx.getStockByParamWithDepotList(depotList, mId, forceFlag, beginTime, endTime);
@@ -1021,7 +1060,7 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
             materialCurrentStock.setMaterialId(mId);
             materialCurrentStock.setDepotId(dId);
             materialCurrentStock.setCurrentNumber(getStockByParam(dId,mId,null,null));
-            if(list!=null && list.size()>0) {
+            if(list!=null && !list.isEmpty()) {
                 Long mcsId = list.get(0).getId();
                 materialCurrentStock.setId(mcsId);
                 materialCurrentStockMapper.updateByPrimaryKeySelective(materialCurrentStock);
@@ -1063,13 +1102,13 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
         BigDecimal count = depotItemMapperEx.getFinishNumber(meId, linkId, linkNumber, goToType);
         //根据多单位情况进行数量的转换
         if(materialUnit.equals(unitInfo.getOtherUnit()) && unitInfo.getRatio()!=null && unitInfo.getRatio().compareTo(BigDecimal.ZERO)!=0) {
-            count = count.divide(unitInfo.getRatio(),2,BigDecimal.ROUND_HALF_UP);
+            count = count.divide(unitInfo.getRatio(), 2, BigDecimal.ROUND_HALF_UP);
         }
         if(materialUnit.equals(unitInfo.getOtherUnitTwo()) && unitInfo.getRatioTwo()!=null && unitInfo.getRatioTwo().compareTo(BigDecimal.ZERO)!=0) {
-            count = count.divide(unitInfo.getRatioTwo(),2,BigDecimal.ROUND_HALF_UP);
+            count = count.divide(unitInfo.getRatioTwo(), 2, BigDecimal.ROUND_HALF_UP);
         }
         if(materialUnit.equals(unitInfo.getOtherUnitThree()) && unitInfo.getRatioThree()!=null && unitInfo.getRatioThree().compareTo(BigDecimal.ZERO)!=0) {
-            count = count.divide(unitInfo.getRatioThree(),2,BigDecimal.ROUND_HALF_UP);
+            count = count.divide(unitInfo.getRatioThree(), 2, BigDecimal.ROUND_HALF_UP);
         }
         return count;
     }
@@ -1093,13 +1132,13 @@ public class DepotItemServiceImpl extends ServiceImpl<DepotItemMapper, DepotItem
         BigDecimal count = depotItemMapperEx.getRealFinishNumber(meId, linkId, linkNumber, currentHeaderId, goToType);
         //根据多单位情况进行数量的转换
         if(materialUnit.equals(unitInfo.getOtherUnit()) && unitInfo.getRatio()!=null && unitInfo.getRatio().compareTo(BigDecimal.ZERO)!=0) {
-            count = count.divide(unitInfo.getRatio(),2,BigDecimal.ROUND_HALF_UP);
+            count = count.divide(unitInfo.getRatio(),2, BigDecimal.ROUND_HALF_UP);
         }
         if(materialUnit.equals(unitInfo.getOtherUnitTwo()) && unitInfo.getRatioTwo()!=null && unitInfo.getRatioTwo().compareTo(BigDecimal.ZERO)!=0) {
-            count = count.divide(unitInfo.getRatioTwo(),2,BigDecimal.ROUND_HALF_UP);
+            count = count.divide(unitInfo.getRatioTwo(),2, BigDecimal.ROUND_HALF_UP);
         }
         if(materialUnit.equals(unitInfo.getOtherUnitThree()) && unitInfo.getRatioThree()!=null && unitInfo.getRatioThree().compareTo(BigDecimal.ZERO)!=0) {
-            count = count.divide(unitInfo.getRatioThree(),2,BigDecimal.ROUND_HALF_UP);
+            count = count.divide(unitInfo.getRatioThree(),2, BigDecimal.ROUND_HALF_UP);
         }
         return count;
     }

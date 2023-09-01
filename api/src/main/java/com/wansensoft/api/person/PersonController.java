@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +24,11 @@ import java.util.Map;
 public class PersonController {
     private Logger logger = LoggerFactory.getLogger(PersonController.class);
 
-    @Resource
-    private PersonService personService;
+    private final PersonService personService;
+
+    public PersonController(PersonService personService) {
+        this.personService = personService;
+    }
 
     /**
      * 全部数据列表
@@ -36,7 +38,7 @@ public class PersonController {
      */
     @GetMapping(value = "/getAllList")
     @ApiOperation(value = "全部数据列表")
-    public BaseResponseInfo getAllList(HttpServletRequest request)throws Exception {
+    public BaseResponseInfo getAllList(HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         Map<String, Object> map = new HashMap<String, Object>();
         try {
@@ -45,7 +47,6 @@ public class PersonController {
             res.code = 200;
             res.data = personList;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -61,7 +62,7 @@ public class PersonController {
     @GetMapping(value = "/getPersonByIds")
     @ApiOperation(value = "根据Id获取经手人信息")
     public BaseResponseInfo getPersonByIds(@RequestParam("personIds") String personIds,
-                                           HttpServletRequest request)throws Exception {
+                                           HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         Map<String, Object> map = new HashMap<String, Object>();
         try {
@@ -71,7 +72,6 @@ public class PersonController {
             res.code = 200;
             res.data = map;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -87,7 +87,7 @@ public class PersonController {
     @GetMapping(value = "/getPersonByType")
     @ApiOperation(value = "根据类型获取经手人信息")
     public BaseResponseInfo getPersonByType(@RequestParam("type") String type,
-                                            HttpServletRequest request)throws Exception {
+                                            HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         Map<String, Object> map = new HashMap<String, Object>();
         try {
@@ -96,7 +96,6 @@ public class PersonController {
             res.code = 200;
             res.data = map;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -112,7 +111,7 @@ public class PersonController {
     @GetMapping(value = "/getPersonByNumType")
     @ApiOperation(value = "根据类型获取经手人信息1-业务员，2-仓管员，3-财务员")
     public JSONArray getPersonByNumType(@RequestParam("type") String typeNum,
-                                        HttpServletRequest request)throws Exception {
+                                        HttpServletRequest request) {
         JSONArray dataArray = new JSONArray();
         try {
             String type = "";
@@ -147,7 +146,7 @@ public class PersonController {
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
     public String batchSetStatus(@RequestBody JSONObject jsonObject,
-                                 HttpServletRequest request)throws Exception {
+                                 HttpServletRequest request) {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();

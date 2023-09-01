@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.account.AccountHead;
 import com.wansensoft.entities.account.AccountHeadVo4Body;
 import com.wansensoft.entities.account.AccountHeadVo4ListEx;
-import com.wansensoft.service.accountHead.AccountHeadServiceImpl;
+import com.wansensoft.service.accountHead.AccountHeadService;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
@@ -20,9 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author jishenghua 752*718*920
- */
 @RestController
 @RequestMapping(value = "/accountHead")
 @Api(tags = {"财务管理"})
@@ -30,7 +27,7 @@ public class AccountHeadController {
     private Logger logger = LoggerFactory.getLogger(AccountHeadController.class);
 
     @Resource
-    private AccountHeadServiceImpl accountHeadServiceImpl;
+    private AccountHeadService accountHeadService;
 
     /**
      * 批量设置状态-审核或者反审核
@@ -45,7 +42,7 @@ public class AccountHeadController {
         Map<String, Object> objectMap = new HashMap<>();
         String status = jsonObject.getString("status");
         String ids = jsonObject.getString("ids");
-        int res = accountHeadServiceImpl.batchSetStatus(status, ids);
+        int res = accountHeadService.batchSetStatus(status, ids);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
@@ -66,7 +63,7 @@ public class AccountHeadController {
         JSONObject result = ExceptionConstants.standardSuccess();
         String beanJson = body.getInfo();
         String rows = body.getRows();
-        accountHeadServiceImpl.addAccountHeadAndDetail(beanJson,rows, request);
+        accountHeadService.addAccountHeadAndDetail(beanJson,rows, request);
         return result;
     }
 
@@ -83,7 +80,7 @@ public class AccountHeadController {
         JSONObject result = ExceptionConstants.standardSuccess();
         String beanJson = body.getInfo();
         String rows = body.getRows();
-        accountHeadServiceImpl.updateAccountHeadAndDetail(beanJson,rows,request);
+        accountHeadService.updateAccountHeadAndDetail(beanJson,rows,request);
         return result;
     }
 
@@ -100,14 +97,13 @@ public class AccountHeadController {
         BaseResponseInfo res = new BaseResponseInfo();
         AccountHeadVo4ListEx ahl = new AccountHeadVo4ListEx();
         try {
-            List<AccountHeadVo4ListEx> list = accountHeadServiceImpl.getDetailByNumber(billNo);
-            if(list.size()>0) {
+            List<AccountHeadVo4ListEx> list = accountHeadService.getDetailByNumber(billNo);
+            if(!list.isEmpty()) {
                 ahl = list.get(0);
             }
             res.code = 200;
             res.data = ahl;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -126,11 +122,10 @@ public class AccountHeadController {
                                               HttpServletRequest request)throws Exception {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            List<AccountHead> list = accountHeadServiceImpl.getFinancialBillNoByBillId(billId);
+            List<AccountHead> list = accountHeadService.getFinancialBillNoByBillId(billId);
             res.code = 200;
             res.data = list;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }

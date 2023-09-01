@@ -3,8 +3,8 @@ package com.wansensoft.api.role;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.role.Role;
-import com.wansensoft.service.role.RoleServiceImpl;
-import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
+import com.wansensoft.service.role.RoleService;
+import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
@@ -25,11 +24,14 @@ import java.util.Map;
 public class RoleController {
     private Logger logger = LoggerFactory.getLogger(RoleController.class);
 
-    @Resource
-    private RoleServiceImpl roleServiceImpl;
+    private final RoleService roleService;
 
-    @Resource
-    private UserBusinessServiceImpl userBusinessServiceImpl;
+    private final UserBusinessService userBusinessService;
+
+    public RoleController(RoleService roleService, UserBusinessService userBusinessService) {
+        this.roleService = roleService;
+        this.userBusinessService = userBusinessService;
+    }
 
     /**
      * 角色对应应用显示
@@ -39,12 +41,12 @@ public class RoleController {
     @GetMapping(value = "/findUserRole")
     @ApiOperation(value = "查询用户的角色")
     public JSONArray findUserRole(@RequestParam("UBType") String type, @RequestParam("UBKeyId") String keyId,
-                                  HttpServletRequest request)throws Exception {
+                                  HttpServletRequest request) {
         JSONArray arr = new JSONArray();
         try {
             //获取权限信息
-            String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, keyId);
-            List<Role> dataList = roleServiceImpl.findUserRole();
+            String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, keyId);
+            List<Role> dataList = roleService.findUserRole();
             if (null != dataList) {
                 for (Role role : dataList) {
                     JSONObject item = new JSONObject();
@@ -66,7 +68,7 @@ public class RoleController {
     @GetMapping(value = "/allList")
     @ApiOperation(value = "查询全部角色列表")
     public List<Role> allList(HttpServletRequest request)throws Exception {
-        return roleServiceImpl.allList();
+        return roleService.allList();
     }
 
     /**
@@ -78,11 +80,11 @@ public class RoleController {
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
     public String batchSetStatus(@RequestBody JSONObject jsonObject,
-                                 HttpServletRequest request)throws Exception {
+                                 HttpServletRequest request) {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
-        int res = roleServiceImpl.batchSetStatus(status, ids);
+        int res = roleService.batchSetStatus(status, ids);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {

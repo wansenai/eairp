@@ -15,15 +15,15 @@ import java.util.Map;
 @FunctionResource
 public class FunctionComponent implements ICommonQuery {
 
-    private final FunctionServiceImpl functionServiceImpl;
+    private final FunctionService functionService;
 
-    public FunctionComponent(FunctionServiceImpl functionServiceImpl) {
-        this.functionServiceImpl = functionServiceImpl;
+    public FunctionComponent(FunctionService functionService) {
+        this.functionService = functionService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return functionServiceImpl.getFunction(id);
+        return functionService.getFunction(id);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class FunctionComponent implements ICommonQuery {
         String name = StringUtil.getInfo(search, "name");
         String type = StringUtil.getInfo(search, "type");
         String order = QueryUtils.order(map);
-        return functionServiceImpl.select(name, type, QueryUtils.offset(map), QueryUtils.rows(map));
+        return functionService.select(name, type, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
     @Override
@@ -44,32 +44,32 @@ public class FunctionComponent implements ICommonQuery {
         String search = map.get(Constants.SEARCH);
         String name = StringUtil.getInfo(search, "name");
         String type = StringUtil.getInfo(search, "type");
-        return functionServiceImpl.countFunction(name, type);
+        return functionService.countFunction(name, type);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request)throws Exception {
-        return functionServiceImpl.insertFunction(obj, request);
+        return functionService.insertFunction(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return functionServiceImpl.updateFunction(obj, request);
+        return functionService.updateFunction(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return functionServiceImpl.deleteFunction(id, request);
+        return functionService.deleteFunction(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return functionServiceImpl.batchDeleteFunction(ids, request);
+        return functionService.batchDeleteFunction(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return functionServiceImpl.checkIsNameExist(id, name);
+        return functionService.checkIsNameExist(id, name);
     }
 
 }

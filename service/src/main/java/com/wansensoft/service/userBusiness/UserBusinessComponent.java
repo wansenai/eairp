@@ -13,15 +13,15 @@ import java.util.Map;
 @UserBusinessResource
 public class UserBusinessComponent implements ICommonQuery {
 
-    private final UserBusinessServiceImpl userBusinessServiceImpl;
+    private final UserBusinessService userBusinessService;
 
-    public UserBusinessComponent(UserBusinessServiceImpl userBusinessServiceImpl) {
-        this.userBusinessServiceImpl = userBusinessServiceImpl;
+    public UserBusinessComponent(UserBusinessService userBusinessService) {
+        this.userBusinessService = userBusinessService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return userBusinessServiceImpl.getUserBusiness(id);
+        return userBusinessService.getUserBusiness(id);
     }
 
     @Override
@@ -40,27 +40,27 @@ public class UserBusinessComponent implements ICommonQuery {
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request) throws Exception {
-        return userBusinessServiceImpl.insertUserBusiness(obj, request);
+        return userBusinessService.insertUserBusiness(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return userBusinessServiceImpl.updateUserBusiness(obj, request);
+        return userBusinessService.updateUserBusiness(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return userBusinessServiceImpl.deleteUserBusiness(id, request);
+        return userBusinessService.deleteUserBusiness(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return userBusinessServiceImpl.batchDeleteUserBusiness(ids, request);
+        return userBusinessService.batchDeleteUserBusiness(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return userBusinessServiceImpl.checkIsNameExist(id, name);
+        return userBusinessService.checkIsNameExist(id, name);
     }
 
 }

@@ -15,15 +15,15 @@ import java.util.Map;
 @OrganizationResource
 public class OrganizationComponent implements ICommonQuery {
 
-    private final OrganizationServiceImpl organizationServiceImpl;
+    private final OrganizationService organizationService;
 
-    public OrganizationComponent(OrganizationServiceImpl organizationServiceImpl) {
-        this.organizationServiceImpl = organizationServiceImpl;
+    public OrganizationComponent(OrganizationService organizationService) {
+        this.organizationService = organizationService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return organizationServiceImpl.getOrganization(id);
+        return organizationService.getOrganization(id);
     }
 
     @Override
@@ -40,26 +40,26 @@ public class OrganizationComponent implements ICommonQuery {
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request)throws Exception {
-        return organizationServiceImpl.insertOrganization(obj,request);
+        return organizationService.insertOrganization(obj,request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return organizationServiceImpl.updateOrganization(obj, request);
+        return organizationService.updateOrganization(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return organizationServiceImpl.deleteOrganization(id, request);
+        return organizationService.deleteOrganization(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return organizationServiceImpl.batchDeleteOrganization(ids, request);
+        return organizationService.batchDeleteOrganization(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return organizationServiceImpl.checkIsNameExist(id, name);
+        return organizationService.checkIsNameExist(id, name);
     }
 }

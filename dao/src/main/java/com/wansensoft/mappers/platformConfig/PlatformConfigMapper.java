@@ -23,6 +23,8 @@ public interface PlatformConfigMapper extends BaseMapper<PlatformConfig> {
 
     List<PlatformConfig> selectByExample(PlatformConfigExample example);
 
+    List<PlatformConfig> getInfoByKey(PlatformConfigExample example);
+
     PlatformConfig selectByPrimaryKey(Long id);
 
     int updateByExampleSelective(@Param("record") PlatformConfig record, @Param("example") PlatformConfigExample example);

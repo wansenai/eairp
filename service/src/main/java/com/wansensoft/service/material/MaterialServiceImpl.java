@@ -10,18 +10,18 @@ import com.wansensoft.entities.material.*;
 import com.wansensoft.entities.unit.Unit;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.depot.DepotItemMapperEx;
-import com.wansensoft.service.depotItem.DepotItemServiceImpl;
+import com.wansensoft.service.depot.DepotService;
+import com.wansensoft.service.depotItem.DepotItemService;
 import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.materialCategory.MaterialCategoryService;
+import com.wansensoft.service.materialExtend.MaterialExtendService;
+import com.wansensoft.service.unit.UnitService;
 import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.material.*;
-import com.wansensoft.service.depot.DepotServiceImpl;
-import com.wansensoft.service.materialCategory.MaterialCategoryService;
-import com.wansensoft.service.materialExtend.MaterialExtendService;
-import com.wansensoft.service.unit.UnitService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ExcelUtils;
 import com.wansensoft.utils.StringUtil;
@@ -55,20 +55,20 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
     private final LogService logService;
     private final UserService userService;
     private final DepotItemMapperEx depotItemMapperEx;
-    private final DepotItemServiceImpl depotItemServiceImpl;
+    private final DepotItemService depotItemService;
     private final MaterialCategoryService materialCategoryService;
     private final UnitService unitService;
     private final MaterialInitialStockMapper materialInitialStockMapper;
     private final MaterialInitialStockMapperEx materialInitialStockMapperEx;
     private final MaterialCurrentStockMapper materialCurrentStockMapper;
     private final MaterialCurrentStockMapperEx materialCurrentStockMapperEx;
-    private final DepotServiceImpl depotServiceImpl;
+    private final DepotService depotService;
     private final MaterialExtendService materialExtendService;
 
     @Value(value="${file.uploadType}")
     private Long fileUploadType;
 
-    public MaterialServiceImpl(MaterialMapper materialMapper, MaterialExtendMapper materialExtendMapper, MaterialMapperEx materialMapperEx, MaterialCategoryMapperEx materialCategoryMapperEx, MaterialExtendMapperEx materialExtendMapperEx, LogService logService, UserService userService, DepotItemMapperEx depotItemMapperEx, DepotItemServiceImpl depotItemServiceImpl, MaterialCategoryService materialCategoryService, UnitService unitService, MaterialInitialStockMapper materialInitialStockMapper, MaterialInitialStockMapperEx materialInitialStockMapperEx, MaterialCurrentStockMapper materialCurrentStockMapper, MaterialCurrentStockMapperEx materialCurrentStockMapperEx, DepotServiceImpl depotServiceImpl, MaterialExtendService materialExtendService) {
+    public MaterialServiceImpl(MaterialMapper materialMapper, MaterialExtendMapper materialExtendMapper, MaterialMapperEx materialMapperEx, MaterialCategoryMapperEx materialCategoryMapperEx, MaterialExtendMapperEx materialExtendMapperEx, LogService logService, UserService userService, DepotItemMapperEx depotItemMapperEx, DepotItemService depotItemService, MaterialCategoryService materialCategoryService, UnitService unitService, MaterialInitialStockMapper materialInitialStockMapper, MaterialInitialStockMapperEx materialInitialStockMapperEx, MaterialCurrentStockMapper materialCurrentStockMapper, MaterialCurrentStockMapperEx materialCurrentStockMapperEx, DepotService depotService, MaterialExtendService materialExtendService) {
         this.materialMapper = materialMapper;
         this.materialExtendMapper = materialExtendMapper;
         this.materialMapperEx = materialMapperEx;
@@ -77,14 +77,14 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
         this.logService = logService;
         this.userService = userService;
         this.depotItemMapperEx = depotItemMapperEx;
-        this.depotItemServiceImpl = depotItemServiceImpl;
+        this.depotItemService = depotItemService;
         this.materialCategoryService = materialCategoryService;
         this.unitService = unitService;
         this.materialInitialStockMapper = materialInitialStockMapper;
         this.materialInitialStockMapperEx = materialInitialStockMapperEx;
         this.materialCurrentStockMapper = materialCurrentStockMapper;
         this.materialCurrentStockMapperEx = materialCurrentStockMapperEx;
-        this.depotServiceImpl = depotServiceImpl;
+        this.depotService = depotService;
         this.materialExtendService = materialExtendService;
     }
 
@@ -253,7 +253,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
                             insertInitialStockByMaterialAndDepot(depotId, material.getId(), parseBigDecimalEx(number), lowSafeStock, highSafeStock);
                         }
                         //更新当前库存
-                        depotItemServiceImpl.updateCurrentStockFun(material.getId(), depotId);
+                        depotItemService.updateCurrentStockFun(material.getId(), depotId);
                     }
                 }
             }
@@ -495,7 +495,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
                 "采购价,零售价,销售价,最低售价,状态*,序列号,批号,仓位货架,制造商,自定义1,自定义2,自定义3,备注";
         List<String> nameList = StringUtil.strToStringList(nameStr);
         //仓库列表
-        List<Depot> depotList = depotServiceImpl.getAllList();
+        List<Depot> depotList = depotService.getAllList();
         if (nameList != null) {
             for(Depot depot: depotList) {
                 nameList.add(depot.getName());
@@ -577,7 +577,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
             Sheet src = workbook.getSheet(0);
             //获取真实的行数，剔除掉空白行
             int rightRows = ExcelUtils.getRightRows(src);
-            List<Depot> depotList= depotServiceImpl.getDepot();
+            List<Depot> depotList= depotService.getDepot();
             int depotCount = depotList.size();
             Map<String, Long> depotMap = parseDepotToMap(depotList);
             User user = userService.getCurrentUser();
@@ -754,7 +754,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
                 //判断该商品是否存在，如果不存在就新增，如果存在就更新
                 String basicBarCode = getBasicBarCode(m);
                 List<Material> materials = getMaterialListByParam(m.getName(),m.getStandard(),m.getModel(),m.getColor(),m.getUnit(),m.getUnitId(), basicBarCode);
-                if(materials.size() == 0) {
+                if(materials.isEmpty()) {
                     materialMapperEx.insertSelectiveEx(m);
                     mId = m.getId();
                 } else {
@@ -793,7 +793,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
                         }
                     }
                     //新增或更新当前库存
-                    Long billCount = depotItemServiceImpl.getCountByMaterialAndDepot(mId, depotId);
+                    Long billCount = depotItemService.getCountByMaterialAndDepot(mId, depotId);
                     if(billCount == 0) {
                         if(stock!=null && stock.compareTo(BigDecimal.ZERO)!=0) {
                             if(materialDepotCurrentMap.get(materialDepotKey)==null) {
@@ -971,7 +971,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
                 //含sku的商品，特殊逻辑
                 meId = materialExtendService.selectIdByMaterialIdAndBarCode(mId, materialExtend.getBarCode());
                 List<MaterialExtend> meList = materialExtendService.getListByMaterialIdAndDefaultFlagAndBarCode(mId, "1", materialExtend.getBarCode());
-                if(meList.size() == 0) {
+                if(meList.isEmpty()) {
                     materialExtend.setDefaultFlag("1");
                 } else {
                     materialExtend.setDefaultFlag("0");
@@ -1151,7 +1151,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
     public BigDecimal getInitStockByMidAndDepotList(List<Long> depotList, Long materialId) {
         BigDecimal stock = BigDecimal.ZERO;
         MaterialInitialStockExample example = new MaterialInitialStockExample();
-        if(depotList!=null && depotList.size()>0) {
+        if(depotList!=null && !depotList.isEmpty()) {
             example.createCriteria().andMaterialIdEqualTo(materialId).andDepotIdIn(depotList)
                     .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         } else {
@@ -1159,7 +1159,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
                     .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         }
         List<MaterialInitialStock> list = materialInitialStockMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             for(MaterialInitialStock ms: list) {
                 if(ms!=null) {
                     stock = stock.add(ms.getNumber());
@@ -1181,7 +1181,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
         example.createCriteria().andMaterialIdEqualTo(materialId).andDepotIdEqualTo(depotId)
                 .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<MaterialInitialStock> list = materialInitialStockMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             stock = list.get(0).getNumber();
         }
         return stock;
@@ -1199,7 +1199,7 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
         example.createCriteria().andMaterialIdEqualTo(materialId).andDepotIdEqualTo(depotId)
                 .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<MaterialCurrentStock> list = materialCurrentStockMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             stock = list.get(0).getCurrentNumber();
         } else {
             stock = getInitStock(materialId,depotId);
@@ -1357,10 +1357,10 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
     public int batchSetMaterialCurrentStock(String ids) {
         int res = 0;
         List<Long> idList = StringUtil.strToLongList(ids);
-        List<Depot> depotList = depotServiceImpl.getAllList();
+        List<Depot> depotList = depotService.getAllList();
         for(Long mId: idList) {
             for(Depot depot: depotList) {
-                depotItemServiceImpl.updateCurrentStockFun(mId, depot.getId());
+                depotItemService.updateCurrentStockFun(mId, depot.getId());
                 res = 1;
             }
         }

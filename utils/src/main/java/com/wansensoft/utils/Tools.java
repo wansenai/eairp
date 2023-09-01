@@ -495,7 +495,7 @@ public class Tools {
      * @return
      * @throws ParseException
      */
-    public static String firstDayOfMonth(String monthTime) throws ParseException {
+    public static String firstDayOfMonth(String monthTime) {
         return monthTime + "-01";
     }
 
@@ -505,13 +505,18 @@ public class Tools {
      * @return
      * @throws ParseException
      */
-    public static String lastDayOfMonth(String monthTime) throws ParseException {
-        Date date = new SimpleDateFormat("yyyy-MM").parse(monthTime);
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        cal.roll(Calendar.DAY_OF_MONTH, -1);
-        return new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime());
+    public static String lastDayOfMonth(String monthTime) {
+        try {
+            Date date = new SimpleDateFormat("yyyy-MM").parse(monthTime);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            cal.roll(Calendar.DAY_OF_MONTH, -1);
+            return new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime());
+        }catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
     }
 
     /**

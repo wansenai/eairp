@@ -2,10 +2,10 @@ package com.wansensoft.api.account;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.wansensoft.service.accountHead.AccountHeadService;
+import com.wansensoft.service.accountItem.AccountItemService;
 import com.wansensoft.vo.AccountItemVo4List;
 import com.wansensoft.utils.constants.BusinessConstants;
-import com.wansensoft.service.accountHead.AccountHeadServiceImpl;
-import com.wansensoft.service.accountItem.AccountItemService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.StringUtil;
 import io.swagger.annotations.Api;
@@ -17,26 +17,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author ji sheng hua 752*718*920
- */
 @RestController
 @RequestMapping(value = "/accountItem")
 @Api(tags = {"财务明细"})
 public class AccountItemController {
     private Logger logger = LoggerFactory.getLogger(AccountItemController.class);
 
-    @Resource
-    private AccountItemService accountItemService;
+    private final AccountItemService accountItemService;
 
-    @Resource
-    private AccountHeadServiceImpl accountHeadServiceImpl;
+    private final AccountHeadService accountHeadService;
+
+    public AccountItemController(AccountItemService accountItemService, AccountHeadService accountHeadService) {
+        this.accountItemService = accountItemService;
+        this.accountHeadService = accountHeadService;
+    }
 
     @GetMapping(value = "/getDetailList")
     @ApiOperation(value = "明细列表")
@@ -48,7 +47,7 @@ public class AccountItemController {
             List<AccountItemVo4List> dataList = new ArrayList<>();
             if(headerId != 0) {
                 dataList = accountItemService.getDetailList(headerId);
-                type = accountHeadServiceImpl.getAccountHead(headerId).getType();
+                type = accountHeadService.getAccountHead(headerId).getType();
             }
             JSONObject outer = new JSONObject();
             outer.put("total", dataList.size());

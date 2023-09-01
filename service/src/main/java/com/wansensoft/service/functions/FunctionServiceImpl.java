@@ -8,11 +8,11 @@ import com.wansensoft.entities.function.FunctionExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.function.FunctionMapper;
 import com.wansensoft.mappers.function.FunctionMapperEx;
+import com.wansensoft.service.CommonService;
 import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.systemConfig.SystemConfigService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.systemConfig.SystemConfigService;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,14 +32,14 @@ public class FunctionServiceImpl extends ServiceImpl<FunctionMapper, Function> i
 
     private final FunctionMapper functionsMapper;
     private final FunctionMapperEx functionMapperEx;
-    private final UserService userService;
+    private final CommonService commonService;
     private final SystemConfigService systemConfigService;
     private final LogService logService;
 
-    public FunctionServiceImpl(FunctionMapper functionsMapper, FunctionMapperEx functionMapperEx, UserService userService, SystemConfigService systemConfigService, LogService logService) {
+    public FunctionServiceImpl(FunctionMapper functionsMapper, FunctionMapperEx functionMapperEx, CommonService commonService, SystemConfigService systemConfigService, LogService logService) {
         this.functionsMapper = functionsMapper;
         this.functionMapperEx = functionMapperEx;
-        this.userService = userService;
+        this.commonService = commonService;
         this.systemConfigService = systemConfigService;
         this.logService = logService;
     }
@@ -82,7 +82,7 @@ public class FunctionServiceImpl extends ServiceImpl<FunctionMapper, Function> i
     public List<FunctionEx> select(String name, String type, int offset, int rows) {
         List<FunctionEx> list=null;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 list = functionMapperEx.selectByConditionFunction(name, type, offset, rows);
             }
         }catch(Exception e){
@@ -94,7 +94,7 @@ public class FunctionServiceImpl extends ServiceImpl<FunctionMapper, Function> i
     public Long countFunction(String name, String type) {
         Long result=null;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = functionMapperEx.countsByFunction(name, type);
             }
         }catch(Exception e){
@@ -108,7 +108,7 @@ public class FunctionServiceImpl extends ServiceImpl<FunctionMapper, Function> i
         Function functions = JSONObject.parseObject(obj.toJSONString(), Function.class);
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 functions.setState(false);
                 functions.setType("电脑版");
                 result = functionsMapper.insertSelective(functions);
@@ -126,7 +126,7 @@ public class FunctionServiceImpl extends ServiceImpl<FunctionMapper, Function> i
         Function functions = JSONObject.parseObject(obj.toJSONString(), Function.class);
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = functionsMapper.updateByPrimaryKeySelective(functions);
                 logService.insertLog("功能",
                         BusinessConstants.LOG_OPERATION_TYPE_EDIT + functions.getName(), request);
@@ -155,11 +155,11 @@ public class FunctionServiceImpl extends ServiceImpl<FunctionMapper, Function> i
         for(Function functions: list){
             sb.append("[").append(functions.getName()).append("]");
         }
-        User userInfo= userService.getCurrentUser();
+        User userInfo= commonService.getCurrentUser();
         String [] idArray=ids.split(",");
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = functionMapperEx.batchDeleteFunctionByIds(new Date(), userInfo == null ? null : userInfo.getId(), idArray);
                 logService.insertLog("功能", sb.toString(),
                         ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());

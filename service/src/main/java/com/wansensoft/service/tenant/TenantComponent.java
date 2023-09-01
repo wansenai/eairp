@@ -15,15 +15,15 @@ import java.util.Map;
 @TenantResource
 public class TenantComponent implements ICommonQuery {
 
-    private final TenantServiceImpl tenantServiceImpl;
+    private final TenantService tenantService;
 
-    public TenantComponent(TenantServiceImpl tenantServiceImpl) {
-        this.tenantServiceImpl = tenantServiceImpl;
+    public TenantComponent(TenantService tenantService) {
+        this.tenantService = tenantService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return tenantServiceImpl.getTenant(id);
+        return tenantService.getTenant(id);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class TenantComponent implements ICommonQuery {
         String type = StringUtil.getInfo(search, "type");
         String enabled = StringUtil.getInfo(search, "enabled");
         String remark = StringUtil.getInfo(search, "remark");
-        return tenantServiceImpl.select(loginName, type, enabled, remark, QueryUtils.offset(map), QueryUtils.rows(map));
+        return tenantService.select(loginName, type, enabled, remark, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
     @Override
@@ -47,32 +47,32 @@ public class TenantComponent implements ICommonQuery {
         String type = StringUtil.getInfo(search, "type");
         String enabled = StringUtil.getInfo(search, "enabled");
         String remark = StringUtil.getInfo(search, "remark");
-        return tenantServiceImpl.countTenant(loginName, type, enabled, remark);
+        return tenantService.countTenant(loginName, type, enabled, remark);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request)throws Exception {
-        return tenantServiceImpl.insertTenant(obj, request);
+        return tenantService.insertTenant(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return tenantServiceImpl.updateTenant(obj, request);
+        return tenantService.updateTenant(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return tenantServiceImpl.deleteTenant(id, request);
+        return tenantService.deleteTenant(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return tenantServiceImpl.batchDeleteTenant(ids, request);
+        return tenantService.batchDeleteTenant(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return tenantServiceImpl.checkIsNameExist(id, name);
+        return tenantService.checkIsNameExist(id, name);
     }
 
 }

@@ -15,15 +15,15 @@ import java.util.Map;
 @DepotResource
 public class DepotComponent implements ICommonQuery {
 
-    private final DepotServiceImpl depotServiceImpl;
+    private final DepotService depotService;
 
-    public DepotComponent(DepotServiceImpl depotServiceImpl) {
-        this.depotServiceImpl = depotServiceImpl;
+    public DepotComponent(DepotService depotService) {
+        this.depotService = depotService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return depotServiceImpl.getDepot(id);
+        return depotService.getDepot(id);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class DepotComponent implements ICommonQuery {
         Integer type = StringUtil.parseInteger(StringUtil.getInfo(search, "type"));
         String remark = StringUtil.getInfo(search, "remark");
         String order = QueryUtils.order(map);
-        return depotServiceImpl.select(name, type, remark, QueryUtils.offset(map), QueryUtils.rows(map));
+        return depotService.select(name, type, remark, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
     @Override
@@ -46,32 +46,32 @@ public class DepotComponent implements ICommonQuery {
         String name = StringUtil.getInfo(search, "name");
         Integer type = StringUtil.parseInteger(StringUtil.getInfo(search, "type"));
         String remark = StringUtil.getInfo(search, "remark");
-        return depotServiceImpl.countDepot(name, type, remark);
+        return depotService.countDepot(name, type, remark);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request) throws Exception{
-        return depotServiceImpl.insertDepot(obj, request);
+        return depotService.insertDepot(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return depotServiceImpl.updateDepot(obj, request);
+        return depotService.updateDepot(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return depotServiceImpl.deleteDepot(id, request);
+        return depotService.deleteDepot(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return depotServiceImpl.batchDeleteDepot(ids, request);
+        return depotService.batchDeleteDepot(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return depotServiceImpl.checkIsNameExist(id, name);
+        return depotService.checkIsNameExist(id, name);
     }
 
 }

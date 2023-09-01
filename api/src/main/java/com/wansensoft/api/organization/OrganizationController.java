@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.organization.Organization;
-import com.wansensoft.service.organization.OrganizationServiceImpl;
+import com.wansensoft.service.organization.OrganizationService;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.utils.BaseResponseInfo;
@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -27,8 +26,12 @@ import java.util.List;
 public class OrganizationController {
     private Logger logger = LoggerFactory.getLogger(OrganizationController.class);
 
-    @Resource
-    private OrganizationServiceImpl organizationServiceImpl;
+    private final OrganizationService organizationService;
+
+    public OrganizationController(OrganizationService organizationService) {
+        this.organizationService = organizationService;
+    }
+
     /**
      * 根据id来查询机构信息
      * @param id
@@ -41,15 +44,15 @@ public class OrganizationController {
         BaseResponseInfo res = new BaseResponseInfo();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
-            List<Organization> dataList = organizationServiceImpl.findById(id);
+            List<Organization> dataList = organizationService.findById(id);
             JSONObject outer = new JSONObject();
             if (null != dataList) {
                 for (Organization org : dataList) {
                     outer.put("id", org.getId());
                     outer.put("orgAbr", org.getOrgAbr());
                     outer.put("parentId", org.getParentId());
-                    List<Organization> dataParentList = organizationServiceImpl.findByParentId(org.getParentId());
-                    if(dataParentList!=null&&dataParentList.size()>0){
+                    List<Organization> dataParentList = organizationService.findByParentId(org.getParentId());
+                    if(dataParentList!=null&& !dataParentList.isEmpty()){
                         //父级机构名称显示简称
                         outer.put("orgParentName", dataParentList.get(0).getOrgAbr());
                     }
@@ -78,8 +81,8 @@ public class OrganizationController {
     @ApiOperation(value = "获取机构树数据")
     public JSONArray getOrganizationTree(@RequestParam("id") Long id) throws Exception{
        JSONArray arr=new JSONArray();
-       List<TreeNode> organizationTree= organizationServiceImpl.getOrganizationTree(id);
-       if(organizationTree!=null&&organizationTree.size()>0){
+       List<TreeNode> organizationTree= organizationService.getOrganizationTree(id);
+       if(organizationTree!=null&& !organizationTree.isEmpty()){
            for(TreeNode node:organizationTree){
                String str=JSON.toJSONString(node);
                JSONObject obj=JSON.parseObject(str);
@@ -96,10 +99,10 @@ public class OrganizationController {
      */
     @PostMapping(value = "/addOrganization")
     @ApiOperation(value = "新增机构信息")
-    public Object addOrganization(@RequestParam("info") String beanJson) throws Exception {
+    public Object addOrganization(@RequestParam("info") String beanJson) {
         JSONObject result = ExceptionConstants.standardSuccess();
         Organization org= JSON.parseObject(beanJson, Organization.class);
-        int i= organizationServiceImpl.addOrganization(org);
+        int i= organizationService.addOrganization(org);
         if(i<1){
             throw new BusinessRunTimeException(ExceptionConstants.ORGANIZATION_ADD_FAILED_CODE,
                     ExceptionConstants.ORGANIZATION_ADD_FAILED_MSG);
@@ -114,10 +117,10 @@ public class OrganizationController {
      */
     @PostMapping(value = "/editOrganization")
     @ApiOperation(value = "修改机构信息")
-    public Object editOrganization(@RequestParam("info") String beanJson) throws Exception {
+    public Object editOrganization(@RequestParam("info") String beanJson) {
         JSONObject result = ExceptionConstants.standardSuccess();
         Organization org= JSON.parseObject(beanJson, Organization.class);
-        int i= organizationServiceImpl.editOrganization(org);
+        int i= organizationService.editOrganization(org);
         if(i<1){
             throw new BusinessRunTimeException(ExceptionConstants.ORGANIZATION_EDIT_FAILED_CODE,
                     ExceptionConstants.ORGANIZATION_EDIT_FAILED_MSG);
