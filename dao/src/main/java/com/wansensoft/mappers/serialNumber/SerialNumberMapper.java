@@ -17,7 +17,7 @@ public interface SerialNumberMapper extends BaseMapper<SerialNumber> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(SerialNumber record);
+    int insertSerialNumber(SerialNumber record);
 
     int insertSelective(SerialNumber record);
 

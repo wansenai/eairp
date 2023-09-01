@@ -16,7 +16,7 @@ public interface AccountItemMapper extends BaseMapper<AccountItem> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(AccountItem record);
+    int insertAccountItem(AccountItem record);
 
     int insertSelective(AccountItem record);
 

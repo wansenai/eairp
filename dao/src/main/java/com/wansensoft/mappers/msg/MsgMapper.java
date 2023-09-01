@@ -17,7 +17,7 @@ public interface MsgMapper extends BaseMapper<Msg> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(Msg record);
+    int insertMsg(Msg record);
 
     int insertSelective(Msg record);
 

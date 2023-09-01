@@ -17,7 +17,7 @@ public interface MaterialCurrentStockMapper extends BaseMapper<MaterialCurrentSt
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(MaterialCurrentStock record);
+    int insertMaterialCurrentStock(MaterialCurrentStock record);
 
     int insertSelective(MaterialCurrentStock record);
 

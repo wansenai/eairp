@@ -104,7 +104,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.role.Role">
+  <insert id="insertRole" parameterType="com.wansensoft.entities.role.Role">
     insert into jsh_role (id, name, type, 
       price_limit, value, description, 
       enabled, sort, tenant_id, 

@@ -105,7 +105,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.organization.Organization">
+  <insert id="insertOrganization" parameterType="com.wansensoft.entities.organization.Organization">
     insert into jsh_organization (id, org_no, org_abr, 
       parent_id, sort, remark, 
       create_time, update_time, tenant_id, 

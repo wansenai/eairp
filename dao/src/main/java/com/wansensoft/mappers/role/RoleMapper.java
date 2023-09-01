@@ -17,7 +17,7 @@ public interface RoleMapper extends BaseMapper<Role> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(Role record);
+    int insertRole(Role record);
 
     int insertSelective(Role record);
 

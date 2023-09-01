@@ -106,7 +106,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.material.MaterialCategory">
+  <insert id="insertMaterialCategory" parameterType="com.wansensoft.entities.material.MaterialCategory">
     insert into jsh_material_category (id, name, category_level, 
       parent_id, sort, serial_no, 
       remark, create_time, update_time, 

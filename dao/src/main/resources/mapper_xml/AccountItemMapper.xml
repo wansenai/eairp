@@ -106,7 +106,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.account.AccountItem">
+  <insert id="insertAccountItem" parameterType="com.wansensoft.entities.account.AccountItem">
     insert into jsh_account_item (id, header_id, account_id, 
       in_out_item_id, bill_id, need_debt, 
       finish_debt, each_amount, remark, 

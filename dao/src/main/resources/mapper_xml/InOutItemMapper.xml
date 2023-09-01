@@ -102,7 +102,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.inOutItem.InOutItem">
+  <insert id="insertInOutItem" parameterType="com.wansensoft.entities.inOutItem.InOutItem">
     insert into jsh_in_out_item (id, name, type, 
       remark, enabled, sort, 
       tenant_id, delete_flag)

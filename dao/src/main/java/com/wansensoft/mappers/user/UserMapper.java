@@ -17,7 +17,7 @@ public interface UserMapper extends BaseMapper<User> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(User record);
+    int insertUser(User record);
 
     int insertSelective(User record);
 

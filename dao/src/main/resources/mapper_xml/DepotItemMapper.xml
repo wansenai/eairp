@@ -122,7 +122,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.depot.DepotItem">
+  <insert id="insertDepotItem" parameterType="com.wansensoft.entities.depot.DepotItem">
     insert into jsh_depot_item (id, header_id, material_id, 
       material_extend_id, material_unit, sku, 
       oper_number, basic_number, unit_price, 

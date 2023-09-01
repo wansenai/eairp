@@ -121,7 +121,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.supplier.Supplier">
+  <insert id="insertSupplier" parameterType="com.wansensoft.entities.supplier.Supplier">
     insert into jsh_supplier (id, supplier, contacts, 
       phone_num, email, description, 
       isystem, type, enabled, 

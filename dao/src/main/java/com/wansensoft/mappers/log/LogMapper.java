@@ -17,7 +17,7 @@ public interface LogMapper extends BaseMapper<Log> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(Log record);
+    int insertLog(Log record);
 
     int insertSelective(Log record);
 

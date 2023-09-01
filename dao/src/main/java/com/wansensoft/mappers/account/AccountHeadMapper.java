@@ -16,7 +16,7 @@ public interface AccountHeadMapper extends BaseMapper<AccountHead> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(AccountHead record);
+    int insertAccountHead(AccountHead record);
 
     int insertSelective(AccountHead record);
 

@@ -17,7 +17,7 @@ public interface MaterialCategoryMapper extends BaseMapper<MaterialCategory> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(MaterialCategory record);
+    int insertMaterialCategory(MaterialCategory record);
 
     int insertSelective(MaterialCategory record);
 

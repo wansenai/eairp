@@ -109,7 +109,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.serialNumber.SerialNumber">
+  <insert id="insertSerialNumber" parameterType="com.wansensoft.entities.serialNumber.SerialNumber">
     insert into jsh_serial_number (id, material_id, depot_id, 
       serial_number, is_sell, remark, 
       delete_flag, create_time, creator, 

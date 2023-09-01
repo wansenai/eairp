@@ -11,13 +11,13 @@ import com.wansensoft.mappers.account.AccountHeadMapper;
 import com.wansensoft.mappers.account.AccountHeadMapperEx;
 import com.wansensoft.mappers.account.AccountItemMapperEx;
 import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.orgaUserRel.OrgaUserRelServiceImpl;
 import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.service.accountItem.AccountItemService;
-import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
 import com.wansensoft.service.supplier.SupplierService;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
@@ -39,17 +39,17 @@ public class AccountHeadServiceImpl extends ServiceImpl<AccountHeadMapper, Accou
     private Logger logger = LoggerFactory.getLogger(AccountHeadServiceImpl.class);
     private final AccountHeadMapper accountHeadMapper;
     private final AccountHeadMapperEx accountHeadMapperEx;
-    private final OrgaUserRelService orgaUserRelService;
+    private final OrgaUserRelServiceImpl orgaUserRelServiceImpl;
     private final AccountItemService accountItemService;
     private final UserService userService;
     private final SupplierService supplierService;
     private final LogService logService;
     private final AccountItemMapperEx accountItemMapperEx;
 
-    public AccountHeadServiceImpl(AccountHeadMapper accountHeadMapper, AccountHeadMapperEx accountHeadMapperEx, OrgaUserRelService orgaUserRelService, AccountItemService accountItemService, UserService userService, SupplierService supplierService, LogService logService, AccountItemMapperEx accountItemMapperEx) {
+    public AccountHeadServiceImpl(AccountHeadMapper accountHeadMapper, AccountHeadMapperEx accountHeadMapperEx, OrgaUserRelServiceImpl orgaUserRelServiceImpl, AccountItemService accountItemService, UserService userService, SupplierService supplierService, LogService logService, AccountItemMapperEx accountItemMapperEx) {
         this.accountHeadMapper = accountHeadMapper;
         this.accountHeadMapperEx = accountHeadMapperEx;
-        this.orgaUserRelService = orgaUserRelService;
+        this.orgaUserRelServiceImpl = orgaUserRelServiceImpl;
         this.accountItemService = accountItemService;
         this.userService = userService;
         this.supplierService = supplierService;
@@ -165,7 +165,7 @@ public class AccountHeadServiceImpl extends ServiceImpl<AccountHeadMapper, Accou
         if(BusinessConstants.ROLE_TYPE_PRIVATE.equals(roleType)) {
             creator = user.getId().toString();
         } else if(BusinessConstants.ROLE_TYPE_THIS_ORG.equals(roleType)) {
-            creator = orgaUserRelService.getUserIdListByUserId(user.getId());
+            creator = orgaUserRelServiceImpl.getUserIdListByUserId(user.getId());
         }
         String [] creatorArray=null;
         if(StringUtil.isNotEmpty(creator)){

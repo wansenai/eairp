@@ -17,7 +17,7 @@ public interface UnitMapper extends BaseMapper<Unit> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(Unit record);
+    int insertUnit(Unit record);
 
     int insertSelective(Unit record);
 

@@ -7,6 +7,7 @@ import com.wansensoft.entities.depot.DepotItemVo4DetailByTypeAndMId;
 import com.wansensoft.entities.depot.DepotItemVo4WithInfoEx;
 import com.wansensoft.entities.material.MaterialVo4Unit;
 import com.wansensoft.entities.unit.Unit;
+import com.wansensoft.service.role.RoleServiceImpl;
 import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
@@ -15,7 +16,6 @@ import com.wansensoft.service.depot.DepotServiceImpl;
 import com.wansensoft.service.depotHead.DepotHeadServiceImpl;
 import com.wansensoft.service.depotItem.DepotItemServiceImpl;
 import com.wansensoft.service.material.MaterialServiceImpl;
-import com.wansensoft.service.role.RoleService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
 import com.wansensoft.service.unit.UnitService;
 import com.wansensoft.utils.*;
@@ -65,7 +65,7 @@ public class DepotItemController {
     private DepotServiceImpl depotServiceImpl;
 
     @Resource
-    private RoleService roleService;
+    private RoleServiceImpl roleServiceImpl;
 
     @Resource
     private UserServiceImpl userServiceImpl;
@@ -247,15 +247,15 @@ public class DepotItemController {
                     item.put("basicNumber", diEx.getBasicNumber());
                     item.put("preNumber", diEx.getOperNumber()); //原数量
                     item.put("finishNumber", depotItemServiceImpl.getFinishNumber(diEx.getMaterialExtendId(), diEx.getId(), diEx.getHeaderId(), unitInfo, materialUnit, linkType)); //已入库|已出库
-                    item.put("purchaseDecimal", roleService.parseBillPriceByLimit(diEx.getPurchaseDecimal(), billCategory, priceLimit, request));  //采购价
+                    item.put("purchaseDecimal", roleServiceImpl.parseBillPriceByLimit(diEx.getPurchaseDecimal(), billCategory, priceLimit, request));  //采购价
                     if("basic".equals(linkType)) {
                         //正常情况显示金额，而以销定购的情况不能显示金额
-                        item.put("unitPrice", roleService.parseBillPriceByLimit(diEx.getUnitPrice(), billCategory, priceLimit, request));
-                        item.put("taxUnitPrice", roleService.parseBillPriceByLimit(diEx.getTaxUnitPrice(), billCategory, priceLimit, request));
-                        item.put("allPrice", roleService.parseBillPriceByLimit(diEx.getAllPrice(), billCategory, priceLimit, request));
-                        item.put("taxRate", roleService.parseBillPriceByLimit(diEx.getTaxRate(), billCategory, priceLimit, request));
-                        item.put("taxMoney", roleService.parseBillPriceByLimit(diEx.getTaxMoney(), billCategory, priceLimit, request));
-                        item.put("taxLastMoney", roleService.parseBillPriceByLimit(diEx.getTaxLastMoney(), billCategory, priceLimit, request));
+                        item.put("unitPrice", roleServiceImpl.parseBillPriceByLimit(diEx.getUnitPrice(), billCategory, priceLimit, request));
+                        item.put("taxUnitPrice", roleServiceImpl.parseBillPriceByLimit(diEx.getTaxUnitPrice(), billCategory, priceLimit, request));
+                        item.put("allPrice", roleServiceImpl.parseBillPriceByLimit(diEx.getAllPrice(), billCategory, priceLimit, request));
+                        item.put("taxRate", roleServiceImpl.parseBillPriceByLimit(diEx.getTaxRate(), billCategory, priceLimit, request));
+                        item.put("taxMoney", roleServiceImpl.parseBillPriceByLimit(diEx.getTaxMoney(), billCategory, priceLimit, request));
+                        item.put("taxLastMoney", roleServiceImpl.parseBillPriceByLimit(diEx.getTaxLastMoney(), billCategory, priceLimit, request));
                     }
                     BigDecimal allWeight = diEx.getBasicNumber()==null||diEx.getWeight()==null?BigDecimal.ZERO:diEx.getBasicNumber().multiply(diEx.getWeight());
                     item.put("weight", allWeight);
@@ -286,9 +286,9 @@ public class DepotItemController {
                 if(StringUtil.isNotEmpty(isReadOnly) && "1".equals(isReadOnly)) {
                     JSONObject footItem = new JSONObject();
                     footItem.put("operNumber", totalOperNumber);
-                    footItem.put("allPrice", roleService.parseBillPriceByLimit(totalAllPrice, billCategory, priceLimit, request));
-                    footItem.put("taxMoney", roleService.parseBillPriceByLimit(totalTaxMoney, billCategory, priceLimit, request));
-                    footItem.put("taxLastMoney", roleService.parseBillPriceByLimit(totalTaxLastMoney, billCategory, priceLimit, request));
+                    footItem.put("allPrice", roleServiceImpl.parseBillPriceByLimit(totalAllPrice, billCategory, priceLimit, request));
+                    footItem.put("taxMoney", roleServiceImpl.parseBillPriceByLimit(totalTaxMoney, billCategory, priceLimit, request));
+                    footItem.put("taxLastMoney", roleServiceImpl.parseBillPriceByLimit(totalTaxLastMoney, billCategory, priceLimit, request));
                     footItem.put("weight", totalWeight);
                     dataArray.add(footItem);
                 }
@@ -829,7 +829,7 @@ public class DepotItemController {
                 BigDecimal outPrice = depotItemServiceImpl.inOrOutPrice("入库", "采购", month, roleType);
                 BigDecimal inPrice = depotItemServiceImpl.inOrOutPrice("出库", "采购退货", month, roleType);
                 obj.put("x", month);
-                obj.put("y", roleService.parseHomePriceByLimit(outPrice.subtract(inPrice), "buy", priceLimit, "***", request));
+                obj.put("y", roleServiceImpl.parseHomePriceByLimit(outPrice.subtract(inPrice), "buy", priceLimit, "***", request));
                 buyPriceList.add(obj);
             }
             map.put("buyPriceList", buyPriceList);
@@ -839,7 +839,7 @@ public class DepotItemController {
                 BigDecimal outPrice = depotItemServiceImpl.inOrOutPrice("出库", "销售", month, roleType);
                 BigDecimal inPrice = depotItemServiceImpl.inOrOutPrice("入库", "销售退货", month, roleType);
                 obj.put("x", month);
-                obj.put("y", roleService.parseHomePriceByLimit(outPrice.subtract(inPrice), "sale", priceLimit, "***", request));
+                obj.put("y", roleServiceImpl.parseHomePriceByLimit(outPrice.subtract(inPrice), "sale", priceLimit, "***", request));
                 salePriceList.add(obj);
             }
             map.put("salePriceList", salePriceList);
@@ -849,7 +849,7 @@ public class DepotItemController {
                 BigDecimal outPrice = depotItemServiceImpl.inOrOutRetailPrice("出库", "零售", month, roleType);
                 BigDecimal inPrice = depotItemServiceImpl.inOrOutRetailPrice("入库", "零售退货", month, roleType);
                 obj.put("x", month);
-                obj.put("y", roleService.parseHomePriceByLimit(outPrice.subtract(inPrice), "retail", priceLimit, "***", request));
+                obj.put("y", roleServiceImpl.parseHomePriceByLimit(outPrice.subtract(inPrice), "retail", priceLimit, "***", request));
                 retailPriceList.add(obj);
             }
             map.put("retailPriceList", retailPriceList);

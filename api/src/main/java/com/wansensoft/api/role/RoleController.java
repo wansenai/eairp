@@ -3,7 +3,7 @@ package com.wansensoft.api.role;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.role.Role;
-import com.wansensoft.service.role.RoleService;
+import com.wansensoft.service.role.RoleServiceImpl;
 import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ResponseJsonUtil;
@@ -26,7 +26,7 @@ public class RoleController {
     private Logger logger = LoggerFactory.getLogger(RoleController.class);
 
     @Resource
-    private RoleService roleService;
+    private RoleServiceImpl roleServiceImpl;
 
     @Resource
     private UserBusinessServiceImpl userBusinessServiceImpl;
@@ -44,7 +44,7 @@ public class RoleController {
         try {
             //获取权限信息
             String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, keyId);
-            List<Role> dataList = roleService.findUserRole();
+            List<Role> dataList = roleServiceImpl.findUserRole();
             if (null != dataList) {
                 for (Role role : dataList) {
                     JSONObject item = new JSONObject();
@@ -66,7 +66,7 @@ public class RoleController {
     @GetMapping(value = "/allList")
     @ApiOperation(value = "查询全部角色列表")
     public List<Role> allList(HttpServletRequest request)throws Exception {
-        return roleService.allList();
+        return roleServiceImpl.allList();
     }
 
     /**
@@ -82,7 +82,7 @@ public class RoleController {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
-        int res = roleService.batchSetStatus(status, ids);
+        int res = roleServiceImpl.batchSetStatus(status, ids);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {

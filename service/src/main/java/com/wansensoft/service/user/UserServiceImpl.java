@@ -13,6 +13,7 @@ import com.wansensoft.mappers.user.UserMapper;
 import com.wansensoft.mappers.user.UserMapperEx;
 import com.wansensoft.service.functions.FunctionService;
 import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
 import com.wansensoft.service.platformConfig.PlatformConfigService;
 import com.wansensoft.service.redis.RedisService;
 import com.wansensoft.service.role.RoleService;
@@ -30,7 +31,6 @@ import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -512,7 +512,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             oul.setUserId(userId);
             //用户在机构中的排序
             oul.setUserBlngOrgaDsplSeq(ue.getUserBlngOrgaDsplSeq());
-            oul=orgaUserRelService.addOrgaUserRel(oul);
+            oul = orgaUserRelService.addOrgaUserRel(oul);
             if(oul==null){
                 logger.error("异常码[{}],异常提示[{}],参数,[{}]",
                         ExceptionConstants.ORGA_USER_REL_ADD_FAILED_CODE,ExceptionConstants.ORGA_USER_REL_ADD_FAILED_MSG);

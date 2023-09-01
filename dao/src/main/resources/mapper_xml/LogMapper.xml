@@ -102,7 +102,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.log.Log">
+  <insert id="insertLog" parameterType="com.wansensoft.entities.log.Log">
     insert into jsh_log (id, user_id, operation, 
       client_ip, create_time, status, 
       content, tenant_id)

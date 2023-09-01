@@ -112,7 +112,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.account.AccountHead">
+  <insert id="insertAccountHead" parameterType="com.wansensoft.entities.account.AccountHead">
     insert into jsh_account_head (id, type, organ_id, 
       hands_person_id, creator, change_amount, 
       discount_money, total_price, account_id, 

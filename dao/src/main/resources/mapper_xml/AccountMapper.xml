@@ -106,7 +106,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.account.Account">
+  <insert id="insertAccount" parameterType="com.wansensoft.entities.account.Account">
     insert into jsh_account (id, name, serial_no, 
       initial_amount, current_amount, remark, 
       enabled, sort, is_default, tenant_id, 

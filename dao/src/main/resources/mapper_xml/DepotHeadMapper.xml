@@ -129,7 +129,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.depot.DepotHead">
+  <insert id="insertDepotHead" parameterType="com.wansensoft.entities.depot.DepotHead">
     insert into jsh_depot_head (id, type, sub_type, 
       default_number, number, create_time, 
       oper_time, organ_id, creator, 

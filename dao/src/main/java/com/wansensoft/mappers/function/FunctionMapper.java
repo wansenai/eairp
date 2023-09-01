@@ -17,7 +17,7 @@ public interface FunctionMapper extends BaseMapper<Function> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(Function record);
+    int insertFunction(Function record);
 
     int insertSelective(Function record);
 

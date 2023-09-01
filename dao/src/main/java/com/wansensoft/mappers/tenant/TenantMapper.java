@@ -17,7 +17,7 @@ public interface TenantMapper extends BaseMapper<Tenant> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(Tenant record);
+    int insertTenant(Tenant record);
 
     int insertSelective(Tenant record);
 

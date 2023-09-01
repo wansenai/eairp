@@ -103,7 +103,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.wansensoft.entities.msg.Msg">
+  <insert id="insertMsg" parameterType="com.wansensoft.entities.msg.Msg">
     insert into jsh_msg (id, msg_title, msg_content, 
       create_time, type, user_id, 
       status, tenant_id, delete_Flag

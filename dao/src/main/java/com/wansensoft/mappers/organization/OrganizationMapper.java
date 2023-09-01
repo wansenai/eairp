@@ -17,7 +17,7 @@ public interface OrganizationMapper extends BaseMapper<Organization> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(Organization record);
+    int insertOrganization(Organization record);
 
     int insertSelective(Organization record);
 

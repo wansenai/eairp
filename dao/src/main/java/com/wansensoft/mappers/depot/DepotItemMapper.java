@@ -17,7 +17,7 @@ public interface DepotItemMapper extends BaseMapper<DepotItem> {
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(DepotItem record);
+    int insertDepotItem(DepotItem record);
 
     int insertSelective(DepotItem record);
 
