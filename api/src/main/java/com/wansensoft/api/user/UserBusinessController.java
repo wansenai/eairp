@@ -2,8 +2,8 @@ package com.wansensoft.api.user;
 
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.user.UserBusiness;
-import com.wansensoft.service.user.UserServiceImpl;
-import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
+import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ResponseJsonUtil;
@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
@@ -23,12 +22,12 @@ import java.util.Map;
 @RequestMapping(value = "/userBusiness")
 @Api(tags = {"用户角色模块的关系"})
 public class UserBusinessController {
-    private Logger logger = LoggerFactory.getLogger(UserBusinessController.class);
 
-    @Resource
-    private UserBusinessServiceImpl userBusinessServiceImpl;
-    @Resource
-    private UserServiceImpl userServiceImpl;
+    private final UserBusinessService userBusinessService;
+
+    public UserBusinessController(UserBusinessService userBusinessService, UserService userService) {
+        this.userBusinessService = userBusinessService;
+    }
 
     /**
      * 获取信息
@@ -42,10 +41,10 @@ public class UserBusinessController {
     @ApiOperation(value = "获取信息")
     public BaseResponseInfo getBasicData(@RequestParam(value = "KeyId") String keyId,
                                          @RequestParam(value = "Type") String type,
-                                         HttpServletRequest request)throws Exception {
+                                         HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            List<UserBusiness> list = userBusinessServiceImpl.getBasicData(keyId, type);
+            List<UserBusiness> list = userBusinessService.getBasicData(keyId, type);
             Map<String, List> mapData = new HashMap<String, List>();
             mapData.put("userBusinessList", list);
             res.code = 200;
@@ -70,9 +69,9 @@ public class UserBusinessController {
     @ApiOperation(value = "校验存在")
     public String checkIsValueExist(@RequestParam(value ="type", required = false) String type,
                                    @RequestParam(value ="keyId", required = false) String keyId,
-                                   HttpServletRequest request)throws Exception {
+                                   HttpServletRequest request) {
         Map<String, Object> objectMap = new HashMap<String, Object>();
-        Long id = userBusinessServiceImpl.checkIsValueExist(type, keyId);
+        Long id = userBusinessService.checkIsValueExist(type, keyId);
         if(id != null) {
             objectMap.put("id", id);
         } else {
@@ -90,14 +89,14 @@ public class UserBusinessController {
     @PostMapping(value = "/updateBtnStr")
     @ApiOperation(value = "更新角色的按钮权限")
     public BaseResponseInfo updateBtnStr(@RequestBody JSONObject jsonObject,
-                                         HttpServletRequest request)throws Exception {
+                                         HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             String roleId = jsonObject.getString("roleId");
             String btnStr = jsonObject.getString("btnStr");
             String keyId = roleId;
             String type = "RoleFunctions";
-            int back = userBusinessServiceImpl.updateBtnStr(keyId, type, btnStr);
+            int back = userBusinessService.updateBtnStr(keyId, type, btnStr);
             if(back > 0) {
                 res.code = 200;
                 res.data = "成功";

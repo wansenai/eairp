@@ -1,19 +1,20 @@
 package com.wansensoft.service.unit;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.material.Material;
 import com.wansensoft.entities.unit.Unit;
 import com.wansensoft.entities.unit.UnitExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.material.MaterialMapperEx;
-import com.wansensoft.service.log.LogServiceImpl;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.unit.UnitMapper;
 import com.wansensoft.mappers.unit.UnitMapperEx;
-import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,20 +30,20 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class UnitService {
-    private Logger logger = LoggerFactory.getLogger(UnitService.class);
+public class UnitServiceImpl extends ServiceImpl<UnitMapper, Unit> implements UnitService{
+    private Logger logger = LoggerFactory.getLogger(UnitServiceImpl.class);
 
     private final UnitMapper unitMapper;
     private final UnitMapperEx unitMapperEx;
-    private final UserServiceImpl userServiceImpl;
-    private final LogServiceImpl logServiceImpl;
+    private final UserService userService;
+    private final LogService logService;
     private final MaterialMapperEx materialMapperEx;
 
-    public UnitService(UnitMapper unitMapper, UnitMapperEx unitMapperEx, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl, MaterialMapperEx materialMapperEx) {
+    public UnitServiceImpl(UnitMapper unitMapper, UnitMapperEx unitMapperEx, UserService userService, LogService logService, MaterialMapperEx materialMapperEx) {
         this.unitMapper = unitMapper;
         this.unitMapperEx = unitMapperEx;
-        this.userServiceImpl = userServiceImpl;
-        this.logServiceImpl = logServiceImpl;
+        this.userService = userService;
+        this.logService = logService;
         this.materialMapperEx = materialMapperEx;
     }
 
@@ -56,7 +57,7 @@ public class UnitService {
         return result;
     }
 
-    public List<Unit> getUnitListByIds(String ids)throws Exception {
+    public List<Unit> getUnitListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<Unit> list = new ArrayList<>();
         try{
@@ -69,7 +70,7 @@ public class UnitService {
         return list;
     }
 
-    public List<Unit> getUnit()throws Exception {
+    public List<Unit> getUnit() {
         UnitExample example = new UnitExample();
         example.createCriteria().andEnabledEqualTo(true).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<Unit> list=null;
@@ -81,7 +82,7 @@ public class UnitService {
         return list;
     }
 
-    public List<Unit> select(String name, int offset, int rows)throws Exception {
+    public List<Unit> select(String name, int offset, int rows) {
         List<Unit> list=null;
         try{
             list=unitMapperEx.selectByConditionUnit(name, offset, rows);
@@ -91,7 +92,7 @@ public class UnitService {
         return list;
     }
 
-    public Long countUnit(String name)throws Exception {
+    public Long countUnit(String name) {
         Long result=null;
         try{
             result=unitMapperEx.countsByUnit(name);
@@ -102,15 +103,15 @@ public class UnitService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertUnit(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertUnit(JSONObject obj, HttpServletRequest request) {
         Unit unit = JSONObject.parseObject(obj.toJSONString(), Unit.class);
         int result=0;
         try{
             parseNameByUnit(unit);
             unit.setEnabled(true);
             result=unitMapper.insertSelective(unit);
-            logServiceImpl.insertLog("计量单位",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(unit.getName()).toString(), request);
+            logService.insertLog("计量单位",
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + unit.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -118,7 +119,7 @@ public class UnitService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateUnit(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int updateUnit(JSONObject obj, HttpServletRequest request) {
         Unit unit = JSONObject.parseObject(obj.toJSONString(), Unit.class);
         int result=0;
         try{
@@ -130,8 +131,8 @@ public class UnitService {
             if(unit.getRatioThree()==null) {
                 unitMapperEx.updateRatioThreeById(unit.getId());
             }
-            logServiceImpl.insertLog("计量单位",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(unit.getName()).toString(), request);
+            logService.insertLog("计量单位",
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + unit.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -154,17 +155,17 @@ public class UnitService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteUnit(Long id, HttpServletRequest request)throws Exception {
+    public int deleteUnit(Long id, HttpServletRequest request) {
         return batchDeleteUnitByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteUnit(String ids, HttpServletRequest request) throws Exception{
+    public int batchDeleteUnit(String ids, HttpServletRequest request) {
         return batchDeleteUnitByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteUnitByIds(String ids)throws Exception {
+    public int batchDeleteUnitByIds(String ids) {
         int result=0;
         String [] idArray=ids.split(",");
         //校验产品表	jsh_material
@@ -174,7 +175,7 @@ public class UnitService {
         }catch(Exception e){
             JshException.readFail(logger, e);
         }
-        if(materialList!=null&&materialList.size()>0){
+        if(materialList!=null&& !materialList.isEmpty()){
             logger.error("异常码[{}],异常提示[{}],参数,UnitIds[{}]",
                     ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,ExceptionConstants.DELETE_FORCE_CONFIRM_MSG,ids);
             throw new BusinessRunTimeException(ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,
@@ -187,9 +188,9 @@ public class UnitService {
         for(Unit unit: list){
             sb.append("[").append(unit.getName()).append("]");
         }
-        logServiceImpl.insertLog("计量单位", sb.toString(),
+        logService.insertLog("计量单位", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo= userServiceImpl.getCurrentUser();
+        User userInfo= userService.getCurrentUser();
         //校验通过执行删除操作
         try{
             result=unitMapperEx.batchDeleteUnitByIds(new Date(),userInfo==null?null:userInfo.getId(),idArray);
@@ -199,7 +200,7 @@ public class UnitService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         UnitExample example = new UnitExample();
         example.createCriteria().andIdNotEqualTo(id).andNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<Unit> list=null;
@@ -218,13 +219,13 @@ public class UnitService {
      * @param ratio
      * @return
      */
-    public Long getUnitIdByParam(String basicUnit, String otherUnit, BigDecimal ratio){
+    public Long getUnitIdByParam(String basicUnit, String otherUnit, BigDecimal ratio) {
         Long unitId = null;
         UnitExample example = new UnitExample();
         example.createCriteria().andBasicUnitEqualTo(basicUnit).andOtherUnitEqualTo(otherUnit).andRatioEqualTo(ratio)
                 .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<Unit> list = unitMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             unitId = list.get(0).getId();
         }
         return unitId;
@@ -239,21 +240,21 @@ public class UnitService {
      */
     public BigDecimal parseStockByUnit(BigDecimal stock, Unit unitInfo, String materialUnit) {
         if(materialUnit.equals(unitInfo.getOtherUnit()) && unitInfo.getRatio()!=null && unitInfo.getRatio().compareTo(BigDecimal.ZERO)!=0) {
-            stock = stock.divide(unitInfo.getRatio(),2,BigDecimal.ROUND_HALF_UP);
+            stock = stock.divide(unitInfo.getRatio(), 2, BigDecimal.ROUND_HALF_UP);
         }
         if(materialUnit.equals(unitInfo.getOtherUnitTwo()) && unitInfo.getRatioTwo()!=null && unitInfo.getRatioTwo().compareTo(BigDecimal.ZERO)!=0) {
-            stock = stock.divide(unitInfo.getRatioTwo(),2,BigDecimal.ROUND_HALF_UP);
+            stock = stock.divide(unitInfo.getRatioTwo(), 2, BigDecimal.ROUND_HALF_UP);
         }
         if(materialUnit.equals(unitInfo.getOtherUnitThree()) && unitInfo.getRatioThree()!=null && unitInfo.getRatioThree().compareTo(BigDecimal.ZERO)!=0) {
-            stock = stock.divide(unitInfo.getRatioThree(),2,BigDecimal.ROUND_HALF_UP);
+            stock = stock.divide(unitInfo.getRatioThree(), 2, BigDecimal.ROUND_HALF_UP);
         }
         return stock;
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchSetStatus(Boolean status, String ids)throws Exception {
-        logServiceImpl.insertLog("计量单位",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ENABLED).toString(),
+    public int batchSetStatus(Boolean status, String ids) {
+        logService.insertLog("计量单位",
+                BusinessConstants.LOG_OPERATION_TYPE_ENABLED,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         List<Long> unitIds = StringUtil.strToLongList(ids);
         Unit unit = new Unit();

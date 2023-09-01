@@ -14,15 +14,15 @@ import java.util.*;
 @UserResource
 public class UserComponent implements ICommonQuery {
 
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
-    public UserComponent(UserServiceImpl userServiceImpl) {
-        this.userServiceImpl = userServiceImpl;
+    public UserComponent(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return userServiceImpl.getUser(id);
+        return userService.getUser(id);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class UserComponent implements ICommonQuery {
         String loginName = StringUtil.getInfo(search, "loginName");
         String order = QueryUtils.order(map);
         String filter = QueryUtils.filter(map);
-        return userServiceImpl.select(userName, loginName, QueryUtils.offset(map), QueryUtils.rows(map));
+        return userService.select(userName, loginName, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
     @Override
@@ -44,32 +44,32 @@ public class UserComponent implements ICommonQuery {
         String search = map.get(Constants.SEARCH);
         String userName = StringUtil.getInfo(search, "userName");
         String loginName = StringUtil.getInfo(search, "loginName");
-        return userServiceImpl.countUser(userName, loginName);
+        return userService.countUser(userName, loginName);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request)throws Exception {
-        return userServiceImpl.insertUser(obj, request);
+        return userService.insertUser(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return userServiceImpl.updateUser(obj, request);
+        return userService.updateUser(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return userServiceImpl.deleteUser(id, request);
+        return userService.deleteUser(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return userServiceImpl.batchDeleteUser(ids, request);
+        return userService.batchDeleteUser(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return userServiceImpl.checkIsNameExist(id, name);
+        return userService.checkIsNameExist(id, name);
     }
 
 }

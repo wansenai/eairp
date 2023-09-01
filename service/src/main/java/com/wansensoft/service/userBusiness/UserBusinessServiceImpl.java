@@ -7,8 +7,8 @@ import com.wansensoft.entities.user.UserBusiness;
 import com.wansensoft.entities.user.UserBusinessExample;
 import com.wansensoft.mappers.user.UserBusinessMapper;
 import com.wansensoft.mappers.user.UserBusinessMapperEx;
+import com.wansensoft.service.CommonService;
 import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.utils.Tools;
@@ -29,13 +29,13 @@ public class UserBusinessServiceImpl extends ServiceImpl<UserBusinessMapper, Use
     private final UserBusinessMapper userBusinessMapper;
     private final UserBusinessMapperEx userBusinessMapperEx;
     private final LogService logService;
-    private final UserServiceImpl userServiceImpl;
+    private final CommonService commonService;
 
-    public UserBusinessServiceImpl(UserBusinessMapper userBusinessMapper, UserBusinessMapperEx userBusinessMapperEx, LogService logService, UserServiceImpl userServiceImpl) {
+    public UserBusinessServiceImpl(UserBusinessMapper userBusinessMapper, UserBusinessMapperEx userBusinessMapperEx, LogService logService, CommonService commonService) {
         this.userBusinessMapper = userBusinessMapper;
         this.userBusinessMapperEx = userBusinessMapperEx;
         this.logService = logService;
-        this.userServiceImpl = userServiceImpl;
+        this.commonService = commonService;
     }
 
     public UserBusiness getUserBusiness(long id) {
@@ -115,9 +115,9 @@ public class UserBusinessServiceImpl extends ServiceImpl<UserBusinessMapper, Use
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int batchDeleteUserBusinessByIds(String ids) {
         logService.insertLog("关联关系",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_DELETE).append(ids).toString(),
+                BusinessConstants.LOG_OPERATION_TYPE_DELETE + ids,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo= userServiceImpl.getCurrentUser();
+        User userInfo = commonService.getCurrentUser();
         String [] idArray=ids.split(",");
         int result=0;
         try{
@@ -161,7 +161,7 @@ public class UserBusinessServiceImpl extends ServiceImpl<UserBusinessMapper, Use
     public String getUBValueByTypeAndKeyId(String type, String keyId) {
         String ubValue = "";
         List<UserBusiness> ubList = getBasicData(keyId, type);
-        if(ubList!=null && ubList.size()>0) {
+        if(ubList!=null && !ubList.isEmpty()) {
             ubValue = ubList.get(0).getValue();
         }
         return ubValue;

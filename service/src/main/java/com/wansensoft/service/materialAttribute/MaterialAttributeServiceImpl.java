@@ -2,14 +2,15 @@ package com.wansensoft.service.materialAttribute;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.material.MaterialAttribute;
 import com.wansensoft.entities.material.MaterialAttributeExample;
 import com.wansensoft.mappers.material.MaterialAttributeMapper;
 import com.wansensoft.mappers.material.MaterialAttributeMapperEx;
+import com.wansensoft.service.log.LogService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.log.LogServiceImpl;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,20 +22,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class MaterialAttributeService {
-    private Logger logger = LoggerFactory.getLogger(MaterialAttributeService.class);
+public class MaterialAttributeServiceImpl extends ServiceImpl<MaterialAttributeMapper, MaterialAttribute> implements MaterialAttributeService{
+    private Logger logger = LoggerFactory.getLogger(MaterialAttributeServiceImpl.class);
 
-    private final LogServiceImpl logServiceImpl;
+    private final LogService logService;
     private final MaterialAttributeMapper materialAttributeMapper;
     private final MaterialAttributeMapperEx materialAttributeMapperEx;
 
-    public MaterialAttributeService(LogServiceImpl logServiceImpl, MaterialAttributeMapper materialAttributeMapper, MaterialAttributeMapperEx materialAttributeMapperEx) {
-        this.logServiceImpl = logServiceImpl;
+    public MaterialAttributeServiceImpl(LogService logService, MaterialAttributeMapper materialAttributeMapper, MaterialAttributeMapperEx materialAttributeMapperEx) {
+        this.logService = logService;
         this.materialAttributeMapper = materialAttributeMapper;
         this.materialAttributeMapperEx = materialAttributeMapperEx;
     }
 
-    public MaterialAttribute getMaterialAttribute(long id)throws Exception {
+    public MaterialAttribute getMaterialAttribute(long id) {
         MaterialAttribute result=null;
         try{
             result=materialAttributeMapper.selectByPrimaryKey(id);
@@ -44,7 +45,7 @@ public class MaterialAttributeService {
         return result;
     }
 
-    public List<MaterialAttribute> getMaterialAttribute() throws Exception{
+    public List<MaterialAttribute> getMaterialAttribute() {
         MaterialAttributeExample example = new MaterialAttributeExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         example.setOrderByClause("id desc");
@@ -57,8 +58,7 @@ public class MaterialAttributeService {
         return list;
     }
 
-    public List<MaterialAttribute> select(String attributeName, int offset, int rows)
-            throws Exception{
+    public List<MaterialAttribute> select(String attributeName, int offset, int rows) {
         List<MaterialAttribute> list = new ArrayList<>();
         try{
             list = materialAttributeMapperEx.selectByConditionMaterialAttribute(attributeName, offset, rows);
@@ -68,7 +68,7 @@ public class MaterialAttributeService {
         return list;
     }
 
-    public Long countMaterialAttribute(String attributeField)throws Exception {
+    public Long countMaterialAttribute(String attributeField) {
         Long result =null;
         try{
             result= 5L;
@@ -79,12 +79,12 @@ public class MaterialAttributeService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertMaterialAttribute(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertMaterialAttribute(JSONObject obj, HttpServletRequest request) {
         MaterialAttribute m = JSONObject.parseObject(obj.toJSONString(), MaterialAttribute.class);
         try{
             materialAttributeMapper.insertSelective(m);
-            logServiceImpl.insertLog("商品属性",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(m.getAttributeName()).toString(), request);
+            logService.insertLog("商品属性",
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + m.getAttributeName(), request);
             return 1;
         }
         catch (BusinessRunTimeException ex) {
@@ -97,12 +97,12 @@ public class MaterialAttributeService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateMaterialAttribute(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateMaterialAttribute(JSONObject obj, HttpServletRequest request) {
         MaterialAttribute materialAttribute = JSONObject.parseObject(obj.toJSONString(), MaterialAttribute.class);
         try{
             materialAttributeMapper.updateByPrimaryKeySelective(materialAttribute);
-            logServiceImpl.insertLog("商品属性",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(materialAttribute.getAttributeName()).toString(), request);
+            logService.insertLog("商品属性",
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + materialAttribute.getAttributeName(), request);
             return 1;
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -111,17 +111,17 @@ public class MaterialAttributeService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteMaterialAttribute(Long id, HttpServletRequest request)throws Exception {
+    public int deleteMaterialAttribute(Long id, HttpServletRequest request) {
         return batchDeleteMaterialAttributeByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteMaterialAttribute(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteMaterialAttribute(String ids, HttpServletRequest request) {
         return batchDeleteMaterialAttributeByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteMaterialAttributeByIds(String ids) throws Exception{
+    public int batchDeleteMaterialAttributeByIds(String ids) {
         String [] idArray=ids.split(",");
         try{
             return materialAttributeMapperEx.batchDeleteMaterialAttributeByIds(idArray);
@@ -131,7 +131,7 @@ public class MaterialAttributeService {
         }
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         MaterialAttributeExample example = new MaterialAttributeExample();
         example.createCriteria().andIdNotEqualTo(id).andAttributeNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<MaterialAttribute> list =null;
@@ -165,7 +165,7 @@ public class MaterialAttributeService {
         MaterialAttributeExample example = new MaterialAttributeExample();
         example.createCriteria().andIdEqualTo(id).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<MaterialAttribute> list = materialAttributeMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             return list.get(0);
         } else {
             return null;

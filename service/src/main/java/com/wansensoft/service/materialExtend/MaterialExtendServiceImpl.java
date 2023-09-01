@@ -3,12 +3,13 @@ package com.wansensoft.service.materialExtend;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.material.MaterialExtend;
 import com.wansensoft.entities.material.MaterialExtendExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.material.MaterialExtendMapper;
 import com.wansensoft.mappers.material.MaterialExtendMapperEx;
-import com.wansensoft.service.user.UserServiceImpl;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
@@ -30,21 +31,21 @@ import java.util.List;
 
 
 @Service
-public class MaterialExtendService {
-    private Logger logger = LoggerFactory.getLogger(MaterialExtendService.class);
+public class MaterialExtendServiceImpl extends ServiceImpl<MaterialExtendMapper, MaterialExtend> implements MaterialExtendService{
+    private Logger logger = LoggerFactory.getLogger(MaterialExtendServiceImpl.class);
     private final MaterialExtendMapper materialExtendMapper;
     private final MaterialExtendMapperEx materialExtendMapperEx;
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
     private final RedisService redisService;
 
-    public MaterialExtendService(MaterialExtendMapper materialExtendMapper, MaterialExtendMapperEx materialExtendMapperEx, UserServiceImpl userServiceImpl, RedisService redisService) {
+    public MaterialExtendServiceImpl(MaterialExtendMapper materialExtendMapper, MaterialExtendMapperEx materialExtendMapperEx, UserService userService, RedisService redisService) {
         this.materialExtendMapper = materialExtendMapper;
         this.materialExtendMapperEx = materialExtendMapperEx;
-        this.userServiceImpl = userServiceImpl;
+        this.userService = userService;
         this.redisService = redisService;
     }
 
-    public MaterialExtend getMaterialExtend(long id)throws Exception {
+    public MaterialExtend getMaterialExtend(long id) {
         MaterialExtend result=null;
         try{
             result=materialExtendMapper.selectByPrimaryKey(id);
@@ -77,7 +78,7 @@ public class MaterialExtendService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public String saveDetials(JSONObject obj, String sortList, Long materialId, String type) throws Exception {
+    public String saveDetials(JSONObject obj, String sortList, Long materialId, String type) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         JSONArray meArr = obj.getJSONArray("meList");
         JSONArray insertedJson = new JSONArray();
@@ -220,8 +221,8 @@ public class MaterialExtendService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertMaterialExtend(MaterialExtend materialExtend)throws Exception {
-        User user = userServiceImpl.getCurrentUser();
+    public int insertMaterialExtend(MaterialExtend materialExtend) {
+        User user = userService.getCurrentUser();
         materialExtend.setDeleteFlag(BusinessConstants.DELETE_FLAG_EXISTS);
         materialExtend.setCreateTime(new Date());
         materialExtend.setUpdateTime(new Date().getTime());
@@ -238,7 +239,7 @@ public class MaterialExtendService {
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public int updateMaterialExtend(MaterialExtend materialExtend) {
-        User user = userServiceImpl.getCurrentUser();
+        User user = userService.getCurrentUser();
         materialExtend.setUpdateTime(System.currentTimeMillis());
         materialExtend.setUpdateSerial(user.getLoginName());
         int res =0;
@@ -250,7 +251,7 @@ public class MaterialExtendService {
         return res;
     }
 
-    public int checkIsBarCodeExist(Long id, String barCode)throws Exception {
+    public int checkIsBarCodeExist(Long id, String barCode) {
         MaterialExtendExample example = new MaterialExtendExample();
         MaterialExtendExample.Criteria criteria = example.createCriteria();
         criteria.andBarCodeEqualTo(barCode);
@@ -269,13 +270,13 @@ public class MaterialExtendService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteMaterialExtend(Long id, HttpServletRequest request)throws Exception {
+    public int deleteMaterialExtend(Long id, HttpServletRequest request) {
         int result =0;
         MaterialExtend materialExtend = new MaterialExtend();
         materialExtend.setId(id);
         materialExtend.setDeleteFlag(BusinessConstants.DELETE_FLAG_DELETED);
         Long userId = Long.parseLong(redisService.getObjectFromSessionByKey(request,"userId").toString());
-        User user = userServiceImpl.getUser(userId);
+        User user = userService.getUser(userId);
         materialExtend.setUpdateTime(new Date().getTime());
         materialExtend.setUpdateSerial(user.getLoginName());
         try{
@@ -287,7 +288,7 @@ public class MaterialExtendService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteMaterialExtendByIds(String ids, HttpServletRequest request) throws Exception{
+    public int batchDeleteMaterialExtendByIds(String ids, HttpServletRequest request) {
         String [] idArray=ids.split(",");
         int result = 0;
         try{
@@ -298,7 +299,7 @@ public class MaterialExtendService {
         return result;
     }
 
-    public int insertMaterialExtend(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int insertMaterialExtend(JSONObject obj, HttpServletRequest request) {
         MaterialExtend materialExtend = JSONObject.parseObject(obj.toJSONString(), MaterialExtend.class);
         int result=0;
         try{
@@ -309,7 +310,7 @@ public class MaterialExtendService {
         return result;
     }
 
-    public int updateMaterialExtend(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int updateMaterialExtend(JSONObject obj, HttpServletRequest request) {
         MaterialExtend materialExtend = JSONObject.parseObject(obj.toJSONString(), MaterialExtend.class);
         int result=0;
         try{
@@ -320,7 +321,7 @@ public class MaterialExtendService {
         return result;
     }
 
-    public List<MaterialExtend> getMaterialExtendByTenantAndTime(Long tenantId, Long lastTime, Long syncNum)throws Exception {
+    public List<MaterialExtend> getMaterialExtendByTenantAndTime(Long tenantId, Long lastTime, Long syncNum) {
         List<MaterialExtend> list=new ArrayList<MaterialExtend>();
         try{
             //先获取最大的时间戳，再查两个时间戳之间的数据，这样同步能够防止丢失数据（应为时间戳有重复）
@@ -345,7 +346,7 @@ public class MaterialExtendService {
         example.createCriteria().andMaterialIdEqualTo(materialId).andDefaultFlagEqualTo(defaultFlag)
                                 .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<MaterialExtend> list = materialExtendMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             id = list.get(0).getId();
         }
         return id;
@@ -358,7 +359,7 @@ public class MaterialExtendService {
         example.createCriteria().andMaterialIdEqualTo(materialId).andBarCodeEqualTo(barCode)
                 .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<MaterialExtend> list = materialExtendMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             id = list.get(0).getId();
         }
         return id;
@@ -392,9 +393,9 @@ public class MaterialExtendService {
      * @return
      * @throws Exception
      */
-    public List<MaterialExtend> getMeListByBarCodeAndMid(List<String> barCodeList, Long mId)throws Exception {
+    public List<MaterialExtend> getMeListByBarCodeAndMid(List<String> barCodeList, Long mId) {
         List<MaterialExtend> list = new ArrayList<>();
-        if(barCodeList.size()>0) {
+        if(!barCodeList.isEmpty()) {
             MaterialExtendExample example = new MaterialExtendExample();
             example.createCriteria().andBarCodeNotIn(barCodeList).andMaterialIdEqualTo(mId)
                     .andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);

@@ -1,10 +1,10 @@
 package com.wansensoft.api.system;
 
 import com.wansensoft.entities.system.SystemConfig;
-import com.wansensoft.service.depot.DepotServiceImpl;
+import com.wansensoft.service.depot.DepotService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.user.UserServiceImpl;
-import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
+import com.wansensoft.service.user.UserService;
+import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.StringUtil;
 import io.swagger.annotations.Api;
@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerMapping;
 
-import jakarta.annotation.Resource;
 import javax.imageio.ImageIO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,17 +36,7 @@ import java.util.List;
 public class SystemConfigController {
     private Logger logger = LoggerFactory.getLogger(SystemConfigController.class);
 
-    @Resource
-    private UserServiceImpl userServiceImpl;
-
-    @Resource
-    private DepotServiceImpl depotServiceImpl;
-
-    @Resource
-    private UserBusinessServiceImpl userBusinessServiceImpl;
-
-    @Resource
-    private SystemConfigService systemConfigService;
+    private final SystemConfigService systemConfigService;
 
     @Value(value="${file.uploadType}")
     private Long fileUploadType;
@@ -61,6 +50,10 @@ public class SystemConfigController {
     @Value(value="10485760")
     private Long maxRequestSize;
 
+    public SystemConfigController(SystemConfigService systemConfigService) {
+        this.systemConfigService = systemConfigService;
+    }
+
     /**
      * 获取当前租户的配置信息
      * @param request
@@ -68,16 +61,15 @@ public class SystemConfigController {
      */
     @GetMapping(value = "/getCurrentInfo")
     @ApiOperation(value = "获取当前租户的配置信息")
-    public BaseResponseInfo getCurrentInfo(HttpServletRequest request) throws Exception {
+    public BaseResponseInfo getCurrentInfo(HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try{
             List<SystemConfig> list = systemConfigService.getSystemConfig();
             res.code = 200;
-            if(list.size()>0) {
+            if(!list.isEmpty()) {
                 res.data = list.get(0);
             }
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -92,10 +84,10 @@ public class SystemConfigController {
      */
     @GetMapping(value = "/fileSizeLimit")
     @ApiOperation(value = "获取文件大小限制")
-    public BaseResponseInfo fileSizeLimit(HttpServletRequest request) throws Exception {
+    public BaseResponseInfo fileSizeLimit(HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try{
-            Long limit = 0L;
+            long limit = 0L;
             if(maxFileSize<maxRequestSize) {
                 limit = maxFileSize;
             } else {
@@ -104,7 +96,6 @@ public class SystemConfigController {
             res.code = 200;
             res.data = limit;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -140,7 +131,6 @@ public class SystemConfigController {
                 res.data = "上传失败！";
             }
         } catch (Exception e) {
-            e.printStackTrace();
             res.code = 500;
             res.data = "上传失败！";
         }
@@ -192,10 +182,8 @@ public class SystemConfigController {
         } catch (IOException e) {
             logger.error("预览文件失败" + e.getMessage());
             response.setStatus(404);
-            e.printStackTrace();
         } catch (Exception e) {
             response.setStatus(404);
-            e.printStackTrace();
         } finally {
             if (inputStream != null) {
                 try {
@@ -254,7 +242,6 @@ public class SystemConfigController {
             response.flushBuffer();
         } catch (Exception e) {
             response.setStatus(404);
-            e.printStackTrace();
         } finally {
             if (outputStream != null) {
                 try {

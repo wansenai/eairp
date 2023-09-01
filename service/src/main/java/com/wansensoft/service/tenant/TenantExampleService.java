@@ -1,4 +1,4 @@
-package com.wansensoft.tenant;
+package com.wansensoft.service.tenant;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.entities.tenant.Tenant;

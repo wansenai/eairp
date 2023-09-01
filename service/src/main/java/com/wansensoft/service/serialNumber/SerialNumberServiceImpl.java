@@ -1,6 +1,7 @@
 package com.wansensoft.service.serialNumber;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.depot.DepotItem;
 import com.wansensoft.entities.material.Material;
 import com.wansensoft.entities.material.MaterialVo4Unit;
@@ -9,6 +10,7 @@ import com.wansensoft.entities.serialNumber.SerialNumberEx;
 import com.wansensoft.entities.serialNumber.SerialNumberExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.material.MaterialMapperEx;
+import com.wansensoft.service.CommonService;
 import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.material.MaterialService;
 import com.wansensoft.service.user.UserService;
@@ -35,27 +37,27 @@ import java.util.List;
  * Description
  */
 @Service
-public class SerialNumberService {
-    private Logger logger = LoggerFactory.getLogger(SerialNumberService.class);
+public class SerialNumberServiceImpl extends ServiceImpl<SerialNumberMapper, SerialNumber> implements SerialNumberService{
+    private Logger logger = LoggerFactory.getLogger(SerialNumberServiceImpl.class);
 
     private final SerialNumberMapper serialNumberMapper;
     private final SerialNumberMapperEx serialNumberMapperEx;
     private final MaterialMapperEx materialMapperEx;
-    private final MaterialService materialService;
+    private final CommonService commonService;
     private final UserService userService;
     private final LogService logService;
 
-    public SerialNumberService(SerialNumberMapper serialNumberMapper, SerialNumberMapperEx serialNumberMapperEx, MaterialMapperEx materialMapperEx, MaterialService materialService, UserService userService, LogService logService) {
+    public SerialNumberServiceImpl(SerialNumberMapper serialNumberMapper, SerialNumberMapperEx serialNumberMapperEx, MaterialMapperEx materialMapperEx, CommonService commonService, UserService userService, LogService logService) {
         this.serialNumberMapper = serialNumberMapper;
         this.serialNumberMapperEx = serialNumberMapperEx;
         this.materialMapperEx = materialMapperEx;
-        this.materialService = materialService;
+        this.commonService = commonService;
         this.userService = userService;
         this.logService = logService;
     }
 
 
-    public SerialNumber getSerialNumber(long id)throws Exception {
+    public SerialNumber getSerialNumber(long id) {
         SerialNumber result=null;
         try{
             result=serialNumberMapper.selectByPrimaryKey(id);
@@ -65,7 +67,7 @@ public class SerialNumberService {
         return result;
     }
 
-    public List<SerialNumber> getSerialNumberListByIds(String ids)throws Exception {
+    public List<SerialNumber> getSerialNumberListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<SerialNumber> list = new ArrayList<>();
         try{
@@ -78,7 +80,7 @@ public class SerialNumberService {
         return list;
     }
 
-    public List<SerialNumber> getSerialNumber()throws Exception {
+    public List<SerialNumber> getSerialNumber() {
         SerialNumberExample example = new SerialNumberExample();
         List<SerialNumber> list=null;
         try{
@@ -89,17 +91,17 @@ public class SerialNumberService {
         return list;
     }
 
-    public List<SerialNumberEx> select(String serialNumber, String materialName, Integer offset, Integer rows)throws Exception {
+    public List<SerialNumberEx> select(String serialNumber, String materialName, Integer offset, Integer rows) {
         return null;
 
     }
 
-    public Long countSerialNumber(String serialNumber,String materialName)throws Exception {
+    public Long countSerialNumber(String serialNumber,String materialName) {
         return null;
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertSerialNumber(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertSerialNumber(JSONObject obj, HttpServletRequest request) {
         int result=0;
         try{
             SerialNumberEx serialNumberEx = JSONObject.parseObject(obj.toJSONString(), SerialNumberEx.class);
@@ -125,7 +127,7 @@ public class SerialNumberService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateSerialNumber(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateSerialNumber(JSONObject obj, HttpServletRequest request) {
         SerialNumberEx serialNumberEx = JSONObject.parseObject(obj.toJSONString(), SerialNumberEx.class);
         int result=0;
         try{
@@ -145,24 +147,22 @@ public class SerialNumberService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteSerialNumber(Long id, HttpServletRequest request)throws Exception {
+    public int deleteSerialNumber(Long id, HttpServletRequest request) {
         return batchDeleteSerialNumberByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteSerialNumber(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteSerialNumber(String ids, HttpServletRequest request) {
         return batchDeleteSerialNumberByIds(ids);
     }
 
     /**
-     * create by: qiankunpingtai
      *  逻辑删除序列号信息
-     * create time: 2019/3/27 17:43
      * @Param: ids
      * @return
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteSerialNumberByIds(String ids) throws Exception{
+    public int batchDeleteSerialNumberByIds(String ids) {
         StringBuffer sb = new StringBuffer();
         sb.append(BusinessConstants.LOG_OPERATION_TYPE_DELETE);
         List<SerialNumber> list = getSerialNumberListByIds(ids);
@@ -182,7 +182,7 @@ public class SerialNumberService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String serialNumber)throws Exception {
+    public int checkIsNameExist(Long id, String serialNumber) {
         SerialNumberExample example = new SerialNumberExample();
         example.createCriteria().andIdNotEqualTo(id).andSerialNumberEqualTo(serialNumber).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<SerialNumber> list=null;
@@ -199,7 +199,7 @@ public class SerialNumberService {
      * @Param: materialName
      * @return Long 满足使用条件的商品的id
      */
-    public Long checkMaterialName(String materialName)throws Exception{
+    public Long checkMaterialName(String materialName) {
         if(StringUtil.isNotEmpty(materialName)) {
             List<Material> mlist=null;
             try{
@@ -238,14 +238,14 @@ public class SerialNumberService {
      * @Param: materialName
      * @return Long 满足使用条件的商品的id
      */
-    public Long getSerialNumberMaterialIdByBarCode(String materialCode)throws Exception{
+    public Long getSerialNumberMaterialIdByBarCode(String materialCode) {
         if(StringUtil.isNotEmpty(materialCode)){
             //计算商品库存和目前占用的可用序列号数量关系
             //库存=入库-出库
             //入库数量
             Long materialId = 0L;
-            List<MaterialVo4Unit> list = materialService.getMaterialByBarCode(materialCode);
-            if(list!=null && list.size()>0) {
+            List<MaterialVo4Unit> list = commonService.getMaterialByBarCode(materialCode);
+            if(list!=null && !list.isEmpty()) {
                 materialId = list.get(0).getId();
             }
             return materialId;
@@ -321,7 +321,7 @@ public class SerialNumberService {
      * @return java.lang.Object
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batAddSerialNumber(String materialCode, String serialNumberPrefix, Integer batAddTotal, String remark)throws Exception {
+    public int batAddSerialNumber(String materialCode, String serialNumberPrefix, Integer batAddTotal, String remark) {
         int result=0;
         try {
             if (StringUtil.isNotEmpty(materialCode)) {
@@ -364,7 +364,7 @@ public class SerialNumberService {
         return result;
     }
 
-    public List<SerialNumberEx> getEnableSerialNumberList(String number, String name, Long depotId, String barCode, Integer offset, Integer rows)throws Exception {
+    public List<SerialNumberEx> getEnableSerialNumberList(String number, String name, Long depotId, String barCode, Integer offset, Integer rows) {
         List<SerialNumberEx> list =null;
         try{
             list = serialNumberMapperEx.getEnableSerialNumberList(StringUtil.toNull(number), StringUtil.toNull(name), depotId, barCode, offset, rows);
@@ -374,7 +374,7 @@ public class SerialNumberService {
         return list;
     }
 
-    public Long getEnableSerialNumberCount(String number, String name, Long depotId, String barCode)throws Exception {
+    public Long getEnableSerialNumberCount(String number, String name, Long depotId, String barCode) {
         Long count = 0L;
         try{
             count = serialNumberMapperEx.getEnableSerialNumberCount(StringUtil.toNull(number), StringUtil.toNull(name), depotId, barCode);

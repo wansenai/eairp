@@ -9,7 +9,9 @@ import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.account.*;
 import com.wansensoft.mappers.depot.DepotHeadMapper;
 import com.wansensoft.mappers.depot.DepotHeadMapperEx;
+import com.wansensoft.service.CommonService;
 import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.systemConfig.SystemConfigService;
 import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
@@ -19,7 +21,6 @@ import com.wansensoft.vo.AccountVo4InOutList;
 import com.wansensoft.vo.AccountVo4List;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.systemConfig.SystemConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -46,10 +47,10 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     private final AccountItemMapper accountItemMapper;
     private final AccountItemMapperEx accountItemMapperEx;
     private final LogService logService;
-    private final UserService userService;
+    private final CommonService commonService;
     private final SystemConfigService systemConfigService;
 
-    public AccountServiceImpl(AccountMapper accountMapper, AccountMapperEx accountMapperEx, DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, AccountHeadMapper accountHeadMapper, AccountHeadMapperEx accountHeadMapperEx, AccountItemMapper accountItemMapper, AccountItemMapperEx accountItemMapperEx, LogService logService, UserService userService, SystemConfigService systemConfigService) {
+    public AccountServiceImpl(AccountMapper accountMapper, AccountMapperEx accountMapperEx, DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, AccountHeadMapper accountHeadMapper, AccountHeadMapperEx accountHeadMapperEx, AccountItemMapper accountItemMapper, AccountItemMapperEx accountItemMapperEx, LogService logService, CommonService commonService, SystemConfigService systemConfigService) {
         this.accountMapper = accountMapper;
         this.accountMapperEx = accountMapperEx;
         this.depotHeadMapper = depotHeadMapper;
@@ -59,7 +60,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         this.accountItemMapper = accountItemMapper;
         this.accountItemMapperEx = accountItemMapperEx;
         this.logService = logService;
-        this.userService = userService;
+        this.commonService = commonService;
         this.systemConfigService = systemConfigService;
     }
 
@@ -103,7 +104,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return list;
     }
 
-    public List<AccountVo4List> select(String name, String serialNo, String remark, int offset, int rows) throws Exception{
+    public List<AccountVo4List> select(String name, String serialNo, String remark, int offset, int rows) {
         List<AccountVo4List> resList = new ArrayList<>();
         List<AccountVo4List> list=null;
         try{
@@ -113,7 +114,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         }
         String timeStr = Tools.getCurrentMonth();
         Boolean forceFlag = systemConfigService.getForceApprovalFlag();
-        if (null != list && null !=timeStr) {
+        if (null != list) {
             for (AccountVo4List al : list) {
                 DecimalFormat df = new DecimalFormat(".##");
                 BigDecimal thisMonthAmount = getAccountSum(al.getId(), timeStr, "month", forceFlag).add(getAccountSumByHead(al.getId(), timeStr, "month", forceFlag))
@@ -132,7 +133,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return resList;
     }
 
-    public Long countAccount(String name, String serialNo, String remark)throws Exception {
+    public Long countAccount(String name, String serialNo, String remark) {
         Long result=null;
         try{
             result=accountMapperEx.countsByAccount(name, serialNo, remark);
@@ -143,13 +144,13 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertAccount(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertAccount(JSONObject obj, HttpServletRequest request) {
         Account account = JSONObject.parseObject(obj.toJSONString(), Account.class);
         if(account.getInitialAmount() == null) {
             account.setInitialAmount(BigDecimal.ZERO);
         }
         List<Account> accountList = getAccountByParam(null, null);
-        if(accountList.size() == 0) {
+        if(accountList.isEmpty()) {
             account.setIsDefault(true);
         } else {
             account.setIsDefault(false);
@@ -159,7 +160,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         try{
             result = accountMapper.insertSelective(account);
             logService.insertLog("账户",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(account.getName()).toString(), request);
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + account.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -167,7 +168,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateAccount(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int updateAccount(JSONObject obj, HttpServletRequest request) {
         Account account = JSONObject.parseObject(obj.toJSONString(), Account.class);
         int result=0;
         try{
@@ -181,17 +182,17 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteAccount(Long id, HttpServletRequest request) throws Exception{
+    public int deleteAccount(Long id, HttpServletRequest request) {
         return batchDeleteAccountByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteAccount(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteAccount(String ids, HttpServletRequest request) {
         return batchDeleteAccountByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteAccountByIds(String ids) throws Exception{
+    public int batchDeleteAccountByIds(String ids) {
         int result=0;
         String [] idArray=ids.split(",");
         //校验财务主表	jsh_accounthead
@@ -201,7 +202,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         }catch(Exception e){
             JshException.readFail(logger, e);
         }
-        if(accountHeadList!=null&&accountHeadList.size()>0){
+        if(accountHeadList!=null&& !accountHeadList.isEmpty()){
             logger.error("异常码[{}],异常提示[{}],参数,AccountIds[{}]",
                     ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,ExceptionConstants.DELETE_FORCE_CONFIRM_MSG,ids);
             throw new BusinessRunTimeException(ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,
@@ -214,7 +215,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         }catch(Exception e){
             JshException.readFail(logger, e);
         }
-        if(accountItemList!=null&&accountItemList.size()>0){
+        if(accountItemList!=null&& !accountItemList.isEmpty()){
             logger.error("异常码[{}],异常提示[{}],参数,AccountIds[{}]",
                     ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,ExceptionConstants.DELETE_FORCE_CONFIRM_MSG,ids);
             throw new BusinessRunTimeException(ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,
@@ -227,7 +228,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         }catch(Exception e){
             JshException.readFail(logger, e);
         }
-        if(depotHeadList!=null&&depotHeadList.size()>0){
+        if(depotHeadList!=null&& !depotHeadList.isEmpty()){
             logger.error("异常码[{}],异常提示[{}],参数,AccountIds[{}]",
                     ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,ExceptionConstants.DELETE_FORCE_CONFIRM_MSG,ids);
             throw new BusinessRunTimeException(ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,
@@ -242,7 +243,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         }
         logService.insertLog("账户", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo = userService.getCurrentUser();
+        User userInfo = commonService.getCurrentUser();
         //校验通过执行删除操作
         try{
             result = accountMapperEx.batchDeleteAccountByIds(new Date(),userInfo==null?null:userInfo.getId(),idArray);
@@ -252,7 +253,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         AccountExample example = new AccountExample();
         example.createCriteria().andIdNotEqualTo(id).andNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<Account> list=null;
@@ -264,7 +265,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return list==null?0:list.size();
     }
 
-    public List<Account> findBySelect()throws Exception {
+    public List<Account> findBySelect() {
         AccountExample example = new AccountExample();
         example.createCriteria().andEnabledEqualTo(true).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         example.setOrderByClause("sort asc, id desc");
@@ -283,7 +284,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      * @param id
      * @return
      */
-    public BigDecimal getAccountSum(Long id, String timeStr, String type, Boolean forceFlag) throws Exception{
+    public BigDecimal getAccountSum(Long id, String timeStr, String type, Boolean forceFlag) {
         BigDecimal accountSum = BigDecimal.ZERO;
         try {
             DepotHeadExample example = new DepotHeadExample();
@@ -332,7 +333,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      * @param id
      * @return
      */
-    public BigDecimal getAccountSumByHead(Long id, String timeStr, String type, Boolean forceFlag) throws Exception{
+    public BigDecimal getAccountSumByHead(Long id, String timeStr, String type, Boolean forceFlag) {
         BigDecimal accountSum = BigDecimal.ZERO;
         try {
             AccountHeadExample example = new AccountHeadExample();
@@ -382,7 +383,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      * @param id
      * @return
      */
-    public BigDecimal getAccountSumByDetail(Long id, String timeStr, String type, Boolean forceFlag)throws Exception {
+    public BigDecimal getAccountSumByDetail(Long id, String timeStr, String type, Boolean forceFlag) {
         BigDecimal accountSum =BigDecimal.ZERO ;
         try {
             AccountHeadExample example = new AccountHeadExample();
@@ -445,7 +446,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      * @param id
      * @return
      */
-    public BigDecimal getManyAccountSum(Long id, String timeStr, String type, Boolean forceFlag)throws Exception {
+    public BigDecimal getManyAccountSum(Long id, String timeStr, String type, Boolean forceFlag) {
         BigDecimal accountSum = BigDecimal.ZERO;
         try {
             DepotHeadExample example = new DepotHeadExample();
@@ -501,7 +502,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return accountSum;
     }
 
-    public List<AccountVo4InOutList> findAccountInOutList(Long accountId, Integer offset, Integer rows) throws Exception{
+    public List<AccountVo4InOutList> findAccountInOutList(Long accountId, Integer offset, Integer rows) {
         List<AccountVo4InOutList> list=null;
         try{
             list = accountMapperEx.findAccountInOutList(accountId, offset, rows);
@@ -511,7 +512,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return list;
     }
 
-    public int findAccountInOutListCount(Long accountId) throws Exception{
+    public int findAccountInOutListCount(Long accountId) {
         int result=0;
         try{
             result = accountMapperEx.findAccountInOutListCount(accountId);
@@ -522,7 +523,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateIsDefault(Long accountId) throws Exception{
+    public int updateIsDefault(Long accountId) {
         int result=0;
         try{
             //全部取消默认
@@ -555,7 +556,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return accountMap;
     }
 
-    public String getAccountStrByIdAndMoney(Map<Long,String> accountMap, String accountIdList, String accountMoneyList){
+    public String getAccountStrByIdAndMoney(Map<Long,String> accountMap, String accountIdList, String accountMoneyList) {
         StringBuffer sb = new StringBuffer();
         List<Long> idList = StringUtil.strToLongList(accountIdList);
         List<BigDecimal> moneyList = StringUtil.strToBigDecimalList(accountMoneyList);
@@ -575,7 +576,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
             BigDecimal allMonthAmount = BigDecimal.ZERO;
             BigDecimal allCurrentAmount = BigDecimal.ZERO;
             Boolean forceFlag = systemConfigService.getForceApprovalFlag();
-            if (null != list && null !=timeStr) {
+            if (null != list) {
                 for (Account a : list) {
                     BigDecimal monthAmount = getAccountSum(a.getId(), timeStr, "month", forceFlag).add(getAccountSumByHead(a.getId(), timeStr, "month", forceFlag))
                             .add(getAccountSumByDetail(a.getId(), timeStr, "month", forceFlag)).add(getManyAccountSum(a.getId(), timeStr, "month", forceFlag));
@@ -608,7 +609,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchSetStatus(Boolean status, String ids)throws Exception {
+    public int batchSetStatus(Boolean status, String ids) {
         logService.insertLog("账户",
                 BusinessConstants.LOG_OPERATION_TYPE_ENABLED,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());

@@ -10,7 +10,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +20,11 @@ import java.util.Map;
 @Api(tags = {"单位管理"})
 public class UnitController {
 
-    @Resource
-    private UnitService unitService;
+    private final UnitService unitService;
+
+    public UnitController(UnitService unitService) {
+        this.unitService = unitService;
+    }
 
     /**
      * 单位列表
@@ -32,14 +34,13 @@ public class UnitController {
      */
     @GetMapping(value = "/getAllList")
     @ApiOperation(value = "单位列表")
-    public BaseResponseInfo getAllList(HttpServletRequest request) throws Exception{
+    public BaseResponseInfo getAllList(HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             List<Unit> unitList = unitService.getUnit();
             res.code = 200;
             res.data = unitList;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -55,7 +56,7 @@ public class UnitController {
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
     public String batchSetStatus(@RequestBody JSONObject jsonObject,
-                                 HttpServletRequest request)throws Exception {
+                                 HttpServletRequest request) {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();

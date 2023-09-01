@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +21,11 @@ import java.util.Map;
 public class MsgController {
     private Logger logger = LoggerFactory.getLogger(MsgController.class);
 
-    @Resource
-    private MsgService msgService;
+    private final MsgService msgService;
+
+    public MsgController(MsgService msgService) {
+        this.msgService = msgService;
+    }
 
     /**
      * 根据状态查询消息
@@ -42,7 +44,6 @@ public class MsgController {
             res.code = 200;
             res.data = list;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -59,7 +60,7 @@ public class MsgController {
     @PostMapping("/batchUpdateStatus")
     @ApiOperation(value = "批量更新状态")
     public BaseResponseInfo batchUpdateStatus(@RequestBody JSONObject jsonObject,
-                                              HttpServletRequest request)throws Exception {
+                                              HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             String ids = jsonObject.getString("ids");
@@ -68,7 +69,6 @@ public class MsgController {
             res.code = 200;
             res.data = "更新成功";
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -85,7 +85,7 @@ public class MsgController {
     @GetMapping("/getMsgCountByStatus")
     @ApiOperation(value = "根据状态查询数量")
     public BaseResponseInfo getMsgCountByStatus(@RequestParam("status") String status,
-                                                HttpServletRequest request)throws Exception {
+                                                HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             Map<String, Long> map = new HashMap<String, Long>();
@@ -94,7 +94,6 @@ public class MsgController {
             res.code = 200;
             res.data = map;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -111,7 +110,7 @@ public class MsgController {
     @GetMapping("/getMsgCountByType")
     @ApiOperation(value = "根据类型查询数量")
     public BaseResponseInfo getMsgCountByType(@RequestParam("type") String type,
-                                                HttpServletRequest request)throws Exception {
+                                                HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             Map<String, Integer> map = new HashMap<>();
@@ -120,7 +119,6 @@ public class MsgController {
             res.code = 200;
             res.data = map;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -135,14 +133,13 @@ public class MsgController {
      */
     @PostMapping("/readAllMsg")
     @ApiOperation(value = "全部设置未已读")
-    public BaseResponseInfo readAllMsg(HttpServletRequest request)throws Exception {
+    public BaseResponseInfo readAllMsg(HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
             msgService.readAllMsg();
             res.code = 200;
             res.data = "操作成功!";
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }

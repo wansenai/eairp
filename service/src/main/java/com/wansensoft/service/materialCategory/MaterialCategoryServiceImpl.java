@@ -1,6 +1,7 @@
 package com.wansensoft.service.materialCategory;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.material.Material;
 import com.wansensoft.entities.material.MaterialCategory;
 import com.wansensoft.entities.material.MaterialCategoryExample;
@@ -8,8 +9,8 @@ import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.material.MaterialCategoryMapper;
 import com.wansensoft.mappers.material.MaterialCategoryMapperEx;
 import com.wansensoft.mappers.material.MaterialMapperEx;
-import com.wansensoft.service.log.LogServiceImpl;
-import com.wansensoft.service.user.UserServiceImpl;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
@@ -29,24 +30,24 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class MaterialCategoryService {
-    private Logger logger = LoggerFactory.getLogger(MaterialCategoryService.class);
+public class MaterialCategoryServiceImpl extends ServiceImpl<MaterialCategoryMapper, MaterialCategory> implements MaterialCategoryService{
+    private Logger logger = LoggerFactory.getLogger(MaterialCategoryServiceImpl.class);
 
     private final MaterialCategoryMapper materialCategoryMapper;
     private final MaterialCategoryMapperEx materialCategoryMapperEx;
-    private final UserServiceImpl userServiceImpl;
-    private final LogServiceImpl logServiceImpl;
+    private final UserService userService;
+    private final LogService logService;
     private final MaterialMapperEx materialMapperEx;
 
-    public MaterialCategoryService(MaterialCategoryMapper materialCategoryMapper, MaterialCategoryMapperEx materialCategoryMapperEx, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl, MaterialMapperEx materialMapperEx) {
+    public MaterialCategoryServiceImpl(MaterialCategoryMapper materialCategoryMapper, MaterialCategoryMapperEx materialCategoryMapperEx, UserService userService, LogService logService, MaterialMapperEx materialMapperEx) {
         this.materialCategoryMapper = materialCategoryMapper;
         this.materialCategoryMapperEx = materialCategoryMapperEx;
-        this.userServiceImpl = userServiceImpl;
-        this.logServiceImpl = logServiceImpl;
+        this.userService = userService;
+        this.logService = logService;
         this.materialMapperEx = materialMapperEx;
     }
 
-    public MaterialCategory getMaterialCategory(long id)throws Exception {
+    public MaterialCategory getMaterialCategory(long id) {
         MaterialCategory result=null;
         try{
             result=materialCategoryMapper.selectByPrimaryKey(id);
@@ -56,7 +57,7 @@ public class MaterialCategoryService {
         return result;
     }
 
-    public List<MaterialCategory> getMaterialCategoryListByIds(String ids)throws Exception {
+    public List<MaterialCategory> getMaterialCategoryListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<MaterialCategory> list = new ArrayList<>();
         try{
@@ -69,7 +70,7 @@ public class MaterialCategoryService {
         return list;
     }
 
-    public List<MaterialCategory> getMaterialCategory()throws Exception {
+    public List<MaterialCategory> getMaterialCategory() {
         MaterialCategoryExample example = new MaterialCategoryExample();
         List<MaterialCategory> list=null;
         try{
@@ -80,7 +81,7 @@ public class MaterialCategoryService {
         return list;
     }
 
-    public List<MaterialCategory> getAllList(Long parentId)throws Exception {
+    public List<MaterialCategory> getAllList(Long parentId) {
         List<MaterialCategory> list=null;
         try{
             list = getMCList(parentId);
@@ -90,7 +91,7 @@ public class MaterialCategoryService {
         return list;
     }
 
-    public List<MaterialCategory> getMCList(Long parentId)throws Exception {
+    public List<MaterialCategory> getMCList(Long parentId) {
         List<MaterialCategory> res= new ArrayList<MaterialCategory>();
         List<MaterialCategory> list=null;
         MaterialCategoryExample example = new MaterialCategoryExample();
@@ -109,7 +110,7 @@ public class MaterialCategoryService {
         return res;
     }
 
-    public List<MaterialCategory> select(String name, Integer parentId, int offset, int rows) throws Exception{
+    public List<MaterialCategory> select(String name, Integer parentId, int offset, int rows) {
         List<MaterialCategory> list=null;
         try{
             list=materialCategoryMapperEx.selectByConditionMaterialCategory(name, parentId, offset, rows);
@@ -119,7 +120,7 @@ public class MaterialCategoryService {
         return list;
     }
 
-    public Long countMaterialCategory(String name, Integer parentId) throws Exception{
+    public Long countMaterialCategory(String name, Integer parentId) {
         Long result=null;
         try{
             result=materialCategoryMapperEx.countsByMaterialCategory(name, parentId);
@@ -130,15 +131,15 @@ public class MaterialCategoryService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertMaterialCategory(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertMaterialCategory(JSONObject obj, HttpServletRequest request) {
         MaterialCategory materialCategory = JSONObject.parseObject(obj.toJSONString(), MaterialCategory.class);
         materialCategory.setCreateTime(new Date());
         materialCategory.setUpdateTime(new Date());
         int result=0;
         try{
             result=materialCategoryMapper.insertSelective(materialCategory);
-            logServiceImpl.insertLog("商品类型",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(materialCategory.getName()).toString(), request);
+            logService.insertLog("商品类型",
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + materialCategory.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -146,14 +147,14 @@ public class MaterialCategoryService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateMaterialCategory(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateMaterialCategory(JSONObject obj, HttpServletRequest request) {
         MaterialCategory materialCategory = JSONObject.parseObject(obj.toJSONString(), MaterialCategory.class);
         materialCategory.setUpdateTime(new Date());
         int result=0;
         try{
             result=materialCategoryMapper.updateByPrimaryKeySelective(materialCategory);
-            logServiceImpl.insertLog("商品类型",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(materialCategory.getName()).toString(), request);
+            logService.insertLog("商品类型",
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + materialCategory.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -161,17 +162,17 @@ public class MaterialCategoryService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteMaterialCategory(Long id, HttpServletRequest request)throws Exception {
+    public int deleteMaterialCategory(Long id, HttpServletRequest request) {
         return batchDeleteMaterialCategoryByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteMaterialCategory(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteMaterialCategory(String ids, HttpServletRequest request) {
         return batchDeleteMaterialCategoryByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteMaterialCategoryByIds(String ids) throws Exception {
+    public int batchDeleteMaterialCategoryByIds(String ids) {
         int result=0;
         String [] idArray=ids.split(",");
         //校验产品表	jsh_material
@@ -181,7 +182,7 @@ public class MaterialCategoryService {
         }catch(Exception e){
             JshException.readFail(logger, e);
         }
-        if(materialList!=null&&materialList.size()>0){
+        if(materialList!=null&& !materialList.isEmpty()){
             logger.error("异常码[{}],异常提示[{}],参数,CategoryIds[{}]",
                     ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,ExceptionConstants.DELETE_FORCE_CONFIRM_MSG,ids);
             throw new BusinessRunTimeException(ExceptionConstants.DELETE_FORCE_CONFIRM_CODE,
@@ -193,19 +194,19 @@ public class MaterialCategoryService {
         for(MaterialCategory materialCategory: list){
             sb.append("[").append(materialCategory.getName()).append("]");
         }
-        logServiceImpl.insertLog("商品类型", sb.toString(),
+        logService.insertLog("商品类型", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         //更新时间
         Date updateDate =new Date();
         //更新人
-        User userInfo= userServiceImpl.getCurrentUser();
+        User userInfo= userService.getCurrentUser();
         Long updater=userInfo==null?null:userInfo.getId();
         String strArray[]=ids.split(",");
         if(strArray.length<1){
             return 0;
         }
         List<MaterialCategory> mcList = materialCategoryMapperEx.getMaterialCategoryListByCategoryIds(idArray);
-        if(mcList!=null && mcList.size()>0) {
+        if(mcList!=null && !mcList.isEmpty()) {
             logger.error("异常码[{}],异常提示[{}]",
                     ExceptionConstants.MATERIAL_CATEGORY_CHILD_NOT_SUPPORT_DELETE_CODE,ExceptionConstants.MATERIAL_CATEGORY_CHILD_NOT_SUPPORT_DELETE_MSG);
             throw new BusinessRunTimeException(ExceptionConstants.MATERIAL_CATEGORY_CHILD_NOT_SUPPORT_DELETE_CODE,
@@ -216,7 +217,7 @@ public class MaterialCategoryService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         MaterialCategoryExample example = new MaterialCategoryExample();
         example.createCriteria().andIdNotEqualTo(id).andNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<MaterialCategory> list=null;
@@ -228,7 +229,7 @@ public class MaterialCategoryService {
         return list==null?0:list.size();
     }
 
-    public List<MaterialCategory> findById(Long id)throws Exception {
+    public List<MaterialCategory> findById(Long id) {
         List<MaterialCategory> list=null;
         if(id!=null) {
             MaterialCategoryExample example = new MaterialCategoryExample();
@@ -245,7 +246,7 @@ public class MaterialCategoryService {
      *获取商品类别树数据
      * @return java.util.List<com.jsh.erp.datasource.vo.TreeNode>
      */
-    public List<TreeNode> getMaterialCategoryTree(Long id) throws Exception{
+    public List<TreeNode> getMaterialCategoryTree(Long id) {
         List<TreeNode> list=null;
         try{
             list=materialCategoryMapperEx.getNodeTree(id);
@@ -263,13 +264,10 @@ public class MaterialCategoryService {
      * @return void
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int addMaterialCategory(MaterialCategory mc) throws Exception {
-        logServiceImpl.insertLog("商品类型",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(mc.getName()).toString(),
+    public int addMaterialCategory(MaterialCategory mc) {
+        logService.insertLog("商品类型",
+                BusinessConstants.LOG_OPERATION_TYPE_ADD + mc.getName(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        if(mc==null){
-            return 0;
-        }
         if(mc.getParentId()==null){
             //没有给定父级目录的id，默认设置父级目录为根目录的父目录
             mc.setParentId(BusinessConstants.MATERIAL_CATEGORY_ROOT_PARENT_ID);
@@ -278,7 +276,7 @@ public class MaterialCategoryService {
         checkMaterialCategorySerialNo(mc);
         //数据状态新增时默认设置为启用
         Date date=new Date();
-        User userInfo= userServiceImpl.getCurrentUser();
+        User userInfo= userService.getCurrentUser();
         //创建时间
         mc.setCreateTime(date);
         //更新时间
@@ -293,9 +291,9 @@ public class MaterialCategoryService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int editMaterialCategory(MaterialCategory mc) throws Exception{
-        logServiceImpl.insertLog("商品类型",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(mc.getName()).toString(),
+    public int editMaterialCategory(MaterialCategory mc) {
+        logService.insertLog("商品类型",
+                BusinessConstants.LOG_OPERATION_TYPE_EDIT + mc.getName(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         if(mc.getParentId()==null){
             //没有给定父级目录的id，默认设置父级目录为根目录的父目录
@@ -306,7 +304,7 @@ public class MaterialCategoryService {
         //更新时间
         mc.setUpdateTime(new Date());
         //更新人
-        User userInfo= userServiceImpl.getCurrentUser();
+        User userInfo= userService.getCurrentUser();
         int result=0;
         try{
             result= materialCategoryMapperEx.editMaterialCategory(mc);
@@ -318,7 +316,7 @@ public class MaterialCategoryService {
     /**
      * 根据商品类别编号判断商品类别是否已存在
      * */
-    public void  checkMaterialCategorySerialNo(MaterialCategory mc)throws Exception {
+    public void checkMaterialCategorySerialNo(MaterialCategory mc) {
         if(mc==null){
             return;
         }
@@ -332,7 +330,7 @@ public class MaterialCategoryService {
         }catch(Exception e){
             JshException.readFail(logger, e);
         }
-        if(mList==null||mList.size()<1){
+        if(mList==null|| mList.isEmpty()){
             //未查询到对应数据，编号可用
             return;
         }
@@ -360,12 +358,12 @@ public class MaterialCategoryService {
      * 根据名称获取类型
      * @param name
      */
-    public Long getCategoryIdByName(String name){
+    public Long getCategoryIdByName(String name) {
         Long categoryId = null;
         MaterialCategoryExample example = new MaterialCategoryExample();
         example.createCriteria().andNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<MaterialCategory> list = materialCategoryMapper.selectByExample(example);
-        if(list!=null && list.size()>0) {
+        if(list!=null && !list.isEmpty()) {
             categoryId = list.get(0).getId();
         }
         return categoryId;

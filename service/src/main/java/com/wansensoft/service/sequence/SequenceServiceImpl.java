@@ -1,6 +1,8 @@
 package com.wansensoft.service.sequence;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansensoft.entities.Sequence;
 import com.wansensoft.entities.serialNumber.SerialNumber;
 import com.wansensoft.entities.serialNumber.SerialNumberEx;
 import com.wansensoft.mappers.serialNumber.SequenceMapperEx;
@@ -18,48 +20,48 @@ import java.util.List;
  * Description
  */
 @Service
-public class SequenceService {
-    private Logger logger = LoggerFactory.getLogger(SequenceService.class);
+public class SequenceServiceImpl extends ServiceImpl<SequenceMapperEx, Sequence> implements SequenceService{
+    private Logger logger = LoggerFactory.getLogger(SequenceServiceImpl.class);
 
     private final SequenceMapperEx sequenceMapperEx;
 
-    public SequenceService(SequenceMapperEx sequenceMapperEx) {
+    public SequenceServiceImpl(SequenceMapperEx sequenceMapperEx) {
         this.sequenceMapperEx = sequenceMapperEx;
     }
 
-    public SerialNumber getSequence(long id)throws Exception {
+    public SerialNumber getSequence(long id) {
         return null;
     }
 
-    public List<SerialNumberEx> select(String name, Integer offset, Integer rows)throws Exception {
+    public List<SerialNumberEx> select(String name, Integer offset, Integer rows) {
         return null;
     }
 
-    public Long countSequence(String name)throws Exception {
+    public Long countSequence(String name) {
         return null;
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertSequence(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertSequence(JSONObject obj, HttpServletRequest request) {
         return 0;
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateSequence(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateSequence(JSONObject obj, HttpServletRequest request) {
         return 0;
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteSequence(Long id, HttpServletRequest request)throws Exception {
+    public int deleteSequence(Long id, HttpServletRequest request) {
         return 0;
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteSequence(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteSequence(String ids, HttpServletRequest request) {
         return 0;
     }
 
-    public int checkIsNameExist(Long id, String serialNumber)throws Exception {
+    public int checkIsNameExist(Long id, String serialNumber) {
         return 0;
     }
 
@@ -67,7 +69,7 @@ public class SequenceService {
      * 创建一个唯一的序列号
      * */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public String buildOnlyNumber()throws Exception{
+    public String buildOnlyNumber() {
         Long buildOnlyNumber=null;
         synchronized (this){
             try{

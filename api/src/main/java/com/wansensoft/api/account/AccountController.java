@@ -3,7 +3,7 @@ package com.wansensoft.api.account;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.account.Account;
-import com.wansensoft.service.account.AccountServiceImpl;
+import com.wansensoft.service.account.AccountService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
@@ -14,6 +14,8 @@ import io.swagger.annotations.ApiOperation;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -26,12 +28,17 @@ import java.util.Map;
 public class AccountController {
     private Logger logger = LoggerFactory.getLogger(AccountController.class);
 
-    private final AccountServiceImpl accountServiceImpl;
+    private AccountService accountService;
 
-    private final SystemConfigService systemConfigService;
+    private SystemConfigService systemConfigService;
 
-    public AccountController(AccountServiceImpl accountServiceImpl, SystemConfigService systemConfigService) {
-        this.accountServiceImpl = accountServiceImpl;
+    @Autowired
+    public void setAccountService(AccountService accountService) {
+        this.accountService = accountService;
+    }
+
+    @Autowired
+    public void setSystemConfigService(SystemConfigService systemConfigService) {
         this.systemConfigService = systemConfigService;
     }
 
@@ -46,7 +53,7 @@ public class AccountController {
     public String findBySelect(HttpServletRequest request) throws Exception {
         String res = null;
         try {
-            List<Account> dataList = accountServiceImpl.findBySelect();
+            List<Account> dataList = accountService.findBySelect();
             //存放数据json数组
             JSONArray dataArray = new JSONArray();
             if (null != dataList) {
@@ -77,7 +84,7 @@ public class AccountController {
         BaseResponseInfo res = new BaseResponseInfo();
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            List<Account> accountList = accountServiceImpl.getAccount();
+            List<Account> accountList = accountService.getAccount();
             map.put("accountList", accountList);
             res.code = 200;
             res.data = map;
@@ -108,8 +115,8 @@ public class AccountController {
         BaseResponseInfo res = new BaseResponseInfo();
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            List<AccountVo4InOutList> dataList = accountServiceImpl.findAccountInOutList(accountId, (currentPage-1)*pageSize, pageSize);
-            int total = accountServiceImpl.findAccountInOutListCount(accountId);
+            List<AccountVo4InOutList> dataList = accountService.findAccountInOutList(accountId, (currentPage-1)*pageSize, pageSize);
+            int total = accountService.findAccountInOutListCount(accountId);
             map.put("total", total);
             //存放数据json数组
             JSONArray dataArray = new JSONArray();
@@ -119,8 +126,8 @@ public class AccountController {
                     String type = aEx.getType().replace("其它", "");
                     aEx.setType(type);
                     String timeStr = aEx.getOperTime().toString();
-                    BigDecimal balance = accountServiceImpl.getAccountSum(accountId, timeStr, "date", forceFlag).add(accountServiceImpl.getAccountSumByHead(accountId, timeStr, "date", forceFlag))
-                            .add(accountServiceImpl.getAccountSumByDetail(accountId, timeStr, "date", forceFlag)).add(accountServiceImpl.getManyAccountSum(accountId, timeStr, "date", forceFlag)).add(initialAmount);
+                    BigDecimal balance = accountService.getAccountSum(accountId, timeStr, "date", forceFlag).add(accountService.getAccountSumByHead(accountId, timeStr, "date", forceFlag))
+                            .add(accountService.getAccountSumByDetail(accountId, timeStr, "date", forceFlag)).add(accountService.getManyAccountSum(accountId, timeStr, "date", forceFlag)).add(initialAmount);
                     aEx.setBalance(balance);
                     aEx.setAccountId(accountId);
                     dataArray.add(aEx);
@@ -150,7 +157,7 @@ public class AccountController {
                                        HttpServletRequest request) throws Exception{
         Long accountId = object.getLong("id");
         Map<String, Object> objectMap = new HashMap<>();
-        int res = accountServiceImpl.updateIsDefault(accountId);
+        int res = accountService.updateIsDefault(accountId);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
@@ -170,7 +177,7 @@ public class AccountController {
                                           HttpServletRequest request) throws Exception {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            Map<String, Object> map = accountServiceImpl.getStatistics(name, serialNo);
+            Map<String, Object> map = accountService.getStatistics(name, serialNo);
             res.code = 200;
             res.data = map;
         } catch(Exception e){
@@ -194,7 +201,7 @@ public class AccountController {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
-        int res = accountServiceImpl.batchSetStatus(status, ids);
+        int res = accountService.batchSetStatus(status, ids);
         if(res > 0) {
             return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {

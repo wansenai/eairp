@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -18,8 +17,11 @@ import java.util.List;
 @Api(tags = {"商品扩展字段"})
 public class MaterialPropertyController {
 
-    @Resource
-    private MaterialPropertyService materialPropertyService;
+    private final MaterialPropertyService materialPropertyService;
+
+    public MaterialPropertyController(MaterialPropertyService materialPropertyService) {
+        this.materialPropertyService = materialPropertyService;
+    }
 
     @GetMapping(value = "/getAllList")
     @ApiOperation(value = "查询全部商品扩展字段信息")
@@ -30,7 +32,6 @@ public class MaterialPropertyController {
             res.code = 200;
             res.data = list;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }

@@ -21,7 +21,7 @@ public interface TenantMapper extends BaseMapper<Tenant> {
 
     int insertSelective(Tenant record);
 
-    List<Tenant> selectByExample(TenantExample example);
+    List<Tenant> getTenantByTenantId(TenantExample example);
 
     Tenant selectByPrimaryKey(Long id);
 

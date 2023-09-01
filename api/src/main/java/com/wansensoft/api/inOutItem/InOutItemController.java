@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +23,11 @@ import java.util.Map;
 public class InOutItemController {
     private Logger logger = LoggerFactory.getLogger(InOutItemController.class);
 
-    @Resource
-    private InOutItemService inOutItemService;
+    private final InOutItemService inOutItemService;
+
+    public InOutItemController(InOutItemService inOutItemService) {
+        this.inOutItemService = inOutItemService;
+    }
 
     /**
      * 查找收支项目信息-下拉框

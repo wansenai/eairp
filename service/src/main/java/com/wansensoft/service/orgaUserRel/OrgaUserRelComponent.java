@@ -14,15 +14,15 @@ import java.util.Map;
 @Service
 @OrgaUserRelResource
 public class OrgaUserRelComponent implements ICommonQuery {
-    private final OrgaUserRelServiceImpl orgaUserRelServiceImpl;
+    private final OrgaUserRelService orgaUserRelService;
 
-    public OrgaUserRelComponent(OrgaUserRelServiceImpl orgaUserRelServiceImpl) {
-        this.orgaUserRelServiceImpl = orgaUserRelServiceImpl;
+    public OrgaUserRelComponent(OrgaUserRelService orgaUserRelService) {
+        this.orgaUserRelService = orgaUserRelService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return orgaUserRelServiceImpl.getOrgaUserRel(id);
+        return orgaUserRelService.getOrgaUserRel(id);
     }
 
     @Override
@@ -39,22 +39,22 @@ public class OrgaUserRelComponent implements ICommonQuery {
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request)throws Exception {
-        return orgaUserRelServiceImpl.insertOrgaUserRel(obj,request);
+        return orgaUserRelService.insertOrgaUserRel(obj,request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return orgaUserRelServiceImpl.updateOrgaUserRel(obj, request);
+        return orgaUserRelService.updateOrgaUserRel(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return orgaUserRelServiceImpl.deleteOrgaUserRel(id, request);
+        return orgaUserRelService.deleteOrgaUserRel(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return orgaUserRelServiceImpl.batchDeleteOrgaUserRel(ids, request);
+        return orgaUserRelService.batchDeleteOrgaUserRel(ids, request);
     }
 
     @Override

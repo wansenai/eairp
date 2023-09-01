@@ -5,9 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.function.Function;
 import com.wansensoft.entities.system.SystemConfig;
 import com.wansensoft.entities.user.UserBusiness;
-import com.wansensoft.service.functions.FunctionServiceImpl;
+import com.wansensoft.service.functions.FunctionService;
 import com.wansensoft.service.systemConfig.SystemConfigService;
-import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
+import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.StringUtil;
@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,14 +32,17 @@ import java.util.Map;
 public class FunctionController {
     private Logger logger = LoggerFactory.getLogger(FunctionController.class);
 
-    @Resource
-    private FunctionServiceImpl functionServiceImpl;
+    private final FunctionService functionService;
 
-    @Resource
-    private UserBusinessServiceImpl userBusinessServiceImpl;
+    private final UserBusinessService userBusinessService;
 
-    @Resource
-    private SystemConfigService systemConfigService;
+    private final SystemConfigService systemConfigService;
+
+    public FunctionController(FunctionService functionService, UserBusinessService userBusinessService, SystemConfigService systemConfigService) {
+        this.functionService = functionService;
+        this.userBusinessService = userBusinessService;
+        this.systemConfigService = systemConfigService;
+    }
 
     @GetMapping(value = "/checkIsNumberExist")
     @ApiOperation(value = "检查编号是否存在")
@@ -48,7 +50,7 @@ public class FunctionController {
                                      @RequestParam(value ="number", required = false) String number,
                                      HttpServletRequest request)throws Exception {
         Map<String, Object> objectMap = new HashMap<String, Object>();
-        int exist = functionServiceImpl.checkIsNumberExist(id, number);
+        int exist = functionService.checkIsNumberExist(id, number);
         if(exist > 0) {
             objectMap.put("status", true);
         } else {
@@ -75,8 +77,8 @@ public class FunctionController {
         try {
             Long roleId = 0L;
             String fc = "";
-            List<UserBusiness> roleList = userBusinessServiceImpl.getBasicData(userId, "UserRole");
-            if(roleList!=null && roleList.size()>0){
+            List<UserBusiness> roleList = userBusinessService.getBasicData(userId, "UserRole");
+            if(roleList!=null && !roleList.isEmpty()){
                 String value = roleList.get(0).getValue();
                 if(StringUtil.isNotEmpty(value)){
                     String roleIdStr = value.replace("[", "").replace("]", "");
@@ -84,18 +86,18 @@ public class FunctionController {
                 }
             }
             //当前用户所拥有的功能列表，格式如：[1][2][5]
-            List<UserBusiness> funList = userBusinessServiceImpl.getBasicData(roleId.toString(), "RoleFunctions");
-            if(funList!=null && funList.size()>0){
+            List<UserBusiness> funList = userBusinessService.getBasicData(roleId.toString(), "RoleFunctions");
+            if(funList!=null && !funList.isEmpty()){
                 fc = funList.get(0).getValue();
             }
             //获取系统配置信息-是否开启多级审核
             String approvalFlag = "0";
             List<SystemConfig> list = systemConfigService.getSystemConfig();
-            if(list.size()>0) {
+            if(!list.isEmpty()) {
                 approvalFlag = list.get(0).getMultiLevelApprovalFlag();
             }
-            List<Function> dataList = functionServiceImpl.getRoleFunction(pNumber);
-            if (dataList.size() != 0) {
+            List<Function> dataList = functionService.getRoleFunction(pNumber);
+            if (!dataList.isEmpty()) {
                 dataArray = getMenuByFunction(dataList, fc, approvalFlag);
                 //增加首页菜单项
                 JSONObject homeItem = new JSONObject();
@@ -120,20 +122,20 @@ public class FunctionController {
                 continue;
             }
             JSONObject item = new JSONObject();
-            List<Function> newList = functionServiceImpl.getRoleFunction(function.getNumber());
+            List<Function> newList = functionService.getRoleFunction(function.getNumber());
             item.put("id", function.getId());
             item.put("text", function.getName());
             item.put("icon", function.getIcon());
             item.put("url", function.getUrl());
             item.put("component", function.getComponent());
-            if (newList.size()>0) {
+            if (!newList.isEmpty()) {
                 JSONArray childrenArr = getMenuByFunction(newList, fc, approvalFlag);
-                if(childrenArr.size()>0) {
+                if(!childrenArr.isEmpty()) {
                     item.put("children", childrenArr);
                     dataArray.add(item);
                 }
             } else {
-                if (fc.indexOf("[" + function.getId().toString() + "]") != -1) {
+                if (fc.contains("[" + function.getId().toString() + "]")) {
                     dataArray.add(item);
                 }
             }
@@ -152,7 +154,7 @@ public class FunctionController {
                                  HttpServletRequest request)throws Exception {
         JSONArray arr = new JSONArray();
         try {
-            List<Function> dataListFun = functionServiceImpl.findRoleFunction("0");
+            List<Function> dataListFun = functionService.findRoleFunction("0");
             //开始拼接json数据
             JSONObject outer = new JSONObject();
             outer.put("id", 0);
@@ -190,7 +192,7 @@ public class FunctionController {
     public JSONArray getFunctionList(List<Function> dataList, String type, String keyId) throws Exception {
         JSONArray dataArray = new JSONArray();
         //获取权限信息
-        String ubValue = userBusinessServiceImpl.getUBValueByTypeAndKeyId(type, keyId);
+        String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, keyId);
         if (null != dataList) {
             for (Function function : dataList) {
                 JSONObject item = new JSONObject();
@@ -199,8 +201,8 @@ public class FunctionController {
                 item.put("value", function.getId());
                 item.put("title", function.getName());
                 item.put("attributes", function.getName());
-                List<Function> funList = functionServiceImpl.findRoleFunction(function.getNumber());
-                if(funList.size()>0) {
+                List<Function> funList = functionService.findRoleFunction(function.getNumber());
+                if(!funList.isEmpty()) {
                     JSONArray funArr = getFunctionList(funList, type, keyId);
                     item.put("children", funArr);
                     dataArray.add(item);
@@ -226,8 +228,8 @@ public class FunctionController {
                                       HttpServletRequest request)throws Exception {
         BaseResponseInfo res = new BaseResponseInfo();
         try {
-            List<UserBusiness> list = userBusinessServiceImpl.getBasicData(roleId.toString(), "RoleFunctions");
-            if(null!=list && list.size()>0) {
+            List<UserBusiness> list = userBusinessService.getBasicData(roleId.toString(), "RoleFunctions");
+            if(null!=list && !list.isEmpty()) {
                 //按钮
                 Map<Long,String> btnMap = new HashMap<>();
                 String btnStr = list.get(0).getBtnStr();
@@ -244,20 +246,18 @@ public class FunctionController {
                 String funIds = list.get(0).getValue();
                 funIds = funIds.substring(1, funIds.length() - 1);
                 funIds = funIds.replace("][",",");
-                List<Function> dataList = functionServiceImpl.findByIds(funIds);
+                List<Function> dataList = functionService.findByIds(funIds);
                 JSONObject outer = new JSONObject();
                 outer.put("total", dataList.size());
                 //存放数据json数组
                 JSONArray dataArray = new JSONArray();
-                if (null != dataList) {
-                    for (Function function : dataList) {
-                        JSONObject item = new JSONObject();
-                        item.put("id", function.getId());
-                        item.put("name", function.getName());
-                        item.put("pushBtn", function.getPushBtn());
-                        item.put("btnStr", btnMap.get(function.getId()));
-                        dataArray.add(item);
-                    }
+                for (Function function : dataList) {
+                    JSONObject item = new JSONObject();
+                    item.put("id", function.getId());
+                    item.put("name", function.getName());
+                    item.put("pushBtn", function.getPushBtn());
+                    item.put("btnStr", btnMap.get(function.getId()));
+                    dataArray.add(item);
                 }
                 outer.put("rows", dataArray);
                 res.code = 200;

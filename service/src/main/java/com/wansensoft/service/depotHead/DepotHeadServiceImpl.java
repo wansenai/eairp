@@ -13,24 +13,22 @@ import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.depot.DepotHeadMapper;
 import com.wansensoft.mappers.depot.DepotHeadMapperEx;
 import com.wansensoft.mappers.depot.DepotItemMapperEx;
+import com.wansensoft.service.CommonService;
 import com.wansensoft.service.account.AccountService;
-import com.wansensoft.service.accountHead.AccountHeadServiceImpl;
 import com.wansensoft.service.depot.DepotService;
+import com.wansensoft.service.depotItem.DepotItemService;
 import com.wansensoft.service.log.LogService;
-import com.wansensoft.service.orgaUserRel.OrgaUserRelServiceImpl;
+import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
+import com.wansensoft.service.person.PersonService;
+import com.wansensoft.service.role.RoleService;
+import com.wansensoft.service.serialNumber.SerialNumberService;
+import com.wansensoft.service.systemConfig.SystemConfigService;
 import com.wansensoft.service.user.UserService;
 import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.plugins.exception.JshException;
-import com.wansensoft.service.accountItem.AccountItemService;
-import com.wansensoft.service.depotItem.DepotItemServiceImpl;
-import com.wansensoft.service.person.PersonService;
-import com.wansensoft.service.role.RoleServiceImpl;
-import com.wansensoft.service.serialNumber.SerialNumberService;
-import com.wansensoft.service.supplier.SupplierService;
-import com.wansensoft.service.systemConfig.SystemConfigService;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
 import com.wansensoft.vo.*;
@@ -52,37 +50,33 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
     private final DepotHeadMapper depotHeadMapper;
     private final DepotHeadMapperEx depotHeadMapperEx;
     private final UserService userService;
-    private final RoleServiceImpl roleServiceImpl;
+    private final RoleService roleService;
     private final DepotService depotService;
-    private final DepotItemServiceImpl depotItemServiceImpl;
-    private final SupplierService supplierService;
+    private final DepotItemService depotItemService;
+    private final CommonService commonService;
     private final UserBusinessService userBusinessService;
     private final SystemConfigService systemConfigService;
     private final SerialNumberService serialNumberService;
-    private final OrgaUserRelServiceImpl orgaUserRelServiceImpl;
+    private final OrgaUserRelService orgaUserRelService;
     private final PersonService personService;
     private final AccountService accountService;
-    private final AccountHeadServiceImpl accountHeadServiceImpl;
-    private final AccountItemService accountItemService;
     private final DepotItemMapperEx depotItemMapperEx;
     private final LogService logService;
 
-    public DepotHeadServiceImpl(DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, UserService userService, RoleServiceImpl roleServiceImpl, DepotService depotService, DepotItemServiceImpl depotItemServiceImpl, SupplierService supplierService, UserBusinessService userBusinessService, SystemConfigService systemConfigService, SerialNumberService serialNumberService, OrgaUserRelServiceImpl orgaUserRelServiceImpl, PersonService personService, AccountService accountService, AccountHeadServiceImpl accountHeadServiceImpl, AccountItemService accountItemService, DepotItemMapperEx depotItemMapperEx, LogService logService) {
+    public DepotHeadServiceImpl(DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, UserService userService, RoleService roleService, DepotService depotService, DepotItemService depotItemService, CommonService commonService, UserBusinessService userBusinessService, SystemConfigService systemConfigService, SerialNumberService serialNumberService, OrgaUserRelService orgaUserRelService, PersonService personService, AccountService accountService, DepotItemMapperEx depotItemMapperEx, LogService logService) {
         this.depotHeadMapper = depotHeadMapper;
         this.depotHeadMapperEx = depotHeadMapperEx;
         this.userService = userService;
-        this.roleServiceImpl = roleServiceImpl;
+        this.roleService = roleService;
         this.depotService = depotService;
-        this.depotItemServiceImpl = depotItemServiceImpl;
-        this.supplierService = supplierService;
+        this.depotItemService = depotItemService;
+        this.commonService = commonService;
         this.userBusinessService = userBusinessService;
         this.systemConfigService = systemConfigService;
         this.serialNumberService = serialNumberService;
-        this.orgaUserRelServiceImpl = orgaUserRelServiceImpl;
+        this.orgaUserRelService = orgaUserRelService;
         this.personService = personService;
         this.accountService = accountService;
-        this.accountHeadServiceImpl = accountHeadServiceImpl;
-        this.accountItemService = accountItemService;
         this.depotItemMapperEx = depotItemMapperEx;
         this.logService = logService;
     }
@@ -155,33 +149,33 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                         dh.setAccountMoneyList(accountmoneylistStr);
                     }
                     if(dh.getChangeAmount() != null) {
-                        dh.setChangeAmount(roleServiceImpl.parseBillPriceByLimit(dh.getChangeAmount().abs(), billCategory, priceLimit, request));
+                        dh.setChangeAmount(roleService.parseBillPriceByLimit(dh.getChangeAmount().abs(), billCategory, priceLimit, request));
                     } else {
                         dh.setChangeAmount(BigDecimal.ZERO);
                     }
                     if(dh.getTotalPrice() != null) {
-                        dh.setTotalPrice(roleServiceImpl.parseBillPriceByLimit(dh.getTotalPrice().abs(), billCategory, priceLimit, request));
+                        dh.setTotalPrice(roleService.parseBillPriceByLimit(dh.getTotalPrice().abs(), billCategory, priceLimit, request));
                     }
                     BigDecimal discountLastMoney = dh.getDiscountLastMoney()!=null?dh.getDiscountLastMoney():BigDecimal.ZERO;
-                    dh.setDiscountLastMoney(roleServiceImpl.parseBillPriceByLimit(discountLastMoney, billCategory, priceLimit, request));
+                    dh.setDiscountLastMoney(roleService.parseBillPriceByLimit(discountLastMoney, billCategory, priceLimit, request));
                     BigDecimal backAmount = dh.getBackAmount()!=null?dh.getBackAmount():BigDecimal.ZERO;
-                    dh.setBackAmount(roleServiceImpl.parseBillPriceByLimit(backAmount, billCategory, priceLimit, request));
+                    dh.setBackAmount(roleService.parseBillPriceByLimit(backAmount, billCategory, priceLimit, request));
                     if(dh.getDeposit() == null) {
                         dh.setDeposit(BigDecimal.ZERO);
                     } else {
-                        dh.setDeposit(roleServiceImpl.parseBillPriceByLimit(dh.getDeposit(), billCategory, priceLimit, request));
+                        dh.setDeposit(roleService.parseBillPriceByLimit(dh.getDeposit(), billCategory, priceLimit, request));
                     }
                     //已经完成的欠款
                     if(finishDepositMap!=null) {
                         BigDecimal finishDeposit = finishDepositMap.get(dh.getNumber()) != null ? finishDepositMap.get(dh.getNumber()) : BigDecimal.ZERO;
-                        dh.setFinishDeposit(roleServiceImpl.parseBillPriceByLimit(finishDeposit, billCategory, priceLimit, request));
+                        dh.setFinishDeposit(roleService.parseBillPriceByLimit(finishDeposit, billCategory, priceLimit, request));
                     }
                     //欠款计算
                     BigDecimal otherMoney = dh.getOtherMoney()!=null?dh.getOtherMoney():BigDecimal.ZERO;
                     BigDecimal deposit = dh.getDeposit()!=null?dh.getDeposit():BigDecimal.ZERO;
                     BigDecimal changeAmount = dh.getChangeAmount()!=null?dh.getChangeAmount():BigDecimal.ZERO;
                     BigDecimal debt = discountLastMoney.add(otherMoney).subtract((deposit.add(changeAmount)));
-                    dh.setDebt(roleServiceImpl.parseBillPriceByLimit(debt, billCategory, priceLimit, request));
+                    dh.setDebt(roleService.parseBillPriceByLimit(debt, billCategory, priceLimit, request));
                     //是否有付款单或收款单
                     if(financialBillNoMap!=null) {
                         Integer financialBillNoSize = financialBillNoMap.get(dh.getId());
@@ -280,7 +274,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         Long userId = userService.getCurrentUser().getId();
         //获取权限信息
         String ubValue = userBusinessService.getUBValueByTypeAndKeyId(type, userId.toString());
-        List<Supplier> supplierList = supplierService.findBySelectCus();
+        List<Supplier> supplierList = commonService.findBySelectCus();
         if(BusinessConstants.SUB_TYPE_SALES_ORDER.equals(subType) || BusinessConstants.SUB_TYPE_SALES.equals(subType)
                 ||BusinessConstants.SUB_TYPE_SALES_RETURN.equals(subType) ) {
             //采购订单里面选择销售订单的时候不要过滤
@@ -319,16 +313,16 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         if(BusinessConstants.ROLE_TYPE_PRIVATE.equals(roleType)) {
             creator = user.getId().toString();
         } else if(BusinessConstants.ROLE_TYPE_THIS_ORG.equals(roleType)) {
-            creator = orgaUserRelServiceImpl.getUserIdListByUserId(user.getId());
+            creator = orgaUserRelService.getUserIdListByUserId(user.getId());
         }
         return creator;
     }
 
     public Map<String, BigDecimal> getFinishDepositMapByNumberList(List<String> numberList) {
         Map<String,BigDecimal> finishDepositMap = new HashMap<>();
-        if(numberList.size()>0) {
+        if(!numberList.isEmpty()) {
             List<FinishDepositVo> list = depotHeadMapperEx.getFinishDepositByNumberList(numberList);
-            if(list!=null && list.size()>0) {
+            if(list!=null && !list.isEmpty()) {
                 for (FinishDepositVo finishDepositVo : list) {
                     if(finishDepositVo!=null) {
                         finishDepositMap.put(finishDepositVo.getNumber(), finishDepositVo.getFinishDeposit());
@@ -341,9 +335,9 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
 
     public Map<String, Integer> getBillSizeMapByLinkNumberList(List<String> numberList) {
         Map<String, Integer> billListMap = new HashMap<>();
-        if(numberList.size()>0) {
+        if(!numberList.isEmpty()) {
             List<DepotHead> list = getBillListByLinkNumberList(numberList);
-            if(list!=null && list.size()>0) {
+            if(list!=null && !list.isEmpty()) {
                 for (DepotHead depotHead : list) {
                     if(depotHead!=null) {
                         billListMap.put(depotHead.getLinkNumber(), list.size());
@@ -356,9 +350,9 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
 
     public Map<Long,Integer> getFinancialBillNoMapByBillIdList(List<Long> idList) {
         Map<Long, Integer> billListMap = new HashMap<>();
-        if(idList.size()>0) {
-            List<AccountItem> list = accountHeadServiceImpl.getFinancialBillNoByBillIdList(idList);
-            if(list!=null && list.size()>0) {
+        if(!idList.isEmpty()) {
+            List<AccountItem> list = commonService.getFinancialBillNoByBillIdList(idList);
+            if(list!=null && !list.isEmpty()) {
                 for (AccountItem accountItem : list) {
                     if(accountItem!=null) {
                         billListMap.put(accountItem.getBillId(), list.size());
@@ -450,7 +444,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                     //查询单据子表列表
                     List<DepotItem> depotItemList = depotItemMapperEx.findDepotItemListBydepotheadId(depotHead.getId(), BusinessConstants.ENABLE_SERIAL_NUMBER_ENABLED);
                     /**回收序列号*/
-                    if (depotItemList != null && depotItemList.size() > 0) {
+                    if (depotItemList != null && !depotItemList.isEmpty()) {
                         for (DepotItem depotItem : depotItemList) {
                             //BasicNumber=OperNumber*ratio
                             serialNumberService.cancelSerialNumber(depotItem.getMaterialId(), depotHead.getNumber(), (depotItem.getBasicNumber() == null ? 0 : depotItem.getBasicNumber()).intValue(), userInfo);
@@ -462,11 +456,11 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                         && BusinessConstants.SUB_TYPE_RETAIL.equals(depotHead.getSubType())){
                     if(BusinessConstants.PAY_TYPE_PREPAID.equals(depotHead.getPayType())) {
                         if (depotHead.getOrganId() != null) {
-                            supplierService.updateAdvanceIn(depotHead.getOrganId(), depotHead.getTotalPrice().abs());
+                            commonService.updateAdvanceIn(depotHead.getOrganId(), depotHead.getTotalPrice().abs());
                         }
                     }
                 }
-                List<DepotItem> list = depotItemServiceImpl.getListByHeaderId(depotHead.getId());
+                List<DepotItem> list = depotItemService.getListByHeaderId(depotHead.getId());
                 //删除单据子表数据
                 depotItemMapperEx.batchDeleteDepotItemByDepotHeadIds(new Long[]{depotHead.getId()});
                 //删除单据主表信息
@@ -482,7 +476,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                         String status = BusinessConstants.BILLS_STATUS_AUDIT;
                         //查询除当前单据之外的关联单据列表
                         List<DepotHead> exceptCurrentList = getListByLinkNumberExceptCurrent(depotHead.getLinkNumber(), depotHead.getNumber(), depotHead.getType());
-                        if(exceptCurrentList!=null && exceptCurrentList.size()>0) {
+                        if(exceptCurrentList!=null && !exceptCurrentList.isEmpty()) {
                             status = BusinessConstants.BILLS_STATUS_SKIPING;
                         }
                         DepotHead dh = new DepotHead();
@@ -499,7 +493,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                         DepotHead dh = new DepotHead();
                         //获取分批操作后单据的商品和商品数量（汇总）
                         List<DepotItemVo4MaterialAndSum> batchList = depotItemMapperEx.getBatchBillDetailMaterialSum(depotHead.getLinkNumber(), depotHead.getType());
-                        if(batchList.size()>0) {
+                        if(!batchList.isEmpty()) {
                             dh.setPurchaseStatus(BusinessConstants.PURCHASE_STATUS_SKIPING);
                         } else {
                             dh.setPurchaseStatus(BusinessConstants.PURCHASE_STATUS_UN_AUDIT);
@@ -511,7 +505,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                 }
                 //更新当前库存
                 for (DepotItem depotItem : list) {
-                    depotItemServiceImpl.updateCurrentStock(depotItem);
+                    depotItemService.updateCurrentStock(depotItem);
                 }
             } else {
                 throw new BusinessRunTimeException(ExceptionConstants.DEPOT_HEAD_UN_AUDIT_DELETE_FAILED_CODE,
@@ -606,9 +600,9 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
             //更新当前库存
             if(systemConfigService.getForceApprovalFlag()) {
                 for(Long dhId: dhIds) {
-                    List<DepotItem> list = depotItemServiceImpl.getListByHeaderId(dhId);
+                    List<DepotItem> list = depotItemService.getListByHeaderId(dhId);
                     for (DepotItem depotItem : list) {
-                        depotItemServiceImpl.updateCurrentStock(depotItem);
+                        depotItemService.updateCurrentStock(depotItem);
                     }
                 }
             }
@@ -792,28 +786,28 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                     dh.setAccountMoneyList(accountmoneylistStr);
                 }
                 if(dh.getChangeAmount() != null) {
-                    dh.setChangeAmount(roleServiceImpl.parseBillPriceByLimit(dh.getChangeAmount().abs(), billCategory, priceLimit, request));
+                    dh.setChangeAmount(roleService.parseBillPriceByLimit(dh.getChangeAmount().abs(), billCategory, priceLimit, request));
                 } else {
                     dh.setChangeAmount(BigDecimal.ZERO);
                 }
                 if(dh.getTotalPrice() != null) {
-                    dh.setTotalPrice(roleServiceImpl.parseBillPriceByLimit(dh.getTotalPrice().abs(), billCategory, priceLimit, request));
+                    dh.setTotalPrice(roleService.parseBillPriceByLimit(dh.getTotalPrice().abs(), billCategory, priceLimit, request));
                 }
                 BigDecimal discountLastMoney = dh.getDiscountLastMoney()!=null?dh.getDiscountLastMoney():BigDecimal.ZERO;
-                dh.setDiscountLastMoney(roleServiceImpl.parseBillPriceByLimit(discountLastMoney, billCategory, priceLimit, request));
+                dh.setDiscountLastMoney(roleService.parseBillPriceByLimit(discountLastMoney, billCategory, priceLimit, request));
                 BigDecimal backAmount = dh.getBackAmount()!=null?dh.getBackAmount():BigDecimal.ZERO;
-                dh.setBackAmount(roleServiceImpl.parseBillPriceByLimit(backAmount, billCategory, priceLimit, request));
+                dh.setBackAmount(roleService.parseBillPriceByLimit(backAmount, billCategory, priceLimit, request));
                 if(dh.getDeposit() == null) {
                     dh.setDeposit(BigDecimal.ZERO);
                 } else {
-                    dh.setDeposit(roleServiceImpl.parseBillPriceByLimit(dh.getDeposit(), billCategory, priceLimit, request));
+                    dh.setDeposit(roleService.parseBillPriceByLimit(dh.getDeposit(), billCategory, priceLimit, request));
                 }
                 //欠款计算
                 BigDecimal otherMoney = dh.getOtherMoney()!=null?dh.getOtherMoney():BigDecimal.ZERO;
                 BigDecimal deposit = dh.getDeposit()!=null?dh.getDeposit():BigDecimal.ZERO;
                 BigDecimal changeAmount = dh.getChangeAmount()!=null?dh.getChangeAmount():BigDecimal.ZERO;
                 BigDecimal debt = discountLastMoney.add(otherMoney).subtract((deposit.add(changeAmount)));
-                dh.setDebt(roleServiceImpl.parseBillPriceByLimit(debt, billCategory, priceLimit, request));
+                dh.setDebt(roleService.parseBillPriceByLimit(debt, billCategory, priceLimit, request));
                 //是否有付款单或收款单
                 if(financialBillNoMap!=null) {
                     Integer financialBillNoSize = financialBillNoMap.get(dh.getId());
@@ -974,9 +968,9 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         /**入库和出库处理预付款信息*/
         if(BusinessConstants.PAY_TYPE_PREPAID.equals(depotHead.getPayType())){
             if(depotHead.getOrganId()!=null) {
-                BigDecimal currentAdvanceIn = supplierService.getSupplier(depotHead.getOrganId()).getAdvanceIn();
+                BigDecimal currentAdvanceIn = commonService.getSupplier(depotHead.getOrganId()).getAdvanceIn();
                 if(currentAdvanceIn.compareTo(depotHead.getTotalPrice())>=0) {
-                    supplierService.updateAdvanceIn(depotHead.getOrganId(), BigDecimal.ZERO.subtract(depotHead.getTotalPrice()));
+                    commonService.updateAdvanceIn(depotHead.getOrganId(), BigDecimal.ZERO.subtract(depotHead.getTotalPrice()));
                 } else {
                     throw new BusinessRunTimeException(ExceptionConstants.DEPOT_HEAD_MEMBER_PAY_LACK_CODE,
                             String.format(ExceptionConstants.DEPOT_HEAD_MEMBER_PAY_LACK_MSG));
@@ -990,7 +984,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         if(list!=null) {
             Long headId = list.get(0).getId();
             /**入库和出库处理单据子表信息*/
-            depotItemServiceImpl.saveDetials(rows,headId, "add",request);
+            depotItemService.saveDetials(rows,headId, "add",request);
         }
         logService.insertLog("单据",
                 BusinessConstants.LOG_OPERATION_TYPE_ADD + depotHead.getNumber(),
@@ -1075,9 +1069,9 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         /**入库和出库处理预付款信息*/
         if(BusinessConstants.PAY_TYPE_PREPAID.equals(depotHead.getPayType())){
             if(depotHead.getOrganId()!=null){
-                BigDecimal currentAdvanceIn = supplierService.getSupplier(depotHead.getOrganId()).getAdvanceIn();
+                BigDecimal currentAdvanceIn = commonService.getSupplier(depotHead.getOrganId()).getAdvanceIn();
                 if(currentAdvanceIn.compareTo(depotHead.getTotalPrice())>=0) {
-                    supplierService.updateAdvanceIn(depotHead.getOrganId(), BigDecimal.ZERO.subtract(depotHead.getTotalPrice().subtract(preTotalPrice)));
+                    commonService.updateAdvanceIn(depotHead.getOrganId(), BigDecimal.ZERO.subtract(depotHead.getTotalPrice().subtract(preTotalPrice)));
                 } else {
                     throw new BusinessRunTimeException(ExceptionConstants.DEPOT_HEAD_MEMBER_PAY_LACK_CODE,
                             String.format(ExceptionConstants.DEPOT_HEAD_MEMBER_PAY_LACK_MSG));
@@ -1085,7 +1079,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
             }
         }
         /**入库和出库处理单据子表信息*/
-        depotItemServiceImpl.saveDetials(rows,depotHead.getId(), "update",request);
+        depotItemService.saveDetials(rows,depotHead.getId(), "update",request);
         logService.insertLog("单据",
                 BusinessConstants.LOG_OPERATION_TYPE_EDIT + depotHead.getNumber(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
@@ -1106,7 +1100,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         //原单欠款
         BigDecimal debt = discountLastMoney.add(otherMoney).subtract((deposit.add(changeAmount)));
         //完成欠款
-        BigDecimal finishDebt = accountItemService.getEachAmountByBillId(depotHead.getId());
+        BigDecimal finishDebt = commonService.getEachAmountByBillId(depotHead.getId());
         finishDebt = finishDebt!=null?finishDebt:BigDecimal.ZERO;
         //原单对应的退货单欠款(总数)
         List<DepotHead> billList = getBillListByLinkNumberExceptNumber(linkNumber, number);
@@ -1181,18 +1175,18 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                 yearBegin, yearEnd, creatorArray); //今年零售出库
         BigDecimal yearRetailSaleBack = getBuyAndSaleRetailStatistics("入库", "零售退货",
                 yearBegin, yearEnd, creatorArray); //今年零售退货
-        map.put("todayBuy", roleServiceImpl.parseHomePriceByLimit(todayBuy.subtract(todayBuyBack), "buy", priceLimit, "***", request));
-        map.put("todaySale", roleServiceImpl.parseHomePriceByLimit(todaySale.subtract(todaySaleBack), "sale", priceLimit, "***", request));
-        map.put("todayRetailSale", roleServiceImpl.parseHomePriceByLimit(todayRetailSale.subtract(todayRetailSaleBack), "retail", priceLimit, "***", request));
-        map.put("monthBuy", roleServiceImpl.parseHomePriceByLimit(monthBuy.subtract(monthBuyBack), "buy", priceLimit, "***", request));
-        map.put("monthSale", roleServiceImpl.parseHomePriceByLimit(monthSale.subtract(monthSaleBack), "sale", priceLimit, "***", request));
-        map.put("monthRetailSale", roleServiceImpl.parseHomePriceByLimit(monthRetailSale.subtract(monthRetailSaleBack), "retail", priceLimit, "***", request));
-        map.put("yesterdayBuy", roleServiceImpl.parseHomePriceByLimit(yesterdayBuy.subtract(yesterdayBuyBack), "buy", priceLimit, "***", request));
-        map.put("yesterdaySale", roleServiceImpl.parseHomePriceByLimit(yesterdaySale.subtract(yesterdaySaleBack), "sale", priceLimit, "***", request));
-        map.put("yesterdayRetailSale", roleServiceImpl.parseHomePriceByLimit(yesterdayRetailSale.subtract(yesterdayRetailSaleBack), "retail", priceLimit, "***", request));
-        map.put("yearBuy", roleServiceImpl.parseHomePriceByLimit(yearBuy.subtract(yearBuyBack), "buy", priceLimit, "***", request));
-        map.put("yearSale", roleServiceImpl.parseHomePriceByLimit(yearSale.subtract(yearSaleBack), "sale", priceLimit, "***", request));
-        map.put("yearRetailSale", roleServiceImpl.parseHomePriceByLimit(yearRetailSale.subtract(yearRetailSaleBack), "retail", priceLimit, "***", request));
+        map.put("todayBuy", roleService.parseHomePriceByLimit(todayBuy.subtract(todayBuyBack), "buy", priceLimit, "***", request));
+        map.put("todaySale", roleService.parseHomePriceByLimit(todaySale.subtract(todaySaleBack), "sale", priceLimit, "***", request));
+        map.put("todayRetailSale", roleService.parseHomePriceByLimit(todayRetailSale.subtract(todayRetailSaleBack), "retail", priceLimit, "***", request));
+        map.put("monthBuy", roleService.parseHomePriceByLimit(monthBuy.subtract(monthBuyBack), "buy", priceLimit, "***", request));
+        map.put("monthSale", roleService.parseHomePriceByLimit(monthSale.subtract(monthSaleBack), "sale", priceLimit, "***", request));
+        map.put("monthRetailSale", roleService.parseHomePriceByLimit(monthRetailSale.subtract(monthRetailSaleBack), "retail", priceLimit, "***", request));
+        map.put("yesterdayBuy", roleService.parseHomePriceByLimit(yesterdayBuy.subtract(yesterdayBuyBack), "buy", priceLimit, "***", request));
+        map.put("yesterdaySale", roleService.parseHomePriceByLimit(yesterdaySale.subtract(yesterdaySaleBack), "sale", priceLimit, "***", request));
+        map.put("yesterdayRetailSale", roleService.parseHomePriceByLimit(yesterdayRetailSale.subtract(yesterdayRetailSaleBack), "retail", priceLimit, "***", request));
+        map.put("yearBuy", roleService.parseHomePriceByLimit(yearBuy.subtract(yearBuyBack), "buy", priceLimit, "***", request));
+        map.put("yearSale", roleService.parseHomePriceByLimit(yearSale.subtract(yearSaleBack), "sale", priceLimit, "***", request));
+        map.put("yearRetailSale", roleService.parseHomePriceByLimit(yearRetailSale.subtract(yearRetailSaleBack), "retail", priceLimit, "***", request));
         return map;
     }
 
@@ -1214,7 +1208,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
             DepotHeadExample example = new DepotHeadExample();
             example.createCriteria().andNumberEqualTo(number).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
             List<DepotHead> list = depotHeadMapper.selectByExample(example);
-            if(null!=list && list.size()>0) {
+            if(null!=list && !list.isEmpty()) {
                 depotHead = list.get(0);
             }
         }catch(Exception e){
@@ -1264,7 +1258,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
                         dh.setNeedDebt(BigDecimal.ZERO.subtract(dh.getNeedDebt()));
                     }
                     BigDecimal needDebt = dh.getNeedDebt()!=null?dh.getNeedDebt():BigDecimal.ZERO;
-                    BigDecimal finishDebt = accountItemService.getEachAmountByBillId(dh.getId());
+                    BigDecimal finishDebt = commonService.getEachAmountByBillId(dh.getId());
                     finishDebt = finishDebt!=null?finishDebt:BigDecimal.ZERO;
                     //已收欠款
                     dh.setFinishDebt(finishDebt);

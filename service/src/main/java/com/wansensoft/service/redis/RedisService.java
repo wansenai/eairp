@@ -2,6 +2,7 @@ package com.wansensoft.service.redis;
 
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.StringUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -15,13 +16,10 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisService {
 
-    public final RedisTemplate redisTemplate;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     public static final String ACCESS_TOKEN = "X-Access-Token";
-
-    public RedisService(RedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
 
     /**
      * @author jisheng hua

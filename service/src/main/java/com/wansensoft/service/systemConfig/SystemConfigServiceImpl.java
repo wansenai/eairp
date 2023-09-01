@@ -6,14 +6,15 @@ import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.PutObjectRequest;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.system.SystemConfig;
 import com.wansensoft.entities.system.SystemConfigExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.system.SystemConfigMapper;
 import com.wansensoft.mappers.system.SystemConfigMapperEx;
-import com.wansensoft.service.log.LogServiceImpl;
-import com.wansensoft.service.platformConfig.PlatformConfigServiceImpl;
-import com.wansensoft.service.user.UserServiceImpl;
+import com.wansensoft.service.CommonService;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.platformConfig.PlatformConfigService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.utils.FileUtils;
@@ -41,27 +42,27 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class SystemConfigService {
-    private Logger logger = LoggerFactory.getLogger(SystemConfigService.class);
+public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, SystemConfig> implements SystemConfigService{
+    private Logger logger = LoggerFactory.getLogger(SystemConfigServiceImpl.class);
 
     private final SystemConfigMapper systemConfigMapper;
     private final SystemConfigMapperEx systemConfigMapperEx;
-    private final PlatformConfigServiceImpl platformConfigServiceImpl;
-    private final UserServiceImpl userServiceImpl;
-    private final LogServiceImpl logServiceImpl;
+    private final PlatformConfigService platformConfigService;
+    private final CommonService commonService;
+    private final LogService logService;
 
     @Value(value="${file.path}")
     private String filePath;
 
-    public SystemConfigService(SystemConfigMapper systemConfigMapper, SystemConfigMapperEx systemConfigMapperEx, PlatformConfigServiceImpl platformConfigServiceImpl, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl) {
+    public SystemConfigServiceImpl(SystemConfigMapper systemConfigMapper, SystemConfigMapperEx systemConfigMapperEx, PlatformConfigService platformConfigService, CommonService commonService, LogService logService) {
         this.systemConfigMapper = systemConfigMapper;
         this.systemConfigMapperEx = systemConfigMapperEx;
-        this.platformConfigServiceImpl = platformConfigServiceImpl;
-        this.userServiceImpl = userServiceImpl;
-        this.logServiceImpl = logServiceImpl;
+        this.platformConfigService = platformConfigService;
+        this.commonService = commonService;
+        this.logService = logService;
     }
 
-    public SystemConfig getSystemConfig(long id)throws Exception {
+    public SystemConfig getSystemConfig(long id) {
         SystemConfig result=null;
         try{
             result=systemConfigMapper.selectByPrimaryKey(id);
@@ -82,7 +83,7 @@ public class SystemConfigService {
         }
         return list;
     }
-    public List<SystemConfig> select(String companyName, int offset, int rows)throws Exception {
+    public List<SystemConfig> select(String companyName, int offset, int rows) {
         List<SystemConfig> list=null;
         try{
             list=systemConfigMapperEx.selectByConditionSystemConfig(companyName, offset, rows);
@@ -92,7 +93,7 @@ public class SystemConfigService {
         return list;
     }
 
-    public Long countSystemConfig(String companyName)throws Exception {
+    public Long countSystemConfig(String companyName) {
         Long result=null;
         try{
             result=systemConfigMapperEx.countsBySystemConfig(companyName);
@@ -103,13 +104,13 @@ public class SystemConfigService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertSystemConfig(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int insertSystemConfig(JSONObject obj, HttpServletRequest request) {
         SystemConfig systemConfig = JSONObject.parseObject(obj.toJSONString(), SystemConfig.class);
         int result=0;
         try{
             result=systemConfigMapper.insertSelective(systemConfig);
-            logServiceImpl.insertLog("系统配置",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(systemConfig.getCompanyName()).toString(), request);
+            logService.insertLog("系统配置",
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + systemConfig.getCompanyName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -117,13 +118,13 @@ public class SystemConfigService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateSystemConfig(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int updateSystemConfig(JSONObject obj, HttpServletRequest request) {
         SystemConfig systemConfig = JSONObject.parseObject(obj.toJSONString(), SystemConfig.class);
         int result=0;
         try{
             result = systemConfigMapper.updateByPrimaryKeySelective(systemConfig);
-            logServiceImpl.insertLog("系统配置",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(systemConfig.getCompanyName()).toString(), request);
+            logService.insertLog("系统配置",
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + systemConfig.getCompanyName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -131,21 +132,21 @@ public class SystemConfigService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteSystemConfig(Long id, HttpServletRequest request)throws Exception {
+    public int deleteSystemConfig(Long id, HttpServletRequest request) {
         return batchDeleteSystemConfigByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteSystemConfig(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteSystemConfig(String ids, HttpServletRequest request) {
         return batchDeleteSystemConfigByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteSystemConfigByIds(String ids)throws Exception {
-        logServiceImpl.insertLog("系统配置",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_DELETE).append(ids).toString(),
+    public int batchDeleteSystemConfigByIds(String ids) {
+        logService.insertLog("系统配置",
+                BusinessConstants.LOG_OPERATION_TYPE_DELETE + ids,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo= userServiceImpl.getCurrentUser();
+        User userInfo = commonService.getCurrentUser();
         String [] idArray=ids.split(",");
         int result=0;
         try{
@@ -156,7 +157,7 @@ public class SystemConfigService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name) throws Exception{
+    public int checkIsNameExist(Long id, String name) {
         SystemConfigExample example = new SystemConfigExample();
         example.createCriteria().andIdNotEqualTo(id).andCompanyNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<SystemConfig> list =null;
@@ -175,7 +176,7 @@ public class SystemConfigService {
      * @param name  自定义文件名
      * @return
      */
-    public String uploadLocal(MultipartFile mf, String bizPath, String name, HttpServletRequest request) throws Exception {
+    public String uploadLocal(MultipartFile mf, String bizPath, String name, HttpServletRequest request) {
         try {
             if(StringUtil.isEmpty(bizPath)){
                 bizPath = "";
@@ -237,40 +238,40 @@ public class SystemConfigService {
      * @param name  自定义文件名
      * @return
      */
-    public String uploadAliOss(MultipartFile mf, String bizPath, String name, HttpServletRequest request) throws Exception {
-        if(StringUtil.isEmpty(bizPath)){
+    public String uploadAliOss(MultipartFile mf, String bizPath, String name, HttpServletRequest request) {
+        if (StringUtil.isEmpty(bizPath)) {
             bizPath = "";
         }
         String token = request.getHeader("X-Access-Token");
         Long tenantId = Tools.getTenantIdByToken(token);
         bizPath = bizPath + "/" + tenantId;
-        String endpoint = platformConfigServiceImpl.getPlatformConfigByKey("aliOss_endpoint").getPlatformValue();
-        String accessKeyId = platformConfigServiceImpl.getPlatformConfigByKey("aliOss_accessKeyId").getPlatformValue();
-        String accessKeySecret = platformConfigServiceImpl.getPlatformConfigByKey("aliOss_accessKeySecret").getPlatformValue();
-        String bucketName = platformConfigServiceImpl.getPlatformConfigByKey("aliOss_bucketName").getPlatformValue();
+        String endpoint = platformConfigService.getPlatformConfigByKey("aliOss_endpoint").getPlatformValue();
+        String accessKeyId = platformConfigService.getPlatformConfigByKey("aliOss_accessKeyId").getPlatformValue();
+        String accessKeySecret = platformConfigService.getPlatformConfigByKey("aliOss_accessKeySecret").getPlatformValue();
+        String bucketName = platformConfigService.getPlatformConfigByKey("aliOss_bucketName").getPlatformValue();
         // 填写Object完整路径，完整路径中不能包含Bucket名称，例如exampledir/exampleobject.txt。
         String fileName = "";
         String orgName = mf.getOriginalFilename();// 获取文件名
         orgName = FileUtils.getFileName(orgName);
-        if(orgName.contains(".")){
-            if(StringUtil.isNotEmpty(name)) {
+        if (orgName.contains(".")) {
+            if (StringUtil.isNotEmpty(name)) {
                 fileName = name.substring(0, name.lastIndexOf(".")) + "_" + System.currentTimeMillis() + orgName.substring(orgName.indexOf("."));
             } else {
                 fileName = orgName.substring(0, orgName.lastIndexOf(".")) + "_" + System.currentTimeMillis() + orgName.substring(orgName.indexOf("."));
             }
-        }else{
-            fileName = orgName+ "_" + System.currentTimeMillis();
+        } else {
+            fileName = orgName + "_" + System.currentTimeMillis();
         }
-        String filePathStr = StringUtil.isNotEmpty(filePath)? filePath.substring(1):"";
+        String filePathStr = StringUtil.isNotEmpty(filePath) ? filePath.substring(1) : "";
         String objectName = filePathStr + "/" + bizPath + "/" + fileName;
         String smallObjectName = filePathStr + "-small/" + bizPath + "/" + fileName;
-        // 如果未指定本地路径，则默认从示例程序所属项目对应本地路径中上传文件流。
-        byte [] byteArr = mf.getBytes();
-
         // 创建OSSClient实例。
-        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
-
+        OSS ossClient = null;
         try {
+            // 如果未指定本地路径，则默认从示例程序所属项目对应本地路径中上传文件流。
+            byte[] byteArr = mf.getBytes();
+            ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+
             // 保存原文件
             InputStream inputStream = new ByteArrayInputStream(byteArr);
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, objectName, inputStream);
@@ -278,7 +279,7 @@ public class SystemConfigService {
             // 如果是图片-保存缩略图
             int index = fileName.lastIndexOf(".");
             String ext = fileName.substring(index + 1);
-            if(ext.contains("gif") || ext.contains("jpg") || ext.contains("jpeg") || ext.contains("png")
+            if (ext.contains("gif") || ext.contains("jpg") || ext.contains("jpeg") || ext.contains("png")
                     || ext.contains("GIF") || ext.contains("JPG") || ext.contains("JPEG") || ext.contains("PNG")) {
                 String fileUrl = getFileUrlAliOss(bizPath + "/" + fileName);
                 URL url = new URL(fileUrl);
@@ -308,6 +309,9 @@ public class SystemConfigService {
                     + "a serious internal problem while trying to communicate with OSS, "
                     + "such as not being able to access the network.");
             System.out.println("Error Message:" + ce.getMessage());
+        } catch (IOException ioe) {
+            logger.error("Caught an IOException while uploading file to OSS.");
+            System.out.println("Error Message:" + ioe.getMessage());
         } finally {
             if (ossClient != null) {
                 ossClient.shutdown();
@@ -320,31 +324,37 @@ public class SystemConfigService {
         return filePath + File.separator + imgPath;
     }
 
-    public String getFileUrlAliOss(String imgPath) throws Exception {
-        String linkUrl = platformConfigServiceImpl.getPlatformConfigByKey("aliOss_linkUrl").getPlatformValue();
+    public String getFileUrlAliOss(String imgPath) {
+        String linkUrl = platformConfigService.getPlatformConfigByKey("aliOss_linkUrl").getPlatformValue();
         return linkUrl + filePath + "/" + imgPath;
     }
 
-    public BufferedImage getImageMini(InputStream inputStream, int w) throws Exception {
-        BufferedImage img = ImageIO.read(inputStream);
-        //获取图片的长和宽
-        int width = img.getWidth();
-        int height = img.getHeight();
-        int tempw = 0;
-        int temph = 0;
-        if(width>height){
-            tempw = w;
-            temph = height* w/width;
-        }else{
-            tempw = w*width/height;
-            temph = w;
+    public BufferedImage getImageMini(InputStream inputStream, int w) {
+        try {
+            BufferedImage img = ImageIO.read(inputStream);
+            //获取图片的长和宽
+            int width = img.getWidth();
+            int height = img.getHeight();
+            int tempw = 0;
+            int temph = 0;
+            if (width > height) {
+                tempw = w;
+                temph = height * w / width;
+            } else {
+                tempw = w * width / height;
+                temph = w;
+            }
+            Image _img = img.getScaledInstance(tempw, temph, Image.SCALE_DEFAULT);
+            BufferedImage image = new BufferedImage(tempw, temph, BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = image.createGraphics();
+            graphics.drawImage(_img, 0, 0, null);
+            graphics.dispose();
+            return image;
+        } catch (IOException e) {
+            // 处理异常
+            e.printStackTrace();
+            return null;
         }
-        Image _img = img.getScaledInstance(tempw, temph, Image.SCALE_DEFAULT);
-        BufferedImage image = new BufferedImage(tempw, temph, BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = image.createGraphics();
-        graphics.drawImage(_img, 0, 0, null);
-        graphics.dispose();
-        return image;
     }
 
     /**
@@ -372,7 +382,7 @@ public class SystemConfigService {
     public boolean getCustomerFlag() {
         boolean customerFlag = false;
         List<SystemConfig> list = getSystemConfig();
-        if(list.size()>0) {
+        if(!list.isEmpty()) {
             String flag = list.get(0).getCustomerFlag();
             if(("1").equals(flag)) {
                 customerFlag = true;
@@ -389,7 +399,7 @@ public class SystemConfigService {
     public boolean getMinusStockFlag() {
         boolean minusStockFlag = false;
         List<SystemConfig> list = getSystemConfig();
-        if(list.size()>0) {
+        if(!list.isEmpty()) {
             String flag = list.get(0).getMinusStockFlag();
             if(("1").equals(flag)) {
                 minusStockFlag = true;
@@ -454,7 +464,7 @@ public class SystemConfigService {
      * @return
      * @throws Exception
      */
-    public boolean getMultiLevelApprovalFlag() throws Exception {
+    public boolean getMultiLevelApprovalFlag() {
         boolean multiLevelApprovalFlag = false;
         List<SystemConfig> list = getSystemConfig();
         if(list.size()>0) {

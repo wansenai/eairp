@@ -4,14 +4,15 @@ import java.io.*;
 import java.util.*;
 
 import jxl.*;
+import jxl.format.Alignment;
+import jxl.format.Border;
+import jxl.format.BorderLineStyle;
+import jxl.format.Colour;
+import jxl.format.VerticalAlignment;
+import jxl.write.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import jxl.format.*;
-import jxl.write.Label;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -42,65 +43,73 @@ public class ExcelUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static File exportObjectsWithoutTitle(String fileName, String tip,
-			String[] names, String title, List<String[]> objects)
-			throws Exception {
+	public static File exportObjectsWithoutTitle(String fileName, String tip, String[] names, String title, List<String[]> objects) {
 		File excelFile = new File(fileName);
-		WritableWorkbook wtwb = Workbook.createWorkbook(excelFile);
-		WritableSheet sheet = wtwb.createSheet(title, 0);
-		sheet.getSettings().setDefaultColumnWidth(12);
+		WritableWorkbook wtwb = null;
+		try {
+			wtwb = Workbook.createWorkbook(excelFile);
+			WritableSheet sheet = wtwb.createSheet(title, 0);
+			sheet.getSettings().setDefaultColumnWidth(12);
 
-		// 标题的格式-红色
-		WritableFont redWF = new WritableFont(WritableFont.ARIAL, 12,
-				WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-				Colour.RED);
-		WritableCellFormat redWFFC = new WritableCellFormat(redWF);
-		redWFFC.setVerticalAlignment(VerticalAlignment.CENTRE);
-		redWFFC.setBorder(jxl.format.Border.ALL,jxl.format.BorderLineStyle.THIN);
+			// 标题的格式-红色
+			WritableFont redWF = new WritableFont(WritableFont.ARIAL, 12, WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE, Colour.RED);
+			WritableCellFormat redWFFC = new WritableCellFormat(redWF);
+			redWFFC.setVerticalAlignment(VerticalAlignment.CENTRE);
+			redWFFC.setBorder(jxl.format.Border.ALL, jxl.format.BorderLineStyle.THIN);
 
-		// 标题的格式-黑色
-		WritableFont blackWF = new WritableFont(WritableFont.ARIAL, 12,
-				WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-				Colour.BLACK);
-		WritableCellFormat blackWFFC = new WritableCellFormat(blackWF);
-		blackWFFC.setVerticalAlignment(VerticalAlignment.CENTRE);
-		blackWFFC.setBorder(jxl.format.Border.ALL,jxl.format.BorderLineStyle.THIN);
+			// 标题的格式-黑色
+			WritableFont blackWF = new WritableFont(WritableFont.ARIAL, 12, WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE, Colour.BLACK);
+			WritableCellFormat blackWFFC = new WritableCellFormat(blackWF);
+			blackWFFC.setVerticalAlignment(VerticalAlignment.CENTRE);
+			blackWFFC.setBorder(jxl.format.Border.ALL, jxl.format.BorderLineStyle.THIN);
 
-		// 设置字体以及单元格格式
-		WritableFont wfont = new WritableFont(WritableFont.createFont("楷书"), 12);
-		WritableCellFormat format = new WritableCellFormat(wfont);
-		format.setAlignment(Alignment.LEFT);
-		format.setVerticalAlignment(VerticalAlignment.TOP);
+			// 设置字体以及单元格格式
+			WritableFont wfont = new WritableFont(WritableFont.createFont("楷书"), 12);
+			WritableCellFormat format = new WritableCellFormat(wfont);
+			format.setAlignment(Alignment.LEFT);
+			format.setVerticalAlignment(VerticalAlignment.TOP);
 
-		// 第一行写入提示
-		if(StringUtil.isNotEmpty(tip) && tip.contains("*")) {
-			sheet.addCell(new Label(0, 0, tip, redWFFC));
-		} else {
-			sheet.addCell(new Label(0, 0, tip, blackWFFC));
-		}
-
-		// 第二行写入标题
-		for (int i = 0; i < names.length; i++) {
-			if(StringUtil.isNotEmpty(names[i]) && names[i].contains("*")) {
-				sheet.addCell(new Label(i, 1, names[i], redWFFC));
+			// 第一行写入提示
+			if (StringUtil.isNotEmpty(tip) && tip.contains("*")) {
+				sheet.addCell(new Label(0, 0, tip, redWFFC));
 			} else {
-				sheet.addCell(new Label(i, 1, names[i], blackWFFC));
+				sheet.addCell(new Label(0, 0, tip, blackWFFC));
 			}
-		}
 
-		// 其余行依次写入数据
-		int rowNum = 2;
-		for (int j = 0; j < objects.size(); j++) {
-			String[] obj = objects.get(j);
-			for (int h = 0; h < obj.length; h++) {
-				sheet.addCell(new Label(h, rowNum, obj[h], format));
+			// 第二行写入标题
+			for (int i = 0; i < names.length; i++) {
+				if (StringUtil.isNotEmpty(names[i]) && names[i].contains("*")) {
+					sheet.addCell(new Label(i, 1, names[i], redWFFC));
+				} else {
+					sheet.addCell(new Label(i, 1, names[i], blackWFFC));
+				}
 			}
-			rowNum = rowNum + 1;
+
+			// 其余行依次写入数据
+			int rowNum = 2;
+			for (int j = 0; j < objects.size(); j++) {
+				String[] obj = objects.get(j);
+				for (int h = 0; h < obj.length; h++) {
+					sheet.addCell(new Label(h, rowNum, obj[h], format));
+				}
+				rowNum = rowNum + 1;
+			}
+			wtwb.write();
+			return excelFile;
+		} catch (IOException | WriteException e) {
+			e.printStackTrace();
+		} finally {
+			if (wtwb != null) {
+				try {
+					wtwb.close();
+				} catch (IOException | WriteException e) {
+					e.printStackTrace();
+				}
+			}
 		}
-		wtwb.write();
-		wtwb.close();
-		return excelFile;
+		return null;
 	}
+
 
 	public static String getContent(Sheet src, int rowNum, int colNum) {
 		if(colNum < src.getRow(rowNum).length) {

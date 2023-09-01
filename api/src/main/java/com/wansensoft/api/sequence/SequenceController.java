@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,8 +20,11 @@ import java.util.Map;
 public class SequenceController {
     private Logger logger = LoggerFactory.getLogger(SequenceController.class);
 
-    @Resource
-    private SequenceService sequenceService;
+    private final SequenceService sequenceService;
+
+    public SequenceController(SequenceService sequenceService) {
+        this.sequenceService = sequenceService;
+    }
 
     /**
      * 单据编号生成接口
@@ -31,7 +33,7 @@ public class SequenceController {
      */
     @GetMapping(value = "/buildNumber")
     @ApiOperation(value = "单据编号生成接口")
-    public BaseResponseInfo buildNumber(HttpServletRequest request)throws Exception {
+    public BaseResponseInfo buildNumber(HttpServletRequest request) {
         BaseResponseInfo res = new BaseResponseInfo();
         Map<String, Object> map = new HashMap<String, Object>();
         try {
@@ -40,7 +42,6 @@ public class SequenceController {
             res.code = 200;
             res.data = map;
         } catch(Exception e){
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }

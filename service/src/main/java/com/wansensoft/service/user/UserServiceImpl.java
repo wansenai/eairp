@@ -11,6 +11,7 @@ import com.wansensoft.entities.user.UserEx;
 import com.wansensoft.entities.user.UserExample;
 import com.wansensoft.mappers.user.UserMapper;
 import com.wansensoft.mappers.user.UserMapperEx;
+import com.wansensoft.service.CommonService;
 import com.wansensoft.service.functions.FunctionService;
 import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
@@ -52,19 +53,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final LogService logService;
     private final TenantService tenantService;
     private final UserBusinessService userBusinessService;
-    private final RoleService roleService;
+    private final CommonService commonService;
     private final FunctionService functionService;
     private final PlatformConfigService platformConfigService;
     private final RedisService redisService;
 
-    public UserServiceImpl(UserMapper userMapper, UserMapperEx userMapperEx, OrgaUserRelService orgaUserRelService, LogService logService, TenantService tenantService, UserBusinessService userBusinessService, RoleService roleService, FunctionService functionService, PlatformConfigService platformConfigService, RedisService redisService) {
+    public UserServiceImpl(UserMapper userMapper, UserMapperEx userMapperEx, OrgaUserRelService orgaUserRelService, LogService logService, TenantService tenantService, UserBusinessService userBusinessService, CommonService commonService, FunctionService functionService, PlatformConfigService platformConfigService, RedisService redisService) {
         this.userMapper = userMapper;
         this.userMapperEx = userMapperEx;
         this.orgaUserRelService = orgaUserRelService;
         this.logService = logService;
         this.tenantService = tenantService;
         this.userBusinessService = userBusinessService;
-        this.roleService = roleService;
+        this.commonService = commonService;
         this.functionService = functionService;
         this.platformConfigService = platformConfigService;
         this.redisService = redisService;
@@ -764,7 +765,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Role role = new Role();
         List<UserBusiness> list = userBusinessService.getBasicData(String.valueOf(userId), "UserRole");
         UserBusiness ub = null;
-        if(list.size() > 0) {
+        if(!list.isEmpty()) {
             ub = list.get(0);
             String values = ub.getValue();
             String roleId = null;
@@ -775,7 +776,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if(valueArray.length>0) {
                 roleId = valueArray[0];
             }
-            role = roleService.getRoleWithoutTenant(Long.parseLong(roleId));
+            role = commonService.getRoleWithoutTenant(Long.parseLong(roleId));
         }
         return role;
     }

@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.material.MaterialCategory;
+import com.wansensoft.service.materialCategory.MaterialCategoryService;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
-import com.wansensoft.service.materialCategory.MaterialCategoryService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.vo.TreeNode;
 import io.swagger.annotations.Api;
@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -27,8 +26,11 @@ import java.util.List;
 public class MaterialCategoryController {
     private Logger logger = LoggerFactory.getLogger(MaterialCategoryController.class);
 
-    @Resource
-    private MaterialCategoryService materialCategoryService;
+    private final MaterialCategoryService materialCategoryService;
+
+    public MaterialCategoryController(MaterialCategoryService materialCategoryService) {
+        this.materialCategoryService = materialCategoryService;
+    }
 
     /**
      * 获取全部商品类别
@@ -72,7 +74,7 @@ public class MaterialCategoryController {
                     outer.put("name", mc.getName());
                     outer.put("parentId", mc.getParentId());
                     List<MaterialCategory> dataParentList = materialCategoryService.findById(mc.getParentId());
-                    if(dataParentList!=null&&dataParentList.size()>0){
+                    if(dataParentList!=null&& !dataParentList.isEmpty()){
                         outer.put("parentName", dataParentList.get(0).getName());
                     }
                     outer.put("sort", mc.getSort());
@@ -100,7 +102,7 @@ public class MaterialCategoryController {
     public JSONArray getMaterialCategoryTree(@RequestParam("id") Long id) throws Exception{
        JSONArray arr=new JSONArray();
        List<TreeNode> materialCategoryTree = materialCategoryService.getMaterialCategoryTree(id);
-       if(materialCategoryTree!=null&&materialCategoryTree.size()>0){
+       if(materialCategoryTree!=null&& !materialCategoryTree.isEmpty()){
            for(TreeNode node:materialCategoryTree){
                String str=JSON.toJSONString(node);
                JSONObject obj=JSON.parseObject(str);

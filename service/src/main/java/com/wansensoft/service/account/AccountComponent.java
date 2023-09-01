@@ -15,15 +15,15 @@ import java.util.Map;
 @AccountResource
 public class AccountComponent implements ICommonQuery {
 
-    private final AccountServiceImpl accountServiceImpl;
+    private final AccountService accountService;
 
-    public AccountComponent(AccountServiceImpl accountServiceImpl) {
-        this.accountServiceImpl = accountServiceImpl;
+    public AccountComponent(AccountService accountService) {
+        this.accountService = accountService;
     }
 
     @Override
     public Object selectOne(Long id) throws Exception {
-        return accountServiceImpl.getAccount(id);
+        return accountService.getAccount(id);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class AccountComponent implements ICommonQuery {
         String serialNo = StringUtil.getInfo(search, "serialNo");
         String remark = StringUtil.getInfo(search, "remark");
         String order = QueryUtils.order(map);
-        return accountServiceImpl.select(name, serialNo, remark, QueryUtils.offset(map), QueryUtils.rows(map));
+        return accountService.select(name, serialNo, remark, QueryUtils.offset(map), QueryUtils.rows(map));
     }
 
     @Override
@@ -46,32 +46,32 @@ public class AccountComponent implements ICommonQuery {
         String name = StringUtil.getInfo(search, "name");
         String serialNo = StringUtil.getInfo(search, "serialNo");
         String remark = StringUtil.getInfo(search, "remark");
-        return accountServiceImpl.countAccount(name, serialNo, remark);
+        return accountService.countAccount(name, serialNo, remark);
     }
 
     @Override
     public int insert(JSONObject obj, HttpServletRequest request) throws Exception{
-        return accountServiceImpl.insertAccount(obj, request);
+        return accountService.insertAccount(obj, request);
     }
 
     @Override
     public int update(JSONObject obj, HttpServletRequest request)throws Exception {
-        return accountServiceImpl.updateAccount(obj, request);
+        return accountService.updateAccount(obj, request);
     }
 
     @Override
     public int delete(Long id, HttpServletRequest request)throws Exception {
-        return accountServiceImpl.deleteAccount(id, request);
+        return accountService.deleteAccount(id, request);
     }
 
     @Override
     public int deleteBatch(String ids, HttpServletRequest request)throws Exception {
-        return accountServiceImpl.batchDeleteAccount(ids, request);
+        return accountService.batchDeleteAccount(ids, request);
     }
 
     @Override
     public int checkIsNameExist(Long id, String name)throws Exception {
-        return accountServiceImpl.checkIsNameExist(id, name);
+        return accountService.checkIsNameExist(id, name);
     }
 
 }

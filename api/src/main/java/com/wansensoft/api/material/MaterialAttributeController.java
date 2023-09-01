@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -23,8 +22,11 @@ import java.util.List;
 public class MaterialAttributeController {
     private Logger logger = LoggerFactory.getLogger(MaterialAttributeController.class);
 
-    @Resource
-    private MaterialAttributeService materialAttributeService;
+    private final MaterialAttributeService materialAttributeService;
+
+    public MaterialAttributeController(MaterialAttributeService materialAttributeService) {
+        this.materialAttributeService = materialAttributeService;
+    }
 
     /**
      * 获取商品属性的名称列表

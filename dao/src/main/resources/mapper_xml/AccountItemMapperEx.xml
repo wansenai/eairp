@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wansensoft.datasource.mappers.AccountItemMapperEx">
+<mapper namespace="com.wansensoft.mappers.account.AccountItemMapperEx">
 
     <resultMap extends="com.wansensoft.mappers.account.AccountItemMapper.BaseResultMap" id="ResultWithInfoExMap" type="com.wansensoft.vo.AccountItemVo4List">
         <result column="AccountName" jdbcType="VARCHAR" property="accountName" />

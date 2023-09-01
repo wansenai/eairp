@@ -6,12 +6,12 @@ import com.wansensoft.entities.tenant.Tenant;
 import com.wansensoft.entities.tenant.TenantEx;
 import com.wansensoft.entities.tenant.TenantExample;
 import com.wansensoft.mappers.user.UserMapperEx;
-import com.wansensoft.service.user.UserServiceImpl;
+import com.wansensoft.service.CommonService;
+import com.wansensoft.service.log.LogService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.tenant.TenantMapper;
 import com.wansensoft.mappers.tenant.TenantMapperEx;
-import com.wansensoft.service.log.LogServiceImpl;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
 import org.slf4j.Logger;
@@ -32,8 +32,8 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
     private final TenantMapper tenantMapper;
     private final TenantMapperEx tenantMapperEx;
     private final UserMapperEx userMapperEx;
-    private final UserServiceImpl userServiceImpl;
-    private final LogServiceImpl logServiceImpl;
+    private final CommonService commonService;
+    private final LogService logService;
 
     @Value("${tenant.userNumLimit}")
     private Integer userNumLimit;
@@ -41,12 +41,12 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
     @Value("${tenant.tryDayLimit}")
     private Integer tryDayLimit;
 
-    public TenantServiceImpl(TenantMapper tenantMapper, TenantMapperEx tenantMapperEx, UserMapperEx userMapperEx, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl) {
+    public TenantServiceImpl(TenantMapper tenantMapper, TenantMapperEx tenantMapperEx, UserMapperEx userMapperEx, CommonService commonService, LogService logService) {
         this.tenantMapper = tenantMapper;
         this.tenantMapperEx = tenantMapperEx;
         this.userMapperEx = userMapperEx;
-        this.userServiceImpl = userServiceImpl;
-        this.logServiceImpl = logServiceImpl;
+        this.commonService = commonService;
+        this.logService = logService;
     }
 
     public Tenant getTenant(long id) {
@@ -63,7 +63,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         TenantExample example = new TenantExample();
         List<Tenant> list=null;
         try{
-            list=tenantMapper.selectByExample(example);
+            list=tenantMapper.getTenantByTenantId(example);
         }catch(Exception e){
             JshException.readFail(logger, e);
         }
@@ -73,7 +73,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
     public List<TenantEx> select(String loginName, String type, String enabled, String remark, int offset, int rows) {
         List<TenantEx> list= new ArrayList<>();
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 list = tenantMapperEx.selectByConditionTenant(loginName, type, enabled, remark, offset, rows);
                 if (null != list) {
                     for (TenantEx tenantEx : list) {
@@ -91,7 +91,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
     public Long countTenant(String loginName, String type, String enabled, String remark) {
         Long result=null;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = tenantMapperEx.countsByTenant(loginName, type, enabled, remark);
             }
         }catch(Exception e){
@@ -124,7 +124,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         Tenant tenant = JSONObject.parseObject(obj.toJSONString(), Tenant.class);
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 //如果租户下的用户限制数量为1，则将该租户之外的用户全部禁用
                 if (1 == tenant.getUserNumLimit()) {
                     userMapperEx.disableUserByLimit(tenant.getTenantId());
@@ -141,7 +141,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
     public int deleteTenant(Long id, HttpServletRequest request) {
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = tenantMapper.deleteByPrimaryKey(id);
             }
         }catch(Exception e){
@@ -157,7 +157,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         example.createCriteria().andIdIn(idList);
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = tenantMapper.deleteByExample(example);
             }
         }catch(Exception e){
@@ -171,7 +171,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         example.createCriteria().andIdNotEqualTo(id).andLoginNameEqualTo(name);
         List<Tenant> list=null;
         try{
-            list= tenantMapper.selectByExample(example);
+            list= tenantMapper.getTenantByTenantId(example);
         }catch(Exception e){
             JshException.readFail(logger, e);
         }
@@ -182,7 +182,7 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
         Tenant tenant = new Tenant();
         TenantExample example = new TenantExample();
         example.createCriteria().andTenantIdEqualTo(tenantId);
-        List<Tenant> list = tenantMapper.selectByExample(example);
+        List<Tenant> list = tenantMapper.getTenantByTenantId(example);
         if(!list.isEmpty()) {
             tenant = list.get(0);
         }
@@ -192,15 +192,15 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
     public int batchSetStatus(Boolean status, String ids) {
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 String statusStr = "";
                 if (status) {
                     statusStr = "批量启用";
                 } else {
                     statusStr = "批量禁用";
                 }
-                logServiceImpl.insertLog("用户",
-                        new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(ids).append("-").append(statusStr).toString(),
+                logService.insertLog("用户",
+                        BusinessConstants.LOG_OPERATION_TYPE_EDIT + ids + "-" + statusStr,
                         ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
                 List<Long> idList = StringUtil.strToLongList(ids);
                 Tenant tenant = new Tenant();

@@ -66,8 +66,8 @@ public class MaterialPropertyComponent implements ICommonQuery {
     }
 
     @Override
-    public int checkIsNameExist(Long id, String name)throws Exception {
-        return materialPropertyService.checkIsNameExist(id, name);
+    public int checkIsNameExist(Long id, String name) throws Exception {
+        return 0;
     }
 
 }

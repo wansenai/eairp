@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.platformConfig.PlatformConfig;
 import com.wansensoft.entities.platformConfig.PlatformConfigExample;
+import com.wansensoft.service.CommonService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
 import com.wansensoft.mappers.platformConfig.PlatformConfigMapper;
 import com.wansensoft.mappers.platformConfig.PlatformConfigMapperEx;
-import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +22,12 @@ import java.util.List;
 public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper, PlatformConfig> implements PlatformConfigService{
     private Logger logger = LoggerFactory.getLogger(PlatformConfigServiceImpl.class);
 
-    private final UserServiceImpl userServiceImpl;
+    private final CommonService commonService;
     private final PlatformConfigMapper platformConfigMapper;
     private final PlatformConfigMapperEx platformConfigMapperEx;
 
-    public PlatformConfigServiceImpl(UserServiceImpl userServiceImpl, PlatformConfigMapper platformConfigMapper, PlatformConfigMapperEx platformConfigMapperEx) {
-        this.userServiceImpl = userServiceImpl;
+    public PlatformConfigServiceImpl(CommonService commonService, PlatformConfigMapper platformConfigMapper, PlatformConfigMapperEx platformConfigMapperEx) {
+        this.commonService = commonService;
         this.platformConfigMapper = platformConfigMapper;
         this.platformConfigMapperEx = platformConfigMapperEx;
     }
@@ -35,7 +35,7 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
     public PlatformConfig getPlatformConfig(long id) {
         PlatformConfig result=null;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = platformConfigMapper.selectByPrimaryKey(id);
             }
         }catch(Exception e){
@@ -49,7 +49,7 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
         example.createCriteria();
         List<PlatformConfig> list=null;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 list = platformConfigMapper.selectByExample(example);
             }
         }catch(Exception e){
@@ -61,7 +61,7 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
     public List<PlatformConfig> select(String platformKey, int offset, int rows) {
         List<PlatformConfig> list=null;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 list = platformConfigMapperEx.selectByConditionPlatformConfig(platformKey, offset, rows);
             }
         }catch(Exception e){
@@ -73,7 +73,7 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
     public Long countPlatformConfig(String platformKey) {
         Long result=null;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = platformConfigMapperEx.countsByPlatformConfig(platformKey);
             }
         }catch(Exception e){
@@ -87,7 +87,7 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
         PlatformConfig platformConfig = JSONObject.parseObject(obj.toJSONString(), PlatformConfig.class);
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = platformConfigMapper.insertSelective(platformConfig);
             }
         }catch(Exception e){
@@ -101,7 +101,7 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
         PlatformConfig platformConfig = JSONObject.parseObject(obj.toJSONString(), PlatformConfig.class);
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = platformConfigMapper.updateByPrimaryKeySelective(platformConfig);
             }
         }catch(Exception e){
@@ -114,7 +114,7 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
     public int deletePlatformConfig(Long id, HttpServletRequest request) {
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = platformConfigMapper.deleteByPrimaryKey(id);
             }
         }catch(Exception e){
@@ -130,7 +130,7 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
         example.createCriteria().andIdIn(idList);
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 result = platformConfigMapper.deleteByExample(example);
             }
         }catch(Exception e){
@@ -142,7 +142,7 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
     public int updatePlatformConfigByKey(String platformKey, String platformValue) {
         int result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(commonService.getCurrentUser().getLoginName())) {
                 PlatformConfig platformConfig = new PlatformConfig();
                 platformConfig.setPlatformValue(platformValue);
                 PlatformConfigExample example = new PlatformConfigExample();
@@ -163,8 +163,8 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
             } else {
                 PlatformConfigExample example = new PlatformConfigExample();
                 example.createCriteria().andPlatformKeyEqualTo(platformKey);
-                List<PlatformConfig> list=platformConfigMapper.selectByExample(example);
-                if(list!=null && list.size()>0){
+                List<PlatformConfig> list = this.baseMapper.getInfoByKey(example);
+                if(list!=null && !list.isEmpty()){
                     platformConfig = list.get(0);
                 }
             }
@@ -186,7 +186,7 @@ public class PlatformConfigServiceImpl extends ServiceImpl<PlatformConfigMapper,
             PlatformConfigExample example = new PlatformConfigExample();
             example.createCriteria().andPlatformKeyEqualTo(platformKey);
             List<PlatformConfig> list=platformConfigMapper.selectByExample(example);
-            if(list!=null && list.size()>0){
+            if(list!=null && !list.isEmpty()){
                 platformConfig = list.get(0);
             }
         }catch(Exception e){

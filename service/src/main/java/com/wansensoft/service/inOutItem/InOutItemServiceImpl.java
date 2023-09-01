@@ -1,12 +1,15 @@
 package com.wansensoft.service.inOutItem;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.account.AccountItem;
 import com.wansensoft.entities.inOutItem.InOutItem;
 import com.wansensoft.entities.inOutItem.InOutItemExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.account.AccountItemMapperEx;
+import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.log.LogServiceImpl;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.service.user.UserServiceImpl;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
@@ -28,24 +31,24 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class InOutItemService {
-    private Logger logger = LoggerFactory.getLogger(InOutItemService.class);
+public class InOutItemServiceImpl extends ServiceImpl<InOutItemMapper, InOutItem> implements InOutItemService{
+    private Logger logger = LoggerFactory.getLogger(InOutItemServiceImpl.class);
 
     private final InOutItemMapper inOutItemMapper;
     private final InOutItemMapperEx inOutItemMapperEx;
-    private final UserServiceImpl userServiceImpl;
-    private final LogServiceImpl logServiceImpl;
+    private final UserService userService;
+    private final LogService logService;
     private final AccountItemMapperEx accountItemMapperEx;
 
-    public InOutItemService(InOutItemMapper inOutItemMapper, InOutItemMapperEx inOutItemMapperEx, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl, AccountItemMapperEx accountItemMapperEx) {
+    public InOutItemServiceImpl(InOutItemMapper inOutItemMapper, InOutItemMapperEx inOutItemMapperEx, UserService userService, LogService logService, AccountItemMapperEx accountItemMapperEx) {
         this.inOutItemMapper = inOutItemMapper;
         this.inOutItemMapperEx = inOutItemMapperEx;
-        this.userServiceImpl = userServiceImpl;
-        this.logServiceImpl = logServiceImpl;
+        this.userService = userService;
+        this.logService = logService;
         this.accountItemMapperEx = accountItemMapperEx;
     }
 
-    public InOutItem getInOutItem(long id)throws Exception {
+    public InOutItem getInOutItem(long id) {
         InOutItem result=null;
         try{
             result=inOutItemMapper.selectByPrimaryKey(id);
@@ -55,7 +58,7 @@ public class InOutItemService {
         return result;
     }
 
-    public List<InOutItem> getInOutItemListByIds(String ids)throws Exception {
+    public List<InOutItem> getInOutItemListByIds(String ids) {
         List<Long> idList = StringUtil.strToLongList(ids);
         List<InOutItem> list = new ArrayList<>();
         try{
@@ -68,7 +71,7 @@ public class InOutItemService {
         return list;
     }
 
-    public List<InOutItem> getInOutItem()throws Exception {
+    public List<InOutItem> getInOutItem() {
         InOutItemExample example = new InOutItemExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<InOutItem> list=null;
@@ -80,7 +83,7 @@ public class InOutItemService {
         return list;
     }
 
-    public List<InOutItem> select(String name, String type, String remark, int offset, int rows)throws Exception {
+    public List<InOutItem> select(String name, String type, String remark, int offset, int rows) {
         List<InOutItem> list=null;
         try{
             list=inOutItemMapperEx.selectByConditionInOutItem(name, type, remark, offset, rows);
@@ -90,7 +93,7 @@ public class InOutItemService {
         return list;
     }
 
-    public Long countInOutItem(String name, String type, String remark)throws Exception {
+    public Long countInOutItem(String name, String type, String remark) {
         Long result=null;
         try{
             result=inOutItemMapperEx.countsByInOutItem(name, type, remark);
@@ -101,14 +104,14 @@ public class InOutItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertInOutItem(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertInOutItem(JSONObject obj, HttpServletRequest request) {
         InOutItem inOutItem = JSONObject.parseObject(obj.toJSONString(), InOutItem.class);
         int result=0;
         try{
             inOutItem.setEnabled(true);
             result=inOutItemMapper.insertSelective(inOutItem);
-            logServiceImpl.insertLog("收支项目",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(inOutItem.getName()).toString(), request);
+            logService.insertLog("收支项目",
+                    BusinessConstants.LOG_OPERATION_TYPE_ADD + inOutItem.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -116,13 +119,13 @@ public class InOutItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateInOutItem(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int updateInOutItem(JSONObject obj, HttpServletRequest request) {
         InOutItem inOutItem = JSONObject.parseObject(obj.toJSONString(), InOutItem.class);
         int result=0;
         try{
             result=inOutItemMapper.updateByPrimaryKeySelective(inOutItem);
-            logServiceImpl.insertLog("收支项目",
-                    new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(inOutItem.getName()).toString(), request);
+            logService.insertLog("收支项目",
+                    BusinessConstants.LOG_OPERATION_TYPE_EDIT + inOutItem.getName(), request);
         }catch(Exception e){
             JshException.writeFail(logger, e);
         }
@@ -130,17 +133,17 @@ public class InOutItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteInOutItem(Long id, HttpServletRequest request)throws Exception {
+    public int deleteInOutItem(Long id, HttpServletRequest request) {
         return batchDeleteInOutItemByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteInOutItem(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteInOutItem(String ids, HttpServletRequest request) {
         return batchDeleteInOutItemByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteInOutItemByIds(String ids)throws Exception {
+    public int batchDeleteInOutItemByIds(String ids) {
         int result = 0;
         String [] idArray=ids.split(",");
         //校验财务子表	jsh_accountitem
@@ -163,9 +166,9 @@ public class InOutItemService {
         for(InOutItem inOutItem: list){
             sb.append("[").append(inOutItem.getName()).append("]");
         }
-        logServiceImpl.insertLog("收支项目", sb.toString(),
+        logService.insertLog("收支项目", sb.toString(),
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
-        User userInfo= userServiceImpl.getCurrentUser();
+        User userInfo= userService.getCurrentUser();
         try{
             result=inOutItemMapperEx.batchDeleteInOutItemByIds(new Date(),userInfo==null?null:userInfo.getId(),idArray);
         }catch(Exception e){
@@ -174,7 +177,7 @@ public class InOutItemService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         InOutItemExample example = new InOutItemExample();
         example.createCriteria().andIdNotEqualTo(id).andNameEqualTo(name).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<InOutItem> list = null;
@@ -187,7 +190,7 @@ public class InOutItemService {
         return list==null?0:list.size();
     }
 
-    public List<InOutItem> findBySelect(String type)throws Exception {
+    public List<InOutItem> findBySelect(String type) {
         InOutItemExample example = new InOutItemExample();
         if (type.equals("in")) {
             example.createCriteria().andTypeEqualTo("收入").andEnabledEqualTo(true)
@@ -210,9 +213,9 @@ public class InOutItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchSetStatus(Boolean status, String ids)throws Exception {
-        logServiceImpl.insertLog("收支项目",
-                new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ENABLED).toString(),
+    public int batchSetStatus(Boolean status, String ids) {
+        logService.insertLog("收支项目",
+                BusinessConstants.LOG_OPERATION_TYPE_ENABLED,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         List<Long> inOutItemIds = StringUtil.strToLongList(ids);
         InOutItem inOutItem = new InOutItem();

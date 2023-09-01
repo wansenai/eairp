@@ -1,13 +1,14 @@
 package com.wansensoft.service.materialProperty;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.material.MaterialProperty;
 import com.wansensoft.entities.material.MaterialPropertyExample;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.material.MaterialPropertyMapper;
 import com.wansensoft.mappers.material.MaterialPropertyMapperEx;
-import com.wansensoft.service.log.LogServiceImpl;
-import com.wansensoft.service.user.UserServiceImpl;
+import com.wansensoft.service.log.LogService;
+import com.wansensoft.service.user.UserService;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.plugins.exception.JshException;
 import org.slf4j.Logger;
@@ -22,22 +23,22 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class MaterialPropertyService {
-    private Logger logger = LoggerFactory.getLogger(MaterialPropertyService.class);
+public class MaterialPropertyServiceImpl extends ServiceImpl<MaterialPropertyMapper, MaterialProperty> implements MaterialPropertyService {
+    private Logger logger = LoggerFactory.getLogger(MaterialPropertyServiceImpl.class);
 
     private final MaterialPropertyMapper materialPropertyMapper;
     private final MaterialPropertyMapperEx materialPropertyMapperEx;
-    private final UserServiceImpl userServiceImpl;
-    private final LogServiceImpl logServiceImpl;
+    private final UserService userService;
+    private final LogService logService;
 
-    public MaterialPropertyService(MaterialPropertyMapper materialPropertyMapper, MaterialPropertyMapperEx materialPropertyMapperEx, UserServiceImpl userServiceImpl, LogServiceImpl logServiceImpl) {
+    public MaterialPropertyServiceImpl(MaterialPropertyMapper materialPropertyMapper, MaterialPropertyMapperEx materialPropertyMapperEx, UserService userService, LogService logService) {
         this.materialPropertyMapper = materialPropertyMapper;
         this.materialPropertyMapperEx = materialPropertyMapperEx;
-        this.userServiceImpl = userServiceImpl;
-        this.logServiceImpl = logServiceImpl;
+        this.userService = userService;
+        this.logService = logService;
     }
 
-    public MaterialProperty getMaterialProperty(long id)throws Exception {
+    public MaterialProperty getMaterialProperty(long id) {
         MaterialProperty result=null;
         try{
             result=materialPropertyMapper.selectByPrimaryKey(id);
@@ -47,7 +48,7 @@ public class MaterialPropertyService {
         return result;
     }
 
-    public List<MaterialProperty> getMaterialProperty()throws Exception {
+    public List<MaterialProperty> getMaterialProperty() {
         MaterialPropertyExample example = new MaterialPropertyExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<MaterialProperty>  list=null;
@@ -59,10 +60,10 @@ public class MaterialPropertyService {
         return list;
     }
 
-    public List<MaterialProperty> select(String name, int offset, int rows)throws Exception {
+    public List<MaterialProperty> select(String name, int offset, int rows) {
         List<MaterialProperty>  list=null;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
                 list = materialPropertyMapperEx.selectByConditionMaterialProperty(name, offset, rows);
             }
         }catch(Exception e){
@@ -71,10 +72,10 @@ public class MaterialPropertyService {
         return list;
     }
 
-    public Long countMaterialProperty(String name)throws Exception {
+    public Long countMaterialProperty(String name) {
         Long  result=null;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
                 result = materialPropertyMapperEx.countsByMaterialProperty(name);
             }
         }catch(Exception e){
@@ -84,14 +85,14 @@ public class MaterialPropertyService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertMaterialProperty(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int insertMaterialProperty(JSONObject obj, HttpServletRequest request) {
         MaterialProperty materialProperty = JSONObject.parseObject(obj.toJSONString(), MaterialProperty.class);
         int  result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
                 result = materialPropertyMapper.insertSelective(materialProperty);
-                logServiceImpl.insertLog("商品属性",
-                        new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_ADD).append(materialProperty.getNativeName()).toString(), request);
+                logService.insertLog("商品属性",
+                        BusinessConstants.LOG_OPERATION_TYPE_ADD + materialProperty.getNativeName(), request);
             }
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -100,14 +101,14 @@ public class MaterialPropertyService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateMaterialProperty(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int updateMaterialProperty(JSONObject obj, HttpServletRequest request) {
         MaterialProperty materialProperty = JSONObject.parseObject(obj.toJSONString(), MaterialProperty.class);
         int  result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
                 result = materialPropertyMapper.updateByPrimaryKeySelective(materialProperty);
-                logServiceImpl.insertLog("商品属性",
-                        new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_EDIT).append(materialProperty.getNativeName()).toString(), request);
+                logService.insertLog("商品属性",
+                        BusinessConstants.LOG_OPERATION_TYPE_EDIT + materialProperty.getNativeName(), request);
             }
         }catch(Exception e){
             JshException.writeFail(logger, e);
@@ -116,25 +117,25 @@ public class MaterialPropertyService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteMaterialProperty(Long id, HttpServletRequest request)throws Exception {
+    public int deleteMaterialProperty(Long id, HttpServletRequest request) {
         return batchDeleteMaterialPropertyByIds(id.toString());
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteMaterialProperty(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteMaterialProperty(String ids, HttpServletRequest request) {
         return batchDeleteMaterialPropertyByIds(ids);
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteMaterialPropertyByIds(String ids) throws Exception{
-        User userInfo= userServiceImpl.getCurrentUser();
+    public int batchDeleteMaterialPropertyByIds(String ids) {
+        User userInfo= userService.getCurrentUser();
         String [] idArray=ids.split(",");
         int  result=0;
         try{
-            if(BusinessConstants.DEFAULT_MANAGER.equals(userServiceImpl.getCurrentUser().getLoginName())) {
+            if(BusinessConstants.DEFAULT_MANAGER.equals(userService.getCurrentUser().getLoginName())) {
                 result = materialPropertyMapperEx.batchDeleteMaterialPropertyByIds(new Date(), userInfo == null ? null : userInfo.getId(), idArray);
-                logServiceImpl.insertLog("商品属性",
-                        new StringBuffer(BusinessConstants.LOG_OPERATION_TYPE_DELETE).append(ids).toString(),
+                logService.insertLog("商品属性",
+                        BusinessConstants.LOG_OPERATION_TYPE_DELETE + ids,
                         ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
             }
         }catch(Exception e){
@@ -143,7 +144,7 @@ public class MaterialPropertyService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         return 0;
     }
 }

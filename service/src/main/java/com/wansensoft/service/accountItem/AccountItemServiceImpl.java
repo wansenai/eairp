@@ -2,6 +2,7 @@ package com.wansensoft.service.accountItem;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.entities.account.AccountItem;
 import com.wansensoft.entities.account.AccountItemExample;
 import com.wansensoft.entities.user.User;
@@ -29,8 +30,8 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class AccountItemService {
-    private Logger logger = LoggerFactory.getLogger(AccountItemService.class);
+public class AccountItemServiceImpl extends ServiceImpl<AccountItemMapper, AccountItem> implements AccountItemService{
+    private Logger logger = LoggerFactory.getLogger(AccountItemServiceImpl.class);
 
     private final AccountItemMapper accountItemMapper;
     private final AccountItemMapperEx accountItemMapperEx;
@@ -38,7 +39,7 @@ public class AccountItemService {
     private final UserService userService;
     private final DepotHeadService depotHeadService;
 
-    public AccountItemService(AccountItemMapper accountItemMapper, AccountItemMapperEx accountItemMapperEx, LogService logService, UserService userService, DepotHeadService depotHeadService) {
+    public AccountItemServiceImpl(AccountItemMapper accountItemMapper, AccountItemMapperEx accountItemMapperEx, LogService logService, UserService userService, DepotHeadService depotHeadService) {
         this.accountItemMapper = accountItemMapper;
         this.accountItemMapperEx = accountItemMapperEx;
         this.logService = logService;
@@ -46,7 +47,7 @@ public class AccountItemService {
         this.depotHeadService = depotHeadService;
     }
 
-    public AccountItem getAccountItem(long id)throws Exception {
+    public AccountItem getAccountItem(long id) {
         AccountItem result=null;
         try{
             result=accountItemMapper.selectByPrimaryKey(id);
@@ -56,7 +57,7 @@ public class AccountItemService {
         return result;
     }
 
-    public List<AccountItem> getAccountItem()throws Exception {
+    public List<AccountItem> getAccountItem() {
         AccountItemExample example = new AccountItemExample();
         example.createCriteria().andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<AccountItem> list=null;
@@ -68,7 +69,7 @@ public class AccountItemService {
         return list;
     }
 
-    public List<AccountItem> select(String name, Integer type, String remark, int offset, int rows)throws Exception {
+    public List<AccountItem> select(String name, Integer type, String remark, int offset, int rows) {
         List<AccountItem> list=null;
         try{
             list = accountItemMapperEx.selectByConditionAccountItem(name, type, remark, offset, rows);
@@ -78,7 +79,7 @@ public class AccountItemService {
         return list;
     }
 
-    public Long countAccountItem(String name, Integer type, String remark)throws Exception {
+    public Long countAccountItem(String name, Integer type, String remark) {
         Long result=null;
         try{
             result = accountItemMapperEx.countsByAccountItem(name, type, remark);
@@ -89,7 +90,7 @@ public class AccountItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int insertAccountItem(JSONObject obj, HttpServletRequest request) throws Exception{
+    public int insertAccountItem(JSONObject obj, HttpServletRequest request) {
         AccountItem accountItem = JSONObject.parseObject(obj.toJSONString(), AccountItem.class);
         int result=0;
         try{
@@ -102,7 +103,7 @@ public class AccountItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateAccountItem(JSONObject obj, HttpServletRequest request)throws Exception {
+    public int updateAccountItem(JSONObject obj, HttpServletRequest request) {
         AccountItem accountItem = JSONObject.parseObject(obj.toJSONString(), AccountItem.class);
         int result=0;
         try{
@@ -116,7 +117,7 @@ public class AccountItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int deleteAccountItem(Long id, HttpServletRequest request)throws Exception {
+    public int deleteAccountItem(Long id, HttpServletRequest request) {
         int result=0;
         try{
             result = accountItemMapper.deleteByPrimaryKey(id);
@@ -129,7 +130,7 @@ public class AccountItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteAccountItem(String ids, HttpServletRequest request)throws Exception {
+    public int batchDeleteAccountItem(String ids, HttpServletRequest request) {
         List<Long> idList = StringUtil.strToLongList(ids);
         AccountItemExample example = new AccountItemExample();
         example.createCriteria().andIdIn(idList);
@@ -143,7 +144,7 @@ public class AccountItemService {
         return result;
     }
 
-    public int checkIsNameExist(Long id, String name)throws Exception {
+    public int checkIsNameExist(Long id, String name) {
         AccountItemExample example = new AccountItemExample();
         example.createCriteria().andIdNotEqualTo(id).andDeleteFlagNotEqualTo(BusinessConstants.DELETE_FLAG_DELETED);
         List<AccountItem> list = null;
@@ -167,7 +168,7 @@ public class AccountItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int updateAccountItemWithObj(AccountItem accountItem)throws Exception {
+    public int updateAccountItemWithObj(AccountItem accountItem) {
         int result=0;
         try{
             result = accountItemMapper.updateByPrimaryKeySelective(accountItem);
@@ -243,7 +244,7 @@ public class AccountItemService {
     }
 
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
-    public int batchDeleteAccountItemByIds(String ids) throws Exception{
+    public int batchDeleteAccountItemByIds(String ids) {
         logService.insertLog("财务明细",
                 BusinessConstants.LOG_OPERATION_TYPE_DELETE + ids,
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());

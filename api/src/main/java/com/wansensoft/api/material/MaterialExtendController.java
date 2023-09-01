@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,8 +24,12 @@ import java.util.Map;
 @Api(tags = {"商品价格扩展"})
 public class MaterialExtendController {
     private Logger logger = LoggerFactory.getLogger(MaterialExtendController.class);
-    @Resource
-    private MaterialExtendService materialExtendService;
+
+    private final MaterialExtendService materialExtendService;
+
+    public MaterialExtendController(MaterialExtendService materialExtendService) {
+        this.materialExtendService = materialExtendService;
+    }
 
     @GetMapping(value = "/getDetailList")
     @ApiOperation(value = "价格信息列表")
@@ -43,21 +46,19 @@ public class MaterialExtendController {
             outer.put("total", dataList.size());
             //存放数据json数组
             JSONArray dataArray = new JSONArray();
-            if (null != dataList) {
-                for (MaterialExtendVo4List md : dataList) {
-                    JSONObject item = new JSONObject();
-                    item.put("id", md.getId());
-                    item.put("barCode", md.getBarCode());
-                    item.put("commodityUnit", md.getCommodityUnit());
-                    if(StringUtil.isNotEmpty(md.getSku())){
-                        item.put("sku", md.getSku());
-                    }
-                    item.put("purchaseDecimal", md.getPurchaseDecimal());
-                    item.put("commodityDecimal", md.getCommodityDecimal());
-                    item.put("wholesaleDecimal", md.getWholesaleDecimal());
-                    item.put("lowDecimal", md.getLowDecimal());
-                    dataArray.add(item);
+            for (MaterialExtendVo4List md : dataList) {
+                JSONObject item = new JSONObject();
+                item.put("id", md.getId());
+                item.put("barCode", md.getBarCode());
+                item.put("commodityUnit", md.getCommodityUnit());
+                if (StringUtil.isNotEmpty(md.getSku())) {
+                    item.put("sku", md.getSku());
                 }
+                item.put("purchaseDecimal", md.getPurchaseDecimal());
+                item.put("commodityDecimal", md.getCommodityDecimal());
+                item.put("wholesaleDecimal", md.getWholesaleDecimal());
+                item.put("lowDecimal", md.getLowDecimal());
+                dataArray.add(item);
             }
             outer.put("rows", dataArray);
             res.code = 200;
@@ -88,7 +89,6 @@ public class MaterialExtendController {
             res.code = 200;
             res.data = materialExtend;
         } catch (Exception e) {
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }
@@ -120,7 +120,6 @@ public class MaterialExtendController {
             res.code = 200;
             res.data = map;
         } catch (Exception e) {
-            e.printStackTrace();
             res.code = 500;
             res.data = "获取数据失败";
         }

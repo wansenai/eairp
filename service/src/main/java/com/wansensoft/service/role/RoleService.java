@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.entities.role.Role;
 import com.wansensoft.entities.role.RoleEx;
+import com.wansensoft.entities.role.RoleExample;
+import com.wansensoft.plugins.exception.JshException;
+import com.wansensoft.utils.constants.BusinessConstants;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.math.BigDecimal;
@@ -44,4 +47,6 @@ public interface RoleService extends IService<Role> {
     Object parseMaterialPriceByLimit(BigDecimal price, String type, String emptyInfo, HttpServletRequest request);
 
     String getCurrentPriceLimit(HttpServletRequest request);
+
+    int checkIsNameExist(Long id, String name);
 }
