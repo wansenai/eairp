@@ -4,7 +4,25 @@
   Next generation intelligent AI ERP system
  </strong>
 </div>
+<br />
 
+<div align="center">
+  <!-- Crates version -->
+  <a href="#">
+    <img alt="Maven Central" src="https://img.shields.io/maven-central/v/:groupId/:artifactId">
+  </a>
+  <a href="#">
+    <img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/wansenai/wansenerp/maven.yml">
+  </a>
+  <!-- Contributors -->
+  <a href="https://github.com/wansenai/wansenerp/graphs/contributors">
+    <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/wansenai/wansenerp">
+  </a>
+  <!-- bors -->
+  <a href="#">
+    <img alt="GitHub last commit (branch)" src="https://img.shields.io/github/last-commit/wansenai/wansenerp/master">
+  </a>
+</div>
 <br />
 
 On the basis of ERP business, we have expanded GPT-3.5. You, individually or as a company, can fine tune your model through our system and deploy it through Docker or other methods. 
