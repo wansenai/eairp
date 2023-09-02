@@ -6,6 +6,7 @@
 </div>
 
 <br />
+
 On the basis of ERP business, we have expanded GPT-3.5. You, individually or as a company, can fine tune your model through our system and deploy it through Docker or other methods. 
 
 You can provide fully automated business form submission operations through your simple description, and you can chat, interact, and consult information with GPT.
@@ -17,7 +18,7 @@ If you have any questions or suggestions, please submit [issue](https://github.c
 
 Experience address: http://140.179.135.174:3000/
 
-## Explanation between modules
+## Module Description
 
 1. **Domain Module:**
 
