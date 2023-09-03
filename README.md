@@ -36,7 +36,7 @@ You can provide fully automated business form submission operations through your
 We have deployed this program on Amazon Cloud for you to experience before deciding to use it. 
 If you have any questions or suggestions, please submit [issue](https://github.com/wansenai/WansenERP/issues/new) and we will handle them in a timely manner.
 
-Experience address: http://erp.wansen.cloud/
+preview address: http://erp.wansen.cloud/
 
 ## Module Description
 
