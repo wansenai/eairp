@@ -1,7 +1,7 @@
 <h1 align="center">WanSen ERP</h1>
 <div align="center">
  <strong>
-  Next generation intelligent AI ERP system
+  Next generation artificial intelligent ERP system
  </strong>
 </div>
 <br />
@@ -28,6 +28,8 @@
 On the basis of ERP business, we have expanded GPT-3.5. individually or company can fine tune your model through our system and deploy it through Docker or other methods. 
 
 You can provide fully automated business form submission operations through your simple description, and you can chat, interact, and consult information with GPT.
+
+**Note: This is a front-end and back-end separated project. This repository stores backend code, please browse [here](https://github.com/wansenai/wansenerpui) for the front-end warehouse.**
 
 ## Online preview
 
