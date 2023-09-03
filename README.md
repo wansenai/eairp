@@ -31,6 +31,8 @@ You can provide fully automated business form submission operations through your
 
 **Note: This is a front-end and back-end separated project. This repository stores backend code, please browse [here](https://github.com/wansenai/wansenerpui) for the front-end warehouse.**
 
+[Enginsh](https://github.com/wansenai/wansen-erp/blob/master/README.md) / [简体中文](https://github.com/wansenai/wansen-erp/blob/master/README_ZH.md)
+
 ## Online preview
 
 We have deployed this program on Amazon Cloud for you to experience before deciding to use it. 
