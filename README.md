@@ -29,6 +29,8 @@ On the basis of ERP business, we have expanded GPT-3.5. individually or company 
 
 You can provide fully automated business form submission operations through your simple description, and you can chat, interact, and consult information with GPT.
 
+**Note: This is a front-end and back-end separated project. This repository stores backend code, please browse [here](https://github.com/wansenai/wansenerpui) for the front-end warehouse.**
+
 ## Online preview
 
 We have deployed this program on Amazon Cloud for you to experience before deciding to use it. 
