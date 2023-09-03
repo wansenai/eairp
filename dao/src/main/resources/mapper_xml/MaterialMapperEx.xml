@@ -88,7 +88,7 @@
             </foreach>
         </if>
         and ifnull(m.delete_flag,'0') !='1'
-        group by m.id
+        GROUP BY m.id, u.name, mc.name, me.bar_code, me.purchase_decimal, me.commodity_decimal, me.wholesale_decimal, me.low_decimal, me.sku
         order by m.id desc
         <if test="offset != null and rows != null">
             limit #{offset},#{rows}
