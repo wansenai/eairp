@@ -1,7 +1,7 @@
 <h1 align="center">WanSen ERP</h1>
 <div align="center">
  <strong>
-  Next generation intelligent AI ERP system
+  Next generation artificial intelligent ERP system
  </strong>
 </div>
 <br />
