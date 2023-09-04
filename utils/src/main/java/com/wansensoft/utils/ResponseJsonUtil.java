@@ -17,9 +17,8 @@ public class ResponseJsonUtil {
         FORMAT.setTimeZone(TimeZone.getTimeZone("GMT+8"));
     }
 
-    /**
-     * 响应过滤器
-     */
+
+
     public static final class ResponseFilter extends ExtJsonUtils.ExtFilter implements ValueFilter {
         @Override
         public Object process(Object object, String name, Object value) {
@@ -33,11 +32,7 @@ public class ResponseJsonUtil {
         }
     }
 
-    /**
-     *
-     * @param responseCode
-     * @return
-     */
+
     public static String backJson4HttpApi(ResponseCode responseCode) {
         if (responseCode != null) {
             String result = JSON.toJSONString(responseCode, new ResponseFilter(),
@@ -49,11 +44,8 @@ public class ResponseJsonUtil {
         return null;
     }
 
-    /**
-     * 验证失败的json串
-     * @param code
-     * @return
-     */
+
+
     public static String backJson4VerifyFailure(int code) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("message", "未通过验证");
@@ -62,11 +54,8 @@ public class ResponseJsonUtil {
                 SerializerFeature.WriteNonStringKeyAsString);
     }
 
-    /**
-     * 成功的json串
-     * @param responseCode
-     * @return
-     */
+
+
     public static String backJson(ResponseCode responseCode) {
         if (responseCode != null) {
             return JSON.toJSONString(responseCode, new ResponseFilter(),

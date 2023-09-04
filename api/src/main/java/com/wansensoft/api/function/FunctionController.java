@@ -13,6 +13,7 @@ import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
 import com.wansensoft.utils.*;
+import com.wansensoft.utils.enums.CodeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class FunctionController {
 
     @GetMapping(value = "/checkIsNumberExist")
     @ApiOperation(value = "检查编号是否存在")
-    public String checkIsNumberExist(@RequestParam Long id,
+    public Response<Map<String, Object>> checkIsNumberExist(@RequestParam Long id,
                                      @RequestParam(value ="number", required = false) String number,
                                      HttpServletRequest request)throws Exception {
         Map<String, Object> objectMap = new HashMap<String, Object>();
@@ -56,7 +57,7 @@ public class FunctionController {
         } else {
             objectMap.put("status", false);
         }
-        return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
+        return Response.responseData(objectMap);
     }
 
     /**

@@ -8,13 +8,11 @@ import com.wansensoft.service.depotItem.DepotItemService;
 import com.wansensoft.service.serialNumber.SerialNumberService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
+import com.wansensoft.utils.Response;
 import com.wansensoft.utils.Tools;
-import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,7 +46,7 @@ public class SerialNumberController {
      */
     @PostMapping("/batAddSerialNumber")
     @ApiOperation(value = "批量添加序列号")
-    public String batAddSerialNumber(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
+    public Response batAddSerialNumber(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
         Map<String, Object> objectMap = new HashMap<>();
         String materialCode = jsonObject.getString("materialCode");
         String serialNumberPrefix = jsonObject.getString("serialNumberPrefix");
@@ -56,11 +54,11 @@ public class SerialNumberController {
         String remark = jsonObject.getString("remark");
         int insert = serialNumberService.batAddSerialNumber(materialCode,serialNumberPrefix,batAddTotal,remark);
         if(insert > 0) {
-            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
+            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
         } else if(insert == -1) {
-            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
+            return Response.responseMsg(ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
         } else {
-            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 

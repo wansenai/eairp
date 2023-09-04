@@ -13,9 +13,10 @@
 hs_err_pid*
 
 .idea
-**/target
+**/target/
 /logs.home_IS_UNDEFINED
 
 **/*.iml
 .gitattributes
 
+/api/src/main/resources/application-prod.yml

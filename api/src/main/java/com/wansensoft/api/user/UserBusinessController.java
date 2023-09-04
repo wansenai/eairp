@@ -5,12 +5,9 @@ import com.wansensoft.entities.user.UserBusiness;
 import com.wansensoft.service.user.UserService;
 import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.BaseResponseInfo;
-import com.wansensoft.utils.ErpInfo;
-import com.wansensoft.utils.ResponseJsonUtil;
+import com.wansensoft.utils.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -67,9 +64,9 @@ public class UserBusinessController {
      */
     @GetMapping(value = "/checkIsValueExist")
     @ApiOperation(value = "校验存在")
-    public String checkIsValueExist(@RequestParam(value ="type", required = false) String type,
-                                   @RequestParam(value ="keyId", required = false) String keyId,
-                                   HttpServletRequest request) {
+    public Response checkIsValueExist(@RequestParam(value ="type", required = false) String type,
+                                      @RequestParam(value ="keyId", required = false) String keyId,
+                                      HttpServletRequest request) {
         Map<String, Object> objectMap = new HashMap<String, Object>();
         Long id = userBusinessService.checkIsValueExist(type, keyId);
         if(id != null) {
@@ -77,7 +74,7 @@ public class UserBusinessController {
         } else {
             objectMap.put("id", null);
         }
-        return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
+        return Response.responseData(objectMap);
     }
 
     /**

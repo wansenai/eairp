@@ -15,7 +15,7 @@ public class ParamUtils {
             if (offset <= 0) {
                 return "0";
             } else {
-                return new StringBuffer().append(offset).toString();
+                return String.valueOf(offset);
             }
         }
         return null;
