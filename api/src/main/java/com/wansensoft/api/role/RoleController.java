@@ -5,8 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.role.Role;
 import com.wansensoft.service.role.RoleService;
 import com.wansensoft.service.userBusiness.UserBusinessService;
-import com.wansensoft.utils.ErpInfo;
-import com.wansensoft.utils.ResponseJsonUtil;
+import com.wansensoft.utils.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -22,8 +21,6 @@ import java.util.Map;
 @RequestMapping(value = "/role")
 @Api(tags = {"角色管理"})
 public class RoleController {
-    private Logger logger = LoggerFactory.getLogger(RoleController.class);
-
     private final RoleService roleService;
 
     private final UserBusinessService userBusinessService;
@@ -79,16 +76,16 @@ public class RoleController {
      */
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
-    public String batchSetStatus(@RequestBody JSONObject jsonObject,
+    public Response batchSetStatus(@RequestBody JSONObject jsonObject,
                                  HttpServletRequest request) {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
         int res = roleService.batchSetStatus(status, ids);
         if(res > 0) {
-            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
+            return Response.responseData(objectMap);
         } else {
-            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return Response.responseData(objectMap);
         }
     }
 }

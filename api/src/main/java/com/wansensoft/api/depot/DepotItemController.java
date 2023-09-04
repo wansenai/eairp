@@ -19,6 +19,7 @@ import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.plugins.exception.BusinessRunTimeException;
 import com.wansensoft.utils.*;
+import com.wansensoft.utils.enums.CodeEnum;
 import com.wansensoft.vo.DepotItemStockWarningCount;
 import com.wansensoft.vo.DepotItemVoBatchNumberList;
 import io.swagger.annotations.Api;
@@ -86,7 +87,7 @@ public class DepotItemController {
      */
     @GetMapping(value = "/findDetailByDepotIdsAndMaterialId")
     @ApiOperation(value = "根据仓库和商品查询单据列表")
-    public String findDetailByDepotIdsAndMaterialId(
+    public Response findDetailByDepotIdsAndMaterialId(
             @RequestParam(value = Constants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(value = Constants.CURRENT_PAGE, required = false) Integer currentPage,
             @RequestParam(value = "depotIds",required = false) String depotIds,
@@ -130,12 +131,12 @@ public class DepotItemController {
         if (list == null) {
             objectMap.put("rows", new ArrayList<Object>());
             objectMap.put("total", BusinessConstants.DEFAULT_LIST_NULL_NUMBER);
-            return ResponseJsonUtil.returnJson(objectMap, "查找不到数据", ErpInfo.OK.code);
+            return Response.responseMsg(CodeEnum.QUERY_DATA_EMPTY);
         }
         objectMap.put("rows", dataArray);
         objectMap.put("total", depotItemService.findDetailByDepotIdsAndMaterialIdCount(depotIds, forceFlag, sku,
                 batchNumber, StringUtil.toNull(number), beginTime, endTime, mId));
-        return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
+        return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
     }
 
     /**

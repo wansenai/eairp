@@ -4,8 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.platformConfig.PlatformConfig;
 import com.wansensoft.service.platformConfig.PlatformConfigService;
 import com.wansensoft.utils.BaseResponseInfo;
-import com.wansensoft.utils.ErpInfo;
-import com.wansensoft.utils.ResponseJsonUtil;
+import com.wansensoft.utils.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -96,16 +95,16 @@ public class PlatformConfigController {
      */
     @PostMapping(value = "/updatePlatformConfigByKey")
     @ApiOperation(value = "根据platformKey更新platformValue")
-    public String updatePlatformConfigByKey(@RequestBody JSONObject object,
+    public Response updatePlatformConfigByKey(@RequestBody JSONObject object,
                                             HttpServletRequest request) {
         Map<String, Object> objectMap = new HashMap<>();
         String platformKey = object.getString("platformKey");
         String platformValue = object.getString("platformValue");
         int res = platformConfigService.updatePlatformConfigByKey(platformKey, platformValue);
         if(res > 0) {
-            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
+            return Response.responseData(objectMap);
         } else {
-            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return Response.responseData(objectMap);
         }
     }
 

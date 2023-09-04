@@ -1,7 +1,9 @@
 package com.wansensoft.service.depotHead;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansensoft.dto.depot.RetailOutboundDto;
 import com.wansensoft.entities.account.AccountItem;
 import com.wansensoft.entities.depot.DepotHead;
 import com.wansensoft.entities.depot.DepotHeadExample;
@@ -1302,5 +1304,70 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         } else {
             return "buy";
         }
+    }
+
+    @Override
+    public List<DepotHeadVo4List> selectByConditionDepotHead(RetailOutboundDto retailOutboundDto) {
+        if (retailOutboundDto == null) {
+            return null;
+        }
+
+        List<DepotHeadVo4List> resList = new ArrayList<>();
+        try{
+            String depotIds = depotService.findDepotStrByCurrentUser();
+            String [] depotArray=depotIds.split(",");
+            String [] creatorArray = getCreatorArray(retailOutboundDto.getRoleType());
+            String beginTime = Tools.parseDayToTime(retailOutboundDto.getBeginTime(), BusinessConstants.DAY_FIRST_TIME);
+            String endTime = Tools.parseDayToTime(retailOutboundDto.getEndTime(), BusinessConstants.DAY_LAST_TIME);
+            List<DepotHeadVo4List> list = depotHeadMapperEx
+                    .debtList(retailOutboundDto.getOrganId(), creatorArray, retailOutboundDto.getStatus(), retailOutboundDto.getNumber(),
+                    beginTime, endTime, retailOutboundDto.getMaterialParam(), depotArray, retailOutboundDto.getOffset(), retailOutboundDto.getRows());
+            if (null != list) {
+                List<Long> idList = new ArrayList<>();
+                for (DepotHeadVo4List dh : list) {
+                    idList.add(dh.getId());
+                }
+                //通过批量查询去构造map
+                Map<Long,String> materialsListMap = findMaterialsListMapByHeaderIdList(idList);
+                for (DepotHeadVo4List dh : list) {
+                    if(dh.getChangeAmount() != null) {
+                        dh.setChangeAmount(dh.getChangeAmount().abs());
+                    }
+                    if(dh.getTotalPrice() != null) {
+                        dh.setTotalPrice(dh.getTotalPrice().abs());
+                    }
+                    if(dh.getDeposit() == null) {
+                        dh.setDeposit(BigDecimal.ZERO);
+                    }
+                    if(dh.getOperTime() != null) {
+                        dh.setOperTimeStr(Tools.getCenternTime(dh.getOperTime()));
+                    }
+                    BigDecimal discountLastMoney = dh.getDiscountLastMoney()!=null?dh.getDiscountLastMoney():BigDecimal.ZERO;
+                    BigDecimal otherMoney = dh.getOtherMoney()!=null?dh.getOtherMoney():BigDecimal.ZERO;
+                    BigDecimal deposit = dh.getDeposit()!=null?dh.getDeposit():BigDecimal.ZERO;
+                    BigDecimal changeAmount = dh.getChangeAmount()!=null?dh.getChangeAmount().abs():BigDecimal.ZERO;
+                    //本单欠款(如果退货则为负数)
+                    dh.setNeedDebt(discountLastMoney.add(otherMoney).subtract(deposit.add(changeAmount)));
+                    if(BusinessConstants.SUB_TYPE_PURCHASE_RETURN.equals(dh.getSubType()) || BusinessConstants.SUB_TYPE_SALES_RETURN.equals(dh.getSubType())) {
+                        dh.setNeedDebt(BigDecimal.ZERO.subtract(dh.getNeedDebt()));
+                    }
+                    BigDecimal needDebt = dh.getNeedDebt()!=null?dh.getNeedDebt():BigDecimal.ZERO;
+                    BigDecimal finishDebt = commonService.getEachAmountByBillId(dh.getId());
+                    finishDebt = finishDebt!=null?finishDebt:BigDecimal.ZERO;
+                    //已收欠款
+                    dh.setFinishDebt(finishDebt);
+                    //待收欠款
+                    dh.setDebt(needDebt.subtract(finishDebt));
+                    //商品信息简述
+                    if(materialsListMap!=null) {
+                        dh.setMaterialsList(materialsListMap.get(dh.getId()));
+                    }
+                    resList.add(dh);
+                }
+            }
+        }catch(Exception e){
+            JshException.readFail(logger, e);
+        }
+        return resList;
     }
 }

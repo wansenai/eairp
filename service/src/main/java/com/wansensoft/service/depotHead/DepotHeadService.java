@@ -1,7 +1,9 @@
 package com.wansensoft.service.depotHead;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.dto.depot.RetailOutboundDto;
 import com.wansensoft.entities.depot.DepotHead;
 import com.wansensoft.vo.DepotHeadVo4InDetail;
 import com.wansensoft.vo.DepotHeadVo4InOutMCount;
@@ -125,4 +127,6 @@ public interface DepotHeadService extends IService<DepotHead> {
                   String roleType, String status);
 
     String getBillCategory(String subType);
+
+    List<DepotHeadVo4List> selectByConditionDepotHead(RetailOutboundDto retailOutboundDto);
 }

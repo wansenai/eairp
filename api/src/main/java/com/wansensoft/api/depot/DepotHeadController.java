@@ -2,6 +2,8 @@ package com.wansensoft.api.depot;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.wansensoft.dto.depot.RetailOutboundDto;
 import com.wansensoft.entities.depot.DepotHead;
 import com.wansensoft.entities.depot.DepotHeadVo4Body;
 import com.wansensoft.service.depot.DepotService;
@@ -11,6 +13,7 @@ import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.service.redis.RedisService;
 import com.wansensoft.utils.*;
+import com.wansensoft.utils.enums.CodeEnum;
 import com.wansensoft.vo.DepotHeadVo4InDetail;
 import com.wansensoft.vo.DepotHeadVo4InOutMCount;
 import com.wansensoft.vo.DepotHeadVo4List;
@@ -49,6 +52,12 @@ public class DepotHeadController {
         this.redisService = redisService;
     }
 
+    @GetMapping("/getAllList")
+    public Response<List<DepotHeadVo4List>> getList(@ModelAttribute RetailOutboundDto retailOutboundDto){
+        return Response.responseData(depotHeadService.selectByConditionDepotHead(retailOutboundDto));
+    }
+
+
     /**
      * 批量设置状态-审核或者反审核
      * @param jsonObject
@@ -57,16 +66,16 @@ public class DepotHeadController {
      */
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态-审核或者反审核")
-    public String batchSetStatus(@RequestBody JSONObject jsonObject,
+    public Response batchSetStatus(@RequestBody JSONObject jsonObject,
                                  HttpServletRequest request) throws Exception{
         Map<String, Object> objectMap = new HashMap<>();
         String status = jsonObject.getString("status");
         String ids = jsonObject.getString("ids");
         int res = depotHeadService.batchSetStatus(status, ids);
         if(res > 0) {
-            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
+            return Response.responseData(objectMap);
         } else {
-            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return Response.responseData(CodeEnum.ERROR);
         }
     }
 
@@ -501,7 +510,7 @@ public class DepotHeadController {
      */
     @GetMapping(value = "/debtList")
     @ApiOperation(value = "查询存在欠款的单据")
-    public String debtList(@RequestParam(value = Constants.SEARCH, required = false) String search,
+    public Response debtList(@RequestParam(value = Constants.SEARCH, required = false) String search,
                            @RequestParam("currentPage") Integer currentPage,
                            @RequestParam("pageSize") Integer pageSize,
                            HttpServletRequest request)throws Exception {
@@ -520,11 +529,11 @@ public class DepotHeadController {
         if (list != null) {
             objectMap.put("rows", list);
             objectMap.put("total", total);
-            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
+            return Response.responseData(objectMap);
         } else {
             objectMap.put("rows", new ArrayList<>());
             objectMap.put("total", 0);
-            return ResponseJsonUtil.returnJson(objectMap, "查找不到数据", ErpInfo.OK.code);
+            return Response.responseData(objectMap);
         }
     }
 }
