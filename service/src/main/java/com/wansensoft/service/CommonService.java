@@ -77,10 +77,6 @@ public class CommonService {
         return userId;
     }
 
-    public Role getRoleWithoutTenant(Long roleId) {
-        return roleMapperEx.getRoleWithoutTenant(roleId);
-    }
-
     public Material getMaterial(long id) {
         Material result=null;
         try{

@@ -129,6 +129,4 @@ public interface DepotHeadService extends IService<DepotHead> {
     String getBillCategory(String subType);
 
     List<DepotHeadVo4List> selectByConditionDepotHead(RetailOutboundDto retailOutboundDto);
-
-    String getCreatorByRoleType(String roleType, String userId);
 }

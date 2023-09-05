@@ -96,15 +96,17 @@ public class UserController {
 
     @PostMapping(value = "/weixinBind")
     @ApiOperation(value = "绑定微信")
-    public Response weixinBind(@RequestBody JSONObject jsonObject) {
+    public String weixinBind(@RequestBody JSONObject jsonObject,
+                             HttpServletRequest request)throws Exception {
+        Map<String, Object> objectMap = new HashMap<>();
         String loginName = jsonObject.getString("loginName");
         String password = jsonObject.getString("password");
         String weixinCode = jsonObject.getString("weixinCode");
         int res = userService.weixinBind(loginName, password, weixinCode);
         if(res > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
@@ -144,7 +146,7 @@ public class UserController {
 
     @PostMapping(value = "/resetPwd")
     @ApiOperation(value = "重置密码")
-    public Response resetPwd(@RequestBody JSONObject jsonObject,
+    public String resetPwd(@RequestBody JSONObject jsonObject,
                                      HttpServletRequest request) throws Exception {
         Map<String, Object> objectMap = new HashMap<>();
         Long id = jsonObject.getLong("id");
@@ -152,15 +154,15 @@ public class UserController {
         String md5Pwd = Tools.md5Encryp(password);
         int update = userService.resetPwd(md5Pwd, id);
         if(update > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, SUCCESS, ErpInfo.OK.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ERROR, ErpInfo.ERROR.code);
         }
     }
 
     @PutMapping(value = "/updatePwd")
     @ApiOperation(value = "更新密码")
-    public Response updatePwd(@RequestBody JSONObject jsonObject, HttpServletRequest request)throws Exception {
+    public String updatePwd(@RequestBody JSONObject jsonObject, HttpServletRequest request)throws Exception {
         Integer flag = 0;
         Map<String, Object> objectMap = new HashMap<String, Object>();
         try {
@@ -180,15 +182,15 @@ public class UserController {
             }
             objectMap.put("status", flag);
             if(flag > 0) {
-                return Response.responseData(info);
+                return ResponseJsonUtil.returnJson(objectMap, info, ErpInfo.OK.code);
             } else {
-                return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+                return ResponseJsonUtil.returnJson(objectMap, ERROR, ErpInfo.ERROR.code);
             }
         } catch (Exception e) {
             logger.error(">>>>>>>>>>>>>修改用户ID为 ： " + jsonObject.getLong("userId") + "密码信息失败", e);
             flag = 3;
             objectMap.put("status", flag);
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ERROR, ErpInfo.ERROR.code);
         }
     }
 
@@ -396,15 +398,16 @@ public class UserController {
      */
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
-    public Response batchSetStatus(@RequestBody JSONObject jsonObject,
+    public String batchSetStatus(@RequestBody JSONObject jsonObject,
                                  HttpServletRequest request)throws Exception {
         Byte status = jsonObject.getByte("status");
         String ids = jsonObject.getString("ids");
+        Map<String, Object> objectMap = new HashMap<>();
         int res = userService.batchSetStatus(status, ids, request);
         if(res > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 

@@ -8,7 +8,8 @@ import com.wansensoft.service.accountHead.AccountHeadService;
 import com.wansensoft.utils.Response;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.utils.BaseResponseInfo;
-import com.wansensoft.utils.enums.CodeEnum;
+import com.wansensoft.utils.ErpInfo;
+import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -37,16 +38,16 @@ public class AccountHeadController {
      */
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态-审核或者反审核")
-    public Response batchSetStatus(@RequestBody JSONObject jsonObject,
+    public String batchSetStatus(@RequestBody JSONObject jsonObject,
                                  HttpServletRequest request) throws Exception{
         Map<String, Object> objectMap = new HashMap<>();
         String status = jsonObject.getString("status");
         String ids = jsonObject.getString("ids");
         int res = accountHeadService.batchSetStatus(status, ids);
         if(res > 0) {
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseData(CodeEnum.ERROR);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 

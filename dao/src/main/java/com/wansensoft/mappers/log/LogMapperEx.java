@@ -1,5 +1,6 @@
 package com.wansensoft.mappers.log;
 
+import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wansensoft.entities.log.Log;
 import com.wansensoft.vo.LogVo4List;
@@ -37,5 +38,6 @@ public interface LogMapperEx extends BaseMapper<Log> {
             @Param("clientIp") String clientIp,
             @Param("createTime") String createTime);
 
+    @InterceptorIgnore(tenantLine = "true")
     int insertLogWithUserId(Log log);
 }

@@ -1,4 +1,4 @@
-package com.wansensoft.plugins.config;
+package com.wansensoft.api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,11 +33,11 @@ public class Swagger2Config {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("华夏ERP Restful Api")
-                .description("华夏ERP接口描述")
+                .title("WanSen ERP Restful Api")
+                .description("WanSen ERP接口描述")
                 .termsOfServiceUrl("http://127.0.0.1")
-                .contact(new Contact("jishenghua", "", ""))
-                .version("3.0")
+                .contact(new Contact("WanSen ERP", "", ""))
+                .version("1.0.1")
                 .build();
     }
 

@@ -13,7 +13,6 @@ import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.utils.constants.ExceptionConstants;
 import com.wansensoft.service.redis.RedisService;
 import com.wansensoft.utils.*;
-import com.wansensoft.utils.enums.CodeEnum;
 import com.wansensoft.vo.DepotHeadVo4InDetail;
 import com.wansensoft.vo.DepotHeadVo4InOutMCount;
 import com.wansensoft.vo.DepotHeadVo4List;
@@ -66,16 +65,16 @@ public class DepotHeadController {
      */
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态-审核或者反审核")
-    public Response batchSetStatus(@RequestBody JSONObject jsonObject,
+    public String batchSetStatus(@RequestBody JSONObject jsonObject,
                                  HttpServletRequest request) throws Exception{
         Map<String, Object> objectMap = new HashMap<>();
         String status = jsonObject.getString("status");
         String ids = jsonObject.getString("ids");
         int res = depotHeadService.batchSetStatus(status, ids);
         if(res > 0) {
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseData(CodeEnum.ERROR);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
@@ -510,7 +509,7 @@ public class DepotHeadController {
      */
     @GetMapping(value = "/debtList")
     @ApiOperation(value = "查询存在欠款的单据")
-    public Response debtList(@RequestParam(value = Constants.SEARCH, required = false) String search,
+    public String debtList(@RequestParam(value = Constants.SEARCH, required = false) String search,
                            @RequestParam("currentPage") Integer currentPage,
                            @RequestParam("pageSize") Integer pageSize,
                            HttpServletRequest request)throws Exception {
@@ -529,11 +528,11 @@ public class DepotHeadController {
         if (list != null) {
             objectMap.put("rows", list);
             objectMap.put("total", total);
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
             objectMap.put("rows", new ArrayList<>());
             objectMap.put("total", 0);
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, "查找不到数据", ErpInfo.OK.code);
         }
     }
 }

@@ -1,11 +1,14 @@
-package com.wansensoft.api;//package com.wansensoft.erp.controller;
+//package com.wansensoft.api;
 //
-//import constants.com.wansensoft.BusinessConstants;
-//import entities.datasource.com.wansensoft.User;
-//import user.service.com.wansensoft.UserService;
-//import utils.com.wansensoft.utils.BaseResponseInfo;
-//import utils.com.wansensoft.utils.ComputerInfo;
-//import utils.com.wansensoft.utils.StringUtil;
+//import com.gitee.starblues.core.PluginInfo;
+//import com.gitee.starblues.integration.application.PluginApplication;
+//import com.gitee.starblues.integration.operator.PluginOperator;
+//import com.wansensoft.entities.user.User;
+//import com.wansensoft.service.user.UserService;
+//import com.wansensoft.utils.BaseResponseInfo;
+//import com.wansensoft.utils.ComputerInfo;
+//import com.wansensoft.utils.StringUtil;
+//import com.wansensoft.utils.constants.BusinessConstants;
 //import io.swagger.annotations.Api;
 //import io.swagger.annotations.ApiOperation;
 //import org.springframework.beans.factory.annotation.Autowired;
@@ -13,29 +16,27 @@ package com.wansensoft.api;//package com.wansensoft.erp.controller;
 //import org.springframework.web.bind.annotation.*;
 //import org.springframework.web.multipart.MultipartFile;
 //
-//import jakarta.annotation.Resource;
 //import jakarta.servlet.http.HttpServletRequest;
 //import jakarta.servlet.http.HttpServletResponse;
 //import java.nio.file.Paths;
 //import java.util.*;
 //
 ///**
-// * 插件jar 包测试功能
-// * @author jishenghua
-// * @version 1.0
+// * 插件包
+// *
 // */
 //@RestController
 //@RequestMapping("/plugin")
 //@Api(tags = {"插件管理"})
 //public class PluginController {
 //
-//    @Resource
-//    private UserService userService;
+//    private final UserService userService;
 //
 //    private final PluginOperator pluginOperator;
 //
 //    @Autowired
-//    public PluginController(PluginApplication pluginApplication) {
+//    public PluginController(UserService userService, PluginApplication pluginApplication) {
+//        this.userService = userService;
 //        this.pluginOperator = pluginApplication.getPluginOperator();
 //    }
 //    /**
@@ -59,7 +60,7 @@ package com.wansensoft.api;//package com.wansensoft.erp.controller;
 //                    resList = list;
 //                } else {
 //                    for (PluginInfo pi : list) {
-//                        String desc = pi.getPluginDescriptor().getPluginDescription();
+//                        String desc = pi.getPluginDescriptor().getDescription();
 //                        if (desc.contains(name)) {
 //                            resList.add(pi);
 //                        }
@@ -82,21 +83,21 @@ package com.wansensoft.api;//package com.wansensoft.erp.controller;
 //     * 获取插件jar文件名
 //     * @return 获取插件文件名。只在生产环境显示
 //     */
-//    @GetMapping("/files")
-//    @ApiOperation(value = "获取插件jar文件名")
-//    public Set<String> getPluginFilePaths(){
-//        try {
-//            User userInfo = userService.getCurrentUser();
-//            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
-//                return pluginOperator.getPluginFilePaths();
-//            } else {
-//                return null;
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
+////    @GetMapping("/files")
+////    @ApiOperation(value = "获取插件jar文件名")
+////    public Set<String> getPluginFilePaths(){
+////        try {
+////            User userInfo = userService.getCurrentUser();
+////            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
+////                return pluginOperator.getPluginFilePaths();
+////            } else {
+////                return null;
+////            }
+////        } catch (Exception e) {
+////            e.printStackTrace();
+////            return null;
+////        }
+////    }
 //
 //
 //    /**
@@ -173,34 +174,34 @@ package com.wansensoft.api;//package com.wansensoft.erp.controller;
 //     * @param id 插件id
 //     * @return 返回操作结果
 //     */
-//    @PostMapping("/uninstall/{id}")
-//    @ApiOperation(value = "根据插件id卸载插件")
-//    public BaseResponseInfo uninstall(@PathVariable("id") String id){
-//        BaseResponseInfo res = new BaseResponseInfo();
-//        Map<String, Object> map = new HashMap<String, Object>();
-//        String message = "";
-//        try {
-//            User userInfo = userService.getCurrentUser();
-//            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
-//                if (pluginOperator.uninstall(id, true)) {
-//                    message = "plugin '" + id + "' uninstall success";
-//                } else {
-//                    message = "plugin '" + id + "' uninstall failure";
-//                }
-//            } else {
-//                message = "power is limit";
-//            }
-//            map.put("message", message);
-//            res.code = 200;
-//            res.data = map;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            map.put("message", "plugin '" + id +"' uninstall failure. " + e.getMessage());
-//            res.code = 500;
-//            res.data = map;
-//        }
-//        return res;
-//    }
+////    @PostMapping("/uninstall/{id}")
+////    @ApiOperation(value = "根据插件id卸载插件")
+////    public BaseResponseInfo uninstall(@PathVariable("id") String id){
+////        BaseResponseInfo res = new BaseResponseInfo();
+////        Map<String, Object> map = new HashMap<String, Object>();
+////        String message = "";
+////        try {
+////            User userInfo = userService.getCurrentUser();
+////            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
+////                if (pluginOperator.uninstall(id, true)) {
+////                    message = "plugin '" + id + "' uninstall success";
+////                } else {
+////                    message = "plugin '" + id + "' uninstall failure";
+////                }
+////            } else {
+////                message = "power is limit";
+////            }
+////            map.put("message", message);
+////            res.code = 200;
+////            res.data = map;
+////        } catch (Exception e) {
+////            e.printStackTrace();
+////            map.put("message", "plugin '" + id +"' uninstall failure. " + e.getMessage());
+////            res.code = 500;
+////            res.data = map;
+////        }
+////        return res;
+////    }
 //
 //
 //    /**
@@ -208,25 +209,25 @@ package com.wansensoft.api;//package com.wansensoft.erp.controller;
 //     * @param path 插件路径名称
 //     * @return 操作结果
 //     */
-//    @PostMapping("/installByPath")
-//    @ApiOperation(value = "根据插件路径安装插件")
-//    public String install(@RequestParam("path") String path){
-//        try {
-//            User userInfo = userService.getCurrentUser();
-//            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
-//                if (pluginOperator.install(Paths.get(path))) {
-//                    return "installByPath success";
-//                } else {
-//                    return "installByPath failure";
-//                }
-//            } else {
-//                return "installByPath failure";
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return "installByPath failure : " + e.getMessage();
-//        }
-//    }
+////    @PostMapping("/installByPath")
+////    @ApiOperation(value = "根据插件路径安装插件")
+////    public String install(@RequestParam("path") String path){
+////        try {
+////            User userInfo = userService.getCurrentUser();
+////            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
+////                if (pluginOperator.install(Paths.get(path))) {
+////                    return "installByPath success";
+////                } else {
+////                    return "installByPath failure";
+////                }
+////            } else {
+////                return "installByPath failure";
+////            }
+////        } catch (Exception e) {
+////            e.printStackTrace();
+////            return "installByPath failure : " + e.getMessage();
+////        }
+////    }
 //
 //
 //    /**
@@ -234,78 +235,78 @@ package com.wansensoft.api;//package com.wansensoft.erp.controller;
 //     * @param file 上传文件 multipartFile
 //     * @return 操作结果
 //     */
-//    @PostMapping("/uploadInstallPluginJar")
-//    @ApiOperation(value = "上传并安装插件")
-//    public BaseResponseInfo install(MultipartFile file, HttpServletRequest request, HttpServletResponse response){
-//        BaseResponseInfo res = new BaseResponseInfo();
-//        try {
-//            User userInfo = userService.getCurrentUser();
-//            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
-//                pluginOperator.uploadPluginAndStart(file);
-//                res.code = 200;
-//                res.data = "导入成功";
-//            } else {
-//                res.code = 500;
-//                res.data = "抱歉，无操作权限！";
-//            }
-//        } catch(Exception e){
-//            e.printStackTrace();
-//            res.code = 500;
-//            res.data = "导入失败";
-//        }
-//        return res;
-//    }
+////    @PostMapping("/uploadInstallPluginJar")
+////    @ApiOperation(value = "上传并安装插件")
+////    public BaseResponseInfo install(MultipartFile file, HttpServletRequest request, HttpServletResponse response){
+////        BaseResponseInfo res = new BaseResponseInfo();
+////        try {
+////            User userInfo = userService.getCurrentUser();
+////            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
+////                pluginOperator.uploadPluginAndStart(file);
+////                res.code = 200;
+////                res.data = "导入成功";
+////            } else {
+////                res.code = 500;
+////                res.data = "抱歉，无操作权限！";
+////            }
+////        } catch(Exception e){
+////            e.printStackTrace();
+////            res.code = 500;
+////            res.data = "导入失败";
+////        }
+////        return res;
+////    }
+////
+////    /**
+////     * 上传插件的配置文件。注意: 该操作只适用于生产环境
+////     * @param multipartFile 上传文件 multipartFile
+////     * @return 操作结果
+////     */
+////    @PostMapping("/uploadPluginConfigFile")
+////    @ApiOperation(value = "上传插件的配置文件")
+////    public String uploadConfig(@RequestParam("configFile") MultipartFile multipartFile){
+////        try {
+////            User userInfo = userService.getCurrentUser();
+////            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
+////                if (pluginOperator.uploadConfigFile(multipartFile)) {
+////                    return "uploadConfig success";
+////                } else {
+////                    return "uploadConfig failure";
+////                }
+////            } else {
+////                return "installByPath failure";
+////            }
+////        } catch (Exception e) {
+////            e.printStackTrace();
+////            return "uploadConfig failure : " + e.getMessage();
+////        }
+////    }
 //
-//    /**
-//     * 上传插件的配置文件。注意: 该操作只适用于生产环境
-//     * @param multipartFile 上传文件 multipartFile
-//     * @return 操作结果
-//     */
-//    @PostMapping("/uploadPluginConfigFile")
-//    @ApiOperation(value = "上传插件的配置文件")
-//    public String uploadConfig(@RequestParam("configFile") MultipartFile multipartFile){
-//        try {
-//            User userInfo = userService.getCurrentUser();
-//            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
-//                if (pluginOperator.uploadConfigFile(multipartFile)) {
-//                    return "uploadConfig success";
-//                } else {
-//                    return "uploadConfig failure";
-//                }
-//            } else {
-//                return "installByPath failure";
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return "uploadConfig failure : " + e.getMessage();
-//        }
-//    }
 //
-//
-//    /**
-//     * 备份插件。注意: 该操作只适用于生产环境
-//     * @param pluginId 插件id
-//     * @return 操作结果
-//     */
-//    @PostMapping("/back/{pluginId}")
-//    @ApiOperation(value = "备份插件")
-//    public String backupPlugin(@PathVariable("pluginId") String pluginId){
-//        try {
-//            User userInfo = userService.getCurrentUser();
-//            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
-//                if (pluginOperator.backupPlugin(pluginId, "testBack")) {
-//                    return "backupPlugin success";
-//                } else {
-//                    return "backupPlugin failure";
-//                }
-//            } else {
-//                return "backupPlugin failure";
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return "backupPlugin failure : " + e.getMessage();
-//        }
-//    }
+////    /**
+////     * 备份插件。注意: 该操作只适用于生产环境
+////     * @param pluginId 插件id
+////     * @return 操作结果
+////     */
+////    @PostMapping("/back/{pluginId}")
+////    @ApiOperation(value = "备份插件")
+////    public String backupPlugin(@PathVariable("pluginId") String pluginId){
+////        try {
+////            User userInfo = userService.getCurrentUser();
+////            if(BusinessConstants.DEFAULT_MANAGER.equals(userInfo.getLoginName())) {
+////                if (pluginOperator.backupPlugin(pluginId, "testBack")) {
+////                    return "backupPlugin success";
+////                } else {
+////                    return "backupPlugin failure";
+////                }
+////            } else {
+////                return "backupPlugin failure";
+////            }
+////        } catch (Exception e) {
+////            e.printStackTrace();
+////            return "backupPlugin failure : " + e.getMessage();
+////        }
+////    }
 //
 //    /**
 //     * 获取加密后的mac

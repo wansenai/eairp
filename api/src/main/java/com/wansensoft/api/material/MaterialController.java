@@ -11,8 +11,8 @@ import com.wansensoft.service.material.MaterialService;
 import com.wansensoft.service.unit.UnitService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
-import com.wansensoft.utils.Response;
 import com.wansensoft.utils.StringUtil;
+import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -72,12 +72,12 @@ public class MaterialController {
      */
     @GetMapping(value = "/checkIsExist")
     @ApiOperation(value = "检查商品是否存在")
-    public Response<Map<String, Object>> checkIsExist(@RequestParam("id") Long id, @RequestParam("name") String name,
-                                                      @RequestParam("model") String model, @RequestParam("color") String color,
-                                                      @RequestParam("standard") String standard, @RequestParam("mfrs") String mfrs,
-                                                      @RequestParam("otherField1") String otherField1, @RequestParam("otherField2") String otherField2,
-                                                      @RequestParam("otherField3") String otherField3, @RequestParam("unit") String unit, @RequestParam("unitId") Long unitId,
-                                                      HttpServletRequest request)throws Exception {
+    public String checkIsExist(@RequestParam("id") Long id, @RequestParam("name") String name,
+                               @RequestParam("model") String model, @RequestParam("color") String color,
+                               @RequestParam("standard") String standard, @RequestParam("mfrs") String mfrs,
+                               @RequestParam("otherField1") String otherField1, @RequestParam("otherField2") String otherField2,
+                               @RequestParam("otherField3") String otherField3, @RequestParam("unit") String unit,@RequestParam("unitId") Long unitId,
+                               HttpServletRequest request)throws Exception {
         Map<String, Object> objectMap = new HashMap<String, Object>();
         int exist = materialService.checkIsExist(id, name, StringUtil.toNull(model), StringUtil.toNull(color),
                 StringUtil.toNull(standard), StringUtil.toNull(mfrs), StringUtil.toNull(otherField1),
@@ -87,7 +87,7 @@ public class MaterialController {
         } else {
             objectMap.put("status", false);
         }
-        return Response.responseData(objectMap);
+        return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
     }
 
     /**
@@ -99,16 +99,16 @@ public class MaterialController {
      */
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态-启用或者禁用")
-    public Response batchSetStatus(@RequestBody JSONObject jsonObject,
+    public String batchSetStatus(@RequestBody JSONObject jsonObject,
                                  HttpServletRequest request)throws Exception {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
         int res = materialService.batchSetStatus(status, ids);
         if(res > 0) {
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
@@ -623,14 +623,15 @@ public class MaterialController {
      */
     @PostMapping(value = "/batchSetMaterialCurrentStock")
     @ApiOperation(value = "批量设置商品当前的实时库存（按每个仓库）")
-    public Response batchSetMaterialCurrentStock(@RequestBody JSONObject jsonObject,
+    public String batchSetMaterialCurrentStock(@RequestBody JSONObject jsonObject,
                                  HttpServletRequest request) {
         String ids = jsonObject.getString("ids");
+        Map<String, Object> objectMap = new HashMap<>();
         int res = materialService.batchSetMaterialCurrentStock(ids);
         if(res > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
@@ -642,12 +643,14 @@ public class MaterialController {
      */
     @PostMapping(value = "/batchUpdate")
     @ApiOperation(value = "批量更新商品信息")
-    public Response batchUpdate(@RequestBody JSONObject jsonObject) {
+    public String batchUpdate(@RequestBody JSONObject jsonObject,
+                              HttpServletRequest request) {
+        Map<String, Object> objectMap = new HashMap<>();
         int res = materialService.batchUpdate(jsonObject);
         if(res > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 }

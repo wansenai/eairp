@@ -1,5 +1,6 @@
 package com.wansensoft.mappers.role;
 
+import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wansensoft.entities.role.Role;
 import com.wansensoft.entities.role.RoleEx;
@@ -24,6 +25,8 @@ public interface RoleMapperEx extends BaseMapper<Role> {
 
     int batchDeleteRoleByIds(@Param("updateTime") Date updateTime, @Param("updater") Long updater, @Param("ids") String ids[]);
 
+
+    @InterceptorIgnore(tenantLine = "true")
     Role getRoleWithoutTenant(
             @Param("roleId") Long roleId);
 }
