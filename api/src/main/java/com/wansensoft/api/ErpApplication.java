@@ -13,7 +13,8 @@ import java.io.IOException;
 
 @EnableScheduling
 @MapperScan("com.wansensoft.mappers")
-@SpringBootApplication(scanBasePackages = {"com.wansensoft"})
+@ComponentScan("com.wansensoft")
+@SpringBootApplication
 public class ErpApplication {
 
     public static void main(String[] args) throws IOException {
@@ -23,4 +24,5 @@ public class ErpApplication {
                 + environment.getProperty("server.port") + "/wansenerp/doc.html");
         System.out.println("您还需启动前端服务，启动命令：yarn run serve 或 npm run serve，测试用户：wansenerp，密码：123456");
     }
+
 }
