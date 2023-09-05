@@ -1,4 +1,4 @@
-package com.wansensoft.api;
+package com.wansensoft.plugins.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;

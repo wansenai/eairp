@@ -48,4 +48,6 @@ public interface DepotService extends IService<Depot> {
     String findDepotStrByCurrentUser();
 
     int batchSetStatus(Boolean status, String ids);
+
+    JSONArray findDepotByCurrentUserTest(String userId);
 }

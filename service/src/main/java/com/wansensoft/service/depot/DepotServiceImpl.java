@@ -347,6 +347,46 @@ public class DepotServiceImpl extends ServiceImpl<DepotMapper, Depot> implements
         return arr;
     }
 
+    public JSONArray findDepotByCurrentUserTest(String userId) {
+        JSONArray arr = new JSONArray();
+        String type = "UserDepot";
+        List<Depot> dataList = findUserDepot();
+        //开始拼接json数据
+        if (null != dataList) {
+            boolean depotFlag = systemConfigService.getDepotFlag();
+            if(depotFlag) {
+                List<UserBusiness> list = userBusinessService.getBasicData(userId, type);
+                if(list!=null && !list.isEmpty()) {
+                    String depotStr = list.get(0).getValue();
+                    if(StringUtil.isNotEmpty(depotStr)){
+                        depotStr = depotStr.replaceAll("\\[", "").replaceAll("]", ",");
+                        String[] depotArr = depotStr.split(",");
+                        for (Depot depot : dataList) {
+                            for(String depotId: depotArr) {
+                                if(depot.getId() == Long.parseLong(depotId)){
+                                    JSONObject item = new JSONObject();
+                                    item.put("id", depot.getId());
+                                    item.put("depotName", depot.getName());
+                                    item.put("isDefault", depot.getIsDefault());
+                                    arr.add(item);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (Depot depot : dataList) {
+                    JSONObject item = new JSONObject();
+                    item.put("id", depot.getId());
+                    item.put("depotName", depot.getName());
+                    item.put("isDefault", depot.getIsDefault());
+                    arr.add(item);
+                }
+            }
+        }
+        return arr;
+    }
+
     /**
      * 当前用户有权限使用的仓库列表的id，用逗号隔开
      * @return

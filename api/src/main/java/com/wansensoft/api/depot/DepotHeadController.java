@@ -52,8 +52,8 @@ public class DepotHeadController {
         this.redisService = redisService;
     }
 
-    @GetMapping("/getAllList")
-    public Response<List<DepotHeadVo4List>> getList(@ModelAttribute RetailOutboundDto retailOutboundDto){
+    @PostMapping("/getAllList")
+    public Response<List<DepotHeadVo4List>> getList(@RequestBody RetailOutboundDto retailOutboundDto){
         return Response.responseData(depotHeadService.selectByConditionDepotHead(retailOutboundDto));
     }
 
