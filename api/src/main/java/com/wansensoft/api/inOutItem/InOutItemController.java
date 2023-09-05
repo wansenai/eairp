@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.inOutItem.InOutItem;
 import com.wansensoft.service.inOutItem.InOutItemService;
 import com.wansensoft.utils.ErpInfo;
-import com.wansensoft.utils.Response;
+import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -67,16 +67,16 @@ public class InOutItemController {
      */
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
-    public Response batchSetStatus(@RequestBody JSONObject jsonObject,
-                                   HttpServletRequest request)throws Exception {
+    public String batchSetStatus(@RequestBody JSONObject jsonObject,
+                                 HttpServletRequest request)throws Exception {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
         int res = inOutItemService.batchSetStatus(status, ids);
         if(res > 0) {
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 }

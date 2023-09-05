@@ -9,7 +9,9 @@ import com.wansensoft.service.depot.DepotService;
 import com.wansensoft.service.material.MaterialService;
 import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.BaseResponseInfo;
+import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.Response;
+import com.wansensoft.utils.ResponseJsonUtil;
 import com.wansensoft.utils.enums.CodeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -142,15 +144,15 @@ public class DepotController {
      */
     @PostMapping(value = "/updateIsDefault")
     @ApiOperation(value = "更新默认仓库")
-    public Response updateIsDefault(@RequestBody JSONObject object,
+    public String updateIsDefault(@RequestBody JSONObject object,
                                        HttpServletRequest request) throws Exception{
         Long depotId = object.getLong("id");
         Map<String, Object> objectMap = new HashMap<>();
         int res = depotService.updateIsDefault(depotId);
         if(res > 0) {
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseData(CodeEnum.ERROR);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
@@ -203,16 +205,16 @@ public class DepotController {
      */
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
-    public Response batchSetStatus(@RequestBody JSONObject jsonObject,
+    public String batchSetStatus(@RequestBody JSONObject jsonObject,
                                  HttpServletRequest request)throws Exception {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();
         int res = depotService.batchSetStatus(status, ids);
         if(res > 0) {
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseData(CodeEnum.ERROR);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 }

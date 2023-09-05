@@ -65,9 +65,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
     private final DepotItemMapperEx depotItemMapperEx;
     private final LogService logService;
 
-    private final UserMapper userMapper;
-
-    public DepotHeadServiceImpl(DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, UserService userService, RoleService roleService, DepotService depotService, DepotItemService depotItemService, CommonService commonService, UserBusinessService userBusinessService, SystemConfigService systemConfigService, SerialNumberService serialNumberService, OrgaUserRelService orgaUserRelService, PersonService personService, AccountService accountService, DepotItemMapperEx depotItemMapperEx, LogService logService, UserMapper userMapper) {
+    public DepotHeadServiceImpl(DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, UserService userService, RoleService roleService, DepotService depotService, DepotItemService depotItemService, CommonService commonService, UserBusinessService userBusinessService, SystemConfigService systemConfigService, SerialNumberService serialNumberService, OrgaUserRelService orgaUserRelService, PersonService personService, AccountService accountService, DepotItemMapperEx depotItemMapperEx, LogService logService) {
         this.depotHeadMapper = depotHeadMapper;
         this.depotHeadMapperEx = depotHeadMapperEx;
         this.userService = userService;
@@ -83,7 +81,6 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         this.accountService = accountService;
         this.depotItemMapperEx = depotItemMapperEx;
         this.logService = logService;
-        this.userMapper = userMapper;
     }
 
     public DepotHead getDepotHead(long id) {
@@ -254,21 +251,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         return depotArray;
     }
 
-    /**
-     * 根据角色类型获取操作员数组
-     * @param roleType
-     * @return
-     * @throws Exception
-     */
-    public String[] getCreatorArray(String roleType, String userId) {
-        String creator = getCreatorByRoleType(roleType, userId);
-        String [] creatorArray=null;
-        if(StringUtil.isNotEmpty(creator)){
-            creatorArray = creator.split(",");
-        }
-        return creatorArray;
-    }
-
+    @Override
     public String[] getCreatorArray(String roleType) {
         String creator = getCreatorByRoleType(roleType);
         String [] creatorArray=null;
@@ -315,27 +298,6 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
     public String getCreatorByRoleType(String roleType) {
         String creator = "";
         User user = userService.getCurrentUser();
-        //再从后端获取一次角色类型，防止前端关闭了缓存功能
-        if(StringUtil.isEmpty(roleType)) {
-            roleType = userService.getRoleTypeByUserId(user.getId()).getType(); //角色类型
-        }
-        if(BusinessConstants.ROLE_TYPE_PRIVATE.equals(roleType)) {
-            creator = user.getId().toString();
-        } else if(BusinessConstants.ROLE_TYPE_THIS_ORG.equals(roleType)) {
-            creator = orgaUserRelService.getUserIdListByUserId(user.getId());
-        }
-        return creator;
-    }
-
-    /**
-     * 根据角色类型获取操作员
-     * @param roleType
-     * @return
-     * @throws Exception
-     */
-    public String getCreatorByRoleType(String roleType, String userId) {
-        String creator = "";
-        User user = userMapper.selectByPrimaryKey(Long.valueOf(userId));
         //再从后端获取一次角色类型，防止前端关闭了缓存功能
         if(StringUtil.isEmpty(roleType)) {
             roleType = userService.getRoleTypeByUserId(user.getId()).getType(); //角色类型
@@ -1344,7 +1306,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         try{
             String depotIds = String.valueOf(depotService.findDepotByCurrentUserTest(String.valueOf(retailOutboundDto.getCreator())));
             String [] depotArray=depotIds.split(",");
-            String [] creatorArray = getCreatorArray(retailOutboundDto.getRoleType(), String.valueOf(retailOutboundDto.getCreator()));
+            String [] creatorArray = getCreatorArray(retailOutboundDto.getRoleType());
             String beginTime = Tools.parseDayToTime(retailOutboundDto.getBeginTime(), BusinessConstants.DAY_FIRST_TIME);
             String endTime = Tools.parseDayToTime(retailOutboundDto.getEndTime(), BusinessConstants.DAY_LAST_TIME);
             List<DepotHeadVo4List> list = depotHeadMapperEx

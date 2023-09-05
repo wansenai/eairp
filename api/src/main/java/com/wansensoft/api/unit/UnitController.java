@@ -5,13 +5,16 @@ import com.wansensoft.entities.unit.Unit;
 import com.wansensoft.service.unit.UnitService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
-import com.wansensoft.utils.Response;
+import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/unit")
@@ -53,15 +56,16 @@ public class UnitController {
      */
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
-    public Response batchSetStatus(@RequestBody JSONObject jsonObject,
-                                 HttpServletRequest request) {
+    public String batchSetStatus(@RequestBody JSONObject jsonObject,
+                                 HttpServletRequest request)throws Exception {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
+        Map<String, Object> objectMap = new HashMap<>();
         int res = unitService.batchSetStatus(status, ids);
         if(res > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 }

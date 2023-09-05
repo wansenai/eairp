@@ -27,22 +27,22 @@ public class ResourceController {
 
     @GetMapping(value = "/{apiName}/info")
     @ApiOperation(value = "根据id获取信息")
-    public Response<Map<String, Object>> getList(@PathVariable("apiName") String apiName,
+    public String getList(@PathVariable("apiName") String apiName,
                           @RequestParam("id") Long id,
                           HttpServletRequest request) throws Exception {
         Object obj = configResourceManager.selectOne(apiName, id);
         Map<String, Object> objectMap = new HashMap<String, Object>();
         if(obj != null) {
             objectMap.put("info", obj);
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
     @GetMapping(value = "/{apiName}/list")
     @ApiOperation(value = "获取信息列表")
-    public Response getList(@PathVariable("apiName") String apiName,
+    public String getList(@PathVariable("apiName") String apiName,
                         @RequestParam(value = Constants.PAGE_SIZE, required = false) Integer pageSize,
                         @RequestParam(value = Constants.CURRENT_PAGE, required = false) Integer currentPage,
                         @RequestParam(value = Constants.SEARCH, required = false) String search,
@@ -61,11 +61,11 @@ public class ResourceController {
         if (list != null) {
             objectMap.put("total", configResourceManager.counts(apiName, parameterMap));
             objectMap.put("rows", list);
-            return Response.responseData(objectMap);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
             objectMap.put("total", BusinessConstants.DEFAULT_LIST_NULL_NUMBER);
             objectMap.put("rows", new ArrayList<Object>());
-            return Response.responseMsg(CodeEnum.QUERY_DATA_EMPTY);
+            return ResponseJsonUtil.returnJson(objectMap, "查找不到数据", ErpInfo.OK.code);
         }
     }
 //    @GetMapping(value = "/{apiName}/list")
@@ -100,65 +100,67 @@ public class ResourceController {
 
     @PostMapping(value = "/{apiName}/add", produces = {"application/javascript", "application/json"})
     @ApiOperation(value = "新增")
-    public Response addResource(@PathVariable("apiName") String apiName,
+    public String addResource(@PathVariable("apiName") String apiName,
                               @RequestBody JSONObject obj, HttpServletRequest request)throws Exception {
         Map<String, Object> objectMap = new HashMap<String, Object>();
         int insert = configResourceManager.insert(apiName, obj, request);
         if(insert > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else if(insert == -1) {
-            return Response.responseMsg(ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
     @PutMapping(value = "/{apiName}/update", produces = {"application/javascript", "application/json"})
     @ApiOperation(value = "修改")
-    public Response updateResource(@PathVariable("apiName") String apiName,
+    public String updateResource(@PathVariable("apiName") String apiName,
                                  @RequestBody JSONObject obj, HttpServletRequest request)throws Exception {
+        Map<String, Object> objectMap = new HashMap<String, Object>();
         int update = configResourceManager.update(apiName, obj, request);
         if(update > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else if(update == -1) {
-            return Response.responseMsg(ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
     @DeleteMapping(value = "/{apiName}/delete", produces = {"application/javascript", "application/json"})
     @ApiOperation(value = "删除")
-    public Response deleteResource(@PathVariable("apiName") String apiName,
+    public String deleteResource(@PathVariable("apiName") String apiName,
                                  @RequestParam("id") Long id, HttpServletRequest request)throws Exception {
         Map<String, Object> objectMap = new HashMap<String, Object>();
         int delete = configResourceManager.delete(apiName, id, request);
         if(delete > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else if(delete == -1) {
-            return Response.responseMsg(ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
     @DeleteMapping(value = "/{apiName}/deleteBatch", produces = {"application/javascript", "application/json"})
     @ApiOperation(value = "批量删除")
-    public Response batchDeleteResource(@PathVariable("apiName") String apiName,
+    public String batchDeleteResource(@PathVariable("apiName") String apiName,
                                       @RequestParam("ids") String ids, HttpServletRequest request)throws Exception {
+        Map<String, Object> objectMap = new HashMap<String, Object>();
         int delete = configResourceManager.deleteBatch(apiName, ids, request);
         if(delete > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else if(delete == -1) {
-            return Response.responseMsg(ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
     @GetMapping(value = "/{apiName}/checkIsNameExist")
     @ApiOperation(value = "检查名称是否存在")
-    public Response<Map<String, Object>> checkIsNameExist(@PathVariable("apiName") String apiName,
+    public String checkIsNameExist(@PathVariable("apiName") String apiName,
                                    @RequestParam Long id, @RequestParam(value ="name", required = false) String name,
                                    HttpServletRequest request)throws Exception {
         Map<String, Object> objectMap = new HashMap<String, Object>();
@@ -168,7 +170,7 @@ public class ResourceController {
         } else {
             objectMap.put("status", false);
         }
-        return Response.responseData(objectMap);
+        return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
     }
 
 

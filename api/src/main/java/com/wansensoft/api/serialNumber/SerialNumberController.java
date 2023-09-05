@@ -10,6 +10,7 @@ import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.Response;
 import com.wansensoft.utils.Tools;
+import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class SerialNumberController {
      */
     @PostMapping("/batAddSerialNumber")
     @ApiOperation(value = "批量添加序列号")
-    public Response batAddSerialNumber(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
+    public String batAddSerialNumber(@RequestBody JSONObject jsonObject, HttpServletRequest request)throws Exception{
         Map<String, Object> objectMap = new HashMap<>();
         String materialCode = jsonObject.getString("materialCode");
         String serialNumberPrefix = jsonObject.getString("serialNumberPrefix");
@@ -54,11 +55,11 @@ public class SerialNumberController {
         String remark = jsonObject.getString("remark");
         int insert = serialNumberService.batAddSerialNumber(materialCode,serialNumberPrefix,batAddTotal,remark);
         if(insert > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else if(insert == -1) {
-            return Response.responseMsg(ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.TEST_USER.name, ErpInfo.TEST_USER.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 

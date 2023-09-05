@@ -10,7 +10,7 @@ import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.BaseResponseInfo;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ExcelUtils;
-import com.wansensoft.utils.Response;
+import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +45,7 @@ public class SupplierController {
 
     @GetMapping(value = "/checkIsNameAndTypeExist")
     @ApiOperation(value = "检查名称和类型是否存在")
-    public Response<Map<String, Object> > checkIsNameAndTypeExist(@RequestParam Long id,
+    public String checkIsNameAndTypeExist(@RequestParam Long id,
                                           @RequestParam(value ="name", required = false) String name,
                                           @RequestParam(value ="type") String type,
                                           HttpServletRequest request)throws Exception {
@@ -56,7 +56,7 @@ public class SupplierController {
         } else {
             objectMap.put("status", false);
         }
-        return Response.responseData(objectMap);
+        return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
     }
 
     /**
@@ -204,15 +204,16 @@ public class SupplierController {
      */
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
-    public Response batchSetStatus(@RequestBody JSONObject jsonObject,
-                                 HttpServletRequest request) {
+    public String batchSetStatus(@RequestBody JSONObject jsonObject,
+                                 HttpServletRequest request)throws Exception {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
+        Map<String, Object> objectMap = new HashMap<>();
         int res = supplierService.batchSetStatus(status, ids);
         if(res > 0) {
-            return Response.responseMsg(ErpInfo.OK.name, ErpInfo.OK.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, ErpInfo.OK.code);
         } else {
-            return Response.responseMsg(ErpInfo.ERROR.name, ErpInfo.ERROR.code);
+            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.ERROR.name, ErpInfo.ERROR.code);
         }
     }
 
