@@ -48,4 +48,6 @@ public class RetailOutboundDto extends PageSizeDto {
     private int offset;
 
     private int rows;
+
+    private String token;
 }

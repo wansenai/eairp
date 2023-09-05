@@ -1,7 +1,6 @@
 package com.wansensoft.service.depotHead;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.dto.depot.RetailOutboundDto;
 import com.wansensoft.entities.account.AccountItem;
@@ -15,6 +14,7 @@ import com.wansensoft.entities.user.User;
 import com.wansensoft.mappers.depot.DepotHeadMapper;
 import com.wansensoft.mappers.depot.DepotHeadMapperEx;
 import com.wansensoft.mappers.depot.DepotItemMapperEx;
+import com.wansensoft.mappers.user.UserMapper;
 import com.wansensoft.service.CommonService;
 import com.wansensoft.service.account.AccountService;
 import com.wansensoft.service.depot.DepotService;
@@ -65,7 +65,9 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
     private final DepotItemMapperEx depotItemMapperEx;
     private final LogService logService;
 
-    public DepotHeadServiceImpl(DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, UserService userService, RoleService roleService, DepotService depotService, DepotItemService depotItemService, CommonService commonService, UserBusinessService userBusinessService, SystemConfigService systemConfigService, SerialNumberService serialNumberService, OrgaUserRelService orgaUserRelService, PersonService personService, AccountService accountService, DepotItemMapperEx depotItemMapperEx, LogService logService) {
+    private final UserMapper userMapper;
+
+    public DepotHeadServiceImpl(DepotHeadMapper depotHeadMapper, DepotHeadMapperEx depotHeadMapperEx, UserService userService, RoleService roleService, DepotService depotService, DepotItemService depotItemService, CommonService commonService, UserBusinessService userBusinessService, SystemConfigService systemConfigService, SerialNumberService serialNumberService, OrgaUserRelService orgaUserRelService, PersonService personService, AccountService accountService, DepotItemMapperEx depotItemMapperEx, LogService logService, UserMapper userMapper) {
         this.depotHeadMapper = depotHeadMapper;
         this.depotHeadMapperEx = depotHeadMapperEx;
         this.userService = userService;
@@ -81,6 +83,7 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         this.accountService = accountService;
         this.depotItemMapperEx = depotItemMapperEx;
         this.logService = logService;
+        this.userMapper = userMapper;
     }
 
     public DepotHead getDepotHead(long id) {
@@ -257,6 +260,15 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
      * @return
      * @throws Exception
      */
+    public String[] getCreatorArray(String roleType, String userId) {
+        String creator = getCreatorByRoleType(roleType, userId);
+        String [] creatorArray=null;
+        if(StringUtil.isNotEmpty(creator)){
+            creatorArray = creator.split(",");
+        }
+        return creatorArray;
+    }
+
     public String[] getCreatorArray(String roleType) {
         String creator = getCreatorByRoleType(roleType);
         String [] creatorArray=null;
@@ -299,15 +311,31 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
         return organArray;
     }
 
+    @Override
+    public String getCreatorByRoleType(String roleType) {
+        String creator = "";
+        User user = userService.getCurrentUser();
+        //再从后端获取一次角色类型，防止前端关闭了缓存功能
+        if(StringUtil.isEmpty(roleType)) {
+            roleType = userService.getRoleTypeByUserId(user.getId()).getType(); //角色类型
+        }
+        if(BusinessConstants.ROLE_TYPE_PRIVATE.equals(roleType)) {
+            creator = user.getId().toString();
+        } else if(BusinessConstants.ROLE_TYPE_THIS_ORG.equals(roleType)) {
+            creator = orgaUserRelService.getUserIdListByUserId(user.getId());
+        }
+        return creator;
+    }
+
     /**
      * 根据角色类型获取操作员
      * @param roleType
      * @return
      * @throws Exception
      */
-    public String getCreatorByRoleType(String roleType) {
+    public String getCreatorByRoleType(String roleType, String userId) {
         String creator = "";
-        User user = userService.getCurrentUser();
+        User user = userMapper.selectByPrimaryKey(Long.valueOf(userId));
         //再从后端获取一次角色类型，防止前端关闭了缓存功能
         if(StringUtil.isEmpty(roleType)) {
             roleType = userService.getRoleTypeByUserId(user.getId()).getType(); //角色类型
@@ -1314,9 +1342,9 @@ public class DepotHeadServiceImpl extends ServiceImpl<DepotHeadMapper, DepotHead
 
         List<DepotHeadVo4List> resList = new ArrayList<>();
         try{
-            String depotIds = depotService.findDepotStrByCurrentUser();
+            String depotIds = String.valueOf(depotService.findDepotByCurrentUserTest(String.valueOf(retailOutboundDto.getCreator())));
             String [] depotArray=depotIds.split(",");
-            String [] creatorArray = getCreatorArray(retailOutboundDto.getRoleType());
+            String [] creatorArray = getCreatorArray(retailOutboundDto.getRoleType(), String.valueOf(retailOutboundDto.getCreator()));
             String beginTime = Tools.parseDayToTime(retailOutboundDto.getBeginTime(), BusinessConstants.DAY_FIRST_TIME);
             String endTime = Tools.parseDayToTime(retailOutboundDto.getEndTime(), BusinessConstants.DAY_LAST_TIME);
             List<DepotHeadVo4List> list = depotHeadMapperEx

@@ -17,13 +17,13 @@ import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
 import com.wansensoft.service.platformConfig.PlatformConfigService;
 import com.wansensoft.service.redis.RedisService;
-import com.wansensoft.service.role.RoleService;
 import com.wansensoft.service.tenant.TenantService;
 import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.HttpClient;
 import com.wansensoft.utils.ExceptionCodeConstants;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
+import com.wansensoft.utils.redis.RedisUtil;
 import com.wansensoft.vo.TreeNodeEx;
 import org.springframework.util.StringUtils;
 import com.alibaba.fastjson.JSONArray;
@@ -58,7 +58,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final PlatformConfigService platformConfigService;
     private final RedisService redisService;
 
-    public UserServiceImpl(UserMapper userMapper, UserMapperEx userMapperEx, OrgaUserRelService orgaUserRelService, LogService logService, TenantService tenantService, UserBusinessService userBusinessService, CommonService commonService, FunctionService functionService, PlatformConfigService platformConfigService, RedisService redisService) {
+    private final RedisUtil redisUtil;
+
+    public UserServiceImpl(UserMapper userMapper, UserMapperEx userMapperEx, OrgaUserRelService orgaUserRelService, LogService logService, TenantService tenantService, UserBusinessService userBusinessService, CommonService commonService, FunctionService functionService, PlatformConfigService platformConfigService, RedisService redisService, RedisUtil redisUtil) {
         this.userMapper = userMapper;
         this.userMapperEx = userMapperEx;
         this.orgaUserRelService = orgaUserRelService;
@@ -69,6 +71,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.functionService = functionService;
         this.platformConfigService = platformConfigService;
         this.redisService = redisService;
+        this.redisUtil = redisUtil;
     }
 
     public User getUser(long id) {
