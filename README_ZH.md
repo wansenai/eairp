@@ -1,7 +1,7 @@
 <h1 align="center">WanSen ERP</h1>
 <div align="center">
  <strong>
-  Next generation artificial intelligent ERP system
+  下一代人工智能 ERP 系统
  </strong>
 </div>
 <br />
@@ -25,26 +25,24 @@
 </div>
 <br />
 
-On the basis of ERP business, we have expanded GPT-3.5. individually or company can fine tune your model through our system and deploy it through Docker or other methods. 
+在 ERP 业务的基础上，我们扩展了 GPT-3.5，个人或公司可以通过我们的系统配置您的模型，并通过 Docker 或其他方法进行部署。
 
-You can provide fully automated business form submission operations through your simple description, and you can chat, interact, and consult information with GPT.
+您可以通过您的简单描述提供完全自动化的业务表单提交操作，并且可以与 GPT 聊天、互动、咨询信息。
 
-**Note: This is a front-end and back-end separated project. This repository stores backend code, please browse [here](https://github.com/wansenai/wansenerpui) for the front-end warehouse.**
+**注意：这是一个前仓库收拾的项目。该仓库仓库代码，仓库仓库请浏览[这里](https://github.com/wansenai/wansenerpui)。**
 
-[Enginsh](https://github.com/wansenai/wansen-erp/blob/master/README.md) / [简体中文](https://github.com/wansenai/wansen-erp/blob/master/README_ZH.md)
+## 在线预览
 
-## Online preview
+我们已将程序部署在Amazon Cloud上，请您在使用前先体验一下。 
+如果您有任何疑问或建议，请提交[issue](https://github.com/wansenai/WansenERP/issues/new)，我们将会及时处理。
 
-We have deployed this program on Amazon Cloud for you to experience before deciding to use it. 
-If you have any questions or suggestions, please submit [issue](https://github.com/wansenai/WansenERP/issues/new) and we will handle them in a timely manner.
+预览地址：http://erp.wansen.cloud/
 
-preview address: http://erp.wansen.cloud/
-
-## Module Description
+## 模块说明
 
 1. **Domain Module:**
 
-Business Operation Data Object.
+业务操作数据对象。
 ```xml
 <dependency>
     <groupId>com.wansensoft</groupId>
@@ -55,7 +53,7 @@ Business Operation Data Object.
 
 2. **Dao Module:**
 
-Data Access Objects separate data access logic from business logic to provide access and operations to data persistent storage.
+数据访问对象将数据访问逻辑与业务逻辑分开，以提供对数据持久存储的访问和操作。
 ```xml
 <dependency>
     <groupId>com.wansensoft</groupId>
@@ -66,7 +64,7 @@ Data Access Objects separate data access logic from business logic to provide ac
 
 3. **Service Module:**
 
-Business logic layer, which delegates specific business logic processing to the Service layer.
+业务逻辑层，将具体的业务逻辑处理委托给服务层。
 ```xml
 <dependency>
     <groupId>com.wansensoft</groupId>
@@ -77,7 +75,7 @@ Business logic layer, which delegates specific business logic processing to the 
 
 4. **Utils Module:**
 
-Tool class code that encapsulates some specific operations.
+封装了一些具体操作的工具类代码。
 ```xml
 <dependency>
     <groupId>com.wansensoft</groupId>
