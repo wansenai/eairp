@@ -1,7 +1,7 @@
 server:
   port: 9999
   servlet:
-    context-path: /wansenerp
+    context-path: /wansenerp-api
   tomcat:
       basedir: /opt/tmp/tomcat
 
