@@ -14,11 +14,7 @@
   <a href="#">
     <img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/wansenai/wansenerp/maven.yml">
   </a>
-  <!-- Contributors -->
-  <a href="https://github.com/wansenai/wansenerp/graphs/contributors">
-    <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/wansenai/wansenerp">
-  </a>
-  <!-- bors -->
+  <!-- commits -->
   <a href="#">
     <img alt="GitHub last commit (branch)" src="https://img.shields.io/github/last-commit/wansenai/wansenerp/master">
   </a>
