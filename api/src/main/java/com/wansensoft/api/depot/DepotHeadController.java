@@ -2,6 +2,8 @@ package com.wansensoft.api.depot;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.wansensoft.dto.depot.RetailOutboundDto;
 import com.wansensoft.entities.depot.DepotHead;
 import com.wansensoft.entities.depot.DepotHeadVo4Body;
 import com.wansensoft.service.depot.DepotService;
@@ -48,6 +50,12 @@ public class DepotHeadController {
         this.systemConfigService = systemConfigService;
         this.redisService = redisService;
     }
+
+    @PostMapping("/getAllList")
+    public Response<List<DepotHeadVo4List>> getList(@RequestBody RetailOutboundDto retailOutboundDto){
+        return Response.responseData(depotHeadService.selectByConditionDepotHead(retailOutboundDto));
+    }
+
 
     /**
      * 批量设置状态-审核或者反审核

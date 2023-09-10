@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.role.Role;
 import com.wansensoft.service.role.RoleService;
 import com.wansensoft.service.userBusiness.UserBusinessService;
+import com.wansensoft.service.userBusiness.UserBusinessServiceImpl;
 import com.wansensoft.utils.ErpInfo;
 import com.wansensoft.utils.ResponseJsonUtil;
 import io.swagger.annotations.Api;
@@ -22,8 +23,6 @@ import java.util.Map;
 @RequestMapping(value = "/role")
 @Api(tags = {"角色管理"})
 public class RoleController {
-    private Logger logger = LoggerFactory.getLogger(RoleController.class);
-
     private final RoleService roleService;
 
     private final UserBusinessService userBusinessService;
@@ -80,7 +79,7 @@ public class RoleController {
     @PostMapping(value = "/batchSetStatus")
     @ApiOperation(value = "批量设置状态")
     public String batchSetStatus(@RequestBody JSONObject jsonObject,
-                                 HttpServletRequest request) {
+                                 HttpServletRequest request)throws Exception {
         Boolean status = jsonObject.getBoolean("status");
         String ids = jsonObject.getString("ids");
         Map<String, Object> objectMap = new HashMap<>();

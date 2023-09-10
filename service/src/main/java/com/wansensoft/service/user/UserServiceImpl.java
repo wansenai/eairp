@@ -9,6 +9,8 @@ import com.wansensoft.entities.user.User;
 import com.wansensoft.entities.user.UserBusiness;
 import com.wansensoft.entities.user.UserEx;
 import com.wansensoft.entities.user.UserExample;
+import com.wansensoft.mappers.role.RoleMapper;
+import com.wansensoft.mappers.role.RoleMapperEx;
 import com.wansensoft.mappers.user.UserMapper;
 import com.wansensoft.mappers.user.UserMapperEx;
 import com.wansensoft.service.CommonService;
@@ -17,13 +19,13 @@ import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.orgaUserRel.OrgaUserRelService;
 import com.wansensoft.service.platformConfig.PlatformConfigService;
 import com.wansensoft.service.redis.RedisService;
-import com.wansensoft.service.role.RoleService;
 import com.wansensoft.service.tenant.TenantService;
 import com.wansensoft.service.userBusiness.UserBusinessService;
 import com.wansensoft.utils.HttpClient;
 import com.wansensoft.utils.ExceptionCodeConstants;
 import com.wansensoft.utils.StringUtil;
 import com.wansensoft.utils.Tools;
+import com.wansensoft.utils.redis.RedisUtil;
 import com.wansensoft.vo.TreeNodeEx;
 import org.springframework.util.StringUtils;
 import com.alibaba.fastjson.JSONArray;
@@ -53,19 +55,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final LogService logService;
     private final TenantService tenantService;
     private final UserBusinessService userBusinessService;
-    private final CommonService commonService;
     private final FunctionService functionService;
     private final PlatformConfigService platformConfigService;
     private final RedisService redisService;
 
-    public UserServiceImpl(UserMapper userMapper, UserMapperEx userMapperEx, OrgaUserRelService orgaUserRelService, LogService logService, TenantService tenantService, UserBusinessService userBusinessService, CommonService commonService, FunctionService functionService, PlatformConfigService platformConfigService, RedisService redisService) {
+    private final RoleMapperEx roleMapperEx;
+
+    public UserServiceImpl(UserMapper userMapper, UserMapperEx userMapperEx, OrgaUserRelService orgaUserRelService, LogService logService, TenantService tenantService, UserBusinessService userBusinessService, FunctionService functionService, PlatformConfigService platformConfigService, RedisService redisService, RoleMapperEx roleMapperEx) {
         this.userMapper = userMapper;
         this.userMapperEx = userMapperEx;
         this.orgaUserRelService = orgaUserRelService;
         this.logService = logService;
         this.tenantService = tenantService;
         this.userBusinessService = userBusinessService;
-        this.commonService = commonService;
+        this.roleMapperEx = roleMapperEx;
         this.functionService = functionService;
         this.platformConfigService = platformConfigService;
         this.redisService = redisService;
@@ -762,13 +765,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Transactional(value = "transactionManager", rollbackFor = Exception.class)
     public Role getRoleTypeByUserId(long userId) {
-        Role role = new Role();
+
         List<UserBusiness> list = userBusinessService.getBasicData(String.valueOf(userId), "UserRole");
+        String roleId = "null";
         UserBusiness ub = null;
         if(!list.isEmpty()) {
             ub = list.get(0);
             String values = ub.getValue();
-            String roleId = null;
             if(values!=null) {
                 values = values.replaceAll("\\[\\]",",").replace("[","").replace("]","");
             }
@@ -776,8 +779,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if(valueArray.length>0) {
                 roleId = valueArray[0];
             }
-            role = commonService.getRoleWithoutTenant(Long.parseLong(roleId));
         }
+        Role role = roleMapperEx.getRoleWithoutTenant(Long.valueOf(roleId));
         return role;
     }
 

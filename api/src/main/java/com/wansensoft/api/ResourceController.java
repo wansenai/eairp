@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.utils.constants.BusinessConstants;
 import com.wansensoft.service.CommonQueryManager;
 import com.wansensoft.utils.*;
+import com.wansensoft.utils.enums.CodeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +19,11 @@ import java.util.Map;
 @Api(tags = {"资源接口"})
 public class ResourceController {
 
-    @Resource
-    private CommonQueryManager configResourceManager;
+    private final CommonQueryManager configResourceManager;
+
+    public ResourceController(CommonQueryManager configResourceManager) {
+        this.configResourceManager = configResourceManager;
+    }
 
     @GetMapping(value = "/{apiName}/info")
     @ApiOperation(value = "根据id获取信息")
@@ -46,7 +49,7 @@ public class ResourceController {
                         HttpServletRequest request)throws Exception {
         Map<String, String> parameterMap = ParamUtils.requestToMap(request);
         parameterMap.put(Constants.SEARCH, search);
-        Map<String, Object> objectMap = new HashMap<String, Object>();
+        Map<String, Object> objectMap = new HashMap<>();
         if (pageSize != null && pageSize <= 0) {
             pageSize = 10;
         }
@@ -65,6 +68,35 @@ public class ResourceController {
             return ResponseJsonUtil.returnJson(objectMap, "查找不到数据", ErpInfo.OK.code);
         }
     }
+//    @GetMapping(value = "/{apiName}/list")
+//    @ApiOperation(value = "获取信息列表")
+//    public String getList(@PathVariable("apiName") String apiName,
+//                          @RequestParam(value = Constants.PAGE_SIZE, required = false) Integer pageSize,
+//                          @RequestParam(value = Constants.CURRENT_PAGE, required = false) Integer currentPage,
+//                          @RequestParam(value = Constants.SEARCH, required = false) String search,
+//                          HttpServletRequest request)throws Exception {
+//        Map<String, String> parameterMap = ParamUtils.requestToMap(request);
+//        parameterMap.put(Constants.SEARCH, search);
+//        Map<String, Object> objectMap = new HashMap<String, Object>();
+//        if (pageSize != null && pageSize <= 0) {
+//            pageSize = 10;
+//        }
+//        String offset = ParamUtils.getPageOffset(currentPage, pageSize);
+//        if (StringUtil.isNotEmpty(offset)) {
+//            parameterMap.put(Constants.OFFSET, offset);
+//        }
+//        List<?> list = configResourceManager.select(apiName, parameterMap);
+//        if (list != null) {
+//            objectMap.put("total", configResourceManager.counts(apiName, parameterMap));
+//            objectMap.put("rows", list);
+//            System.err.println(ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, Integer.parseInt(ErpInfo.OK.code)));
+//            return ResponseJsonUtil.returnJson(objectMap, ErpInfo.OK.name, Integer.parseInt(ErpInfo.OK.code));
+//        } else {
+//            objectMap.put("total", BusinessConstants.DEFAULT_LIST_NULL_NUMBER);
+//            objectMap.put("rows", new ArrayList<Object>());
+//            return ResponseJsonUtil.returnJson(objectMap, "查找不到数据", Integer.parseInt(ErpInfo.OK.code));
+//        }
+//    }
 
     @PostMapping(value = "/{apiName}/add", produces = {"application/javascript", "application/json"})
     @ApiOperation(value = "新增")

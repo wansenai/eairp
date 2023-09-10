@@ -35,6 +35,7 @@ file:
   path: /opt/wansenerp/upload
 
 plugin:
-  runMode: prod
+  runMode: dev
+  mainPackage:
+    - plugins
   pluginPath: plugins
-  pluginConfigFilePath: pluginConfig

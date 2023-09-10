@@ -638,7 +638,6 @@ public class MaterialController {
     /**
      * 批量更新商品信息
      * @param jsonObject
-     * @param request
      * @return
      * @throws Exception
      */

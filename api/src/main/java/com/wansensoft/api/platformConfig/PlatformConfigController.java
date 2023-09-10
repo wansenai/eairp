@@ -97,7 +97,7 @@ public class PlatformConfigController {
     @PostMapping(value = "/updatePlatformConfigByKey")
     @ApiOperation(value = "根据platformKey更新platformValue")
     public String updatePlatformConfigByKey(@RequestBody JSONObject object,
-                                            HttpServletRequest request) {
+                                            HttpServletRequest request)throws Exception {
         Map<String, Object> objectMap = new HashMap<>();
         String platformKey = object.getString("platformKey");
         String platformValue = object.getString("platformValue");

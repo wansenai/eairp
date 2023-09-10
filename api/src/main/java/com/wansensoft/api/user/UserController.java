@@ -6,7 +6,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.tenant.Tenant;
 import com.wansensoft.entities.user.User;
 import com.wansensoft.entities.user.UserEx;
-import com.wansensoft.service.log.LogService;
 import com.wansensoft.service.role.RoleService;
 import com.wansensoft.service.tenant.TenantService;
 import com.wansensoft.service.user.UserService;
