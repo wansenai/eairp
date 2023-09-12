@@ -3,6 +3,8 @@ package com.wansensoft.service.role;
 import com.wansensoft.entities.role.SysRoleMenuRel;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  * 角色菜单关系表 服务类
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ISysRoleMenuRelService extends IService<SysRoleMenuRel> {
 
+    List<SysRoleMenuRel> listByRoleId(Long roleId);
 }

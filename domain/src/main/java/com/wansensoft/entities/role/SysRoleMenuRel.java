@@ -42,9 +42,9 @@ public class SysRoleMenuRel implements Serializable {
     private Long roleId;
 
     /**
-     * 菜单资源id
+     * 菜单资源id 多个菜单ID合并到字符串
      */
-    private Long menuId;
+    private String menuId;
 
     /**
      * 创建时间

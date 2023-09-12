@@ -2,6 +2,8 @@ package com.wansensoft.entities.role;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.io.Serial;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -23,6 +25,7 @@ import lombok.experimental.Accessors;
 @TableName("sys_role")
 public class SysRole implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

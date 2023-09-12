@@ -6,7 +6,10 @@ import com.wansensoft.service.user.ISysUserService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.constants.ApiVersionConstants;
 import com.wansensoft.vo.UserInfoVo;
+import com.wansensoft.vo.UserRoleVo;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -34,5 +37,10 @@ public class SysUserController {
     @GetMapping(value = "info")
     public Response<UserInfoVo> info() {
         return userService.userInfo();
+    }
+
+    @GetMapping(value = "perm")
+    public Response<List<UserRoleVo>> permission() {
+        return userService.userRole();
     }
 }

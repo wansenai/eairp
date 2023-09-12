@@ -5,6 +5,9 @@ import com.wansensoft.entities.user.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.UserInfoVo;
+import com.wansensoft.vo.UserRoleVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -21,4 +24,8 @@ public interface ISysUserService extends IService<SysUser> {
     Response<UserInfoVo> userInfo();
 
     UserInfoVo getCurrentUser();
+
+    String getCurrentUserId();
+
+    Response<List<UserRoleVo>> userRole();
 }

@@ -2,8 +2,11 @@ package com.wansensoft.service.user.impl;
 
 import com.wansensoft.dto.login.AccountLoginDto;
 import com.wansensoft.entities.user.SysUser;
+import com.wansensoft.entities.user.SysUserRoleRel;
+import com.wansensoft.mappers.role.SysRoleMapper;
 import com.wansensoft.mappers.user.SysUserMapper;
 import com.wansensoft.middleware.security.JWTUtils;
+import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.utils.response.Response;
@@ -12,7 +15,7 @@ import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.enums.CodeEnum;
 import com.wansensoft.utils.redis.RedisUtil;
 import com.wansensoft.vo.UserInfoVo;
-import jakarta.servlet.http.HttpServletRequest;
+import com.wansensoft.vo.UserRoleVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -21,6 +24,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -38,9 +44,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private final RedisUtil redisUtil;
 
-    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil) {
+    private final ISysUserRoleRelService userRoleRelService;
+
+    private final SysRoleMapper roleMapper;
+
+    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, ISysUserRoleRelService userRoleRelService, SysRoleMapper roleMapper) {
         this.userMapper = userMapper;
         this.redisUtil = redisUtil;
+        this.userRoleRelService = userRoleRelService;
+        this.roleMapper = roleMapper;
     }
 
     @Override
@@ -101,21 +113,24 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         return Response.responseData(user);
     }
 
+    private String httpServletRequestContextToken() {
+        var sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (sra == null) {
+            log.error("[异常]获取HttpServletRequest为空");
+        }
+        return Optional.ofNullable(sra.getRequest().getHeader("Authorization")).orElseThrow(null);
+    }
+
     /**
      * 通过请求获取当前用户信息
      * @return UserInfoVo
      */
     @Override
     public UserInfoVo getCurrentUser() {
-        ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (sra == null) {
-            return null;
-        }
-        HttpServletRequest request = sra.getRequest();
-        String token = request.getHeader("Authorization");
+        var token = httpServletRequestContextToken();
         if (StringUtils.hasText(token)) {
             var userId = Long.parseLong(redisUtil.getString(token + ":userId"));
-            SysUser user = userMapper.selectById(userId);
+            var user = userMapper.selectById(userId);
             if (user != null) {
                 return UserInfoVo.builder()
                         .id(user.getId())
@@ -125,7 +140,35 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                         .build();
             }
         }
-
         return null;
+    }
+
+    @Override
+    public String getCurrentUserId() {
+        var token = httpServletRequestContextToken();
+        return redisUtil.getString(token + ":userId");
+    }
+
+    @Override
+    public Response<List<UserRoleVo>> userRole() {
+        var userRoleVos = new ArrayList<UserRoleVo>();
+
+        var userId = Long.parseLong(getCurrentUserId());
+        var ids = userRoleRelService.queryByUserId(userId).stream()
+                .map(SysUserRoleRel::getRoleId).toList();
+        if(ids.isEmpty()) {
+            return Response.responseMsg(CodeEnum.QUERY_DATA_EMPTY);
+        }
+
+        var roles = roleMapper.selectBatchIds(ids);
+        roles.forEach(item -> {
+            UserRoleVo userRoleVo = new UserRoleVo();
+            userRoleVo.setRoleId(item.getId());
+            userRoleVo.setRoleType(item.getType());
+            userRoleVo.setRoleName(item.getName());
+            userRoleVos.add(userRoleVo);
+        });
+
+        return Response.responseData(userRoleVos);
     }
 }
