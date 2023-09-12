@@ -1,6 +1,6 @@
 package com.wansensoft.mappers.product;
 
-import com.wansensoft.entities.ProductExtendPrice;
+import com.wansensoft.entities.product.ProductExtendPrice;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

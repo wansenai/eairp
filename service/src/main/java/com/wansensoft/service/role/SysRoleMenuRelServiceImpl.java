@@ -1,6 +1,6 @@
 package com.wansensoft.service.role;
 
-import com.wansensoft.entities.SysRoleMenuRel;
+import com.wansensoft.entities.role.SysRoleMenuRel;
 import com.wansensoft.mappers.role.SysRoleMenuRelMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.wansensoft.mappers.tenant;
 
-import com.wansensoft.entities.SysTenant;
+import com.wansensoft.entities.tenant.SysTenant;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

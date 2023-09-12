@@ -1,6 +1,6 @@
 package com.wansensoft.service.financial;
 
-import com.wansensoft.entities.FinancialMain;
+import com.wansensoft.entities.financial.FinancialMain;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

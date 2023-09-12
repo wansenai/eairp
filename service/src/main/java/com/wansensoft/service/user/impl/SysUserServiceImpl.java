@@ -1,7 +1,7 @@
 package com.wansensoft.service.user.impl;
 
 import com.wansensoft.dto.login.AccountLoginDto;
-import com.wansensoft.entities.SysUser;
+import com.wansensoft.entities.user.SysUser;
 import com.wansensoft.mappers.user.SysUserMapper;
 import com.wansensoft.middleware.security.JWTUtils;
 import com.wansensoft.service.user.ISysUserService;

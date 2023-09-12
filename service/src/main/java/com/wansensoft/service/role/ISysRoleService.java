@@ -1,6 +1,6 @@
 package com.wansensoft.service.role;
 
-import com.wansensoft.entities.SysRole;
+import com.wansensoft.entities.role.SysRole;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

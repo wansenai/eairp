@@ -1,6 +1,6 @@
 //package com.wansensoft.middleware.security;
 //
-//import com.wansensoft.entities.SysUser;
+//import com.wansensoft.entities.user.SysUser;
 //import org.springframework.security.core.GrantedAuthority;
 //import org.springframework.security.core.userdetails.UserDetails;
 //

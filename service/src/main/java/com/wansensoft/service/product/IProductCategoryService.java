@@ -1,6 +1,6 @@
 package com.wansensoft.service.product;
 
-import com.wansensoft.entities.ProductCategory;
+import com.wansensoft.entities.product.ProductCategory;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

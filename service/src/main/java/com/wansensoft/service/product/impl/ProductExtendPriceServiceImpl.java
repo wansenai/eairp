@@ -1,7 +1,7 @@
 package com.wansensoft.service.product.impl;
 
 import com.wansensoft.service.product.IProductExtendPriceService;
-import com.wansensoft.entities.ProductExtendPrice;
+import com.wansensoft.entities.product.ProductExtendPrice;
 import com.wansensoft.mappers.product.ProductExtendPriceMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;

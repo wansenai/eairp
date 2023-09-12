@@ -1,7 +1,7 @@
 package com.wansensoft.service.product.impl;
 
 import com.wansensoft.service.product.IProductInventoryCurrentService;
-import com.wansensoft.entities.ProductInventoryCurrent;
+import com.wansensoft.entities.product.ProductInventoryCurrent;
 import com.wansensoft.mappers.product.ProductInventoryCurrentMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;

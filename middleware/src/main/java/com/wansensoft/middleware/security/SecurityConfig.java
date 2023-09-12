@@ -2,7 +2,7 @@
 //
 //import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 //import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-//import com.wansensoft.entities.SysUser;
+//import com.wansensoft.entities.user.SysUser;
 //import com.wansensoft.mappers.user.SysUserMapper;
 //import com.wansensoft.mappers.user.UserMapper;
 //import org.springframework.beans.factory.annotation.Autowired;

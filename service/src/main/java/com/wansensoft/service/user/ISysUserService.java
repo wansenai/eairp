@@ -1,7 +1,7 @@
 package com.wansensoft.service.user;
 
 import com.wansensoft.dto.login.AccountLoginDto;
-import com.wansensoft.entities.SysUser;
+import com.wansensoft.entities.user.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.UserInfoVo;
