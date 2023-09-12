@@ -1,6 +1,6 @@
 package com.wansensoft.service.user.impl;
 
-import com.wansensoft.entities.SysUserRoleRel;
+import com.wansensoft.entities.user.SysUserRoleRel;
 import com.wansensoft.mappers.user.SysUserRoleRelMapper;
 import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

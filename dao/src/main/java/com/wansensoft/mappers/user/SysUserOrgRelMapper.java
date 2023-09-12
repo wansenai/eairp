@@ -1,6 +1,6 @@
 package com.wansensoft.mappers.user;
 
-import com.wansensoft.entities.SysUserOrgRel;
+import com.wansensoft.entities.user.SysUserOrgRel;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

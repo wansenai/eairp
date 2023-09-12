@@ -1,6 +1,6 @@
 package com.wansensoft.service.user;
 
-import com.wansensoft.entities.SysUserWarehouseRel;
+import com.wansensoft.entities.user.SysUserWarehouseRel;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

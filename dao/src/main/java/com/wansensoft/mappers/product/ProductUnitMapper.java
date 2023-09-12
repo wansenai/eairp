@@ -1,6 +1,6 @@
 package com.wansensoft.mappers.product;
 
-import com.wansensoft.entities.ProductUnit;
+import com.wansensoft.entities.product.ProductUnit;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

@@ -1,6 +1,6 @@
 package com.wansensoft.service.system;
 
-import com.wansensoft.entities.SysPlatformConfig;
+import com.wansensoft.entities.system.SysPlatformConfig;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

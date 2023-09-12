@@ -1,7 +1,7 @@
 package com.wansensoft.service.product.impl;
 
 import com.wansensoft.service.product.IProductInventoryInitialService;
-import com.wansensoft.entities.ProductInventoryInitial;
+import com.wansensoft.entities.product.ProductInventoryInitial;
 import com.wansensoft.mappers.product.ProductInventoryInitialMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;

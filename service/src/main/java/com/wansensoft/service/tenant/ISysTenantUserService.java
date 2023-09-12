@@ -1,6 +1,6 @@
 package com.wansensoft.service.tenant;
 
-import com.wansensoft.entities.SysTenantUser;
+import com.wansensoft.entities.tenant.SysTenantUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

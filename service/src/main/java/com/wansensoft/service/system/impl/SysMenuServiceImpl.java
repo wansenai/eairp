@@ -1,7 +1,7 @@
 package com.wansensoft.service.system.impl;
 
 import com.wansensoft.service.system.ISysMenuService;
-import com.wansensoft.entities.SysMenu;
+import com.wansensoft.entities.system.SysMenu;
 import com.wansensoft.mappers.system.SysMenuMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;

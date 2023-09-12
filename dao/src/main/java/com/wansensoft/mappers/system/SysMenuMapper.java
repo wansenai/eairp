@@ -1,6 +1,6 @@
 package com.wansensoft.mappers.system;
 
-import com.wansensoft.entities.SysMenu;
+import com.wansensoft.entities.system.SysMenu;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

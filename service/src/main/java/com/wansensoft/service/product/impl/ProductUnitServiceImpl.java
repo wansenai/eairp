@@ -1,7 +1,7 @@
 package com.wansensoft.service.product.impl;
 
 import com.wansensoft.service.product.IProductUnitService;
-import com.wansensoft.entities.ProductUnit;
+import com.wansensoft.entities.product.ProductUnit;
 import com.wansensoft.mappers.product.ProductUnitMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;

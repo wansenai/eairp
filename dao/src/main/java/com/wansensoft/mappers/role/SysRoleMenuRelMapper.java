@@ -1,6 +1,6 @@
 package com.wansensoft.mappers.role;
 
-import com.wansensoft.entities.SysRoleMenuRel;
+import com.wansensoft.entities.role.SysRoleMenuRel;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

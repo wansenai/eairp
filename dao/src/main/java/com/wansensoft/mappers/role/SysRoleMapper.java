@@ -1,6 +1,6 @@
 package com.wansensoft.mappers.role;
 
-import com.wansensoft.entities.SysRole;
+import com.wansensoft.entities.role.SysRole;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

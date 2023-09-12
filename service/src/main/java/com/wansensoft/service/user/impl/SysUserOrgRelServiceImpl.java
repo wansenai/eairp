@@ -1,6 +1,6 @@
 package com.wansensoft.service.user.impl;
 
-import com.wansensoft.entities.SysUserOrgRel;
+import com.wansensoft.entities.user.SysUserOrgRel;
 import com.wansensoft.mappers.user.SysUserOrgRelMapper;
 import com.wansensoft.service.user.ISysUserOrgRelService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
