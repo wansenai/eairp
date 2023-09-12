@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
-import com.wansensoft.utils.Tools;
+import com.wansensoft.utils.CommonTools;
 import jakarta.servlet.http.HttpServletRequest;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -25,7 +25,7 @@ public class MybatisPlusConfig {
             @Override
             public Expression getTenantId() {
                 String token = request.getHeader("X-Access-Token");
-                Long tenantId = Tools.getTenantIdByToken(token);
+                Long tenantId = CommonTools.getTenantIdByToken(token);
                 if (tenantId!=0L) {
                     return new LongValue(tenantId);
                 } else {
@@ -40,7 +40,7 @@ public class MybatisPlusConfig {
                 //获取开启状态
                 boolean res = true;
                 String token = request.getHeader("X-Access-Token");
-                Long tenantId = Tools.getTenantIdByToken(token);
+                Long tenantId = CommonTools.getTenantIdByToken(token);
                 if (tenantId!=0L) {
                     // 这里可以判断是否过滤表
                     if ("jsh_material_property".equals(tableName) || "jsh_sequence".equals(tableName)

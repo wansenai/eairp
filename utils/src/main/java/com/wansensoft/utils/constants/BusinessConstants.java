@@ -1,64 +1,60 @@
 package com.wansensoft.utils.constants;
 
 /**
- * @ClassName:BusinessConstants
- * @Description 业务字典类
- * @Author qiankunpingtai
- * @Date 2019-3-6 17:58
- * @Version 1.0
+ * 业务字典类
  **/
-public class BusinessConstants {
+public interface BusinessConstants {
 
     /**
      * 默认的日期格式
      */
-    public static final String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     /**
      * 一天的初始时间
      */
-    public static final String DAY_FIRST_TIME = " 00:00:00";
+    String DAY_FIRST_TIME = " 00:00:00";
     /**
      * 一天的结束时间
      */
-    public static final String DAY_LAST_TIME = " 23:59:59";
+    String DAY_LAST_TIME = " 23:59:59";
     /**
      * 默认的分页起始页页码
      */
-    public static final Integer DEFAULT_PAGINATION_PAGE_NUMBER = 1;
+    Integer DEFAULT_PAGINATION_PAGE_NUMBER = 1;
     /**
      * 无数据时列表返回的默认数据条数
      */
-    public static final Long DEFAULT_LIST_NULL_NUMBER = 0L;
+    Long DEFAULT_LIST_NULL_NUMBER = 0L;
     /**
      * 默认的分页条数
      */
-    public static final Integer DEFAULT_PAGINATION_PAGE_SIZE = 10;
+    Integer DEFAULT_PAGINATION_PAGE_SIZE = 10;
     /**
      * 单据主表出入库类型 type 入库 出库 其它
      * depothead
      * */
-    public static final String DEPOTHEAD_TYPE_IN = "入库";
-    public static final String DEPOTHEAD_TYPE_OUT = "出库";
-    public static final String DEPOTHEAD_TYPE_OTHER = "其它";
+    String DEPOTHEAD_TYPE_IN = "入库";
+    String DEPOTHEAD_TYPE_OUT = "出库";
+    String DEPOTHEAD_TYPE_OTHER = "其它";
     /**
      * 付款类型 payType //现付/预付款
      * */
-    public static final String PAY_TYPE_PREPAID = "预付款";
-    public static final String PAY_TYPE_BY_CASH = "现付";
+    String PAY_TYPE_PREPAID = "预付款";
+    String PAY_TYPE_BY_CASH = "现付";
     /**
      * 删除标记 deleteFlag  '0'未删除 '1'已删除
      * */
-    public static final String DELETE_FLAG_DELETED = "1";
-    public static final String DELETE_FLAG_EXISTS = "0";
+    String DELETE_FLAG_DELETED = "1";
+    String DELETE_FLAG_EXISTS = "0";
     /**
      * 是否卖出 isSell  '0'未卖出 '1'已卖出
      * */
-    public static final String IS_SELL_SELLED = "1";
-    public static final String IS_SELL_HOLD = "0";
+    String IS_SELL_SELLED = "1";
+    String IS_SELL_HOLD = "0";
     /**
      * 商品是否开启序列号标识enableSerialNumber  '0'未启用 '1'启用
      * */
-    public static final String ENABLE_SERIAL_NUMBER_ENABLED = "1";
+    String ENABLE_SERIAL_NUMBER_ENABLED = "1";
     public static final String ENABLE_SERIAL_NUMBER_NOT_ENABLED = "0";
     /**
      * 商品是否开启批号标识enableBatchNumber  '0'未启用 '1'启用

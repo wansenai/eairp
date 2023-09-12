@@ -1,9 +1,12 @@
 package com.wansensoft.api.user;
 
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import com.wansensoft.dto.login.AccountLoginDto;
+import com.wansensoft.service.user.ISysUserService;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.utils.constants.ApiVersionConstants;
+import com.wansensoft.vo.UserInfoVo;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -14,7 +17,22 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2023-09-05
  */
 @RestController
-@RequestMapping("/sysUser")
+@RequestMapping("/user")
 public class SysUserController {
 
+    private final ISysUserService userService;
+
+    public SysUserController(ISysUserService userService) {
+        this.userService = userService;
+    }
+
+    @PostMapping(value = ApiVersionConstants.API_VERSION_V2 + "/login")
+    public Response<UserInfoVo> accountLogin(@RequestBody AccountLoginDto accountLoginDto) {
+        return userService.accountLogin(accountLoginDto);
+    }
+
+    @GetMapping(value = "info")
+    public Response<UserInfoVo> info() {
+        return userService.userInfo();
+    }
 }

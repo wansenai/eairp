@@ -33,12 +33,17 @@ public class SysUser implements Serializable {
     /**
      * 用户姓名--例如张三
      */
-    private String username;
+    private String name;
 
     /**
      * 登录用户名
      */
-    private String loginName;
+    private String userName;
+
+    /**
+     *
+     */
+    private String avatar;
 
     /**
      * 登陆密码
@@ -68,17 +73,17 @@ public class SysUser implements Serializable {
     /**
      * 手机号码
      */
-    private String phonenum;
+    private String phoneNumber;
 
     /**
      * 是否为管理者 0==管理者 1==员工
      */
-    private Integer ismanager;
+    private Integer isManager;
 
     /**
      * 是否系统自带数据 
      */
-    private Integer isystem;
+    private Integer isSystem;
 
     /**
      * 状态，0：正常，1：删除，2封禁
@@ -98,7 +103,7 @@ public class SysUser implements Serializable {
     /**
      * 微信绑定
      */
-    private String weixinOpenId;
+    private String wechatOpenId;
 
     /**
      * 租户id

@@ -4,8 +4,6 @@ import java.util.List;
 
 /**
  * 分页查询结果
- *
- * @author jishenghua qq752718920  2018-10-7 15:26:27
  */
 public class PageQueryInfo {
 

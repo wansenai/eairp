@@ -6,11 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Adm on 2015/12/14.
- *
- * @author yubiao
- *         <p/>
- *         mysql匹配正则表达式
+ * mysql匹配正则表达式
  */
 public class RegExpTools {
     /**
