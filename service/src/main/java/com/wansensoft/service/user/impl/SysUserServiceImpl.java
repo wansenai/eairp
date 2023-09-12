@@ -34,16 +34,19 @@ import java.security.NoSuchAlgorithmException;
 @Slf4j
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements ISysUserService {
 
+    private final SysUserMapper userMapper;
+
     private final RedisUtil redisUtil;
 
-    public SysUserServiceImpl(RedisUtil redisUtil) {
+    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil) {
+        this.userMapper = userMapper;
         this.redisUtil = redisUtil;
     }
 
     @Override
     public Response<UserInfoVo> accountLogin(AccountLoginDto accountLoginDto) {
 
-        Object verifyCode = redisUtil.get(SecurityConstants.VERIFY_CODE_CACHE_PREFIX + accountLoginDto.getCaptchaId());
+        var verifyCode = redisUtil.get(SecurityConstants.VERIFY_CODE_CACHE_PREFIX + accountLoginDto.getCaptchaId());
         if(ObjectUtils.isEmpty(verifyCode)) {
             return Response.responseMsg(CodeEnum.VERIFY_CODE_EXPIRE);
         }
@@ -52,14 +55,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             return Response.responseMsg(CodeEnum.VERIFY_CODE_EXPIRE);
         }
 
-        String md5Password = "";
+        var md5Password = "";
         try {
             md5Password = CommonTools.md5Encryp(accountLoginDto.getPassword());
         }catch (NoSuchAlgorithmException e) {
             log.error("用户登录MD5密码解密错误: " + e.getMessage());
         }
 
-        SysUser user = lambdaQuery()
+        var user = lambdaQuery()
                 .eq(SysUser::getUserName, accountLoginDto.getUsername())
                 .eq(SysUser::getPassword, md5Password)
                 .one();
@@ -68,14 +71,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             return Response.responseMsg(CodeEnum.USERNAME_OR_PASSWORD_ERROR);
         }
 
-        String token = "";
+        var token = "";
         if(redisUtil.hasKey(user.getUserName() + ":token")) {
             token = String.valueOf(redisUtil.get(user.getUserName() + ":token"));
         } else {
             // 生成JWT的令牌
             token = JWTUtils.createToken(accountLoginDto.getUsername());
             redisUtil.set(user.getUserName() + ":token", token);
-            redisUtil.expire(user.getUserName() + ":token", 7200);
+            redisUtil.expire(user.getUserName() + ":token", 86400);
+            // 同时存放userId和userName
+            var userId = String.valueOf(user.getId());
+            redisUtil.set(token + ":userName", user.getUserName(), 86400);
+            redisUtil.set(token + ":userId", userId, 86400);
         }
 
         return Response.responseData(UserInfoVo.builder()
@@ -87,13 +94,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public Response<UserInfoVo> userInfo() {
-
-        return Response.responseData(UserInfoVo.builder()
-                .id(156156165L)
-                .name("测试")
-                .avatar("https://www.sadas.jpg")
-                .userName("test66")
-                .build());
+        var user = getCurrentUser();
+        if (user == null) {
+            return Response.responseMsg(CodeEnum.QUERY_DATA_EMPTY);
+        }
+        return Response.responseData(user);
     }
 
     /**
@@ -108,9 +113,19 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
         HttpServletRequest request = sra.getRequest();
         String token = request.getHeader("Authorization");
-        if (!StringUtils.hasText(token)) {
-            return null;
+        if (StringUtils.hasText(token)) {
+            var userId = Long.parseLong(redisUtil.getString(token + ":userId"));
+            SysUser user = userMapper.selectById(userId);
+            if (user != null) {
+                return UserInfoVo.builder()
+                        .id(user.getId())
+                        .name(user.getName())
+                        .userName(user.getUserName())
+                        .avatar(user.getAvatar())
+                        .build();
+            }
         }
+
         return null;
     }
 }
