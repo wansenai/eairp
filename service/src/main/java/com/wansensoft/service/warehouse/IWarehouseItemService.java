@@ -1,6 +1,6 @@
 package com.wansensoft.service.warehouse;
 
-import com.wansensoft.entities.WarehouseItem;
+import com.wansensoft.entities.warehouse.WarehouseItem;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

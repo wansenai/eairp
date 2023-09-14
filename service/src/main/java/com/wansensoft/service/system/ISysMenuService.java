@@ -1,7 +1,9 @@
 package com.wansensoft.service.system;
 
-import com.wansensoft.entities.SysMenu;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.entities.system.SysMenu;
+import com.wansensoft.utils.response.Response;
 
 /**
  * <p>
@@ -13,4 +15,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ISysMenuService extends IService<SysMenu> {
 
+    Response<JSONObject> menuList();
+
+    String test();
 }

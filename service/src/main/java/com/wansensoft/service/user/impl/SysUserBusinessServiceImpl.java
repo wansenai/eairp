@@ -1,6 +1,6 @@
 package com.wansensoft.service.user.impl;
 
-import com.wansensoft.entities.SysUserBusiness;
+import com.wansensoft.entities.user.SysUserBusiness;
 import com.wansensoft.mappers.user.SysUserBusinessMapper;
 import com.wansensoft.service.user.ISysUserBusinessService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

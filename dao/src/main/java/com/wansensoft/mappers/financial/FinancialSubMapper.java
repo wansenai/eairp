@@ -1,6 +1,6 @@
 package com.wansensoft.mappers.financial;
 
-import com.wansensoft.entities.FinancialSub;
+import com.wansensoft.entities.financial.FinancialSub;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

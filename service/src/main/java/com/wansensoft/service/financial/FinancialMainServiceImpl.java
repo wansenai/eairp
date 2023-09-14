@@ -1,6 +1,6 @@
 package com.wansensoft.service.financial;
 
-import com.wansensoft.entities.FinancialMain;
+import com.wansensoft.entities.financial.FinancialMain;
 import com.wansensoft.mappers.financial.FinancialMainMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;

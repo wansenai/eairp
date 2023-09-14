@@ -1,6 +1,6 @@
 package com.wansensoft.service.system;
 
-import com.wansensoft.entities.SysMsg;
+import com.wansensoft.entities.system.SysMsg;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

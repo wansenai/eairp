@@ -1,7 +1,7 @@
 package com.wansensoft.service.system.impl;
 
 import com.wansensoft.service.system.ISysLogService;
-import com.wansensoft.entities.SysLog;
+import com.wansensoft.entities.system.SysLog;
 import com.wansensoft.mappers.system.SysLogMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;

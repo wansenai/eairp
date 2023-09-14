@@ -1,9 +1,11 @@
 package com.wansensoft.service.role;
 
-import com.wansensoft.entities.SysRoleMenuRel;
+import com.wansensoft.entities.role.SysRoleMenuRel;
 import com.wansensoft.mappers.role.SysRoleMenuRelMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -16,4 +18,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class SysRoleMenuRelServiceImpl extends ServiceImpl<SysRoleMenuRelMapper, SysRoleMenuRel> implements ISysRoleMenuRelService {
 
+    @Override
+    public List<SysRoleMenuRel> listByRoleId(Long roleId) {
+        return lambdaQuery()
+                .eq(SysRoleMenuRel::getRoleId, roleId)
+                .list();
+    }
 }

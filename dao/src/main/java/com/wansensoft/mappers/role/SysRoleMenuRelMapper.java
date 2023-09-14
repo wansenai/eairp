@@ -1,7 +1,10 @@
 package com.wansensoft.mappers.role;
 
-import com.wansensoft.entities.SysRoleMenuRel;
+import com.wansensoft.entities.role.SysRoleMenuRel;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface SysRoleMenuRelMapper extends BaseMapper<SysRoleMenuRel> {
 
+    List<SysRoleMenuRel> listByRoleId(@Param("roleIds") List<Long> roleIds);
 }

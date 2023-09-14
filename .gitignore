@@ -20,3 +20,5 @@ hs_err_pid*
 .gitattributes
 
 /api/src/main/resources/application-prod.yml
+
+/log

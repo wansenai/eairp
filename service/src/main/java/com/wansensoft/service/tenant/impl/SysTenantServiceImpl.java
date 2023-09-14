@@ -1,7 +1,7 @@
 package com.wansensoft.service.tenant.impl;
 
 import com.wansensoft.service.tenant.ISysTenantService;
-import com.wansensoft.entities.SysTenant;
+import com.wansensoft.entities.tenant.SysTenant;
 import com.wansensoft.mappers.tenant.SysTenantMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,9 @@
 package com.wansensoft.service.user;
 
-import com.wansensoft.entities.SysUserRoleRel;
+import com.wansensoft.entities.user.SysUserRoleRel;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ISysUserRoleRelService extends IService<SysUserRoleRel> {
 
+    List<SysUserRoleRel> queryByUserId(long userId);
 }
