@@ -1,6 +1,19 @@
+/*
+ * Copyright 2023-2033 WanSen AI Team, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ * with the License. A copy of the License is located at
+ *
+ * http://opensource.wansenai.com/apache2.0/
+ *
+ * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+ * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
+ */
 package com.wansensoft.service.user.impl;
 
-import com.wansensoft.dto.login.AccountLoginDto;
+import com.wansensoft.dto.user.AccountLoginDto;
+import com.wansensoft.dto.user.AccountRegisterDto;
 import com.wansensoft.entities.user.SysUser;
 import com.wansensoft.entities.user.SysUserRoleRel;
 import com.wansensoft.mappers.role.SysRoleMapper;
@@ -53,6 +66,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         this.redisUtil = redisUtil;
         this.userRoleRelService = userRoleRelService;
         this.roleMapper = roleMapper;
+    }
+
+    @Override
+    public Response<String> accountRegister(AccountRegisterDto accountRegisterDto) {
+        if (accountRegisterDto == null) {
+            return Response.responseMsg(CodeEnum.PARAMETER_NULL);
+        }
+
+        // check if the username under the same tenant is duplicate
+
+
+        return null;
     }
 
     @Override
@@ -150,6 +175,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    public String getCurrentUserName() {
+        var token = httpServletRequestContextToken();
+        return redisUtil.getString(token + ":userName");
+    }
+
+    @Override
     public Response<List<UserRoleVo>> userRole() {
         var userRoleVos = new ArrayList<UserRoleVo>();
 
@@ -170,5 +201,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         });
 
         return Response.responseData(userRoleVos);
+    }
+
+    @Override
+    public Response<String> userLogout() {
+        var token = httpServletRequestContextToken();
+        redisUtil.del(token + ":userId", token + ":userName", getCurrentUserName() + ":token");
+        return Response.responseMsg(CodeEnum.USER_LOGOUT);
     }
 }

@@ -1,20 +1,17 @@
 package com.wansensoft.service.system.impl;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.entities.role.SysRoleMenuRel;
+import com.wansensoft.entities.system.SysMenu;
 import com.wansensoft.entities.user.SysUserRoleRel;
 import com.wansensoft.mappers.role.SysRoleMenuRelMapper;
-import com.wansensoft.service.role.ISysRoleMenuRelService;
 import com.wansensoft.service.system.ISysMenuService;
-import com.wansensoft.entities.system.SysMenu;
 import com.wansensoft.mappers.system.SysMenuMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.MenuVo;
-import nonapi.io.github.classgraph.utils.FileUtils;
 import org.aspectj.util.FileUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
@@ -22,7 +19,6 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,7 +63,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
 
     @Override
-    public Response<List<MenuVo>> menuList() {
+    public Response<JSONObject> menuList() {
+        var menuData = new JSONObject();
         var menuVos = new ArrayList<MenuVo>();
 
         var userId = userService.getCurrentUserId();
@@ -81,8 +78,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             var menusReals = roleMenuRelMapper.listByRoleId(roleIds);
             if(!menusReals.isEmpty()) {
                 var numberList = menusReals.stream().map(SysRoleMenuRel::getMenuId).toList();
-                // menuIds 去重和分割成数字
-                System.err.println(numberList);
+                // menuIds  deduplication and segmentation into numbers
                 Pattern pattern = Pattern.compile("\\d+");
                 List<String> distinctNumbers = numberList.stream()
                         .flatMap(item -> {
@@ -97,26 +93,56 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                         .collect(Collectors.toList());
 
                 var menus = menuMapper.selectBatchIds(distinctNumbers);
-                System.out.println(menus);
                 if(!menus.isEmpty()) {
                     menus.forEach(menu -> {
-                        MenuVo menuVo = MenuVo.builder()
+                        // JSON Assembly
+                        var meta = getMetaJsonObject(menu);
+                        var menuVo = MenuVo.builder()
                                 .id(menu.getId())
-                                .parentId(Integer.valueOf(menu.getParentNumber()))
                                 .name(menu.getName())
-                            //    .menuType(Integer.valueOf(menu.getType()))
-                                .path(menu.getUrl())
+                                .menuType(menu.getMenuType())
+                                .path(menu.getPath())
                                 .component(menu.getComponent())
                                 .icon(menu.getIcon())
-                                .sort(Integer.valueOf(menu.getSort()))
+                                .sort(menu.getSort())
+                                .redirect(menu.getRedirect())
+                                .meta(meta)
                                 .build();
+                        if(menu.getParentId() != null) {
+                            menuVo.setParentId(menu.getParentId());
+                        }
 
                         menuVos.add(menuVo);
                     });
                 }
+                menuData.put("total", menuVos.size());
+                menuData.put("data", menuVos);
             }
         }
+        return Response.responseData(menuData);
+    }
 
-        return Response.responseData(menuVos);
+    /**
+     *  menu Json Assembly
+     * @param menu menu data object
+     * @return meta data
+     */
+    private static JSONObject getMetaJsonObject(SysMenu menu) {
+        var meta = new JSONObject();
+        meta.put("title", menu.getTitle());
+        meta.put("icon", menu.getIcon());
+        meta.put("hideMenu", menu.getHideMenu());
+        meta.put("hideBreadcrumb", menu.getHideBreadcrumb());
+        meta.put("ignoreKeepAlive", menu.getIgnoreKeepAlive());
+        meta.put("hideTab", menu.getHideTab());
+        meta.put("carryParam", menu.getCarryParam());
+        meta.put("hideChildrenInMenu", menu.getHideChildrenInMenu());
+        meta.put("affix", menu.getAffix());
+        meta.put("frameSrc", menu.getFrameSrc());
+        meta.put("realPath", menu.getRealPath());
+        // default value 20
+        meta.put("dynamicLevel", 20);
+
+        return meta;
     }
 }

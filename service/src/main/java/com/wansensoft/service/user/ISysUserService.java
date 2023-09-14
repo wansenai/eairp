@@ -1,6 +1,7 @@
 package com.wansensoft.service.user;
 
-import com.wansensoft.dto.login.AccountLoginDto;
+import com.wansensoft.dto.user.AccountLoginDto;
+import com.wansensoft.dto.user.AccountRegisterDto;
 import com.wansensoft.entities.user.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.utils.response.Response;
@@ -19,6 +20,8 @@ import java.util.List;
  */
 public interface ISysUserService extends IService<SysUser> {
 
+    Response<String> accountRegister(AccountRegisterDto accountRegisterDto);
+
     Response<UserInfoVo> accountLogin(AccountLoginDto accountLoginDto);
 
     Response<UserInfoVo> userInfo();
@@ -27,5 +30,9 @@ public interface ISysUserService extends IService<SysUser> {
 
     String getCurrentUserId();
 
+    String getCurrentUserName();
+
     Response<List<UserRoleVo>> userRole();
+
+    Response<String> userLogout();
 }
