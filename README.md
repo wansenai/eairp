@@ -36,6 +36,10 @@ If you have any questions or suggestions, please submit [issue](https://github.c
 
 preview address: http://erp.wansen.cloud/
 
+## Version
+1. 1.0.2 (current version)
+2. 1.0.1 [old versions](https://github.com/wansenai/wansen-erp/releases/tag/V1.0.1)
+
 ## Module Description
 
 1. **Domain Module:**
