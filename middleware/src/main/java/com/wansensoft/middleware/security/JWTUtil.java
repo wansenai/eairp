@@ -13,7 +13,7 @@ import java.util.Map;
 
 //封装工具类
 @Component
-public class JWTUtils {
+public class JWTUtil {
 
     /** 有效期为一天 **/
     private static long time = 1000*60*60*24;
@@ -24,7 +24,7 @@ public class JWTUtils {
      * 生成token
      *
      */
-    public static String createToken(String userName) {
+    public String createToken(String userName) {
         // 设置JWT头部
         Map<String, Object> map = new HashMap<>();
         map.put("alg", "HS256");
@@ -47,7 +47,7 @@ public class JWTUtils {
      * 验证token
      * @param token
      */
-    public static Claims checkToken(String token){
+    public Claims checkToken(String token){
         if(token == null){
             return null;
         }
@@ -68,7 +68,7 @@ public class JWTUtils {
      * @param token
      * @return
      */
-    public static Long getToken(String token){
+    public Long getToken(String token){
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256(SECRET)).build();
         DecodedJWT jwt = verifier.verify(token);
         String jwtSubject = jwt.getSubject();

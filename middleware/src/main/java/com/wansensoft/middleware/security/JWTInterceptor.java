@@ -1,13 +1,8 @@
 package com.wansensoft.middleware.security;
 
-import com.auth0.jwt.exceptions.AlgorithmMismatchException;
-import com.auth0.jwt.exceptions.SignatureVerificationException;
-import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.redis.RedisUtil;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +19,11 @@ public class JWTInterceptor implements HandlerInterceptor { //校验类
 
     private final RedisUtil redisUtil;
 
-    public JWTInterceptor(RedisUtil redisUtil) {
+    private final JWTUtil jwtUtil;
+
+    public JWTInterceptor(RedisUtil redisUtil, JWTUtil jwtUtil) {
         this.redisUtil = redisUtil;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -33,7 +31,7 @@ public class JWTInterceptor implements HandlerInterceptor { //校验类
         Map<Object, Object> map = new HashMap<>();
         String requestToken = request.getHeader("Authorization");
         if(StringUtils.hasText(requestToken)){
-            Claims claims = JWTUtils.checkToken(request.getHeader("Authorization"));
+            Claims claims = jwtUtil.checkToken(request.getHeader("Authorization"));
             if (claims != null) {
                 String token = redisUtil.getString(claims.get("userName") + ":token");
                 if(Boolean.TRUE.equals(redisUtil.hasKey(claims.get("userName") + ":token"))){

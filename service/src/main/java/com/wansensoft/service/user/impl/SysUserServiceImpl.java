@@ -18,7 +18,7 @@ import com.wansensoft.entities.user.SysUser;
 import com.wansensoft.entities.user.SysUserRoleRel;
 import com.wansensoft.mappers.role.SysRoleMapper;
 import com.wansensoft.mappers.user.SysUserMapper;
-import com.wansensoft.middleware.security.JWTUtils;
+import com.wansensoft.middleware.security.JWTUtil;
 import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -57,13 +57,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private final RedisUtil redisUtil;
 
+    private final JWTUtil jwtUtil;
+
     private final ISysUserRoleRelService userRoleRelService;
 
     private final SysRoleMapper roleMapper;
 
-    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, ISysUserRoleRelService userRoleRelService, SysRoleMapper roleMapper) {
+    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService, SysRoleMapper roleMapper) {
         this.userMapper = userMapper;
         this.redisUtil = redisUtil;
+        this.jwtUtil = jwtUtil;
         this.userRoleRelService = userRoleRelService;
         this.roleMapper = roleMapper;
     }
@@ -113,7 +116,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             token = String.valueOf(redisUtil.get(user.getUserName() + ":token"));
         } else {
             // 生成JWT的令牌
-            token = JWTUtils.createToken(accountLoginDto.getUsername());
+            token = jwtUtil.createToken(accountLoginDto.getUsername());
             redisUtil.set(user.getUserName() + ":token", token);
             redisUtil.expire(user.getUserName() + ":token", 86400);
             // 同时存放userId和userName
