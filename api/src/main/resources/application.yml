@@ -1,0 +1,38 @@
+server:
+  port: 9999
+  servlet:
+    context-path: /erp-api
+  tomcat:
+      basedir: /opt/tmp/tomcat
+
+spring:
+  profiles:
+    active: dev
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 100MB
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: always
+
+logging:
+  config: classpath:logback-spring.xml
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper_xml/**/*.xml
+  type-aliases-package: com.wansensoft.entities
+  global-config:
+    id-type: 0
+    #刷新mapper 调试神器
+    refresh-mapper: true
+  configuration:
+    # log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

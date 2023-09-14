@@ -1,0 +1,55 @@
+{
+  "code": 0,
+  "msg": "成功",
+  "data": {
+    "total": 1,
+    "data": [
+      {
+        "path": "/dashboard",
+        "name": "Dashboard",
+        "component": "/dashboard/workbench/index",
+        "id": 1,
+        "menuType": 1,
+        "sort": 0,
+        "redirect": "",
+        "meta": {
+          "title": "首页",
+          "icon": "ant-design:home-outlined",
+          "hideMenu": false,
+          "hideBreadcrumb": false,
+          "ignoreKeepAlive": false,
+          "hideTab": false,
+          "frameSrc": "",
+          "carryParam": false,
+          "hideChildrenInMenu": false,
+          "affix": false,
+          "dynamicLevel": 20,
+          "realPath": ""
+        }
+      },
+      {
+        "path": "/fms/file",
+        "name": "FileManagement",
+        "component": "/fms/file/index",
+        "id": 2,
+        "menuType": 1,
+        "sort": 1,
+        "redirect": "",
+        "meta": {
+          "title": "零售管理",
+          "icon": "ant-design:folder-open-outlined",
+          "hideMenu": false,
+          "hideBreadcrumb": false,
+          "ignoreKeepAlive": false,
+          "hideTab": false,
+          "frameSrc": "",
+          "carryParam": false,
+          "hideChildrenInMenu": false,
+          "affix": false,
+          "dynamicLevel": 20,
+          "realPath": ""
+        }
+      }
+    ]
+  }
+}
