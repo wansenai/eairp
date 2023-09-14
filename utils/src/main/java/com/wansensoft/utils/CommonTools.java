@@ -634,12 +634,16 @@ public class CommonTools {
      * @return 加密后的MD5字符串
      * @throws NoSuchAlgorithmException
      */
-    public static String md5Encryp(String msg) throws NoSuchAlgorithmException {
+    public static String md5Encryp(String msg) {
         // 生成一个MD5加密计算摘要
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        // 计算md5函数
-        md.update(msg.getBytes());
-        return new BigInteger(1, md.digest()).toString(16);
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            // 计算md5函数
+            md.update(msg.getBytes());
+            return new BigInteger(1, md.digest()).toString(16);
+        }catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -739,13 +743,8 @@ public class CommonTools {
         }
         System.out.println(getBeforeMonth(1));
 
-        try {
-            System.out.println(md5Encryp("guest"));
-            System.out.println(md5Encryp("admin"));
-        } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        System.out.println(md5Encryp("guest"));
+        System.out.println(md5Encryp("admin"));
 
         String value = "2333";
         System.out.println(checkStrIsNum(value));

@@ -51,7 +51,7 @@ public class SysUserController {
         return userService.accountRegister(accountRegisterDto);
     }
 
-    @PostMapping(value = ApiVersionConstants.API_METHOD_VERSION_V2 + "login")
+    @PostMapping(value = "login")
     public Response<UserInfoVo> accountLogin(@RequestBody AccountLoginDto accountLoginDto) {
         return userService.accountLogin(accountLoginDto);
     }

@@ -22,6 +22,7 @@ import com.wansensoft.middleware.security.JWTUtil;
 import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansensoft.utils.SnowflakeIdUtil;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.CommonTools;
 import com.wansensoft.utils.constants.SecurityConstants;
@@ -40,6 +41,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * <p>
@@ -71,16 +73,44 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         this.roleMapper = roleMapper;
     }
 
+
     @Override
     public Response<String> accountRegister(AccountRegisterDto accountRegisterDto) {
         if (accountRegisterDto == null) {
             return Response.responseMsg(CodeEnum.PARAMETER_NULL);
         }
 
+        var verifyCode = redisUtil.get(SecurityConstants.VERIFY_CODE_CACHE_PREFIX + accountRegisterDto.getCaptchaId());
+        if(ObjectUtils.isEmpty(verifyCode)) {
+            return Response.responseMsg(CodeEnum.VERIFY_CODE_EXPIRE);
+        }
+
+        if(!String.valueOf(verifyCode).equals(accountRegisterDto.getCaptcha())) {
+            return Response.responseMsg(CodeEnum.VERIFY_CODE_ERROR);
+        }
+
         // check if the username under the same tenant is duplicate
+        var isRegister = lambdaQuery()
+                .eq(SysUser::getUserName, accountRegisterDto.getUsername())
+                .exists();
+        if(isRegister) {
+            return Response.responseMsg(CodeEnum.USER_EXISTS);
+        }
 
+        // start register
+        boolean result = save(SysUser.builder()
+                .id(SnowflakeIdUtil.nextId())
+                .userName(accountRegisterDto.getUsername())
+                .name("测试租户")
+                .password(CommonTools.md5Encryp(accountRegisterDto.getPassword()))
+                .email(Optional.ofNullable(accountRegisterDto.getEmail()).orElse(""))
+                .tenantId(SnowflakeIdUtil.nextId())
+                .build());
+        if (!result) {
+            return Response.fail();
+        }
 
-        return null;
+        return Response.responseMsg(CodeEnum.REGISTER_SUCCESS);
     }
 
     @Override
@@ -92,19 +122,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
 
         if(!String.valueOf(verifyCode).equals(accountLoginDto.getCaptcha())) {
-            return Response.responseMsg(CodeEnum.VERIFY_CODE_EXPIRE);
-        }
-
-        var md5Password = "";
-        try {
-            md5Password = CommonTools.md5Encryp(accountLoginDto.getPassword());
-        }catch (NoSuchAlgorithmException e) {
-            log.error("用户登录MD5密码解密错误: " + e.getMessage());
+            return Response.responseMsg(CodeEnum.VERIFY_CODE_ERROR);
         }
 
         var user = lambdaQuery()
                 .eq(SysUser::getUserName, accountLoginDto.getUsername())
-                .eq(SysUser::getPassword, md5Password)
+                .eq(SysUser::getPassword, CommonTools.md5Encryp(accountLoginDto.getPassword()))
                 .one();
 
         if(user == null) {

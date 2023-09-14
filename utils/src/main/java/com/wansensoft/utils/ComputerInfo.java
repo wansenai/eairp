@@ -1,3 +1,15 @@
+/*
+ * Copyright 2023-2033 WanSen AI Team, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ * with the License. A copy of the License is located at
+ *
+ * http://opensource.wansenai.com/apache2.0/
+ *
+ * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+ * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
+ */
 package com.wansensoft.utils;
 
 import java.io.BufferedReader;
@@ -10,15 +22,16 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/*
- * <取网卡物理地址--
- * 1.在Windows,Linux系统下均可用；
- * 2.通过ipconifg,ifconfig获得计算机信息；
- * 3.再用模式匹配方式查找MAC地址，与操作系统的语言无关>
- *
- * //* Description: <取计算机名--从环境变量中取>
- * abstract 限制继承/创建实例
- */
+/**
+ * 取网卡物理地址-
+ *  1.在Windows,Linux系统下均可用；
+ *  2.通过ipconifg,ifconfig获得计算机信息；
+ *  3.再用模式匹配方式查找MAC地址，与操作系统的语言无关>
+ *  <p>
+ *  Description: <取计算机名--从环境变量中取>
+ *  abstract 限制继承/创建实例
+ *  </p>
+ **/
 public abstract class ComputerInfo {
     private static String macAddressStr = null;
     private static String computerName = System.getenv().get("COMPUTERNAME");
