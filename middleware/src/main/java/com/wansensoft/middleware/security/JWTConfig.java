@@ -19,6 +19,6 @@ public class JWTConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 // 路径不进行拦截
                 .excludePathPatterns("/v2/common/captcha")
-                .excludePathPatterns("/user/v2/login");
+                .excludePathPatterns("/user/v2/user");
     }
 }
