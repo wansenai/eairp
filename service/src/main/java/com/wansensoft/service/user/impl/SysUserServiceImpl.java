@@ -12,6 +12,11 @@
  */
 package com.wansensoft.service.user.impl;
 
+import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.PageDto;
 import com.wansensoft.dto.user.AccountLoginDto;
 import com.wansensoft.dto.user.AccountRegisterDto;
 import com.wansensoft.entities.user.SysUser;
@@ -23,12 +28,14 @@ import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.utils.SnowflakeIdUtil;
+import com.wansensoft.utils.constants.UserConstants;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.CommonTools;
 import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.enums.CodeEnum;
 import com.wansensoft.utils.redis.RedisUtil;
 import com.wansensoft.vo.UserInfoVo;
+import com.wansensoft.vo.UserListVo;
 import com.wansensoft.vo.UserRoleVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,6 +44,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.sound.sampled.Line;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -144,8 +152,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             redisUtil.expire(user.getUserName() + ":token", 86400);
             // 同时存放userId和userName
             var userId = String.valueOf(user.getId());
+            var tenantId = String.valueOf(user.getTenantId());
             redisUtil.set(token + ":userName", user.getUserName(), 86400);
             redisUtil.set(token + ":userId", userId, 86400);
+            // 存放租户id
+            // redisUtil.set(token + ":tenantId", tenantId, 86400);
         }
 
         return Response.responseData(UserInfoVo.builder()
@@ -234,5 +245,39 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         var token = httpServletRequestContextToken();
         redisUtil.del(token + ":userId", token + ":userName", getCurrentUserName() + ":token");
         return Response.responseMsg(CodeEnum.USER_LOGOUT);
+    }
+
+    @Override
+    public Response<Page<UserListVo>> userList(PageDto pageDto) {
+        var result = new Page<UserListVo>();
+        var userListVos = new ArrayList<UserListVo>();
+        var user = userMapper.selectById(getCurrentUserId());
+        var tenantId = user.getTenantId();
+
+        Page<SysUser> page = new Page<>(pageDto.getPage(), pageDto.getPageSize());
+        LambdaQueryWrapper<SysUser> query = new LambdaQueryWrapper<>();
+        query.eq(SysUser::getTenantId, tenantId);
+        query.eq(SysUser::getStatus, UserConstants.USER_STATUS_ENABLE);
+        userMapper.selectPage(page, query);
+
+        page.getRecords().forEach(item -> {
+            UserListVo userListVo = UserListVo.builder()
+                    .id(item.getId())
+                    .username(item.getUserName())
+                    .name(item.getName())
+                    .roleName("")
+                    .phoneNumber(item.getPhoneNumber())
+                    .email(item.getEmail())
+                    .status(item.getStatus())
+                    .createTime(String.valueOf(item.getCreateTime()))
+                    .build();
+            userListVos.add(userListVo);
+        });
+        result.setRecords(userListVos);
+        result.setTotal(page.getTotal());
+        result.setSize(page.getSize());
+        result.setPages(page.getPages());
+
+        return Response.responseData(result);
     }
 }

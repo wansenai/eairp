@@ -12,12 +12,15 @@
  */
 package com.wansensoft.api.user;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.PageDto;
 import com.wansensoft.dto.user.AccountLoginDto;
 import com.wansensoft.dto.user.AccountRegisterDto;
 import com.wansensoft.service.user.ISysUserService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.constants.ApiVersionConstants;
 import com.wansensoft.vo.UserInfoVo;
+import com.wansensoft.vo.UserListVo;
 import com.wansensoft.vo.UserRoleVo;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,5 +72,10 @@ public class SysUserController {
     @GetMapping(value = "logout")
     public Response<String> logout() {
         return userService.userLogout();
+    }
+
+    @PostMapping(value = "list")
+    public Response<Page<UserListVo>> list(@RequestBody PageDto pageDto) {
+        return userService.userList(pageDto);
     }
 }

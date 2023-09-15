@@ -16,7 +16,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
+import jxl.write.DateTime;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -122,5 +124,28 @@ public class SysUser implements Serializable {
      */
     private Long tenantId;
 
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
 
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
+
+    /**
+     * 创建人
+     */
+    private Long createBy;
+
+    /**
+     * 修改人
+     */
+    private Long updateBy;
+
+    /**
+     * 删除标记，0未删除，1删除
+     */
+    private Boolean deleteFlag;
 }

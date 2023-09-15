@@ -12,12 +12,15 @@
  */
 package com.wansensoft.service.user;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.PageDto;
 import com.wansensoft.dto.user.AccountLoginDto;
 import com.wansensoft.dto.user.AccountRegisterDto;
 import com.wansensoft.entities.user.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.UserInfoVo;
+import com.wansensoft.vo.UserListVo;
 import com.wansensoft.vo.UserRoleVo;
 
 import java.util.List;
@@ -44,4 +47,6 @@ public interface ISysUserService extends IService<SysUser> {
     Response<List<UserRoleVo>> userRole();
 
     Response<String> userLogout();
+
+    Response<Page<UserListVo>> userList(PageDto pageDto);
 }

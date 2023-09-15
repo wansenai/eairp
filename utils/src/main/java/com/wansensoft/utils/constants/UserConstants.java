@@ -10,20 +10,22 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.api.system;
-
-import com.wansensoft.utils.response.Response;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+package com.wansensoft.utils.constants;
 
 /**
  * <p>
- * 机构表 前端控制器
+ *  用户状态常量类
+ *  User Status Constants
  * </p>
  */
-@RestController
-@RequestMapping("/sys-organization")
-public class SysOrganizationController {
+public interface UserConstants {
 
+    /** 用户状态启用 */
+    int USER_STATUS_ENABLE = 0;
+
+    /** 用户状态停用 */
+    int USER_STATUS_DISABLE = 1;
+
+    /** 用户状态封禁 */
+    int USER_STATUS_BAN = 2;
 }
