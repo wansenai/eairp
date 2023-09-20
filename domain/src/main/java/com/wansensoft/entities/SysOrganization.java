@@ -61,6 +61,11 @@ public class SysOrganization implements Serializable {
     private String organizationName;
 
     /**
+     * 负责人
+     */
+    private String leader;
+
+    /**
      * 备注
      */
     private String remark;

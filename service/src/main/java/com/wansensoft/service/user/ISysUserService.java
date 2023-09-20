@@ -13,9 +13,7 @@
 package com.wansensoft.service.user;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansensoft.dto.PageDto;
-import com.wansensoft.dto.user.AccountLoginDto;
-import com.wansensoft.dto.user.AccountRegisterDto;
+import com.wansensoft.dto.user.*;
 import com.wansensoft.entities.user.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.utils.response.Response;
@@ -36,6 +34,10 @@ public interface ISysUserService extends IService<SysUser> {
 
     Response<UserInfoVo> accountLogin(AccountLoginDto accountLoginDto);
 
+    Response<UserInfoVo> mobileLogin(MobileLoginDto mobileLoginDto);
+
+    Response<String> updatePassword(UpdatePasswordDto updatePasswordDto);
+
     Response<UserInfoVo> userInfo();
 
     UserInfoVo getCurrentUser();
@@ -48,5 +50,5 @@ public interface ISysUserService extends IService<SysUser> {
 
     Response<String> userLogout();
 
-    Response<Page<UserListVo>> userList(PageDto pageDto);
+    Response<Page<UserListVo>> userList(UserListDto pageDto);
 }

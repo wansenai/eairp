@@ -12,27 +12,19 @@
  */
 package com.wansensoft.utils.constants;
 
-public interface SecurityConstants {
+public interface SmsConstants {
 
-    /**
-     * 验证码缓存前缀
-     */
-    String REGISTER_VERIFY_CODE_CACHE_PREFIX = "AUTH:VERIFY_CODE:REGISTER:";
+    String SMS_SIGN_NAME = "万森云服务";
 
-    String LOGIN_VERIFY_CODE_CACHE_PREFIX = "AUTH:VERIFY_CODE:LOGIN:";
+    int SMS_TEMPLATE_REGISTER_USER = 0;
 
-    String UPDATE_PASSWORD_VERIFY_CODE_CACHE_PREFIX = "AUTH:VERIFY_CODE:UPDATE_PASSWORD:";
+    int SMS_TEMPLATE_PHONE_LOGIN = 1;
 
+    int SMS_TEMPLATE_UPDATE_PASSWORD = 2;
 
-    String EMAIL_VERIFY_CODE_CACHE_PREFIX = "AUTH:VERIFY_CODE:EMAIL:";
+    String SMS_TEMPLATE_ID_REGISTER_USER = "1933307";
 
-    /**
-     * 用户权限集合缓存前缀
-     */
-    String USER_PERMS_CACHE_PREFIX = "AUTH:USER_PERMS:";
+    String SMS_TEMPLATE_ID_PHONE_LOGIN = "1934058";
 
-    /**
-     * 黑名单Token缓存前缀
-     */
-    String BLACK_TOKEN_CACHE_PREFIX = "AUTH:BLACK_TOKEN:";
+    String SMS_TEMPLATE_ID_UPDATE_PASSWORD = "1933311";
 }

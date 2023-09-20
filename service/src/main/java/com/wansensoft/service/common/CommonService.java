@@ -14,6 +14,7 @@ package com.wansensoft.service.common;
 
 import com.wansensoft.vo.CaptchaVo;
 public interface CommonService {
+    CaptchaVo getCaptcha();
 
-    public CaptchaVo getCaptcha();
+    Boolean sendSmsCode(Integer type, String phoneNumber);
 }

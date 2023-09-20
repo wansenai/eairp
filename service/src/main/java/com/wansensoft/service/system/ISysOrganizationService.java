@@ -12,8 +12,11 @@
  */
 package com.wansensoft.service.system;
 
+import com.wansensoft.dto.organization.OrganizationListDto;
 import com.wansensoft.entities.SysOrganization;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.OrganizationListVo;
 
 /**
  * <p>
@@ -22,4 +25,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ISysOrganizationService extends IService<SysOrganization> {
 
+    Response<OrganizationListVo> queryOrganization(OrganizationListDto organizationListDto);
 }

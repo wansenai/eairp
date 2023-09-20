@@ -25,9 +25,7 @@ public class AccountRegisterDto {
 
     String password;
 
-    String email;
+    String phoneNumber;
 
-    String captchaId;
-
-    String captcha;
+    String sms;
 }
