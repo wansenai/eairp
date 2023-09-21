@@ -10,16 +10,20 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.mappers.system;
+package com.wansensoft.service.system;
 
-import com.wansensoft.entities.SysOrganization;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.wansensoft.dto.organization.OrganizationListDto;
+import com.wansensoft.entities.SysDepartment;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.OrganizationListVo;
 
 /**
  * <p>
- * 机构表 Mapper 接口
+ * 机构表 服务类
  * </p>
  */
-public interface SysOrganizationMapper extends BaseMapper<SysOrganization> {
+public interface ISysDepartmentService extends IService<SysDepartment> {
 
+    Response<OrganizationListVo> queryOrganization(OrganizationListDto organizationListDto);
 }

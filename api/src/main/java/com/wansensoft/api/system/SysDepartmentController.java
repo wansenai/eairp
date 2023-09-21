@@ -13,7 +13,7 @@
 package com.wansensoft.api.system;
 
 import com.wansensoft.dto.organization.OrganizationListDto;
-import com.wansensoft.service.system.ISysOrganizationService;
+import com.wansensoft.service.system.ISysDepartmentService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.OrganizationListVo;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,17 +27,22 @@ import org.springframework.web.bind.annotation.RestController;
  * </p>
  */
 @RestController
-@RequestMapping("/organization")
-public class SysOrganizationController {
+@RequestMapping("/dept")
+public class SysDepartmentController {
 
-    private final ISysOrganizationService organizationService;
+    private final ISysDepartmentService organizationService;
 
-    public SysOrganizationController(ISysOrganizationService organizationService) {
+    public SysDepartmentController(ISysDepartmentService organizationService) {
         this.organizationService = organizationService;
     }
 
-    @GetMapping("userOrgRel")
-    public Response<OrganizationListVo> userOrgRel(@RequestBody OrganizationListDto organizationListDto) {
+    @GetMapping("list")
+    public Response<OrganizationListVo> list(@RequestBody OrganizationListDto organizationListDto) {
         return organizationService.queryOrganization(organizationListDto);
+    }
+
+    @GetMapping("userOrgRel")
+    public Response<OrganizationListVo> userOrgRel() {
+        return organizationService.getUserOrgan(organizationListDto);
     }
 }
