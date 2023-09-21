@@ -12,18 +12,14 @@
  */
 package com.wansensoft.api.user;
 
-import com.wansensoft.dto.user.AccountLoginDto;
-import com.wansensoft.dto.user.AccountRegisterDto;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.user.*;
 import com.wansensoft.service.user.ISysUserService;
 import com.wansensoft.utils.response.Response;
-import com.wansensoft.utils.constants.ApiVersionConstants;
 import com.wansensoft.vo.UserInfoVo;
+import com.wansensoft.vo.UserListVo;
 import com.wansensoft.vo.UserRoleVo;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
@@ -51,9 +47,19 @@ public class SysUserController {
         return userService.accountRegister(accountRegisterDto);
     }
 
-    @PostMapping(value = ApiVersionConstants.API_METHOD_VERSION_V2 + "login")
+    @PostMapping(value = "login")
     public Response<UserInfoVo> accountLogin(@RequestBody AccountLoginDto accountLoginDto) {
         return userService.accountLogin(accountLoginDto);
+    }
+
+    @PostMapping(value = "mobileLogin")
+    public Response<UserInfoVo> accountLogin(@RequestBody MobileLoginDto mobileLoginDto) {
+        return userService.mobileLogin(mobileLoginDto);
+    }
+
+    @PostMapping(value = "updatePassword")
+    public Response<String> updatePassword(@RequestBody UpdatePasswordDto updatePasswordDto) {
+        return userService.updatePassword(updatePasswordDto);
     }
 
     @GetMapping(value = "info")
@@ -69,5 +75,10 @@ public class SysUserController {
     @GetMapping(value = "logout")
     public Response<String> logout() {
         return userService.userLogout();
+    }
+
+    @PostMapping(value = "list")
+    public Response<Page<UserListVo>> list(@RequestBody UserListDto userListDto) {
+        return userService.userList(userListDto);
     }
 }

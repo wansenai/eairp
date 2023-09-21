@@ -1,5 +1,18 @@
+/*
+ * Copyright 2023-2033 WanSen AI Team, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ * with the License. A copy of the License is located at
+ *
+ * http://opensource.wansenai.com/apache2.0/
+ *
+ * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+ * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
+ */
 package com.wansensoft.utils;
 
+import com.wansensoft.utils.redis.RedisUtil;
 import org.springframework.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -18,10 +31,9 @@ import java.util.regex.Pattern;
 
 /**
  * 工具类
- *
- * @author jishenghua  qq:7-5-2-7-1-8-9-2-0
  */
 public class CommonTools {
+
     /**
      * 获得32位唯一序列号
      *
@@ -634,12 +646,16 @@ public class CommonTools {
      * @return 加密后的MD5字符串
      * @throws NoSuchAlgorithmException
      */
-    public static String md5Encryp(String msg) throws NoSuchAlgorithmException {
+    public static String md5Encryp(String msg) {
         // 生成一个MD5加密计算摘要
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        // 计算md5函数
-        md.update(msg.getBytes());
-        return new BigInteger(1, md.digest()).toString(16);
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            // 计算md5函数
+            md.update(msg.getBytes());
+            return new BigInteger(1, md.digest()).toString(16);
+        }catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -664,22 +680,6 @@ public class CommonTools {
         if (null == beforeStr || beforeStr.length() == 0)
             return "";
         return beforeStr;
-    }
-
-    /**
-     * 根据token截取租户id
-     * @param token
-     * @return
-     */
-    public static Long getTenantIdByToken(String token) {
-        long tenantId = 0L;
-        if(StringUtils.hasText(token) && token.contains("_")) {
-            String[] tokenArr = token.split("_");
-            if (tokenArr.length == 2) {
-                tenantId = Long.parseLong(tokenArr[1]);
-            }
-        }
-        return tenantId;
     }
 
     /**
@@ -739,13 +739,8 @@ public class CommonTools {
         }
         System.out.println(getBeforeMonth(1));
 
-        try {
-            System.out.println(md5Encryp("guest"));
-            System.out.println(md5Encryp("admin"));
-        } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        System.out.println(md5Encryp("guest"));
+        System.out.println(md5Encryp("admin"));
 
         String value = "2333";
         System.out.println(checkStrIsNum(value));

@@ -24,7 +24,7 @@ public class PageSizeDto {
     /**
      * 查询列表总记录数
      */
-    int pageTotal = 0;
+    int page = 0;
 
     /**
      * 每页显示条数，默认10

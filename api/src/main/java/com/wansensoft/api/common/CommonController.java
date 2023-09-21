@@ -18,6 +18,7 @@ import com.wansensoft.utils.constants.ApiVersionConstants;
 import com.wansensoft.utils.enums.CodeEnum;
 import com.wansensoft.vo.CaptchaVo;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,5 +39,14 @@ public class CommonController {
             return Response.responseMsg(CodeEnum.ERROR);
         }
         return Response.responseData(captchaVo);
+    }
+
+    @GetMapping("sms/{type}/{phoneNumber}")
+    public Response<String> sendSmsCode(@PathVariable Integer type, @PathVariable String phoneNumber) {
+        boolean result = commonService.sendSmsCode(type, phoneNumber);
+        if(!result) {
+            return Response.responseMsg(CodeEnum.PHONE_NUMBER_FORMAT_ERROR);
+        }
+        return Response.responseMsg(CodeEnum.SMS_VERIFY_SEND_SUCCESS);
     }
 }
