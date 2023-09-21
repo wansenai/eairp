@@ -6,14 +6,14 @@ import lombok.Data;
 
 @Data
 @Builder
-public class OrganizationListVo {
+public class DeptListVo {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
-    private String organizationNumber;
+    private String deptNumber;
 
-    private String organizationName;
+    private String deptName;
 
     private String remark;
 
