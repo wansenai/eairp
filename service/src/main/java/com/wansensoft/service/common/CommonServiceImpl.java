@@ -22,7 +22,7 @@ import com.wansensoft.utils.SnowflakeIdUtil;
 import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.constants.SmsConstants;
 import com.wansensoft.utils.redis.RedisUtil;
-import com.wansensoft.vo.CaptchaVo;
+import com.wansensoft.vo.CaptchaVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -62,7 +62,7 @@ public class CommonServiceImpl implements CommonService{
     }
 
     @Override
-    public CaptchaVo getCaptcha() {
+    public CaptchaVO getCaptcha() {
         String captchaId = "CAPTCHA" + SnowflakeIdUtil.nextId();
         String text = producer.createText();
         String imgEncode = "";
@@ -76,7 +76,7 @@ public class CommonServiceImpl implements CommonService{
             log.error("获取验证码失败: " + e.getMessage());
             return null;
         }
-        return CaptchaVo.builder()
+        return CaptchaVO.builder()
                 .captchaId(captchaId)
                 .imagePath("data:image/jpeg;base64," + imgEncode)
                 .build();
@@ -93,20 +93,19 @@ public class CommonServiceImpl implements CommonService{
         if(!matcher.matches()) {
             return false;
         }
-        var templateId = "";
-        var key = "";
-        if (type == 0) {
-            templateId = SmsConstants.SMS_TEMPLATE_ID_REGISTER_USER;
-            key = SecurityConstants.REGISTER_VERIFY_CODE_CACHE_PREFIX;
-        }else if (type == 1) {
-            templateId = SmsConstants.SMS_TEMPLATE_ID_PHONE_LOGIN;
-            key = SecurityConstants.LOGIN_VERIFY_CODE_CACHE_PREFIX;
-        }else if (type == 2) {
-            templateId = SmsConstants.SMS_TEMPLATE_ID_UPDATE_PASSWORD;
-            key = SecurityConstants.UPDATE_PASSWORD_VERIFY_CODE_CACHE_PREFIX;
-        }else {
-            return false;
-        }
+        var templateId = switch (type) {
+            case 0 -> SmsConstants.SMS_TEMPLATE_ID_REGISTER_USER;
+            case 1 -> SmsConstants.SMS_TEMPLATE_ID_PHONE_LOGIN;
+            case 2 -> SmsConstants.SMS_TEMPLATE_ID_UPDATE_PASSWORD;
+            default -> "";
+        };
+
+        var key = switch (type) {
+            case 0 -> SecurityConstants.REGISTER_VERIFY_CODE_CACHE_PREFIX;
+            case 1 -> SecurityConstants.LOGIN_VERIFY_CODE_CACHE_PREFIX;
+            case 2 -> SecurityConstants.UPDATE_PASSWORD_VERIFY_CODE_CACHE_PREFIX;
+            default -> "";
+        };
 
         try {
             Credential cred = new Credential(secretId, secretKey);

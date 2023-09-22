@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
 import com.wansensoft.utils.response.Response;
-import com.wansensoft.vo.MenuVo;
+import com.wansensoft.vo.MenuVO;
 import org.aspectj.util.FileUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
@@ -65,7 +65,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     @Override
     public Response<JSONObject> menuList() {
         var menuData = new JSONObject();
-        var menuVos = new ArrayList<MenuVo>();
+        var menuVos = new ArrayList<MenuVO>();
 
         var userId = userService.getCurrentUserId();
         if (!StringUtils.hasText(userId)) {
@@ -97,7 +97,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                     menus.forEach(menu -> {
                         // JSON Assembly
                         var meta = getMetaJsonObject(menu);
-                        var menuVo = MenuVo.builder()
+                        var menuVo = MenuVO.builder()
                                 .id(menu.getId())
                                 .name(menu.getName())
                                 .menuType(menu.getMenuType())

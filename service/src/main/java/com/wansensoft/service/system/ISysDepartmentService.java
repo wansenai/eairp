@@ -12,11 +12,13 @@
  */
 package com.wansensoft.service.system;
 
-import com.wansensoft.dto.organization.OrganizationListDto;
+import com.wansensoft.dto.organization.DeptListDTO;
 import com.wansensoft.entities.SysDepartment;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.utils.response.Response;
-import com.wansensoft.vo.OrganizationListVo;
+import com.wansensoft.vo.DeptListVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -25,5 +27,7 @@ import com.wansensoft.vo.OrganizationListVo;
  */
 public interface ISysDepartmentService extends IService<SysDepartment> {
 
-    Response<OrganizationListVo> queryOrganization(OrganizationListDto organizationListDto);
+    Response<DeptListVO> deptList(DeptListDTO deptListDto);
+
+    Response<List<DeptListVO>> getUserDeptRel();
 }

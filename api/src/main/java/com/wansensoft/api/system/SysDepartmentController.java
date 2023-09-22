@@ -12,14 +12,16 @@
  */
 package com.wansensoft.api.system;
 
-import com.wansensoft.dto.organization.OrganizationListDto;
+import com.wansensoft.dto.organization.DeptListDTO;
 import com.wansensoft.service.system.ISysDepartmentService;
 import com.wansensoft.utils.response.Response;
-import com.wansensoft.vo.OrganizationListVo;
+import com.wansensoft.vo.DeptListVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * <p>
@@ -30,19 +32,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/dept")
 public class SysDepartmentController {
 
-    private final ISysDepartmentService organizationService;
+    private final ISysDepartmentService departmentService;
 
-    public SysDepartmentController(ISysDepartmentService organizationService) {
-        this.organizationService = organizationService;
+    public SysDepartmentController(ISysDepartmentService departmentService) {
+        this.departmentService = departmentService;
     }
 
     @GetMapping("list")
-    public Response<OrganizationListVo> list(@RequestBody OrganizationListDto organizationListDto) {
-        return organizationService.queryOrganization(organizationListDto);
+    public Response<DeptListVO> list(@RequestBody DeptListDTO deptListDto) {
+        return departmentService.deptList(deptListDto);
     }
 
-    @GetMapping("userOrgRel")
-    public Response<OrganizationListVo> userOrgRel() {
-        return organizationService.getUserOrgan(organizationListDto);
+    @GetMapping("userDeptRel")
+    public Response<List<DeptListVO>> getUserDeptRel() {
+        return departmentService.getUserDeptRel();
     }
 }

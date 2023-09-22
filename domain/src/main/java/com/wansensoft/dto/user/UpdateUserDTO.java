@@ -15,13 +15,19 @@ package com.wansensoft.dto.user;
 import lombok.Data;
 
 @Data
-public class UpdatePasswordDto {
+public class UpdateUserDTO {
 
-    String username;
+    private Long Id;
 
-    String password;
+    private String name;
 
-    String phoneNumber;
+    private Integer status;
 
-    String sms;
+    private String email;
+
+    private String phoneNumber;
+
+    private String position;
+
+    private Integer leaderFlag;
 }

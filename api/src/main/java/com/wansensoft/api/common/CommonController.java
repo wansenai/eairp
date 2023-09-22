@@ -16,7 +16,7 @@ import com.wansensoft.service.common.CommonService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.constants.ApiVersionConstants;
 import com.wansensoft.utils.enums.CodeEnum;
-import com.wansensoft.vo.CaptchaVo;
+import com.wansensoft.vo.CaptchaVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,8 +33,8 @@ public class CommonController {
     }
 
     @GetMapping( "captcha")
-    public Response<CaptchaVo> getCaptcha() {
-        CaptchaVo captchaVo = commonService.getCaptcha();
+    public Response<CaptchaVO> getCaptcha() {
+        CaptchaVO captchaVo = commonService.getCaptcha();
         if(captchaVo == null) {
             return Response.responseMsg(CodeEnum.ERROR);
         }

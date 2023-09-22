@@ -12,9 +12,9 @@
  */
 package com.wansensoft.service.common;
 
-import com.wansensoft.vo.CaptchaVo;
+import com.wansensoft.vo.CaptchaVO;
 public interface CommonService {
-    CaptchaVo getCaptcha();
+    CaptchaVO getCaptcha();
 
     Boolean sendSmsCode(Integer type, String phoneNumber);
 }
