@@ -10,16 +10,16 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.user;
+package com.wansensoft.vo;
 
-import com.wansensoft.entities.user.SysUserOrgRel;
-import com.baomidou.mybatisplus.extension.service.IService;
+import lombok.Builder;
+import lombok.Data;
 
-/**
- * <p>
- * 机构用户关系表 服务类
- * </p>
- */
-public interface ISysUserOrgRelService extends IService<SysUserOrgRel> {
+@Data
+@Builder
+public class CaptchaVO {
 
+    private String captchaId;
+
+    private String imagePath;
 }

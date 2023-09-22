@@ -12,7 +12,7 @@
  */
 package com.wansensoft.mappers.user;
 
-import com.wansensoft.entities.user.SysUserOrgRel;
+import com.wansensoft.entities.user.SysUserDeptRel;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -20,6 +20,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 机构用户关系表 Mapper 接口
  * </p>
  */
-public interface SysUserOrgRelMapper extends BaseMapper<SysUserOrgRel> {
+public interface SysUserDeptRelMapper extends BaseMapper<SysUserDeptRel> {
 
 }

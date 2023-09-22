@@ -1,12 +1,12 @@
 package com.wansensoft.dto.organization;
 
-import com.wansensoft.dto.PageSizeDto;
+import com.wansensoft.dto.PageSizeDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class DeptListDto extends PageSizeDto {
+public class DeptListDTO extends PageSizeDTO {
 
     private String deptName;
 

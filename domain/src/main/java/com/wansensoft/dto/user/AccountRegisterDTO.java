@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountRegisterDto {
+public class AccountRegisterDTO {
 
     String username;
 

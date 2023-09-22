@@ -12,31 +12,40 @@
  */
 package com.wansensoft.vo;
 
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserInfoVo {
+public class MenuVO {
 
-    /** 用户id */
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long id;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    private Integer id;
 
-    /** 用户昵称（别名 姓名） */
+    private Integer parentId;
+
     private String name;
 
-    /** 用户名（登陆的账户） */
-    private String userName;
+    private String path;
 
-    /** 用户头像地址 */
-    private String avatar;
+    private String component;
 
-    /** 用户token */
-    private String token;
+    private Integer sort;
 
-    /** 过期 */
-    private long expire;
+    private String icon;
+
+    private Integer menuType;
+
+    private String type;
+
+    private String redirect;
+
+    private JSONObject meta;
 }

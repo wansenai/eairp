@@ -15,7 +15,7 @@ package com.wansensoft.dto.user;
 import lombok.Data;
 
 @Data
-public class AccountLoginDto {
+public class AccountLoginDTO {
 
     String username;
 
