@@ -13,11 +13,14 @@
 package com.wansensoft.utils.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.wansensoft.utils.enums.CodeEnum;
+import com.wansensoft.utils.enums.BaseCodeEnum;
+import com.wansensoft.utils.enums.UserCodeEnum;
+import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
 
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Response<T> implements Serializable {
 
@@ -31,17 +34,24 @@ public class Response<T> implements Serializable {
     private T data;
 
     public static <T> Response<T> success() {
-        return responseMsg(CodeEnum.SUCCESS);
+        return responseMsg(BaseCodeEnum.SUCCESS);
     }
 
     public static <T> Response<T> fail() {
-        return responseMsg(CodeEnum.ERROR);
+        return responseMsg(BaseCodeEnum.ERROR);
     }
 
-    public static <T> Response<T> responseMsg(CodeEnum codeEnum) {
+    public static <T> Response<T> responseMsg(BaseCodeEnum baseCodeEnum) {
         Response<T> baseResponse = new Response<T>();
-        baseResponse.setCode(codeEnum.getCode());
-        baseResponse.setMsg(codeEnum.getMsg());
+        baseResponse.setCode(baseCodeEnum.getCode());
+        baseResponse.setMsg(baseCodeEnum.getMsg());
+        return baseResponse;
+    }
+
+    public static <T> Response<T> responseMsg(UserCodeEnum userCodeEnum) {
+        Response<T> baseResponse = new Response<T>();
+        baseResponse.setCode(userCodeEnum.getCode());
+        baseResponse.setMsg(userCodeEnum.getMsg());
         return baseResponse;
     }
 
@@ -54,7 +64,7 @@ public class Response<T> implements Serializable {
 
     public static <T> Response<T> responseData(T data) {
         Response<T> baseResponse = new Response<T>();
-        baseResponse.setCode(CodeEnum.SUCCESS.getCode());
+        baseResponse.setCode(BaseCodeEnum.SUCCESS.getCode());
         baseResponse.setData(data);
         return baseResponse;
     }
@@ -64,29 +74,5 @@ public class Response<T> implements Serializable {
         baseResponse.setCode(code);
         baseResponse.setData(data);
         return baseResponse;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
     }
 }

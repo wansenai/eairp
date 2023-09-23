@@ -25,4 +25,6 @@ import java.util.List;
 public interface ISysUserRoleRelService extends IService<SysUserRoleRel> {
 
     List<SysUserRoleRel> queryByUserId(long userId);
+
+    List<SysUserRoleRel> queryBatchByUserIds(List<Long> userIds);
 }

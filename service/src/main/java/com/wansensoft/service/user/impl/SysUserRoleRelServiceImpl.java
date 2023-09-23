@@ -25,4 +25,11 @@ public class SysUserRoleRelServiceImpl extends ServiceImpl<SysUserRoleRelMapper,
                 .eq(SysUserRoleRel::getUserId, userId)
                 .list();
     }
+
+    @Override
+    public List<SysUserRoleRel> queryBatchByUserIds(List<Long> userIds) {
+        return lambdaQuery()
+                .in(SysUserRoleRel::getUserId, userIds)
+                .list();
+    }
 }
