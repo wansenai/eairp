@@ -15,7 +15,7 @@ package com.wansensoft.api.common;
 import com.wansensoft.service.common.CommonService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.constants.ApiVersionConstants;
-import com.wansensoft.utils.enums.CodeEnum;
+import com.wansensoft.utils.enums.BaseCodeEnum;
 import com.wansensoft.vo.CaptchaVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +36,7 @@ public class CommonController {
     public Response<CaptchaVO> getCaptcha() {
         CaptchaVO captchaVo = commonService.getCaptcha();
         if(captchaVo == null) {
-            return Response.responseMsg(CodeEnum.ERROR);
+            return Response.responseMsg(BaseCodeEnum.ERROR);
         }
         return Response.responseData(captchaVo);
     }
@@ -45,8 +45,8 @@ public class CommonController {
     public Response<String> sendSmsCode(@PathVariable Integer type, @PathVariable String phoneNumber) {
         boolean result = commonService.sendSmsCode(type, phoneNumber);
         if(!result) {
-            return Response.responseMsg(CodeEnum.PHONE_NUMBER_FORMAT_ERROR);
+            return Response.responseMsg(BaseCodeEnum.PHONE_NUMBER_FORMAT_ERROR);
         }
-        return Response.responseMsg(CodeEnum.SMS_VERIFY_SEND_SUCCESS);
+        return Response.responseMsg(BaseCodeEnum.SMS_VERIFY_SEND_SUCCESS);
     }
 }

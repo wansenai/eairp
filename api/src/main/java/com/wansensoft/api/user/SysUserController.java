@@ -84,7 +84,7 @@ public class SysUserController {
 
     @PostMapping(value = "update")
     public Response<String> update(@RequestBody UpdateUserDTO updateUserDTO) {
-        return null;
+        return userService.updateUser(updateUserDTO);
     }
 
 }

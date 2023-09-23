@@ -9,7 +9,7 @@ import com.wansensoft.service.system.ISysDepartmentService;
 import com.wansensoft.entities.SysDepartment;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.service.user.ISysUserService;
-import com.wansensoft.utils.enums.CodeEnum;
+import com.wansensoft.utils.enums.BaseCodeEnum;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.DeptListVO;
 import org.springframework.stereotype.Service;
@@ -57,7 +57,7 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
 
         var departments = departmentMapper.selectBatchIds(userDeptRelList);
         if(departments.isEmpty()) {
-            return Response.responseMsg(CodeEnum.QUERY_DATA_EMPTY);
+            return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
         }
         // find children department only 2 leave
         departments.forEach(item -> {
