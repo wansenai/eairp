@@ -19,6 +19,7 @@ import com.wansensoft.entities.user.SysUser;
 import com.wansensoft.entities.user.SysUserDeptRel;
 import com.wansensoft.entities.user.SysUserRoleRel;
 import com.wansensoft.mappers.role.SysRoleMapper;
+import com.wansensoft.mappers.system.SysDepartmentMapper;
 import com.wansensoft.mappers.user.SysUserMapper;
 import com.wansensoft.middleware.security.JWTUtil;
 import com.wansensoft.service.user.ISysUserDeptRelService;
@@ -44,6 +45,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -70,13 +72,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private final SysRoleMapper roleMapper;
 
-    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService, ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper) {
+    private final SysDepartmentMapper departmentMapper;
+
+    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService, ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper) {
         this.userMapper = userMapper;
         this.redisUtil = redisUtil;
         this.jwtUtil = jwtUtil;
         this.userRoleRelService = userRoleRelService;
         this.userDeptRelService = userDeptRelService;
         this.roleMapper = roleMapper;
+        this.departmentMapper = departmentMapper;
     }
 
 
@@ -334,6 +339,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         return Response.responseMsg(UserCodeEnum.USER_LOGOUT);
     }
 
+    /**
+     * 这里要查询管理角色和部门表以获取 角色名称和 部门名称 主表user 关联表2张 部门和角色表各1张
+     * 所以是5表联查，最好可以用mapper xml写，但我这里实现是通过关联数据集合筛选查询
+     * 后续数据量大的情况下可以使用二分查询
+     *
+     * @param userListDto 用户列表查询数据请求对象
+     * @return 返回用户列表
+     */
     @Override
     public Response<Page<UserListVO>> userList(UserListDTO userListDto) {
         var result = new Page<UserListVO>();
@@ -364,20 +377,51 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         query.eq(StringUtils.hasText(userListDto.getUsername()), SysUser::getUserName, userListDto.getUsername());
         query.eq(StringUtils.hasText(userListDto.getName()), SysUser::getName, userListDto.getName());
         query.eq(StringUtils.hasText(userListDto.getPhoneNumber()), SysUser::getPhoneNumber, userListDto.getPhoneNumber());
-
         userMapper.selectPage(page, query);
+
+        var resultIds = page.getRecords().stream().map(SysUser::getId).toList();
+
+        // query role info need roleName
+        var userRoles =  userRoleRelService.queryBatchByUserIds(resultIds);
+        var roleIds = userRoles.stream().map(SysUserRoleRel::getRoleId).toList();
+        var roles = roleMapper.selectBatchIds(roleIds);
+        // query department info, need deptName
+        var userDepartments = userDeptRelService.queryBatchByUserIds(resultIds);
+        var deptIds = userDepartments.stream().map(SysUserDeptRel::getDeptId).toList();
+        var departments = departmentMapper.selectBatchIds(deptIds);
+
         page.getRecords().forEach(item -> {
-            UserListVO userListVo = UserListVO.builder()
+            UserListVO userVo = UserListVO.builder()
                     .id(item.getId())
                     .username(item.getUserName())
                     .name(item.getName())
-                    .roleName("")
                     .phoneNumber(item.getPhoneNumber())
                     .email(item.getEmail())
                     .status(item.getStatus())
                     .createTime(item.getCreateTime())
                     .build();
-            userListVos.add(userListVo);
+            // bind roleName
+            userRoles.forEach(userRole -> {
+                roles.forEach(role -> {
+                    if(Objects.equals(item.getId(), userRole.getUserId()) &&
+                            Objects.equals(userRole.getRoleId(), role.getId())) {
+                        userVo.setRoleId(role.getId());
+                        userVo.setRoleName(role.getName());
+                    }
+                });
+            });
+            // bind deptName
+            userDepartments.forEach(userDept -> {
+                departments.forEach(dept -> {
+                    if(Objects.equals(item.getId(), userDept.getUserId()) &&
+                            Objects.equals(userDept.getDeptId(), dept.getId())) {
+                        userVo.setDeptId(dept.getId());
+                        userVo.setDeptName(dept.getName());
+                    }
+                });
+            });
+
+            userListVos.add(userVo);
         });
         result.setRecords(userListVos);
         result.setTotal(page.getTotal());

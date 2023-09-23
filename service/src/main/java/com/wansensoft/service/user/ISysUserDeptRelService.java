@@ -15,6 +15,8 @@ package com.wansensoft.service.user;
 import com.wansensoft.entities.user.SysUserDeptRel;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  * 部门用户关系表 服务类
@@ -22,4 +24,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ISysUserDeptRelService extends IService<SysUserDeptRel> {
 
+    List<SysUserDeptRel> queryBatchByUserIds(List<Long> userIds);
 }

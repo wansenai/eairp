@@ -6,6 +6,8 @@ import com.wansensoft.service.user.ISysUserDeptRelService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * <p>
  * 部门用户关系表 服务实现类
@@ -17,4 +19,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class SysUserDeptRelServiceImpl extends ServiceImpl<SysUserDeptRelMapper, SysUserDeptRel> implements ISysUserDeptRelService {
 
+    @Override
+    public List<SysUserDeptRel> queryBatchByUserIds(List<Long> userIds) {
+        return lambdaQuery()
+                .in(SysUserDeptRel::getUserId, userIds)
+                .list();
+    }
 }
