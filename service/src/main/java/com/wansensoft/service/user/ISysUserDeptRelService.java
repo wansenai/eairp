@@ -10,18 +10,16 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.dto.user;
+package com.wansensoft.service.user;
 
-import lombok.Data;
+import com.wansensoft.entities.user.SysUserDeptRel;
+import com.baomidou.mybatisplus.extension.service.IService;
 
-@Data
-public class UpdatePasswordDto {
+/**
+ * <p>
+ * 部门用户关系表 服务类
+ * </p>
+ */
+public interface ISysUserDeptRelService extends IService<SysUserDeptRel> {
 
-    String username;
-
-    String password;
-
-    String phoneNumber;
-
-    String sms;
 }

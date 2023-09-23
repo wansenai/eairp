@@ -29,8 +29,8 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("sys_organization")
-public class SysOrganization implements Serializable {
+@TableName("sys_department")
+public class SysDepartment implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,22 +46,22 @@ public class SysOrganization implements Serializable {
     private Long tenantId;
 
     /**
-     * 父机构id
+     * 父级部门id
      */
     private Long parentId;
 
     /**
-     * 机构编号
+     * 部门编号
      */
-    private String organizationNumber;
+    private String number;
 
     /**
-     * 机构简称
+     * 部门简称
      */
-    private String organizationName;
+    private String name;
 
     /**
-     * 负责人
+     * 部门负责人
      */
     private String leader;
 
@@ -71,7 +71,7 @@ public class SysOrganization implements Serializable {
     private String remark;
 
     /**
-     * 机构显示顺序
+     * 部门显示顺序
      */
     private String sort;
 

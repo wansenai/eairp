@@ -17,9 +17,9 @@ import com.wansensoft.dto.user.*;
 import com.wansensoft.entities.user.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.utils.response.Response;
-import com.wansensoft.vo.UserInfoVo;
-import com.wansensoft.vo.UserListVo;
-import com.wansensoft.vo.UserRoleVo;
+import com.wansensoft.vo.UserInfoVO;
+import com.wansensoft.vo.UserListVO;
+import com.wansensoft.vo.UserRoleVO;
 
 import java.util.List;
 
@@ -30,25 +30,27 @@ import java.util.List;
  */
 public interface ISysUserService extends IService<SysUser> {
 
-    Response<String> accountRegister(AccountRegisterDto accountRegisterDto);
+    Response<String> accountRegister(AccountRegisterDTO accountRegisterDto);
 
-    Response<UserInfoVo> accountLogin(AccountLoginDto accountLoginDto);
+    Response<UserInfoVO> accountLogin(AccountLoginDTO accountLoginDto);
 
-    Response<UserInfoVo> mobileLogin(MobileLoginDto mobileLoginDto);
+    Response<UserInfoVO> mobileLogin(MobileLoginDTO mobileLoginDto);
 
     Response<String> updatePassword(UpdatePasswordDto updatePasswordDto);
 
-    Response<UserInfoVo> userInfo();
+    Response<UserInfoVO> userInfo();
 
-    UserInfoVo getCurrentUser();
+    UserInfoVO getCurrentUser();
 
     String getCurrentUserId();
 
+    String getCurrentTenantId();
+
     String getCurrentUserName();
 
-    Response<List<UserRoleVo>> userRole();
+    Response<List<UserRoleVO>> userRole();
 
     Response<String> userLogout();
 
-    Response<Page<UserListVo>> userList(UserListDto pageDto);
+    Response<Page<UserListVO>> userList(UserListDTO pageDto);
 }

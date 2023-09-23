@@ -15,13 +15,19 @@ package com.wansensoft.dto.user;
 import lombok.Data;
 
 @Data
-public class AccountLoginDto {
+public class UpdateUserDTO {
 
-    String username;
+    private Long Id;
 
-    String password;
+    private String name;
 
-    String captchaId;
+    private Integer status;
 
-    String captcha;
+    private String email;
+
+    private String phoneNumber;
+
+    private String position;
+
+    private Integer leaderFlag;
 }

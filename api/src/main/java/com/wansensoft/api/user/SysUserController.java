@@ -16,9 +16,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansensoft.dto.user.*;
 import com.wansensoft.service.user.ISysUserService;
 import com.wansensoft.utils.response.Response;
-import com.wansensoft.vo.UserInfoVo;
-import com.wansensoft.vo.UserListVo;
-import com.wansensoft.vo.UserRoleVo;
+import com.wansensoft.vo.UserInfoVO;
+import com.wansensoft.vo.UserListVO;
+import com.wansensoft.vo.UserRoleVO;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -43,17 +43,17 @@ public class SysUserController {
     }
 
     @PostMapping("register")
-    public Response<String> accountRegister(@RequestBody AccountRegisterDto accountRegisterDto) {
+    public Response<String> accountRegister(@RequestBody AccountRegisterDTO accountRegisterDto) {
         return userService.accountRegister(accountRegisterDto);
     }
 
     @PostMapping(value = "login")
-    public Response<UserInfoVo> accountLogin(@RequestBody AccountLoginDto accountLoginDto) {
+    public Response<UserInfoVO> accountLogin(@RequestBody AccountLoginDTO accountLoginDto) {
         return userService.accountLogin(accountLoginDto);
     }
 
     @PostMapping(value = "mobileLogin")
-    public Response<UserInfoVo> accountLogin(@RequestBody MobileLoginDto mobileLoginDto) {
+    public Response<UserInfoVO> accountLogin(@RequestBody MobileLoginDTO mobileLoginDto) {
         return userService.mobileLogin(mobileLoginDto);
     }
 
@@ -63,12 +63,12 @@ public class SysUserController {
     }
 
     @GetMapping(value = "info")
-    public Response<UserInfoVo> info() {
+    public Response<UserInfoVO> info() {
         return userService.userInfo();
     }
 
     @GetMapping(value = "perm")
-    public Response<List<UserRoleVo>> permission() {
+    public Response<List<UserRoleVO>> permission() {
         return userService.userRole();
     }
 
@@ -78,7 +78,13 @@ public class SysUserController {
     }
 
     @PostMapping(value = "list")
-    public Response<Page<UserListVo>> list(@RequestBody UserListDto userListDto) {
+    public Response<Page<UserListVO>> list(@RequestBody UserListDTO userListDto) {
         return userService.userList(userListDto);
     }
+
+    @PostMapping(value = "update")
+    public Response<String> update(@RequestBody UpdateUserDTO updateUserDTO) {
+        return null;
+    }
+
 }

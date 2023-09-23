@@ -10,16 +10,22 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.mappers.system;
+package com.wansensoft.dto.user;
 
-import com.wansensoft.entities.SysOrganization;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * <p>
- * 机构表 Mapper 接口
- * </p>
- */
-public interface SysOrganizationMapper extends BaseMapper<SysOrganization> {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class AccountRegisterDTO {
 
+    String username;
+
+    String password;
+
+    String phoneNumber;
+
+    String sms;
 }

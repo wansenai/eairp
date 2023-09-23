@@ -23,14 +23,14 @@ import lombok.experimental.Accessors;
 
 /**
  * <p>
- * 机构用户关系表
+ * 用户部门关系表
  * </p>
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("sys_user_org_rel")
-public class SysUserOrgRel implements Serializable {
+@TableName("sys_user_dept_rel")
+public class SysUserDeptRel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,9 +46,9 @@ public class SysUserOrgRel implements Serializable {
     private Long tenantId;
 
     /**
-     * 机构id
+     * 部门id
      */
-    private Long organizationId;
+    private Long deptId;
 
     /**
      * 用户id
@@ -56,9 +56,9 @@ public class SysUserOrgRel implements Serializable {
     private Long userId;
 
     /**
-     * 用户在所属机构中显示顺序
+     * 用户在所属部门中显示顺序
      */
-    private String userOrganizationSort;
+    private String userDeptSort;
 
     /**
      * 删除标记，0未删除，1删除

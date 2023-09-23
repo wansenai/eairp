@@ -75,11 +75,6 @@ public class SysUser implements Serializable {
     private String position;
 
     /**
-     * 所属部门
-     */
-    private String department;
-
-    /**
      * 电子邮箱
      */
     private String email;

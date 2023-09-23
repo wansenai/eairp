@@ -10,16 +10,25 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.mappers.user;
+package com.wansensoft.dto;
 
-import com.wansensoft.entities.user.SysUserOrgRel;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import lombok.Data;
 
 /**
- * <p>
- * 机构用户关系表 Mapper 接口
- * </p>
+ * 默认分页数据传输对象，针对需要进行分页查询的请求
+ * 如果需要就继承该类
  */
-public interface SysUserOrgRelMapper extends BaseMapper<SysUserOrgRel> {
+@Data
+public class PageSizeDTO {
+
+    /**
+     * 查询列表总记录数
+     */
+    int page = 0;
+
+    /**
+     * 每页显示条数，默认10
+     */
+    int pageSize = 10;
 
 }

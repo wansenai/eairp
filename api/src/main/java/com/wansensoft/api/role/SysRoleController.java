@@ -15,13 +15,10 @@ package com.wansensoft.api.role;
 import com.alibaba.fastjson.JSONObject;
 import com.wansensoft.service.system.ISysMenuService;
 import com.wansensoft.utils.response.Response;
-import com.wansensoft.vo.MenuVo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * <p>

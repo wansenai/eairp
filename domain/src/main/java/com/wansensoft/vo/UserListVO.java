@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class UserListVo {
+public class UserListVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
@@ -23,5 +23,6 @@ public class UserListVo {
 
     private Integer status;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "GMT+8")
     private String createTime;
 }

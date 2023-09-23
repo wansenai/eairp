@@ -16,10 +16,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansensoft.dto.user.*;
 import com.wansensoft.entities.user.SysUser;
+import com.wansensoft.entities.user.SysUserDeptRel;
 import com.wansensoft.entities.user.SysUserRoleRel;
 import com.wansensoft.mappers.role.SysRoleMapper;
 import com.wansensoft.mappers.user.SysUserMapper;
 import com.wansensoft.middleware.security.JWTUtil;
+import com.wansensoft.service.user.ISysUserDeptRelService;
 import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -30,11 +32,10 @@ import com.wansensoft.utils.CommonTools;
 import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.enums.CodeEnum;
 import com.wansensoft.utils.redis.RedisUtil;
-import com.wansensoft.vo.UserInfoVo;
-import com.wansensoft.vo.UserListVo;
-import com.wansensoft.vo.UserRoleVo;
+import com.wansensoft.vo.UserInfoVO;
+import com.wansensoft.vo.UserListVO;
+import com.wansensoft.vo.UserRoleVO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.Md5Crypt;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -65,29 +66,32 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private final ISysUserRoleRelService userRoleRelService;
 
+    private final ISysUserDeptRelService userDeptRelService;
+
     private final SysRoleMapper roleMapper;
 
-    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService, SysRoleMapper roleMapper) {
+    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService, ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper) {
         this.userMapper = userMapper;
         this.redisUtil = redisUtil;
         this.jwtUtil = jwtUtil;
         this.userRoleRelService = userRoleRelService;
+        this.userDeptRelService = userDeptRelService;
         this.roleMapper = roleMapper;
     }
 
 
     @Override
-    public Response<String> accountRegister(AccountRegisterDto accountRegisterDto) {
+    public Response<String> accountRegister(AccountRegisterDTO accountRegisterDto) {
         if (accountRegisterDto == null) {
             return Response.responseMsg(CodeEnum.PARAMETER_NULL);
         }
 
         var verifyCode = redisUtil.get(SecurityConstants.REGISTER_VERIFY_CODE_CACHE_PREFIX + accountRegisterDto.getPhoneNumber());
-        if(ObjectUtils.isEmpty(verifyCode)) {
+        if (ObjectUtils.isEmpty(verifyCode)) {
             return Response.responseMsg(CodeEnum.SMS_VERIFY_CODE_EXPIRE);
         }
 
-        if(!String.valueOf(verifyCode).equals(accountRegisterDto.getSms())) {
+        if (!String.valueOf(verifyCode).equals(accountRegisterDto.getSms())) {
             return Response.responseMsg(CodeEnum.SMS_VERIFY_CODE_ERROR);
         }
 
@@ -95,14 +99,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         var isRegister = lambdaQuery()
                 .eq(SysUser::getUserName, accountRegisterDto.getUsername())
                 .exists();
-        if(isRegister) {
+        if (isRegister) {
             return Response.responseMsg(CodeEnum.USER_NAME_EXISTS);
         }
 
         var checkPhoneNumber = lambdaQuery()
                 .eq(SysUser::getPhoneNumber, accountRegisterDto.getPhoneNumber())
                 .exists();
-        if(checkPhoneNumber) {
+        if (checkPhoneNumber) {
             return Response.responseMsg(CodeEnum.PHONE_EXISTS);
         }
 
@@ -123,14 +127,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public Response<UserInfoVo> accountLogin(AccountLoginDto accountLoginDto) {
+    public Response<UserInfoVO> accountLogin(AccountLoginDTO accountLoginDto) {
 
         var verifyCode = redisUtil.get(SecurityConstants.EMAIL_VERIFY_CODE_CACHE_PREFIX + accountLoginDto.getCaptchaId());
-        if(ObjectUtils.isEmpty(verifyCode)) {
+        if (ObjectUtils.isEmpty(verifyCode)) {
             return Response.responseMsg(CodeEnum.VERIFY_CODE_EXPIRE);
         }
 
-        if(!String.valueOf(verifyCode).equals(accountLoginDto.getCaptcha())) {
+        if (!String.valueOf(verifyCode).equals(accountLoginDto.getCaptcha())) {
             return Response.responseMsg(CodeEnum.VERIFY_CODE_ERROR);
         }
 
@@ -139,42 +143,39 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .eq(SysUser::getPassword, CommonTools.md5Encryp(accountLoginDto.getPassword()))
                 .one();
 
-        if(user == null) {
+        if (user == null) {
             return Response.responseMsg(CodeEnum.USERNAME_OR_PASSWORD_ERROR);
         }
 
         var token = "";
-        if(redisUtil.hasKey(user.getUserName() + ":token")) {
+        if (redisUtil.hasKey(user.getUserName() + ":token")) {
             token = String.valueOf(redisUtil.get(user.getUserName() + ":token"));
         } else {
             // 生成JWT的令牌
             token = jwtUtil.createToken(accountLoginDto.getUsername());
             redisUtil.set(accountLoginDto.getUsername() + ":token", token);
             redisUtil.expire(accountLoginDto.getUsername() + ":token", 86400);
-            // 同时存放userId和userName
-            var userId = String.valueOf(user.getId());
-            var tenantId = String.valueOf(user.getTenantId());
+            // 同时存放userId和userName 租户id
             redisUtil.set(token + ":userName", user.getUserName(), 86400);
-            redisUtil.set(token + ":userId", userId, 86400);
-            // 存放租户id
-            // redisUtil.set(token + ":tenantId", tenantId, 86400);
+            redisUtil.set(token + ":userId", String.valueOf(user.getId()), 86400);
+            redisUtil.set(token + ":tenantId", String.valueOf(user.getTenantId()), 86400);
         }
 
-        return Response.responseData(UserInfoVo.builder()
-                        .id(user.getId())
-                        .token(token)
-                        .expire(1694757956L)
+        return Response.responseData(UserInfoVO.builder()
+                .id(user.getId())
+                .token(token)
+                .expire(1694757956L)
                 .build());
     }
 
     @Override
-    public Response<UserInfoVo> mobileLogin(MobileLoginDto mobileLoginDto) {
+    public Response<UserInfoVO> mobileLogin(MobileLoginDTO mobileLoginDto) {
         var verifyCode = redisUtil.getString(SecurityConstants.LOGIN_VERIFY_CODE_CACHE_PREFIX + mobileLoginDto.getPhoneNumber());
-        if(ObjectUtils.isEmpty(verifyCode)) {
+        if (ObjectUtils.isEmpty(verifyCode)) {
             return Response.responseMsg(CodeEnum.SMS_VERIFY_CODE_EXPIRE);
         }
 
-        if(!verifyCode.equals(mobileLoginDto.getSms())) {
+        if (!verifyCode.equals(mobileLoginDto.getSms())) {
             return Response.responseMsg(CodeEnum.SMS_VERIFY_CODE_ERROR);
         }
 
@@ -182,12 +183,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .eq(SysUser::getPhoneNumber, mobileLoginDto.getPhoneNumber())
                 .one();
 
-        if(user == null) {
+        if (user == null) {
             return Response.responseMsg(CodeEnum.USER_NOT_EXISTS);
         }
 
         var token = "";
-        if(redisUtil.hasKey(user.getUserName() + ":token")) {
+        if (redisUtil.hasKey(user.getUserName() + ":token")) {
             token = String.valueOf(redisUtil.get(user.getUserName() + ":token"));
         } else {
             // 生成JWT的令牌
@@ -195,11 +196,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             redisUtil.set(user.getUserName() + ":token", token);
             redisUtil.expire(user.getUserName() + ":token", 86400);
             var userId = String.valueOf(user.getId());
+            var tenantId = String.valueOf(user.getTenantId());
             redisUtil.set(token + ":userName", user.getUserName(), 86400);
             redisUtil.set(token + ":userId", userId, 86400);
+            redisUtil.set(token + ":tenantId", tenantId, 86400);
         }
 
-        return Response.responseData(UserInfoVo.builder()
+        return Response.responseData(UserInfoVO.builder()
                 .id(user.getId())
                 .token(token)
                 .expire(1694757956L)
@@ -208,16 +211,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public Response<String> updatePassword(UpdatePasswordDto updatePasswordDto) {
-        if(updatePasswordDto == null) {
+        if (updatePasswordDto == null) {
             return Response.responseMsg(CodeEnum.PARAMETER_NULL);
         }
 
         var verifyCode = redisUtil.getString(SecurityConstants.UPDATE_PASSWORD_VERIFY_CODE_CACHE_PREFIX + updatePasswordDto.getPhoneNumber());
-        if(ObjectUtils.isEmpty(verifyCode)) {
+        if (ObjectUtils.isEmpty(verifyCode)) {
             return Response.responseMsg(CodeEnum.SMS_VERIFY_CODE_EXPIRE);
         }
 
-        if(!verifyCode.equals(updatePasswordDto.getSms())) {
+        if (!verifyCode.equals(updatePasswordDto.getSms())) {
             return Response.responseMsg(CodeEnum.SMS_VERIFY_CODE_ERROR);
         }
 
@@ -226,7 +229,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .eq(SysUser::getPhoneNumber, updatePasswordDto.getPhoneNumber())
                 .one();
 
-        if(isExists == null) {
+        if (isExists == null) {
             return Response.responseMsg(CodeEnum.USER_NOT_EXISTS);
         }
 
@@ -236,7 +239,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .set(SysUser::getPassword, CommonTools.md5Encryp(updatePasswordDto.getPassword()))
                 .update();
 
-        if(!result) {
+        if (!result) {
             return Response.responseMsg(CodeEnum.UPDATE_PASSWORD_ERROR);
         }
 
@@ -244,7 +247,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public Response<UserInfoVo> userInfo() {
+    public Response<UserInfoVO> userInfo() {
         var user = getCurrentUser();
         if (user == null) {
             return Response.responseMsg(CodeEnum.QUERY_DATA_EMPTY);
@@ -262,16 +265,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 通过请求获取当前用户信息
+     *
      * @return UserInfoVo
      */
     @Override
-    public UserInfoVo getCurrentUser() {
+    public UserInfoVO getCurrentUser() {
         var token = httpServletRequestContextToken();
         if (StringUtils.hasText(token)) {
             var userId = Long.parseLong(redisUtil.getString(token + ":userId"));
             var user = userMapper.selectById(userId);
             if (user != null) {
-                return UserInfoVo.builder()
+                return UserInfoVO.builder()
                         .id(user.getId())
                         .name(user.getName())
                         .userName(user.getUserName())
@@ -289,25 +293,31 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    public String getCurrentTenantId() {
+        var token = httpServletRequestContextToken();
+        return redisUtil.getString(token + ":tenantId");
+    }
+
+    @Override
     public String getCurrentUserName() {
         var token = httpServletRequestContextToken();
         return redisUtil.getString(token + ":userName");
     }
 
     @Override
-    public Response<List<UserRoleVo>> userRole() {
-        var userRoleVos = new ArrayList<UserRoleVo>();
+    public Response<List<UserRoleVO>> userRole() {
+        var userRoleVos = new ArrayList<UserRoleVO>();
 
         var userId = Long.parseLong(getCurrentUserId());
         var ids = userRoleRelService.queryByUserId(userId).stream()
                 .map(SysUserRoleRel::getRoleId).toList();
-        if(ids.isEmpty()) {
+        if (ids.isEmpty()) {
             return Response.responseMsg(CodeEnum.QUERY_DATA_EMPTY);
         }
 
         var roles = roleMapper.selectBatchIds(ids);
         roles.forEach(item -> {
-            UserRoleVo userRoleVo = new UserRoleVo();
+            UserRoleVO userRoleVo = new UserRoleVO();
             userRoleVo.setRoleId(item.getId());
             userRoleVo.setRoleType(item.getType());
             userRoleVo.setRoleName(item.getName());
@@ -325,24 +335,39 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public Response<Page<UserListVo>> userList(UserListDto userListDto) {
-        var result = new Page<UserListVo>();
-        var userListVos = new ArrayList<UserListVo>();
+    public Response<Page<UserListVO>> userList(UserListDTO userListDto) {
+        var result = new Page<UserListVO>();
+        var userListVos = new ArrayList<UserListVO>();
+
+        // Dept query
+        var userIds = new ArrayList<Long>();
+        if (StringUtils.hasText(userListDto.getDepartmentId())) {
+            var userDeptRelList = userDeptRelService.lambdaQuery()
+                    .eq(SysUserDeptRel::getDeptId, userListDto.getDepartmentId())
+                    .list();
+            if (!userDeptRelList.isEmpty()) {
+                userIds.addAll(userDeptRelList.stream().map(SysUserDeptRel::getUserId).toList());
+                userMapper.selectBatchIds(userIds);
+            }
+        }
+
         var user = userMapper.selectById(getCurrentUserId());
         var tenantId = user.getTenantId();
 
         Page<SysUser> page = new Page<>(userListDto.getPage(), userListDto.getPageSize());
         LambdaQueryWrapper<SysUser> query = new LambdaQueryWrapper<>();
+        if (!userIds.isEmpty()) {
+            query.in(SysUser::getId, userIds);
+        }
         query.eq(SysUser::getTenantId, tenantId);
         query.eq(StringUtils.hasText(userListDto.getEmail()), SysUser::getEmail, userListDto.getEmail());
         query.eq(StringUtils.hasText(userListDto.getUsername()), SysUser::getUserName, userListDto.getUsername());
         query.eq(StringUtils.hasText(userListDto.getName()), SysUser::getName, userListDto.getName());
         query.eq(StringUtils.hasText(userListDto.getPhoneNumber()), SysUser::getPhoneNumber, userListDto.getPhoneNumber());
-        query.eq(SysUser::getStatus, UserConstants.USER_STATUS_ENABLE);
 
         userMapper.selectPage(page, query);
         page.getRecords().forEach(item -> {
-            UserListVo userListVo = UserListVo.builder()
+            UserListVO userListVo = UserListVO.builder()
                     .id(item.getId())
                     .username(item.getUserName())
                     .name(item.getName())

@@ -10,20 +10,24 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.system;
+package com.wansensoft.vo;
 
-import com.wansensoft.dto.organization.OrganizationListDto;
-import com.wansensoft.entities.SysOrganization;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansensoft.utils.response.Response;
-import com.wansensoft.vo.OrganizationListVo;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * <p>
- * 机构表 服务类
- * </p>
- */
-public interface ISysOrganizationService extends IService<SysOrganization> {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserRoleVO {
 
-    Response<OrganizationListVo> queryOrganization(OrganizationListDto organizationListDto);
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long roleId;
+
+    private String roleName;
+
+    private String roleType;
 }

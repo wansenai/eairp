@@ -10,16 +10,24 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.vo;
+package com.wansensoft.service.system;
 
-import lombok.Builder;
-import lombok.Data;
+import com.wansensoft.dto.organization.DeptListDTO;
+import com.wansensoft.entities.SysDepartment;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.DeptListVO;
 
-@Data
-@Builder
-public class CaptchaVo {
+import java.util.List;
 
-    private String captchaId;
+/**
+ * <p>
+ * 机构表 服务类
+ * </p>
+ */
+public interface ISysDepartmentService extends IService<SysDepartment> {
 
-    private String imagePath;
+    Response<DeptListVO> deptList(DeptListDTO deptListDto);
+
+    Response<List<DeptListVO>> getUserDeptRel();
 }

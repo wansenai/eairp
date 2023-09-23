@@ -10,18 +10,16 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.dto.user;
+package com.wansensoft.mappers.user;
 
-import lombok.Data;
+import com.wansensoft.entities.user.SysUserDeptRel;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-@Data
-public class UpdatePasswordDto {
+/**
+ * <p>
+ * 机构用户关系表 Mapper 接口
+ * </p>
+ */
+public interface SysUserDeptRelMapper extends BaseMapper<SysUserDeptRel> {
 
-    String username;
-
-    String password;
-
-    String phoneNumber;
-
-    String sms;
 }
