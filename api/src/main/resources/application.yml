@@ -2,8 +2,6 @@ server:
   port: 9999
   servlet:
     context-path: /erp-api
-  tomcat:
-      basedir: /opt/tmp/tomcat
 
 spring:
   profiles:
