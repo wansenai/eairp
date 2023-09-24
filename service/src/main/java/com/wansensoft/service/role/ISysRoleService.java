@@ -14,6 +14,8 @@ package com.wansensoft.service.role;
 
 import com.wansensoft.entities.role.SysRole;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.RoleVO;
 
 import java.util.List;
 
@@ -24,4 +26,5 @@ import java.util.List;
  */
 public interface ISysRoleService extends IService<SysRole> {
 
+    Response<List<RoleVO>> roleList();
 }

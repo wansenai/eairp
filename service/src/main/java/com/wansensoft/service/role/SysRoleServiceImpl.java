@@ -15,7 +15,13 @@ package com.wansensoft.service.role;
 import com.wansensoft.entities.role.SysRole;
 import com.wansensoft.mappers.role.SysRoleMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.RoleVO;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -25,4 +31,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> implements ISysRoleService {
 
+    @Override
+    public Response<List<RoleVO>> roleList() {
+        var roles = new ArrayList<RoleVO>();
+
+        var sysRoles = lambdaQuery().list();
+        sysRoles.forEach(item -> {
+            var roleVo = new RoleVO();
+            BeanUtils.copyProperties(item, roleVo);
+
+            roles.add(roleVo);
+        });
+
+        return Response.responseData(roles);
+    }
 }

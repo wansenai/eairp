@@ -13,12 +13,16 @@
 package com.wansensoft.api.role;
 
 import com.alibaba.fastjson.JSONObject;
+import com.wansensoft.service.role.ISysRoleService;
 import com.wansensoft.service.system.ISysMenuService;
 import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.RoleVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * <p>
@@ -34,8 +38,11 @@ public class SysRoleController {
 
     private final ISysMenuService menuService;
 
-    public SysRoleController(ISysMenuService menuService) {
+    private final ISysRoleService roleService;
+
+    public SysRoleController(ISysMenuService menuService, ISysRoleService roleService) {
         this.menuService = menuService;
+        this.roleService = roleService;
     }
 
 
@@ -43,4 +50,10 @@ public class SysRoleController {
     public Response<JSONObject> queryMenu() {
         return menuService.menuList();
     }
+
+    @GetMapping("list")
+    public Response<List<RoleVO>> getRoleList() {
+        return roleService.roleList();
+    }
+
 }

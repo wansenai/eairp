@@ -325,7 +325,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             UserRoleVO userRoleVo = new UserRoleVO();
             userRoleVo.setRoleId(item.getId());
             userRoleVo.setRoleType(item.getType());
-            userRoleVo.setRoleName(item.getName());
+            userRoleVo.setRoleName(item.getRoleName());
             userRoleVos.add(userRoleVo);
         });
 
@@ -354,9 +354,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
         // Dept query
         var userIds = new ArrayList<Long>();
-        if (StringUtils.hasText(userListDto.getDepartmentId())) {
+        if (StringUtils.hasText(userListDto.getDeptId())) {
             var userDeptRelList = userDeptRelService.lambdaQuery()
-                    .eq(SysUserDeptRel::getDeptId, userListDto.getDepartmentId())
+                    .eq(SysUserDeptRel::getDeptId, userListDto.getDeptId())
                     .list();
             if (!userDeptRelList.isEmpty()) {
                 userIds.addAll(userDeptRelList.stream().map(SysUserDeptRel::getUserId).toList());
@@ -406,7 +406,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                     if(Objects.equals(item.getId(), userRole.getUserId()) &&
                             Objects.equals(userRole.getRoleId(), role.getId())) {
                         userVo.setRoleId(role.getId());
-                        userVo.setRoleName(role.getName());
+                        userVo.setRoleName(role.getRoleName());
                     }
                 });
             });
