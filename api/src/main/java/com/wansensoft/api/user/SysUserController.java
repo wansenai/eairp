@@ -87,4 +87,13 @@ public class SysUserController {
         return userService.updateUser(updateUserDTO);
     }
 
+    @PostMapping(value = "addOrUpdate")
+    public Response<String> addOrUpdate(@RequestBody AddOrUpdateUserDTO addOrUpdateUserDTO) {
+        return userService.addOrUpdate(addOrUpdateUserDTO);
+    }
+
+    @PostMapping(value = "delete")
+    public Response<String> deleteUser(@RequestParam(value = "ids") List<Long> ids) {
+        return userService.deleteUser(ids);
+    }
 }

@@ -27,6 +27,7 @@ import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.utils.SnowflakeIdUtil;
+import com.wansensoft.utils.constants.CommonConstants;
 import com.wansensoft.utils.enums.UserCodeEnum;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.CommonTools;
@@ -38,15 +39,14 @@ import com.wansensoft.vo.UserListVO;
 import com.wansensoft.vo.UserRoleVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * <p>
@@ -74,7 +74,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private final SysDepartmentMapper departmentMapper;
 
-    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService, ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper) {
+    public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService,
+                              ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper) {
         this.userMapper = userMapper;
         this.redisUtil = redisUtil;
         this.jwtUtil = jwtUtil;
@@ -101,10 +102,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
 
         // check if the username under the same tenant is duplicate
-        var isRegister = lambdaQuery()
-                .eq(SysUser::getUserName, accountRegisterDto.getUsername())
-                .exists();
-        if (isRegister) {
+        if (checkUserNameExist(accountRegisterDto.getUsername())) {
             return Response.responseMsg(UserCodeEnum.USER_NAME_EXISTS);
         }
 
@@ -377,12 +375,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         query.eq(StringUtils.hasText(userListDto.getUsername()), SysUser::getUserName, userListDto.getUsername());
         query.eq(StringUtils.hasText(userListDto.getName()), SysUser::getName, userListDto.getName());
         query.eq(StringUtils.hasText(userListDto.getPhoneNumber()), SysUser::getPhoneNumber, userListDto.getPhoneNumber());
+        query.eq(SysUser::getDeleteFlag, CommonConstants.NOT_DELETED);
         userMapper.selectPage(page, query);
 
         var resultIds = page.getRecords().stream().map(SysUser::getId).toList();
 
         // query role info need roleName
-        var userRoles =  userRoleRelService.queryBatchByUserIds(resultIds);
+        var userRoles = userRoleRelService.queryBatchByUserIds(resultIds);
         var roleIds = userRoles.stream().map(SysUserRoleRel::getRoleId).toList();
         var roles = roleMapper.selectBatchIds(roleIds);
         // query department info, need deptName
@@ -401,26 +400,30 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                     .createTime(item.getCreateTime())
                     .build();
             // bind roleName
+            var userRoleIds = new ArrayList<Long>();
+            var roleName = new StringBuilder();
             userRoles.forEach(userRole -> {
                 roles.forEach(role -> {
-                    if(Objects.equals(item.getId(), userRole.getUserId()) &&
+                    if (Objects.equals(item.getId(), userRole.getUserId()) &&
                             Objects.equals(userRole.getRoleId(), role.getId())) {
-                        userVo.setRoleId(role.getId());
-                        userVo.setRoleName(role.getRoleName());
+                        userRoleIds.add(role.getId());
+                        roleName.append(role.getRoleName()).append(" ");
                     }
                 });
             });
+            userVo.setRoleName(String.valueOf(roleName));
+            userVo.setRoleId(userRoleIds);
             // bind deptName
+            var userDepartmentIds = new ArrayList<Long>();
             userDepartments.forEach(userDept -> {
                 departments.forEach(dept -> {
-                    if(Objects.equals(item.getId(), userDept.getUserId()) &&
+                    if (Objects.equals(item.getId(), userDept.getUserId()) &&
                             Objects.equals(userDept.getDeptId(), dept.getId())) {
-                        userVo.setDeptId(dept.getId());
-                        userVo.setDeptName(dept.getName());
+                        userDepartmentIds.add(dept.getId());
                     }
                 });
             });
-
+            userVo.setDeptId(userDepartmentIds);
             userListVos.add(userVo);
         });
         result.setRecords(userListVos);
@@ -433,7 +436,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public Response<String> updateUser(UpdateUserDTO updateUserDTO) {
-        if(updateUserDTO == null) {
+        if (updateUserDTO == null) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
 
@@ -446,10 +449,99 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .set(null != updateUserDTO.getStatus(), SysUser::getStatus, updateUserDTO.getStatus())
                 .update();
 
-        if(!updateResult) {
+        if (!updateResult) {
             return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_ERROR);
         }
 
         return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS);
+    }
+
+    private Boolean checkUserNameExist(String userName) {
+        return lambdaQuery()
+                .eq(SysUser::getUserName, userName)
+                .exists();
+    }
+
+    @Override
+    @Transactional
+    public Response<String> addOrUpdate(AddOrUpdateUserDTO addOrUpdateUserDTO) {
+        if (addOrUpdateUserDTO.getId() != null) {
+            // update
+            return null;
+        } else {
+            // Add
+            if (checkUserNameExist(addOrUpdateUserDTO.getUsername())) {
+                return Response.responseMsg(UserCodeEnum.USER_NAME_EXISTS);
+            }
+
+            var userId = SnowflakeIdUtil.nextId();
+            var user = SysUser.builder()
+                    .id(userId)
+                    .userName(addOrUpdateUserDTO.getUsername())
+                    .name(addOrUpdateUserDTO.getName())
+                    .phoneNumber(addOrUpdateUserDTO.getPhoneNumber())
+                    .email(addOrUpdateUserDTO.getEmail())
+                    .createBy(Long.parseLong(getCurrentUserId()))
+                    .createTime(LocalDateTime.now())
+                    .description(addOrUpdateUserDTO.getRemake())
+                    .tenantId(Long.parseLong(getCurrentTenantId()))
+                    .build();
+
+            var saveUserResult = save(user);
+
+            // add dept relation and role relation
+            List<SysUserRoleRel> userRoleReals = new ArrayList<>(5);
+
+            addOrUpdateUserDTO.getRoleId().forEach(roleId -> {
+                var userRoleRel = SysUserRoleRel.builder()
+                        .id(SnowflakeIdUtil.nextId())
+                        .roleId(roleId)
+                        .userId(userId)
+                        .tenantId(Long.parseLong(getCurrentTenantId()))
+                        .createBy(Long.parseLong(getCurrentUserId()))
+                        .createTime(LocalDateTime.now())
+                        .build();
+
+                userRoleReals.add(userRoleRel);
+            });
+            var saveUserRoleRealResult = userRoleRelService.saveBatch(userRoleReals);
+
+            List<SysUserDeptRel> userDeptRels = new ArrayList<>(7);
+            addOrUpdateUserDTO.getDeptId().forEach(deptId -> {
+                var userDeptRel = SysUserDeptRel.builder()
+                        .id(SnowflakeIdUtil.nextId())
+                        .deptId(deptId)
+                        .userId(userId)
+                        .tenantId(Long.parseLong(getCurrentTenantId()))
+                        .createBy(Long.parseLong(getCurrentUserId()))
+                        .createTime(LocalDateTime.now())
+                        .build();
+
+                userDeptRels.add(userDeptRel);
+            });
+            var saveUserDeptRealResult = userDeptRelService.saveBatch(userDeptRels);
+
+            if(saveUserResult && saveUserRoleRealResult && saveUserDeptRealResult) {
+                return Response.responseMsg(UserCodeEnum.USER_ADD_SUCCESS);
+            }
+            return Response.responseMsg(UserCodeEnum.USER_ADD_ERROR);
+        }
+    }
+
+    @Override
+    public Response<String> deleteUser(List<Long> ids) {
+        if(ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        boolean deleteResult = lambdaUpdate()
+                .in(SysUser::getId, ids)
+                .set(SysUser::getDeleteFlag, CommonConstants.DELETED)
+                .update();
+        if(!deleteResult) {
+            return Response.responseMsg(UserCodeEnum.USER_DELETE_ERROR);
+        }
+
+        return Response.responseMsg(UserCodeEnum.USER_DELETE_SUCCESS);
     }
 }
