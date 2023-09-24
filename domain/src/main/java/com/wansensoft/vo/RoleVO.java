@@ -10,21 +10,30 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.role;
+package com.wansensoft.vo;
 
-import com.wansensoft.entities.role.SysRole;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansensoft.utils.response.Response;
-import com.wansensoft.vo.RoleVO;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class RoleVO {
 
-/**
- * <p>
- * 角色表 服务类
- * </p>
- */
-public interface ISysRoleService extends IService<SysRole> {
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;
 
-    Response<List<RoleVO>> roleList();
+    private String roleName;
+
+    private String type;
+
+    private Integer priceLimit;
+
+    private Integer status;
 }

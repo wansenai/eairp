@@ -46,7 +46,7 @@ public class SysRole implements Serializable {
     /**
      * 名称
      */
-    private String name;
+    private String roleName;
 
     /**
      * 类型
@@ -56,7 +56,7 @@ public class SysRole implements Serializable {
     /**
      * 价格屏蔽 1-屏蔽采购价 2-屏蔽零售价 3-屏蔽销售价
      */
-    private String priceLimit;
+    private Integer priceLimit;
 
     /**
      * 描述
@@ -66,7 +66,7 @@ public class SysRole implements Serializable {
     /**
      * 状态（0-启用，1-停用）
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 创建时间
@@ -91,7 +91,7 @@ public class SysRole implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }
