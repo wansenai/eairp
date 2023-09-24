@@ -16,5 +16,5 @@ public class UserListDTO extends PageSizeDTO {
 
     private String phoneNumber;
 
-    private String departmentId;
+    private String deptId;
 }
