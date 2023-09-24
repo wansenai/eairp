@@ -1,4 +1,4 @@
-package com.wansensoft.api;/*
+/*
  * Copyright 2023-2033 WanSen AI Team, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
@@ -10,6 +10,7 @@ package com.wansensoft.api;/*
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
+package com.wansensoft.api;
 
 import com.wansensoft.utils.ComputerInfo;
 import org.mybatis.spring.annotation.MapperScan;
