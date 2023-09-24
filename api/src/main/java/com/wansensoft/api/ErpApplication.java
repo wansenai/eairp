@@ -1,4 +1,4 @@
-/*
+package com.wansensoft.api;/*
  * Copyright 2023-2033 WanSen AI Team, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
