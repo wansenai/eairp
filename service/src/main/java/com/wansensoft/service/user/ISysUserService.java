@@ -53,5 +53,10 @@ public interface ISysUserService extends IService<SysUser> {
     Response<String> userLogout();
 
     Response<Page<UserListVO>> userList(UserListDTO pageDto);
+
     Response<String> updateUser(UpdateUserDTO updateUserDTO);
+
+    Response<String> addOrUpdate(AddOrUpdateUserDTO addOrUpdateUserDTO);
+
+    Response<String> deleteUser(List<Long> ids);
 }

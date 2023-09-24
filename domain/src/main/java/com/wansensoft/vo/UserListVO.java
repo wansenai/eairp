@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -16,10 +17,10 @@ public class UserListVO {
     private Long id;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long roleId;
+    private List<Long> roleId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long deptId;
+    private List<Long> deptId;
 
     private String username;
 

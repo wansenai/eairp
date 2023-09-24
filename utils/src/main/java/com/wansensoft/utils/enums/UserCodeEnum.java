@@ -23,6 +23,10 @@ public enum UserCodeEnum {
     // login business
     USER_REGISTER_SUCCESS("A0001", "用户注册成功"),
 
+    USER_ADD_SUCCESS("A0002", "用户添加成功"),
+
+    USER_DELETE_SUCCESS("A0003", "用户删除成功"),
+
     USER_NAME_EXISTS("A0111", "用户名已存在"),
 
     USER_LOGOUT("A0012", "账户注销成功"),
@@ -41,6 +45,10 @@ public enum UserCodeEnum {
     USER_INFO_UPDATE_SUCCESS("A0014", "用户资料修改成功"),
 
     USER_INFO_UPDATE_ERROR("A0202", "用户资料修改失败"),
+
+    USER_ADD_ERROR("A0203", "用户添加失败"),
+
+    USER_DELETE_ERROR("A0204", "用户删除失败"),
 
     // user role
     USER_NOT_PERMISSION("D0000", "用户没有权限");
