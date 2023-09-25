@@ -13,14 +13,14 @@
 package com.wansensoft.api.role;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.role.RoleListDTO;
 import com.wansensoft.service.role.ISysRoleService;
+import com.wansensoft.service.role.KtSysRoleService;
 import com.wansensoft.service.system.ISysMenuService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.RoleVO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,11 +40,13 @@ public class SysRoleController {
 
     private final ISysRoleService roleService;
 
-    public SysRoleController(ISysMenuService menuService, ISysRoleService roleService) {
+    private final KtSysRoleService ktSysRoleService;
+
+    public SysRoleController(ISysMenuService menuService, ISysRoleService roleService, KtSysRoleService ktSysRoleService) {
         this.menuService = menuService;
         this.roleService = roleService;
+        this.ktSysRoleService = ktSysRoleService;
     }
-
 
     @GetMapping("menu")
     public Response<JSONObject> queryMenu() {
@@ -53,7 +55,17 @@ public class SysRoleController {
 
     @GetMapping("list")
     public Response<List<RoleVO>> getRoleList() {
-        return roleService.roleList();
+        return ktSysRoleService.roleList();
+    }
+
+    @PostMapping("PageList")
+    public Response<Page<RoleVO>> getRolePageList(@RequestBody RoleListDTO roleListDTO) {
+        return ktSysRoleService.rolePageList(roleListDTO);
+    }
+
+    @PostMapping("updateStatus")
+    public Response<String> updateStatus(@RequestParam(value = "id") String id, @RequestParam(value = "status") Integer status) {
+        return ktSysRoleService.updateStatus(id, status);
     }
 
 }
