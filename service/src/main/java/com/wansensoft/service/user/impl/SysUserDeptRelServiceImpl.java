@@ -25,4 +25,11 @@ public class SysUserDeptRelServiceImpl extends ServiceImpl<SysUserDeptRelMapper,
                 .in(SysUserDeptRel::getUserId, userIds)
                 .list();
     }
+
+    @Override
+    public List<SysUserDeptRel> queryByUserId(Long userIds) {
+        return lambdaQuery()
+                .eq(SysUserDeptRel::getUserId, userIds)
+                .list();
+    }
 }

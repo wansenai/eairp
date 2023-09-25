@@ -28,6 +28,7 @@ import com.wansensoft.service.user.ISysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.utils.SnowflakeIdUtil;
 import com.wansensoft.utils.constants.CommonConstants;
+import com.wansensoft.utils.constants.UserConstants;
 import com.wansensoft.utils.enums.UserCodeEnum;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.CommonTools;
@@ -106,11 +107,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             return Response.responseMsg(UserCodeEnum.USER_NAME_EXISTS);
         }
 
-        var checkPhoneNumber = lambdaQuery()
-                .eq(SysUser::getPhoneNumber, accountRegisterDto.getPhoneNumber())
-                .exists();
-        if (checkPhoneNumber) {
-            return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
+        if (checkPhoneNumberExist(accountRegisterDto.getPhoneNumber())) {
+            return Response.responseMsg(UserCodeEnum.USER_REGISTER_PHONE_EXISTS);
         }
 
         // start register
@@ -148,6 +146,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
         if (user == null) {
             return Response.responseMsg(UserCodeEnum.USERNAME_OR_PASSWORD_ERROR);
+        }
+
+        if (user.getStatus() == UserConstants.USER_STATUS_DISABLE) {
+            return Response.responseMsg(UserCodeEnum.USER_ACCOUNT_FREEZE);
+        }
+
+        if (user.getDeleteFlag() == CommonConstants.DELETED) {
+            return Response.responseMsg(UserCodeEnum.USER_ACCOUNT_INVALID);
         }
 
         var token = "";
@@ -188,6 +194,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
         if (user == null) {
             return Response.responseMsg(UserCodeEnum.USER_NOT_EXISTS);
+        }
+
+        if (user.getStatus() == UserConstants.USER_STATUS_DISABLE) {
+            return Response.responseMsg(UserCodeEnum.USER_ACCOUNT_FREEZE);
+        }
+
+        if (user.getDeleteFlag() == CommonConstants.DELETED) {
+            return Response.responseMsg(UserCodeEnum.USER_ACCOUNT_INVALID);
         }
 
         var token = "";
@@ -462,22 +476,104 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .exists();
     }
 
+    private Boolean checkPhoneNumberExist(String phoneNumber) {
+        return lambdaQuery()
+                .eq(SysUser::getPhoneNumber, phoneNumber)
+                .exists();
+    }
+
+    private boolean addUserRoleRelations(Long userId, List<Long> roleIds) {
+        List<SysUserRoleRel> userRoleReals = new ArrayList<>(roleIds.size());
+        roleIds.forEach(roleId -> {
+            var userRoleRel = SysUserRoleRel.builder()
+                    .id(SnowflakeIdUtil.nextId())
+                    .roleId(roleId)
+                    .userId(userId)
+                    .tenantId(Long.parseLong(getCurrentTenantId()))
+                    .createBy(Long.parseLong(getCurrentUserId()))
+                    .createTime(LocalDateTime.now())
+                    .build();
+            userRoleReals.add(userRoleRel);
+        });
+        return userRoleRelService.saveBatch(userRoleReals);
+    }
+
+    private boolean addUserDeptRelations(Long userId, List<Long> deptIds) {
+        List<SysUserDeptRel> userDeptReals = new ArrayList<>(deptIds.size());
+        deptIds.forEach(deptId -> {
+            var userDeptRel = SysUserDeptRel.builder()
+                    .id(SnowflakeIdUtil.nextId())
+                    .deptId(deptId)
+                    .userId(userId)
+                    .tenantId(Long.parseLong(getCurrentTenantId()))
+                    .createBy(Long.parseLong(getCurrentUserId()))
+                    .createTime(LocalDateTime.now())
+                    .build();
+            userDeptReals.add(userDeptRel);
+        });
+        return userDeptRelService.saveBatch(userDeptReals);
+    }
+
+
     @Override
     @Transactional
     public Response<String> addOrUpdate(AddOrUpdateUserDTO addOrUpdateUserDTO) {
         if (addOrUpdateUserDTO.getId() != null) {
-            // update
-            return null;
+            var userExist = lambdaQuery()
+                    .eq(SysUser::getId, addOrUpdateUserDTO.getId())
+                    .eq(SysUser::getPhoneNumber, addOrUpdateUserDTO.getPhoneNumber())
+                    .one();
+            if (userExist == null) {
+                if(checkPhoneNumberExist(addOrUpdateUserDTO.getPhoneNumber())) {
+                    return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
+                }
+            }
+            // update user info, Delete the original role and department association information
+            var userRoles = userRoleRelService.queryByUserId(addOrUpdateUserDTO.getId());
+            var userDepartments = userDeptRelService.queryByUserId(addOrUpdateUserDTO.getId());
+            if(!userRoles.isEmpty()) {
+                userRoleRelService.removeBatchByIds(userRoles.stream()
+                        .map(SysUserRoleRel::getId)
+                        .toList()
+                );
+            }
+            if(!userDepartments.isEmpty()) {
+                userDeptRelService.removeBatchByIds(userDepartments.stream()
+                        .map(SysUserDeptRel::getId)
+                        .toList()
+                );
+            }
+            // Reassign roles and departments
+            var saveUserRoleRealResult = addUserRoleRelations(addOrUpdateUserDTO.getId(), addOrUpdateUserDTO.getRoleId());
+            var saveUserDeptRealResult = addUserDeptRelations(addOrUpdateUserDTO.getId(), addOrUpdateUserDTO.getDeptId());
+            var updateUserResult = lambdaUpdate()
+                    .eq(SysUser::getId, addOrUpdateUserDTO.getId())
+                    .set(StringUtils.hasText(addOrUpdateUserDTO.getName()), SysUser::getName, addOrUpdateUserDTO.getName())
+                    .set(StringUtils.hasText(addOrUpdateUserDTO.getPhoneNumber()), SysUser::getPhoneNumber, addOrUpdateUserDTO.getPhoneNumber())
+                    .set(StringUtils.hasText(addOrUpdateUserDTO.getEmail()), SysUser::getEmail, addOrUpdateUserDTO.getEmail())
+                    .set(StringUtils.hasText(addOrUpdateUserDTO.getRemake()), SysUser::getRemark, addOrUpdateUserDTO.getRemake())
+                    .update();
+
+            if(updateUserResult && saveUserRoleRealResult && saveUserDeptRealResult) {
+                return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS);
+            }
+            return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_ERROR);
         } else {
-            // Add
+            // Add user info
             if (checkUserNameExist(addOrUpdateUserDTO.getUsername())) {
                 return Response.responseMsg(UserCodeEnum.USER_NAME_EXISTS);
+            }
+
+            if (checkPhoneNumberExist(addOrUpdateUserDTO.getPhoneNumber())) {
+                return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
             }
 
             var userId = SnowflakeIdUtil.nextId();
             var user = SysUser.builder()
                     .id(userId)
                     .userName(addOrUpdateUserDTO.getUsername())
+                    .password(Optional.ofNullable(CommonTools.md5Encryp(addOrUpdateUserDTO.getPassword()))
+                            .orElse(CommonTools.md5Encryp(UserConstants.DEFAULT_PASSWORD)))
                     .name(addOrUpdateUserDTO.getName())
                     .phoneNumber(addOrUpdateUserDTO.getPhoneNumber())
                     .email(addOrUpdateUserDTO.getEmail())
@@ -490,36 +586,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             var saveUserResult = save(user);
 
             // add dept relation and role relation
-            List<SysUserRoleRel> userRoleReals = new ArrayList<>(5);
-
-            addOrUpdateUserDTO.getRoleId().forEach(roleId -> {
-                var userRoleRel = SysUserRoleRel.builder()
-                        .id(SnowflakeIdUtil.nextId())
-                        .roleId(roleId)
-                        .userId(userId)
-                        .tenantId(Long.parseLong(getCurrentTenantId()))
-                        .createBy(Long.parseLong(getCurrentUserId()))
-                        .createTime(LocalDateTime.now())
-                        .build();
-
-                userRoleReals.add(userRoleRel);
-            });
-            var saveUserRoleRealResult = userRoleRelService.saveBatch(userRoleReals);
-
-            List<SysUserDeptRel> userDeptRels = new ArrayList<>(7);
-            addOrUpdateUserDTO.getDeptId().forEach(deptId -> {
-                var userDeptRel = SysUserDeptRel.builder()
-                        .id(SnowflakeIdUtil.nextId())
-                        .deptId(deptId)
-                        .userId(userId)
-                        .tenantId(Long.parseLong(getCurrentTenantId()))
-                        .createBy(Long.parseLong(getCurrentUserId()))
-                        .createTime(LocalDateTime.now())
-                        .build();
-
-                userDeptRels.add(userDeptRel);
-            });
-            var saveUserDeptRealResult = userDeptRelService.saveBatch(userDeptRels);
+            var saveUserRoleRealResult = addUserRoleRelations(userId, addOrUpdateUserDTO.getRoleId());
+            var saveUserDeptRealResult = addUserDeptRelations(userId, addOrUpdateUserDTO.getDeptId());
 
             if(saveUserResult && saveUserRoleRealResult && saveUserDeptRealResult) {
                 return Response.responseMsg(UserCodeEnum.USER_ADD_SUCCESS);
@@ -543,5 +611,23 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
 
         return Response.responseMsg(UserCodeEnum.USER_DELETE_SUCCESS);
+    }
+
+    @Override
+    public Response<String> resetPassword(Long id) {
+        if(id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        boolean resetResult = lambdaUpdate()
+                .eq(SysUser::getId, id)
+                .set(SysUser::getPassword, CommonTools.md5Encryp(UserConstants.DEFAULT_PASSWORD))
+                .update();
+
+        if(!resetResult) {
+            return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_ERROR);
+        }
+
+        return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_SUCCESS);
     }
 }

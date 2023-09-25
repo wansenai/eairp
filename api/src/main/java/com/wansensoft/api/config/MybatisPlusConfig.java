@@ -43,7 +43,7 @@ public class MybatisPlusConfig {
      * @return
      */
     public Long getTenantIdByToken(String token) {
-        long tenantId = 0L;
+        long tenantId = -1L;
         if(StringUtils.hasText(token)) {
             tenantId = Long.parseLong(redisUtil.getString(token + ":tenantId"));
         }
@@ -53,39 +53,39 @@ public class MybatisPlusConfig {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(HttpServletRequest request) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-//        interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
-//            @Override
-//            public Expression getTenantId() {
-//                String token = request.getHeader("Authorization");
-//                Long tenantId = getTenantIdByToken(token);
-//                if (tenantId!=0L) {
-//                    return new LongValue(tenantId);
-//                } else {
-//                    //超管
-//                    return null;
-//                }
-//            }
-//
-//            // 这是 default 方法,默认返回 false 表示所有表都需要拼多租户条件
-//            @Override
-//            public boolean ignoreTable(String tableName) {
-//                //获取开启状态
-//                boolean res = true;
-//                String token = request.getHeader("Authorization");
-//                Long tenantId = getTenantIdByToken(token);
-//                if (tenantId!=0L) {
-//                    // 这里可以判断是否过滤表
-//                    if ("jsh_material_property".equals(tableName) || "jsh_sequence".equals(tableName)
-//                            || "jsh_user_business".equals(tableName) || "jsh_function".equals(tableName)
-//                            || "jsh_platform_config".equals(tableName) || "jsh_tenant".equals(tableName)) {
-//                        res = true;
-//                    } else {
-//                        res = false;
-//                    }
-//                }
-//                return res;
-//            }
-//        }));
+        interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
+            @Override
+            public Expression getTenantId() {
+                String token = request.getHeader("Authorization");
+                Long tenantId = getTenantIdByToken(token);
+                if (tenantId!=0L) {
+                    return new LongValue(tenantId);
+                } else {
+                    //超管
+                    return null;
+                }
+            }
+
+            // 这是 default 方法,默认返回 false 表示所有表都需要拼多租户条件
+            @Override
+            public boolean ignoreTable(String tableName) {
+                //获取开启状态
+                boolean res = true;
+                String token = request.getHeader("Authorization");
+                Long tenantId = getTenantIdByToken(token);
+                if (tenantId!=0L) {
+                    // 这里可以判断是否过滤表
+                    if ("sys_user".equals(tableName) || "jsh_sequence".equals(tableName)
+                            || "jsh_user_business".equals(tableName) || "jsh_function".equals(tableName)
+                            || "jsh_platform_config".equals(tableName) || "jsh_tenant".equals(tableName)) {
+                        res = true;
+                    } else {
+                        res = false;
+                    }
+                }
+                return res;
+            }
+        }));
 
 
         // 如果用了分页插件注意先 add TenantLineInnerInterceptor 再 add PaginationInnerInterceptor

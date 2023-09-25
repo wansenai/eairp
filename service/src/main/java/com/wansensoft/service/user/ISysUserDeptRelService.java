@@ -25,4 +25,6 @@ import java.util.List;
 public interface ISysUserDeptRelService extends IService<SysUserDeptRel> {
 
     List<SysUserDeptRel> queryBatchByUserIds(List<Long> userIds);
+
+    List<SysUserDeptRel> queryByUserId(Long userIds);
 }

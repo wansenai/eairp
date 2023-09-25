@@ -12,13 +12,20 @@
  */
 package com.wansensoft.service.role;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.role.RoleListDTO;
 import com.wansensoft.entities.role.SysRole;
 import com.wansensoft.mappers.role.SysRoleMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansensoft.utils.enums.BaseCodeEnum;
+import com.wansensoft.utils.enums.RoleCodeEnum;
+import com.wansensoft.utils.enums.test;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.RoleVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +38,12 @@ import java.util.List;
 @Service
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> implements ISysRoleService {
 
+    private final SysRoleMapper roleMapper;
+
+    public SysRoleServiceImpl(SysRoleMapper roleMapper) {
+        this.roleMapper = roleMapper;
+    }
+
     @Override
     public Response<List<RoleVO>> roleList() {
         var roles = new ArrayList<RoleVO>();
@@ -39,10 +52,53 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         sysRoles.forEach(item -> {
             var roleVo = new RoleVO();
             BeanUtils.copyProperties(item, roleVo);
-
             roles.add(roleVo);
         });
 
         return Response.responseData(roles);
+    }
+
+    @Override
+    public Response<Page<RoleVO>> rolePageList(RoleListDTO roleListDTO) {
+        var result = new Page<RoleVO>();
+        var listVo = new ArrayList<RoleVO>();
+
+        Page<SysRole> rolePage = new Page<>(roleListDTO.getPage(), roleListDTO.getPageSize());
+        LambdaQueryWrapper<SysRole> roleWrapper = new LambdaQueryWrapper<>();
+        roleWrapper.eq(StringUtils.hasText(roleListDTO.getRoleName()), SysRole::getRoleName, roleListDTO.getRoleName());
+        roleWrapper.eq(roleListDTO.getStatus() != null, SysRole::getStatus, roleListDTO.getStatus());
+
+        roleMapper.selectPage(rolePage, roleWrapper);
+        if(!rolePage.getRecords().isEmpty()) {
+            rolePage.getRecords().forEach(role -> {
+                var roleVo = new RoleVO();
+                BeanUtils.copyProperties(role, roleVo);
+                listVo.add(roleVo);
+            });
+        }
+        result.setRecords(listVo);
+        result.setTotal(rolePage.getTotal());
+        result.setSize(rolePage.getSize());
+        result.setPages(rolePage.getPages());
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<String> updateStatus(String id, Integer status) {
+        if(!StringUtils.hasText(id) && status == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        var updateResult = lambdaUpdate()
+                .eq(SysRole::getId, id)
+                .set(SysRole::getStatus, status)
+                .update();
+
+        if(!updateResult) {
+            return Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_STATUS_ERROR);
+        }
+
+        return Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_STATUS_SUCCESS);
     }
 }

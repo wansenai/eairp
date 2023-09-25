@@ -12,6 +12,8 @@
  */
 package com.wansensoft.service.role;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.role.RoleListDTO;
 import com.wansensoft.entities.role.SysRole;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.utils.response.Response;
@@ -27,4 +29,8 @@ import java.util.List;
 public interface ISysRoleService extends IService<SysRole> {
 
     Response<List<RoleVO>> roleList();
+
+    Response<Page<RoleVO>> rolePageList(RoleListDTO roleListDTO);
+
+    Response<String> updateStatus(String id, Integer status);
 }

@@ -59,4 +59,6 @@ public interface ISysUserService extends IService<SysUser> {
     Response<String> addOrUpdate(AddOrUpdateUserDTO addOrUpdateUserDTO);
 
     Response<String> deleteUser(List<Long> ids);
+
+    Response<String> resetPassword(Long id);
 }

@@ -10,25 +10,13 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.utils.constants;
+package com.wansensoft.service.role
 
-/**
- * <p>
- *  用户状态常量类
- *  User Status Constants
- * </p>
- */
-public interface UserConstants {
+import com.wansensoft.entities.role.SysRoleMenuRel
+import com.baomidou.mybatisplus.extension.service.IService
 
-    /** 用户状态启用 */
-    int USER_STATUS_ENABLE = 0;
+interface KtSysRoleMenuRelService : IService<SysRoleMenuRel> {
 
-    /** 用户状态停用 */
-    int USER_STATUS_DISABLE = 1;
+    fun listByRoleId(roleId: Long?): List<SysRoleMenuRel>
 
-    /** 用户状态封禁 */
-    int USER_STATUS_BAN = 2;
-
-    /** 默认密码 */
-    String DEFAULT_PASSWORD = "123456";
 }
