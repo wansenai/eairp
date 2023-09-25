@@ -28,4 +28,7 @@ public interface UserConstants {
 
     /** 用户状态封禁 */
     int USER_STATUS_BAN = 2;
+
+    /** 默认密码 */
+    String DEFAULT_PASSWORD = "123456";
 }
