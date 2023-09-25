@@ -96,4 +96,9 @@ public class SysUserController {
     public Response<String> deleteUser(@RequestParam(value = "ids") List<Long> ids) {
         return userService.deleteUser(ids);
     }
+
+    @PostMapping(value = "resetPassword")
+    public Response<String> resetPassword(@RequestParam(value = "id") Long id) {
+        return userService.resetPassword(id);
+    }
 }
