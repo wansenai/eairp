@@ -1,0 +1,128 @@
+package com.wansensoft.api.material;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.wansensoft.entities.material.MaterialExtend;
+import com.wansensoft.service.materialExtend.MaterialExtendService;
+import com.wansensoft.utils.BaseResponseInfo;
+import com.wansensoft.utils.StringUtil;
+import com.wansensoft.vo.MaterialExtendVo4List;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping(value = "/materialsExtend")
+@Api(tags = {"商品价格扩展"})
+public class MaterialExtendController {
+    private Logger logger = LoggerFactory.getLogger(MaterialExtendController.class);
+
+    private final MaterialExtendService materialExtendService;
+
+    public MaterialExtendController(MaterialExtendService materialExtendService) {
+        this.materialExtendService = materialExtendService;
+    }
+
+    @GetMapping(value = "/getDetailList")
+    @ApiOperation(value = "价格信息列表")
+    public BaseResponseInfo getDetailList(@RequestParam("materialId") Long materialId,
+                                          HttpServletRequest request)throws Exception {
+        BaseResponseInfo res = new BaseResponseInfo();
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            List<MaterialExtendVo4List> dataList = new ArrayList<>();
+            if(materialId!=0) {
+                dataList = materialExtendService.getDetailList(materialId);
+            }
+            JSONObject outer = new JSONObject();
+            outer.put("total", dataList.size());
+            //存放数据json数组
+            JSONArray dataArray = new JSONArray();
+            for (MaterialExtendVo4List md : dataList) {
+                JSONObject item = new JSONObject();
+                item.put("id", md.getId());
+                item.put("barCode", md.getBarCode());
+                item.put("commodityUnit", md.getCommodityUnit());
+                if (StringUtil.isNotEmpty(md.getSku())) {
+                    item.put("sku", md.getSku());
+                }
+                item.put("purchaseDecimal", md.getPurchaseDecimal());
+                item.put("commodityDecimal", md.getCommodityDecimal());
+                item.put("wholesaleDecimal", md.getWholesaleDecimal());
+                item.put("lowDecimal", md.getLowDecimal());
+                dataArray.add(item);
+            }
+            outer.put("rows", dataArray);
+            res.code = 200;
+            res.data = outer;
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.code = 500;
+            res.data = "获取数据失败";
+        }
+        return res;
+    }
+
+    /**
+     * 根据条码查询商品信息
+     * @param barCode
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value = "/getInfoByBarCode")
+    @ApiOperation(value = "根据条码查询商品信息")
+    public BaseResponseInfo getInfoByBarCode(@RequestParam("barCode") String barCode,
+                                          HttpServletRequest request)throws Exception {
+        BaseResponseInfo res = new BaseResponseInfo();
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            MaterialExtend materialExtend = materialExtendService.getInfoByBarCode(barCode);
+            res.code = 200;
+            res.data = materialExtend;
+        } catch (Exception e) {
+            res.code = 500;
+            res.data = "获取数据失败";
+        }
+        return res;
+    }
+
+    /**
+     * 校验条码是否存在
+     * @param id
+     * @param barCode
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value = "/checkIsBarCodeExist")
+    @ApiOperation(value = "校验条码是否存在")
+    public BaseResponseInfo checkIsBarCodeExist(@RequestParam("id") Long id,
+                                                @RequestParam("barCode") String barCode,
+                                             HttpServletRequest request)throws Exception {
+        BaseResponseInfo res = new BaseResponseInfo();
+        Map<String, Object> map = new HashMap<>();
+        try {
+            int exist = materialExtendService.checkIsBarCodeExist(id, barCode);
+            if(exist > 0) {
+                map.put("status", true);
+            } else {
+                map.put("status", false);
+            }
+            res.code = 200;
+            res.data = map;
+        } catch (Exception e) {
+            res.code = 500;
+            res.data = "获取数据失败";
+        }
+        return res;
+    }
+}
