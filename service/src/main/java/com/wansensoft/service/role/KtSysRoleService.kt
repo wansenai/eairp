@@ -2,6 +2,7 @@ package com.wansensoft.service.role
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.IService
+import com.wansensoft.dto.role.AddOrUpdateRoleDTO
 import com.wansensoft.dto.role.RoleListDTO
 import com.wansensoft.entities.role.SysRole
 import com.wansensoft.utils.response.Response
@@ -14,4 +15,8 @@ interface KtSysRoleService : IService<SysRole> {
     fun rolePageList(roleListDTO: RoleListDTO?) : Response<Page<RoleVO>>
 
     fun updateStatus(id: String?, status: Int?) : Response<String>
+
+    fun addOrUpdateRole(addOrUpdateRoleDTO : AddOrUpdateRoleDTO?) : Response<String>
+
+    fun deleteRole(id: String?): Response<String>
 }

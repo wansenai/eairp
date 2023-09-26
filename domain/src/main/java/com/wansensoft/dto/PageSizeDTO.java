@@ -24,11 +24,11 @@ public class PageSizeDTO {
     /**
      * 查询列表总记录数
      */
-    int page = 0;
+    Long page = 0L;
 
     /**
      * 每页显示条数，默认10
      */
-    int pageSize = 10;
+    Long pageSize = 10L;
 
 }

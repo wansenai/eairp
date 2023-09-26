@@ -14,6 +14,7 @@ package com.wansensoft.api.role;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.role.AddOrUpdateRoleDTO;
 import com.wansensoft.dto.role.RoleListDTO;
 import com.wansensoft.service.role.ISysRoleService;
 import com.wansensoft.service.role.KtSysRoleService;
@@ -38,13 +39,10 @@ public class SysRoleController {
 
     private final ISysMenuService menuService;
 
-    private final ISysRoleService roleService;
-
     private final KtSysRoleService ktSysRoleService;
 
-    public SysRoleController(ISysMenuService menuService, ISysRoleService roleService, KtSysRoleService ktSysRoleService) {
+    public SysRoleController(ISysMenuService menuService, KtSysRoleService ktSysRoleService) {
         this.menuService = menuService;
-        this.roleService = roleService;
         this.ktSysRoleService = ktSysRoleService;
     }
 
@@ -68,4 +66,13 @@ public class SysRoleController {
         return ktSysRoleService.updateStatus(id, status);
     }
 
+    @PostMapping("addOrUpdateRole")
+    public Response<String> addOrUpdateRole(@RequestBody AddOrUpdateRoleDTO addOrUpdateRoleDTO) {
+        return ktSysRoleService.addOrUpdateRole(addOrUpdateRoleDTO);
+    }
+
+    @PostMapping("deleteRole")
+    public Response<String> deleteRole(@RequestParam(value = "id") String id) {
+        return ktSysRoleService.deleteRole(id);
+    }
 }
