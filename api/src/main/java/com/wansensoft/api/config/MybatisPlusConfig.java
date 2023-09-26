@@ -1,15 +1,3 @@
-/*
- * Copyright 2023-2033 WanSen AI Team, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
- * with the License. A copy of the License is located at
- *
- * http://opensource.wansenai.com/apache2.0/
- *
- * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
- * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
- * and limitations under the License.
- */
 package com.wansensoft.api.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
@@ -17,47 +5,27 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
-import com.wansensoft.utils.redis.RedisUtil;
+import com.wansensoft.utils.Tools;
 import jakarta.servlet.http.HttpServletRequest;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
 
 @Configuration
 @MapperScan("com.wansensoft.mappers")
 public class MybatisPlusConfig {
 
-    public final RedisUtil redisUtil;
-
-    public MybatisPlusConfig(RedisUtil redisUtil) {
-        this.redisUtil = redisUtil;
-    }
-
-
-    /**
-     * 根据token截取租户id
-     * @param token
-     * @return
-     */
-    public Long getTenantIdByToken(String token) {
-        long tenantId = -1L;
-        if(StringUtils.hasText(token)) {
-            tenantId = Long.parseLong(redisUtil.getString(token + ":tenantId"));
-        }
-        return tenantId;
-    }
-
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(HttpServletRequest request) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor();
         interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
             @Override
             public Expression getTenantId() {
-                String token = request.getHeader("Authorization");
-                Long tenantId = getTenantIdByToken(token);
+                String token = request.getHeader("X-Access-Token");
+                Long tenantId = Tools.getTenantIdByToken(token);
                 if (tenantId!=0L) {
                     return new LongValue(tenantId);
                 } else {
@@ -71,11 +39,11 @@ public class MybatisPlusConfig {
             public boolean ignoreTable(String tableName) {
                 //获取开启状态
                 boolean res = true;
-                String token = request.getHeader("Authorization");
-                Long tenantId = getTenantIdByToken(token);
+                String token = request.getHeader("X-Access-Token");
+                Long tenantId = Tools.getTenantIdByToken(token);
                 if (tenantId!=0L) {
                     // 这里可以判断是否过滤表
-                    if ("sys_user".equals(tableName) || "jsh_sequence".equals(tableName)
+                    if ("jsh_material_property".equals(tableName) || "jsh_sequence".equals(tableName)
                             || "jsh_user_business".equals(tableName) || "jsh_function".equals(tableName)
                             || "jsh_platform_config".equals(tableName) || "jsh_tenant".equals(tableName)) {
                         res = true;
@@ -93,5 +61,96 @@ public class MybatisPlusConfig {
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
     }
+
+//    @Bean
+//    public PaginationInnerInterceptor paginationInterceptor(HttpServletRequest request) {
+//        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+//
+//        PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor();
+//        List<ISqlParser> sqlParserList = new ArrayList<>();
+//        TenantSqlParser tenantSqlParser = new TenantSqlParser();
+//        tenantSqlParser.setTenantHandler(new TenantHandler() {
+//            @Override
+//            public Expression getTenantId() {
+//                String token = request.getHeader("X-Access-Token");
+//                Long tenantId = Tools.getTenantIdByToken(token);
+//                if (tenantId!=0L) {
+//                    return new LongValue(tenantId);
+//                } else {
+//                    //超管
+//                    return null;
+//                }
+//            }
+//
+//            @Override
+//            public String getTenantIdColumn() {
+//                return "tenant_id";
+//            }
+//
+//            @Override
+//            public boolean doTableFilter(String tableName) {
+//                //获取开启状态
+//                Boolean res = true;
+//                String token = request.getHeader("X-Access-Token");
+//                Long tenantId = Tools.getTenantIdByToken(token);
+//                if (tenantId!=0L) {
+//                    // 这里可以判断是否过滤表
+//                    if ("jsh_material_property".equals(tableName) || "jsh_sequence".equals(tableName)
+//                            || "jsh_user_business".equals(tableName) || "jsh_function".equals(tableName)
+//                            || "jsh_platform_config".equals(tableName) || "jsh_tenant".equals(tableName)) {
+//                        res = true;
+//                    } else {
+//                        res = false;
+//                    }
+//                }
+//                return res;
+//            }
+//        });
+//
+//        sqlParserList.add(tenantSqlParser);
+//        paginationInterceptor.setSqlParserList(sqlParserList);
+//        paginationInterceptor.setSqlParserFilter(new ISqlParserFilter() {
+//            @Override
+//            public boolean doFilter(MetaObject metaObject) {
+//                MappedStatement ms = SqlParserHelper.getMappedStatement(metaObject);
+//                // 过滤自定义查询此时无租户信息约束出现
+//                if ("com.jsh.erp.datasource.mappers.UserMapperEx.getUserByWeixinOpenId".equals(ms.getId())) {
+//                    return true;
+//                } else if ("com.jsh.erp.datasource.mappers.UserMapperEx.updateUserWithWeixinOpenId".equals(ms.getId())) {
+//                    return true;
+//                } else if ("com.jsh.erp.datasource.mappers.UserMapperEx.getUserListByUserNameOrLoginName".equals(ms.getId())) {
+//                    return true;
+//                } else if ("com.jsh.erp.datasource.mappers.UserMapperEx.disableUserByLimit".equals(ms.getId())) {
+//                    return true;
+//                } else if ("com.jsh.erp.datasource.mappers.RoleMapperEx.getRoleWithoutTenant".equals(ms.getId())) {
+//                    return true;
+//                } else if ("com.jsh.erp.datasource.mappers.LogMapperEx.insertLogWithUserId".equals(ms.getId())) {
+//                    return true;
+//                }
+//                return false;
+//            }
+//        });
+//        return paginationInterceptor;
+//    }
+
+    /**
+     * 相当于顶部的：
+     * {@code @MapperScan("com.wansensoft.erp.datasource.mappers*")}
+     * 这里可以扩展，比如使用配置文件来配置扫描Mapper的路径
+     */
+//    @Bean
+//    public MapperScannerConfigurer mapperScannerConfigurer() {
+//        MapperScannerConfigurer scannerConfigurer = new MapperScannerConfigurer();
+//        scannerConfigurer.setBasePackage("com.wansensoft.mappers*");
+//        return scannerConfigurer;
+//    }
+
+    /**
+     * 性能分析拦截器，不建议生产使用
+     */
+//    @Bean
+//    public PerformanceInterceptor performanceInterceptor(){
+//        return new PerformanceInterceptor();
+//    }
 
 }

@@ -1,72 +1,64 @@
-/*
- * Copyright 2023-2033 WanSen AI Team, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
- * with the License. A copy of the License is located at
- *
- * http://opensource.wansenai.com/apache2.0/
- *
- * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
- * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
- * and limitations under the License.
- */
 package com.wansensoft.utils.constants;
 
 /**
- * 业务字典类
+ * @ClassName:BusinessConstants
+ * @Description 业务字典类
+ * @Author qiankunpingtai
+ * @Date 2019-3-6 17:58
+ * @Version 1.0
  **/
-public interface BusinessConstants {
+public class BusinessConstants {
 
     /**
      * 默认的日期格式
      */
-    String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     /**
      * 一天的初始时间
      */
-    String DAY_FIRST_TIME = " 00:00:00";
+    public static final String DAY_FIRST_TIME = " 00:00:00";
     /**
      * 一天的结束时间
      */
-    String DAY_LAST_TIME = " 23:59:59";
+    public static final String DAY_LAST_TIME = " 23:59:59";
     /**
      * 默认的分页起始页页码
      */
-    Integer DEFAULT_PAGINATION_PAGE_NUMBER = 1;
+    public static final Integer DEFAULT_PAGINATION_PAGE_NUMBER = 1;
     /**
      * 无数据时列表返回的默认数据条数
      */
-    Long DEFAULT_LIST_NULL_NUMBER = 0L;
+    public static final Long DEFAULT_LIST_NULL_NUMBER = 0L;
     /**
      * 默认的分页条数
      */
-    Integer DEFAULT_PAGINATION_PAGE_SIZE = 10;
+    public static final Integer DEFAULT_PAGINATION_PAGE_SIZE = 10;
     /**
      * 单据主表出入库类型 type 入库 出库 其它
      * depothead
      * */
-    String DEPOTHEAD_TYPE_IN = "入库";
-    String DEPOTHEAD_TYPE_OUT = "出库";
-    String DEPOTHEAD_TYPE_OTHER = "其它";
+    public static final String DEPOTHEAD_TYPE_IN = "入库";
+    public static final String DEPOTHEAD_TYPE_OUT = "出库";
+    public static final String DEPOTHEAD_TYPE_OTHER = "其它";
     /**
      * 付款类型 payType //现付/预付款
      * */
-    String PAY_TYPE_PREPAID = "预付款";
-    String PAY_TYPE_BY_CASH = "现付";
+    public static final String PAY_TYPE_PREPAID = "预付款";
+    public static final String PAY_TYPE_BY_CASH = "现付";
     /**
      * 删除标记 deleteFlag  '0'未删除 '1'已删除
      * */
-    String DELETE_FLAG_DELETED = "1";
-    String DELETE_FLAG_EXISTS = "0";
+    public static final String DELETE_FLAG_DELETED = "1";
+    public static final String DELETE_FLAG_EXISTS = "0";
     /**
      * 是否卖出 isSell  '0'未卖出 '1'已卖出
      * */
-    String IS_SELL_SELLED = "1";
-    String IS_SELL_HOLD = "0";
+    public static final String IS_SELL_SELLED = "1";
+    public static final String IS_SELL_HOLD = "0";
     /**
      * 商品是否开启序列号标识enableSerialNumber  '0'未启用 '1'启用
      * */
-    String ENABLE_SERIAL_NUMBER_ENABLED = "1";
+    public static final String ENABLE_SERIAL_NUMBER_ENABLED = "1";
     public static final String ENABLE_SERIAL_NUMBER_NOT_ENABLED = "0";
     /**
      * 商品是否开启批号标识enableBatchNumber  '0'未启用 '1'启用

@@ -1,7 +1,7 @@
 package com.wansensoft.service.system.impl;
 
 import com.wansensoft.service.system.ISysConfigService;
-import com.wansensoft.entities.system.SysConfig;
+import com.wansensoft.entities.SysConfig;
 import com.wansensoft.mappers.system.SysConfigMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;

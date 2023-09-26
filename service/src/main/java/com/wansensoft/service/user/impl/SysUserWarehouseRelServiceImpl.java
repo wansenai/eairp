@@ -1,6 +1,6 @@
 package com.wansensoft.service.user.impl;
 
-import com.wansensoft.entities.user.SysUserWarehouseRel;
+import com.wansensoft.entities.SysUserWarehouseRel;
 import com.wansensoft.mappers.user.SysUserWarehouseRelMapper;
 import com.wansensoft.service.user.ISysUserWarehouseRelService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

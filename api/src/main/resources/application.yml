@@ -1,7 +1,9 @@
 server:
   port: 9999
   servlet:
-    context-path: /erp-api
+    context-path: /wansenerp-api
+  tomcat:
+      basedir: /opt/tmp/tomcat
 
 spring:
   profiles:
@@ -32,5 +34,5 @@ mybatis-plus:
     #刷新mapper 调试神器
     refresh-mapper: true
   configuration:
-    # log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

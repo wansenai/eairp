@@ -1,7 +1,7 @@
 package com.wansensoft.service.system.impl;
 
 import com.wansensoft.service.system.ISysMsgService;
-import com.wansensoft.entities.system.SysMsg;
+import com.wansensoft.entities.SysMsg;
 import com.wansensoft.mappers.system.SysMsgMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
