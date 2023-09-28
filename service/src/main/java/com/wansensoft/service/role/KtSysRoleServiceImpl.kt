@@ -6,7 +6,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import com.wansensoft.dto.role.AddOrUpdateRoleDTO
 import com.wansensoft.dto.role.RoleListDTO
 import com.wansensoft.entities.role.SysRole
+import com.wansensoft.entities.role.SysRoleMenuRel
 import com.wansensoft.mappers.role.SysRoleMapper
+import com.wansensoft.mappers.role.SysRoleMenuRelMapper
+import com.wansensoft.mappers.user.SysUserRoleRelMapper
 import com.wansensoft.utils.SnowflakeIdUtil
 import com.wansensoft.utils.constants.CommonConstants
 import com.wansensoft.utils.enums.BaseCodeEnum
@@ -15,12 +18,13 @@ import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.RoleVO
 import org.springframework.beans.BeanUtils
 import org.springframework.stereotype.Service
-import org.springframework.util.StringUtils
 import java.time.LocalDateTime
 
 @Service
-open class KtSysRoleServiceImpl(private val roleMapper: SysRoleMapper)
-    : ServiceImpl<SysRoleMapper, SysRole>(), KtSysRoleService {
+open class KtSysRoleServiceImpl(
+        private val roleMapper: SysRoleMapper,
+        private val roleMenuRelMapper: SysRoleMenuRelMapper
+) : ServiceImpl<SysRoleMapper, SysRole>(), KtSysRoleService {
 
     override fun roleList(): Response<List<RoleVO>> {
         val roles = ArrayList<RoleVO>()
@@ -37,6 +41,13 @@ open class KtSysRoleServiceImpl(private val roleMapper: SysRoleMapper)
         return Response.responseData(roles)
     }
 
+
+    /**
+     * 分页查询角色列表
+     *
+     * @param roleListDTO 角色列表查询条件
+     * @return 角色列表
+     */
     override fun rolePageList(roleListDTO: RoleListDTO?): Response<Page<RoleVO>> {
         val rolePage = roleListDTO?.let { Page<SysRole>(it.page, it.pageSize) }
         val roleWrapper = LambdaQueryWrapper<SysRole>().apply {
@@ -53,6 +64,22 @@ open class KtSysRoleServiceImpl(private val roleMapper: SysRoleMapper)
                         BeanUtils.copyProperties(role, this)
                     }
                 }
+                listVo.forEach { roleVo ->
+                    val roleMenuRelList = roleMenuRelMapper.selectList(
+                            LambdaQueryWrapper<SysRoleMenuRel>()
+                                    .eq(SysRoleMenuRel::getRoleId, roleVo.id)
+                    )
+                    val menuList = ArrayList<Int>()
+                      roleMenuRelList.forEach { roleMenuRel ->
+                            val menuId = roleMenuRel.menuId
+                            val regex = "\\d+".toRegex()
+                            val matchResult = regex.findAll(menuId)
+                            matchResult.forEach { match ->
+                                menuList.add(match.value.toInt())
+                            }
+                        }
+                    roleVo.menuIds = menuList
+                }
                 Page<RoleVO>().apply {
                     records = listVo
                     total = this@run.total
@@ -66,7 +93,6 @@ open class KtSysRoleServiceImpl(private val roleMapper: SysRoleMapper)
 
         return Response.responseData(result)
     }
-
 
     override fun updateStatus(id: String?, status: Int?): Response<String> {
         if (id.isNullOrBlank() || status == null) {
@@ -144,6 +170,4 @@ open class KtSysRoleServiceImpl(private val roleMapper: SysRoleMapper)
         }
         return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
     }
-
-
 }
