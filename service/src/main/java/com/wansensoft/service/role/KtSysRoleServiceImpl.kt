@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import com.wansensoft.dto.role.AddOrUpdateRoleDTO
 import com.wansensoft.dto.role.RoleListDTO
+import com.wansensoft.dto.role.RolePermissionDTO
 import com.wansensoft.entities.role.SysRole
 import com.wansensoft.entities.role.SysRoleMenuRel
 import com.wansensoft.mappers.role.SysRoleMapper
@@ -22,16 +23,17 @@ import java.time.LocalDateTime
 
 @Service
 open class KtSysRoleServiceImpl(
-        private val roleMapper: SysRoleMapper,
-        private val roleMenuRelMapper: SysRoleMenuRelMapper
+    private val roleMapper: SysRoleMapper,
+    private val roleMenuRelMapper: SysRoleMenuRelMapper,
+    private val roleMenuRelService: ISysRoleMenuRelService
 ) : ServiceImpl<SysRoleMapper, SysRole>(), KtSysRoleService {
 
     override fun roleList(): Response<List<RoleVO>> {
         val roles = ArrayList<RoleVO>()
 
         val sysRoles = lambdaQuery()
-                .eq(SysRole::getDeleteFlag, CommonConstants.NOT_DELETED)
-                .list()
+            .eq(SysRole::getDeleteFlag, CommonConstants.NOT_DELETED)
+            .list()
         sysRoles.forEach { item ->
             val roleVo = RoleVO()
             BeanUtils.copyProperties(item, roleVo)
@@ -66,18 +68,18 @@ open class KtSysRoleServiceImpl(
                 }
                 listVo.forEach { roleVo ->
                     val roleMenuRelList = roleMenuRelMapper.selectList(
-                            LambdaQueryWrapper<SysRoleMenuRel>()
-                                    .eq(SysRoleMenuRel::getRoleId, roleVo.id)
+                        LambdaQueryWrapper<SysRoleMenuRel>()
+                            .eq(SysRoleMenuRel::getRoleId, roleVo.id)
                     )
                     val menuList = ArrayList<Int>()
-                      roleMenuRelList.forEach { roleMenuRel ->
-                            val menuId = roleMenuRel.menuId
-                            val regex = "\\d+".toRegex()
-                            val matchResult = regex.findAll(menuId)
-                            matchResult.forEach { match ->
-                                menuList.add(match.value.toInt())
-                            }
+                    roleMenuRelList.forEach { roleMenuRel ->
+                        val menuId = roleMenuRel.menuId
+                        val regex = "\\d+".toRegex()
+                        val matchResult = regex.findAll(menuId)
+                        matchResult.forEach { match ->
+                            menuList.add(match.value.toInt())
                         }
+                    }
                     roleVo.menuIds = menuList
                 }
                 Page<RoleVO>().apply {
@@ -100,9 +102,9 @@ open class KtSysRoleServiceImpl(
         }
 
         val updateResult = lambdaUpdate()
-                .eq(SysRole::getId, id)
-                .set(SysRole::getStatus, status)
-                .update()
+            .eq(SysRole::getId, id)
+            .set(SysRole::getStatus, status)
+            .update()
 
         return if (updateResult) {
             Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_STATUS_SUCCESS)
@@ -158,9 +160,9 @@ open class KtSysRoleServiceImpl(
                 return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
             }
             val deleteResult = lambdaUpdate()
-                    .eq(SysRole::getId, roleId)
-                    .set(SysRole::getDeleteFlag, CommonConstants.DELETED)
-                    .update()
+                .eq(SysRole::getId, roleId)
+                .set(SysRole::getDeleteFlag, CommonConstants.DELETED)
+                .update()
 
             return if (deleteResult) {
                 Response.responseMsg(RoleCodeEnum.DELETE_ROLE_SUCCESS)
@@ -169,5 +171,27 @@ open class KtSysRoleServiceImpl(
             }
         }
         return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+    }
+
+    // 帮我优化rolePermission方法
+
+    override fun rolePermission(rolePermissionDTO: RolePermissionDTO): Response<String> {
+        val roleId = rolePermissionDTO.id
+        val menuIds = rolePermissionDTO.menuIds
+        if (roleId == null || menuIds.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+        }
+
+        val roleMenuRel = SysRoleMenuRel()
+        val menuIdStr = menuIds.joinToString(separator = "") { "[${it}]" }
+        roleMenuRel.menuId = menuIdStr
+        roleMenuRel.roleId = roleId
+        // 进行saveOrUpdate操作
+        val saveBatchResult = roleMenuRelService.saveOrUpdate(roleMenuRel);
+        return if (saveBatchResult) {
+            Response.responseMsg(RoleCodeEnum.ROLE_PERMISSION_MENU_SUCCESS)
+        } else {
+            Response.responseMsg(RoleCodeEnum.ROLE_PERMISSION_MENU_ERROR)
+        }
     }
 }
