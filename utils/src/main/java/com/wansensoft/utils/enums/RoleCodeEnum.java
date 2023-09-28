@@ -19,7 +19,11 @@ public enum RoleCodeEnum {
 
     DELETE_ROLE_SUCCESS("A0007", "删除角色成功"),
 
-    DELETE_ROLE_ERROR("A0210", "删除角色失败");
+    DELETE_ROLE_ERROR("A0210", "删除角色失败"),
+
+    ROLE_PERMISSION_MENU_SUCCESS("A0008", "赋予角色菜单权限成功"),
+
+    ROLE_PERMISSION_MENU_ERROR("A0211", "赋予角色菜单权限失败");
 
     /**
      * 响应状态码

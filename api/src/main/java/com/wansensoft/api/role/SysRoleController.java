@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansensoft.dto.role.AddOrUpdateRoleDTO;
 import com.wansensoft.dto.role.RoleListDTO;
+import com.wansensoft.dto.role.RolePermissionDTO;
 import com.wansensoft.service.role.ISysRoleService;
 import com.wansensoft.service.role.KtSysRoleService;
 import com.wansensoft.service.system.ISysMenuService;
@@ -74,5 +75,10 @@ public class SysRoleController {
     @PostMapping("deleteRole")
     public Response<String> deleteRole(@RequestParam(value = "id") String id) {
         return ktSysRoleService.deleteRole(id);
+    }
+
+    @PostMapping("permission")
+    public Response<String> rolePermission(@RequestBody RolePermissionDTO rolePermissionDTO) {
+        return ktSysRoleService.rolePermission(rolePermissionDTO);
     }
 }
