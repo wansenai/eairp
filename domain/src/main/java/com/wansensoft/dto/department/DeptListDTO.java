@@ -1,4 +1,4 @@
-package com.wansensoft.dto.organization;
+package com.wansensoft.dto.department;
 
 import com.wansensoft.dto.PageSizeDTO;
 import lombok.Data;
