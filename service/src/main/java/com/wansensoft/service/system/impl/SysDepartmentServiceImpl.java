@@ -12,7 +12,10 @@ import com.wansensoft.service.user.ISysUserService;
 import com.wansensoft.utils.enums.BaseCodeEnum;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.DeptListVO;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,67 +35,118 @@ public class SysDepartmentServiceImpl extends ServiceImpl<SysDepartmentMapper, S
 
     private final SysUserDeptRelMapper userDeptRelMapper;
 
-    private final SysDepartmentMapper departmentMapper;
-
-    public SysDepartmentServiceImpl(ISysUserService userService, SysUserDeptRelMapper userDeptRelMapper, SysDepartmentMapper departmentMapper) {
+    public SysDepartmentServiceImpl(ISysUserService userService, SysUserDeptRelMapper userDeptRelMapper) {
         this.userService = userService;
         this.userDeptRelMapper = userDeptRelMapper;
-        this.departmentMapper = departmentMapper;
     }
 
     @Override
-    public Response<DeptListVO> deptList(DeptListDTO deptListDto) {
-        return null;
-    }
-
-    @Override
-    public Response<List<DeptListVO>> getUserDeptRel() {
-        var results = new ArrayList<DeptListVO>(5);
+    public Response<List<DeptListVO>> userDept() {
+        var results = new ArrayList<DeptListVO>(10);
         var tenantId = userService.getCurrentTenantId();
 
         var userRoleWrapper = new QueryWrapper<SysUserDeptRel>();
         userRoleWrapper.eq("tenant_id", tenantId);
+        userRoleWrapper.eq("user_id", userService.getCurrentUserId());
         var userDeptRelList = userDeptRelMapper.selectList(userRoleWrapper)
                 .stream().map(SysUserDeptRel::getDeptId).toList();
 
-        var departments = departmentMapper.selectBatchIds(userDeptRelList);
+        var departments = lambdaQuery()
+                .in(SysDepartment::getId, userDeptRelList)
+                .list();
         if(departments.isEmpty()) {
             return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
         }
-        // find children department only 2 leave
-        departments.forEach(item -> {
-            if(item.getParentId() == null) {
-                // parent Dept Node
-                var deptVo = new DeptListVO();
-                deptVo.setId(item.getId());
-                deptVo.setDeptName(item.getName());
-                deptVo.setDeptNumber(item.getNumber());
-                deptVo.setSort(item.getSort());
-                deptVo.setRemark(item.getRemark());
-                // Query Children Node List
-                var deptQuery = new QueryWrapper<SysDepartment>();
-                deptQuery.eq("parent_id", item.getId());
-                var childrenDept = departmentMapper.selectList(deptQuery);
-                // Assemble Children Node Data
-                if (!childrenDept.isEmpty()) {
-                    var DeptChildrenVOs = new ArrayList<DeptListVO.DeptChildrenVO>();
-                    childrenDept.forEach(childrenItem -> {
-                        var childrenDeptVo = new DeptListVO.DeptChildrenVO();
-                        childrenDeptVo.setId(childrenItem.getId());
-                        childrenDeptVo.setParentId(childrenItem.getParentId());
-                        childrenDeptVo.setDeptName(childrenItem.getName());
-                        childrenDeptVo.setDeptNumber(childrenItem.getNumber());
-                        childrenDeptVo.setSort(childrenItem.getSort());
-                        childrenDeptVo.setRemark(childrenItem.getRemark());
 
-                        DeptChildrenVOs.add(childrenDeptVo);
+        return assemblePcNodesList(results, departments, null);
+    }
+
+    /**
+     * P: Parent
+     * C: Children
+     * 组装部门树
+     * @param results   返回结果
+     * @param departments   部门列表
+     * @return  Response<List<DeptListVO>>
+     */
+    @NotNull
+    private Response<List<DeptListVO>> assemblePcNodesList(ArrayList<DeptListVO> results, List<SysDepartment> departments, String deptName) {
+        if (deptName != null) {
+            departments.forEach(item -> {
+                var parent = lambdaQuery()
+                        .eq(SysDepartment::getId, item.getParentId())
+                        .one();
+                var children = new ArrayList<DeptListVO>(3);
+                var childrenVo = DeptListVO.builder()
+                        .id(item.getId())
+                        .deptNumber(item.getNumber())
+                        .deptName(item.getName())
+                        .remark(item.getRemark())
+                        .sort(item.getSort())
+                        .createTime(item.getCreateTime())
+                        .build();
+                children.add(childrenVo);
+                var deptChildrenVO = DeptListVO.builder()
+                        .id(parent.getId())
+                        .parentId(parent.getParentId())
+                        .deptNumber(parent.getNumber())
+                        .deptName(parent.getName())
+                        .remark(parent.getRemark())
+                        .sort(parent.getSort())
+                        .createTime(parent.getCreateTime())
+                        .children(children)
+                        .build();
+
+                results.add(deptChildrenVO);
+            });
+        } else {
+            departments.forEach(item -> {
+                var deptListVO = DeptListVO.builder()
+                        .id(item.getId())
+                        .deptNumber(item.getNumber())
+                        .deptName(item.getName())
+                        .remark(item.getRemark())
+                        .sort(item.getSort())
+                        .createTime(item.getCreateTime())
+                        .build();
+                if (item.getParentId() == null) {
+                    // 遍历父节点，然后找到父节点的子节点，parentId为父节点id的
+                    // 把子节点放到父节点的children里面
+                    var children = new ArrayList<DeptListVO>(10);
+                    var childrenList = lambdaQuery()
+                            .eq(SysDepartment::getParentId, item.getId())
+                            .list();
+                    childrenList.forEach(childrenItem -> {
+                        var deptChildrenVO = DeptListVO.builder()
+                                .id(childrenItem.getId())
+                                .parentId(childrenItem.getParentId())
+                                .deptNumber(childrenItem.getNumber())
+                                .deptName(childrenItem.getName())
+                                .remark(childrenItem.getRemark())
+                                .sort(childrenItem.getSort())
+                                .createTime(childrenItem.getCreateTime())
+                                .build();
+                        children.add(deptChildrenVO);
+                        deptListVO.setChildren(children);
                     });
-                    deptVo.setChildren(DeptChildrenVOs);
+                    results.add(deptListVO);
                 }
-                // Add multiple child nodes to the parent node
-                results.add(deptVo);
-            }
-        });
+            });
+        }
+
         return Response.responseData(results);
+    }
+
+    @Override
+    public Response<List<DeptListVO>> getDeptList(String deptName) {
+        var results = new ArrayList<DeptListVO>(10);
+        var tenantId = userService.getCurrentTenantId();
+
+        var departments = lambdaQuery()
+                .in(SysDepartment::getTenantId, tenantId)
+                .like(StringUtils.hasText(deptName), SysDepartment::getName, deptName)
+                .list();
+
+        return assemblePcNodesList(results, departments, deptName);
     }
 }

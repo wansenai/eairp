@@ -27,7 +27,7 @@ import java.util.List;
  */
 public interface ISysDepartmentService extends IService<SysDepartment> {
 
-    Response<DeptListVO> deptList(DeptListDTO deptListDto);
+    Response<List<DeptListVO>> getDeptList(String deptName);
 
-    Response<List<DeptListVO>> getUserDeptRel();
+    Response<List<DeptListVO>> userDept();
 }
