@@ -9,6 +9,4 @@ import lombok.EqualsAndHashCode;
 public class DeptListDTO extends PageSizeDTO {
 
     private String deptName;
-
-    private String leader;
 }
