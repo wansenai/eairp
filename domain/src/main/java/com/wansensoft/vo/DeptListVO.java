@@ -25,7 +25,11 @@ public class DeptListVO {
 
     private String deptName;
 
+    private Integer status;
+
     private String remark;
+
+    private String leader;
 
     private String sort;
 

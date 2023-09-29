@@ -17,7 +17,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansensoft.dto.role.AddOrUpdateRoleDTO;
 import com.wansensoft.dto.role.RoleListDTO;
 import com.wansensoft.dto.role.RolePermissionDTO;
-import com.wansensoft.service.role.ISysRoleService;
 import com.wansensoft.service.role.KtSysRoleService;
 import com.wansensoft.service.system.ISysMenuService;
 import com.wansensoft.utils.response.Response;

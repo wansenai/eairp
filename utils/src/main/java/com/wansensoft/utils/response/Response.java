@@ -13,9 +13,7 @@
 package com.wansensoft.utils.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.wansensoft.utils.enums.BaseCodeEnum;
-import com.wansensoft.utils.enums.RoleCodeEnum;
-import com.wansensoft.utils.enums.UserCodeEnum;
+import com.wansensoft.utils.enums.*;
 import lombok.Data;
 
 import java.io.Serial;
@@ -60,6 +58,13 @@ public class Response<T> implements Serializable {
         Response<T> baseResponse = new Response<T>();
         baseResponse.setCode(roleCodeEnum.getCode());
         baseResponse.setMsg(roleCodeEnum.getMsg());
+        return baseResponse;
+    }
+
+    public static <T> Response<T> responseMsg(DeptCodeEnum deptCodeEnum) {
+        Response<T> baseResponse = new Response<T>();
+        baseResponse.setCode(deptCodeEnum.getCode());
+        baseResponse.setMsg(deptCodeEnum.getMsg());
         return baseResponse;
     }
 

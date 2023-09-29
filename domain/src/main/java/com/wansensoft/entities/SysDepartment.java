@@ -14,9 +14,13 @@ package com.wansensoft.entities;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.io.Serial;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -27,11 +31,13 @@ import lombok.experimental.Accessors;
  * </p>
  */
 @Data
+@Builder
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("sys_department")
 public class SysDepartment implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -64,6 +70,12 @@ public class SysDepartment implements Serializable {
      * 部门负责人
      */
     private String leader;
+
+    /**
+     * 状态 默认启用
+     * 启用-0 停用-1
+     */
+    private Integer status;
 
     /**
      * 备注
