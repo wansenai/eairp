@@ -16,10 +16,7 @@ import com.wansensoft.dto.organization.DeptListDTO;
 import com.wansensoft.service.system.ISysDepartmentService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.DeptListVO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -39,12 +36,12 @@ public class SysDepartmentController {
     }
 
     @GetMapping("list")
-    public Response<DeptListVO> list(@RequestBody DeptListDTO deptListDto) {
-        return departmentService.deptList(deptListDto);
+    public Response<List<DeptListVO>> getDeptList(@RequestParam(value = "deptName", required = false) String deptName) {
+        return departmentService.getDeptList(deptName);
     }
 
-    @GetMapping("userDeptRel")
-    public Response<List<DeptListVO>> getUserDeptRel() {
-        return departmentService.getUserDeptRel();
+    @GetMapping("userBindDept")
+    public Response<List<DeptListVO>> userDept() {
+        return departmentService.userDept();
     }
 }
