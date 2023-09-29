@@ -3,7 +3,7 @@ package com.wansensoft.utils.enums
 import lombok.Getter
 
 @Getter
-enum class DeptCodeEnum(val code: String, val msg: String) {
+enum class DeptCodeEnumIngore(val code: String, val msg: String) {
 
     ADD_DEPARTMENT_SUCCESS("A0009", "添加部门成功"),
 

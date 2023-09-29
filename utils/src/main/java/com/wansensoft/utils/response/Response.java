@@ -13,10 +13,7 @@
 package com.wansensoft.utils.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.wansensoft.utils.enums.BaseCodeEnum;
-import com.wansensoft.utils.enums.DeptCodeEnum;
-import com.wansensoft.utils.enums.RoleCodeEnum;
-import com.wansensoft.utils.enums.UserCodeEnum;
+import com.wansensoft.utils.enums.*;
 import lombok.Data;
 
 import java.io.Serial;
