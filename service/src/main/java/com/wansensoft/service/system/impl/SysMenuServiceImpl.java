@@ -10,6 +10,7 @@ import com.wansensoft.mappers.system.SysMenuMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
+import com.wansensoft.utils.constants.CommonConstants;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.MenuVO;
 import org.aspectj.util.FileUtil;
@@ -92,7 +93,11 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                         .distinct()
                         .collect(Collectors.toList());
 
-                var menus = menuMapper.selectBatchIds(distinctNumbers);
+                var menus = lambdaQuery()
+                        .in(SysMenu::getId, distinctNumbers)
+                        .eq(SysMenu::getDeleteFlag, CommonConstants.NOT_DELETED)
+                        .list();
+
                 if(!menus.isEmpty()) {
                     menus.forEach(menu -> {
                         // JSON Assembly
@@ -100,12 +105,18 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                         var menuVo = MenuVO.builder()
                                 .id(menu.getId())
                                 .name(menu.getName())
+                                .title(menu.getTitle())
                                 .menuType(menu.getMenuType())
                                 .path(menu.getPath())
                                 .component(menu.getComponent())
                                 .icon(menu.getIcon())
                                 .sort(menu.getSort())
                                 .redirect(menu.getRedirect())
+                                .createTime(menu.getCreateTime())
+                                .status(menu.getStatus())
+                                .hideMenu(menu.getHideMenu())
+                                .blank(menu.getBlank())
+                                .ignoreKeepAlive(menu.getIgnoreKeepAlive())
                                 .meta(meta)
                                 .build();
                         if(menu.getParentId() != null) {
@@ -129,11 +140,10 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
      */
     private static JSONObject getMetaJsonObject(SysMenu menu) {
         var meta = new JSONObject();
+        // 这里的title和menu里的title一样
         meta.put("title", menu.getTitle());
         meta.put("icon", menu.getIcon());
-        meta.put("hideMenu", menu.getHideMenu());
         meta.put("hideBreadcrumb", menu.getHideBreadcrumb());
-        meta.put("ignoreKeepAlive", menu.getIgnoreKeepAlive());
         meta.put("hideTab", menu.getHideTab());
         meta.put("carryParam", menu.getCarryParam());
         meta.put("hideChildrenInMenu", menu.getHideChildrenInMenu());

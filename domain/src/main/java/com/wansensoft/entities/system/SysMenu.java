@@ -16,7 +16,9 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.Serial;
@@ -30,6 +32,7 @@ import java.io.Serializable;
  */
 @TableName("sys_menu")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class SysMenu implements Serializable {
 
     @Serial
@@ -93,7 +96,7 @@ public class SysMenu implements Serializable {
      * 状态（0-启用，1-停用）
      */
     @TableField("status")
-    private Boolean status;
+    private Integer status;
 
     /**
      * 图标
@@ -105,43 +108,47 @@ public class SysMenu implements Serializable {
      * 隐藏路由不在菜单显示
      */
     @TableField("hide_menu")
-    private Boolean hideMenu;
+    private Integer hideMenu;
+
+
+    @TableField("blank")
+    private Integer blank;
 
     /**
      * 隐藏该路由在面包屑上面的显示
      */
     @TableField("hide_breadcrumb")
-    private Boolean hideBreadcrumb;
+    private Integer hideBreadcrumb;
 
     /**
      * 是否忽略KeepAlive缓存
      */
     @TableField("ignore_keep_alive")
-    private Boolean ignoreKeepAlive;
+    private Integer ignoreKeepAlive;
 
     /**
      * 隐藏路由不在标签页显示
      */
     @TableField("hide_tab")
-    private Boolean hideTab;
+    private Integer hideTab;
 
     /**
      * 如果该路由会携带参数，且需要在tab页上面显示。则需要设置为true
      */
     @TableField("carry_param")
-    private Boolean carryParam;
+    private Integer carryParam;
 
     /**
      * 隐藏所有子菜单
      */
     @TableField("hide_children_in_menu")
-    private Boolean hideChildrenInMenu;
+    private Integer hideChildrenInMenu;
 
     /**
      * 是否固定标签
      */
     @TableField("affix")
-    private Boolean affix;
+    private Integer affix;
 
     /**
      * 内嵌iframe的地址
@@ -183,5 +190,5 @@ public class SysMenu implements Serializable {
      * 删除标记，0未删除，1删除
      */
     @TableField("delete_flag")
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 }
