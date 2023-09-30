@@ -19,6 +19,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -33,6 +36,8 @@ public class MenuVO {
 
     private String name;
 
+    private String title;
+
     private String path;
 
     private String component;
@@ -43,9 +48,18 @@ public class MenuVO {
 
     private Integer menuType;
 
-    private String type;
-
     private String redirect;
+
+    private Integer status;
+
+    private Integer hideMenu;
+
+    private Integer blank;
+
+    private Integer ignoreKeepAlive;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime createTime;
 
     private JSONObject meta;
 }

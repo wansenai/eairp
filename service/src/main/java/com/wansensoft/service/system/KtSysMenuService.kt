@@ -10,22 +10,16 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.api.system;
+package com.wansensoft.service.system
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.baomidou.mybatisplus.extension.service.IService
+import com.wansensoft.dto.menu.AddOrUpdateMenuDTO
+import com.wansensoft.entities.system.SysMenu
+import com.wansensoft.utils.response.Response
 
-import org.springframework.web.bind.annotation.RestController;
+interface KtSysMenuService : IService<SysMenu>{
 
-/**
- * <p>
- * 功能模块表 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
-@RestController
-@RequestMapping("/sys-menu")
-public class SysMenuController {
+    fun addOrSaveMenu(addOrUpdateMenuDTO: AddOrUpdateMenuDTO?): Response<String>
 
+    fun deleteMenu(id: Int?): Response<String>
 }
