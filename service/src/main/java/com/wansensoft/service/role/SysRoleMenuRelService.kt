@@ -10,16 +10,13 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.system
+package com.wansensoft.service.role
 
+import com.wansensoft.entities.role.SysRoleMenuRel
 import com.baomidou.mybatisplus.extension.service.IService
-import com.wansensoft.dto.menu.AddOrUpdateMenuDTO
-import com.wansensoft.entities.system.SysMenu
-import com.wansensoft.utils.response.Response
 
-interface KtSysMenuService : IService<SysMenu>{
+interface SysRoleMenuRelService : IService<SysRoleMenuRel> {
 
-    fun addOrSaveMenu(addOrUpdateMenuDTO: AddOrUpdateMenuDTO?): Response<String>
+    fun listByRoleId(roleId: Long?): List<SysRoleMenuRel>
 
-    fun deleteMenu(id: Int?): Response<String>
 }

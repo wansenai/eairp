@@ -33,11 +33,11 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-open class KtSysRoleServiceImpl(
+open class SysRoleServiceImpl(
     private val roleMapper: SysRoleMapper,
     private val roleMenuRelMapper: SysRoleMenuRelMapper,
-    private val roleMenuRelService: KtSysRoleMenuRelService,
-) : ServiceImpl<SysRoleMapper, SysRole>(), KtSysRoleService {
+    private val roleMenuRelService: SysRoleMenuRelService,
+) : ServiceImpl<SysRoleMapper, SysRole>(), SysRoleService {
 
     override fun roleList(): Response<List<RoleVO>> {
         val roles = ArrayList<RoleVO>()
@@ -191,6 +191,13 @@ open class KtSysRoleServiceImpl(
         val menuIds = rolePermissionDTO.menuIds
         if (roleId == null || menuIds.isEmpty()) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+        }
+        // 先删除原有的角色权限关系
+        val deleteResult = roleMenuRelService.lambdaUpdate()
+            .eq(SysRoleMenuRel::getRoleId, roleId)
+            .remove()
+        if (!deleteResult) {
+            return Response.responseMsg(RoleCodeEnum.ROLE_PERMISSION_MENU_ERROR)
         }
 
         val roleMenuRel = SysRoleMenuRel()

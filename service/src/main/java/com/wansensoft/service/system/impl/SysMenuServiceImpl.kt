@@ -12,25 +12,36 @@
  */
 package com.wansensoft.service.system.impl
 
+import com.alibaba.fastjson.JSONObject
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import com.wansensoft.dto.menu.AddOrUpdateMenuDTO
 import com.wansensoft.entities.role.SysRoleMenuRel
 import com.wansensoft.entities.system.SysMenu
+import com.wansensoft.mappers.role.SysRoleMenuRelMapper
 import com.wansensoft.mappers.system.SysMenuMapper
-import com.wansensoft.service.role.KtSysRoleMenuRelService
-import com.wansensoft.service.system.KtSysMenuService
+import com.wansensoft.service.role.SysRoleMenuRelService
+import com.wansensoft.service.system.SysMenuService
+import com.wansensoft.service.user.ISysUserRoleRelService
+import com.wansensoft.service.user.ISysUserService
 import com.wansensoft.utils.constants.CommonConstants
 import com.wansensoft.utils.enums.BaseCodeEnum
 import com.wansensoft.utils.enums.MenuCodeEnum
 import com.wansensoft.utils.response.Response
+import com.wansensoft.vo.MenuVO
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.StringUtils
 import java.time.LocalDateTime
+import java.util.regex.Pattern
 
 @Service
-open class KtSysMenuServiceImpl(
-    private val roleMenuRelService: KtSysRoleMenuRelService,
-) :ServiceImpl<SysMenuMapper, SysMenu>(), KtSysMenuService {
+open class SysMenuServiceImpl(
+    private val roleMenuRelService: SysRoleMenuRelService,
+    private val userRoleRelService : ISysUserRoleRelService,
+    private val userService: ISysUserService,
+    private val roleMenuRelMapper: SysRoleMenuRelMapper,
+) :ServiceImpl<SysMenuMapper, SysMenu>(), SysMenuService {
 
     @Transactional
     override fun addOrSaveMenu(addOrUpdateMenuDTO: AddOrUpdateMenuDTO?): Response<String> {
@@ -108,5 +119,87 @@ open class KtSysMenuServiceImpl(
             }
         }
         return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+    }
+
+    override fun menuList(): Response<JSONObject> {
+        val menuData = JSONObject()
+        val menuVos = ArrayList<MenuVO>()
+
+        val userId = userService.getCurrentUserId()
+        if (!StringUtils.hasText(userId)) {
+            return Response.fail()
+        }
+
+        val roleIds = userRoleRelService.queryByUserId(userId.toLong())
+            .map { it.roleId }
+
+        if (roleIds.isNotEmpty()) {
+            val menusReals = roleMenuRelMapper.listByRoleId(roleIds)
+            if (menusReals.isNotEmpty()) {
+                val numberList = menusReals.map { it.menuId }
+                    .flatMap { item ->
+                        val pattern = Pattern.compile("\\d+")
+                        val matcher = pattern.matcher(item)
+                        val numbers = ArrayList<String>()
+                        while (matcher.find()) {
+                            numbers.add(matcher.group())
+                        }
+                        numbers
+                    }
+                    .distinct()
+                    .toList()
+
+                val menus = lambdaQuery()
+                    .`in`(SysMenu::getId, numberList)
+                    .eq(SysMenu::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list()
+
+                if (menus.isNotEmpty()) {
+                    menus.forEach { menu ->
+                        val meta = getMetaJsonObject(menu)
+                        val menuVoBuilder = MenuVO.builder()
+                            .id(menu.id)
+                            .name(menu.name)
+                            .title(menu.title)
+                            .menuType(menu.menuType)
+                            .path(menu.path)
+                            .component(menu.component)
+                            .icon(menu.icon)
+                            .sort(menu.sort)
+                            .redirect(menu.redirect)
+                            .createTime(menu.createTime)
+                            .status(menu.status)
+                            .hideMenu(menu.hideMenu)
+                            .blank(menu.blank)
+                            .ignoreKeepAlive(menu.ignoreKeepAlive)
+                            .meta(meta)
+
+                        if (menu.parentId != null) {
+                            menuVoBuilder.parentId(menu.parentId)
+                        }
+                        val menuVo = menuVoBuilder.build()
+                        menuVos.add(menuVo)
+                    }
+                }
+                menuData["total"] = menuVos.size
+                menuData["data"] = menuVos
+            }
+        }
+        return Response.responseData(menuData)
+    }
+
+    private fun getMetaJsonObject(menu: SysMenu): JSONObject {
+        val meta = JSONObject()
+        meta["title"] = menu.title
+        meta["icon"] = menu.icon
+        meta["hideBreadcrumb"] = menu.hideBreadcrumb
+        meta["hideTab"] = menu.hideTab
+        meta["carryParam"] = menu.carryParam
+        meta["hideChildrenInMenu"] = menu.hideChildrenInMenu
+        meta["affix"] = menu.affix
+        meta["frameSrc"] = menu.frameSrc
+        meta["realPath"] = menu.realPath
+        meta["dynamicLevel"] = 20
+        return meta
     }
 }

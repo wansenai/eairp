@@ -18,7 +18,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import org.springframework.stereotype.Service
 
 @Service
-open class KtSysRoleMenuRelServiceImpl : ServiceImpl<SysRoleMenuRelMapper, SysRoleMenuRel>(), KtSysRoleMenuRelService {
+open class SysRoleMenuRelServiceImpl : ServiceImpl<SysRoleMenuRelMapper, SysRoleMenuRel>(), SysRoleMenuRelService {
 
     override fun listByRoleId(roleId: Long?): List<SysRoleMenuRel> {
         requireNotNull(roleId) { "roleId must not be null" }
