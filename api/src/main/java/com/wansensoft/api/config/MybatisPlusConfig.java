@@ -62,31 +62,18 @@ public class MybatisPlusConfig {
                     return new LongValue(tenantId);
                 } else {
                     //超管
-                    return null;
+                    return new LongValue(0);
                 }
             }
 
             // 这是 default 方法,默认返回 false 表示所有表都需要拼多租户条件
             @Override
             public boolean ignoreTable(String tableName) {
-                //获取开启状态
-                boolean res = true;
-                String token = request.getHeader("Authorization");
-                Long tenantId = getTenantIdByToken(token);
-                if (tenantId!=0L) {
-                    // 这里可以判断是否过滤表
-                    if ("sys_user".equals(tableName) || "jsh_sequence".equals(tableName)
-                            || "jsh_user_business".equals(tableName) || "jsh_function".equals(tableName)
-                            || "jsh_platform_config".equals(tableName) || "jsh_tenant".equals(tableName)) {
-                        res = true;
-                    } else {
-                        res = false;
-                    }
-                }
-                return res;
+                return "sys_user".equalsIgnoreCase(tableName) || "sys_menu".equalsIgnoreCase(tableName)
+                        || "sys_user_role_rel".equalsIgnoreCase(tableName) || "sys_user_dept_rel".equalsIgnoreCase(tableName)
+                        || "sys_role_menu_rel".equalsIgnoreCase(tableName);
             }
         }));
-
 
         // 如果用了分页插件注意先 add TenantLineInnerInterceptor 再 add PaginationInnerInterceptor
         // 用了分页插件必须设置 MybatisConfiguration#useDeprecatedExecutor = false
