@@ -10,20 +10,30 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.product.impl;
+package com.wansensoft.vo;
 
-import com.wansensoft.service.product.IProductCategoryService;
-import com.wansensoft.entities.product.ProductCategory;
-import com.wansensoft.mappers.product.ProductCategoryMapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * <p>
- * 产品类型表 服务实现类
- * </p>
- */
-@Service
-public class ProductCategoryServiceImpl extends ServiceImpl<ProductCategoryMapper, ProductCategory> implements IProductCategoryService {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProductCategoryVO {
 
+    private Long id;
+
+    private Long parentId;
+
+    private String categoryName;
+
+    private String categoryLevel;
+
+    private String serialNumber;
+
+    private String remark;
+
+    private Integer sort;
 }

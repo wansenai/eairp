@@ -88,6 +88,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
 
     @Override
+    @Transactional
     public Response<String> accountRegister(AccountRegisterDTO accountRegisterDto) {
         if (accountRegisterDto == null) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
@@ -112,15 +113,29 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
 
         // start register
-        boolean result = save(SysUser.builder()
-                .id(SnowflakeIdUtil.nextId())
+        var userId = SnowflakeIdUtil.nextId();
+        var user = SysUser.builder()
+                .id(userId)
                 .userName(accountRegisterDto.getUsername())
                 .name("测试租户")
                 .password(CommonTools.md5Encryp(accountRegisterDto.getPassword()))
                 .phoneNumber(accountRegisterDto.getPhoneNumber())
-                .tenantId(SnowflakeIdUtil.nextId())
-                .build());
-        if (!result) {
+                .tenantId(userId)
+                .createTime(LocalDateTime.now())
+                .build();
+        // default tenantId role
+        var userRoleRel = SysUserRoleRel.builder()
+                .id(SnowflakeIdUtil.nextId())
+                .roleId(1L)
+                .userId(userId)
+                .tenantId(userId)
+                .createTime(LocalDateTime.now())
+                .build();
+
+        var userResult = save(user);
+        var userRoleResult = userRoleRelService.save(userRoleRel);
+
+        if (!userResult && userRoleResult) {
             return Response.fail();
         }
 

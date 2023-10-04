@@ -196,9 +196,6 @@ open class SysRoleServiceImpl(
         val deleteResult = roleMenuRelService.lambdaUpdate()
             .eq(SysRoleMenuRel::getRoleId, roleId)
             .remove()
-        if (!deleteResult) {
-            return Response.responseMsg(RoleCodeEnum.ROLE_PERMISSION_MENU_ERROR)
-        }
 
         val roleMenuRel = SysRoleMenuRel()
         val menuIdStr = menuIds.joinToString(separator = "") { "[${it}]" }

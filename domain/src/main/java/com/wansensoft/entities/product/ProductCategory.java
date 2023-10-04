@@ -63,7 +63,7 @@ public class ProductCategory implements Serializable {
     /**
      * 显示顺序
      */
-    private String sort;
+    private Integer sort;
 
     /**
      * 编号
