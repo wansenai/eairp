@@ -10,16 +10,14 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.product;
+package com.wansensoft.service.product
 
-import com.wansensoft.entities.product.ProductCategory;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.extension.service.IService
+import com.wansensoft.entities.product.ProductCategory
+import com.wansensoft.utils.response.Response
+import com.wansensoft.vo.ProductCategoryVO
 
-/**
- * <p>
- * 产品类型表 服务类
- * </p>
- */
-public interface IProductCategoryService extends IService<ProductCategory> {
+interface ProductCategoryService : IService<ProductCategory> {
 
+    fun productCategoryList() : Response<List<ProductCategoryVO>>
 }
