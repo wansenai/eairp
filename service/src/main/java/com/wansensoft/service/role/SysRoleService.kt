@@ -9,7 +9,7 @@ import com.wansensoft.entities.role.SysRole
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.RoleVO
 
-interface KtSysRoleService : IService<SysRole> {
+interface SysRoleService : IService<SysRole> {
 
     fun roleList() : Response<List<RoleVO>>
 

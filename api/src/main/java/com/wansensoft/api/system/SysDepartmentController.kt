@@ -13,7 +13,7 @@
 package com.wansensoft.api.system
 
 import com.wansensoft.dto.department.AddOrUpdateDeptDTO
-import com.wansensoft.service.system.KtSysDepartmentService
+import com.wansensoft.service.system.SysDepartmentService
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.DeptListVO
 import org.springframework.web.bind.annotation.GetMapping
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/dept")
-class SysDepartmentController(private val departmentService: KtSysDepartmentService) {
+class SysDepartmentController(private val departmentService: SysDepartmentService) {
 
     @GetMapping("list")
     fun getDeptList(@RequestParam(value = "deptName", required = false) deptName: String?): Response<List<DeptListVO>> {

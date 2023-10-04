@@ -19,7 +19,7 @@ import com.wansensoft.entities.SysDepartment
 import com.wansensoft.entities.user.SysUserDeptRel
 import com.wansensoft.mappers.system.SysDepartmentMapper
 import com.wansensoft.mappers.user.SysUserDeptRelMapper
-import com.wansensoft.service.system.KtSysDepartmentService
+import com.wansensoft.service.system.SysDepartmentService
 import com.wansensoft.service.user.ISysUserService
 import com.wansensoft.utils.SnowflakeIdUtil
 import com.wansensoft.utils.constants.CommonConstants
@@ -31,13 +31,12 @@ import org.jetbrains.annotations.NotNull
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 import java.time.LocalDateTime
-import java.time.LocalTime
 
 @Service
-open class KtSysDepartmentServiceImpl(
+open class SysDepartmentServiceImpl(
     private val userService: ISysUserService,
     private val userDeptRelMapper: SysUserDeptRelMapper
-) : ServiceImpl<SysDepartmentMapper, SysDepartment>(), KtSysDepartmentService {
+) : ServiceImpl<SysDepartmentMapper, SysDepartment>(), SysDepartmentService {
 
     override fun userDept(): Response<List<DeptListVO>> {
         val results = ArrayList<DeptListVO>(10)

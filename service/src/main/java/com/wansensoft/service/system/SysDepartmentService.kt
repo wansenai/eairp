@@ -18,7 +18,7 @@ import com.wansensoft.entities.SysDepartment
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.DeptListVO
 
-interface KtSysDepartmentService : IService<SysDepartment> {
+interface SysDepartmentService : IService<SysDepartment> {
 
     fun getDeptList(deptName: String?): Response<List<DeptListVO>>
 

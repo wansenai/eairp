@@ -17,8 +17,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansensoft.dto.role.AddOrUpdateRoleDTO;
 import com.wansensoft.dto.role.RoleListDTO;
 import com.wansensoft.dto.role.RolePermissionDTO;
-import com.wansensoft.service.role.KtSysRoleService;
-import com.wansensoft.service.system.ISysMenuService;
+import com.wansensoft.service.role.SysRoleService;
+import com.wansensoft.service.system.SysMenuService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.RoleVO;
 import org.springframework.web.bind.annotation.*;
@@ -37,13 +37,13 @@ import java.util.List;
 @RequestMapping("sysRole")
 public class SysRoleController {
 
-    private final ISysMenuService menuService;
+    private final SysMenuService menuService;
 
-    private final KtSysRoleService ktSysRoleService;
+    private final SysRoleService sysRoleService;
 
-    public SysRoleController(ISysMenuService menuService, KtSysRoleService ktSysRoleService) {
+    public SysRoleController(SysMenuService menuService, SysRoleService sysRoleService) {
         this.menuService = menuService;
-        this.ktSysRoleService = ktSysRoleService;
+        this.sysRoleService = sysRoleService;
     }
 
     @GetMapping("menu")
@@ -53,31 +53,31 @@ public class SysRoleController {
 
     @GetMapping("list")
     public Response<List<RoleVO>> getRoleList() {
-        return ktSysRoleService.roleList();
+        return sysRoleService.roleList();
     }
 
     @PostMapping("PageList")
     public Response<Page<RoleVO>> getRolePageList(@RequestBody RoleListDTO roleListDTO) {
-        return ktSysRoleService.rolePageList(roleListDTO);
+        return sysRoleService.rolePageList(roleListDTO);
     }
 
     @PostMapping("updateStatus")
     public Response<String> updateStatus(@RequestParam(value = "id") String id, @RequestParam(value = "status") Integer status) {
-        return ktSysRoleService.updateStatus(id, status);
+        return sysRoleService.updateStatus(id, status);
     }
 
     @PostMapping("addOrUpdateRole")
     public Response<String> addOrUpdateRole(@RequestBody AddOrUpdateRoleDTO addOrUpdateRoleDTO) {
-        return ktSysRoleService.addOrUpdateRole(addOrUpdateRoleDTO);
+        return sysRoleService.addOrUpdateRole(addOrUpdateRoleDTO);
     }
 
     @PostMapping("deleteRole")
     public Response<String> deleteRole(@RequestParam(value = "id") String id) {
-        return ktSysRoleService.deleteRole(id);
+        return sysRoleService.deleteRole(id);
     }
 
     @PostMapping("permission")
     public Response<String> rolePermission(@RequestBody RolePermissionDTO rolePermissionDTO) {
-        return ktSysRoleService.rolePermission(rolePermissionDTO);
+        return sysRoleService.rolePermission(rolePermissionDTO);
     }
 }

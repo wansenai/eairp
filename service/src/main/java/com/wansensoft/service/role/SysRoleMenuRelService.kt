@@ -10,22 +10,13 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.api.product;
+package com.wansensoft.service.role
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.wansensoft.entities.role.SysRoleMenuRel
+import com.baomidou.mybatisplus.extension.service.IService
 
-import org.springframework.web.bind.annotation.RestController;
+interface SysRoleMenuRelService : IService<SysRoleMenuRel> {
 
-/**
- * <p>
- * 产品类型表 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
-@RestController
-@RequestMapping("/product-category")
-public class ProductCategoryController {
+    fun listByRoleId(roleId: Long?): List<SysRoleMenuRel>
 
 }
