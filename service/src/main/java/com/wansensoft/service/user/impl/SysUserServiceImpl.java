@@ -15,24 +15,29 @@ package com.wansensoft.service.user.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansensoft.dto.user.*;
+import com.wansensoft.entities.SysDepartment;
+import com.wansensoft.entities.role.SysRole;
+import com.wansensoft.entities.role.SysRoleMenuRel;
+import com.wansensoft.entities.system.SysMenu;
 import com.wansensoft.entities.user.SysUser;
 import com.wansensoft.entities.user.SysUserDeptRel;
 import com.wansensoft.entities.user.SysUserRoleRel;
 import com.wansensoft.mappers.role.SysRoleMapper;
 import com.wansensoft.mappers.system.SysDepartmentMapper;
+import com.wansensoft.mappers.system.SysMenuMapper;
 import com.wansensoft.mappers.user.SysUserMapper;
 import com.wansensoft.middleware.security.JWTUtil;
+import com.wansensoft.service.role.SysRoleMenuRelService;
+import com.wansensoft.service.system.SysMenuService;
 import com.wansensoft.service.user.ISysUserDeptRelService;
 import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.utils.SnowflakeIdUtil;
-import com.wansensoft.utils.constants.CommonConstants;
-import com.wansensoft.utils.constants.UserConstants;
+import com.wansensoft.utils.constants.*;
 import com.wansensoft.utils.enums.UserCodeEnum;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.CommonTools;
-import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.enums.BaseCodeEnum;
 import com.wansensoft.utils.redis.RedisUtil;
 import com.wansensoft.vo.UserInfoVO;
@@ -75,8 +80,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private final SysDepartmentMapper departmentMapper;
 
+    private final SysMenuMapper menuMapper;
+
+    private final SysRoleMenuRelService roleMenuRelService;
+
     public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService,
-                              ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper) {
+                              ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper, SysMenuMapper menuMapper, SysRoleMenuRelService roleMenuRelService) {
         this.userMapper = userMapper;
         this.redisUtil = redisUtil;
         this.jwtUtil = jwtUtil;
@@ -84,6 +93,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         this.userDeptRelService = userDeptRelService;
         this.roleMapper = roleMapper;
         this.departmentMapper = departmentMapper;
+        this.menuMapper = menuMapper;
+        this.roleMenuRelService = roleMenuRelService;
     }
 
 
@@ -123,19 +134,70 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .tenantId(userId)
                 .createTime(LocalDateTime.now())
                 .build();
-        // default tenantId role
+        // Assign the tenant administrator role and default department to newly registered tenants by default
+        var role = SysRole.builder()
+                .id(SnowflakeIdUtil.nextId())
+                .tenantId(userId)
+                .roleName(RoleConstants.DEFAULT_TENANT_ROLE_NAME)
+                .type(RoleConstants.ROLE_TYPE_ALL_DATA)
+                .description(RoleConstants.DEFAULT_TENANT_ROLE_REMARK)
+                .status(CommonConstants.NOT_DELETED)
+                .createTime(LocalDateTime.now())
+                .createBy(userId)
+                .build();
+        var department = SysDepartment.builder()
+                .id(SnowflakeIdUtil.nextId())
+                .tenantId(userId)
+                .number(DepartmentConstants.DEFAULT_TENANT_DEPARTMENT_NUMBER)
+                .name(DepartmentConstants.DEFAULT_TENANT_DEPARTMENT_NAME)
+                .leader(String.valueOf(userId))
+                .status(CommonConstants.NOT_DELETED)
+                .remark(DepartmentConstants.DEFAULT_TENANT_DEPARTMENT_REMARK)
+                .createTime(LocalDateTime.now())
+                .createBy(userId)
+                .build();
+
         var userRoleRel = SysUserRoleRel.builder()
                 .id(SnowflakeIdUtil.nextId())
-                .roleId(1L)
+                .roleId(role.getId())
                 .userId(userId)
                 .tenantId(userId)
                 .createTime(LocalDateTime.now())
+                .createBy(userId)
+                .build();
+
+        var userDepartmentRel = SysUserDeptRel.builder()
+                .id(SnowflakeIdUtil.nextId())
+                .deptId(department.getId())
+                .userId(userId)
+                .tenantId(userId)
+                .sort(0)
+                .createTime(LocalDateTime.now())
+                .createBy(userId)
+                .build();
+        var menuIds = menuMapper.selectList(null)
+                .stream()
+                .map(SysMenu::getId)
+                .filter(id -> id != 15)
+                .toList();
+        var menuIdStr = menuIds.toString().replace(",", "][");
+        var roleMenuRel = SysRoleMenuRel.builder()
+                .id(SnowflakeIdUtil.nextId())
+                .tenantId(userId)
+                .roleId(role.getId())
+                .menuId(menuIdStr)
+                .createTime(LocalDateTime.now())
+                .createBy(userId)
                 .build();
 
         var userResult = save(user);
+        var roleResult = roleMapper.insert(role);
+        var departmentResult = departmentMapper.insert(department);
         var userRoleResult = userRoleRelService.save(userRoleRel);
+        var userDepartmentResult = userDeptRelService.save(userDepartmentRel);
+        var roleMenuResult = roleMenuRelService.save(roleMenuRel);
 
-        if (!userResult && userRoleResult) {
+        if (!userResult && roleResult!=0 && departmentResult!=0 && !userRoleResult && !userDepartmentResult && !roleMenuResult) {
             return Response.fail();
         }
 
@@ -584,11 +646,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             }
 
             var userId = SnowflakeIdUtil.nextId();
+
+            var password = "";
+            if(StringUtils.hasText(addOrUpdateUserDTO.getPassword())) {
+                password = CommonTools.md5Encryp(addOrUpdateUserDTO.getPassword());
+            } else {
+                password = CommonTools.md5Encryp(UserConstants.DEFAULT_PASSWORD);
+            }
+
             var user = SysUser.builder()
                     .id(userId)
                     .userName(addOrUpdateUserDTO.getUsername())
-                    .password(Optional.ofNullable(CommonTools.md5Encryp(addOrUpdateUserDTO.getPassword()))
-                            .orElse(CommonTools.md5Encryp(UserConstants.DEFAULT_PASSWORD)))
+                    .password(password)
                     .name(addOrUpdateUserDTO.getName())
                     .phoneNumber(addOrUpdateUserDTO.getPhoneNumber())
                     .email(addOrUpdateUserDTO.getEmail())
