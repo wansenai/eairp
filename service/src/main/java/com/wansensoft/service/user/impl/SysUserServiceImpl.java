@@ -28,7 +28,6 @@ import com.wansensoft.mappers.system.SysMenuMapper;
 import com.wansensoft.mappers.user.SysUserMapper;
 import com.wansensoft.middleware.security.JWTUtil;
 import com.wansensoft.service.role.SysRoleMenuRelService;
-import com.wansensoft.service.system.SysMenuService;
 import com.wansensoft.service.user.ISysUserDeptRelService;
 import com.wansensoft.service.user.ISysUserRoleRelService;
 import com.wansensoft.service.user.ISysUserService;
