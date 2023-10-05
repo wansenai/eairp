@@ -20,9 +20,7 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 /**
@@ -34,7 +32,9 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("sys_role")
-
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SysRole implements Serializable {
 
     @Serial
@@ -45,6 +45,11 @@ public class SysRole implements Serializable {
      */
     @TableId(value = "id", type = IdType.NONE)
     private Long id;
+
+    /**
+     * 租户ID
+     */
+    private Long tenantId;
 
     /**
      * 名称

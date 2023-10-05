@@ -17,8 +17,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import lombok.*;
 import lombok.experimental.Accessors;
 
 /**
@@ -30,6 +30,9 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("sys_role_menu_rel")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SysRoleMenuRel implements Serializable {
 
     private static final long serialVersionUID = 1L;
