@@ -13,6 +13,7 @@
 package com.wansensoft.service.product
 
 import com.baomidou.mybatisplus.extension.service.IService
+import com.wansensoft.dto.product.AddOrUpdateProductCategoryDTO
 import com.wansensoft.entities.product.ProductCategory
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.ProductCategoryVO
@@ -20,4 +21,6 @@ import com.wansensoft.vo.ProductCategoryVO
 interface ProductCategoryService : IService<ProductCategory> {
 
     fun productCategoryList() : Response<List<ProductCategoryVO>>
+
+    fun addOrUpdateProductCategory(productCategory: AddOrUpdateProductCategoryDTO) : Response<String>
 }
