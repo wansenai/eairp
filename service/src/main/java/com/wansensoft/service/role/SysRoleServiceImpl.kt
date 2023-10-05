@@ -193,7 +193,7 @@ open class SysRoleServiceImpl(
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
         }
         // 先删除原有的角色权限关系
-        val deleteResult = roleMenuRelService.lambdaUpdate()
+        roleMenuRelService.lambdaUpdate()
             .eq(SysRoleMenuRel::getRoleId, roleId)
             .remove()
 

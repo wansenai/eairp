@@ -61,12 +61,12 @@ public class SysUserDeptRel implements Serializable {
     /**
      * 用户在所属部门中显示顺序
      */
-    private String userDeptSort;
+    private Integer sort;
 
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
     /**
      * 创建时间

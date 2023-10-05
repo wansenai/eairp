@@ -40,10 +40,8 @@ open class SysDepartmentServiceImpl(
 
     override fun userDept(): Response<List<DeptListVO>> {
         val results = ArrayList<DeptListVO>(10)
-        val tenantId = userService.getCurrentTenantId()
 
         val userRoleWrapper = QueryWrapper<SysUserDeptRel>()
-            .eq("tenant_id", tenantId)
             .eq("user_id", userService.getCurrentUserId())
         val userDeptRelList = userDeptRelMapper.selectList(userRoleWrapper)
             .stream().map(SysUserDeptRel::getDeptId).toList()
@@ -165,9 +163,10 @@ open class SysDepartmentServiceImpl(
     override fun addOrSaveDept(addOrUpdateDeptDTO: AddOrUpdateDeptDTO?): Response<String> {
         addOrUpdateDeptDTO?.let { dto ->
             if (dto.id == null) {
+                val userId = userService.getCurrentTenantId().toLong();
                 val dept = SysDepartment.builder()
                     .id(SnowflakeIdUtil.nextId())
-                    .tenantId(userService.getCurrentTenantId().toLong())
+                    .tenantId(userId)
                     .parentId(dto.parentId)
                     .name(dto.deptName)
                     .number(dto.deptName)
@@ -178,6 +177,15 @@ open class SysDepartmentServiceImpl(
                     .createTime(LocalDateTime.now())
                     .build()
                 val saveResult = save(dept)
+                // add user_dept_rel
+                val userDeptRel = SysUserDeptRel.builder()
+                    .id(SnowflakeIdUtil.nextId())
+                    .tenantId(userId)
+                    .userId(userId)
+                    .deptId(dept.id)
+                    .createTime(LocalDateTime.now())
+                    .build()
+                userDeptRelMapper.insert(userDeptRel)
                 if (!saveResult) {
                     return Response.responseMsg(DeptCodeEnum.ADD_DEPARTMENT_ERROR)
                 }
