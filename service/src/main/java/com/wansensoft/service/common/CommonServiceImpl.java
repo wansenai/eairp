@@ -18,13 +18,15 @@ import com.tencentcloudapi.common.profile.ClientProfile;
 import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.sms.v20190711.SmsClient;
 import com.tencentcloudapi.sms.v20190711.models.SendSmsRequest;
+import com.wansensoft.bo.SmsInfoBO;
+import com.wansensoft.entities.system.SysPlatformConfig;
+import com.wansensoft.service.system.ISysPlatformConfigService;
 import com.wansensoft.utils.SnowflakeIdUtil;
 import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.constants.SmsConstants;
 import com.wansensoft.utils.redis.RedisUtil;
 import com.wansensoft.vo.CaptchaVO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
@@ -35,6 +37,7 @@ import java.util.Base64;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -44,21 +47,23 @@ public class CommonServiceImpl implements CommonService{
 
     private final Producer producer;
 
-    @Value("${sms.secretId}")
-    private String secretId;
+    private final ISysPlatformConfigService platformConfigService;
 
-    @Value("${sms.secretKey}")
-    private String secretKey;
-
-    @Value("${sms.smsClint}")
-    private String smsClint;
-
-    @Value("${sms.sdkAppId}")
-    private String sdkAppId;
-
-    public CommonServiceImpl(RedisUtil redisUtil, Producer producer) {
+    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, ISysPlatformConfigService platformConfigService) {
         this.redisUtil = redisUtil;
         this.producer = producer;
+        this.platformConfigService = platformConfigService;
+    }
+
+    private SmsInfoBO getSmsInfo() {
+        var platform = platformConfigService.list().stream().filter(item -> item.getPlatformKey().startsWith("tencent_sms")).toList();
+        var smsInfoMap = platform.stream().collect(Collectors.toMap(SysPlatformConfig::getPlatformKey, SysPlatformConfig::getPlatformValue));
+        return SmsInfoBO.builder()
+                .secretId(smsInfoMap.get("tencent_sms_secret_id"))
+                .secretKey(smsInfoMap.get("tencent_sms_secret_key"))
+                .smsClint(smsInfoMap.get("tencent_sms_client"))
+                .sdkAppId(smsInfoMap.get("tencent_sms_sdk_appId"))
+                .build();
     }
 
     @Override
@@ -108,7 +113,8 @@ public class CommonServiceImpl implements CommonService{
         };
 
         try {
-            Credential cred = new Credential(secretId, secretKey);
+            SmsInfoBO smsInfo = getSmsInfo();
+            Credential cred = new Credential(smsInfo.getSecretId(), smsInfo.getSecretKey());
             HttpProfile httpProfile = new HttpProfile();
             httpProfile.setReqMethod("POST");
             httpProfile.setConnTimeout(60);
@@ -116,10 +122,10 @@ public class CommonServiceImpl implements CommonService{
             ClientProfile clientProfile = new ClientProfile();
             clientProfile.setSignMethod("HmacSHA256");
             clientProfile.setHttpProfile(httpProfile);
-            SmsClient client = new SmsClient(cred, smsClint,clientProfile);
+            SmsClient client = new SmsClient(cred, smsInfo.getSmsClint(),clientProfile);
 
             SendSmsRequest req = new SendSmsRequest();
-            req.setSmsSdkAppid(sdkAppId);
+            req.setSmsSdkAppid(smsInfo.getSdkAppId());
             req.setSign(SmsConstants.SMS_SIGN_NAME);
             req.setSessionContext(phoneNumber);
             req.setTemplateID(templateId);

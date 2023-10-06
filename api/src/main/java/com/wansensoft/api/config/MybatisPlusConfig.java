@@ -71,7 +71,7 @@ public class MybatisPlusConfig {
             public boolean ignoreTable(String tableName) {
                 return "sys_user".equalsIgnoreCase(tableName) || "sys_menu".equalsIgnoreCase(tableName)
                         || "sys_user_role_rel".equalsIgnoreCase(tableName) || "sys_user_dept_rel".equalsIgnoreCase(tableName)
-                        || "sys_role_menu_rel".equalsIgnoreCase(tableName);
+                        || "sys_role_menu_rel".equalsIgnoreCase(tableName) || "sys_platform_config".equalsIgnoreCase(tableName);
             }
         }));
 
