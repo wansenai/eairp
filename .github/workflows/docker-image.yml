@@ -3,19 +3,9 @@ name: Docker Image CI
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
-env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ''
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -27,8 +17,15 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn -B clean package
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build -f ./docker/Dockerfile . -t my-image-name:${{ github.run_number }}
-    
+      run: mvn clean package
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        file: ./docker/Dockerfile
+        push: true
+        tags: wansenerp-core:${{ github.sha }}
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
