@@ -30,9 +30,5 @@ jobs:
       run: mvn -B clean package
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      uses: docker/build-push-action@v2
-      with:
-        file: ./docker/Dockerfile
-        push: false
-        tags: my-image-name:${{ github.run_number }}
+      run: docker build -f ./docker/Dockerfile . -t my-image-name:${{ github.run_number }}
     
