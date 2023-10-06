@@ -34,7 +34,7 @@ public class ErpApplication {
         Environment environment = context.getBean(Environment.class);
         System.out.println("启动成功，后端服务API地址：http://" + ComputerInfo.getIpAddr() + ":"
                 + environment.getProperty("server.port") + "/wansenerp/doc.html");
-        System.out.println("您还需启动前端服务，启动命令：yarn run serve 或 npm run serve，测试用户：wansenerp，密码：123456");
+        System.out.println("您还需启动前端服务，启动命令：pnpm serve ，测试用户：wansenerp，密码：123456");
     }
 
 }
