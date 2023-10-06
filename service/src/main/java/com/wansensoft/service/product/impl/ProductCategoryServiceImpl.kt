@@ -13,17 +13,25 @@
 package com.wansensoft.service.product.impl
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
+import com.wansensoft.dto.product.AddOrUpdateProductCategoryDTO
 import com.wansensoft.entities.product.ProductCategory
 import com.wansensoft.mappers.product.ProductCategoryMapper
 import com.wansensoft.service.product.ProductCategoryService
+import com.wansensoft.service.user.ISysUserService
+import com.wansensoft.utils.SnowflakeIdUtil
+import com.wansensoft.utils.enums.BaseCodeEnum
+import com.wansensoft.utils.enums.ProdcutCodeEnum
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.ProductCategoryVO
 import org.springframework.beans.BeanUtils
 import org.springframework.stereotype.Service
+import org.springframework.util.StringUtils
+import java.time.LocalDateTime
 
 @Service
 open class ProductCategoryServiceImpl(
-    private val productCategoryMapper: ProductCategoryMapper
+    private val productCategoryMapper: ProductCategoryMapper,
+    private val userService: ISysUserService
 ) : ServiceImpl<ProductCategoryMapper, ProductCategory>(), ProductCategoryService {
 
     override fun productCategoryList(): Response<List<ProductCategoryVO>> {
@@ -37,5 +45,53 @@ open class ProductCategoryServiceImpl(
         }
 
         return Response.responseData(productCategoryVOs)
+    }
+
+    override fun addOrUpdateProductCategory(productCategoryDTO: AddOrUpdateProductCategoryDTO): Response<String> {
+        productCategoryDTO.let { dto ->
+            val userId = userService.getCurrentTenantId().toLong()
+            if (dto.id == null) {
+                // Add product category
+                val productCategory = ProductCategory.builder()
+                    .id(SnowflakeIdUtil.nextId())
+                    .tenantId(userId)
+                    .categoryName(dto.categoryName)
+                    .categoryLevel(dto.categoryLevel)
+                    .parentId(dto.parentId)
+                    .sort(dto.sort)
+                    .serialNumber(dto.serialNumber)
+                    .remark(dto.remark)
+                    .createTime(LocalDateTime.now())
+                    .createBy(userId)
+                    .build()
+
+                val savaResult = save(productCategory)
+                if (!savaResult) {
+                    return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_CATEGORY_ERROR)
+                }
+                return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_CATEGORY_SUCCESS)
+
+            } else {
+                val updateResult = lambdaUpdate()
+                    .eq(ProductCategory::getId, dto.id)
+                    .apply {
+                        set(StringUtils.hasText(dto.categoryName), ProductCategory::getCategoryName, dto.categoryName)
+                        set(dto.categoryLevel != null, ProductCategory::getCategoryLevel, dto.categoryLevel)
+                        set(dto.parentId != null, ProductCategory::getParentId, dto.parentId)
+                        set(dto.sort != null, ProductCategory::getSort, dto.sort)
+                        set(StringUtils.hasText(dto.serialNumber), ProductCategory::getSerialNumber, dto.serialNumber)
+                        set(StringUtils.hasText(dto.remark), ProductCategory::getRemark, dto.remark)
+                        set(ProductCategory::getUpdateTime, LocalDateTime.now())
+                        set(ProductCategory::getUpdateBy, userId)
+                    }
+                    .update()
+
+                if (!updateResult) {
+                    return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_CATEGORY_ERROR)
+                }
+                return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_CATEGORY_SUCCESS)
+            }
+        }
+        return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
     }
 }

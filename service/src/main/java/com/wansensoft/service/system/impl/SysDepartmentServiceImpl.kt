@@ -163,7 +163,7 @@ open class SysDepartmentServiceImpl(
     override fun addOrSaveDept(addOrUpdateDeptDTO: AddOrUpdateDeptDTO?): Response<String> {
         addOrUpdateDeptDTO?.let { dto ->
             if (dto.id == null) {
-                val userId = userService.getCurrentTenantId().toLong();
+                val userId = userService.getCurrentTenantId().toLong()
                 val dept = SysDepartment.builder()
                     .id(SnowflakeIdUtil.nextId())
                     .tenantId(userId)
