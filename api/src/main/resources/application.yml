@@ -1,5 +1,5 @@
 server:
-  port: 9999
+  port: 8088
   servlet:
     context-path: /erp-api
 
