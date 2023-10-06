@@ -3,8 +3,6 @@ name: Docker Image CI
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
   build:
@@ -27,7 +25,7 @@ jobs:
         context: .
         file: ./docker/Dockerfile
         push: true
-        tags: wansenerp-core:${{ github.run_number }}
+        tags: wansenerp-core:${{ github.sha }}
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
