@@ -34,5 +34,5 @@ jobs:
       with:
         context: ./docker
         push: false
-        tags: my-image-name:$(date +%s)
+        tags: my-image-name:${{ github.run_number }}
     
