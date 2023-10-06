@@ -2,7 +2,7 @@ FROM openjdk:21 as builder
 WORKDIR application
 MAINTAINER WanSen AI<team@wansenai.com>
 EXPOSE 8088
-ARG JAR_FILE=target/*.jar
+ARG JAR_FILE=*.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
