@@ -32,8 +32,7 @@ jobs:
     - name: Build the Docker image
       uses: docker/build-push-action@v2
       with:
-        context: ./docker
-        file: ./Dockerfile
+        file: ./docker/Dockerfile
         push: false
         tags: my-image-name:${{ github.run_number }}
     
