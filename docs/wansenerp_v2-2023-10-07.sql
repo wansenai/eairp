@@ -733,10 +733,10 @@ INSERT INTO `sys_platform_config` VALUES (15, 'aliOss_accessKeySecret', '阿里O
 INSERT INTO `sys_platform_config` VALUES (16, 'aliOss_bucketName', '阿里OSS-bucketName', '', NULL, NULL, NULL, NULL);
 INSERT INTO `sys_platform_config` VALUES (17, 'aliOss_linkUrl', '阿里OSS-linkUrl', '', NULL, NULL, NULL, NULL);
 INSERT INTO `sys_platform_config` VALUES (18, 'bill_excel_url', '单据Excel地址', '', NULL, NULL, NULL, NULL);
-INSERT INTO `sys_platform_config` VALUES (19, 'tencent_sms_secret_id', '腾讯短信服务SId', 'AKIDhEmJl9LOI1dL1gJzax53jCQ9sX9azEM4', NULL, NULL, NULL, NULL);
-INSERT INTO `sys_platform_config` VALUES (20, 'tencent_sms_secret_key', '腾讯短信服务SKey', 'EE2iP5cyHOIzTjniHp9HJNUdXBcrtiGb', NULL, NULL, NULL, NULL);
-INSERT INTO `sys_platform_config` VALUES (21, 'tencent_sms_client', '腾讯短信服务地区', 'ap-shanghai', NULL, NULL, NULL, NULL);
-INSERT INTO `sys_platform_config` VALUES (22, 'tencent_sms_sdk_appId', '腾讯短信服务SDK', '1400856421', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_platform_config` VALUES (19, 'tencent_sms_secret_id', '腾讯短信服务SId', '', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_platform_config` VALUES (20, 'tencent_sms_secret_key', '腾讯短信服务SKey', '', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_platform_config` VALUES (21, 'tencent_sms_client', '腾讯短信服务地区', '', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_platform_config` VALUES (22, 'tencent_sms_sdk_appId', '腾讯短信服务SDK', '', NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for sys_role
