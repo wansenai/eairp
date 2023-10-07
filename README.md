@@ -36,6 +36,20 @@ If you have any questions or suggestions, please submit [issue](https://github.c
 
 preview address: http://erp.wansen.cloud/
 
+## Quick Start
+
+You need to first install the Docker environment and already have the Redis and MySQL8.0 environments
+
+### Pull images
+```shell
+docker pull wansenai/erp-core:2.0.1
+```
+### Run Server
+You can customize and modify port 9998, please ensure that the service ports monitored by your front-end are consistent
+```shell
+docker run -d -p 9998:8088 erp-core:2.0.1 --name wansenerp 
+```
+
 ## Version
 1. 1.0.2 (current version)
 2. 1.0.1 [old versions](https://github.com/wansenai/wansen-erp/releases/tag/V1.0.1)
