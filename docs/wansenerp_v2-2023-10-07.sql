@@ -5,13 +5,13 @@
  Source Server Type    : MySQL
  Source Server Version : 80032 (8.0.32)
  Source Host           : localhost:3306
- Source Schema         : wansenerp2
+ Source Schema         : wansenerp_v2
 
  Target Server Type    : MySQL
  Target Server Version : 80032 (8.0.32)
  File Encoding         : 65001
 
- Date: 29/09/2023 19:53:32
+ Date: 07/10/2023 12:52:19
 */
 
 SET NAMES utf8mb4;
@@ -264,9 +264,9 @@ CREATE TABLE `product_category`  (
   `id` bigint NOT NULL COMMENT '主键',
   `tenant_id` bigint NULL DEFAULT NULL COMMENT '租户id',
   `category_name` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '名称',
-  `category_level` smallint NULL DEFAULT NULL COMMENT '等级',
+  `category_level` tinyint NULL DEFAULT NULL COMMENT '等级',
   `parent_id` bigint NULL DEFAULT NULL COMMENT '上级id',
-  `sort` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '显示顺序',
+  `sort` int NULL DEFAULT NULL COMMENT '显示顺序',
   `serial_number` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '编号',
   `remark` varchar(1024) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
@@ -281,10 +281,12 @@ CREATE TABLE `product_category`  (
 -- ----------------------------
 -- Records of product_category
 -- ----------------------------
-INSERT INTO `product_category` VALUES (17, 63, '目录1', NULL, NULL, '11', 'wae12', 'eee', '2019-04-10 22:18:12', '2021-02-17 15:11:35', NULL, NULL, 0);
-INSERT INTO `product_category` VALUES (21, 63, '目录2', NULL, 17, '22', 'ada112', 'ddd', '2020-07-20 23:08:44', '2020-07-20 23:08:44', NULL, NULL, 0);
-INSERT INTO `product_category` VALUES (29, 63, '海鲜水产', NULL, NULL, NULL, 'HX0001', NULL, '2023-08-30 14:55:13', '2023-08-30 14:55:13', NULL, NULL, 0);
-INSERT INTO `product_category` VALUES (30, 63, '测试水产', NULL, NULL, '1', 'HX0001', '111', '2023-08-30 15:27:51', '2023-08-30 15:27:51', NULL, NULL, 0);
+INSERT INTO `product_category` VALUES (17, 0, '目录1', NULL, NULL, 11, 'wae12', 'eee', '2019-04-10 22:18:12', '2021-02-17 15:11:35', NULL, NULL, 0);
+INSERT INTO `product_category` VALUES (21, 0, '目录2', NULL, 17, 22, 'ada112', 'ddd', '2020-07-20 23:08:44', '2020-07-20 23:08:44', NULL, NULL, 0);
+INSERT INTO `product_category` VALUES (29, 0, '海鲜水产', NULL, 21, NULL, 'HX0001', NULL, '2023-08-30 14:55:13', '2023-08-30 14:55:13', NULL, NULL, 0);
+INSERT INTO `product_category` VALUES (30, 63, '测试水产', NULL, NULL, 1, 'HX0001', '111', '2023-08-30 15:27:51', '2023-08-30 15:27:51', NULL, NULL, 0);
+INSERT INTO `product_category` VALUES (2131, 0, '水果', 111, NULL, 2, 'HX12113123', '测试', '2023-10-04 21:42:34', NULL, NULL, NULL, 0);
+INSERT INTO `product_category` VALUES (1159622687736201200, 0, '苹果', 1, 2131, 22, '2222', 'test', '2023-10-05 22:46:34', '2023-10-05 22:50:42', 0, 0, 0);
 
 -- ----------------------------
 -- Table structure for product_extend_price
@@ -522,7 +524,7 @@ CREATE TABLE `sys_config`  (
 -- ----------------------------
 -- Records of sys_config
 -- ----------------------------
-INSERT INTO `sys_config` VALUES (11, 63, '万森（陕西）机器人有限公司', '赵伟', '陕西省西安市高新区软件新城A6', '16621211605', NULL, NULL, '注：本单为我公司与客户约定账期内结款的依据，由客户或其单位员工签字生效，并承担法律责任。', 0, 0, 1, 0, 0, '', 0, 1, 0, 0);
+INSERT INTO `sys_config` VALUES (11, 0, '万森（陕西）机器人有限公司', '赵伟', '陕西省西安市高新区软件新城A6', '16621211605', NULL, NULL, '注：本单为我公司与客户约定账期内结款的依据，由客户或其单位员工签字生效，并承担法律责任。', 0, 0, 1, 0, 0, '', 0, 1, 0, 0);
 
 -- ----------------------------
 -- Table structure for sys_department
@@ -549,9 +551,6 @@ CREATE TABLE `sys_department`  (
 -- ----------------------------
 -- Records of sys_department
 -- ----------------------------
-INSERT INTO `sys_department` VALUES (12, 63, NULL, '001', '测试机构', NULL, 0, 'aaaa2', '2', NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_department` VALUES (13, 63, 12, 'jg1', '机构1', NULL, 0, '', '3', NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_department` VALUES (14, 63, 13, '12', '机构2', NULL, 0, '', '4', NULL, NULL, NULL, NULL, 0);
 INSERT INTO `sys_department` VALUES (1154490573429018634, 0, 1154756575114956805, '1154490573429018634', '技术团队', NULL, 0, NULL, '2', '2023-09-21 18:53:51', '2023-09-21 18:53:48', NULL, NULL, 0);
 INSERT INTO `sys_department` VALUES (1154756575114956805, 0, NULL, '1154756575114956805', '万森智能部门', '赵伟', 0, '硬件设备', '1', '2023-06-23 12:53:31', NULL, NULL, NULL, 0);
 INSERT INTO `sys_department` VALUES (1154794589170044930, 0, 1154794589174239277, '1154794589170044930', '硬件研发团队', '李楚德', 0, NULL, '3', '2023-01-18 17:53:36', NULL, NULL, NULL, 0);
@@ -559,10 +558,8 @@ INSERT INTO `sys_department` VALUES (1154794589174239242, 0, 1154794589174239277
 INSERT INTO `sys_department` VALUES (1154794589174239268, 0, 1154756575114956805, '1154794589174239268', '运营团队', '张峰', 0, NULL, '2', '2023-09-16 08:53:47', NULL, NULL, NULL, 0);
 INSERT INTO `sys_department` VALUES (1154794589174239277, 0, NULL, '1154794589174239277', '万森机器人', '赵伟', 0, '智能机器人', '2', '2019-07-25 11:53:52', NULL, NULL, NULL, 0);
 INSERT INTO `sys_department` VALUES (1157397928067727360, 0, 5574799175374231982, '1157397928067727360', '法务办公室', 'James', 1, NULL, '1', '2023-09-29 19:26:09', '2023-09-29 19:26:27', NULL, NULL, 0);
-INSERT INTO `sys_department` VALUES (1157398148818141184, 0, 1154794589174239277, '测试', '测试', '1231', 0, '', '321313', '2023-09-29 19:27:02', '2023-09-29 19:35:02', NULL, NULL, 1);
-INSERT INTO `sys_department` VALUES (1157399551699582976, 0, 1157398148818141184, '技术团队', '技术团队', '111', 0, NULL, '11', '2023-09-29 19:32:37', NULL, NULL, NULL, 1);
-INSERT INTO `sys_department` VALUES (1157401700722540544, 0, 1154794589174239277, '阿萨德撒大', '阿萨德撒大', '111', 0, '111', '111', '2023-09-29 19:41:09', NULL, NULL, NULL, 1);
-INSERT INTO `sys_department` VALUES (5574799175374231982, 0, NULL, '5574799175374231982', '法务部门', '张润发', 1, NULL, '4', '2023-09-29 14:43:40', NULL, NULL, NULL, 0);
+INSERT INTO `sys_department` VALUES (1159563040610320384, 0, 1154794589174239277, '测试', '测试', '赵伟', 1, NULL, NULL, '2023-10-05 18:49:33', '2023-10-05 18:49:39', NULL, NULL, 0);
+INSERT INTO `sys_department` VALUES (1159563649187053570, 1159563649187053568, NULL, 'DT0000', '默认部门', '1159563649187053568', 0, '租户注册后的默认部门 该部门为父级部门', NULL, '2023-10-05 18:51:58', NULL, 1159563649187053568, NULL, 0);
 
 -- ----------------------------
 -- Table structure for sys_log
@@ -639,6 +636,7 @@ CREATE TABLE `sys_menu`  (
   `status` tinyint(1) NULL DEFAULT NULL COMMENT '状态（0-启用，1-停用）',
   `icon` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '图标',
   `hide_menu` tinyint(1) NULL DEFAULT 0 COMMENT '隐藏路由不在菜单显示',
+  `blank` tinyint(1) NULL DEFAULT NULL COMMENT '是否外链(target = _blank)',
   `hide_breadcrumb` tinyint(1) NULL DEFAULT 0 COMMENT '隐藏该路由在面包屑上面的显示',
   `ignore_keep_alive` tinyint(1) NULL DEFAULT 0 COMMENT '是否忽略KeepAlive缓存',
   `hide_tab` tinyint(1) NULL DEFAULT 0 COMMENT '隐藏路由不在标签页显示',
@@ -654,75 +652,27 @@ CREATE TABLE `sys_menu`  (
   `delete_flag` tinyint(1) NULL DEFAULT 0 COMMENT '删除标记，0未删除，1删除',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `url`(`path` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 260 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci COMMENT = '功能模块表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 278 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci COMMENT = '功能模块表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
 -- ----------------------------
-INSERT INTO `sys_menu` VALUES (1, 'Dashboard', '首页', NULL, 1, '/dashboard', '/dashboard/workbench/index', NULL, 1, 1, 'ant-design:home-outlined', 0, 0, 0, 0, 0, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (2, 'FileManagement', '零售管理', NULL, 1, '/fms/file', '/fms/file/index', NULL, 2, 1, 'ant-design:folder-open-outlined', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (3, 'SystemManagement', '系统管理', NULL, 0, '/sys', 'LAYOUT', NULL, 999, NULL, 'ant-design:tool-outlined', 0, 0, 0, 0, 0, 0, 0, '', '', NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (13, 'RoleManagement', '角色管理', 3, 1, '/role', '/sys/role/index', NULL, 2, 1, 'ant-design:user-outlined', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (14, 'UserManagement', '用户管理', 3, 1, '/user', '/sys/user/index', NULL, 3, 1, 'ant-design:user-outlined', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (15, 'DepartmentManagement', '部门管理', 3, 1, '/department', '/sys/department/index', NULL, 160, 1, 'ic:outline-people-alt', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (16, '功能管理', NULL, 1, 1, '/system/function', '/system/FunctionList', NULL, 166, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (18, '租户管理', NULL, 1, 1, '/system/tenant', '/system/TenantList', NULL, 167, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (21, '商品管理', NULL, 0, 1, '/material', '/layouts/TabLayout', NULL, 620, 1, 'shopping', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (22, '商品类别', NULL, 101, 1, '/material/material_category', '/material/MaterialCategoryList', NULL, 230, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (23, '商品信息', NULL, 101, 1, '/material/material', '/material/MaterialList', NULL, 240, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (24, '基本资料', NULL, 0, 1, '/systemA', '/layouts/TabLayout', NULL, 750, 1, 'appstore', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (25, '供应商信息', NULL, 102, 1, '/system/vendor', '/system/VendorList', NULL, 260, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (26, '仓库信息', NULL, 102, 1, '/system/depot', '/system/DepotList', NULL, 270, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (31, '经手人管理', NULL, 102, 1, '/system/person', '/system/PersonList', NULL, 284, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (32, '采购管理', NULL, 0, 1, '/bill', '/layouts/TabLayout', NULL, 330, 1, 'retweet', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (33, '采购入库', NULL, 502, 1, '/bill/purchase_in', '/bill/PurchaseInList', NULL, 340, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (38, '销售管理', NULL, 0, 1, '/billB', '/layouts/TabLayout', NULL, 390, 1, 'shopping-cart', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (40, '调拨出库', NULL, 801, 1, '/bill/allocation_out', '/bill/AllocationOutList', NULL, 807, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (41, '销售出库', NULL, 603, 1, '/bill/sale_out', '/bill/SaleOutList', NULL, 394, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (44, '财务管理', NULL, 0, 1, '/financial', '/layouts/TabLayout', NULL, 450, 1, 'money-collect', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (59, '进销存统计', NULL, 301, 1, '/report/in_out_stock_report', '/report/InOutStockReport', NULL, 658, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (194, '收支项目', NULL, 102, 1, '/system/in_out_item', '/system/InOutItemList', NULL, 282, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (195, '结算账户', NULL, 102, 1, '/system/account', '/system/AccountList', NULL, 283, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (197, '收入单', NULL, 704, 1, '/financial/item_in', '/financial/ItemInList', NULL, 465, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (198, '报表查询', NULL, 0, 1, '/report', '/layouts/TabLayout', NULL, 570, 1, 'pie-chart', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (199, '采购退货', NULL, 502, 1, '/bill/purchase_back', '/bill/PurchaseBackList', NULL, 345, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (200, '销售退货', NULL, 603, 1, '/bill/sale_back', '/bill/SaleBackList', NULL, 396, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (201, '其它入库', NULL, 801, 1, '/bill/other_in', '/bill/OtherInList', NULL, 803, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (202, '其它出库', NULL, 801, 1, '/bill/other_out', '/bill/OtherOutList', NULL, 805, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (203, '支出单', NULL, 704, 1, '/financial/item_out', '/financial/ItemOutList', NULL, 470, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (204, '收款单', NULL, 704, 1, '/financial/money_in', '/financial/MoneyInList', NULL, 475, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (205, '付款单', NULL, 704, 1, '/financial/money_out', '/financial/MoneyOutList', NULL, 480, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (206, '转账单', NULL, 704, 1, '/financial/giro', '/financial/GiroList', NULL, 490, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (207, '账户统计', NULL, 301, 1, '/report/account_report', '/report/AccountReport', NULL, 610, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (208, '采购统计', NULL, 301, 1, '/report/buy_in_report', '/report/BuyInReport', NULL, 620, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (209, '销售统计', NULL, 301, 1, '/report/sale_out_report', '/report/SaleOutReport', NULL, 630, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (210, '零售出库', NULL, 401, 1, '/bill/retail_out', '/bill/RetailOutList', NULL, 405, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (211, '零售退货', NULL, 401, 1, '/bill/retail_back', '/bill/RetailBackList', NULL, 407, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (212, '收预付款', NULL, 704, 1, '/financial/advance_in', '/financial/AdvanceInList', NULL, 495, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (217, '客户信息', NULL, 102, 1, '/system/customer', '/system/CustomerList', NULL, 262, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (218, '会员信息', NULL, 102, 1, '/system/member', '/system/MemberList', NULL, 263, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (220, '计量单位', NULL, 101, 1, '/system/unit', '/system/UnitList', NULL, 245, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (226, '入库明细', NULL, 301, 1, '/report/in_detail', '/report/InDetail', NULL, 640, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (227, '出库明细', NULL, 301, 1, '/report/out_detail', '/report/OutDetail', NULL, 645, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (228, '入库汇总', NULL, 301, 1, '/report/in_material_count', '/report/InMaterialCount', NULL, 650, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (229, '出库汇总', NULL, 301, 1, '/report/out_material_count', '/report/OutMaterialCount', NULL, 655, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (232, '组装单', NULL, 801, 1, '/bill/assemble', '/bill/AssembleList', NULL, 809, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (233, '拆卸单', NULL, 801, 1, '/bill/disassemble', '/bill/DisassembleList', NULL, 811, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (234, '系统配置', NULL, 1, 1, '/system/system_config', '/system/SystemConfigList', NULL, 165, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (235, '客户对账', NULL, 301, 1, '/report/customer_account', '/report/CustomerAccount', NULL, 660, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (236, '商品属性', NULL, 1, 1, '/material/material_property', '/material/MaterialPropertyList', NULL, 168, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (237, '供应商对账', NULL, 301, 1, '/report/vendor_account', '/report/VendorAccount', NULL, 665, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (239, '仓库管理', NULL, 0, 1, '/billD', '/layouts/TabLayout', NULL, 420, 1, 'hdd', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (241, '采购订单', NULL, 502, 1, '/bill/purchase_order', '/bill/PurchaseOrderList', NULL, 335, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (242, '销售订单', NULL, 603, 1, '/bill/sale_order', '/bill/SaleOrderList', NULL, 392, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (243, '机构管理', NULL, 1, 1, '/system/organization', '/system/OrganizationList', NULL, 150, 1, 'profile', 1, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (244, '库存预警', NULL, 301, 1, '/report/stock_warning_report', '/report/StockWarningReport', NULL, 670, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (245, '插件管理', NULL, 1, 1, '/system/plugin', '/system/PluginList', NULL, 170, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (246, '商品库存', NULL, 301, 1, '/report/material_stock', '/report/MaterialStock', NULL, 605, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (247, '多属性', NULL, 101, 1, '/material/material_attribute', '/material/MaterialAttributeList', NULL, 250, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (248, '调拨明细', NULL, 301, 1, '/report/allocation_detail', '/report/AllocationDetail', NULL, 646, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (258, '平台配置', NULL, 1, 1, '/system/platform_config', '/system/PlatformConfigList', NULL, 175, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_menu` VALUES (259, '零售统计', NULL, 301, 1, '/report/retail_out_report', '/report/RetailOutReport', NULL, 615, 1, 'profile', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (1, 'Dashboard', '首页', 0, 1, '/dashboard', '/dashboard/analysis/index', NULL, 1, 0, 'ant-design:dashboard-outlined', 0, NULL, 0, 0, 0, 0, 0, 1, NULL, NULL, '2023-06-23 14:36:55', '2023-09-30 18:46:44', NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (2, 'workbench', '工作台', 0, 1, '/dashboard/workbench', '/dashboard/workbench/index', NULL, 2, NULL, 'ant-design:home-outlined', 0, NULL, 0, 0, 0, 0, 0, 0, '', '', '2023-10-02 16:01:53', '2023-10-02 16:01:56', NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (3, 'RetailManagement', '零售管理', 0, 0, '/fms/file', '/fms/file/index', NULL, 3, 0, 'ant-design:folder-open-outlined', 0, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-08-07 14:36:50', '2023-09-30 18:44:57', NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (4, 'SystemManagement', '系统管理', 0, 0, '/sys', 'LAYOUT', NULL, 1, 0, 'ant-design:setting-outlined', 0, NULL, 0, 0, 0, 0, 0, 0, '', '', '2023-09-30 14:36:33', NULL, NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (5, 'PurchaseManagement', '采购管理', 0, 0, '/purchase', '/system/FunctionList', NULL, 1, 0, 'ant-design:retweet-outlined', 0, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-10-02 14:39:13', NULL, NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (6, 'SaleManagement', '销售管理', 0, 0, '/sale', '/system/TenantList', NULL, 1, 0, 'ant-design:shop-outlined', 0, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-09-30 14:39:29', NULL, NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (7, 'WarehouseManagement', '仓库管理', 0, 0, '/warehouse', '/layouts/TabLayout', NULL, 1, 0, 'ant-design:bank-outlined', 0, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-10-02 14:39:15', NULL, NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (8, 'FinancialManagement', '财务管理', 0, 0, '/financial', '/material/MaterialCategoryList', NULL, 1, 0, 'ant-design:transaction-outlined', 0, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-10-02 14:39:18', NULL, NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (9, 'Reports', '报表查询', 0, 0, '/reports', '/material/MaterialList', NULL, 1, 0, 'ant-design:pie-chart-outlined', 0, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-09-30 14:39:25', NULL, NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (10, 'ProductManagement', '商品管理', 0, 0, '/product', '/layouts/TabLayout', NULL, 1, 0, 'ant-design:shopping-outlined', 0, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-10-04 14:39:20', NULL, NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (11, 'BasicInformation', '基本资料', 0, 0, '/basic', '/system/VendorList', NULL, 1, 0, 'ant-design:appstore-outlined', 0, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-10-01 14:39:22', NULL, NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (12, 'RoleManagement', '角色管理', 4, 1, '/role', '/sys/role/index', NULL, 1, 0, 'ant-design:solution-outlined', 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-09-20 14:36:37', '2023-10-04 21:32:47', NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (13, 'UserManagement', '用户管理', 4, 1, '/user', '/sys/user/index', NULL, 2, 0, 'ant-design:user-outlined', 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-08-25 14:36:39', '2023-10-04 21:33:04', NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (14, 'DepartmentManagement', '部门管理', 4, 1, '/department', '/sys/department/index', NULL, 3, 0, 'ic:outline-people-alt', 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, '2023-10-04 14:36:43', '2023-10-04 21:32:53', NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (15, 'MenuManagement', '菜单管理', 4, 1, '/menu', '/sys/menu/index', NULL, 4, 0, 'ant-design:menu-outlined', 0, 0, 0, 0, 0, 0, 0, 0, '', '', '2023-09-13 14:36:47', '2023-10-04 21:32:58', NULL, NULL, 0);
+INSERT INTO `sys_menu` VALUES (16, 'ProductCategory', '商品类别', 10, 1, '/product/category', '/product/category/index', NULL, 1, 0, 'ant-design:share-alt-outlined', 0, 0, 0, 0, 0, 0, 0, 0, '', '', '2023-10-02 15:06:55', '2023-10-04 17:31:45', NULL, NULL, 0);
 
 -- ----------------------------
 -- Table structure for sys_msg
@@ -783,6 +733,10 @@ INSERT INTO `sys_platform_config` VALUES (15, 'aliOss_accessKeySecret', '阿里O
 INSERT INTO `sys_platform_config` VALUES (16, 'aliOss_bucketName', '阿里OSS-bucketName', '', NULL, NULL, NULL, NULL);
 INSERT INTO `sys_platform_config` VALUES (17, 'aliOss_linkUrl', '阿里OSS-linkUrl', '', NULL, NULL, NULL, NULL);
 INSERT INTO `sys_platform_config` VALUES (18, 'bill_excel_url', '单据Excel地址', '', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_platform_config` VALUES (19, 'tencent_sms_secret_id', '腾讯短信服务SId', 'AKIDhEmJl9LOI1dL1gJzax53jCQ9sX9azEM4', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_platform_config` VALUES (20, 'tencent_sms_secret_key', '腾讯短信服务SKey', 'EE2iP5cyHOIzTjniHp9HJNUdXBcrtiGb', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_platform_config` VALUES (21, 'tencent_sms_client', '腾讯短信服务地区', 'ap-shanghai', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_platform_config` VALUES (22, 'tencent_sms_sdk_appId', '腾讯短信服务SDK', '1400856421', NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -790,6 +744,7 @@ INSERT INTO `sys_platform_config` VALUES (18, 'bill_excel_url', '单据Excel地�
 DROP TABLE IF EXISTS `sys_role`;
 CREATE TABLE `sys_role`  (
   `id` bigint NOT NULL COMMENT '主键',
+  `tenant_id` bigint NULL DEFAULT NULL COMMENT '租户id',
   `role_name` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '角色名称',
   `type` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '类型',
   `price_limit` tinyint(1) NULL DEFAULT NULL COMMENT '价格屏蔽 1-屏蔽采购价 2-屏蔽零售价 3-屏蔽销售价',
@@ -806,12 +761,11 @@ CREATE TABLE `sys_role`  (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES (1151153250280804356, '租户', '全部数据', 1, '通用数据', 0, '2023-09-25 19:51:47', '2023-09-26 15:19:20', NULL, NULL, 0);
-INSERT INTO `sys_role` VALUES (1151153250280804397, '销售经理', '全部数据', 1, '查询全部数据', 1, '2023-09-25 19:51:49', '2023-09-26 21:28:38', NULL, NULL, 0);
-INSERT INTO `sys_role` VALUES (1151153250280804400, '销售代表', '全部数据', 2, '智能查询个人数据', 0, '2023-09-25 19:51:52', '2023-09-26 15:19:09', NULL, NULL, 0);
-INSERT INTO `sys_role` VALUES (1151247731923488769, '管理员', '全部数据', 1, '管理员数据', 0, '2023-09-25 19:51:51', '2023-09-26 15:18:41', NULL, NULL, 0);
-INSERT INTO `sys_role` VALUES (1156239790945861632, 'C++', '个人数据', 2, NULL, 0, '2023-09-26 14:44:08', '2023-09-26 14:51:08', NULL, NULL, 0);
-INSERT INTO `sys_role` VALUES (1156341627376107520, 'asdsad', '全部数据', 3, '1', 1, '2023-09-26 21:28:48', NULL, NULL, NULL, 1);
+INSERT INTO `sys_role` VALUES (0, 0, '管理员', '全部数据', 1, '管理员数据', 0, '2023-09-25 19:51:51', '2023-09-26 15:18:41', NULL, NULL, 0);
+INSERT INTO `sys_role` VALUES (1, 0, '租户', '全部数据', 1, '通用数据', 0, '2023-09-25 19:51:47', '2023-09-26 15:19:20', NULL, NULL, 0);
+INSERT INTO `sys_role` VALUES (1159563649187053569, 1159563649187053568, '租户管理员', '全部数据', NULL, '租户注册后的默认角色 租户管理员有所有权限', 0, '2023-10-05 18:51:58', NULL, 1159563649187053568, NULL, 0);
+INSERT INTO `sys_role` VALUES (1159564417168310272, 1159563649187053568, '测试角色', '全部数据', NULL, '', 0, '2023-10-05 18:55:01', NULL, NULL, NULL, 0);
+INSERT INTO `sys_role` VALUES (1159565451349458944, 1159563649187053568, '财务人员', '全部数据', NULL, NULL, 0, '2023-10-05 18:59:07', NULL, NULL, NULL, 0);
 
 -- ----------------------------
 -- Table structure for sys_role_menu_rel
@@ -827,14 +781,16 @@ CREATE TABLE `sys_role_menu_rel`  (
   `create_by` bigint NULL DEFAULT NULL COMMENT '创建人',
   `update_by` bigint NULL DEFAULT NULL COMMENT '修改人',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色菜单关系表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色菜单关系表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role_menu_rel
 -- ----------------------------
-INSERT INTO `sys_role_menu_rel` VALUES (111, 0, 1151153250280804356, '[1]', '2023-09-12 20:59:26', NULL, NULL, NULL);
-INSERT INTO `sys_role_menu_rel` VALUES (1151243989895483414, 0, 1151247731923488769, '[1][2][3][13][14][15]', '2023-09-12 19:52:22', '2023-09-12 19:52:24', 0, 0);
-INSERT INTO `sys_role_menu_rel` VALUES (1707407684418498562, NULL, 1156239790945861632, '[1][15]', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_role_menu_rel` VALUES (0, 0, 0, '[1][2][3][4][5][6][7][8][9][10][11][12][13][14][15][16]', '2023-09-12 19:52:22', '2023-09-12 19:52:24', 0, 0);
+INSERT INTO `sys_role_menu_rel` VALUES (1159563649203830784, 1159563649187053568, 1159563649187053569, '[1][ 2][ 3][ 4][ 5][ 6][ 7][ 8][ 9][ 10][ 11][ 12][ 13][ 14][ 16]', '2023-10-05 18:51:58', NULL, 1159563649187053568, NULL);
+INSERT INTO `sys_role_menu_rel` VALUES (1709572272098492417, 0, 1, '[1][2]', '2023-10-05 18:45:52', '2023-10-05 18:45:57', 0, 0);
+INSERT INTO `sys_role_menu_rel` VALUES (1709885426275819522, NULL, 1159564417168310272, '[1][2][3][5][11]', NULL, NULL, NULL, NULL);
+INSERT INTO `sys_role_menu_rel` VALUES (1709885982713159682, NULL, 1159565451349458944, '[1][2][8]', NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for sys_serial_number
@@ -949,11 +905,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1151247731923488777, 1151153829895868454, '测试用户2', 'test2', '7bc7b277e3436b88e2494da6194ce807', 0, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, NULL, NULL, '2023-09-14 22:00:26', NULL, NULL, NULL, 0);
-INSERT INTO `sys_user` VALUES (1151247731927683073, 0, '万森小杨', 'xiaoyang', 'e10adc3949ba59abbe56e057f20f883e', 0, '总监', '7777777@qq.com', '1662121150', 'https://points.wansen.cloud/group1/default/20230821/12/50/4/tmp_b389e880bb493e7249181dd7f6708cfd.jpg?download=0', 1, 0, 0, '', NULL, NULL, '2023-09-14 22:00:30', NULL, NULL, NULL, 0);
-INSERT INTO `sys_user` VALUES (1151247731927683077, 0, '管理员', 'admin', 'e10adc3949ba59abbe56e057f20f883e', 0, '集团管理员', 'jameszow@wansen.email', '16621211605', 'https://points.wansen.cloud/group1/default/20230821/12/50/4/tmp_b389e880bb493e7249181dd7f6708cfd.jpg?download=0', 1, 0, 0, NULL, NULL, NULL, '2023-09-14 22:00:28', NULL, NULL, NULL, 0);
-INSERT INTO `sys_user` VALUES (1151247731927683082, 0, '测试用户', 'test', 'e10adc3949ba59abbe56e057f20f883e', 0, '主管', 'test1158163a@qq.com', '19985151623', NULL, 1, 1, 0, '', NULL, NULL, '2023-09-14 22:00:32', NULL, NULL, NULL, 0);
-INSERT INTO `sys_user` VALUES (1151934773204090880, 1151934773204090881, '赵伟', 'zhaowei', '7bc7b277e3436b88e2494da6194ce807', 0, NULL, '', NULL, NULL, 1, 0, 0, NULL, NULL, NULL, '2023-09-14 22:00:35', NULL, NULL, NULL, 0);
+INSERT INTO `sys_user` VALUES (0, 0, '管理员', 'admin', 'e10adc3949ba59abbe56e057f20f883e', 0, '集团管理员', 'jameszow@wansen.email', '16621211608', 'https://points.wansen.cloud/group1/default/20230821/12/50/4/tmp_b389e880bb493e7249181dd7f6708cfd.jpg?download=0', 1, 0, 0, NULL, NULL, NULL, '2023-09-14 22:00:28', NULL, NULL, NULL, 0);
 INSERT INTO `sys_user` VALUES (1153648835588132865, 0, '王有田', 'youtian', '7bc7b277e3436b88e2494da6194ce807', 0, NULL, 'testyu@wansenai.com', '17015963215', NULL, 1, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 INSERT INTO `sys_user` VALUES (1153648835588132870, 0, '李法群', 'tli18716', '7bc7b277e3436b88e2494da6194ce807', 0, NULL, 'htomassl@qq.com', '13379815236', NULL, 1, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 INSERT INTO `sys_user` VALUES (1153648835588132879, 0, '张晓东', 'xiaodongzhang', '7bc7b277e3436b88e2494da6194ce807', 0, NULL, 'yuxiuaa@tecia.com', '18015156235', NULL, 1, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
@@ -962,13 +914,9 @@ INSERT INTO `sys_user` VALUES (1153648835588132895, 0, '王一亭', 'wangyt', 'e
 INSERT INTO `sys_user` VALUES (1153648835588132897, 0, '梁伟', 'lw17816152316', '7bc7b277e3436b88e2494da6194ce807', 0, NULL, 'cestuis@163.com', '17816152316', NULL, 1, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 INSERT INTO `sys_user` VALUES (1153648835588132900, 0, '梁超飞', 'chaofei7788', '7bc7b277e3436b88e2494da6194ce807', 0, NULL, 'hjunweiu@163.com', '17715151621', NULL, 1, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 INSERT INTO `sys_user` VALUES (1153648835588132912, 0, '孙婷', 'sunting', 'e10adc3949ba59abbe56e057f20f883e', 0, NULL, 'asdjjamsai@hotmail.com', '18027431919', NULL, 1, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_user` VALUES (1154127100467216384, 1154127100471410688, '李丽红', 'ouoppy', '7bc7b277e3436b88e2494da6194ce807', 0, NULL, NULL, '16621211608', NULL, 1, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_user` VALUES (1154139420769648640, 1154139420773842944, '杨雅', 'yangxiaoya', '7bc7b277e3436b88e2494da6194ce807', 0, NULL, NULL, '16621211606', NULL, 1, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `sys_user` VALUES (1155561368271716352, 0, '张小山', 'xiaozhangshan', NULL, 0, NULL, 'shanxiaozhang@163.com', '19915052163', NULL, 1, 0, 0, NULL, NULL, NULL, '2023-09-24 17:48:19', NULL, 1151247731927683077, NULL, 0);
-INSERT INTO `sys_user` VALUES (1155862830281392128, 0, 'sadad', 'sadad11', 'e10adc3949ba59abbe56e057f20f883e', 0, NULL, '666666@qq.com', '16621211609', NULL, 1, 0, 0, NULL, NULL, NULL, '2023-09-25 13:46:14', NULL, 1151247731927683077, NULL, 0);
-INSERT INTO `sys_user` VALUES (1155863216891363328, 0, 'hhaha', 'asdsadasd21312', 'e10adc3949ba59abbe56e057f20f883e', 0, NULL, '666666@qq.com', '1662121163', NULL, 1, 0, 0, NULL, NULL, NULL, '2023-09-25 13:47:46', NULL, 1151247731927683077, NULL, 0);
-INSERT INTO `sys_user` VALUES (1155866789842780160, 0, '万森小张2', 'asdsadasdasdas', 'e10adc3949ba59abbe56e057f20f883e', 0, NULL, '666666@qq.com', '16621211603', NULL, 1, 0, 0, NULL, NULL, NULL, '2023-09-25 14:01:58', NULL, 1151247731927683077, NULL, 0);
-INSERT INTO `sys_user` VALUES (1155866989621673984, 0, '阿萨德', '123131aa', 'c0f6b77b727978c069432481fb2c6575', 0, NULL, '666666@qq.com', '16621211602', NULL, 1, 0, 0, NULL, NULL, NULL, '2023-09-25 14:02:45', NULL, 1151247731927683077, NULL, 1);
+INSERT INTO `sys_user` VALUES (1159563649187053568, 1159563649187053568, '测试租户', 'wansenerp', 'e10adc3949ba59abbe56e057f20f883e', 0, NULL, 'wansenerp@163.com', '16616616661', NULL, 1, 0, 0, NULL, NULL, NULL, '2023-10-05 18:51:58', NULL, NULL, NULL, 0);
+INSERT INTO `sys_user` VALUES (1159564587188617216, 1159563649187053568, '测试租户用户一', 'test', 'e10adc3949ba59abbe56e057f20f883e', 0, NULL, '666666@qq.com', '16616616662', NULL, 1, 0, 0, NULL, NULL, NULL, '2023-10-05 18:55:41', NULL, 1159563649187053568, NULL, 0);
+INSERT INTO `sys_user` VALUES (1159565124227301376, 1159563649187053568, '测试租户用户二', 'test2', 'e10adc3949ba59abbe56e057f20f883e', 0, NULL, '666666@163.com', '16616616663', NULL, 1, 0, 0, NULL, NULL, NULL, '2023-10-05 18:57:49', NULL, 1159563649187053568, NULL, 0);
 
 -- ----------------------------
 -- Table structure for sys_user_business
@@ -1039,45 +987,35 @@ CREATE TABLE `sys_user_dept_rel`  (
   `tenant_id` bigint NULL DEFAULT NULL COMMENT '租户id',
   `dept_id` bigint NOT NULL COMMENT '部门id',
   `user_id` bigint NOT NULL COMMENT '用户id',
-  `user_dept_sort` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '用户在所属部门中显示顺序',
+  `sort` int NULL DEFAULT NULL COMMENT '用户在所属部门中显示顺序',
   `delete_flag` tinyint(1) NULL DEFAULT 0 COMMENT '删除标记，0未删除，1删除',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
   `create_by` bigint NULL DEFAULT NULL COMMENT '创建人',
   `update_by` bigint NULL DEFAULT NULL COMMENT '修改人',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1157366180789354498 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci COMMENT = '机构用户关系表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1159565569175846913 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci COMMENT = '机构用户关系表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_dept_rel
 -- ----------------------------
-INSERT INTO `sys_user_dept_rel` VALUES (1154812104038289412, NULL, 1154794589174239268, 1153648835588132897, NULL, 0, NULL, NULL, NULL, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1154812104038289420, NULL, 1154794589174239268, 1153648835588132895, NULL, 0, NULL, NULL, NULL, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1154812104038289431, NULL, 1154794589174239242, 1153648835588132893, NULL, 0, NULL, NULL, NULL, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1154812104038289436, NULL, 1154794589174239242, 1153648835588132879, NULL, 0, NULL, NULL, NULL, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1154812104042483718, NULL, 1154794589170044930, 1151934773204090880, NULL, 0, NULL, NULL, NULL, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155561368351408128, 0, 1154490573429018634, 1155561368271716352, NULL, 0, '2023-09-24 17:48:20', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155561368359796736, 0, 1154794589174239268, 1155561368271716352, NULL, 0, '2023-09-24 17:48:20', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155862830344306688, 0, 1154794589174239242, 1155862830281392128, NULL, 0, '2023-09-25 13:46:14', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155863216920723456, 0, 1154794589170044930, 1155863216891363328, NULL, 0, '2023-09-25 13:47:46', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155866789867945984, 0, 1154490573429018634, 1155866789842780160, NULL, 0, '2023-09-25 14:01:58', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155866789872140288, 0, 1154794589174239268, 1155866789842780160, NULL, 0, '2023-09-25 14:01:58', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155866989638451200, 0, 1154490573429018634, 1155866989621673984, NULL, 0, '2023-09-25 14:02:45', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155898886368264192, 0, 1154794589174239242, 1151247731927683082, NULL, 0, '2023-09-25 16:09:30', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155898886368264193, 0, 1154794589170044930, 1151247731927683082, NULL, 0, '2023-09-25 16:09:30', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155926849251966976, 0, 1154490573429018634, 1153648835588132912, NULL, 0, '2023-09-25 18:00:37', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1155927001324847104, 0, 1154490573429018634, 1153648835588132900, NULL, 0, '2023-09-25 18:01:13', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1156254234027491328, 0, 1154794589170044930, 1153648835588132870, NULL, 0, '2023-09-26 15:41:32', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1157088121716736000, 0, 1154756575114956805, 1151247731927683073, NULL, 0, '2023-09-28 22:55:06', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1157346641070522368, 0, 5574799175374231982, 1151247731927683077, NULL, 0, '2023-09-29 16:02:22', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1157346641074716672, 0, 1154756575114956805, 1151247731927683077, NULL, 0, '2023-09-29 16:02:22', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1157346641074716673, 0, 1154794589174239277, 1151247731927683077, NULL, 0, '2023-09-29 16:02:22', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1157346641074716674, 0, 1154794589170044930, 1151247731927683077, NULL, 0, '2023-09-29 16:02:22', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1157346641078910976, 0, 1154794589174239242, 1151247731927683077, NULL, 0, '2023-09-29 16:02:22', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1157346641078910977, 0, 1154794589174239268, 1151247731927683077, NULL, 0, '2023-09-29 16:02:22', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1157346641078910978, 0, 1154490573429018634, 1151247731927683077, NULL, 0, '2023-09-29 16:02:22', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1157366180789354496, 0, 1154794589170044930, 1153648835588132865, NULL, 0, '2023-09-29 17:20:00', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_dept_rel` VALUES (1157366180789354497, 0, 1154794589174239268, 1153648835588132865, NULL, 0, '2023-09-29 17:20:00', NULL, 1151247731927683077, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1157714147601809409, 0, 1154756575114956805, 0, NULL, 0, '2023-09-30 16:22:42', NULL, 1151247731927683077, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159252910790410240, 0, 1154794589174239277, 0, NULL, 0, '2023-10-04 22:17:12', NULL, 1159252418010021888, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562436399857664, 0, 1154794589170044930, 1151247731927683082, NULL, 0, '2023-10-05 18:47:08', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562481442488320, 0, 1154794589170044930, 1153648835588132865, NULL, 0, '2023-10-05 18:47:19', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562506344071168, 0, 1154794589170044930, 1153648835588132870, NULL, 0, '2023-10-05 18:47:25', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562541039353856, 0, 1154794589174239242, 1153648835588132879, NULL, 0, '2023-10-05 18:47:33', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562541043548160, 0, 1154794589174239268, 1153648835588132879, NULL, 0, '2023-10-05 18:47:33', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562576258924544, 0, 1154794589174239268, 1153648835588132895, NULL, 0, '2023-10-05 18:47:42', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562576258924545, 0, 1154794589174239242, 1153648835588132895, NULL, 0, '2023-10-05 18:47:42', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562603685478400, 0, 1154490573429018634, 1153648835588132897, NULL, 0, '2023-10-05 18:47:48', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562603689672704, 0, 1154794589174239268, 1153648835588132897, NULL, 0, '2023-10-05 18:47:48', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562627454599168, 0, 1154794589174239242, 1153648835588132900, NULL, 0, '2023-10-05 18:47:54', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159562650217086976, 0, 1154794589174239242, 1153648835588132912, NULL, 0, '2023-10-05 18:47:59', NULL, 0, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159563040627097600, 0, 1159563040610320384, 0, NULL, 0, '2023-10-05 18:49:33', NULL, NULL, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159563921766481921, 1159563649187053568, 1159563649187053570, 1159563649187053568, NULL, 0, '2023-10-05 18:53:03', NULL, 1159563649187053568, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159564587213783040, 1159563649187053568, 1159563649187053570, 1159564587188617216, NULL, 0, '2023-10-05 18:55:41', NULL, 1159563649187053568, NULL);
+INSERT INTO `sys_user_dept_rel` VALUES (1159565569175846912, 1159563649187053568, 1159563649187053570, 1159565124227301376, NULL, 0, '2023-10-05 18:59:35', NULL, 1159563649187053568, NULL);
 
 -- ----------------------------
 -- Table structure for sys_user_role_rel
@@ -1093,29 +1031,23 @@ CREATE TABLE `sys_user_role_rel`  (
   `create_by` bigint NULL DEFAULT NULL COMMENT '创建人',
   `update_by` bigint NULL DEFAULT NULL COMMENT '修改人',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户角色关系表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户角色关系表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_role_rel
 -- ----------------------------
-INSERT INTO `sys_user_role_rel` VALUES (1155222611291410462, 0, 1153648835588132895, 1151153250280804400, '2023-09-23 19:23:14', '2023-09-23 19:23:17', NULL, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155232990910353443, 0, 1153648835588132897, 1151153250280804397, '2023-09-23 20:04:31', NULL, NULL, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155240913224994825, 0, 1153648835588132879, 1151153250280804400, '2023-09-23 20:35:45', NULL, NULL, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155240913224994826, 0, 1153648835588132893, 1151153250280804356, '2023-09-23 20:36:09', NULL, NULL, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155561368322048000, 0, 1155561368271716352, 1151153250280804356, '2023-09-24 17:48:20', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155561368322048001, 0, 1155561368271716352, 1151153250280804400, '2023-09-24 17:48:20', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155862830327529472, 0, 1155862830281392128, 1151153250280804356, '2023-09-25 13:46:14', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155863216908140544, 0, 1155863216891363328, 1151153250280804356, '2023-09-25 13:47:46', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155866789859557376, 0, 1155866789842780160, 1151153250280804356, '2023-09-25 14:01:58', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155866989630062592, 0, 1155866989621673984, 1151153250280804356, '2023-09-25 14:02:45', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155898886359875584, 0, 1151247731927683082, 1151153250280804397, '2023-09-25 16:09:30', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155898886359875585, 0, 1151247731927683082, 1151153250280804400, '2023-09-25 16:09:30', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155926849243578368, 0, 1153648835588132912, 1151153250280804400, '2023-09-25 18:00:37', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1155927001316458496, 0, 1153648835588132900, 1151153250280804400, '2023-09-25 18:01:13', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1156254233998131200, 0, 1153648835588132870, 1151153250280804356, '2023-09-26 15:41:32', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1157088121691570176, 0, 1151247731927683073, 1156239790945861632, '2023-09-28 22:55:06', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1157346641057939456, 0, 1151247731927683077, 1151247731923488769, '2023-09-29 16:02:22', NULL, 1151247731927683077, NULL);
-INSERT INTO `sys_user_role_rel` VALUES (1157366180751605760, 0, 1153648835588132865, 1151153250280804397, '2023-09-29 17:20:00', NULL, 1151247731927683077, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1155232990910353443, 0, 0, 0, '2023-09-23 20:04:31', NULL, NULL, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159562436357914624, 0, 1151247731927683082, 1, '2023-10-05 18:47:08', NULL, 0, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159562481434099712, 0, 1153648835588132865, 1, '2023-10-05 18:47:19', NULL, 0, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159562506327293952, 0, 1153648835588132870, 1, '2023-10-05 18:47:25', NULL, 0, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159562541030965248, 0, 1153648835588132879, 1, '2023-10-05 18:47:33', NULL, 0, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159562576246341632, 0, 1153648835588132895, 1, '2023-10-05 18:47:42', NULL, 0, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159562603677089792, 0, 1153648835588132897, 1, '2023-10-05 18:47:48', NULL, 0, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159562627446210560, 0, 1153648835588132900, 1, '2023-10-05 18:47:54', NULL, 0, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159562650204504064, 0, 1153648835588132912, 1, '2023-10-05 18:47:59', NULL, 0, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159563921766481920, 1159563649187053568, 1159563649187053568, 1159563649187053569, '2023-10-05 18:53:03', NULL, 1159563649187053568, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159564587205394432, 1159563649187053568, 1159564587188617216, 1159564417168310272, '2023-10-05 18:55:41', NULL, 1159563649187053568, NULL);
+INSERT INTO `sys_user_role_rel` VALUES (1159565569167458304, 1159563649187053568, 1159565124227301376, 1159565451349458944, '2023-10-05 18:59:35', NULL, 1159563649187053568, NULL);
 
 -- ----------------------------
 -- Table structure for sys_user_warehouse_rel
@@ -1131,7 +1063,7 @@ CREATE TABLE `sys_user_warehouse_rel`  (
   `create_by` bigint NULL DEFAULT NULL COMMENT '创建人',
   `update_by` bigint NULL DEFAULT NULL COMMENT '修改人',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_warehouse_rel
