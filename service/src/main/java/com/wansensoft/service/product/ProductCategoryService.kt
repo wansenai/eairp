@@ -23,4 +23,6 @@ interface ProductCategoryService : IService<ProductCategory> {
     fun productCategoryList() : Response<List<ProductCategoryVO>>
 
     fun addOrUpdateProductCategory(productCategory: AddOrUpdateProductCategoryDTO) : Response<String>
+
+    fun deleteProductCategory(id: Long?) : Response<String>
 }

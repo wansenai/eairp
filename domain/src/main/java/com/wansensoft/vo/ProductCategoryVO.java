@@ -12,6 +12,7 @@
  */
 package com.wansensoft.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,13 +24,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductCategoryVO {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long parentId;
 
     private String categoryName;
 
-    private String categoryLevel;
+    private Integer categoryLevel;
 
     private String serialNumber;
 

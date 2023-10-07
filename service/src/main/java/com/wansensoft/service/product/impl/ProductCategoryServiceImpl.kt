@@ -12,6 +12,7 @@
  */
 package com.wansensoft.service.product.impl
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import com.wansensoft.dto.product.AddOrUpdateProductCategoryDTO
 import com.wansensoft.entities.product.ProductCategory
@@ -19,6 +20,7 @@ import com.wansensoft.mappers.product.ProductCategoryMapper
 import com.wansensoft.service.product.ProductCategoryService
 import com.wansensoft.service.user.ISysUserService
 import com.wansensoft.utils.SnowflakeIdUtil
+import com.wansensoft.utils.constants.CommonConstants
 import com.wansensoft.utils.enums.BaseCodeEnum
 import com.wansensoft.utils.enums.ProdcutCodeEnum
 import com.wansensoft.utils.response.Response
@@ -35,9 +37,11 @@ open class ProductCategoryServiceImpl(
 ) : ServiceImpl<ProductCategoryMapper, ProductCategory>(), ProductCategoryService {
 
     override fun productCategoryList(): Response<List<ProductCategoryVO>> {
-        val productCategoryVOs = mutableListOf<ProductCategoryVO>();
-        val productCategories =  productCategoryMapper.selectList(null)
-
+        val productCategoryVOs = mutableListOf<ProductCategoryVO>()
+        val productCategories = lambdaQuery()
+            .eq(ProductCategory::getDeleteFlag, CommonConstants.NOT_DELETED)
+            .orderByAsc(ProductCategory::getSort)
+            .list()
         productCategories.forEach {
             val productCategoryVO = ProductCategoryVO()
             BeanUtils.copyProperties(it, productCategoryVO)
@@ -47,25 +51,25 @@ open class ProductCategoryServiceImpl(
         return Response.responseData(productCategoryVOs)
     }
 
-    override fun addOrUpdateProductCategory(productCategoryDTO: AddOrUpdateProductCategoryDTO): Response<String> {
-        productCategoryDTO.let { dto ->
+    override fun addOrUpdateProductCategory(productCategory: AddOrUpdateProductCategoryDTO): Response<String> {
+        productCategory.let { dto ->
             val userId = userService.getCurrentTenantId().toLong()
             if (dto.id == null) {
                 // Add product category
-                val productCategory = ProductCategory.builder()
-                    .id(SnowflakeIdUtil.nextId())
-                    .tenantId(userId)
-                    .categoryName(dto.categoryName)
-                    .categoryLevel(dto.categoryLevel)
-                    .parentId(dto.parentId)
-                    .sort(dto.sort)
-                    .serialNumber(dto.serialNumber)
-                    .remark(dto.remark)
-                    .createTime(LocalDateTime.now())
-                    .createBy(userId)
-                    .build()
-
-                val savaResult = save(productCategory)
+                val savaResult = save(
+                    ProductCategory.builder()
+                        .id(SnowflakeIdUtil.nextId())
+                        .tenantId(userId)
+                        .categoryName(dto.categoryName)
+                        .categoryLevel(dto.categoryLevel)
+                        .parentId(dto.parentId)
+                        .sort(dto.sort)
+                        .serialNumber(dto.serialNumber)
+                        .remark(dto.remark)
+                        .createTime(LocalDateTime.now())
+                        .createBy(userId)
+                        .build()
+                )
                 if (!savaResult) {
                     return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_CATEGORY_ERROR)
                 }
@@ -92,6 +96,22 @@ open class ProductCategoryServiceImpl(
                 return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_CATEGORY_SUCCESS)
             }
         }
-        return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+    }
+
+    override fun deleteProductCategory(id: Long?): Response<String> {
+        // 如果id为空返回参数错误 否则进行逻辑删除产品分类id
+        if(id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+        }
+        val deleteResult = lambdaUpdate()
+            .eq(ProductCategory::getId, id)
+            .set(ProductCategory::getDeleteFlag, CommonConstants.DELETED)
+            .update()
+
+        if(!deleteResult){
+            return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_CATEGORY_ERROR)
+        }
+
+        return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_CATEGORY_SUCCESS)
     }
 }
