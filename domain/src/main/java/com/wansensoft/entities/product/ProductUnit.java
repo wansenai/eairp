@@ -47,9 +47,9 @@ public class ProductUnit implements Serializable {
     private Long tenantId;
 
     /**
-     * 名称，支持多单位
+     * 计量单位，计算得出
      */
-    private String name;
+    private String computeUnit;
 
     /**
      * 基础单位
@@ -89,7 +89,7 @@ public class ProductUnit implements Serializable {
     /**
      * 启用
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 创建时间
@@ -114,7 +114,7 @@ public class ProductUnit implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }
