@@ -25,8 +25,8 @@ class ProductCategoryController(private val productCategoryService: ProductCateg
         return productCategoryService.addOrUpdateProductCategory(productCategory)
     }
 
-    @PostMapping("/delete")
-    fun deleteProductCategory(@RequestParam id: Long): Response<String> {
-        return productCategoryService.deleteProductCategory(id)
+    @PostMapping("/deleteBatch")
+    fun deleteProductCategory(@RequestParam ids: List<Long>): Response<String> {
+        return productCategoryService.deleteProductCategory(ids)
     }
 }

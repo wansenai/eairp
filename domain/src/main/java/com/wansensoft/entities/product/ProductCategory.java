@@ -54,9 +54,9 @@ public class ProductCategory implements Serializable {
     private String categoryName;
 
     /**
-     * 等级
+     * 分类编号
      */
-    private Integer categoryLevel;
+    private String categoryNumber;
 
     /**
      * 上级id
@@ -67,11 +67,6 @@ public class ProductCategory implements Serializable {
      * 显示顺序
      */
     private Integer sort;
-
-    /**
-     * 编号
-     */
-    private String serialNumber;
 
     /**
      * 备注

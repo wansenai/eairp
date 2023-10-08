@@ -18,6 +18,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -27,16 +29,19 @@ public class ProductCategoryVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
+    private String categoryName;
+
+    private String categoryNumber;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long parentId;
 
-    private String categoryName;
-
-    private Integer categoryLevel;
-
-    private String serialNumber;
+    private String parentName;
 
     private String remark;
 
     private Integer sort;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
 }
