@@ -44,6 +44,14 @@ open class ProductCategoryServiceImpl(
             .list()
         productCategories.forEach {
             val productCategoryVO = ProductCategoryVO()
+            // 获取item的父级分类名称
+            val parentId = it.parentId
+            if (parentId != null) {
+                val parentCategory = lambdaQuery()
+                    .eq(ProductCategory::getId, parentId)
+                    .one()
+                productCategoryVO.parentName = parentCategory.categoryName
+            }
             BeanUtils.copyProperties(it, productCategoryVO)
             productCategoryVOs.add(productCategoryVO)
         }
@@ -61,10 +69,9 @@ open class ProductCategoryServiceImpl(
                         .id(SnowflakeIdUtil.nextId())
                         .tenantId(userId)
                         .categoryName(dto.categoryName)
-                        .categoryLevel(dto.categoryLevel)
+                        .categoryNumber(dto.categoryNumber)
                         .parentId(dto.parentId)
                         .sort(dto.sort)
-                        .serialNumber(dto.serialNumber)
                         .remark(dto.remark)
                         .createTime(LocalDateTime.now())
                         .createBy(userId)
@@ -80,10 +87,9 @@ open class ProductCategoryServiceImpl(
                     .eq(ProductCategory::getId, dto.id)
                     .apply {
                         set(StringUtils.hasText(dto.categoryName), ProductCategory::getCategoryName, dto.categoryName)
-                        set(dto.categoryLevel != null, ProductCategory::getCategoryLevel, dto.categoryLevel)
+                        set(StringUtils.hasText(dto.categoryNumber), ProductCategory::getCategoryNumber, dto.categoryNumber)
                         set(dto.parentId != null, ProductCategory::getParentId, dto.parentId)
                         set(dto.sort != null, ProductCategory::getSort, dto.sort)
-                        set(StringUtils.hasText(dto.serialNumber), ProductCategory::getSerialNumber, dto.serialNumber)
                         set(StringUtils.hasText(dto.remark), ProductCategory::getRemark, dto.remark)
                         set(ProductCategory::getUpdateTime, LocalDateTime.now())
                         set(ProductCategory::getUpdateBy, userId)

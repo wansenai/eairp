@@ -9,13 +9,11 @@ class AddOrUpdateProductCategoryDTO {
 
     val categoryName: String? = null
 
-    val categoryLevel: Int? = null
+    val categoryNumber: String? = null
 
     val parentId: Long? = null
 
     val sort: Int? = null
-
-    val serialNumber: String? = null
 
     val remark: String? = null
 }
