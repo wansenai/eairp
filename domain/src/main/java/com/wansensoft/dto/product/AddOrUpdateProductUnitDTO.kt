@@ -10,20 +10,27 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.product.impl;
+package com.wansensoft.dto.product
 
-import com.wansensoft.service.product.IProductUnitService;
-import com.wansensoft.entities.product.ProductUnit;
-import com.wansensoft.mappers.product.ProductUnitMapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
+import java.math.BigDecimal
 
-/**
- * <p>
- * 多单位表 服务实现类
- * </p>
- */
-@Service
-public class ProductUnitServiceImpl extends ServiceImpl<ProductUnitMapper, ProductUnit> implements IProductUnitService {
+data class AddOrUpdateProductUnitDTO (
 
-}
+    val id : Long? = null,
+
+    var basicUnit: String? = null,
+
+    var otherUnit: String? = null,
+
+    var otherUnitTwo: String? = null,
+
+    var otherUnitThree: String? = null,
+
+    var ratio: BigDecimal? = null,
+
+    var ratioTwo: BigDecimal? = null,
+
+    var ratioThree: BigDecimal? = null,
+
+    var status: Int? = null
+)

@@ -30,7 +30,26 @@ public enum ProdcutCodeEnum {
 
     DELETE_PRODUCT_ATTRIBUTE_SUCCESS("P0005", "删除商品属性成功"),
 
-    DELETE_PRODUCT_ATTRIBUTE_ERROR("P0505", "删除商品属性失败");
+    DELETE_PRODUCT_ATTRIBUTE_ERROR("P0505", "删除商品属性失败"),
+
+    // Product Unit Code
+    PRODUCT_COMPUTE_UNIT_EXIST("P0507", "商品计量单位已存在"),
+
+    PRODUCT_UNIT_ADD_SUCCESS("P0006", "添加商品单位成功"),
+
+    PRODUCT_UNIT_ADD_ERROR("P0506", "添加商品单位失败"),
+
+    PRODUCT_UNIT_UPDATE_SUCCESS("P0007", "修改商品单位成功"),
+
+    PRODUCT_UNIT_UPDATE_ERROR("P0507", "修改商品单位失败"),
+
+    PRODUCT_UNIT_DELETE_SUCCESS("P0008", "删除商品单位成功"),
+
+    PRODUCT_UNIT_DELETE_ERROR("P0508", "删除商品单位失败"),
+
+    UPDATE_PRODUCT_UNIT_STATUS_SUCCESS("P0009", "修改商品单位状态成功"),
+
+    UPDATE_PRODUCT_UNIT_STATUS_ERROR("P0509", "修改商品单位状态失败");
 
 
     private final String code;

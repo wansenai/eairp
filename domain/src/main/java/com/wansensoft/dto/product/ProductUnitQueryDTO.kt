@@ -10,22 +10,13 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.api.product;
+package com.wansensoft.dto.product
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.wansensoft.dto.PageSizeDTO
 
-import org.springframework.web.bind.annotation.RestController;
+data class ProductUnitQueryDTO (
 
-/**
- * <p>
- * 多单位表 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
-@RestController
-@RequestMapping("/product-unit")
-public class ProductUnitController {
+    val page: PageSizeDTO? = null,
 
-}
+    val computeUnit: String? = null,
+)
