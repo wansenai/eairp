@@ -98,13 +98,13 @@ open class ProductCategoryServiceImpl(
         }
     }
 
-    override fun deleteProductCategory(id: Long?): Response<String> {
+    override fun deleteProductCategory(ids: List<Long>?): Response<String> {
         // 如果id为空返回参数错误 否则进行逻辑删除产品分类id
-        if(id == null) {
+        if(ids.isNullOrEmpty()) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
         }
         val deleteResult = lambdaUpdate()
-            .eq(ProductCategory::getId, id)
+            .`in`(ProductCategory::getId, ids)
             .set(ProductCategory::getDeleteFlag, CommonConstants.DELETED)
             .update()
 
