@@ -380,15 +380,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public String getCurrentUserId() {
+    public Long getCurrentUserId() {
         var token = httpServletRequestContextToken();
-        return redisUtil.getString(token + ":userId");
+        return Long.parseLong(redisUtil.getString(token + ":userId"));
     }
 
     @Override
-    public String getCurrentTenantId() {
+    public Long getCurrentTenantId() {
         var token = httpServletRequestContextToken();
-        return redisUtil.getString(token + ":tenantId");
+        return Long.parseLong(redisUtil.getString(token + ":tenantId"));
     }
 
     @Override
@@ -401,7 +401,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     public Response<List<UserRoleVO>> userRole() {
         var userRoleVos = new ArrayList<UserRoleVO>();
 
-        var userId = Long.parseLong(getCurrentUserId());
+        var userId = getCurrentUserId();
         var ids = userRoleRelService.queryByUserId(userId).stream()
                 .map(SysUserRoleRel::getRoleId).toList();
         if (ids.isEmpty()) {
@@ -565,8 +565,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                     .id(SnowflakeIdUtil.nextId())
                     .roleId(roleId)
                     .userId(userId)
-                    .tenantId(Long.parseLong(getCurrentTenantId()))
-                    .createBy(Long.parseLong(getCurrentUserId()))
+                    .tenantId(getCurrentTenantId())
+                    .createBy(getCurrentUserId())
                     .createTime(LocalDateTime.now())
                     .build();
             userRoleReals.add(userRoleRel);
@@ -581,8 +581,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                     .id(SnowflakeIdUtil.nextId())
                     .deptId(deptId)
                     .userId(userId)
-                    .tenantId(Long.parseLong(getCurrentTenantId()))
-                    .createBy(Long.parseLong(getCurrentUserId()))
+                    .tenantId(getCurrentTenantId())
+                    .createBy(getCurrentUserId())
                     .createTime(LocalDateTime.now())
                     .build();
             userDeptReals.add(userDeptRel);
@@ -660,10 +660,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                     .name(addOrUpdateUserDTO.getName())
                     .phoneNumber(addOrUpdateUserDTO.getPhoneNumber())
                     .email(addOrUpdateUserDTO.getEmail())
-                    .createBy(Long.parseLong(getCurrentUserId()))
+                    .createBy(getCurrentUserId())
                     .createTime(LocalDateTime.now())
                     .description(addOrUpdateUserDTO.getRemake())
-                    .tenantId(Long.parseLong(getCurrentTenantId()))
+                    .tenantId(getCurrentTenantId())
                     .build();
 
             var saveUserResult = save(user);

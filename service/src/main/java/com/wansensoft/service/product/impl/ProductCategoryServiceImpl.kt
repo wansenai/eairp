@@ -12,7 +12,6 @@
  */
 package com.wansensoft.service.product.impl
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import com.wansensoft.dto.product.AddOrUpdateProductCategoryDTO
 import com.wansensoft.entities.product.ProductCategory
@@ -24,7 +23,7 @@ import com.wansensoft.utils.constants.CommonConstants
 import com.wansensoft.utils.enums.BaseCodeEnum
 import com.wansensoft.utils.enums.ProdcutCodeEnum
 import com.wansensoft.utils.response.Response
-import com.wansensoft.vo.ProductCategoryVO
+import com.wansensoft.vo.product.ProductCategoryVO
 import org.springframework.beans.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils

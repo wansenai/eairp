@@ -16,7 +16,7 @@ import com.baomidou.mybatisplus.extension.service.IService
 import com.wansensoft.dto.product.AddOrUpdateProductCategoryDTO
 import com.wansensoft.entities.product.ProductCategory
 import com.wansensoft.utils.response.Response
-import com.wansensoft.vo.ProductCategoryVO
+import com.wansensoft.vo.product.ProductCategoryVO
 
 interface ProductCategoryService : IService<ProductCategory> {
 
