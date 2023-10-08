@@ -21,6 +21,7 @@ import com.wansensoft.entities.product.ProductAttribute
 import com.wansensoft.mappers.product.ProductAttributeMapper
 import com.wansensoft.service.product.ProductAttributeService
 import com.wansensoft.service.user.ISysUserService
+import com.wansensoft.utils.SnowflakeIdUtil
 import com.wansensoft.utils.constants.CommonConstants
 import com.wansensoft.utils.enums.BaseCodeEnum
 import com.wansensoft.utils.enums.ProdcutCodeEnum
@@ -45,23 +46,18 @@ open class ProductAttributeServiceImpl(
 
         val result = page?.run {
             productAttributeMapper.selectPage(this, wrapper)
-            if (records.isNotEmpty()) {
-                val listVo = records.map { attribute ->
-                    ProductAttributeVO().apply {
-                        BeanUtils.copyProperties(attribute, this)
-                    }
+            val listVo = records.map { attribute ->
+                ProductAttributeVO().apply {
+                    BeanUtils.copyProperties(attribute, this)
                 }
-                Page<ProductAttributeVO>().apply {
-                    records = listVo
-                    total = this@run.total
-                    pages = this@run.pages
-                    size = this@run.size
-                }
-
-            } else {
-                Page<ProductAttributeVO>()
             }
-        }?: Page<ProductAttributeVO>()
+            Page<ProductAttributeVO>().apply {
+                records = listVo
+                total = this@run.total
+                pages = this@run.pages
+                size = this@run.size
+            }
+        } ?: Page<ProductAttributeVO>()
 
         return Response.responseData(result)
     }
@@ -79,6 +75,7 @@ open class ProductAttributeServiceImpl(
                     if (count > 0) {
                         return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ATTRIBUTE_NAME_EXIST)
                     }
+                    attribute.id = SnowflakeIdUtil.nextId()
                     attribute.createTime = LocalDateTime.now()
                     attribute.createBy = userId
                     val saveResult = saveAttribute(attribute)
