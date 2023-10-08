@@ -13,6 +13,9 @@
 package com.wansensoft.vo.product
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.wansensoft.bo.BigDecimalSerializerBO
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class ProductUnitVO (
@@ -20,15 +23,34 @@ data class ProductUnitVO (
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     var id : Long? = null,
 
-    var computeUnit : String? = null,
-
     var basicUnit: String? = null,
 
     var otherUnit: String? = null,
 
+    // Table All Unit Assembly Text Data
+    var computeUnit : String? = null,
+
+    // Table Multiple Unit Text Data
+    var otherComputeUnit : String? = null,
+
     var otherUnitTwo: String? = null,
 
+    // Table Multiple Unit 2 Text Data
+    var otherComputeUnitTwo : String? = null,
+
     var otherUnitThree: String? = null,
+
+    // Table Multiple Unit 3 Text Data
+    var otherComputeUnitThree : String? = null,
+
+    @JsonSerialize(using = BigDecimalSerializerBO::class)
+    var ratio: BigDecimal? = null,
+
+    @JsonSerialize(using = BigDecimalSerializerBO::class)
+    var ratioTwo: BigDecimal? = null,
+
+    @JsonSerialize(using = BigDecimalSerializerBO::class)
+    var ratioThree: BigDecimal? = null,
 
     var status: Int? = null,
 
