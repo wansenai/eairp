@@ -42,9 +42,9 @@ public interface ISysUserService extends IService<SysUser> {
 
     UserInfoVO getCurrentUser();
 
-    String getCurrentUserId();
+    Long getCurrentUserId();
 
-    String getCurrentTenantId();
+    Long getCurrentTenantId();
 
     String getCurrentUserName();
 

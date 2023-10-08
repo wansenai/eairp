@@ -12,17 +12,19 @@
  */
 package com.wansensoft.service.product
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.IService
-import com.wansensoft.dto.product.AddOrUpdateProductCategoryDTO
-import com.wansensoft.entities.product.ProductCategory
+import com.wansensoft.dto.product.AddOrUpdateProductAttributeDTO
+import com.wansensoft.dto.product.ProductAttributeQueryDTO
+import com.wansensoft.entities.product.ProductAttribute
 import com.wansensoft.utils.response.Response
-import com.wansensoft.vo.product.ProductCategoryVO
+import com.wansensoft.vo.product.ProductAttributeVO
 
-interface ProductCategoryService : IService<ProductCategory> {
+interface ProductAttributeService : IService<ProductAttribute> {
 
-    fun productCategoryList() : Response<List<ProductCategoryVO>>
+    fun productAttributeList(productAttributeQuery : ProductAttributeQueryDTO?) : Response<Page<ProductAttributeVO>>
 
-    fun addOrUpdateProductCategory(productCategory: AddOrUpdateProductCategoryDTO) : Response<String>
+    fun addOrUpdateProductAttribute(productAttributeAddOrUpdate: AddOrUpdateProductAttributeDTO?) : Response<String>
 
-    fun deleteProductCategory(ids: List<Long>?) : Response<String>
+    fun batchDeleteProductAttribute(ids: List<Long>?) : Response<String>
 }

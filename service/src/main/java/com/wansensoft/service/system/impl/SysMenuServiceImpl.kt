@@ -125,12 +125,8 @@ open class SysMenuServiceImpl(
         val menuData = JSONObject()
         val menuVos = ArrayList<MenuVO>()
 
-        val userId = userService.getCurrentUserId()
-        if (!StringUtils.hasText(userId)) {
-            return Response.fail()
-        }
-
-        val roleIds = userRoleRelService.queryByUserId(userId.toLong())
+        val userId = userService.getCurrentUserId() ?: return Response.fail()
+        val roleIds = userRoleRelService.queryByUserId(userId)
             .map { it.roleId }
 
         if (roleIds.isNotEmpty()) {

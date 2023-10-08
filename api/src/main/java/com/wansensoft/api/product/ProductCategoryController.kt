@@ -3,7 +3,7 @@ package com.wansensoft.api.product
 import com.wansensoft.dto.product.AddOrUpdateProductCategoryDTO
 import com.wansensoft.service.product.ProductCategoryService
 import com.wansensoft.utils.response.Response
-import com.wansensoft.vo.ProductCategoryVO
+import com.wansensoft.vo.product.ProductCategoryVO
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

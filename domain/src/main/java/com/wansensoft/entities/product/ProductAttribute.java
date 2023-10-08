@@ -53,6 +53,16 @@ public class ProductAttribute implements Serializable {
     private String attributeValue;
 
     /**
+     * 备注
+     */
+    private String remark;
+
+    /**
+     * 排序
+     */
+    private Integer sort;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
@@ -75,7 +85,7 @@ public class ProductAttribute implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }
