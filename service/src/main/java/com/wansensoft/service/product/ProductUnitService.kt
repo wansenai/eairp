@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.IService
 import com.wansensoft.dto.product.AddOrUpdateProductUnitDTO
 import com.wansensoft.dto.product.ProductUnitQueryDTO
+import com.wansensoft.dto.product.ProductUnitStatusDTO
 import com.wansensoft.entities.product.ProductUnit
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.product.ProductUnitVO
@@ -27,4 +28,6 @@ interface ProductUnitService: IService<ProductUnit> {
     fun addOrUpdateProductUnit(productUnit: AddOrUpdateProductUnitDTO?): Response<String>
 
     fun deleteProductUnit(ids:  List<Long>?): Response<String>
+
+    fun updateUnitStatus(productUnitStatus: ProductUnitStatusDTO?): Response<String>
 }

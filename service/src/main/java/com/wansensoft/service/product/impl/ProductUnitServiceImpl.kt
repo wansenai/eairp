@@ -17,8 +17,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import com.wansensoft.dto.product.AddOrUpdateProductUnitDTO
 import com.wansensoft.dto.product.ProductUnitQueryDTO
+import com.wansensoft.dto.product.ProductUnitStatusDTO
 import com.wansensoft.entities.product.ProductUnit
 import com.wansensoft.mappers.product.ProductUnitMapper
+import com.wansensoft.service.BaseService
 import com.wansensoft.service.product.ProductUnitService
 import com.wansensoft.utils.SnowflakeIdUtil
 import com.wansensoft.utils.constants.CommonConstants
@@ -27,10 +29,14 @@ import com.wansensoft.utils.enums.ProdcutCodeEnum
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.product.ProductUnitVO
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.time.LocalDateTime
 
 @Service
 open class ProductUnitServiceImpl(
-    private val productUnitMapper: ProductUnitMapper
+    private val productUnitMapper: ProductUnitMapper,
+    private val baseService: BaseService
 ) :ServiceImpl<ProductUnitMapper, ProductUnit>(), ProductUnitService {
 
     override fun productUnitList(productUnitQuery: ProductUnitQueryDTO?): Response<Page<ProductUnitVO>> {
@@ -49,27 +55,44 @@ open class ProductUnitServiceImpl(
             productUnitMapper.selectPage(this, wrapper)
             val listVo = records.map { unit ->
                 ProductUnitVO(
-                    id              = unit.id,
-                    computeUnit     = unit.computeUnit,
-                    basicUnit       = unit.basicUnit,
-                    otherUnit       = unit.otherUnit,
-                    otherUnitTwo    = unit.otherUnitTwo,
-                    otherUnitThree  = unit.otherUnitThree,
-                    status          = unit.status,
-                    createTime      = unit.createTime,
+                    id = unit.id,
+                    computeUnit = unit.computeUnit,
+                    basicUnit = unit.basicUnit,
+                    otherUnit = unit.otherUnit,
+                    otherUnitTwo = unit.otherUnitTwo,
+                    otherUnitThree = unit.otherUnitThree,
+                    ratio = unit.ratio,
+                    ratioTwo = unit.ratioTwo,
+                    ratioThree = unit.ratioThree,
+                    status = unit.status,
+                    createTime = unit.createTime,
+                    otherComputeUnit = formatBigDecimal(unit.ratio, unit.otherUnit, unit.basicUnit),
+                    otherComputeUnitTwo = formatBigDecimal(unit.ratioTwo, unit.otherUnitTwo, unit.basicUnit),
+                    otherComputeUnitThree = formatBigDecimal(unit.ratioThree, unit.otherUnitThree, unit.basicUnit)
                 )
             }
             Page<ProductUnitVO>().apply {
                 records = listVo
-                total   = this@run.total
-                pages   = this@run.pages
-                size    = this@run.size
+                total = this@run.total
+                pages = this@run.pages
+                size = this@run.size
             }
         } ?: Page<ProductUnitVO>()
 
         return Response.responseData(result)
     }
 
+    private fun formatBigDecimal(ratio: BigDecimal?, otherUnit: String?, basicUnit: String?): String? {
+        return ratio?.let {
+            val scaledValue = it.setScale(3, RoundingMode.HALF_UP)
+            val formattedValue = if (scaledValue.stripTrailingZeros().scale() <= 0) {
+                scaledValue.toBigInteger().toString()
+            } else {
+                scaledValue.toString()
+            }
+            "$otherUnit=$formattedValue$basicUnit"
+        }
+    }
 
     override fun addOrUpdateProductUnit(productUnit: AddOrUpdateProductUnitDTO?): Response<String> {
         productUnit?.let { unit ->
@@ -107,6 +130,7 @@ open class ProductUnitServiceImpl(
     }
 
     private fun buildProductUnit(id: Long, unit: AddOrUpdateProductUnitDTO): ProductUnit {
+        val creator = baseService.currentUserId
         return ProductUnit().apply {
             this.id = id
             computeUnit = buildComputeUnit(unit)
@@ -118,14 +142,22 @@ open class ProductUnitServiceImpl(
             ratioTwo = unit.ratioTwo
             ratioThree = unit.ratioThree
             status = unit.status
+            // 如果id为空，说明是新增，需要设置创建时间
+            if (unit.id == null) {
+                createTime = LocalDateTime.now()
+                createBy = creator
+            } else {
+                updateTime = LocalDateTime.now()
+                updateBy = creator
+            }
         }
     }
 
     private fun buildComputeUnit(productUnit: AddOrUpdateProductUnitDTO): String {
         val computeUnit = StringBuilder()
-        computeUnit.append("${productUnit.basicUnit}/(${productUnit.otherUnit}=${productUnit.ratio})")
-        productUnit.otherUnitTwo?.let { computeUnit.append("/(${it}=${productUnit.ratioTwo})") }
-        productUnit.otherUnitThree?.let { computeUnit.append("/(${it}=${productUnit.ratioThree})") }
+        computeUnit.append("${productUnit.basicUnit}/(${productUnit.otherUnit}=${productUnit.ratio}${productUnit.basicUnit})")
+        productUnit.otherUnitTwo?.let { computeUnit.append("/(${it}=${productUnit.ratioTwo}${productUnit.basicUnit})") }
+        productUnit.otherUnitThree?.let { computeUnit.append("/(${it}=${productUnit.ratioThree}${productUnit.basicUnit})") }
         return computeUnit.toString()
     }
 
@@ -139,4 +171,18 @@ open class ProductUnitServiceImpl(
         }?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
     }
 
+    override fun updateUnitStatus(productUnitStatus: ProductUnitStatusDTO?): Response<String> {
+        return productUnitStatus?.let { item ->
+            val unit = ProductUnit().apply {
+                id = item.id
+                status = item.status
+            }
+            val updateResult = productUnitMapper.updateById(unit)
+            if (updateResult == 0) {
+                Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_UNIT_STATUS_ERROR)
+            } else {
+                Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_UNIT_STATUS_SUCCESS)
+            }
+        } ?: Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+    }
 }

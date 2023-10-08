@@ -15,14 +15,11 @@ package com.wansensoft.api.product
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.wansensoft.dto.product.AddOrUpdateProductUnitDTO
 import com.wansensoft.dto.product.ProductUnitQueryDTO
+import com.wansensoft.dto.product.ProductUnitStatusDTO
 import com.wansensoft.service.product.ProductUnitService
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.product.ProductUnitVO
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/product/unit")
@@ -39,7 +36,12 @@ class ProductUnitController(private val productUnitService: ProductUnitService) 
     }
 
     @DeleteMapping("/deleteBatch")
-    fun deleteProductUnit(@RequestBody ids: List<Long>): Response<String> {
+    fun deleteProductUnit(@RequestParam ids: List<Long>): Response<String> {
         return productUnitService.deleteProductUnit(ids)
+    }
+
+    @PostMapping("/updateUnitStatus")
+    fun updateUnitStatus(@RequestBody productUnitStatus: ProductUnitStatusDTO): Response<String> {
+        return productUnitService.updateUnitStatus(productUnitStatus)
     }
 }
