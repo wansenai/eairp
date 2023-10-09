@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 data class ProductUnitVO (
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    var id : Long? = null,
+    var id : Long,
 
     var basicUnit: String? = null,
 
