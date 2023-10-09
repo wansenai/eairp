@@ -12,6 +12,7 @@
  */
 package com.wansensoft.utils.enums;
 
+import com.wansensoft.utils.response.Response;
 import lombok.Getter;
 
 /**
