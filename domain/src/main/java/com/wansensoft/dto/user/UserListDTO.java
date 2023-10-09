@@ -12,13 +12,11 @@
  */
 package com.wansensoft.dto.user;
 
-import com.wansensoft.dto.PageSizeDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class UserListDTO extends PageSizeDTO {
+public class UserListDTO {
 
     private String username;
 
@@ -29,4 +27,8 @@ public class UserListDTO extends PageSizeDTO {
     private String phoneNumber;
 
     private String deptId;
+
+    private Long page;
+
+    private Long pageSize;
 }

@@ -12,11 +12,14 @@
  */
 package com.wansensoft.dto.product
 
-import com.wansensoft.dto.PageSizeDTO
 import lombok.Data
 
 @Data
-class ProductAttributeQueryDTO : PageSizeDTO() {
+data class ProductAttributeQueryDTO (
 
-    val attributeName: String? = null
-}
+    val attributeName: String?,
+
+    val page: Long?,
+
+    val pageSize: Long?,
+)

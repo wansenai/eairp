@@ -40,12 +40,7 @@ open class ProductUnitServiceImpl(
 ) :ServiceImpl<ProductUnitMapper, ProductUnit>(), ProductUnitService {
 
     override fun productUnitList(productUnitQuery: ProductUnitQueryDTO?): Response<Page<ProductUnitVO>> {
-        val page = productUnitQuery?.let { query ->
-            val pageSizeDTO = query.page
-            val page = pageSizeDTO?.page ?: 0L
-            val pageSize = pageSizeDTO?.pageSize ?: 10L
-            Page<ProductUnit>(page, pageSize)
-        }
+        val page = productUnitQuery?.run { Page<ProductUnit>(page ?: 1, pageSize ?: 10) }
         val wrapper = LambdaQueryWrapper<ProductUnit>().apply {
             productUnitQuery?.computeUnit?.let { like(ProductUnit::getComputeUnit, it) }
             eq(ProductUnit::getDeleteFlag, CommonConstants.NOT_DELETED)
