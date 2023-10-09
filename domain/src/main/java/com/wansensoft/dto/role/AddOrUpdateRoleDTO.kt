@@ -12,23 +12,26 @@
  */
 package com.wansensoft.dto.role
 
-import com.wansensoft.dto.PageSizeDTO
 import lombok.Data
 import lombok.EqualsAndHashCode
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-class AddOrUpdateRoleDTO : PageSizeDTO() {
+data class AddOrUpdateRoleDTO (
 
-    var id : Long? = null
+    var id : Long?,
 
-    var roleName: String? = null
+    var roleName: String? ,
 
-    var type: String? = null
+    var type: String?,
 
-    var priceLimit: Int? = null
+    var priceLimit: Int?,
 
-    var status: Int? = null
+    var status: Int?,
 
-    var description: String? = null
-}
+    var description: String?,
+
+    val page: Long?,
+
+    val pageSize: Long?
+)

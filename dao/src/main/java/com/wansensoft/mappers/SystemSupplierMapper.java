@@ -12,7 +12,7 @@
  */
 package com.wansensoft.mappers;
 
-import com.wansensoft.entities.system.SystemSupplier;
+import com.wansensoft.entities.basic.Supplier;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -20,6 +20,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 供应商/客户信息表 Mapper 接口
  * </p>
  */
-public interface SystemSupplierMapper extends BaseMapper<SystemSupplier> {
+public interface SystemSupplierMapper extends BaseMapper<Supplier> {
 
 }

@@ -12,11 +12,11 @@
  */
 package com.wansensoft.dto.product
 
-import com.wansensoft.dto.PageSizeDTO
-
 data class ProductUnitQueryDTO (
 
-    val page: PageSizeDTO? = null,
-
     val computeUnit: String? = null,
+
+    val page: Long?,
+
+    val pageSize: Long?
 )

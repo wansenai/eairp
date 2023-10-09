@@ -82,10 +82,10 @@ public class Response<T> implements Serializable {
         return baseResponse;
     }
 
-    public static <T> Response<T> responseMsg(String code, String msg) {
+    public static <T> Response<T> responseMsg(SupplierCodeEnum supplierCodeEnum) {
         Response<T> baseResponse = new Response<T>();
-        baseResponse.setCode(code);
-        baseResponse.setMsg(msg);
+        baseResponse.setCode(supplierCodeEnum.getCode());
+        baseResponse.setMsg(supplierCodeEnum.getMsg());
         return baseResponse;
     }
 

@@ -10,8 +10,9 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.entities.system;
+package com.wansensoft.entities.basic;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -31,8 +32,9 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("supplier")
-public class SystemSupplier implements Serializable {
+public class Supplier implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -67,11 +69,6 @@ public class SystemSupplier implements Serializable {
     private String email;
 
     /**
-     * 备注
-     */
-    private String remake;
-
-    /**
      * 是否系统自带 0==系统 1==非系统
      */
     private Integer isSystem;
@@ -82,34 +79,59 @@ public class SystemSupplier implements Serializable {
     private String type;
 
     /**
-     * 状态（0-启用，1-停用）
+     * 状态（0-启用，1-停用）默认启用
      */
-    private Boolean status;
+    private Integer status;
 
     /**
-     * 预收款
+     * 一季度应收账款
      */
-    private BigDecimal advanceReceivable;
+    private BigDecimal firstQuarterAccountReceivable;
 
     /**
-     * 期初应收
+     * 二季度应收账款
      */
-    private BigDecimal beginAccountReceivable;
+    private BigDecimal secondQuarterAccountReceivable;
 
     /**
-     * 期初应付
+     * 三季度应收账款
      */
-    private BigDecimal beginAccountPayment;
+    private BigDecimal thirdQuarterAccountReceivable;
 
     /**
-     * 累计应收
+     * 四季度应收账款
      */
-    private BigDecimal totalReceivable;
+    private BigDecimal fourthQuarterAccountReceivable;
 
     /**
-     * 累计应付
+     * 一季度应付账款
      */
-    private BigDecimal totalPayment;
+    private BigDecimal firstQuarterAccountPayment;
+
+    /**
+     * 二季度应付账款
+     */
+    private BigDecimal secondQuarterAccountPayment;
+
+    /**
+     * 三季度应付账款
+     */
+    private BigDecimal thirdQuarterAccountPayment;
+
+    /**
+     * 四季度应付账款
+     */
+    private BigDecimal fourthQuarterAccountPayment;
+
+    /**
+     * 累计应收账款
+     */
+    private BigDecimal totalAccountReceivable;
+
+    /**
+     * 累计应付账款
+     */
+    private BigDecimal totalAccountPayment;
 
     /**
      * 传真
@@ -134,7 +156,7 @@ public class SystemSupplier implements Serializable {
     /**
      * 开户行
      */
-    private String bankNumber;
+    private String bankName;
 
     /**
      * 账号
@@ -149,7 +171,17 @@ public class SystemSupplier implements Serializable {
     /**
      * 排序
      */
-    private String sort;
+    private Integer sort;
+
+    /**
+     * 备注
+     */
+    private String remark;
+
+    /**
+     * 删除标记，0未删除，1删除
+     */
+    private Integer deleteFlag;
 
     /**
      * 创建时间
@@ -170,11 +202,4 @@ public class SystemSupplier implements Serializable {
      * 修改人
      */
     private Long updateBy;
-
-    /**
-     * 删除标记，0未删除，1删除
-     */
-    private Boolean deleteFlag;
-
-
 }

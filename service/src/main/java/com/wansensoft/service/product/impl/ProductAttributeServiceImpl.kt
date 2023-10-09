@@ -38,7 +38,7 @@ open class ProductAttributeServiceImpl(
 ):ServiceImpl<ProductAttributeMapper, ProductAttribute>(), ProductAttributeService {
 
     override fun productAttributeList(productAttributeQuery : ProductAttributeQueryDTO?): Response<Page<ProductAttributeVO>> {
-        val page = productAttributeQuery?.let { Page<ProductAttribute>(it.page, it.pageSize) }
+        val page = productAttributeQuery?.run { Page<ProductAttribute>(page ?: 1, pageSize ?: 10) }
         val wrapper = LambdaQueryWrapper<ProductAttribute>().apply() {
             productAttributeQuery?.attributeName?.let { like(ProductAttribute::getAttributeName, it) }
             eq(ProductAttribute::getDeleteFlag, CommonConstants.NOT_DELETED)
