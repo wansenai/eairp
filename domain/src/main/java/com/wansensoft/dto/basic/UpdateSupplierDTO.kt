@@ -18,7 +18,7 @@ data class UpdateSupplierDTO(
     /**
      * 联系电话
      */
-    val contactNumber: String,
+    val contactNumber: String?,
     /**
      * 手机号码
      */
@@ -26,81 +26,81 @@ data class UpdateSupplierDTO(
     /**
      * 地址
      */
-    val address: String,
+    val address: String?,
     /**
      * 邮箱
      */
-    val email: String,
+    val email: String?,
     /**
      * 状态
      */
-    val status: Int,
+    val status: Int?,
     /**
      * 第一季度应收账款
      */
-    val firstQuarterAccountReceivable: Double,
+    val firstQuarterAccountReceivable: Double?,
     /**
      * 第二季度应收账款
      */
-    val secondQuarterAccountReceivable: Double,
+    val secondQuarterAccountReceivable: Double?,
     /**
      * 第三季度应收账款
      */
-    val thirdQuarterAccountReceivable: Double,
+    val thirdQuarterAccountReceivable: Double?,
     /**
      * 第四季度应收账款
      */
-    val fourthQuarterAccountReceivable: Double,
+    val fourthQuarterAccountReceivable: Double?,
     /**
      * 应收账款总额
      */
-    val totalAccountReceivable: BigDecimal,
+    val totalAccountReceivable: BigDecimal?,
     /**
      * 第一季度应付账款
      */
-    val firstQuarterAccountPayment: Double,
+    val firstQuarterAccountPayment: Double?,
     /**
      * 第二季度应付账款
      */
-    val secondQuarterAccountPayment: Double,
+    val secondQuarterAccountPayment: Double?,
     /**
      * 第三季度应付账款
      */
-    val thirdQuarterAccountPayment: Double,
+    val thirdQuarterAccountPayment: Double?,
     /**
      * 第四季度应付账款
      */
-    val fourthQuarterAccountPayment: Double,
+    val fourthQuarterAccountPayment: Double?,
     /**
      * 应付账款总额
      */
-    val totalAccountPayment: BigDecimal,
+    val totalAccountPayment: BigDecimal?,
     /**
      * 传真
      */
-    val fax: String,
+    val fax: String?,
     /**
      * 税号
      */
-    val taxNumber: String,
+    val taxNumber: String?,
     /**
      * 开户行
      */
-    val bankName: String,
+    val bankName: String?,
     /**
      * 账号
      */
-    val accountNumber: String,
+    val accountNumber: Long?,
     /**
      * 税率
      */
-    val taxRate: String,
+    val taxRate: Int?,
     /**
      * 排序
      */
-    val sort: Int,
+    val sort: Int?,
     /**
      * 备注
      */
-    val remark: String,
+    val remark: String?,
 )

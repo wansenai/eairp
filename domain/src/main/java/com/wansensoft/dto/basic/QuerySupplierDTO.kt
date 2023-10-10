@@ -23,5 +23,9 @@ data class QuerySupplierDTO (
      */
     val page: Long?,
 
-    val pageSize: Long?
+    val pageSize: Long?,
+
+    val startDate: String?,
+
+    val endDate: String?,
 )

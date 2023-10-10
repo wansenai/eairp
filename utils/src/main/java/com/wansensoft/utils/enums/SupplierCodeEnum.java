@@ -16,8 +16,11 @@ public enum SupplierCodeEnum {
 
     DELETE_SUPPLIER_SUCCESS("S0003", "供应商删除成功"),
 
-    DELETE_SUPPLIER_ERROR("S0504", "供应商删除失败");
+    DELETE_SUPPLIER_ERROR("S0504", "供应商删除失败"),
 
+    UPDATE_SUPPLIER_STATUS_SUCCESS("S0004", "供应商状态修改成功"),
+
+    UPDATE_SUPPLIER_STATUS_ERROR("S0505", "供应商状态修改失败");
 
     /**
      * 响应状态码

@@ -161,7 +161,7 @@ public class Supplier implements Serializable {
     /**
      * 账号
      */
-    private String accountNumber;
+    private Long accountNumber;
 
     /**
      * 税率

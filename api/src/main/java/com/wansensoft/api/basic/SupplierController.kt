@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.wansensoft.dto.basic.AddSupplierDTO
 import com.wansensoft.dto.basic.QuerySupplierDTO
 import com.wansensoft.dto.basic.UpdateSupplierDTO
+import com.wansensoft.dto.basic.UpdateSupplierStatusDTO
 import com.wansensoft.service.basic.SupplierService
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.basic.SupplierVO
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -32,8 +34,13 @@ class SupplierController (private val supplierService: SupplierService){
         return supplierService.updateSupplier(updateSupplierDTO)
     }
 
-    @PostMapping("/deleteBatch")
+    @DeleteMapping("/deleteBatch")
     fun deleteSupplier(@RequestParam ids: List<Long>) : Response<String> {
         return supplierService.deleteSupplier(ids)
+    }
+
+    @PostMapping("/updateStatus")
+    fun updateSupplierStatus(@RequestBody updateSupplierStatusDTO: UpdateSupplierStatusDTO) : Response<String> {
+        return supplierService.updateSupplierStatus(updateSupplierStatusDTO)
     }
 }
