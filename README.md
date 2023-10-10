@@ -42,12 +42,12 @@ You need to first install the Docker environment and already have the Redis and 
 
 ### Pull images
 ```shell
-docker pull wansenai/erp-core:latest
+docker pull wansenai/eairp:latest
 ```
 ### Run Server
 You can customize and modify port 9998, please ensure that the service ports monitored by your front-end are consistent
 ```shell
-docker run --name erp-core -d -p 9998:8088 wansenai/erp-core:latest 
+docker run --name eairp -d -p 9998:8088 wansenai/eairp:latest 
 ```
 
 ## Version
