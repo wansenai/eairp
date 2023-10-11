@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import com.wansensoft.dto.basic.AddSupplierDTO
 import com.wansensoft.dto.basic.QuerySupplierDTO
 import com.wansensoft.dto.basic.UpdateSupplierDTO
+import com.wansensoft.dto.basic.UpdateSupplierStatusDTO
 import com.wansensoft.entities.basic.Supplier
 import com.wansensoft.mappers.SystemSupplierMapper
 import com.wansensoft.service.BaseService
@@ -46,6 +47,8 @@ open class SupplierServiceImpl(
             supplier?.contact?.let { like(Supplier::getContact, it) }
             supplier?.contactNumber?.let { like(Supplier::getContactNumber, it) }
             supplier?.phoneNumber?.let { like(Supplier::getPhoneNumber, it) }
+            supplier?.startDate?.let { ge(Supplier::getCreateTime, it) }
+            supplier?.endDate?.let { le(Supplier::getCreateTime, it) }
             eq(Supplier::getDeleteFlag, CommonConstants.NOT_DELETED)
         }
 
@@ -91,41 +94,100 @@ open class SupplierServiceImpl(
         return result?.let { Response.responseData(it) } ?: Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
     }
 
-    override fun addSupplier(supplier: AddSupplierDTO?): Response<String> {
-        val supplierEntity = Supplier()
-        if (supplier != null) {
-            BeanUtils.copyProperties(supplier, supplierEntity)
-        }
+    private fun calculateTotalAccount(list: List<BigDecimal?>): BigDecimal {
+        return list.mapNotNull { it }.sumOf { it }.setScale(3, RoundingMode.HALF_UP)
+    }
 
-        val totalAccountPayment = (supplierEntity.firstQuarterAccountPayment ?: BigDecimal.ZERO)
-            .add(supplierEntity.secondQuarterAccountPayment ?: BigDecimal.ZERO)
-            .add(supplierEntity.thirdQuarterAccountPayment ?: BigDecimal.ZERO)
-            .add(supplierEntity.fourthQuarterAccountPayment ?: BigDecimal.ZERO)
-            .setScale(3, RoundingMode.HALF_UP) // 保留3位小数，四舍五入
+    override fun addSupplier(supplier: AddSupplierDTO?): Response<String> {
+        val supplierEntity = supplier?.let {
+            Supplier().apply {
+                BeanUtils.copyProperties(it, this)
+                firstQuarterAccountReceivable = it.firstQuarterAccountReceivable?.toBigDecimal()
+                secondQuarterAccountReceivable = it.secondQuarterAccountReceivable?.toBigDecimal()
+                thirdQuarterAccountReceivable = it.thirdQuarterAccountReceivable?.toBigDecimal()
+                fourthQuarterAccountReceivable = it.fourthQuarterAccountReceivable?.toBigDecimal()
+                firstQuarterAccountPayment = it.firstQuarterAccountPayment?.toBigDecimal()
+                secondQuarterAccountPayment = it.secondQuarterAccountPayment?.toBigDecimal()
+                thirdQuarterAccountPayment = it.thirdQuarterAccountPayment?.toBigDecimal()
+                fourthQuarterAccountPayment = it.fourthQuarterAccountPayment?.toBigDecimal()
+                taxRate = it.taxRate?.toBigDecimal()
+            }
+        } ?: Supplier()
+
+        val totalAccountReceivable = calculateTotalAccount(
+            listOf(
+                supplierEntity.firstQuarterAccountReceivable,
+                supplierEntity.secondQuarterAccountReceivable,
+                supplierEntity.thirdQuarterAccountReceivable,
+                supplierEntity.fourthQuarterAccountReceivable
+            )
+        )
+
+        val totalAccountPayment = calculateTotalAccount(
+            listOf(
+                supplierEntity.firstQuarterAccountPayment,
+                supplierEntity.secondQuarterAccountPayment,
+                supplierEntity.thirdQuarterAccountPayment,
+                supplierEntity.fourthQuarterAccountPayment
+            )
+        )
+
+        supplierEntity.totalAccountReceivable = totalAccountReceivable
         supplierEntity.totalAccountPayment = totalAccountPayment
         supplierEntity.createTime = LocalDateTime.now()
         supplierEntity.createBy = baseService.currentUserId
 
-        val saveResult = save(supplierEntity)
-        if (!saveResult) {
-            return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR)
+        return if (save(supplierEntity)) {
+            Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS)
+        } else {
+            Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR)
         }
-        return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS)
     }
 
     override fun updateSupplier(supplier: UpdateSupplierDTO?): Response<String> {
-        val supplierEntity = Supplier()
-        if (supplier != null) {
-            BeanUtils.copyProperties(supplier, supplierEntity)
-        }
+        val supplierEntity = supplier?.let {
+            Supplier().apply {
+                BeanUtils.copyProperties(it, this)
+                firstQuarterAccountReceivable = it.firstQuarterAccountReceivable?.toBigDecimal()
+                secondQuarterAccountReceivable = it.secondQuarterAccountReceivable?.toBigDecimal()
+                thirdQuarterAccountReceivable = it.thirdQuarterAccountReceivable?.toBigDecimal()
+                fourthQuarterAccountReceivable = it.fourthQuarterAccountReceivable?.toBigDecimal()
+                firstQuarterAccountPayment = it.firstQuarterAccountPayment?.toBigDecimal()
+                secondQuarterAccountPayment = it.secondQuarterAccountPayment?.toBigDecimal()
+                thirdQuarterAccountPayment = it.thirdQuarterAccountPayment?.toBigDecimal()
+                fourthQuarterAccountPayment = it.fourthQuarterAccountPayment?.toBigDecimal()
+                taxRate = it.taxRate?.toBigDecimal()
+            }
+        } ?: Supplier()
+
+        val totalAccountReceivable = calculateTotalAccount(
+            listOf(
+                supplierEntity.firstQuarterAccountReceivable,
+                supplierEntity.secondQuarterAccountReceivable,
+                supplierEntity.thirdQuarterAccountReceivable,
+                supplierEntity.fourthQuarterAccountReceivable
+            )
+        )
+
+        val totalAccountPayment = calculateTotalAccount(
+            listOf(
+                supplierEntity.firstQuarterAccountPayment,
+                supplierEntity.secondQuarterAccountPayment,
+                supplierEntity.thirdQuarterAccountPayment,
+                supplierEntity.fourthQuarterAccountPayment
+            )
+        )
+
+        supplierEntity.totalAccountReceivable = totalAccountReceivable
+        supplierEntity.totalAccountPayment = totalAccountPayment
         supplierEntity.updateTime = LocalDateTime.now()
         supplierEntity.updateBy = baseService.currentUserId
 
-        val updateResult = updateById(supplierEntity)
-        if (!updateResult) {
-            return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_ERROR)
+        return if (updateById(supplierEntity)) {
+            Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_SUCCESS)
+        } else {
+            Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_ERROR)
         }
-        return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_SUCCESS)
     }
 
     override fun deleteSupplier(ids: List<Long>?): Response<String> {
@@ -135,6 +197,21 @@ open class SupplierServiceImpl(
                 return Response.responseMsg(SupplierCodeEnum.DELETE_SUPPLIER_ERROR)
             }
             return Response.responseMsg(SupplierCodeEnum.DELETE_SUPPLIER_SUCCESS)
+        } ?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+    }
+
+    override fun updateSupplierStatus(updateSupplierStatusDTO: UpdateSupplierStatusDTO?): Response<String> {
+        updateSupplierStatusDTO?.let {
+            val supplier = Supplier().apply {
+                status = it.status
+                updateTime = LocalDateTime.now()
+                updateBy = baseService.currentUserId
+            }
+            val updateResult = supplierMapper.update(supplier, LambdaQueryWrapper<Supplier>().`in`(Supplier::getId, it.ids))
+            if (updateResult == 0) {
+                return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_STATUS_ERROR)
+            }
+            return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_STATUS_SUCCESS)
         } ?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
     }
 }

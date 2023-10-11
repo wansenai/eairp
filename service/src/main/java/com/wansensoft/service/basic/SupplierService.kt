@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.extension.service.IService
 import com.wansensoft.dto.basic.AddSupplierDTO
 import com.wansensoft.dto.basic.QuerySupplierDTO
 import com.wansensoft.dto.basic.UpdateSupplierDTO
+import com.wansensoft.dto.basic.UpdateSupplierStatusDTO
 import com.wansensoft.entities.basic.Supplier
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.basic.SupplierVO
@@ -30,4 +31,6 @@ interface SupplierService : IService<Supplier> {
     fun updateSupplier(supplier: UpdateSupplierDTO?): Response<String>
 
     fun deleteSupplier(ids: List<Long>?): Response<String>
+
+    fun updateSupplierStatus(updateSupplierStatusDTO: UpdateSupplierStatusDTO?): Response<String>
 }

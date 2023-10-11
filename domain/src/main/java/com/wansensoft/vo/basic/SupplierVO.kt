@@ -50,7 +50,7 @@ data class SupplierVO(
     val fax: String?,
     val taxNumber: String?,
     val bankName: String?,
-    val accountNumber: String?,
+    val accountNumber: Long?,
     @JsonSerialize(using = BigDecimalSerializerBO::class)
     val taxRate: BigDecimal?,
     val sort: Int?,
