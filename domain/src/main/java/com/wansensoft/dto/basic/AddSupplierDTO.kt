@@ -12,8 +12,6 @@
  */
 package com.wansensoft.dto.basic
 
-import java.math.BigDecimal
-
 data class AddSupplierDTO (
     /**
      * 供应商名称
