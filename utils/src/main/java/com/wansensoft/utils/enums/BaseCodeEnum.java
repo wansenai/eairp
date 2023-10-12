@@ -42,7 +42,11 @@ public enum BaseCodeEnum {
 
     SMS_VERIFY_CODE_ERROR("A0131", "短信校验码错误"),
 
-    PHONE_NUMBER_FORMAT_ERROR("A0131", "手机格式校验失败");
+    PHONE_NUMBER_FORMAT_ERROR("A0131", "手机格式校验失败"),
+
+    FILE_UPLOAD_ERROR("A0500", "文件上传失败"),
+
+    FILE_UPLOAD_NO_FILENAME_MATCH("A0501", "文件上传失败，文件名不匹配");
 
     /**
      * 响应状态码

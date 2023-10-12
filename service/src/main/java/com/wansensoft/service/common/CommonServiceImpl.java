@@ -19,22 +19,31 @@ import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.sms.v20190711.SmsClient;
 import com.tencentcloudapi.sms.v20190711.models.SendSmsRequest;
 import com.wansensoft.bo.SmsInfoBO;
+import com.wansensoft.entities.basic.Supplier;
 import com.wansensoft.entities.system.SysPlatformConfig;
+import com.wansensoft.service.basic.SupplierService;
 import com.wansensoft.service.system.ISysPlatformConfigService;
 import com.wansensoft.utils.SnowflakeIdUtil;
 import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.constants.SmsConstants;
+import com.wansensoft.utils.enums.BaseCodeEnum;
+import com.wansensoft.utils.enums.SupplierCodeEnum;
 import com.wansensoft.utils.redis.RedisUtil;
+import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.CaptchaVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.util.Base64;
-import java.util.Random;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -47,11 +56,14 @@ public class CommonServiceImpl implements CommonService{
 
     private final Producer producer;
 
+    private final SupplierService supplierService;
+
     private final ISysPlatformConfigService platformConfigService;
 
-    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, ISysPlatformConfigService platformConfigService) {
+    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, ISysPlatformConfigService platformConfigService) {
         this.redisUtil = redisUtil;
         this.producer = producer;
+        this.supplierService = supplierService;
         this.platformConfigService = platformConfigService;
     }
 
@@ -143,5 +155,95 @@ public class CommonServiceImpl implements CommonService{
             log.error(String.format("用户手机号:%s, 验证码发送失败，错误消息:%s", phoneNumber, e.getMessage()));
             return false;
         }
+    }
+
+    @Override
+    public Response<String> uploadExclsData(MultipartFile file) {
+        if(!file.isEmpty()) {
+            try {
+                String filename = file.getOriginalFilename();
+                 if(filename == null || filename.isEmpty()) {
+                    return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_NO_FILENAME_MATCH);
+
+                 } else if (filename.contains("供应商模板.xlsx")) {
+                    var result = readSuppliersFromExcel(file);
+                    if(!result){
+                        return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR);
+                    }
+                     return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS);
+
+                } else if (filename.contains("222.xlsx")) {
+                    System.out.println("其他文件");
+
+                } else {
+                    log.error("上传Excel文件失败: 文件名不匹配");
+                    return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_NO_FILENAME_MATCH);
+                }
+            } catch (Exception e) {
+                log.error("上传Excel文件失败: " + e.getMessage());
+                return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+            }
+        }
+        return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+    }
+
+    private boolean readSuppliersFromExcel(MultipartFile file) throws IOException {
+        List<Supplier> suppliers = new ArrayList<>();
+        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+        DataFormatter dataFormatter = new DataFormatter();
+
+        for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
+            Row row = sheet.getRow(i);
+            var supplier = Supplier.builder()
+                    .supplierName(getCellValue(row.getCell(0), dataFormatter))
+                    .contact(getCellValue(row.getCell(1), dataFormatter))
+                    .phoneNumber(getCellValue(row.getCell(2), dataFormatter))
+                    .contactNumber(getCellValue(row.getCell(3), dataFormatter))
+                    .email(getCellValue(row.getCell(4), dataFormatter))
+                    .fax(getCellValue(row.getCell(5), dataFormatter))
+                    .firstQuarterAccountReceivable(getNumericCellValue(row.getCell(6)))
+                    .secondQuarterAccountReceivable(getNumericCellValue(row.getCell(7)))
+                    .thirdQuarterAccountReceivable(getNumericCellValue(row.getCell(8)))
+                    .fourthQuarterAccountReceivable(getNumericCellValue(row.getCell(9)))
+                    .firstQuarterAccountPayment(getNumericCellValue(row.getCell(10)))
+                    .secondQuarterAccountPayment(getNumericCellValue(row.getCell(11)))
+                    .thirdQuarterAccountPayment(getNumericCellValue(row.getCell(12)))
+                    .fourthQuarterAccountPayment(getNumericCellValue(row.getCell(13)))
+                    .taxNumber(getCellValue(row.getCell(14), dataFormatter))
+                    .taxRate(getNumericCellValue(row.getCell(15)))
+                    .bankName(getCellValue(row.getCell(16), dataFormatter))
+                    .accountNumber(getLongCellValue(row.getCell(17)))
+                    .address(getCellValue(row.getCell(18), dataFormatter))
+                    .remark(getCellValue(row.getCell(19), dataFormatter))
+                    .build();
+            suppliers.add(supplier);
+            workbook.close();
+        }
+        return supplierService.batchAddSupplier(suppliers);
+    }
+
+    private String getCellValue(Cell cell, DataFormatter dataFormatter) {
+        if (cell != null) {
+            String value = dataFormatter.formatCellValue(cell);
+            if (value != null && !value.isEmpty()) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private BigDecimal getNumericCellValue(Cell cell) {
+        if (cell != null && cell.getCellType() == CellType.NUMERIC) {
+            return BigDecimal.valueOf(cell.getNumericCellValue());
+        }
+        return null;
+    }
+
+    private Long getLongCellValue(Cell cell) {
+        if (cell != null && cell.getCellType() == CellType.NUMERIC) {
+            return (long) cell.getNumericCellValue();
+        }
+        return null;
     }
 }

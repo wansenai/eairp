@@ -23,6 +23,7 @@ import com.wansensoft.entities.basic.Supplier
 import com.wansensoft.mappers.SystemSupplierMapper
 import com.wansensoft.service.BaseService
 import com.wansensoft.service.basic.SupplierService
+import com.wansensoft.utils.SnowflakeIdUtil
 import com.wansensoft.utils.constants.CommonConstants
 import com.wansensoft.utils.enums.BaseCodeEnum
 import com.wansensoft.utils.enums.SupplierCodeEnum
@@ -30,6 +31,7 @@ import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.basic.SupplierVO
 import org.springframework.beans.BeanUtils
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDateTime
@@ -94,7 +96,7 @@ open class SupplierServiceImpl(
         return result?.let { Response.responseData(it) } ?: Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
     }
 
-    private fun calculateTotalAccount(list: List<BigDecimal?>): BigDecimal {
+    open fun calculateTotalAccount(list: List<BigDecimal?>): BigDecimal {
         return list.mapNotNull { it }.sumOf { it }.setScale(3, RoundingMode.HALF_UP)
     }
 
@@ -143,6 +145,59 @@ open class SupplierServiceImpl(
             Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR)
         }
     }
+
+    @Transactional
+    override fun batchAddSupplier(suppliers: List<Supplier>?): Boolean {
+        val supplierEntities = mutableListOf<Supplier>()
+        val existingSuppliers = HashSet<Pair<String, String>>() // 存储已存在的供应商名称和联系人的组合
+
+        suppliers?.forEach { supplier ->
+            val supplierKey = Pair(supplier.supplierName, supplier.contact)
+            if (!existingSuppliers.contains(supplierKey)) {
+                val supplierEntity = supplierMapper.selectOne(
+                    LambdaQueryWrapper<Supplier>()
+                        .eq(Supplier::getSupplierName, supplier.supplierName)
+                        .eq(Supplier::getContact, supplier.contact)
+                )
+                if (supplierEntity == null) {
+                    val newSupplierEntity = Supplier().apply {
+                        BeanUtils.copyProperties(supplier, this)
+                        firstQuarterAccountReceivable = supplier.firstQuarterAccountReceivable
+                        secondQuarterAccountReceivable = supplier.secondQuarterAccountReceivable
+                        thirdQuarterAccountReceivable = supplier.thirdQuarterAccountReceivable
+                        fourthQuarterAccountReceivable = supplier.fourthQuarterAccountReceivable
+                        firstQuarterAccountPayment = supplier.firstQuarterAccountPayment
+                        secondQuarterAccountPayment = supplier.secondQuarterAccountPayment
+                        thirdQuarterAccountPayment = supplier.thirdQuarterAccountPayment
+                        fourthQuarterAccountPayment = supplier.fourthQuarterAccountPayment
+                        taxRate = supplier.taxRate
+                        totalAccountReceivable = calculateTotalAccount(
+                            listOf(
+                        supplier.firstQuarterAccountReceivable,
+                        supplier.secondQuarterAccountReceivable,
+                        supplier.thirdQuarterAccountReceivable,
+                        supplier.fourthQuarterAccountReceivable
+                        )
+                        )
+                        totalAccountPayment = calculateTotalAccount(
+                            listOf(
+                                supplier.firstQuarterAccountPayment,
+                                supplier.secondQuarterAccountPayment,
+                                supplier.thirdQuarterAccountPayment,
+                                supplier.fourthQuarterAccountPayment
+                            )
+                        )
+                        createTime = LocalDateTime.now()
+                        createBy = baseService.currentUserId
+                    }
+                    supplierEntities.add(newSupplierEntity)
+                    existingSuppliers.add(supplierKey)
+                }
+            }
+        }
+        return saveBatch(supplierEntities)
+    }
+
 
     override fun updateSupplier(supplier: UpdateSupplierDTO?): Response<String> {
         val supplierEntity = supplier?.let {

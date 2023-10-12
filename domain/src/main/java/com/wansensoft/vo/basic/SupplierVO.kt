@@ -19,6 +19,7 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class SupplierVO(
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     val id: Long,
     val supplierName: String,
     val contact: String?,

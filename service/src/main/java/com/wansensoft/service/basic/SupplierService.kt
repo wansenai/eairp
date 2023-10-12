@@ -28,6 +28,11 @@ interface SupplierService : IService<Supplier> {
 
     fun addSupplier(supplier: AddSupplierDTO?): Response<String>
 
+    /**
+     * 内部使用方法
+     */
+    fun batchAddSupplier(suppliers: List<Supplier>?): Boolean
+
     fun updateSupplier(supplier: UpdateSupplierDTO?): Response<String>
 
     fun deleteSupplier(ids: List<Long>?): Response<String>
