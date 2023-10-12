@@ -12,9 +12,14 @@
  */
 package com.wansensoft.service.common;
 
+import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.CaptchaVO;
+import org.springframework.web.multipart.MultipartFile;
+
 public interface CommonService {
     CaptchaVO getCaptcha();
-
     Boolean sendSmsCode(Integer type, String phoneNumber);
+
+    Response<String> uploadExclsData(MultipartFile file);
+
 }

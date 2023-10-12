@@ -17,10 +17,17 @@ import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.constants.ApiVersionConstants;
 import com.wansensoft.utils.enums.BaseCodeEnum;
 import com.wansensoft.vo.CaptchaVO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(ApiVersionConstants.API_CLASS_VERSION_V2 + "common")
@@ -48,5 +55,10 @@ public class CommonController {
             return Response.responseMsg(BaseCodeEnum.PHONE_NUMBER_FORMAT_ERROR);
         }
         return Response.responseMsg(BaseCodeEnum.SMS_VERIFY_SEND_SUCCESS);
+    }
+
+    @PostMapping("upload/excls")
+    public Response<String> uploadExclsData(@RequestParam("file") MultipartFile file) {
+        return commonService.uploadExclsData(file);
     }
 }
