@@ -21,11 +21,13 @@ jobs:
             const issue = context.payload.issue;
             const labelsToAdd = ['status: waiting-for-triage']; 
             
-            if (issue.title.includes('java')) {
+            if (issue.title && issue.title.includes('java')) {
               labelsToAdd.push('theme: java-21');
-            } else if (issue.body.includes('kotlin')) {
+            } 
+            if (issue.title && issue.title.includes('kotlin')) {
               labelsToAdd.push('theme: kotlin');
             }
+            
             await github.issues.addLabels({
               owner: 'wansenai',
               repo: 'eairp',
