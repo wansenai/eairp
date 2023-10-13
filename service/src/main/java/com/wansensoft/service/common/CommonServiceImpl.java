@@ -23,6 +23,7 @@ import com.wansensoft.entities.basic.Supplier;
 import com.wansensoft.entities.system.SysPlatformConfig;
 import com.wansensoft.service.basic.SupplierService;
 import com.wansensoft.service.system.ISysPlatformConfigService;
+import com.wansensoft.utils.ExcelUtil;
 import com.wansensoft.utils.SnowflakeIdUtil;
 import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.constants.SmsConstants;
@@ -31,9 +32,13 @@ import com.wansensoft.utils.enums.SupplierCodeEnum;
 import com.wansensoft.utils.redis.RedisUtil;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.CaptchaVO;
+import com.wansensoft.vo.basic.SupplierVO;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.springframework.beans.BeanUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
@@ -41,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
@@ -165,7 +171,7 @@ public class CommonServiceImpl implements CommonService{
                  if(filename == null || filename.isEmpty()) {
                     return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_NO_FILENAME_MATCH);
 
-                 } else if (filename.contains("供应商模板.xlsx")) {
+                 } else if (filename.contains("供应商")) {
                     var result = readSuppliersFromExcel(file);
                     if(!result){
                         return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR);
@@ -186,6 +192,61 @@ public class CommonServiceImpl implements CommonService{
         }
         return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
     }
+
+    public File exportExcel(String type) {
+        if (!StringUtils.hasLength(type)) {
+            return null;
+        }
+        File file = null;
+
+        if (type.contains("供应商")) {
+            List<Supplier> suppliersList = supplierService.list();
+            List<SupplierVO> supplierData = new ArrayList<>();
+
+            for (Supplier supplier : suppliersList) {
+                SupplierVO supplierVO = new SupplierVO();
+                BeanUtils.copyProperties(supplier, supplierVO);
+                supplierData.add(supplierVO);
+            }
+
+            String[] columnNames = {"供应商名称", "联系人", "联系电话", "联系人电话", "邮箱", "传真",
+                    "第一季度应收账款", "第二季度应收账款", "第三季度应收账款", "第四季度应收账款",
+                    "第一季度应付账款", "第二季度应付账款", "第三季度应付账款", "第四季度应付账款",
+                    "税号", "税率", "开户行", "账号", "地址", "备注"};
+
+            List<String[]> data = new ArrayList<>();
+            String title = "信息内容";
+            for (SupplierVO item : supplierData) {
+                String[] supplier = new String[columnNames.length];
+                supplier[0] = StringUtils.hasText(item.getSupplierName()) ? item.getSupplierName() : "";
+                supplier[1] = StringUtils.hasText(item.getContact()) ? item.getContact() : "";
+                supplier[2] = StringUtils.hasText(item.getPhoneNumber()) ? item.getPhoneNumber() : "";
+                supplier[3] = StringUtils.hasText(item.getContactNumber()) ? item.getContactNumber() : "";
+                supplier[4] = StringUtils.hasText(item.getEmail()) ? item.getEmail() : "";
+                supplier[5] = StringUtils.hasText(item.getFax()) ? item.getFax() : "";
+                supplier[6] = item.getFirstQuarterAccountReceivable() != null ? item.getFirstQuarterAccountReceivable().toString() : "";
+                supplier[7] = item.getSecondQuarterAccountReceivable() != null ? item.getSecondQuarterAccountReceivable().toString() : "";
+                supplier[8] = item.getThirdQuarterAccountReceivable() != null ? item.getThirdQuarterAccountReceivable().toString() : "";
+                supplier[9] = item.getFourthQuarterAccountReceivable() != null ? item.getFourthQuarterAccountReceivable().toString() : "";
+                supplier[10] = item.getFirstQuarterAccountPayment() != null ? item.getFirstQuarterAccountPayment().toString() : "";
+                supplier[11] = item.getSecondQuarterAccountPayment() != null ? item.getSecondQuarterAccountPayment().toString() : "";
+                supplier[12] = item.getThirdQuarterAccountPayment() != null ? item.getThirdQuarterAccountPayment().toString() : "";
+                supplier[13] = item.getFourthQuarterAccountPayment() != null ? item.getFourthQuarterAccountPayment().toString() : "";
+                supplier[14] = StringUtils.hasText(item.getTaxNumber()) ? item.getTaxNumber() : "";
+                supplier[15] = item.getTaxRate() != null ? item.getTaxRate().toString() : "";
+                supplier[16] = StringUtils.hasText(item.getBankName()) ? item.getBankName() : "";
+                supplier[17] = item.getAccountNumber() != null ? item.getAccountNumber().toString() : "";
+                supplier[18] = StringUtils.hasText(item.getAddress()) ? item.getAddress() : "";
+                supplier[19] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
+                data.add(supplier);
+            }
+
+            file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
+        }
+
+        return file;
+    }
+
 
     private boolean readSuppliersFromExcel(MultipartFile file) throws IOException {
         List<Supplier> suppliers = new ArrayList<>();

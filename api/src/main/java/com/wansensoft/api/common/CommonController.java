@@ -13,24 +13,21 @@
 package com.wansensoft.api.common;
 
 import com.wansensoft.service.common.CommonService;
+import com.wansensoft.utils.ExcelUtil;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.utils.constants.ApiVersionConstants;
 import com.wansensoft.utils.enums.BaseCodeEnum;
 import com.wansensoft.vo.CaptchaVO;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping(ApiVersionConstants.API_CLASS_VERSION_V2 + "common")
+@Slf4j
 public class CommonController {
 
     private final CommonService commonService;
@@ -57,8 +54,18 @@ public class CommonController {
         return Response.responseMsg(BaseCodeEnum.SMS_VERIFY_SEND_SUCCESS);
     }
 
-    @PostMapping("upload/excls")
+    @PostMapping("upload/excel")
     public Response<String> uploadExclsData(@RequestParam("file") MultipartFile file) {
         return commonService.uploadExclsData(file);
+    }
+
+    @GetMapping("/export/excel")
+    public void exportExcel(@RequestParam("type") String type, HttpServletResponse response) {
+        try {
+            File file = commonService.exportExcel(type);
+            ExcelUtil.downloadExcel(file, file.getName(), response);
+        }catch (Exception e) {
+            log.error("导出excel异常", e);
+        }
     }
 }
