@@ -42,22 +42,6 @@ data class AddSupplierDTO (
      */
     val status: Int? = null,
     /**
-     * 第一季度应收账款
-     */
-    val firstQuarterAccountReceivable: Double? = null,
-    /**
-     * 第二季度应收账款
-     */
-    val secondQuarterAccountReceivable: Double? = null,
-    /**
-     * 第三季度应收账款
-     */
-    val thirdQuarterAccountReceivable: Double? = null,
-    /**
-     * 第四季度应收账款
-     */
-    val fourthQuarterAccountReceivable: Double? = null,
-    /**
      * 第一季度应付账款
      */
     val firstQuarterAccountPayment: Double? = null,

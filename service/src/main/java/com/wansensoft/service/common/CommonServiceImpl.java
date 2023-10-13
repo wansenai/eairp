@@ -210,7 +210,6 @@ public class CommonServiceImpl implements CommonService{
             }
 
             String[] columnNames = {"供应商名称", "联系人", "联系电话", "联系人电话", "邮箱", "传真",
-                    "第一季度应收账款", "第二季度应收账款", "第三季度应收账款", "第四季度应收账款",
                     "第一季度应付账款", "第二季度应付账款", "第三季度应付账款", "第四季度应付账款",
                     "税号", "税率", "开户行", "账号", "地址", "备注"};
 
@@ -224,20 +223,16 @@ public class CommonServiceImpl implements CommonService{
                 supplier[3] = StringUtils.hasText(item.getContactNumber()) ? item.getContactNumber() : "";
                 supplier[4] = StringUtils.hasText(item.getEmail()) ? item.getEmail() : "";
                 supplier[5] = StringUtils.hasText(item.getFax()) ? item.getFax() : "";
-                supplier[6] = item.getFirstQuarterAccountReceivable() != null ? item.getFirstQuarterAccountReceivable().toString() : "";
-                supplier[7] = item.getSecondQuarterAccountReceivable() != null ? item.getSecondQuarterAccountReceivable().toString() : "";
-                supplier[8] = item.getThirdQuarterAccountReceivable() != null ? item.getThirdQuarterAccountReceivable().toString() : "";
-                supplier[9] = item.getFourthQuarterAccountReceivable() != null ? item.getFourthQuarterAccountReceivable().toString() : "";
-                supplier[10] = item.getFirstQuarterAccountPayment() != null ? item.getFirstQuarterAccountPayment().toString() : "";
-                supplier[11] = item.getSecondQuarterAccountPayment() != null ? item.getSecondQuarterAccountPayment().toString() : "";
-                supplier[12] = item.getThirdQuarterAccountPayment() != null ? item.getThirdQuarterAccountPayment().toString() : "";
-                supplier[13] = item.getFourthQuarterAccountPayment() != null ? item.getFourthQuarterAccountPayment().toString() : "";
-                supplier[14] = StringUtils.hasText(item.getTaxNumber()) ? item.getTaxNumber() : "";
-                supplier[15] = item.getTaxRate() != null ? item.getTaxRate().toString() : "";
-                supplier[16] = StringUtils.hasText(item.getBankName()) ? item.getBankName() : "";
-                supplier[17] = item.getAccountNumber() != null ? item.getAccountNumber().toString() : "";
-                supplier[18] = StringUtils.hasText(item.getAddress()) ? item.getAddress() : "";
-                supplier[19] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
+                supplier[6] = item.getFirstQuarterAccountPayment() != null ? item.getFirstQuarterAccountPayment().toString() : "";
+                supplier[7] = item.getSecondQuarterAccountPayment() != null ? item.getSecondQuarterAccountPayment().toString() : "";
+                supplier[8] = item.getThirdQuarterAccountPayment() != null ? item.getThirdQuarterAccountPayment().toString() : "";
+                supplier[9] = item.getFourthQuarterAccountPayment() != null ? item.getFourthQuarterAccountPayment().toString() : "";
+                supplier[10] = StringUtils.hasText(item.getTaxNumber()) ? item.getTaxNumber() : "";
+                supplier[11] = item.getTaxRate() != null ? item.getTaxRate().toString() : "";
+                supplier[12] = StringUtils.hasText(item.getBankName()) ? item.getBankName() : "";
+                supplier[13] = item.getAccountNumber() != null ? item.getAccountNumber().toString() : "";
+                supplier[14] = StringUtils.hasText(item.getAddress()) ? item.getAddress() : "";
+                supplier[15] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
                 data.add(supplier);
             }
 
@@ -263,10 +258,6 @@ public class CommonServiceImpl implements CommonService{
                     .contactNumber(getCellValue(row.getCell(3), dataFormatter))
                     .email(getCellValue(row.getCell(4), dataFormatter))
                     .fax(getCellValue(row.getCell(5), dataFormatter))
-                    .firstQuarterAccountReceivable(getNumericCellValue(row.getCell(6)))
-                    .secondQuarterAccountReceivable(getNumericCellValue(row.getCell(7)))
-                    .thirdQuarterAccountReceivable(getNumericCellValue(row.getCell(8)))
-                    .fourthQuarterAccountReceivable(getNumericCellValue(row.getCell(9)))
                     .firstQuarterAccountPayment(getNumericCellValue(row.getCell(10)))
                     .secondQuarterAccountPayment(getNumericCellValue(row.getCell(11)))
                     .thirdQuarterAccountPayment(getNumericCellValue(row.getCell(12)))

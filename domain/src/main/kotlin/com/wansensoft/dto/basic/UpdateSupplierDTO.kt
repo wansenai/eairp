@@ -36,26 +36,6 @@ data class UpdateSupplierDTO(
      */
     val status: Int?,
     /**
-     * 第一季度应收账款
-     */
-    val firstQuarterAccountReceivable: Double?,
-    /**
-     * 第二季度应收账款
-     */
-    val secondQuarterAccountReceivable: Double?,
-    /**
-     * 第三季度应收账款
-     */
-    val thirdQuarterAccountReceivable: Double?,
-    /**
-     * 第四季度应收账款
-     */
-    val fourthQuarterAccountReceivable: Double?,
-    /**
-     * 应收账款总额
-     */
-    val totalAccountReceivable: BigDecimal?,
-    /**
      * 第一季度应付账款
      */
     val firstQuarterAccountPayment: Double?,

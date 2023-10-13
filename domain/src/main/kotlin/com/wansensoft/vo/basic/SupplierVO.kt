@@ -51,26 +51,6 @@ data class SupplierVO (
     var status: Int,
 
     @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "一季度收款", sort = 7)
-    var firstQuarterAccountReceivable: BigDecimal?,
-
-    @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "二季度收款", sort = 8)
-    var secondQuarterAccountReceivable: BigDecimal?,
-
-    @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "三季度收款", sort = 9)
-    var thirdQuarterAccountReceivable: BigDecimal?,
-
-    @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "四季度收款", sort = 10)
-    var fourthQuarterAccountReceivable: BigDecimal?,
-
-    @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "累计应收账款", sort = 11)
-    var totalAccountReceivable: BigDecimal?,
-
-    @JsonSerialize(using = BigDecimalSerializerBO::class)
     @ExcelExport(value = "一季度付款", sort = 12)
     var firstQuarterAccountPayment: BigDecimal?,
 
