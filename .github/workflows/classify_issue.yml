@@ -27,7 +27,7 @@ jobs:
               labelsToAdd.push('theme: kotlin');
             }
             await github.issues.addLabels({
-              owner: 'jzow',
+              owner: 'wansenai',
               repo: 'eairp',
               issue_number: issue.number,
               labels: labelsToAdd
