@@ -65,11 +65,6 @@ open class SupplierServiceImpl(
                     address = supplier.address,
                     email = supplier.email,
                     status = supplier.status,
-                    firstQuarterAccountReceivable = supplier.firstQuarterAccountReceivable,
-                    secondQuarterAccountReceivable = supplier.secondQuarterAccountReceivable,
-                    thirdQuarterAccountReceivable = supplier.thirdQuarterAccountReceivable,
-                    fourthQuarterAccountReceivable = supplier.fourthQuarterAccountReceivable,
-                    totalAccountReceivable = supplier.totalAccountReceivable,
                     firstQuarterAccountPayment = supplier.firstQuarterAccountPayment,
                     secondQuarterAccountPayment = supplier.secondQuarterAccountPayment,
                     thirdQuarterAccountPayment = supplier.thirdQuarterAccountPayment,
@@ -103,10 +98,6 @@ open class SupplierServiceImpl(
         val supplierEntity = supplier?.let {
             Supplier().apply {
                 BeanUtils.copyProperties(it, this)
-                firstQuarterAccountReceivable = it.firstQuarterAccountReceivable?.toBigDecimal()
-                secondQuarterAccountReceivable = it.secondQuarterAccountReceivable?.toBigDecimal()
-                thirdQuarterAccountReceivable = it.thirdQuarterAccountReceivable?.toBigDecimal()
-                fourthQuarterAccountReceivable = it.fourthQuarterAccountReceivable?.toBigDecimal()
                 firstQuarterAccountPayment = it.firstQuarterAccountPayment?.toBigDecimal()
                 secondQuarterAccountPayment = it.secondQuarterAccountPayment?.toBigDecimal()
                 thirdQuarterAccountPayment = it.thirdQuarterAccountPayment?.toBigDecimal()
@@ -114,15 +105,6 @@ open class SupplierServiceImpl(
                 taxRate = it.taxRate?.toBigDecimal()
             }
         } ?: Supplier()
-
-        val totalAccountReceivable = calculateTotalAccount(
-            listOf(
-                supplierEntity.firstQuarterAccountReceivable,
-                supplierEntity.secondQuarterAccountReceivable,
-                supplierEntity.thirdQuarterAccountReceivable,
-                supplierEntity.fourthQuarterAccountReceivable
-            )
-        )
 
         val totalAccountPayment = calculateTotalAccount(
             listOf(
@@ -133,7 +115,6 @@ open class SupplierServiceImpl(
             )
         )
 
-        supplierEntity.totalAccountReceivable = totalAccountReceivable
         supplierEntity.totalAccountPayment = totalAccountPayment
         supplierEntity.createTime = LocalDateTime.now()
         supplierEntity.createBy = baseService.currentUserId
@@ -161,23 +142,11 @@ open class SupplierServiceImpl(
                 if (supplierEntity == null) {
                     val newSupplierEntity = Supplier().apply {
                         BeanUtils.copyProperties(supplier, this)
-                        firstQuarterAccountReceivable = supplier.firstQuarterAccountReceivable
-                        secondQuarterAccountReceivable = supplier.secondQuarterAccountReceivable
-                        thirdQuarterAccountReceivable = supplier.thirdQuarterAccountReceivable
-                        fourthQuarterAccountReceivable = supplier.fourthQuarterAccountReceivable
                         firstQuarterAccountPayment = supplier.firstQuarterAccountPayment
                         secondQuarterAccountPayment = supplier.secondQuarterAccountPayment
                         thirdQuarterAccountPayment = supplier.thirdQuarterAccountPayment
                         fourthQuarterAccountPayment = supplier.fourthQuarterAccountPayment
                         taxRate = supplier.taxRate
-                        totalAccountReceivable = calculateTotalAccount(
-                            listOf(
-                        supplier.firstQuarterAccountReceivable,
-                        supplier.secondQuarterAccountReceivable,
-                        supplier.thirdQuarterAccountReceivable,
-                        supplier.fourthQuarterAccountReceivable
-                        )
-                        )
                         totalAccountPayment = calculateTotalAccount(
                             listOf(
                                 supplier.firstQuarterAccountPayment,
@@ -202,10 +171,6 @@ open class SupplierServiceImpl(
         val supplierEntity = supplier?.let {
             Supplier().apply {
                 BeanUtils.copyProperties(it, this)
-                firstQuarterAccountReceivable = it.firstQuarterAccountReceivable?.toBigDecimal()
-                secondQuarterAccountReceivable = it.secondQuarterAccountReceivable?.toBigDecimal()
-                thirdQuarterAccountReceivable = it.thirdQuarterAccountReceivable?.toBigDecimal()
-                fourthQuarterAccountReceivable = it.fourthQuarterAccountReceivable?.toBigDecimal()
                 firstQuarterAccountPayment = it.firstQuarterAccountPayment?.toBigDecimal()
                 secondQuarterAccountPayment = it.secondQuarterAccountPayment?.toBigDecimal()
                 thirdQuarterAccountPayment = it.thirdQuarterAccountPayment?.toBigDecimal()
@@ -213,15 +178,6 @@ open class SupplierServiceImpl(
                 taxRate = it.taxRate?.toBigDecimal()
             }
         } ?: Supplier()
-
-        val totalAccountReceivable = calculateTotalAccount(
-            listOf(
-                supplierEntity.firstQuarterAccountReceivable,
-                supplierEntity.secondQuarterAccountReceivable,
-                supplierEntity.thirdQuarterAccountReceivable,
-                supplierEntity.fourthQuarterAccountReceivable
-            )
-        )
 
         val totalAccountPayment = calculateTotalAccount(
             listOf(
@@ -232,7 +188,6 @@ open class SupplierServiceImpl(
             )
         )
 
-        supplierEntity.totalAccountReceivable = totalAccountReceivable
         supplierEntity.totalAccountPayment = totalAccountPayment
         supplierEntity.updateTime = LocalDateTime.now()
         supplierEntity.updateBy = baseService.currentUserId

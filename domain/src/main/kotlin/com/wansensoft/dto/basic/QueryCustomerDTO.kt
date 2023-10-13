@@ -10,5 +10,21 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft
-annotation class NoArg
+package com.wansensoft.dto.basic
+
+data class QueryCustomerDTO(
+
+    var customerName: String?,
+
+    var contact: String?,
+
+    var phoneNumber: String?,
+
+    val page: Long?,
+
+    val pageSize: Long?,
+
+    val startDate: String?,
+
+    val endDate: String?,
+)

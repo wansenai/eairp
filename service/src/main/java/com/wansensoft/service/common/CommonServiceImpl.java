@@ -19,8 +19,10 @@ import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.sms.v20190711.SmsClient;
 import com.tencentcloudapi.sms.v20190711.models.SendSmsRequest;
 import com.wansensoft.bo.SmsInfoBO;
+import com.wansensoft.entities.basic.Customer;
 import com.wansensoft.entities.basic.Supplier;
 import com.wansensoft.entities.system.SysPlatformConfig;
+import com.wansensoft.service.basic.CustomerService;
 import com.wansensoft.service.basic.SupplierService;
 import com.wansensoft.service.system.ISysPlatformConfigService;
 import com.wansensoft.utils.ExcelUtil;
@@ -28,17 +30,16 @@ import com.wansensoft.utils.SnowflakeIdUtil;
 import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.constants.SmsConstants;
 import com.wansensoft.utils.enums.BaseCodeEnum;
+import com.wansensoft.utils.enums.CustomerCodeEnum;
 import com.wansensoft.utils.enums.SupplierCodeEnum;
 import com.wansensoft.utils.redis.RedisUtil;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.CaptchaVO;
 import com.wansensoft.vo.basic.SupplierVO;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
@@ -64,12 +65,15 @@ public class CommonServiceImpl implements CommonService{
 
     private final SupplierService supplierService;
 
+    private final CustomerService customerService;
+
     private final ISysPlatformConfigService platformConfigService;
 
-    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, ISysPlatformConfigService platformConfigService) {
+    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, ISysPlatformConfigService platformConfigService) {
         this.redisUtil = redisUtil;
         this.producer = producer;
         this.supplierService = supplierService;
+        this.customerService = customerService;
         this.platformConfigService = platformConfigService;
     }
 
@@ -178,9 +182,12 @@ public class CommonServiceImpl implements CommonService{
                     }
                      return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS);
 
-                } else if (filename.contains("222.xlsx")) {
-                    System.out.println("其他文件");
-
+                } else if (filename.contains("客户")) {
+                     var result = readCustomerFromExcel(file);
+                     if(!result){
+                         return Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_ERROR);
+                     }
+                     return Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_SUCCESS);
                 } else {
                     log.error("上传Excel文件失败: 文件名不匹配");
                     return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_NO_FILENAME_MATCH);
@@ -191,6 +198,68 @@ public class CommonServiceImpl implements CommonService{
             }
         }
         return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+    }
+
+    private boolean readSuppliersFromExcel(MultipartFile file) throws IOException {
+        List<Supplier> suppliers = new ArrayList<>();
+        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+        DataFormatter dataFormatter = new DataFormatter();
+
+        for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
+            Row row = sheet.getRow(i);
+            var supplier = Supplier.builder()
+                    .supplierName(getCellValue(row.getCell(0), dataFormatter))
+                    .contact(getCellValue(row.getCell(1), dataFormatter))
+                    .phoneNumber(getCellValue(row.getCell(2), dataFormatter))
+                    .contactNumber(getCellValue(row.getCell(3), dataFormatter))
+                    .email(getCellValue(row.getCell(4), dataFormatter))
+                    .fax(getCellValue(row.getCell(5), dataFormatter))
+                    .firstQuarterAccountPayment(getNumericCellValue(row.getCell(10)))
+                    .secondQuarterAccountPayment(getNumericCellValue(row.getCell(11)))
+                    .thirdQuarterAccountPayment(getNumericCellValue(row.getCell(12)))
+                    .fourthQuarterAccountPayment(getNumericCellValue(row.getCell(13)))
+                    .taxNumber(getCellValue(row.getCell(14), dataFormatter))
+                    .taxRate(getNumericCellValue(row.getCell(15)))
+                    .bankName(getCellValue(row.getCell(16), dataFormatter))
+                    .accountNumber(getCellValue(row.getCell(17), dataFormatter))
+                    .address(getCellValue(row.getCell(18), dataFormatter))
+                    .remark(getCellValue(row.getCell(19), dataFormatter))
+                    .build();
+            suppliers.add(supplier);
+            workbook.close();
+        }
+        return supplierService.batchAddSupplier(suppliers);
+    }
+
+    private boolean readCustomerFromExcel(MultipartFile file) throws IOException {
+        List<Customer> customers = new ArrayList<>();
+        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+        DataFormatter dataFormatter = new DataFormatter();
+
+        for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
+            Row row = sheet.getRow(i);
+            var customer = Customer.builder()
+                    .customerName(getCellValue(row.getCell(0), dataFormatter))
+                    .contact(getCellValue(row.getCell(1), dataFormatter))
+                    .phoneNumber(getCellValue(row.getCell(2), dataFormatter))
+                    .email(getCellValue(row.getCell(3), dataFormatter))
+                    .firstQuarterAccountReceivable(getNumericCellValue(row.getCell(4)))
+                    .secondQuarterAccountReceivable(getNumericCellValue(row.getCell(5)))
+                    .thirdQuarterAccountReceivable(getNumericCellValue(row.getCell(6)))
+                    .fourthQuarterAccountReceivable(getNumericCellValue(row.getCell(7)))
+                    .taxNumber(getCellValue(row.getCell(8), dataFormatter))
+                    .taxRate(getNumericCellValue(row.getCell(9)))
+                    .bankName(getCellValue(row.getCell(10), dataFormatter))
+                    .accountNumber(getCellValue(row.getCell(11), dataFormatter))
+                    .address(getCellValue(row.getCell(12), dataFormatter))
+                    .remark(getCellValue(row.getCell(13), dataFormatter))
+                    .build();
+            customers.add(customer);
+            workbook.close();
+        }
+        return customerService.batchAddCustomer(customers);
     }
 
     public File exportExcel(String type) {
@@ -224,20 +293,16 @@ public class CommonServiceImpl implements CommonService{
                 supplier[3] = StringUtils.hasText(item.getContactNumber()) ? item.getContactNumber() : "";
                 supplier[4] = StringUtils.hasText(item.getEmail()) ? item.getEmail() : "";
                 supplier[5] = StringUtils.hasText(item.getFax()) ? item.getFax() : "";
-                supplier[6] = item.getFirstQuarterAccountReceivable() != null ? item.getFirstQuarterAccountReceivable().toString() : "";
-                supplier[7] = item.getSecondQuarterAccountReceivable() != null ? item.getSecondQuarterAccountReceivable().toString() : "";
-                supplier[8] = item.getThirdQuarterAccountReceivable() != null ? item.getThirdQuarterAccountReceivable().toString() : "";
-                supplier[9] = item.getFourthQuarterAccountReceivable() != null ? item.getFourthQuarterAccountReceivable().toString() : "";
-                supplier[10] = item.getFirstQuarterAccountPayment() != null ? item.getFirstQuarterAccountPayment().toString() : "";
-                supplier[11] = item.getSecondQuarterAccountPayment() != null ? item.getSecondQuarterAccountPayment().toString() : "";
-                supplier[12] = item.getThirdQuarterAccountPayment() != null ? item.getThirdQuarterAccountPayment().toString() : "";
-                supplier[13] = item.getFourthQuarterAccountPayment() != null ? item.getFourthQuarterAccountPayment().toString() : "";
-                supplier[14] = StringUtils.hasText(item.getTaxNumber()) ? item.getTaxNumber() : "";
-                supplier[15] = item.getTaxRate() != null ? item.getTaxRate().toString() : "";
-                supplier[16] = StringUtils.hasText(item.getBankName()) ? item.getBankName() : "";
-                supplier[17] = item.getAccountNumber() != null ? item.getAccountNumber().toString() : "";
-                supplier[18] = StringUtils.hasText(item.getAddress()) ? item.getAddress() : "";
-                supplier[19] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
+                supplier[6] = item.getFirstQuarterAccountPayment() != null ? item.getFirstQuarterAccountPayment().toString() : "";
+                supplier[7] = item.getSecondQuarterAccountPayment() != null ? item.getSecondQuarterAccountPayment().toString() : "";
+                supplier[8] = item.getThirdQuarterAccountPayment() != null ? item.getThirdQuarterAccountPayment().toString() : "";
+                supplier[9] = item.getFourthQuarterAccountPayment() != null ? item.getFourthQuarterAccountPayment().toString() : "";
+                supplier[10] = StringUtils.hasText(item.getTaxNumber()) ? item.getTaxNumber() : "";
+                supplier[11] = item.getTaxRate() != null ? item.getTaxRate().toString() : "";
+                supplier[12] = StringUtils.hasText(item.getBankName()) ? item.getBankName() : "";
+                supplier[13] = item.getAccountNumber() != null ? item.getAccountNumber().toString() : "";
+                supplier[14] = StringUtils.hasText(item.getAddress()) ? item.getAddress() : "";
+                supplier[15] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
                 data.add(supplier);
             }
 
@@ -245,43 +310,6 @@ public class CommonServiceImpl implements CommonService{
         }
 
         return file;
-    }
-
-
-    private boolean readSuppliersFromExcel(MultipartFile file) throws IOException {
-        List<Supplier> suppliers = new ArrayList<>();
-        Workbook workbook = new HSSFWorkbook(file.getInputStream());
-        Sheet sheet = workbook.getSheetAt(0);
-        DataFormatter dataFormatter = new DataFormatter();
-
-        for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
-            Row row = sheet.getRow(i);
-            var supplier = Supplier.builder()
-                    .supplierName(getCellValue(row.getCell(0), dataFormatter))
-                    .contact(getCellValue(row.getCell(1), dataFormatter))
-                    .phoneNumber(getCellValue(row.getCell(2), dataFormatter))
-                    .contactNumber(getCellValue(row.getCell(3), dataFormatter))
-                    .email(getCellValue(row.getCell(4), dataFormatter))
-                    .fax(getCellValue(row.getCell(5), dataFormatter))
-                    .firstQuarterAccountReceivable(getNumericCellValue(row.getCell(6)))
-                    .secondQuarterAccountReceivable(getNumericCellValue(row.getCell(7)))
-                    .thirdQuarterAccountReceivable(getNumericCellValue(row.getCell(8)))
-                    .fourthQuarterAccountReceivable(getNumericCellValue(row.getCell(9)))
-                    .firstQuarterAccountPayment(getNumericCellValue(row.getCell(10)))
-                    .secondQuarterAccountPayment(getNumericCellValue(row.getCell(11)))
-                    .thirdQuarterAccountPayment(getNumericCellValue(row.getCell(12)))
-                    .fourthQuarterAccountPayment(getNumericCellValue(row.getCell(13)))
-                    .taxNumber(getCellValue(row.getCell(14), dataFormatter))
-                    .taxRate(getNumericCellValue(row.getCell(15)))
-                    .bankName(getCellValue(row.getCell(16), dataFormatter))
-                    .accountNumber(getLongCellValue(row.getCell(17)))
-                    .address(getCellValue(row.getCell(18), dataFormatter))
-                    .remark(getCellValue(row.getCell(19), dataFormatter))
-                    .build();
-            suppliers.add(supplier);
-            workbook.close();
-        }
-        return supplierService.batchAddSupplier(suppliers);
     }
 
     private String getCellValue(Cell cell, DataFormatter dataFormatter) {

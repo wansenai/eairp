@@ -77,7 +77,7 @@ public class Supplier implements Serializable {
     private Integer isSystem;
 
     /**
-     * 类型
+     * 类型 (预留字段)
      */
     private String type;
 
@@ -85,26 +85,6 @@ public class Supplier implements Serializable {
      * 状态（0-启用，1-停用）默认启用
      */
     private Integer status;
-
-    /**
-     * 一季度应收账款
-     */
-    private BigDecimal firstQuarterAccountReceivable;
-
-    /**
-     * 二季度应收账款
-     */
-    private BigDecimal secondQuarterAccountReceivable;
-
-    /**
-     * 三季度应收账款
-     */
-    private BigDecimal thirdQuarterAccountReceivable;
-
-    /**
-     * 四季度应收账款
-     */
-    private BigDecimal fourthQuarterAccountReceivable;
 
     /**
      * 一季度应付账款
@@ -125,11 +105,6 @@ public class Supplier implements Serializable {
      * 四季度应付账款
      */
     private BigDecimal fourthQuarterAccountPayment;
-
-    /**
-     * 累计应收账款
-     */
-    private BigDecimal totalAccountReceivable;
 
     /**
      * 累计应付账款
@@ -164,7 +139,7 @@ public class Supplier implements Serializable {
     /**
      * 账号
      */
-    private Long accountNumber;
+    private String accountNumber;
 
     /**
      * 税率

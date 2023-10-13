@@ -13,6 +13,8 @@
 package com.wansensoft.utils;
 
 import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import jxl.*;
@@ -156,7 +158,7 @@ public class ExcelUtil {
 
 	public static void downloadExcel(File excelFile, String fileName, HttpServletResponse response) throws Exception{
 		response.setContentType("application/octet-stream");
-		fileName = new String(fileName.getBytes("gbk"),"ISO8859_1");
+		fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
 		response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + ".xls" + "\"");
 		FileInputStream fis = new FileInputStream(excelFile);
 		OutputStream out = response.getOutputStream();

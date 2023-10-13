@@ -16,81 +16,54 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.wansensoft.NoArg
 import com.wansensoft.bo.BigDecimalSerializerBO
-import com.wansensoft.utils.excel.ExcelExport
-import lombok.AllArgsConstructor
-import lombok.NoArgsConstructor
-import lombok.Setter
-
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @NoArg
-data class SupplierVO (
+data class CustomerVO (
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    var id: Long,
+    var id: Long?,
 
-    @ExcelExport(value = "供应商名称*", sort = 1)
-    var supplierName: String,
+    var customerName: String?,
 
-    @ExcelExport(value = "联系人*", sort = 2)
     var contact: String?,
 
-    @ExcelExport(value = "联系电话", sort = 4)
-    var contactNumber: String?,
-
-    @ExcelExport(value = "手机号码*", sort = 3)
     var phoneNumber: String?,
 
-    @ExcelExport(value = "", sort = 22)
-    var address: String?,
-
-    @ExcelExport(value = "电子邮箱", sort = 5)
     var email: String?,
 
-    var status: Int,
+    @JsonSerialize(using = BigDecimalSerializerBO::class)
+    var firstQuarterAccountReceivable: BigDecimal?,
 
     @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "一季度付款", sort = 12)
-    var firstQuarterAccountPayment: BigDecimal?,
+    var secondQuarterAccountReceivable: BigDecimal?,
 
     @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "二季度付款", sort = 13)
-    var secondQuarterAccountPayment: BigDecimal?,
+    var thirdQuarterAccountReceivable: BigDecimal?,
 
     @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "三季度付款", sort = 14)
-    var thirdQuarterAccountPayment: BigDecimal?,
+    var fourthQuarterAccountReceivable: BigDecimal?,
 
     @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "四季度付款", sort = 15)
-    var fourthQuarterAccountPayment: BigDecimal?,
+    var totalAccountReceivable: BigDecimal?,
 
-    @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "累计应付账款", sort = 16)
-    var totalAccountPayment: BigDecimal?,
+    var address: String?,
 
-    @ExcelExport(value = "传真", sort = 6)
-    var fax: String?,
-
-    @ExcelExport(value = "纳税人识别号", sort = 17)
     var taxNumber: String?,
 
-    @ExcelExport(value = "开户行", sort = 19)
     var bankName: String?,
 
-    @ExcelExport(value = "账号", sort = 20)
     var accountNumber: String?,
 
     @JsonSerialize(using = BigDecimalSerializerBO::class)
-    @ExcelExport(value = "税率(%)", sort = 18)
     var taxRate: BigDecimal?,
 
-    @ExcelExport(value = "排序", sort = 21)
-    var sort: Int?,
+    var status: Int?,
 
-    @ExcelExport(value = "备注", sort = 23)
     var remark: String?,
+
+    var sort: Int?,
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     var createTime: LocalDateTime?,
