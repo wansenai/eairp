@@ -23,7 +23,6 @@ import com.wansensoft.entities.basic.Supplier
 import com.wansensoft.mappers.SystemSupplierMapper
 import com.wansensoft.service.BaseService
 import com.wansensoft.service.basic.SupplierService
-import com.wansensoft.utils.SnowflakeIdUtil
 import com.wansensoft.utils.constants.CommonConstants
 import com.wansensoft.utils.enums.BaseCodeEnum
 import com.wansensoft.utils.enums.SupplierCodeEnum

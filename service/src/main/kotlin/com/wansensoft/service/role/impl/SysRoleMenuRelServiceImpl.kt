@@ -10,11 +10,12 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.role
+package com.wansensoft.service.role.impl
 
 import com.wansensoft.entities.role.SysRoleMenuRel
 import com.wansensoft.mappers.role.SysRoleMenuRelMapper
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
+import com.wansensoft.service.role.SysRoleMenuRelService
 import org.springframework.stereotype.Service
 
 @Service
