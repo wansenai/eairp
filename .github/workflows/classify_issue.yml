@@ -16,7 +16,7 @@ jobs:
       - name: Classify Issue
         uses: actions/github-script@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.WANSEN_AI_TOKEN }}
           script: |
             const issue = context.payload.issue;
             const labelsToAdd = ['status: waiting-for-triage']; 
