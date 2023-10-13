@@ -45,9 +45,9 @@ You need to first install the Docker environment and already have the Redis and 
 docker pull wansenai/eairp:latest
 ```
 ### Run Server
-You can customize and modify port 9998, please ensure that the service ports monitored by your front-end are consistent
+You can customize and modify port 8080, please ensure that the service ports monitored by your front-end are consistent
 ```shell
-docker run --name eairp -d -p 9998:8088 wansenai/eairp:latest 
+docker run --name eairp -d -p 8080:8088 wansenai/eairp:latest 
 ```
 
 ## Version
