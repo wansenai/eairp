@@ -14,7 +14,10 @@ package com.wansensoft.service.common;
 
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.CaptchaVO;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 
 public interface CommonService {
     CaptchaVO getCaptcha();
@@ -22,4 +25,5 @@ public interface CommonService {
 
     Response<String> uploadExclsData(MultipartFile file);
 
+    File exportExcel(String type);
 }
