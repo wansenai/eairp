@@ -80,7 +80,7 @@ data class SupplierVO (
     var bankName: String?,
 
     @ExcelExport(value = "账号", sort = 20)
-    var accountNumber: Long?,
+    var accountNumber: String?,
 
     @JsonSerialize(using = BigDecimalSerializerBO::class)
     @ExcelExport(value = "税率(%)", sort = 18)
