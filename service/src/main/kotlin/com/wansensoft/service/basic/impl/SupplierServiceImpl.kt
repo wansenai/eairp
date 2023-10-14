@@ -20,7 +20,7 @@ import com.wansensoft.dto.basic.QuerySupplierDTO
 import com.wansensoft.dto.basic.UpdateSupplierDTO
 import com.wansensoft.dto.basic.UpdateSupplierStatusDTO
 import com.wansensoft.entities.basic.Supplier
-import com.wansensoft.mappers.SystemSupplierMapper
+import com.wansensoft.mappers.basic.SystemSupplierMapper
 import com.wansensoft.service.BaseService
 import com.wansensoft.service.basic.SupplierService
 import com.wansensoft.utils.constants.CommonConstants
