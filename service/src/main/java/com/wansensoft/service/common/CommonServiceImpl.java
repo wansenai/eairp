@@ -20,9 +20,11 @@ import com.tencentcloudapi.sms.v20190711.SmsClient;
 import com.tencentcloudapi.sms.v20190711.models.SendSmsRequest;
 import com.wansensoft.bo.SmsInfoBO;
 import com.wansensoft.entities.basic.Customer;
+import com.wansensoft.entities.basic.Member;
 import com.wansensoft.entities.basic.Supplier;
 import com.wansensoft.entities.system.SysPlatformConfig;
 import com.wansensoft.service.basic.CustomerService;
+import com.wansensoft.service.basic.MemberService;
 import com.wansensoft.service.basic.SupplierService;
 import com.wansensoft.service.system.ISysPlatformConfigService;
 import com.wansensoft.utils.ExcelUtil;
@@ -31,10 +33,13 @@ import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.constants.SmsConstants;
 import com.wansensoft.utils.enums.BaseCodeEnum;
 import com.wansensoft.utils.enums.CustomerCodeEnum;
+import com.wansensoft.utils.enums.MemberCodeEnum;
 import com.wansensoft.utils.enums.SupplierCodeEnum;
 import com.wansensoft.utils.redis.RedisUtil;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.CaptchaVO;
+import com.wansensoft.vo.basic.CustomerVO;
+import com.wansensoft.vo.basic.MemberVO;
 import com.wansensoft.vo.basic.SupplierVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -67,13 +72,16 @@ public class CommonServiceImpl implements CommonService{
 
     private final CustomerService customerService;
 
+    private final MemberService memberService;
+
     private final ISysPlatformConfigService platformConfigService;
 
-    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, ISysPlatformConfigService platformConfigService) {
+    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService) {
         this.redisUtil = redisUtil;
         this.producer = producer;
         this.supplierService = supplierService;
         this.customerService = customerService;
+        this.memberService = memberService;
         this.platformConfigService = platformConfigService;
     }
 
@@ -188,7 +196,13 @@ public class CommonServiceImpl implements CommonService{
                          return Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_ERROR);
                      }
                      return Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_SUCCESS);
-                } else {
+                } else if (filename.contains("会员")) {
+                     var result = readMemberFromExcel(file);
+                     if(!result){
+                         return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_ERROR);
+                     }
+                     return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_SUCCESS);
+                 } else {
                     log.error("上传Excel文件失败: 文件名不匹配");
                     return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_NO_FILENAME_MATCH);
                 }
@@ -215,16 +229,16 @@ public class CommonServiceImpl implements CommonService{
                     .contactNumber(getCellValue(row.getCell(3), dataFormatter))
                     .email(getCellValue(row.getCell(4), dataFormatter))
                     .fax(getCellValue(row.getCell(5), dataFormatter))
-                    .firstQuarterAccountPayment(getNumericCellValue(row.getCell(10)))
-                    .secondQuarterAccountPayment(getNumericCellValue(row.getCell(11)))
-                    .thirdQuarterAccountPayment(getNumericCellValue(row.getCell(12)))
-                    .fourthQuarterAccountPayment(getNumericCellValue(row.getCell(13)))
-                    .taxNumber(getCellValue(row.getCell(14), dataFormatter))
-                    .taxRate(getNumericCellValue(row.getCell(15)))
-                    .bankName(getCellValue(row.getCell(16), dataFormatter))
-                    .accountNumber(getCellValue(row.getCell(17), dataFormatter))
-                    .address(getCellValue(row.getCell(18), dataFormatter))
-                    .remark(getCellValue(row.getCell(19), dataFormatter))
+                    .firstQuarterAccountPayment(getNumericCellValue(row.getCell(6)))
+                    .secondQuarterAccountPayment(getNumericCellValue(row.getCell(7)))
+                    .thirdQuarterAccountPayment(getNumericCellValue(row.getCell(8)))
+                    .fourthQuarterAccountPayment(getNumericCellValue(row.getCell(9)))
+                    .taxNumber(getCellValue(row.getCell(10), dataFormatter))
+                    .taxRate(getNumericCellValue(row.getCell(11)))
+                    .bankName(getCellValue(row.getCell(12), dataFormatter))
+                    .accountNumber(getCellValue(row.getCell(13), dataFormatter))
+                    .address(getCellValue(row.getCell(14), dataFormatter))
+                    .remark(getCellValue(row.getCell(15), dataFormatter))
                     .build();
             suppliers.add(supplier);
             workbook.close();
@@ -262,6 +276,28 @@ public class CommonServiceImpl implements CommonService{
         return customerService.batchAddCustomer(customers);
     }
 
+    private boolean readMemberFromExcel(MultipartFile file) throws IOException {
+        List<Member> members = new ArrayList<>();
+        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+        DataFormatter dataFormatter = new DataFormatter();
+
+        for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
+            Row row = sheet.getRow(i);
+            var member = Member.builder()
+                    .memberNumber(getCellValue(row.getCell(0), dataFormatter))
+                    .memberName(getCellValue(row.getCell(1), dataFormatter))
+                    .phoneNumber(getCellValue(row.getCell(2), dataFormatter))
+                    .email(getCellValue(row.getCell(3), dataFormatter))
+                    .advancePayment(getNumericCellValue(row.getCell(4)))
+                    .remark(getCellValue(row.getCell(5), dataFormatter))
+                    .build();
+            members.add(member);
+            workbook.close();
+        }
+        return memberService.batchAddMember(members);
+    }
+
     public File exportExcel(String type) {
         if (!StringUtils.hasLength(type)) {
             return null;
@@ -278,10 +314,9 @@ public class CommonServiceImpl implements CommonService{
                 supplierData.add(supplierVO);
             }
 
-            String[] columnNames = {"供应商名称", "联系人", "联系电话", "联系人电话", "邮箱", "传真",
-                    "第一季度应收账款", "第二季度应收账款", "第三季度应收账款", "第四季度应收账款",
+            String[] columnNames = {"供应商名称", "联系人", "手机号码", "联系电话", "电子邮箱", "传真",
                     "第一季度应付账款", "第二季度应付账款", "第三季度应付账款", "第四季度应付账款",
-                    "税号", "税率", "开户行", "账号", "地址", "备注"};
+                    "纳税人识别号", "税率(%)", "开户行", "账号", "地址", "备注"};
 
             List<String[]> data = new ArrayList<>();
             String title = "信息内容";
@@ -300,12 +335,73 @@ public class CommonServiceImpl implements CommonService{
                 supplier[10] = StringUtils.hasText(item.getTaxNumber()) ? item.getTaxNumber() : "";
                 supplier[11] = item.getTaxRate() != null ? item.getTaxRate().toString() : "";
                 supplier[12] = StringUtils.hasText(item.getBankName()) ? item.getBankName() : "";
-                supplier[13] = item.getAccountNumber() != null ? item.getAccountNumber().toString() : "";
+                supplier[13] = item.getAccountNumber() != null ? item.getAccountNumber() : "";
                 supplier[14] = StringUtils.hasText(item.getAddress()) ? item.getAddress() : "";
                 supplier[15] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
                 data.add(supplier);
             }
+            file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
 
+        } else if (type.contains("客户")) {
+            List<Customer> customerList = customerService.list();
+            List<CustomerVO> customerData = new ArrayList<>();
+
+            for (Customer customer : customerList) {
+                CustomerVO customerVO = new CustomerVO();
+                BeanUtils.copyProperties(customer, customerVO);
+                customerData.add(customerVO);
+            }
+
+            String[] columnNames = {"客户名称", "联系人", "手机号码", "电子邮箱",
+                    "第一季度应收账款", "第二季度应收账款", "第三季度应收账款", "第四季度应收账款",
+                    "纳税人识别号", "税率(%)", "开户行", "账号", "地址", "备注"};
+
+            List<String[]> data = new ArrayList<>();
+            String title = "信息内容";
+            for (CustomerVO item : customerData) {
+                String[] customer = new String[columnNames.length];
+                customer[0] = StringUtils.hasText(item.getCustomerName()) ? item.getCustomerName() : "";
+                customer[1] = StringUtils.hasText(item.getContact()) ? item.getContact() : "";
+                customer[2] = StringUtils.hasText(item.getPhoneNumber()) ? item.getPhoneNumber() : "";
+                customer[3] = StringUtils.hasText(item.getEmail()) ? item.getEmail() : "";
+                customer[4] = item.getFirstQuarterAccountReceivable() != null ? item.getFirstQuarterAccountReceivable().toString() : "";
+                customer[5] = item.getSecondQuarterAccountReceivable() != null ? item.getSecondQuarterAccountReceivable().toString() : "";
+                customer[6] = item.getThirdQuarterAccountReceivable() != null ? item.getThirdQuarterAccountReceivable().toString() : "";
+                customer[7] = item.getFirstQuarterAccountReceivable() != null ? item.getFirstQuarterAccountReceivable().toString() : "";
+                customer[8] = StringUtils.hasText(item.getTaxNumber()) ? item.getTaxNumber() : "";
+                customer[9] = item.getTaxRate() != null ? item.getTaxRate().toString() : "";
+                customer[10] = StringUtils.hasText(item.getBankName()) ? item.getBankName() : "";
+                customer[11] = item.getAccountNumber() != null ? item.getAccountNumber() : "";
+                customer[12] = StringUtils.hasText(item.getAddress()) ? item.getAddress() : "";
+                customer[13] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
+                data.add(customer);
+            }
+
+            file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
+
+        } else if (type.contains("会员")) {
+            List<Member> memberList = memberService.list();
+            List<MemberVO> memberData = new ArrayList<>();
+
+            for (Member member : memberList) {
+                MemberVO memberVO = new MemberVO();
+                BeanUtils.copyProperties(member, memberVO);
+                memberData.add(memberVO);
+            }
+
+            String[] columnNames = {"会员卡号", "会员名称", "手机号码", "电子邮箱", "预付款", "备注"};
+            List<String[]> data = new ArrayList<>();
+            String title = "信息内容";
+            for (MemberVO item : memberData) {
+                String[] member = new String[columnNames.length];
+                member[0] = StringUtils.hasText(item.getMemberNumber()) ? item.getMemberNumber() : "";
+                member[1] = StringUtils.hasText(item.getMemberName()) ? item.getMemberName() : "";
+                member[2] = StringUtils.hasText(item.getPhoneNumber()) ? item.getPhoneNumber() : "";
+                member[3] = StringUtils.hasText(item.getEmail()) ? item.getEmail() : "";
+                member[4] = item.getAdvancePayment() != null ? item.getAdvancePayment().toString() : "";
+                member[5] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
+                data.add(member);
+            }
             file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
         }
 
@@ -332,6 +428,13 @@ public class CommonServiceImpl implements CommonService{
     private Long getLongCellValue(Cell cell) {
         if (cell != null && cell.getCellType() == CellType.NUMERIC) {
             return (long) cell.getNumericCellValue();
+        }
+        return null;
+    }
+
+    private Integer getIntegerCellValue(Cell cell) {
+        if (cell != null && cell.getCellType() == CellType.STRING) {
+            return Integer.parseInt(cell.getStringCellValue());
         }
         return null;
     }

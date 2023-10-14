@@ -18,7 +18,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import com.wansensoft.dto.basic.AddOrUpdateCustomerDTO
 import com.wansensoft.dto.basic.QueryCustomerDTO
 import com.wansensoft.entities.basic.Customer
-import com.wansensoft.mappers.CustomerMapper
+import com.wansensoft.mappers.basic.CustomerMapper
 import com.wansensoft.service.BaseService
 import com.wansensoft.service.basic.CustomerService
 import com.wansensoft.utils.SnowflakeIdUtil
