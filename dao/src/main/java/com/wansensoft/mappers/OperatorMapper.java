@@ -12,7 +12,7 @@
  */
 package com.wansensoft.mappers;
 
-import com.wansensoft.entities.Operator;
+import com.wansensoft.entities.basic.Operator;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
