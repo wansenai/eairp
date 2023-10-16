@@ -12,8 +12,15 @@
  */
 package com.wansensoft.service.financial;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.financial.AddOrUpdateAccountDTO;
+import com.wansensoft.dto.financial.QueryAccountDTO;
 import com.wansensoft.entities.financial.FinancialAccount;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.financial.AccountVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -22,4 +29,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IFinancialAccountService extends IService<FinancialAccount> {
 
+    Response<Page<AccountVO>> getAccountList(QueryAccountDTO queryAccountDTO);
+
+    Response<String> addOrUpdateAccount(AddOrUpdateAccountDTO addOrUpdateAccountDTO);
+
+    Response<String> deleteBatchAccount(List<Long> ids);
+
+    Response<String> updateAccountStatus(List<Long> ids, Integer status);
 }

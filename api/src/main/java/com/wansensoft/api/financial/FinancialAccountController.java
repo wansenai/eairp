@@ -13,19 +13,44 @@
 package com.wansensoft.api.financial;
 
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.financial.AddOrUpdateAccountDTO;
+import com.wansensoft.dto.financial.QueryAccountDTO;
+import com.wansensoft.service.financial.IFinancialAccountService;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.financial.AccountVO;
+import org.springframework.web.bind.annotation.*;
 
-/**
- * <p>
- * 账户信息 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
+import java.util.List;
+
 @RestController
-@RequestMapping("/financialAccount")
+@RequestMapping("/financial/account")
 public class FinancialAccountController {
+
+    private final IFinancialAccountService accountService;
+
+    public FinancialAccountController(IFinancialAccountService accountService) {
+        this.accountService = accountService;
+    }
+
+    @PostMapping("list")
+    public Response<Page<AccountVO>> getAccountList(@RequestBody QueryAccountDTO queryAccountDTO) {
+        return accountService.getAccountList(queryAccountDTO);
+    }
+
+    @PostMapping("addOrUpdate")
+    public Response<String> addOrUpdateAccount(@RequestBody AddOrUpdateAccountDTO addOrUpdateAccountDTO) {
+        return accountService.addOrUpdateAccount(addOrUpdateAccountDTO);
+    }
+
+    @DeleteMapping("delete")
+    public Response<String> deleteAccount(@RequestParam("ids") List<Long> ids) {
+        return accountService.deleteBatchAccount(ids);
+    }
+
+    @PostMapping("updateStatus")
+    public Response<String> updateAccountStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
+        return accountService.updateAccountStatus(ids, status);
+    }
 
 }
