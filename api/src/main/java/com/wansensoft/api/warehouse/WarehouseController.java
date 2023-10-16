@@ -12,20 +12,43 @@
  */
 package com.wansensoft.api.warehouse;
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.basic.AddOrUpdateWarehouseDTO;
+import com.wansensoft.dto.basic.QueryWarehouseDTO;
+import com.wansensoft.service.warehouse.WarehouseService;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.warehouse.WarehouseVO;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
-/**
- * <p>
- * 仓库表 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
 @RestController
-@RequestMapping("/warehouse")
+@RequestMapping("/basic/warehouse")
 public class WarehouseController {
 
+    private final WarehouseService warehouseService;
+
+    public WarehouseController(WarehouseService warehouseService) {
+        this.warehouseService = warehouseService;
+    }
+
+    @PostMapping("list")
+    public Response<Page<WarehouseVO>> getWarehouseList(@RequestBody QueryWarehouseDTO warehouseDTO) {
+        return warehouseService.getWarehouseList(warehouseDTO);
+    }
+
+    @PostMapping("addOrUpdate")
+    public Response<String> addOrUpdateWarehouse(@RequestBody AddOrUpdateWarehouseDTO warehouseDTO) {
+        return warehouseService.addOrUpdateWarehouse(warehouseDTO);
+    }
+
+    @DeleteMapping("delete")
+    public Response<String> deleteWarehouse(@RequestParam("ids") List<Long> ids) {
+        return warehouseService.deleteBatch(ids);
+    }
+
+    @PostMapping("updateStatus")
+    public Response<String> updateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
+        return warehouseService.updateBatchStatus(ids, status);
+    }
 }

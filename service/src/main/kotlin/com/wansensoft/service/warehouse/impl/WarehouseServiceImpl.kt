@@ -10,6 +10,7 @@ import com.wansensoft.mappers.warehouse.WarehouseMapper
 import com.wansensoft.service.BaseService
 import com.wansensoft.service.user.ISysUserService
 import com.wansensoft.service.warehouse.WarehouseService
+import com.wansensoft.utils.SnowflakeIdUtil
 import com.wansensoft.utils.constants.CommonConstants
 import com.wansensoft.utils.enums.BaseCodeEnum
 import com.wansensoft.utils.enums.WarehouseCodeEnum
@@ -73,7 +74,7 @@ open class WarehouseServiceImpl (
         val isAdd = warehouseDTO.id == null
 
         val warehouse = Warehouse().apply {
-            id = warehouseDTO.id
+            id = warehouseDTO.id ?: SnowflakeIdUtil.nextId()
             warehouseName = warehouseDTO.warehouseName
             warehouseManager = warehouseDTO.warehouseManager
             address = warehouseDTO.address
@@ -83,6 +84,7 @@ open class WarehouseServiceImpl (
             status = warehouseDTO.status
             remark = warehouseDTO.remark
             sort = warehouseDTO.sort
+            isDefault = warehouseDTO.isDefault
             if (isAdd) {
                 createTime = LocalDateTime.now()
                 createBy = userId
@@ -94,7 +96,7 @@ open class WarehouseServiceImpl (
         val saveResult = saveOrUpdate(warehouse)
         return when {
             saveResult && isAdd -> Response.responseMsg(WarehouseCodeEnum.ADD_WAREHOUSE_SUCCESS)
-            saveResult && !isAdd -> Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_ERROR)
+            saveResult && !isAdd -> Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_SUCCESS)
             else -> Response.fail()
         }
     }
@@ -123,9 +125,9 @@ open class WarehouseServiceImpl (
             .update()
 
         return if (!updateResult) {
-            Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_ERROR)
+            Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_ERROR)
         } else {
-            Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_SUCCESS)
+            Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_SUCCESS)
         }
     }
 }
