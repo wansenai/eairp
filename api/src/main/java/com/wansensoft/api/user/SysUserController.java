@@ -82,6 +82,11 @@ public class SysUserController {
         return userService.userList(userListDto);
     }
 
+    @GetMapping(value = "listAll")
+    public Response<List<UserListVO>> listAll() {
+        return userService.userListAll();
+    }
+
     @PostMapping(value = "update")
     public Response<String> update(@RequestBody UpdateUserDTO updateUserDTO) {
         return userService.updateUser(updateUserDTO);

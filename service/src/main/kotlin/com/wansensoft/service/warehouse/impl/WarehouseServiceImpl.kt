@@ -10,6 +10,7 @@ import com.wansensoft.mappers.warehouse.WarehouseMapper
 import com.wansensoft.service.BaseService
 import com.wansensoft.service.user.ISysUserService
 import com.wansensoft.service.warehouse.WarehouseService
+import com.wansensoft.utils.SnowflakeIdUtil
 import com.wansensoft.utils.constants.CommonConstants
 import com.wansensoft.utils.enums.BaseCodeEnum
 import com.wansensoft.utils.enums.WarehouseCodeEnum
@@ -37,7 +38,6 @@ open class WarehouseServiceImpl (
                 eq(Warehouse::getDeleteFlag, CommonConstants.NOT_DELETED)
         }
 
-
         val result = page?.run {
             warehouseMapper.selectPage(this, wrapper)
             val listVo = records.map { warehouse ->
@@ -45,7 +45,8 @@ open class WarehouseServiceImpl (
                 WarehouseVO(
                     id = warehouse.id,
                     warehouseName = warehouse.warehouseName,
-                    warehouseManager = name,
+                    warehouseManager = warehouse.warehouseManager,
+                    warehouseManagerName = name,
                     address = warehouse.address,
                     price = warehouse.price,
                     truckage = warehouse.truckage,
@@ -53,6 +54,7 @@ open class WarehouseServiceImpl (
                     status = warehouse.status,
                     remark = warehouse.remark,
                     sort = warehouse.sort,
+                    isDefault = warehouse.isDefault,
                     createTime = warehouse.createTime
                 )
             }
@@ -67,13 +69,29 @@ open class WarehouseServiceImpl (
         return result?.let { Response.responseData(it) } ?: Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
     }
 
+    fun updateDefaultAccount(id: Long) {
+        lambdaQuery()
+            .eq(Warehouse::getIsDefault, CommonConstants.IS_DEFAULT)
+            .eq(Warehouse::getDeleteFlag, CommonConstants.NOT_DELETED)
+            .one()
+            ?.apply {
+                setIsDefault(CommonConstants.NOT_DEFAULT)
+                updateById(this)
+            }
+
+        getById(id)?.apply {
+            setIsDefault(CommonConstants.IS_DEFAULT)
+            updateById(this)
+        }
+    }
+
     @Transactional
     override fun addOrUpdateWarehouse(warehouseDTO: AddOrUpdateWarehouseDTO): Response<String> {
         val userId = baseService.getCurrentUserId()
         val isAdd = warehouseDTO.id == null
 
         val warehouse = Warehouse().apply {
-            id = warehouseDTO.id
+            id = warehouseDTO.id ?: SnowflakeIdUtil.nextId()
             warehouseName = warehouseDTO.warehouseName
             warehouseManager = warehouseDTO.warehouseManager
             address = warehouseDTO.address
@@ -83,6 +101,7 @@ open class WarehouseServiceImpl (
             status = warehouseDTO.status
             remark = warehouseDTO.remark
             sort = warehouseDTO.sort
+            isDefault = warehouseDTO.isDefault
             if (isAdd) {
                 createTime = LocalDateTime.now()
                 createBy = userId
@@ -91,10 +110,13 @@ open class WarehouseServiceImpl (
                 updateBy = userId
             }
         }
+        if(warehouse.isDefault == CommonConstants.IS_DEFAULT) {
+            updateDefaultAccount(warehouse.id)
+        }
         val saveResult = saveOrUpdate(warehouse)
         return when {
             saveResult && isAdd -> Response.responseMsg(WarehouseCodeEnum.ADD_WAREHOUSE_SUCCESS)
-            saveResult && !isAdd -> Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_ERROR)
+            saveResult && !isAdd -> Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_SUCCESS)
             else -> Response.fail()
         }
     }
@@ -123,9 +145,9 @@ open class WarehouseServiceImpl (
             .update()
 
         return if (!updateResult) {
-            Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_ERROR)
+            Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_ERROR)
         } else {
-            Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_SUCCESS)
+            Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_SUCCESS)
         }
     }
 }

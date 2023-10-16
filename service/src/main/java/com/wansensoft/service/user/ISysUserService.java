@@ -54,6 +54,8 @@ public interface ISysUserService extends IService<SysUser> {
 
     Response<Page<UserListVO>> userList(UserListDTO pageDto);
 
+    Response<List<UserListVO>> userListAll();
+
     Response<String> updateUser(UpdateUserDTO updateUserDTO);
 
     Response<String> addOrUpdate(AddOrUpdateUserDTO addOrUpdateUserDTO);

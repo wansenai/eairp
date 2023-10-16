@@ -10,24 +10,18 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.utils.constants;
+package com.wansensoft.dto.financial;
 
-/**
- * 通用常量接口
- */
-public interface CommonConstants {
+import lombok.Data;
 
-    // 逻辑删除标识对应DB的delete_flag 未删除
-    int NOT_DELETED = 0;
+@Data
+public class QueryAccountDTO {
 
-    // 逻辑删除标识对应DB的delete_flag 已删除
-    int DELETED = 1;
+    private String accountNumber;
 
-    int STATUS_NORMAL = 0;
+    private String accountName;
 
-    int STATUS_DISABLE = 1;
+    private Long page;
 
-    int IS_DEFAULT = 1;
-
-    int NOT_DEFAULT = 0;
+    private Long pageSize;
 }

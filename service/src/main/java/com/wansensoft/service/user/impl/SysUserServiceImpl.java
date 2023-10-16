@@ -43,6 +43,7 @@ import com.wansensoft.vo.UserInfoVO;
 import com.wansensoft.vo.UserListVO;
 import com.wansensoft.vo.UserRoleVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -522,6 +523,20 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         result.setPages(page.getPages());
 
         return Response.responseData(result);
+    }
+
+    @Override
+    public Response<List<UserListVO>> userListAll() {
+        List<UserListVO> userVOS =  new ArrayList<>();
+        var users = lambdaQuery()
+                .eq(SysUser::getTenantId, getCurrentTenantId())
+                .list();
+        users.forEach(item -> {
+            UserListVO userVo = UserListVO.builder().build();
+            BeanUtils.copyProperties(item, userVo);
+            userVOS.add(userVo);
+        });
+        return Response.responseData(userVOS);
     }
 
     @Override

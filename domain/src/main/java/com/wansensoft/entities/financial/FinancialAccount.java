@@ -52,9 +52,9 @@ public class FinancialAccount implements Serializable {
     private String accountName;
 
     /**
-     * 编号
+     * 账户编号
      */
-    private String serialNumber;
+    private String accountNumber;
 
     /**
      * 期初金额
@@ -74,17 +74,17 @@ public class FinancialAccount implements Serializable {
     /**
      * 启用
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 排序
      */
-    private String sort;
+    private Integer sort;
 
     /**
      * 是否默认
      */
-    private Boolean isDefault;
+    private Integer isDefault;
 
     /**
      * 创建时间
@@ -109,7 +109,6 @@ public class FinancialAccount implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
-
+    private Integer deleteFlag;
 
 }
