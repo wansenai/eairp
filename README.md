@@ -25,19 +25,23 @@ On the basis of ERP business, we have expanded GPT-3.5. individually or company 
 
 You can provide fully automated business form submission operations through your simple description, and you can chat, interact, and consult information with GPT.
 
-**Note: This is a front-end and back-end separated project. This repository stores backend code, please browse [here](https://github.com/wansenai/wansenerpui) for the front-end warehouse.**
+**Note: This is a front-end and back-end separated project. This repository stores backend code, please browse [here](https://github.com/wansenai/wansenerpui) for the front-end repository.**
 
 [Enginsh](https://github.com/wansenai/wansen-erp/blob/master/README.md) / [简体中文](https://github.com/wansenai/wansen-erp/blob/master/README_ZH.md)
 
 ## Online preview
+- [eairp preview / 在线预览](https://erp.wansen.cloud/)
+- test account (测试账号): wansen
+- test password (测试密码): 123456
 
-We have deployed this program on Amazon Cloud for you to experience before deciding to use it. 
-If you have any questions or suggestions, please submit [issue](https://github.com/wansenai/WansenERP/issues/new) and we will handle them in a timely manner.
+Some functional modules are being developed and improved, please refer to our [to-do list](https://github.com/wansenai/eairp-web/issues/41). It's not easy to generate electricity with love.
+If this project is helpful to you, please click on Star. Thank you.
 
-preview address: http://erp.wansen.cloud/
+## Other Repository
+- [eairp-web](https://github.com/wansenai/eairp-web)
+- [eairp-app](https://github.com/wansenai/eairp-app) Note: (App is currently in the development stag)
 
 ## Quick Start
-
 You need to first install the Docker environment and already have the Redis and MySQL8.0 environments
 
 ### Pull images
@@ -49,53 +53,31 @@ You can customize and modify port 8080, please ensure that the service ports mon
 ```shell
 docker run --name eairp -d -p 8080:8088 wansenai/eairp:latest 
 ```
+At present, we are preparing to package all the environments into a `docker-compose`, and this plan may need to be postponed later
 
-## Version
-1. 1.0.2 (current version)
-2. 1.0.1 [old versions](https://github.com/wansenai/wansen-erp/releases/tag/V1.0.1)
+## System screenshot (only part)
+![](images/login-page-en.png)
+![](images/home-page-zh.png)
+![](images/user-manage-zh.png)
+![](images/add-menu-zh.png)
+![](images/role-permission-zh.png)
 
-## Module Description
+## License
 
-1. **Domain Module:**
+Licensed under either of
 
-Business Operation Data Object.
-```xml
-<dependency>
-    <groupId>com.wansensoft</groupId>
-    <artifactId>domain</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
-```
+- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
-2. **Dao Module:**
+at your option.
 
-Data Access Objects separate data access logic from business logic to provide access and operations to data persistent storage.
-```xml
-<dependency>
-    <groupId>com.wansensoft</groupId>
-    <artifactId>dao</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
-```
+## Community
+WeChat Group: 关注微信公众号**万森工业技术**点击开源交流按钮扫码进群，欢迎进群交流
+(由于微信的群规则，每周会更新一次二维码链接推送)
 
-3. **Service Module:**
+## Contribution
+We welcome every contributor, both in terms of code and documentation.
 
-Business logic layer, which delegates specific business logic processing to the Service layer.
-```xml
-<dependency>
-    <groupId>com.wansensoft</groupId>
-    <artifactId>service</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
-```
-
-4. **Utils Module:**
-
-Tool class code that encapsulates some specific operations.
-```xml
-<dependency>
-    <groupId>com.wansensoft</groupId>
-    <artifactId>utils</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
-```
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the
+work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any
+additional terms or conditions.

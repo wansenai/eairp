@@ -12,6 +12,7 @@
  */
 package com.wansensoft.entities.warehouse;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -33,7 +34,8 @@ import lombok.experimental.Accessors;
 @TableName("warehouse")
 public class Warehouse implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 667891612L;
 
     /**
      * 主键
@@ -49,12 +51,12 @@ public class Warehouse implements Serializable {
     /**
      * 负责人
      */
-    private Long principal;
+    private Long warehouseManager;
 
     /**
      * 仓库名称
      */
-    private String name;
+    private String warehouseName;
 
     /**
      * 仓库地址
@@ -64,7 +66,7 @@ public class Warehouse implements Serializable {
     /**
      * 仓储费
      */
-    private BigDecimal warehousPrice;
+    private BigDecimal price;
 
     /**
      * 搬运费
@@ -77,9 +79,9 @@ public class Warehouse implements Serializable {
     private Integer type;
 
     /**
-     * 状态（0-启用，1-停用）
+     * 状态（0-启用，1-停用）默认启用
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 描述
@@ -89,12 +91,12 @@ public class Warehouse implements Serializable {
     /**
      * 排序
      */
-    private String sort;
+    private Integer sort;
 
     /**
-     * 是否默认仓库（0-启用，1-停用）
+     * 是否默认仓库（0-是，1-不是）默认是0
      */
-    private Boolean isDefault;
+    private Integer isDefault;
 
     /**
      * 创建时间
@@ -119,7 +121,7 @@ public class Warehouse implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }
