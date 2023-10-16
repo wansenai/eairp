@@ -10,19 +10,18 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service;
+package com.wansensoft.dto.basic;
 
-import com.wansensoft.entities.Operator;
-import com.wansensoft.mappers.OperatorMapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
+import lombok.Data;
 
-/**
- * <p>
- * 经手人表 服务实现类
- * </p>
- */
-@Service
-public class OperatorServiceImpl extends ServiceImpl<OperatorMapper, Operator> implements IOperatorService {
+@Data
+public class QueryOperatorDTO {
 
+    private String name;
+
+    private String type;
+
+    private Long page;
+
+    private Long pageSize;
 }

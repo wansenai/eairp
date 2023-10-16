@@ -10,16 +10,25 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service;
+package com.wansensoft.service.basic;
 
-import com.wansensoft.entities.Operator;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.basic.AddOrUpdateOperatorDTO;
+import com.wansensoft.dto.basic.QueryOperatorDTO;
+import com.wansensoft.entities.basic.Operator;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.basic.OperatorVO;
 
-/**
- * <p>
- * 经手人表 服务类
- * </p>
- */
+import java.util.List;
+
 public interface IOperatorService extends IService<Operator> {
 
+    Response<Page<OperatorVO>> getOperatorList(QueryOperatorDTO queryOperatorDTO);
+
+    Response<String> addOrUpdateOperator(AddOrUpdateOperatorDTO addOrUpdateOperatorDTO);
+
+    Response<String> deleteBatchOperator(List<Long> ids);
+
+    Response<String> updateOperatorStatus(List<Long> ids, Integer status);
 }
