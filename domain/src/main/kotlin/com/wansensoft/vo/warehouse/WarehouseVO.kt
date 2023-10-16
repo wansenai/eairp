@@ -13,7 +13,10 @@ data class WarehouseVO (
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val id : Long? = null,
 
-    var warehouseManager : String? = null,
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    var warehouseManager : Long? = null,
+
+    var warehouseManagerName : String? = null,
 
     var warehouseName : String? = null,
 
@@ -32,6 +35,8 @@ data class WarehouseVO (
     var remark: String? = null,
 
     var sort: Int? = null,
+
+    var isDefault: Int? = null,
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     var createTime: LocalDateTime? = null,

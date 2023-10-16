@@ -22,4 +22,12 @@ public interface CommonConstants {
 
     // 逻辑删除标识对应DB的delete_flag 已删除
     int DELETED = 1;
+
+    int STATUS_NORMAL = 0;
+
+    int STATUS_DISABLE = 1;
+
+    int IS_DEFAULT = 1;
+
+    int NOT_DEFAULT = 0;
 }

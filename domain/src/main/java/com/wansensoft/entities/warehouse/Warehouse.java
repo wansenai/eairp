@@ -94,7 +94,7 @@ public class Warehouse implements Serializable {
     private Integer sort;
 
     /**
-     * 是否默认仓库（0-是，1-不是）默认是0
+     * 是否默认仓库（0-是，1-不是）默认不是1
      */
     private Integer isDefault;
 

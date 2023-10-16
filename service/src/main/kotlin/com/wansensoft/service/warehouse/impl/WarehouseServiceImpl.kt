@@ -38,7 +38,6 @@ open class WarehouseServiceImpl (
                 eq(Warehouse::getDeleteFlag, CommonConstants.NOT_DELETED)
         }
 
-
         val result = page?.run {
             warehouseMapper.selectPage(this, wrapper)
             val listVo = records.map { warehouse ->
@@ -46,7 +45,8 @@ open class WarehouseServiceImpl (
                 WarehouseVO(
                     id = warehouse.id,
                     warehouseName = warehouse.warehouseName,
-                    warehouseManager = name,
+                    warehouseManager = warehouse.warehouseManager,
+                    warehouseManagerName = name,
                     address = warehouse.address,
                     price = warehouse.price,
                     truckage = warehouse.truckage,
@@ -54,6 +54,7 @@ open class WarehouseServiceImpl (
                     status = warehouse.status,
                     remark = warehouse.remark,
                     sort = warehouse.sort,
+                    isDefault = warehouse.isDefault,
                     createTime = warehouse.createTime
                 )
             }
@@ -66,6 +67,22 @@ open class WarehouseServiceImpl (
             }
         }
         return result?.let { Response.responseData(it) } ?: Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
+    }
+
+    fun updateDefaultAccount(id: Long) {
+        lambdaQuery()
+            .eq(Warehouse::getIsDefault, CommonConstants.IS_DEFAULT)
+            .eq(Warehouse::getDeleteFlag, CommonConstants.NOT_DELETED)
+            .one()
+            ?.apply {
+                setIsDefault(CommonConstants.NOT_DEFAULT)
+                updateById(this)
+            }
+
+        getById(id)?.apply {
+            setIsDefault(CommonConstants.IS_DEFAULT)
+            updateById(this)
+        }
     }
 
     @Transactional
@@ -92,6 +109,9 @@ open class WarehouseServiceImpl (
                 updateTime = LocalDateTime.now()
                 updateBy = userId
             }
+        }
+        if(warehouse.isDefault == CommonConstants.IS_DEFAULT) {
+            updateDefaultAccount(warehouse.id)
         }
         val saveResult = saveOrUpdate(warehouse)
         return when {
