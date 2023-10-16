@@ -10,10 +10,12 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.entities;
+package com.wansensoft.entities.basic;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.io.Serial;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -32,7 +34,8 @@ import lombok.experimental.Accessors;
 @TableName("operator")
 public class Operator implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 75516356162L;
 
     /**
      * 主键
@@ -46,7 +49,12 @@ public class Operator implements Serializable {
     private Long tenantId;
 
     /**
-     * 姓名
+     * 用户id（预留字段后续考虑加到用户表关联角色）
+     */
+    private Long userId;
+
+    /**
+     * 经手人名称
      */
     private String name;
 
@@ -56,14 +64,19 @@ public class Operator implements Serializable {
     private String type;
 
     /**
-     * 状态（0-启用, 1-停用）
+     * 状态（0-启用, 1-停用） 默认启用
      */
-    private Boolean status;
+    private Integer status;
+
+    /**
+     * 备注
+     */
+    private String remark;
 
     /**
      * 排序
      */
-    private String sort;
+    private Integer sort;
 
     /**
      * 创建时间
@@ -88,7 +101,7 @@ public class Operator implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }
