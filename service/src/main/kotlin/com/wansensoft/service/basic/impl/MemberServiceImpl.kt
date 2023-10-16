@@ -76,6 +76,7 @@ open class MemberServiceImpl(
         return result.let { Response.responseData(it) } ?: Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
     }
 
+    @Transactional
     override fun addOrUpdateMember(memberDTO: AddOrUpdateMemberDTO): Response<String> {
         val userId = baseService.getCurrentUserId()
         val isAdd = memberDTO.id == null
