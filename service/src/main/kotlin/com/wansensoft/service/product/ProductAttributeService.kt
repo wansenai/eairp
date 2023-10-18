@@ -18,6 +18,7 @@ import com.wansensoft.dto.product.AddOrUpdateProductAttributeDTO
 import com.wansensoft.dto.product.ProductAttributeQueryDTO
 import com.wansensoft.entities.product.ProductAttribute
 import com.wansensoft.utils.response.Response
+import com.wansensoft.vo.product.ProductAttributeNameVO
 import com.wansensoft.vo.product.ProductAttributeVO
 
 interface ProductAttributeService : IService<ProductAttribute> {
@@ -27,4 +28,6 @@ interface ProductAttributeService : IService<ProductAttribute> {
     fun addOrUpdateProductAttribute(productAttributeAddOrUpdate: AddOrUpdateProductAttributeDTO?) : Response<String>
 
     fun batchDeleteProductAttribute(ids: List<Long>?) : Response<String>
+
+    fun getAttributeValuesById(id: Long?) : List<ProductAttributeNameVO>
 }

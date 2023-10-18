@@ -26,6 +26,7 @@ import com.wansensoft.utils.constants.CommonConstants
 import com.wansensoft.utils.enums.BaseCodeEnum
 import com.wansensoft.utils.enums.ProdcutCodeEnum
 import com.wansensoft.utils.response.Response
+import com.wansensoft.vo.product.ProductAttributeNameVO
 import com.wansensoft.vo.product.ProductAttributeVO
 import org.springframework.beans.BeanUtils
 import org.springframework.stereotype.Service
@@ -123,4 +124,20 @@ open class ProductAttributeServiceImpl(
             return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_ATTRIBUTE_SUCCESS)
         }?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
     }
+
+    override fun getAttributeValuesById(id: Long?): List<ProductAttributeNameVO> {
+        return id?.let {
+            val attribute = productAttributeMapper.selectById(id)
+            attribute?.run {
+                val values = attribute.attributeValue?.split("|")
+                values?.map { value ->
+                    ProductAttributeNameVO().apply {
+                        name = attribute.attributeName
+                        this.value = value
+                    }
+                } ?: emptyList()
+            } ?: emptyList()
+        } ?: emptyList()
+    }
+
 }

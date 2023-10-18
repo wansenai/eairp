@@ -13,10 +13,12 @@
 package com.wansensoft.vo.product
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonInclude
 import lombok.Data
 import java.time.LocalDateTime
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class ProductAttributeVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
