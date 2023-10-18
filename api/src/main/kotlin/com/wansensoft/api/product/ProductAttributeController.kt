@@ -17,6 +17,7 @@ import com.wansensoft.dto.product.AddOrUpdateProductAttributeDTO
 import com.wansensoft.dto.product.ProductAttributeQueryDTO
 import com.wansensoft.service.product.ProductAttributeService
 import com.wansensoft.utils.response.Response
+import com.wansensoft.vo.product.ProductAttributeNameVO
 import com.wansensoft.vo.product.ProductAttributeVO
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -44,4 +45,10 @@ class ProductAttributeController(private val productAttributeService: ProductAtt
     fun deleteProductAttribute(@RequestParam ids: List<Long>): Response<String> {
         return productAttributeService.batchDeleteProductAttribute(ids)
     }
+
+    @GetMapping("/getValuesById")
+    fun getAttributeValuesById(@RequestParam("id") id: Long?): List<ProductAttributeNameVO> {
+        return productAttributeService.getAttributeValuesById(id)
+    }
+
 }
