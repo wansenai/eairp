@@ -12,15 +12,15 @@
  */
 package com.wansensoft.api.product;
 
+import com.wansensoft.service.product.ProductExtendPriceService;
+import com.wansensoft.service.product.ProductService;
+import com.wansensoft.utils.response.Response;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * <p>
- * 产品表 前端控制器
- * </p>
- *
  * @author James Zow
  * @since 2023-09-05
  */
@@ -28,4 +28,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/product")
 public class ProductController {
 
+    private final ProductService productService;
+
+    private final ProductExtendPriceService extendPriceService;
+
+    public ProductController(ProductService productService, ProductExtendPriceService extendPriceService) {
+        this.productService = productService;
+        this.extendPriceService = extendPriceService;
+    }
+
+    @GetMapping("getBarCode")
+    public Response<Integer> getBarCode() {
+        return extendPriceService.getBarCode();
+    }
 }

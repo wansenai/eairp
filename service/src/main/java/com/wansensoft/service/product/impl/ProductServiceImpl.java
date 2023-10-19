@@ -12,18 +12,20 @@
  */
 package com.wansensoft.service.product.impl;
 
-import com.wansensoft.service.product.IProductService;
 import com.wansensoft.entities.product.Product;
 import com.wansensoft.mappers.product.ProductMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansensoft.service.product.ProductService;
+import com.wansensoft.utils.response.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/**
- * <p>
- * 产品表 服务实现类
- * </p>
- */
 @Service
-public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements IProductService {
+@Slf4j
+public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements ProductService {
 
+    private final ProductMapper productMapper;
+    public ProductServiceImpl(ProductMapper productMapper) {
+        this.productMapper = productMapper;
+    }
 }
