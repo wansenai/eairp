@@ -12,14 +12,7 @@
  */
 package com.wansensoft.service.product;
 
-import com.wansensoft.entities.product.Product;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.utils.response.Response;
 
-/**
- * <p>
- * 产品表 服务类
- * </p>
- */
-public interface IProductService extends IService<Product> {
-
+public interface ProductService {
 }
