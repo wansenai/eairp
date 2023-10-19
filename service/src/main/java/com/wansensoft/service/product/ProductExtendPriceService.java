@@ -14,12 +14,14 @@ package com.wansensoft.service.product;
 
 import com.wansensoft.entities.product.ProductExtendPrice;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.utils.response.Response;
 
 /**
  * <p>
  * 产品价格扩展 服务类
  * </p>
  */
-public interface IProductExtendPriceService extends IService<ProductExtendPrice> {
+public interface ProductExtendPriceService extends IService<ProductExtendPrice> {
 
+    Response<Integer> getBarCode();
 }

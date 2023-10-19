@@ -12,6 +12,7 @@
  */
 package com.wansensoft.entities.product;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -33,7 +34,8 @@ import lombok.experimental.Accessors;
 @TableName("product_extend_price")
 public class ProductExtendPrice implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 7891651633323L;
 
     /**
      * 主键
@@ -54,7 +56,7 @@ public class ProductExtendPrice implements Serializable {
     /**
      * 商品条码
      */
-    private String productBarCode;
+    private Integer productBarCode;
 
     /**
      * 商品单位
@@ -87,9 +89,9 @@ public class ProductExtendPrice implements Serializable {
     private BigDecimal lowPrice;
 
     /**
-     * 是否为默认单位，1是，0否
+     * 是否为默认单位，1是，0否 默认0
      */
-    private Boolean defaultFlag;
+    private Integer defaultFlag;
 
     /**
      * 创建时间
@@ -114,7 +116,7 @@ public class ProductExtendPrice implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }
