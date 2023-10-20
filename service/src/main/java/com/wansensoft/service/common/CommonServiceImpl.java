@@ -23,11 +23,13 @@ import com.wansensoft.entities.basic.Customer;
 import com.wansensoft.entities.basic.Member;
 import com.wansensoft.entities.basic.Supplier;
 import com.wansensoft.entities.system.SysPlatformConfig;
+import com.wansensoft.middleware.oss.TencentOSS;
 import com.wansensoft.service.basic.CustomerService;
 import com.wansensoft.service.basic.MemberService;
 import com.wansensoft.service.basic.SupplierService;
 import com.wansensoft.service.system.ISysPlatformConfigService;
 import com.wansensoft.utils.ExcelUtil;
+import com.wansensoft.utils.FileUtil;
 import com.wansensoft.utils.SnowflakeIdUtil;
 import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.constants.SmsConstants;
@@ -44,6 +46,7 @@ import com.wansensoft.vo.basic.SupplierVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FastByteArrayOutputStream;
@@ -75,6 +78,7 @@ public class CommonServiceImpl implements CommonService{
     private final MemberService memberService;
 
     private final ISysPlatformConfigService platformConfigService;
+
 
     public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService) {
         this.redisUtil = redisUtil;
@@ -406,6 +410,38 @@ public class CommonServiceImpl implements CommonService{
         }
 
         return file;
+    }
+
+    @Override
+    public Response<List<String>> uploadOss(List<MultipartFile> files) {
+        var platform = platformConfigService.list().stream().filter(item -> item.getPlatformKey().startsWith("tencent_oss")).toList();
+        var ossInfoMap = platform.stream().collect(Collectors.toMap(SysPlatformConfig::getPlatformKey, SysPlatformConfig::getPlatformValue));
+
+       if (ossInfoMap.get("tencent_oss_secret_id") == null || ossInfoMap.get("tencent_oss_secret_key") == null
+               || ossInfoMap.get("tencent_oss_region") == null || ossInfoMap.get("tencent_oss_bucket") == null) {
+            return Response.responseMsg(BaseCodeEnum.OSS_KEY_NOT_EXIST);
+        }
+
+        TencentOSS.getInstance().setBucket(ossInfoMap.get("tencent_oss_bucket"));
+        TencentOSS.getInstance().setRegion(ossInfoMap.get("tencent_oss_region"));
+        TencentOSS.getInstance().setSecretid(ossInfoMap.get("tencent_oss_secret_id"));
+        TencentOSS.getInstance().setSecretkey(ossInfoMap.get("tencent_oss_secret_key"));
+        var instance = TencentOSS.getInstance();
+        if(instance == null) {
+            return Response.responseMsg(BaseCodeEnum.OSS_GET_INSTANCE_ERROR);
+        }
+        try {
+            List<String> keys = new ArrayList<>(files.size() + 2);
+            files.forEach(file -> {
+                keys.add("temp" + "_" + SnowflakeIdUtil.nextId() + "_" + file.getOriginalFilename());
+            });
+            var result = instance.uploadBatch(FileUtil.convertMultipartFilesToFiles(files), keys);
+            log.info("上传图片信息: " + result);
+            return Response.responseData(result);
+        }catch (Exception e) {
+            log.error("上传图片失败: " + e.getMessage());
+            return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+        }
     }
 
     private String getCellValue(Cell cell, DataFormatter dataFormatter) {
