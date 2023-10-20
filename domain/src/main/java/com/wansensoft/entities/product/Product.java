@@ -92,9 +92,14 @@ public class Product implements Serializable {
     private Integer productExpiryNum;
 
     /**
-     * 图片名称
+     * 产品图片url地址 用,分割
      */
-    private String productImgName;
+    private String productImageUrl;
+
+    /**
+     * 产品图片名称
+     */
+    private String productImageName;
 
     /**
      * 基础重量(kg)
@@ -109,7 +114,7 @@ public class Product implements Serializable {
     /**
      * 启用 0-禁用  1-启用
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 自定义1
@@ -129,12 +134,12 @@ public class Product implements Serializable {
     /**
      * 是否开启序列号，0否，1是
      */
-    private Boolean enableSerialNumber;
+    private Integer enableSerialNumber;
 
     /**
      * 是否开启批号，0否，1是
      */
-    private Boolean enableBatchNumber;
+    private Integer enableBatchNumber;
 
     /**
      * 仓位货架
@@ -164,7 +169,7 @@ public class Product implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }
