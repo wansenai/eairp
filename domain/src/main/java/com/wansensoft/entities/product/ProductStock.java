@@ -12,6 +12,7 @@
  */
 package com.wansensoft.entities.product;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -30,10 +31,11 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("product_inventory_initial")
-public class ProductInventoryInitial implements Serializable {
+@TableName("product_stock")
+public class ProductStock implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 723165136L;
 
     /**
      * 主键
@@ -72,6 +74,11 @@ public class ProductInventoryInitial implements Serializable {
     private BigDecimal highStockQuantity;
 
     /**
+     * 当前库存数量
+     */
+    private BigDecimal currentStockQuantity;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
@@ -94,7 +101,7 @@ public class ProductInventoryInitial implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }
