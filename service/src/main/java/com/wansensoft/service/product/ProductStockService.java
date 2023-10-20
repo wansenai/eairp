@@ -10,20 +10,21 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.product.impl;
+package com.wansensoft.service.product;
 
-import com.wansensoft.service.product.IProductInventoryCurrentService;
-import com.wansensoft.entities.product.ProductInventoryCurrent;
-import com.wansensoft.mappers.product.ProductInventoryCurrentMapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
+import com.wansensoft.entities.product.ProductStock;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.product.ProductStockVO;
+
+import java.util.List;
 
 /**
  * <p>
- * 产品当前库存 服务实现类
+ * 产品初始库存 服务类
  * </p>
  */
-@Service
-public class ProductInventoryCurrentServiceImpl extends ServiceImpl<ProductInventoryCurrentMapper, ProductInventoryCurrent> implements IProductInventoryCurrentService {
+public interface ProductStockService extends IService<ProductStock> {
 
+    Response<List<ProductStockVO>> getProductStockList();
 }

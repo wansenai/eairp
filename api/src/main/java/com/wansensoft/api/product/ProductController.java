@@ -14,11 +14,15 @@ package com.wansensoft.api.product;
 
 import com.wansensoft.service.product.ProductExtendPriceService;
 import com.wansensoft.service.product.ProductService;
+import com.wansensoft.service.product.ProductStockService;
 import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.product.ProductStockVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @author James Zow
@@ -32,13 +36,21 @@ public class ProductController {
 
     private final ProductExtendPriceService extendPriceService;
 
-    public ProductController(ProductService productService, ProductExtendPriceService extendPriceService) {
+    private final ProductStockService productStockService;
+
+    public ProductController(ProductService productService, ProductExtendPriceService extendPriceService, ProductStockService productStockService) {
         this.productService = productService;
         this.extendPriceService = extendPriceService;
+        this.productStockService = productStockService;
     }
 
     @GetMapping("getBarCode")
     public Response<Integer> getBarCode() {
         return extendPriceService.getBarCode();
+    }
+
+    @GetMapping("getStock")
+    public Response<List<ProductStockVO>> getStock() {
+        return productStockService.getProductStockList();
     }
 }

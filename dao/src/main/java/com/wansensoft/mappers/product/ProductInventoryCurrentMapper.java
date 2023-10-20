@@ -12,14 +12,14 @@
  */
 package com.wansensoft.mappers.product;
 
-import com.wansensoft.entities.product.ProductInventoryCurrent;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.wansensoft.entities.product.ProductStock;
 
 /**
  * <p>
  * 产品当前库存 Mapper 接口
  * </p>
  */
-public interface ProductInventoryCurrentMapper extends BaseMapper<ProductInventoryCurrent> {
+public interface ProductInventoryCurrentMapper extends BaseMapper<ProductStock> {
 
 }
