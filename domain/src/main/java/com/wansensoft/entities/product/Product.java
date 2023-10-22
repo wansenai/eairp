@@ -12,14 +12,15 @@
  */
 package com.wansensoft.entities.product;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import lombok.*;
 import lombok.experimental.Accessors;
 
 /**
@@ -28,12 +29,16 @@ import lombok.experimental.Accessors;
  * </p>
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("product")
 public class Product implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 79165168544983L;
 
     /**
      * 主键
@@ -90,16 +95,6 @@ public class Product implements Serializable {
      * 保质期天数
      */
     private Integer productExpiryNum;
-
-    /**
-     * 产品图片url地址 用,分割
-     */
-    private String productImageUrl;
-
-    /**
-     * 产品图片名称
-     */
-    private String productImageName;
 
     /**
      * 基础重量(kg)
