@@ -20,6 +20,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 产品扩展字段表 服务类
  * </p>
  */
-public interface IProductExtendPropertyService extends IService<ProductExtendProperty> {
+public interface ProductExtendPropertyService extends IService<ProductExtendProperty> {
 
 }
