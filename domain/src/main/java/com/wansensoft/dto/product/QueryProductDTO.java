@@ -10,21 +10,32 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.product;
+package com.wansensoft.dto.product;
 
-import com.wansensoft.entities.product.ProductStock;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansensoft.utils.response.Response;
-import com.wansensoft.vo.product.ProductStockVO;
+import lombok.Data;
 
-import java.util.List;
+@Data
+public class QueryProductDTO {
 
-/**
- * <p>
- * 产品初始库存 服务类
- * </p>
- */
-public interface ProductStockService extends IService<ProductStock> {
+    private Long productCategoryId;
 
-   List<ProductStockVO> getProductStockList(Long productId);
+    private String keywords;
+
+    private String productColor;
+
+    private String extendInfo;
+
+    private String remark;
+
+    private String warehouseShelves;
+
+    private Integer status;
+
+    private Integer enableSerialNumber;
+
+    private Integer enableBatchNumber;
+
+    private Long page;
+
+    private Long pageSize;
 }

@@ -49,8 +49,28 @@ public enum ProdcutCodeEnum {
 
     UPDATE_PRODUCT_UNIT_STATUS_SUCCESS("P0009", "修改商品单位状态成功"),
 
-    UPDATE_PRODUCT_UNIT_STATUS_ERROR("P0509", "修改商品单位状态失败");
+    UPDATE_PRODUCT_UNIT_STATUS_ERROR("P0509", "修改商品单位状态失败"),
 
+    // Product code
+    PRODUCT_NAME_EXIST("P0510", "商品名称已存在"),
+
+    PRODUCT_BAR_CODE_EXIST("P0511", "商品条码已存在"),
+
+    PRODUCT_ADD_SUCCESS("P0010", "添加商品成功"),
+
+    PRODUCT_ADD_ERROR("P0512", "添加商品失败"),
+
+    PRODUCT_UPDATE_SUCCESS("P0011", "修改商品成功"),
+
+    PRODUCT_UPDATE_ERROR("P0513", "修改商品失败"),
+
+    PRODUCT_DELETE_SUCCESS("P0012", "删除商品成功"),
+
+    PRODUCT_DELETE_ERROR("P0514", "删除商品失败"),
+
+    PRODUCT_STATUS_UPDATE_SUCCESS("P0013", "修改商品状态成功"),
+
+    PRODUCT_STATUS_UPDATE_ERROR("P0515", "修改商品状态失败");
 
     private final String code;
 

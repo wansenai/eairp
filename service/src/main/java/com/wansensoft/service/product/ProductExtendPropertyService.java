@@ -12,19 +12,14 @@
  */
 package com.wansensoft.service.product;
 
-import com.wansensoft.entities.product.ProductStock;
+import com.wansensoft.entities.product.ProductExtendProperty;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansensoft.utils.response.Response;
-import com.wansensoft.vo.product.ProductStockVO;
-
-import java.util.List;
 
 /**
  * <p>
- * 产品初始库存 服务类
+ * 产品扩展字段表 服务类
  * </p>
  */
-public interface ProductStockService extends IService<ProductStock> {
+public interface ProductExtendPropertyService extends IService<ProductExtendProperty> {
 
-   List<ProductStockVO> getProductStockList(Long productId);
 }

@@ -12,15 +12,17 @@
  */
 package com.wansensoft.api.product;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.product.AddProductDTO;
+import com.wansensoft.dto.product.QueryProductDTO;
 import com.wansensoft.service.product.ProductExtendPriceService;
 import com.wansensoft.service.product.ProductService;
 import com.wansensoft.service.product.ProductStockService;
 import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.product.ProductDetailVO;
 import com.wansensoft.vo.product.ProductStockVO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import com.wansensoft.vo.product.ProductVO;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,12 +38,9 @@ public class ProductController {
 
     private final ProductExtendPriceService extendPriceService;
 
-    private final ProductStockService productStockService;
-
-    public ProductController(ProductService productService, ProductExtendPriceService extendPriceService, ProductStockService productStockService) {
+    public ProductController(ProductService productService, ProductExtendPriceService extendPriceService) {
         this.productService = productService;
         this.extendPriceService = extendPriceService;
-        this.productStockService = productStockService;
     }
 
     @GetMapping("getBarCode")
@@ -49,8 +48,18 @@ public class ProductController {
         return extendPriceService.getBarCode();
     }
 
-    @GetMapping("getStock")
-    public Response<List<ProductStockVO>> getStock() {
-        return productStockService.getProductStockList();
+    @PostMapping("addProduct")
+    public Response<String> addProduct(@RequestBody AddProductDTO addProductDTO) {
+        return productService.addProduct(addProductDTO);
+    }
+
+    @PostMapping("getProductInfo")
+    public Response<Page<ProductVO>> getProductInfo(@RequestBody QueryProductDTO queryProductDTO) {
+        return productService.getProductInfo(queryProductDTO);
+    }
+
+    @GetMapping("getProductInfoDetail/{productId}")
+    public Response<ProductDetailVO> getProductInfoDetail(@PathVariable Long productId) {
+        return productService.getProductInfoDetail(productId);
     }
 }

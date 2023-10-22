@@ -35,10 +35,12 @@ public class ProductStockServiceImpl extends ServiceImpl<ProductInventoryInitial
     }
 
     @Override
-    public Response<List<ProductStockVO>> getProductStockList() {
+    public List<ProductStockVO> getProductStockList(Long productId) {
         var productStockVos = new ArrayList<ProductStockVO>();
 
-        var productStocks = lambdaQuery().list();
+        var productStocks = lambdaQuery()
+                .eq(ProductStock::getProductId, productId)
+                .list();
         productStocks.forEach(productStock -> {
             ProductStockVO productStockVO = new ProductStockVO();
             BeanUtils.copyProperties(productStock, productStockVO);
@@ -49,6 +51,6 @@ public class ProductStockServiceImpl extends ServiceImpl<ProductInventoryInitial
             productStockVO.setWarehouseName(warehouse.getWarehouseName());
         });
 
-        return Response.responseData(productStockVos);
+        return productStockVos;
     }
 }

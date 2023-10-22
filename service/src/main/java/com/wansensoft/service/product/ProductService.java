@@ -12,7 +12,18 @@
  */
 package com.wansensoft.service.product;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansensoft.dto.product.AddProductDTO;
+import com.wansensoft.dto.product.QueryProductDTO;
 import com.wansensoft.utils.response.Response;
+import com.wansensoft.vo.product.ProductDetailVO;
+import com.wansensoft.vo.product.ProductVO;
 
 public interface ProductService {
+
+    Response<String> addProduct(AddProductDTO addProductDTO);
+
+    Response<Page<ProductVO>> getProductInfo(QueryProductDTO queryProductDTO);
+
+    Response<ProductDetailVO> getProductInfoDetail(Long productId);
 }

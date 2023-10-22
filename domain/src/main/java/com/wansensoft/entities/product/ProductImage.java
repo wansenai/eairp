@@ -12,74 +12,45 @@
  */
 package com.wansensoft.entities.product;
 
-import java.io.Serial;
-import java.math.BigDecimal;
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
-import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.io.Serializable;
-
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-/**
- * <p>
- * 产品初始库存
- * </p>
- */
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("product_stock")
-public class ProductStock implements Serializable {
+@TableName("product_image")
+public class ProductImage implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 723165136L;
+    private static final long serialVersionUID = 546615619482L;
 
-    /**
-     * 主键
-     */
+
     @TableId(value = "id", type = IdType.NONE)
     private Long id;
 
-    /**
-     * 租户id
-     */
-    private Long tenantId;
-
-    /**
-     * 产品id
-     */
     private Long productId;
 
-    /**
-     * 仓库id
-     */
-    private Long warehouseId;
+    private String uid;
 
-    /**
-     * 初始库存数量
-     */
-    private BigDecimal initStockQuantity;
+    private String type;
 
-    /**
-     * 最低库存数量
-     */
-    private BigDecimal lowStockQuantity;
+    private String status;
 
-    /**
-     * 最高库存数量
-     */
-    private BigDecimal highStockQuantity;
+    private String imageName;
 
-    /**
-     * 当前库存数量
-     */
-    private BigDecimal currentStockQuantity;
+    private String imageUrl;
+
+    private Integer imageSize;
 
     /**
      * 创建时间
@@ -87,7 +58,7 @@ public class ProductStock implements Serializable {
     private LocalDateTime createTime;
 
     /**
-     * 修改时间
+     * 更新时间
      */
     private LocalDateTime updateTime;
 
@@ -105,6 +76,4 @@ public class ProductStock implements Serializable {
      * 删除标记，0未删除，1删除
      */
     private Integer deleteFlag;
-
-
 }

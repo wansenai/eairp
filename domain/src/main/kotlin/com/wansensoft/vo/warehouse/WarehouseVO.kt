@@ -1,6 +1,7 @@
 package com.wansensoft.vo.warehouse
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.wansensoft.NoArg
 import com.wansensoft.bo.BigDecimalSerializerBO
@@ -8,6 +9,7 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @NoArg
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class WarehouseVO (
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)

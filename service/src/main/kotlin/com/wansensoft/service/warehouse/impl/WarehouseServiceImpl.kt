@@ -17,6 +17,7 @@ import com.wansensoft.utils.enums.WarehouseCodeEnum
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.warehouse.WarehouseVO
 import lombok.extern.slf4j.Slf4j
+import org.springframework.beans.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -132,6 +133,29 @@ open class WarehouseServiceImpl (
                 }
             }
             ?: Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+    }
+
+    override fun getWarehouse(): Response<List<WarehouseVO>> {
+        val warehouseList = mutableListOf<WarehouseVO>()
+        val warehouses = list()
+        for (warehouse in warehouses) {
+            BeanUtils.copyProperties(warehouse, WarehouseVO())
+            warehouseList += WarehouseVO(
+                id = warehouse.id,
+                warehouseName = warehouse.warehouseName,
+                warehouseManager = warehouse.warehouseManager,
+                address = warehouse.address,
+                price = warehouse.price,
+                truckage = warehouse.truckage,
+                type = warehouse.type,
+                status = warehouse.status,
+                remark = warehouse.remark,
+                sort = warehouse.sort,
+                isDefault = warehouse.isDefault,
+                createTime = warehouse.createTime
+            )
+        }
+        return Response.responseData(warehouseList)
     }
 
     override fun updateBatchStatus(ids: List<Long>?, status: Int?): Response<String> {
