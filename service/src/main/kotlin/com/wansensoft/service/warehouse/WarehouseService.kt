@@ -16,5 +16,7 @@ interface WarehouseService : IService<Warehouse> {
 
     fun deleteBatch(ids: List<Long>?): Response<String>
 
+    fun getWarehouse(): Response<List<WarehouseVO>>
+
     fun updateBatchStatus(ids: List<Long>?, status: Int?): Response<String>
 }
