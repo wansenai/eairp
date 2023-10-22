@@ -42,7 +42,9 @@ public class ProductExtendPriceServiceImpl extends ServiceImpl<ProductExtendPric
 
     @Override
     public Response<Integer> getBarCode() {
-        var data = lambdaQuery().orderByDesc(ProductExtendPrice::getProductBarCode).one();
+        var data = lambdaQuery()
+                .orderByDesc(ProductExtendPrice::getProductBarCode)
+                .last("LIMIT 1").one();
         if(data == null){
             return Response.responseData(1000);
         }
