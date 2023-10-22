@@ -37,6 +37,11 @@ public class WarehouseController {
         return warehouseService.getWarehouseList(warehouseDTO);
     }
 
+    @GetMapping("getWarehouse")
+    public Response<List<WarehouseVO>> getWarehouse() {
+        return warehouseService.getWarehouse();
+    }
+
     @PostMapping("addOrUpdate")
     public Response<String> addOrUpdateWarehouse(@RequestBody AddOrUpdateWarehouseDTO warehouseDTO) {
         return warehouseService.addOrUpdateWarehouse(warehouseDTO);
