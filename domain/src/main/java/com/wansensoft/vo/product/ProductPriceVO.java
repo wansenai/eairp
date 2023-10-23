@@ -1,5 +1,6 @@
 package com.wansensoft.vo.product;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansensoft.bo.BigDecimalSerializerBO;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductPriceVO {
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long productPriceId;
 
     private Integer barCode;
 

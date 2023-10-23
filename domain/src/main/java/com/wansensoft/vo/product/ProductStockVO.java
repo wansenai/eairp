@@ -29,7 +29,7 @@ import java.math.BigDecimal;
 public class ProductStockVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long id;
+    private Long productStockId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long warehouseId;
