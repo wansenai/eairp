@@ -15,6 +15,7 @@ package com.wansensoft.api.product;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansensoft.dto.product.AddOrUpdateProductDTO;
 import com.wansensoft.dto.product.QueryProductDTO;
+import com.wansensoft.dto.product.UpdateBatchProductDTO;
 import com.wansensoft.service.product.ProductExtendPriceService;
 import com.wansensoft.service.product.ProductService;
 import com.wansensoft.utils.response.Response;
@@ -69,5 +70,10 @@ public class ProductController {
     @PutMapping("updateProductStatus/{productIds}/{status}")
     public Response<String> updateProductStatus(@PathVariable List<Long> productIds, @PathVariable Integer status) {
         return productService.updateProductStatus(productIds, status);
+    }
+
+    @PutMapping("updateBatchProductInfo")
+    public Response<String> updateBatchProductInfo(@RequestBody UpdateBatchProductDTO updateBatchProductDTO) {
+        return productService.updateBatchProductInfo(updateBatchProductDTO);
     }
 }
