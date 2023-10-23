@@ -17,7 +17,9 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class AddProductDTO {
+public class AddOrUpdateProductDTO {
+
+    private Long productId;
 
     private String productName;
 
@@ -37,9 +39,9 @@ public class AddProductDTO {
 
     private Long productCategoryId;
 
-    private Integer enableSerialNumber;
+    private String enableSerialNumber;
 
-    private Integer enableBatchNumber;
+    private String enableBatchNumber;
 
     private String warehouseShelves;
 
