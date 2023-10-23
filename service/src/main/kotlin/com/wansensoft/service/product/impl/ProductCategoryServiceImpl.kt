@@ -119,4 +119,14 @@ open class ProductCategoryServiceImpl(
 
         return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_CATEGORY_SUCCESS)
     }
+
+    override fun getProductCategoryByName(name: String?): ProductCategory {
+        // 如果name为空就返回空对象 否则根据name查询产品分类
+        if(StringUtils.hasLength(name)){
+            return ProductCategory()
+        }
+        return lambdaQuery()
+            .eq(ProductCategory::getCategoryName, name)
+            .one()
+    }
 }
