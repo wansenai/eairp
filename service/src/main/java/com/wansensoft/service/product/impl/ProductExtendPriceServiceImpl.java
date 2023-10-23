@@ -19,6 +19,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.utils.response.Response;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -49,5 +50,10 @@ public class ProductExtendPriceServiceImpl extends ServiceImpl<ProductExtendPric
             return Response.responseData(1000);
         }
         return Response.responseData(data.getProductBarCode() + 1);
+    }
+
+    @Override
+    public Boolean checkProductCode(List<String> barCodes) {
+        return lambdaQuery().in(ProductExtendPrice::getProductBarCode, barCodes).exists();
     }
 }

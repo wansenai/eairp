@@ -16,6 +16,8 @@ import com.wansensoft.entities.product.ProductExtendPrice;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.utils.response.Response;
 
+import java.util.List;
+
 /**
  * <p>
  * 产品价格扩展 服务类
@@ -24,4 +26,6 @@ import com.wansensoft.utils.response.Response;
 public interface ProductExtendPriceService extends IService<ProductExtendPrice> {
 
     Response<Integer> getBarCode();
+
+    Boolean checkProductCode(List<String> barCodes);
 }
