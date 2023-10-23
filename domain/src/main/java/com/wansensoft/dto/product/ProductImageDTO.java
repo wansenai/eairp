@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class ProductImageDTO {
 
+    private Long productImageId;
+
     private String uid;
 
     private String type;

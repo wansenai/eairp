@@ -17,6 +17,8 @@ import lombok.Data;
 @Data
 public class ProductStockDTO {
 
+    private Long productStockId;
+
     private Long warehouseId;
 
     private String warehouseName;

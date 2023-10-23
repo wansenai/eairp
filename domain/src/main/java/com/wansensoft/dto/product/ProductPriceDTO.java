@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 @Data
 public class ProductPriceDTO {
 
+    private Long productPriceId;
+
     private Integer barCode;
 
     private String productUnit;

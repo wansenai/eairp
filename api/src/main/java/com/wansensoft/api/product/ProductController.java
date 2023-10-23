@@ -13,14 +13,12 @@
 package com.wansensoft.api.product;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansensoft.dto.product.AddProductDTO;
+import com.wansensoft.dto.product.AddOrUpdateProductDTO;
 import com.wansensoft.dto.product.QueryProductDTO;
 import com.wansensoft.service.product.ProductExtendPriceService;
 import com.wansensoft.service.product.ProductService;
-import com.wansensoft.service.product.ProductStockService;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.product.ProductDetailVO;
-import com.wansensoft.vo.product.ProductStockVO;
 import com.wansensoft.vo.product.ProductVO;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,9 +46,9 @@ public class ProductController {
         return extendPriceService.getBarCode();
     }
 
-    @PostMapping("addProduct")
-    public Response<String> addProduct(@RequestBody AddProductDTO addProductDTO) {
-        return productService.addProduct(addProductDTO);
+    @PostMapping("addOrUpdateProduct")
+    public Response<String> addOrUpdateProduct(@RequestBody AddOrUpdateProductDTO addOrUpdateProductDTO) {
+        return productService.addOrUpdateProduct(addOrUpdateProductDTO);
     }
 
     @PostMapping("getProductInfo")
@@ -61,5 +59,15 @@ public class ProductController {
     @GetMapping("getProductInfoDetail/{productId}")
     public Response<ProductDetailVO> getProductInfoDetail(@PathVariable Long productId) {
         return productService.getProductInfoDetail(productId);
+    }
+
+    @DeleteMapping("deleteProduct/{productIds}")
+    public Response<String> deleteProduct(@PathVariable List<Long> productIds) {
+        return productService.deleteProduct(productIds);
+    }
+
+    @PutMapping("updateProductStatus/{productIds}/{status}")
+    public Response<String> updateProductStatus(@PathVariable List<Long> productIds, @PathVariable Integer status) {
+        return productService.updateProductStatus(productIds, status);
     }
 }
