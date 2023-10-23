@@ -22,21 +22,27 @@ import com.wansensoft.bo.SmsInfoBO;
 import com.wansensoft.entities.basic.Customer;
 import com.wansensoft.entities.basic.Member;
 import com.wansensoft.entities.basic.Supplier;
+import com.wansensoft.entities.product.Product;
+import com.wansensoft.entities.product.ProductExtendPrice;
+import com.wansensoft.entities.product.ProductStock;
 import com.wansensoft.entities.system.SysPlatformConfig;
 import com.wansensoft.middleware.oss.TencentOSS;
+import com.wansensoft.service.BaseService;
 import com.wansensoft.service.basic.CustomerService;
 import com.wansensoft.service.basic.MemberService;
 import com.wansensoft.service.basic.SupplierService;
+import com.wansensoft.service.product.ProductCategoryService;
+import com.wansensoft.service.product.ProductExtendPriceService;
+import com.wansensoft.service.product.ProductService;
+import com.wansensoft.service.product.ProductStockService;
 import com.wansensoft.service.system.ISysPlatformConfigService;
+import com.wansensoft.service.warehouse.WarehouseService;
 import com.wansensoft.utils.ExcelUtil;
 import com.wansensoft.utils.FileUtil;
 import com.wansensoft.utils.SnowflakeIdUtil;
 import com.wansensoft.utils.constants.SecurityConstants;
 import com.wansensoft.utils.constants.SmsConstants;
-import com.wansensoft.utils.enums.BaseCodeEnum;
-import com.wansensoft.utils.enums.CustomerCodeEnum;
-import com.wansensoft.utils.enums.MemberCodeEnum;
-import com.wansensoft.utils.enums.SupplierCodeEnum;
+import com.wansensoft.utils.enums.*;
 import com.wansensoft.utils.redis.RedisUtil;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.CaptchaVO;
@@ -46,7 +52,6 @@ import com.wansensoft.vo.basic.SupplierVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FastByteArrayOutputStream;
@@ -58,6 +63,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,6 +77,8 @@ public class CommonServiceImpl implements CommonService{
 
     private final Producer producer;
 
+    private final BaseService baseService;
+
     private final SupplierService supplierService;
 
     private final CustomerService customerService;
@@ -79,14 +87,29 @@ public class CommonServiceImpl implements CommonService{
 
     private final ISysPlatformConfigService platformConfigService;
 
+    private final ProductService productService;
 
-    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService) {
+    private final ProductExtendPriceService productExtendPriceService;
+
+    private final ProductStockService productStockService;
+
+    private final ProductCategoryService productCategoryService;
+
+    private final WarehouseService warehouseService;
+
+    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService, ProductService productService, ProductExtendPriceService productExtendPriceService, ProductStockService productStockService, ProductCategoryService productCategoryService, WarehouseService warehouseService, BaseService baseService) {
         this.redisUtil = redisUtil;
         this.producer = producer;
         this.supplierService = supplierService;
         this.customerService = customerService;
         this.memberService = memberService;
         this.platformConfigService = platformConfigService;
+        this.productService = productService;
+        this.productExtendPriceService = productExtendPriceService;
+        this.productStockService = productStockService;
+        this.productCategoryService = productCategoryService;
+        this.warehouseService = warehouseService;
+        this.baseService = baseService;
     }
 
     private SmsInfoBO getSmsInfo() {
@@ -206,6 +229,12 @@ public class CommonServiceImpl implements CommonService{
                          return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_ERROR);
                      }
                      return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_SUCCESS);
+                 } else if (filename.contains("商品")) {
+                     var result = readProductFromExcel(file);
+                     if(!result){
+                         return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
+                     }
+                     return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS);
                  } else {
                     log.error("上传Excel文件失败: 文件名不匹配");
                     return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_NO_FILENAME_MATCH);
@@ -300,6 +329,95 @@ public class CommonServiceImpl implements CommonService{
             workbook.close();
         }
         return memberService.batchAddMember(members);
+    }
+
+    private boolean readProductFromExcel(MultipartFile file) throws IOException {
+        List<Product> products = new ArrayList<>();
+        List<ProductExtendPrice> productExtendPrices = new ArrayList<>();
+        List<ProductStock> productStocks = new ArrayList<>();
+
+        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+        DataFormatter dataFormatter = new DataFormatter();
+
+        Long warehouseId = null;
+        if(getCellValue(sheet.getRow(1).getCell(24), dataFormatter) != null) {
+            var warehouse = warehouseService.getWarehouseByName(getCellValue(sheet.getRow(1).getCell(24), dataFormatter));
+            warehouseId = warehouse.getId();
+        }
+        var userId = baseService.getCurrentUserId();
+
+        for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
+            Row row = sheet.getRow(i);
+            var productCode = getCellValue(row.getCell(9), dataFormatter);
+
+            // 检查商品条码是否重复存在于数据库中 重复则不导入 比较商品条码是否有重复
+            if (productExtendPriceService.checkProductCode(List.of(productCode))) {
+                return false;
+            }
+
+            var productId = SnowflakeIdUtil.nextId();
+            Long productCategoryId = null;
+
+            if(getCellValue(row.getCell(4), dataFormatter) != null) {
+                var productCategory = productCategoryService.getProductCategoryByName(getCellValue(row.getCell(4), dataFormatter));
+                productCategoryId = productCategory.getId();
+            }
+
+            var product = Product.builder()
+                    .id(productId)
+                    .productName(getCellValue(row.getCell(0), dataFormatter))
+                    .productStandard(getCellValue(row.getCell(1), dataFormatter))
+                    .productModel(getCellValue(row.getCell(2), dataFormatter))
+                    .productColor(getCellValue(row.getCell(3), dataFormatter))
+                    .productCategoryId(productCategoryId)
+                    .productWeight(getNumericCellValue(row.getCell(5)))
+                    .productExpiryNum(getIntegerCellValue(row.getCell(6)))
+                    .productUnit(getCellValue(row.getCell(7), dataFormatter))
+                    .enableSerialNumber(getIntegerCellValue(row.getCell(16)))
+                    .enableBatchNumber(getIntegerCellValue(row.getCell(17)))
+                    .warehouseShelves(getCellValue(row.getCell(18), dataFormatter))
+                    .productManufacturer(getCellValue(row.getCell(19), dataFormatter))
+                    .otherFieldOne(getCellValue(row.getCell(20), dataFormatter))
+                    .otherFieldTwo(getCellValue(row.getCell(21), dataFormatter))
+                    .otherFieldThree(getCellValue(row.getCell(22), dataFormatter))
+                    .remark(getCellValue(row.getCell(23), dataFormatter))
+                    .createBy(userId)
+                    .createTime(LocalDateTime.now())
+                    .build();
+            products.add(product);
+
+            var productPrice = ProductExtendPrice.builder()
+                    .id(SnowflakeIdUtil.nextId())
+                    .productId(productId)
+                    .productBarCode(Integer.parseInt(productCode))
+                    .multiAttribute(getCellValue(row.getCell(11), dataFormatter))
+                    .purchasePrice(getNumericCellValue(row.getCell(12)))
+                    .retailPrice(getNumericCellValue(row.getCell(13)))
+                    .salePrice(getNumericCellValue(row.getCell(14)))
+                    .lowPrice(getNumericCellValue(row.getCell(15)))
+                    .createBy(userId)
+                    .createTime(LocalDateTime.now())
+                    .build();
+            productExtendPrices.add(productPrice);
+
+            var productStock = ProductStock.builder()
+                    .id(SnowflakeIdUtil.nextId())
+                    .productId(productId)
+                    .warehouseId(warehouseId)
+                    .initStockQuantity(getNumericCellValue(row.getCell(24)))
+                    .currentStockQuantity(getNumericCellValue(row.getCell(24)))
+                    .createBy(userId)
+                    .createTime(LocalDateTime.now())
+                    .build();
+            productStocks.add(productStock);
+            workbook.close();
+        }
+        boolean addProductResult = productService.batchAddProduct(products);
+        boolean addProductPriceResult = productExtendPriceService.saveBatch(productExtendPrices);
+        boolean addProductStockResult = productStockService.saveBatch(productStocks);
+
+        return addProductResult && addProductPriceResult && addProductStockResult;
     }
 
     public File exportExcel(String type) {
@@ -407,6 +525,7 @@ public class CommonServiceImpl implements CommonService{
                 data.add(member);
             }
             file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
+        } else if (type.contains("商品")) {
         }
 
         return file;
