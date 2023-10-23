@@ -43,6 +43,7 @@ public class ProductStockServiceImpl extends ServiceImpl<ProductInventoryInitial
                 .list();
         productStocks.forEach(productStock -> {
             ProductStockVO productStockVO = new ProductStockVO();
+            productStockVO.setProductStockId(productStock.getId());
             BeanUtils.copyProperties(productStock, productStockVO);
             productStockVos.add(productStockVO);
 
