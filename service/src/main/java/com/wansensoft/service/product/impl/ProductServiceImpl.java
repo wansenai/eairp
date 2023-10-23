@@ -96,8 +96,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Response<String> addOrUpdateProduct(AddOrUpdateProductDTO productDTO) {
-        if(productDTO.getPriceList().isEmpty() && !StringUtils.hasLength(productDTO.getProductName()) &&
-           !StringUtils.hasLength(productDTO.getProductUnit())) {
+        if (productDTO.getPriceList().isEmpty() && !StringUtils.hasLength(productDTO.getProductName()) &&
+                !StringUtils.hasLength(productDTO.getProductUnit())) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
 
@@ -106,7 +106,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .toList();
         var barCodeSet = new HashSet<>(barCodeList);
         boolean existBarCode;
-        if(productDTO.getProductId() == null) {
+        if (productDTO.getProductId() == null) {
             existBarCode = productExtendPriceService.lambdaQuery()
                     .in(ProductExtendPrice::getProductBarCode, barCodeList)
                     .exists();
@@ -117,7 +117,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                     .exists();
 
         }
-        if(barCodeList.size() != barCodeSet.size() || existBarCode) {
+        if (barCodeList.size() != barCodeSet.size() || existBarCode) {
             return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_EXIST);
         }
 
@@ -179,7 +179,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         boolean addOrUpdatePriceResult = productExtendPriceService.saveOrUpdateBatch(productExtendPrices);
 
         var productStocks = new ArrayList<ProductStock>(productDTO.getStockList().size() + 2);
-        if(!productDTO.getStockList().isEmpty()) {
+        if (!productDTO.getStockList().isEmpty()) {
             for (ProductStockDTO productStockDTO : productDTO.getStockList()) {
                 var productStockId = Optional.ofNullable(productStockDTO.getProductStockId())
                         .orElse(SnowflakeIdUtil.nextId());
@@ -201,7 +201,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         }
         boolean addOrUpdateStockResult = productStockService.saveOrUpdateBatch(productStocks);
 
-        if(!productDTO.getImageList().isEmpty()) {
+        if (!productDTO.getImageList().isEmpty()) {
             var imageIds = productImageService.lambdaQuery()
                     .eq(ProductImage::getProductId, productId)
                     .eq(ProductImage::getDeleteFlag, CommonConstants.NOT_DELETED)
@@ -209,7 +209,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                     .stream()
                     .map(ProductImage::getId)
                     .toList();
-            if(!imageIds.isEmpty()) {
+            if (!imageIds.isEmpty()) {
                 productImageService.removeByIds(imageIds);
             }
 
@@ -229,7 +229,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             productImageService.saveBatch(imageList);
         }
 
-        if(productDTO.getProductId() == null) {
+        if (productDTO.getProductId() == null) {
             if (addOrUpdateResult && addOrUpdatePriceResult && addOrUpdateStockResult) {
                 return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS);
             }
@@ -282,7 +282,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                     .findFirst()
                     .orElse(null);
 
-            if(price != null) {
+            if (price != null) {
                 productVO.setProductBarcode(price.getProductBarCode());
                 productVO.setPurchasePrice(price.getPurchasePrice());
                 productVO.setRetailPrice(price.getRetailPrice());
@@ -295,7 +295,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                     .eq(ProductStock::getProductId, item.getId())
                     .eq(ProductStock::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .list();
-            if(!stock.isEmpty()) {
+            if (!stock.isEmpty()) {
                 var currentStockQuantity = stock.stream()
                         .map(ProductStock::getCurrentStockQuantity)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -313,11 +313,11 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Override
     public Response<ProductDetailVO> getProductInfoDetail(Long productId) {
-        if(productId == null) {
+        if (productId == null) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
         var product = getById(productId);
-        if(product == null) {
+        if (product == null) {
             return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
         }
 
@@ -327,7 +327,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         // 判断单位是否是多单位 如果productUnitId不为空则是多单位就需要进行查询单位信息 否则productUnit不为空就是单位信息
 
-        if(product.getProductUnitId() != null) {
+        if (product.getProductUnitId() != null) {
             var productUnit = productUnitService.lambdaQuery()
                     .eq(ProductUnit::getId, product.getProductUnitId())
                     .eq(ProductUnit::getDeleteFlag, CommonConstants.NOT_DELETED)
@@ -335,7 +335,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                     .map(ProductUnit::getComputeUnit)
                     .orElse(null);
             productDetailVO.setProductUnit(productUnit);
-        } else if (StringUtils.hasLength(product.getProductUnit())){
+        } else if (StringUtils.hasLength(product.getProductUnit())) {
             productDetailVO.setProductUnit(product.getProductUnit());
         }
 
@@ -344,7 +344,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .eq(ProductExtendPrice::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list();
 
-        if(prices != null && !prices.isEmpty()) {
+        if (prices != null && !prices.isEmpty()) {
             var productPrices = new ArrayList<ProductPriceVO>();
             for (ProductExtendPrice price : prices) {
                 ProductPriceVO productPriceVO = ProductPriceVO.builder()
@@ -371,7 +371,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .eq(ProductImage::getProductId, productId)
                 .eq(ProductImage::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list();
-        if(productImages != null && !productImages.isEmpty()) {
+        if (productImages != null && !productImages.isEmpty()) {
             var imagesVo = new ArrayList<ProductImageVO>();
             for (ProductImage image : productImages) {
                 ProductImageVO productImageVO = new ProductImageVO();
@@ -399,7 +399,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .stream()
                 .map(ProductImage::getId)
                 .toList();
-        if(!imageIds.isEmpty()) {
+        if (!imageIds.isEmpty()) {
             productImageService.removeByIds(imageIds);
         }
 
@@ -410,7 +410,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .stream()
                 .map(ProductExtendPrice::getId)
                 .toList();
-        if(!priceIds.isEmpty()) {
+        if (!priceIds.isEmpty()) {
             productExtendPriceService.removeByIds(priceIds);
         }
 
@@ -421,11 +421,11 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .stream()
                 .map(ProductStock::getId)
                 .toList();
-        if(!stockIds.isEmpty()) {
+        if (!stockIds.isEmpty()) {
             productStockService.removeByIds(stockIds);
         }
 
-       // 物理删除商品信息
+        // 物理删除商品信息
         var deleteProductResult = removeByIds(productIds);
         if (deleteProductResult) {
             return Response.responseMsg(ProdcutCodeEnum.PRODUCT_DELETE_SUCCESS);
@@ -449,5 +449,40 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             return Response.responseMsg(ProdcutCodeEnum.PRODUCT_STATUS_UPDATE_SUCCESS);
         }
         return Response.responseMsg(ProdcutCodeEnum.PRODUCT_STATUS_UPDATE_ERROR);
+    }
+
+    @Override
+    public Response<String> updateBatchProductInfo(UpdateBatchProductDTO productDTO) {
+        if (productDTO.getProductIds() == null || productDTO.getProductIds().isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        if (productDTO.getProductCategoryId() != null) {
+            lambdaUpdate()
+                    .set(Product::getProductCategoryId, productDTO.getProductCategoryId())
+                    .in(Product::getId, productDTO.getProductIds())
+                    .eq(Product::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .update();
+        }
+
+        var updateResult = lambdaUpdate()
+                .set(StringUtils.hasLength(productDTO.getProductColor()), Product::getProductColor, productDTO.getProductColor())
+                .set(productDTO.getProductWeight() != null, Product::getProductWeight, productDTO.getProductWeight())
+                .set(productDTO.getProductExpiryNum() != null, Product::getProductExpiryNum, productDTO.getProductExpiryNum())
+                .set(StringUtils.hasLength(productDTO.getEnableSerialNumber()), Product::getEnableSerialNumber, productDTO.getEnableSerialNumber())
+                .set(StringUtils.hasLength(productDTO.getEnableBatchNumber()), Product::getEnableBatchNumber, productDTO.getEnableBatchNumber())
+                .set(StringUtils.hasLength(productDTO.getRemark()), Product::getRemark, productDTO.getRemark())
+                .in(Product::getId, productDTO.getProductIds())
+                .eq(Product::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .update();
+        if (updateResult) {
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BATCH_UPDATE_SUCCESS);
+        }
+        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BATCH_UPDATE_ERROR);
+    }
+
+    @Override
+    @Transactional
+    public boolean batchAddProduct(List<Product> productVos) {
+        return saveBatch(productVos);
     }
 }

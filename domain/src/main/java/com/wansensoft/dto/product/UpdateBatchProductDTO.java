@@ -10,22 +10,28 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.product;
+package com.wansensoft.dto.product;
 
-import com.wansensoft.entities.product.ProductExtendPrice;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansensoft.utils.response.Response;
+import lombok.Data;
 
 import java.util.List;
 
-/**
- * <p>
- * 产品价格扩展 服务类
- * </p>
- */
-public interface ProductExtendPriceService extends IService<ProductExtendPrice> {
+@Data
+public class UpdateBatchProductDTO {
 
-    Response<Integer> getBarCode();
+    private List<Long> productIds;
 
-    Boolean checkProductCode(List<String> barCodes);
+    private Long productCategoryId;
+
+    private String productColor;
+
+    private Double productWeight;
+
+    private Integer productExpiryNum;
+
+    private String enableSerialNumber;
+
+    private String enableBatchNumber;
+
+    private String remark;
 }

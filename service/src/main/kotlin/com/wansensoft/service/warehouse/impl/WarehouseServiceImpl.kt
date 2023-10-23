@@ -174,4 +174,16 @@ open class WarehouseServiceImpl (
             Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_SUCCESS)
         }
     }
+
+    override fun getWarehouseByName(name: String?): Warehouse {
+        if (name.isNullOrEmpty()) {
+            return Warehouse()
+        }
+
+        return lambdaQuery()
+            .eq(Warehouse::getWarehouseName, name)
+            .eq(Warehouse::getDeleteFlag, CommonConstants.NOT_DELETED)
+            .one()
+            ?: Warehouse()
+    }
 }

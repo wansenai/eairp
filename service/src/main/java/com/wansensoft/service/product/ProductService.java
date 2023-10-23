@@ -15,6 +15,8 @@ package com.wansensoft.service.product;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansensoft.dto.product.AddOrUpdateProductDTO;
 import com.wansensoft.dto.product.QueryProductDTO;
+import com.wansensoft.dto.product.UpdateBatchProductDTO;
+import com.wansensoft.entities.product.Product;
 import com.wansensoft.utils.response.Response;
 import com.wansensoft.vo.product.ProductDetailVO;
 import com.wansensoft.vo.product.ProductVO;
@@ -32,4 +34,8 @@ public interface ProductService {
     Response<String> deleteProduct(List<Long> productIds);
 
     Response<String> updateProductStatus(List<Long> productIds, Integer status);
+
+    Response<String> updateBatchProductInfo(UpdateBatchProductDTO updateBatchProductDTO);
+
+    boolean batchAddProduct(List<Product> products);
 }
