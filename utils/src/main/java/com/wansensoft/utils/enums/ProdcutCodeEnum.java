@@ -70,7 +70,11 @@ public enum ProdcutCodeEnum {
 
     PRODUCT_STATUS_UPDATE_SUCCESS("P0013", "修改商品状态成功"),
 
-    PRODUCT_STATUS_UPDATE_ERROR("P0515", "修改商品状态失败");
+    PRODUCT_STATUS_UPDATE_ERROR("P0515", "修改商品状态失败"),
+
+    PRODUCT_BATCH_UPDATE_SUCCESS("P0014", "批量修改商品成功"),
+
+    PRODUCT_BATCH_UPDATE_ERROR("P0516", "批量修改商品失败");
 
     private final String code;
 
