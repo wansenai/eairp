@@ -49,6 +49,8 @@ import com.wansensoft.vo.CaptchaVO;
 import com.wansensoft.vo.basic.CustomerVO;
 import com.wansensoft.vo.basic.MemberVO;
 import com.wansensoft.vo.basic.SupplierVO;
+import com.wansensoft.vo.product.ExportProductVO;
+import com.wansensoft.vo.product.ProductVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
@@ -526,6 +528,90 @@ public class CommonServiceImpl implements CommonService{
             }
             file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
         } else if (type.contains("商品")) {
+            List<Product> products = productService.list();
+            List<ExportProductVO> productVOS = new ArrayList<>(products.size() + 1);
+            List<ProductExtendPrice> productExtendPrices = productExtendPriceService.list();
+            List<ProductStock> productStocks = productStockService.list();
+
+            for (Product product : products) {
+
+                // 查询商品类别名称
+                var productCategory = productCategoryService.getById(product.getProductCategoryId());
+                String productCategoryName = "";
+                if(productCategory != null) {
+                    productCategoryName = productCategory.getCategoryName();
+                }
+
+                var productPrice = productExtendPrices.stream()
+                        .filter(item -> item.getProductId().equals(product.getId()))
+                        .findFirst()
+                        .orElse(null);
+
+                ExportProductVO productVO = ExportProductVO.builder()
+                        .productName(product.getProductName())
+                        .productStandard(product.getProductStandard())
+                        .productModel(product.getProductModel())
+                        .productColor(product.getProductColor())
+                        .productCategoryName(productCategoryName)
+                        .productWeight(product.getProductWeight())
+                        .productExpiryNum(product.getProductExpiryNum())
+                        .productUnit(product.getProductUnit())
+                        .build();
+                if(productPrice != null) {
+                    productVO.setProductBarcode(productPrice.getProductBarCode());
+                    productVO.setMultiAttribute(productPrice.getMultiAttribute());
+                    productVO.setPurchasePrice(productPrice.getPurchasePrice());
+                    productVO.setRetailPrice(productPrice.getRetailPrice());
+                    productVO.setSalesPrice(productPrice.getSalePrice());
+                    productVO.setLowSalesPrice(productPrice.getLowPrice());
+                    productVO.setEnableSerialNumber(String.valueOf(product.getEnableSerialNumber()));
+                    productVO.setEnableBatchNumber(String.valueOf(product.getEnableBatchNumber()));
+                    productVO.setWarehouseShelves(product.getWarehouseShelves());
+                    productVO.setProductManufacturer(product.getProductManufacturer());
+                    productVO.setOtherFieldOne(product.getOtherFieldOne());
+                    productVO.setOtherFieldTwo(product.getOtherFieldTwo());
+                    productVO.setOtherFieldThree(product.getOtherFieldThree());
+                }
+                productStocks.stream()
+                        .filter(item -> item.getProductId().equals(product.getId()))
+                        .findFirst().ifPresent(productStock -> productVO.setStock(productStock.getCurrentStockQuantity()));
+
+                productVOS.add(productVO);
+
+                String[] columnNames =
+                        {"名称*", "规格", "型号", "颜色", "类别", "基础重量(kg)", "保质期(天)", "基本单位*", "商品条码*",
+                        "多属性", "采购价", "零售价", "销售价", "最低售价", "序列号", "批次号", "仓库货架", "制造商",
+                        "其他字段1", "其他字段2", "其他字段3", "库存"};
+                List<String[]> data = new ArrayList<>();
+                String title = "信息内容";
+                for (ExportProductVO item : productVOS) {
+                    String[] productData = new String[columnNames.length];
+                    productData[0] = StringUtils.hasText(item.getProductName()) ? item.getProductName() : "";
+                    productData[1] = StringUtils.hasText(item.getProductStandard()) ? item.getProductStandard() : "";
+                    productData[2] = StringUtils.hasText(item.getProductModel()) ? item.getProductModel() : "";
+                    productData[3] = StringUtils.hasText(item.getProductColor()) ? item.getProductColor() : "";
+                    productData[4] = StringUtils.hasText(item.getProductCategoryName()) ? item.getProductCategoryName() : "";
+                    productData[5] = item.getProductWeight() != null ? item.getProductWeight().toString() : "";
+                    productData[6] = item.getProductExpiryNum() != null ? item.getProductExpiryNum().toString() : "";
+                    productData[7] = StringUtils.hasText(item.getProductUnit()) ? item.getProductUnit() : "";
+                    productData[8] = item.getProductBarcode() != null ? item.getProductBarcode().toString() : "";
+                    productData[9] = StringUtils.hasText(item.getMultiAttribute()) ? item.getMultiAttribute() : "";
+                    productData[10] = item.getPurchasePrice() != null ? item.getPurchasePrice().toString() : "";
+                    productData[11] = item.getRetailPrice() != null ? item.getRetailPrice().toString() : "";
+                    productData[12] = item.getSalesPrice() != null ? item.getSalesPrice().toString() : "";
+                    productData[13] = item.getLowSalesPrice() != null ? item.getLowSalesPrice().toString() : "";
+                    productData[14] = StringUtils.hasText(item.getEnableSerialNumber()) ? item.getEnableSerialNumber() : "";
+                    productData[15] = StringUtils.hasText(item.getEnableBatchNumber()) ? item.getEnableBatchNumber() : "";
+                    productData[16] = StringUtils.hasText(item.getWarehouseShelves()) ? item.getWarehouseShelves() : "";
+                    productData[17] = StringUtils.hasText(item.getProductManufacturer()) ? item.getProductManufacturer() : "";
+                    productData[18] = StringUtils.hasText(item.getOtherFieldOne()) ? item.getOtherFieldOne() : "";
+                    productData[19] = StringUtils.hasText(item.getOtherFieldTwo()) ? item.getOtherFieldTwo() : "";
+                    productData[20] = StringUtils.hasText(item.getOtherFieldThree()) ? item.getOtherFieldThree() : "";
+                    productData[21] = item.getStock() != null ? item.getStock().toString() : "";
+                    data.add(productData);
+                }
+                file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
+            }
         }
 
         return file;

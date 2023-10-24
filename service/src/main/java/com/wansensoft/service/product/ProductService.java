@@ -13,6 +13,7 @@
 package com.wansensoft.service.product;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansensoft.dto.product.AddOrUpdateProductDTO;
 import com.wansensoft.dto.product.QueryProductDTO;
 import com.wansensoft.dto.product.UpdateBatchProductDTO;
@@ -23,7 +24,7 @@ import com.wansensoft.vo.product.ProductVO;
 
 import java.util.List;
 
-public interface ProductService {
+public interface ProductService extends IService<Product> {
 
     Response<String> addOrUpdateProduct(AddOrUpdateProductDTO addOrUpdateProductDTO);
 
