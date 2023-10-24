@@ -125,7 +125,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         var productNumber = productDTO.getPriceList();
         var productExtendPrices = new ArrayList<ProductExtendPrice>(productNumber.size());
 
-
         // 如果productId就赋值给productId 否则生成一个id
         var productId = Optional.ofNullable(productDTO.getProductId())
                 .orElse(SnowflakeIdUtil.nextId());
@@ -142,9 +141,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .productExpiryNum(getNumberValue(productDTO.getProductExpiryNum()))
                 .productWeight(getBigDecimalValue(productDTO.getProductWeight()))
                 .warehouseShelves(getStringValue(productDTO.getWarehouseShelves()))
-                // 2023-10-23 16:00 这里将来格式需要统一修复
-                .enableBatchNumber(Integer.parseInt(productDTO.getEnableBatchNumber()))
-                .enableSerialNumber(Integer.parseInt(productDTO.getEnableSerialNumber()))
                 .productManufacturer(getStringValue(productDTO.getProductManufacturer()))
                 .otherFieldOne(getStringValue(productDTO.getOtherFieldOne()))
                 .otherFieldTwo(getStringValue(productDTO.getOtherFieldTwo()))
@@ -155,8 +151,28 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .createTime(LocalDateTime.now())
                 .createBy(userId)
                 .build();
+
+        // 2023-10-23 16:00 这里将来格式需要统一修复 这里getEnableBatchNumber() 和 getProductManufacturer如果是空的话就不进行转换 会报错
+        if (productDTO.getEnableBatchNumber() != null) {
+            product.setEnableBatchNumber(Integer.valueOf(productDTO.getEnableBatchNumber()));
+        }
+        if (productDTO.getEnableSerialNumber() != null) {
+            product.setEnableSerialNumber(Integer.valueOf(productDTO.getEnableSerialNumber()));
+        }
         boolean addOrUpdateResult = saveOrUpdate(product);
 
+        // 删除原有的价格信息
+        var priceIds = productExtendPriceService.lambdaQuery()
+                .eq(ProductExtendPrice::getProductId, productId)
+                .eq(ProductExtendPrice::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list()
+                .stream()
+                .map(ProductExtendPrice::getId)
+                .toList();
+        if (!priceIds.isEmpty()) {
+            productExtendPriceService.removeByIds(priceIds);
+        }
+        
         for (ProductPriceDTO priceDTO : productNumber) {
             var productPriceId = Optional.ofNullable(priceDTO.getProductPriceId())
                     .orElse(SnowflakeIdUtil.nextId());
@@ -176,10 +192,22 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                     .build();
             productExtendPrices.add(price);
         }
-        boolean addOrUpdatePriceResult = productExtendPriceService.saveOrUpdateBatch(productExtendPrices);
+        boolean addPriceResult = productExtendPriceService.saveBatch(productExtendPrices);
 
         var productStocks = new ArrayList<ProductStock>(productDTO.getStockList().size() + 2);
         if (!productDTO.getStockList().isEmpty()) {
+            // 删除原有的库存信息
+            var stockIds = productStockService.lambdaQuery()
+                    .eq(ProductStock::getProductId, productId)
+                    .eq(ProductStock::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list()
+                    .stream()
+                    .map(ProductStock::getId)
+                    .toList();
+            if (!stockIds.isEmpty()) {
+                productStockService.removeByIds(stockIds);
+            }
+
             for (ProductStockDTO productStockDTO : productDTO.getStockList()) {
                 var productStockId = Optional.ofNullable(productStockDTO.getProductStockId())
                         .orElse(SnowflakeIdUtil.nextId());
@@ -199,7 +227,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 productStocks.add(productStock);
             }
         }
-        boolean addOrUpdateStockResult = productStockService.saveOrUpdateBatch(productStocks);
+        boolean addStockResult = productStockService.saveBatch(productStocks);
 
         if (!productDTO.getImageList().isEmpty()) {
             var imageIds = productImageService.lambdaQuery()
@@ -230,13 +258,13 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         }
 
         if (productDTO.getProductId() == null) {
-            if (addOrUpdateResult && addOrUpdatePriceResult && addOrUpdateStockResult) {
+            if (addOrUpdateResult && addPriceResult && addStockResult) {
                 return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS);
             }
             return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
         }
 
-        if (addOrUpdateResult && addOrUpdatePriceResult && addOrUpdateStockResult) {
+        if (addOrUpdateResult && addPriceResult && addStockResult) {
             return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UPDATE_SUCCESS);
         }
         return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UPDATE_ERROR);
