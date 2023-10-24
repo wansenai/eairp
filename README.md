@@ -46,12 +46,12 @@ You need to first install the Docker environment and already have the Redis and 
 
 ### Pull images
 ```shell
-docker pull wansenai/eairp:latest
+docker pull wansenai/eairp:2.0.3
 ```
 ### Run Server
 You can customize and modify port 8080, please ensure that the service ports monitored by your front-end are consistent
 ```shell
-docker run --name eairp -d -p 8080:8088 wansenai/eairp:latest 
+docker run --name eairp -d -p 8080:8088 wansenai/eairp:2.0.3
 ```
 At present, we are preparing to package all the environments into a `docker-compose`, and this plan may need to be postponed later
 
