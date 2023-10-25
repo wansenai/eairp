@@ -49,6 +49,7 @@ public class ProductDetailVO {
 
     private String productCategoryName;
 
+    private String remark;
     //
     // TODO
     // The @JsonFormat has been added here because the front-end is a select component,
