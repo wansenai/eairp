@@ -153,10 +153,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .build();
 
         // 2023-10-23 16:00 这里将来格式需要统一修复 这里getEnableBatchNumber() 和 getProductManufacturer如果是空的话就不进行转换 会报错
-        if (productDTO.getEnableBatchNumber() != null) {
+        if (StringUtils.hasLength(productDTO.getEnableBatchNumber())) {
             product.setEnableBatchNumber(Integer.valueOf(productDTO.getEnableBatchNumber()));
         }
-        if (productDTO.getEnableSerialNumber() != null) {
+        if (StringUtils.hasLength(productDTO.getEnableSerialNumber())) {
             product.setEnableSerialNumber(Integer.valueOf(productDTO.getEnableSerialNumber()));
         }
         boolean addOrUpdateResult = saveOrUpdate(product);
@@ -172,7 +172,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         if (!priceIds.isEmpty()) {
             productExtendPriceService.removeByIds(priceIds);
         }
-        
+
         for (ProductPriceDTO priceDTO : productNumber) {
             var productPriceId = Optional.ofNullable(priceDTO.getProductPriceId())
                     .orElse(SnowflakeIdUtil.nextId());
