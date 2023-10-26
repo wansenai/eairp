@@ -186,4 +186,27 @@ open class WarehouseServiceImpl (
             .one()
             ?: Warehouse()
     }
+
+    override fun getWarehouseList(): Response<List<WarehouseVO>> {
+        val warehouseList = mutableListOf<WarehouseVO>()
+        val warehouses = list()
+        for (warehouse in warehouses) {
+            val warehouseVO = WarehouseVO(
+                id = warehouse.id,
+                warehouseName = warehouse.warehouseName,
+                warehouseManager = warehouse.warehouseManager,
+                address = warehouse.address,
+                price = warehouse.price,
+                truckage = warehouse.truckage,
+                type = warehouse.type,
+                status = warehouse.status,
+                remark = warehouse.remark,
+                sort = warehouse.sort,
+                isDefault = warehouse.isDefault,
+                createTime = warehouse.createTime
+            )
+            warehouseList.add(warehouseVO)
+        }
+        return Response.responseData(warehouseList)
+    }
 }

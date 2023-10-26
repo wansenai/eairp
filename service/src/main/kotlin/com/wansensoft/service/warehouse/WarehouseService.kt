@@ -21,4 +21,6 @@ interface WarehouseService : IService<Warehouse> {
     fun updateBatchStatus(ids: List<Long>?, status: Int?): Response<String>
 
     fun getWarehouseByName(name: String?): Warehouse
+
+    fun getWarehouseList(): Response<List<WarehouseVO>>
 }

@@ -56,4 +56,9 @@ public class WarehouseController {
     public Response<String> updateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return warehouseService.updateBatchStatus(ids, status);
     }
+
+    @GetMapping("list")
+    public Response<List<WarehouseVO>> getWarehouseList() {
+        return warehouseService.getWarehouseList();
+    }
 }
