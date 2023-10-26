@@ -1,6 +1,0 @@
-[workspace]
-members = [
-    "air",
-    # modal rust api members
-    "airpi",
-]
