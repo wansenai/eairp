@@ -32,9 +32,9 @@ public class WarehouseController {
         this.warehouseService = warehouseService;
     }
 
-    @PostMapping("list")
-    public Response<Page<WarehouseVO>> getWarehouseList(@RequestBody QueryWarehouseDTO warehouseDTO) {
-        return warehouseService.getWarehouseList(warehouseDTO);
+    @PostMapping("pageList")
+    public Response<Page<WarehouseVO>> getWarehousePageList(@RequestBody QueryWarehouseDTO warehouseDTO) {
+        return warehouseService.getWarehousePageList(warehouseDTO);
     }
 
     @GetMapping("getWarehouse")

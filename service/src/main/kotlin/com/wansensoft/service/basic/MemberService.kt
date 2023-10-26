@@ -22,7 +22,7 @@ import com.wansensoft.vo.basic.MemberVO
 
 interface MemberService: IService<Member> {
 
-    fun getMemberList(memberDTO: QueryMemberDTO?): Response<Page<MemberVO>>
+    fun getMemberPageList(memberDTO: QueryMemberDTO?): Response<Page<MemberVO>>
 
     fun addOrUpdateMember(memberDTO: AddOrUpdateMemberDTO): Response<String>
 
@@ -31,4 +31,6 @@ interface MemberService: IService<Member> {
     fun updateMemberStatus(ids: List<Long>, status: Int): Response<String>
 
     fun batchAddMember(members: List<Member>?): Boolean
+
+    fun getMemberList(): Response<List<MemberVO>>
 }

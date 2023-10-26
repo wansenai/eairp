@@ -10,7 +10,7 @@ import com.wansensoft.vo.warehouse.WarehouseVO
 
 interface WarehouseService : IService<Warehouse> {
 
-    fun getWarehouseList(warehouseDTO: QueryWarehouseDTO?): Response<Page<WarehouseVO>>
+    fun getWarehousePageList(warehouseDTO: QueryWarehouseDTO?): Response<Page<WarehouseVO>>
 
     fun addOrUpdateWarehouse(warehouseDTO: AddOrUpdateWarehouseDTO): Response<String>
 
