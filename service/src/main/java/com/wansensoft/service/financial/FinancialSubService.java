@@ -20,6 +20,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 财务子表 服务类
  * </p>
  */
-public interface IFinancialSubService extends IService<FinancialSub> {
+public interface FinancialSubService extends IService<FinancialSub> {
 
 }
