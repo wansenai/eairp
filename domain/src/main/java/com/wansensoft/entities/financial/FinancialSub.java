@@ -12,14 +12,15 @@
  */
 package com.wansensoft.entities.financial;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import lombok.*;
 import lombok.experimental.Accessors;
 
 /**
@@ -28,12 +29,16 @@ import lombok.experimental.Accessors;
  * </p>
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("financial_sub")
 public class FinancialSub implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 74651615L;
 
     /**
      * 主键
@@ -47,9 +52,9 @@ public class FinancialSub implements Serializable {
     private Long tenantId;
 
     /**
-     * 表头Id
+     * 财务主表id
      */
-    private Long tableHeaderId;
+    private Long financialMainId;
 
     /**
      * 账户Id

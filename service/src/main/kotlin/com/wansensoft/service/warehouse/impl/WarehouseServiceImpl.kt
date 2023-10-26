@@ -31,7 +31,7 @@ open class WarehouseServiceImpl (
     private val userService: ISysUserService,
 ) : ServiceImpl<WarehouseMapper, Warehouse>(), WarehouseService {
 
-    override fun getWarehouseList(warehouseDTO: QueryWarehouseDTO?): Response<Page<WarehouseVO>> {
+    override fun getWarehousePageList(warehouseDTO: QueryWarehouseDTO?): Response<Page<WarehouseVO>> {
         val page = warehouseDTO?.run { Page<Warehouse>(page ?: 1, pageSize ?: 10) }
         val wrapper = LambdaQueryWrapper<Warehouse>().apply {
                 warehouseDTO?.warehouseName?.let { like(Warehouse::getWarehouseName, it) }
@@ -185,5 +185,28 @@ open class WarehouseServiceImpl (
             .eq(Warehouse::getDeleteFlag, CommonConstants.NOT_DELETED)
             .one()
             ?: Warehouse()
+    }
+
+    override fun getWarehouseList(): Response<List<WarehouseVO>> {
+        val warehouseList = mutableListOf<WarehouseVO>()
+        val warehouses = list()
+        for (warehouse in warehouses) {
+            val warehouseVO = WarehouseVO(
+                id = warehouse.id,
+                warehouseName = warehouse.warehouseName,
+                warehouseManager = warehouse.warehouseManager,
+                address = warehouse.address,
+                price = warehouse.price,
+                truckage = warehouse.truckage,
+                type = warehouse.type,
+                status = warehouse.status,
+                remark = warehouse.remark,
+                sort = warehouse.sort,
+                isDefault = warehouse.isDefault,
+                createTime = warehouse.createTime
+            )
+            warehouseList.add(warehouseVO)
+        }
+        return Response.responseData(warehouseList)
     }
 }

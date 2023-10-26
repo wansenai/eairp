@@ -10,19 +10,10 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.financial;
+package com.wansensoft.mappers.system;
 
-import com.wansensoft.entities.financial.FinancialSub;
-import com.wansensoft.mappers.financial.FinancialSubMapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.wansensoft.entities.system.SysFile;
 
-/**
- * <p>
- * 财务子表 服务实现类
- * </p>
- */
-@Service
-public class FinancialSubServiceImpl extends ServiceImpl<FinancialSubMapper, FinancialSub> implements IFinancialSubService {
-
+public interface SysFileMapper extends BaseMapper<SysFile> {
 }

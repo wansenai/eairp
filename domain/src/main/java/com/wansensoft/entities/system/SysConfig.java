@@ -15,6 +15,8 @@ package com.wansensoft.entities.system;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+
+import java.io.Serial;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,7 +33,8 @@ import lombok.experimental.Accessors;
 @TableName("sys_config")
 public class SysConfig implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 61416156L;
 
     /**
      * 主键

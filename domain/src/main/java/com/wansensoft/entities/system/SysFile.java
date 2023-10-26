@@ -10,66 +10,44 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.entities.user;
+package com.wansensoft.entities.system;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-
-import java.io.Serial;
-import java.time.LocalDateTime;
-import java.io.Serializable;
-
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.*;
 import lombok.experimental.Accessors;
 
-/**
- * <p>
- * 用户部门关系表
- * </p>
- */
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("sys_user_dept_rel")
-@Builder
-public class SysUserDeptRel implements Serializable {
+@TableName("sys_file")
+public class SysFile implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 71918916161L;
+    private static final long serialVersionUID = 9161563216532L;
 
-    /**
-     * 主键
-     */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.NONE)
     private Long id;
 
-    /**
-     * 租户id
-     */
-    private Long tenantId;
+    private String uId;
 
-    /**
-     * 部门id
-     */
-    private Long deptId;
+    private String fileName;
 
-    /**
-     * 用户id
-     */
-    private Long userId;
+    private String fileUrl;
 
-    /**
-     * 用户在所属部门中显示顺序
-     */
-    private Integer sort;
+    private String fileDownloadUrl;
 
-    /**
-     * 删除标记，0未删除，1删除
-     */
-    private Integer deleteFlag;
+    private String fileType;
+
+    private Long fileSize;
 
     /**
      * 创建时间
@@ -91,5 +69,5 @@ public class SysUserDeptRel implements Serializable {
      */
     private Long updateBy;
 
-
+    private Integer deleteFlag;
 }

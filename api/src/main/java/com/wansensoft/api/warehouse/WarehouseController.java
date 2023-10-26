@@ -32,9 +32,9 @@ public class WarehouseController {
         this.warehouseService = warehouseService;
     }
 
-    @PostMapping("list")
-    public Response<Page<WarehouseVO>> getWarehouseList(@RequestBody QueryWarehouseDTO warehouseDTO) {
-        return warehouseService.getWarehouseList(warehouseDTO);
+    @PostMapping("pageList")
+    public Response<Page<WarehouseVO>> getWarehousePageList(@RequestBody QueryWarehouseDTO warehouseDTO) {
+        return warehouseService.getWarehousePageList(warehouseDTO);
     }
 
     @GetMapping("getWarehouse")
@@ -55,5 +55,10 @@ public class WarehouseController {
     @PostMapping("updateStatus")
     public Response<String> updateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return warehouseService.updateBatchStatus(ids, status);
+    }
+
+    @GetMapping("list")
+    public Response<List<WarehouseVO>> getWarehouseList() {
+        return warehouseService.getWarehouseList();
     }
 }

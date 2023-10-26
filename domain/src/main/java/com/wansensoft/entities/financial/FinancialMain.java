@@ -12,14 +12,15 @@
  */
 package com.wansensoft.entities.financial;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import lombok.*;
 import lombok.experimental.Accessors;
 
 /**
@@ -28,12 +29,16 @@ import lombok.experimental.Accessors;
  * </p>
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("financial_main")
 public class FinancialMain implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 71651561123L;
 
     /**
      * 主键
@@ -89,7 +94,7 @@ public class FinancialMain implements Serializable {
     /**
      * 单据来源，0-pc，1-手机
      */
-    private Boolean receiptSource;
+    private Integer receiptSource;
 
     /**
      * 单据日期
@@ -102,14 +107,14 @@ public class FinancialMain implements Serializable {
     private String remark;
 
     /**
-     * 附件名称
+     * 附件名称 多个用,号分隔
      */
-    private String fileName;
+    private String fileId;
 
     /**
      * 状态，0未审核、1已审核、9审核中
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 创建时间
@@ -134,7 +139,7 @@ public class FinancialMain implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }

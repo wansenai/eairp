@@ -40,7 +40,7 @@ open class MemberServiceImpl(
     private val memberMapper: MemberMapper
 ) : ServiceImpl<MemberMapper, Member>(), MemberService {
 
-    override fun getMemberList(memberDTO: QueryMemberDTO?): Response<Page<MemberVO>> {
+    override fun getMemberPageList(memberDTO: QueryMemberDTO?): Response<Page<MemberVO>> {
         val page = memberDTO?.run { Page<Member>(page ?: 1, pageSize ?: 10) }
         val wrapper = LambdaQueryWrapper<Member>().apply {
             memberDTO?.memberNumber?.let { like(Member::getMemberNumber, it) }
@@ -161,5 +161,43 @@ open class MemberServiceImpl(
             }
         }
         return saveBatch(memberEntities)
+    }
+
+    override fun getMemberList(): Response<List<MemberVO>> {
+        val memberList = list(
+            LambdaQueryWrapper<Member>()
+                .eq(Member::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .orderByAsc(Member::getSort)
+        )
+        val memberVOList = memberList.map { member ->
+            MemberVO(
+                id = member.id,
+                memberNumber = member.memberNumber,
+                memberName = member.memberName,
+                phoneNumber = member.phoneNumber,
+                email = member.email,
+                advancePayment = member.advancePayment,
+                status = member.status,
+                remark = member.remark,
+                sort = member.sort,
+                createTime = member.createTime
+            )
+        }
+        return Response.responseData(memberVOList)
+    }
+
+    override fun updateAdvanceChargeAmount(memberId: Long?, amount: BigDecimal): Boolean {
+        if (memberId == null || amount <= BigDecimal.ZERO) {
+            return false
+        }
+        val member = getById(memberId)
+        if (member == null) {
+            log.error("Member does not exist, memberId: $memberId")
+            return false
+        }
+        return lambdaUpdate()
+            .eq(Member::getId, memberId)
+            .set(Member::getAdvancePayment, member.advancePayment.add(amount))
+            .update()
     }
 }

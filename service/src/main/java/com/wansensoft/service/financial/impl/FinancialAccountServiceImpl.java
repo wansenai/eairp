@@ -10,7 +10,7 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansensoft.service.financial;
+package com.wansensoft.service.financial.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -20,6 +20,7 @@ import com.wansensoft.entities.financial.FinancialAccount;
 import com.wansensoft.mappers.financial.FinancialAccountMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansensoft.service.BaseService;
+import com.wansensoft.service.financial.IFinancialAccountService;
 import com.wansensoft.utils.constants.CommonConstants;
 import com.wansensoft.utils.enums.BaseCodeEnum;
 import com.wansensoft.utils.enums.FinancialCodeEnum;

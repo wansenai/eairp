@@ -19,10 +19,11 @@ import com.wansensoft.dto.basic.QueryMemberDTO
 import com.wansensoft.entities.basic.Member
 import com.wansensoft.utils.response.Response
 import com.wansensoft.vo.basic.MemberVO
+import java.math.BigDecimal
 
 interface MemberService: IService<Member> {
 
-    fun getMemberList(memberDTO: QueryMemberDTO?): Response<Page<MemberVO>>
+    fun getMemberPageList(memberDTO: QueryMemberDTO?): Response<Page<MemberVO>>
 
     fun addOrUpdateMember(memberDTO: AddOrUpdateMemberDTO): Response<String>
 
@@ -31,4 +32,8 @@ interface MemberService: IService<Member> {
     fun updateMemberStatus(ids: List<Long>, status: Int): Response<String>
 
     fun batchAddMember(members: List<Member>?): Boolean
+
+    fun getMemberList(): Response<List<MemberVO>>
+
+    fun updateAdvanceChargeAmount(memberId: Long?, amount: BigDecimal): Boolean
 }
