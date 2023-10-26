@@ -185,4 +185,19 @@ open class MemberServiceImpl(
         }
         return Response.responseData(memberVOList)
     }
+
+    override fun updateAdvanceChargeAmount(memberId: Long?, amount: BigDecimal): Boolean {
+        if (memberId == null || amount <= BigDecimal.ZERO) {
+            return false
+        }
+        val member = getById(memberId)
+        if (member == null) {
+            log.error("Member does not exist, memberId: $memberId")
+            return false
+        }
+        return lambdaUpdate()
+            .eq(Member::getId, memberId)
+            .set(Member::getAdvancePayment, member.advancePayment.add(amount))
+            .update()
+    }
 }
