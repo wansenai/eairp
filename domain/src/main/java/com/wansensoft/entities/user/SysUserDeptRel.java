@@ -15,6 +15,8 @@ package com.wansensoft.entities.user;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -35,7 +37,8 @@ import lombok.experimental.Accessors;
 @Builder
 public class SysUserDeptRel implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 71918916161L;
 
     /**
      * 主键
