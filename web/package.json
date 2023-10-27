@@ -133,7 +133,6 @@
     "cross-env": "^7.0.3",
     "cz-git": "^1.6.1",
     "czg": "^1.6.1",
-    "husky": "^8.0.3",
     "lint-staged": "13.2.3",
     "prettier": "^2.8.8",
     "prettier-plugin-packagejson": "^2.4.4",
