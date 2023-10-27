@@ -2,7 +2,7 @@ FROM node:18.18.0 as build-stage
 MAINTAINER WanSen AI<team@wansenai.com>
 WORKDIR app
 
-COPY ./web ./
+COPY . ./
 
 ENV NODE_OPTIONS --max-old-space-size=16384
 
