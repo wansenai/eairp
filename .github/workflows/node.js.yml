@@ -27,7 +27,11 @@ jobs:
         run: npm install -g pnpm 
 
       - name: Install dependencies
-        run: pnpm install --prefix web
+        run: |
+          cd web
+          pnpm install
 
       - name: Build
-        run: pnpm build --prefix web
+        run: |
+          cd web
+          pnpm build
