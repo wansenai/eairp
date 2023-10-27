@@ -25,6 +25,11 @@ jobs:
 
       - name: Install pnpm
         run: npm install -g pnpm 
+        
+      - name: Install Husky
+        run: |
+          cd web
+          npx husky install  
 
       - name: Install dependencies
         run: |
