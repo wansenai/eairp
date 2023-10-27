@@ -61,6 +61,6 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         context: .
-        file: ./docker/WebDockerfile
+        file: ./web/Dockerfile
         push: false
         tags: ${{ steps.meta.outputs.tags }}
