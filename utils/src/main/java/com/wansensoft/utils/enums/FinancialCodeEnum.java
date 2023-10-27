@@ -31,16 +31,22 @@ public enum FinancialCodeEnum {
 
     UPDATE_ACCOUNT_STATUS_SUCCESS("F0004", "修改账号状态成功"),
 
-    UPDATE_ACCOUNT_STATUS_ERROR("F0503", "修改账号状态失败");
+    UPDATE_ACCOUNT_STATUS_ERROR("F0503", "修改账号状态失败"),
 
-    /**
-     * 响应状态码
-     */
+    ADD_ADVANCE_SUCCESS("F0005", "新增预收款成功"),
+
+    ADD_ADVANCE_ERROR("F0504", "新增预收款失败"),
+
+    UPDATE_ADVANCE_SUCCESS("F0006", "更新预收款数据成功"),
+
+    UPDATE_ADVANCE_ERROR("F0505", "更新预收款数据失败"),
+
+    DELETE_ADVANCE_SUCCESS("F0007", "删除预收款数据成功"),
+
+    DELETE_ADVANCE_ERROR("F0506", "删除预收款数据失败");
+
     private final String code;
 
-    /**
-     * 响应提示
-     */
     private final String msg;
 
     FinancialCodeEnum(String code, String msg) {
