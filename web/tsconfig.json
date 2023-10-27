@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@vben/ts-config/vue-app.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["vite/client", "unplugin-vue-define-options/macros-global"],
+    "paths": {
+      "/@/*": ["src/*"],
+      "/#/*": ["types/*"],
+      "@/*": ["src/*"],
+      "#/*": ["types/*"]
+    },
+    "declaration": false
+  },
+  "include": [
+    "tests/**/*.ts",
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "types/**/*.d.ts",
+    "types/**/*.ts",
+    "build/**/*.ts",
+    "build/**/*.d.ts",
+    "mock/**/*.ts",
+    "vite.config.ts"
+  ],
+  "exclude": ["node_modules", "tests/server/**/*.ts", "dist", "**/*.js"]
+}
