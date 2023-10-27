@@ -45,14 +45,8 @@ public enum FinancialCodeEnum {
 
     DELETE_ADVANCE_ERROR("F0506", "删除预收款数据失败");
 
-    /**
-     * 响应状态码
-     */
     private final String code;
 
-    /**
-     * 响应提示
-     */
     private final String msg;
 
     FinancialCodeEnum(String code, String msg) {
