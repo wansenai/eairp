@@ -8,7 +8,6 @@ node_modules
 dist
 /public
 /docs
-.husky
 .local
 /bin
 /docker
