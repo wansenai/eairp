@@ -204,9 +204,6 @@ importers:
       czg:
         specifier: ^1.6.1
         version: registry.npmmirror.com/czg@1.7.1
-      husky:
-        specifier: ^8.0.3
-        version: 8.0.3
       lint-staged:
         specifier: 13.2.3
         version: registry.npmmirror.com/lint-staged@13.2.3
@@ -3322,12 +3319,6 @@ packages:
       domhandler: 5.0.3
       domutils: 3.1.0
       entities: 4.5.0
-    dev: true
-
-  /husky@8.0.3:
-    resolution: {integrity: sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==}
-    engines: {node: '>=14'}
-    hasBin: true
     dev: true
 
   /iconv-lite@0.6.3:

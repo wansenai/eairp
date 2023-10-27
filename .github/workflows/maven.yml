@@ -33,13 +33,13 @@ jobs:
         cache: maven
         
     - name: clean with Maven
-      run: mvn clean install
+      run: mvn -f core/pom.xml clean install
         
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -f core/pom.xml -B package --file pom.xml
 
     - name: Run tests and generate coverage report
-      run: mvn test  
+      run: mvn -f core/pom.xml test  
     
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
