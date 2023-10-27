@@ -59,5 +59,5 @@ jobs:
 
     - name: Build Docker image
       run: |
-        cd ./docker
-        docker build -t ${{ steps.meta.outputs.tags }} WebDockerfile .
+        cd web
+        docker build .
