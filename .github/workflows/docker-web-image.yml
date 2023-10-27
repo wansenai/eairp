@@ -57,10 +57,7 @@ jobs:
           # tag event
           type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v3
-      with:
-        context: .
-        file: ./web/Dockerfile
-        push: false
-        tags: ${{ steps.meta.outputs.tags }}
+    - name: Build Docker image
+      run: |
+        cd ./docker
+        docker build -t ${{ steps.meta.outputs.tags }} WebDockerfile .
