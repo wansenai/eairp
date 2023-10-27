@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.wansenai.eairp</groupId>
+        <artifactId>core</artifactId>
+        <version>2.0.4-SNAPSHOT</version>
+    </parent>
+    <packaging>jar</packaging>
+    <artifactId>api</artifactId>
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.wansenai.eairp</groupId>
+            <artifactId>utils</artifactId>
+            <version>2.0.4-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.wansenai.eairp</groupId>
+            <artifactId>plugins</artifactId>
+            <version>2.0.4-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.wansenai.eairp</groupId>
+            <artifactId>middleware</artifactId>
+            <version>2.0.4-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.wansenai.eairp</groupId>
+            <artifactId>service</artifactId>
+            <version>2.0.4-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.wansenai.eairp</groupId>
+            <artifactId>domain</artifactId>
+            <version>2.0.4-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.wansenai.eairp</groupId>
+            <artifactId>dao</artifactId>
+            <version>2.0.4-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.1.4</version>
+                <configuration>
+                    <finalName>eairp-core</finalName>
+                    <mainClass>com.wansenai.api.ErpApplication</mainClass>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
