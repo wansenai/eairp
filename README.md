@@ -11,6 +11,9 @@
   <a href="https://spring.io/projects/spring-boot#learn">
     <img alt="Static Badge" src="https://img.shields.io/badge/spring-boot?label=Spring%20Boot%203.1.3">
   </a>
+ <a href="https://codecov.io/gh/wansenai/eairp" > 
+    <img src="https://codecov.io/gh/wansenai/eairp/graph/badge.svg?token=6OO8JX0ZVV"/> 
+ </a>
   <a href="#">
     <img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/wansenai/wansenerp/maven.yml">
   </a>
