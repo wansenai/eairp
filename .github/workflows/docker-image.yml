@@ -23,7 +23,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn clean package
+      run: mvn -f core/pom.xml clean package
 
     - name: Log into registry
       uses: docker/login-action@v2
