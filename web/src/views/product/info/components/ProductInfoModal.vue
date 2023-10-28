@@ -1160,9 +1160,6 @@ export default defineComponent({
         return;
       }
 
-      console.info(editableData)
-      console.info(editStockData)
-
       const imageList: AddProductImageReq[] = [];
       if (fileList && fileList.value) {
         for (let i = 0; i < fileList.value.length; i++) {
