@@ -12,6 +12,48 @@
  */
 package com.wansenai.api.financial
 
-class AdvanceChargeController {
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page
+import com.wansenai.dto.financial.AddOrUpdateAdvanceChargeDTO
+import com.wansenai.dto.financial.QueryAdvanceChargeDTO
+import com.wansenai.service.financial.AdvanceChargeService
+import com.wansenai.utils.response.Response
+import com.wansenai.vo.financial.AdvanceChargeDetailVO
+import com.wansenai.vo.financial.AdvanceChargeVO
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
+@RestController
+@RequestMapping("/financial/advanceCharge")
+class AdvanceChargeController(private val advanceChargeService: AdvanceChargeService) {
+
+    @PostMapping("addOrUpdate")
+    fun addOrUpdateAdvanceCharge(@RequestBody advanceChargeDTO: AddOrUpdateAdvanceChargeDTO): Response<String> {
+        return advanceChargeService.addOrUpdateAdvanceCharge(advanceChargeDTO)
+    }
+
+    @PostMapping("getPageList")
+    fun getAdvanceChargePageList(@RequestBody advanceChargeDTO: QueryAdvanceChargeDTO) : Response<Page<AdvanceChargeVO>> {
+        return advanceChargeService.getAdvanceChargePageList(advanceChargeDTO)
+    }
+
+    @GetMapping("getDetailById/{id}")
+    fun getDetailById(@PathVariable id: Long) : Response<AdvanceChargeDetailVO> {
+        return advanceChargeService.getAdvanceChargeDetailById(id)
+    }
+
+    @PutMapping("deleteByIds")
+    fun deleteByIds(@RequestParam("ids") ids: List<Long>) : Response<String> {
+        return advanceChargeService.deleteAdvanceChargeById(ids)
+    }
+
+    @PutMapping("updateStatusByIds")
+    fun updateStatus(@RequestParam("ids") ids: List<Long>, @RequestParam("status") status: Int) : Response<String> {
+        return advanceChargeService.updateAdvanceChargeStatusById(ids, status)
+    }
 }

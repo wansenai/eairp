@@ -12,11 +12,17 @@
  */
 package com.wansenai.bo
 
+import com.wansenai.NoArg
+import lombok.Data
 import java.math.BigDecimal
 
+@NoArg
+@Data
 data class AdvanceChargeDataBO(
 
     val accountId: Long,
+
+    val accountName: String,
 
     val amount : BigDecimal,
 

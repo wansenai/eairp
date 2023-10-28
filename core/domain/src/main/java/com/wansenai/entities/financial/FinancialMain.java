@@ -57,6 +57,11 @@ public class FinancialMain implements Serializable {
     private Long organizationId;
 
     /**
+     * 会员id
+     */
+    private Long memberId;
+
+    /**
      * 经手人id
      */
     private Long handsPersonId;

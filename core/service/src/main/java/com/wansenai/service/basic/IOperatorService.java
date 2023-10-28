@@ -31,4 +31,8 @@ public interface IOperatorService extends IService<Operator> {
     Response<String> deleteBatchOperator(List<Long> ids);
 
     Response<String> updateOperatorStatus(List<Long> ids, Integer status);
+
+    Operator getOperatorById(Long id);
+
+
 }

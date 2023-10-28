@@ -19,12 +19,20 @@ import com.wansenai.entities.SysDepartment
 import com.wansenai.entities.financial.FinancialMain
 import com.wansenai.entities.financial.FinancialSub
 import com.wansenai.bo.AdvanceChargeDataBO
+import com.wansenai.bo.FileDataBO
 import com.wansenai.dto.financial.AddOrUpdateAdvanceChargeDTO
 import com.wansenai.dto.financial.QueryAdvanceChargeDTO
+import com.wansenai.entities.basic.Member
+import com.wansenai.entities.basic.Operator
+import com.wansenai.entities.user.SysUser
 import com.wansenai.mappers.financial.FinancialMainMapper
+import com.wansenai.mappers.system.SysFileMapper
+import com.wansenai.service.basic.IOperatorService
 import com.wansenai.service.basic.MemberService
 import com.wansenai.service.financial.AdvanceChargeService
+import com.wansenai.service.financial.IFinancialAccountService
 import com.wansenai.service.system.SysDepartmentService
+import com.wansenai.service.user.ISysUserService
 import com.wansenai.utils.SnowflakeIdUtil
 import com.wansenai.utils.TimeUtil
 import com.wansenai.utils.constants.CommonConstants
@@ -46,11 +54,14 @@ open class AdvanceChargeServiceImpl(
     private val financialSubService: com.wansenai.service.financial.FinancialSubService,
     private val financialMainMapper: FinancialMainMapper,
     private val memberService: MemberService,
+    private val operatorService: IOperatorService,
+    private val userService: ISysUserService,
+    private val accountService: IFinancialAccountService,
+    private val fileMapper: SysFileMapper,
 ) : ServiceImpl<FinancialMainMapper, FinancialMain>(), AdvanceChargeService {
 
     @Transactional
     override fun addOrUpdateAdvanceCharge(advanceChargeDTO: AddOrUpdateAdvanceChargeDTO): Response<String> {
-        // 先判断如果memberId和receiptDate为空返回必填参数错误
         if (advanceChargeDTO.memberId == null || advanceChargeDTO.receiptDate.isEmpty()) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
         }
@@ -93,6 +104,7 @@ open class AdvanceChargeServiceImpl(
                 .organizationId(deptId)
                 .handsPersonId(advanceChargeDTO.financialPersonnelId)
                 .type("收预付款")
+                .memberId(advanceChargeDTO.memberId)
                 .changePrice(advanceChargeDTO.totalAmount)
                 .totalPrice(advanceChargeDTO.totalAmount)
                 .receiptNumber(advanceChargeDTO.receiptNumber)
@@ -130,7 +142,7 @@ open class AdvanceChargeServiceImpl(
 
     override fun getAdvanceChargePageList(advanceChargeDTO: QueryAdvanceChargeDTO?): Response<Page<AdvanceChargeVO>> {
         val page = advanceChargeDTO?.run { Page<FinancialMain>(page ?: 1, pageSize ?: 10) }
-        val wrapper = LambdaQueryWrapper<FinancialMain>().apply{
+        val wrapper = LambdaQueryWrapper<FinancialMain>().apply {
             advanceChargeDTO?.financialPersonnelId?.let { eq(FinancialMain::getHandsPersonId, it) }
             advanceChargeDTO?.receiptNumber?.let { eq(FinancialMain::getReceiptNumber, it) }
             advanceChargeDTO?.status?.let { eq(FinancialMain::getStatus, it) }
@@ -143,31 +155,133 @@ open class AdvanceChargeServiceImpl(
 
         val result = page?.run {
             financialMainMapper.selectPage(this, wrapper)
-            val listVo = records.map { financialMain ->
-//                AdvanceChargeVO(
-//                    id = financialMain.id,
-//                )
-            }
-            Page<AdvanceChargeVO>().apply {
-                records = null
-                total = this@run.total
-                pages = this@run.pages
-                size = this@run.size
-            }
+            records.map { financialMain ->
+                val member = memberService.getMemberById(financialMain.memberId)
+                val operator = userService.getById(financialMain.createBy)
+                val financialPerson = operatorService.getOperatorById(financialMain.handsPersonId)
+
+                financialMain.toAdvanceChargeVO(member, operator, financialPerson)
+            }.toPage(this@run.total, this@run.pages, this@run.size)
         }
-        return result?.let { Response.responseData(it) } ?: Response.responseMsg(
-            BaseCodeEnum.QUERY_DATA_EMPTY)
+        return result?.let { Response.responseData(it) } ?: Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
+    }
+
+    // Extension function to convert FinancialMain to AdvanceChargeVO
+    private fun FinancialMain.toAdvanceChargeVO(member: Member?, operator: SysUser, financialPerson: Operator): AdvanceChargeVO {
+        return AdvanceChargeVO(
+            id = this.id,
+            receiptNumber = this.receiptNumber,
+            receiptDate = this.receiptTime,
+            operator = operator.name,
+            financialPersonnel = financialPerson.name,
+            memberName = member?.memberName,
+            totalAmount = this.totalPrice,
+            collectedAmount = this.changePrice,
+            status = this.status,
+            remark = this.remark
+        )
+    }
+
+    // Extension function, converting List to Page
+    private fun <T> List<T>.toPage(total: Long, pages: Long, size: Long): Page<T> {
+        return Page<T>().apply {
+            records = this@toPage
+            this.total = total
+            this.pages = pages
+            this.size = size
+        }
     }
 
     override fun getAdvanceChargeDetailById(id: Long): Response<AdvanceChargeDetailVO> {
-        TODO("Not yet implemented")
+        val financialMain = getById(id)
+        if(financialMain != null) {
+            val member = memberService.getMemberById(financialMain.memberId)
+            val financialPerson = operatorService.getOperatorById(financialMain.handsPersonId)
+
+            val subData = financialSubService.lambdaQuery()
+                .eq(FinancialSub::getFinancialMainId, financialPerson.id)
+                .list()
+
+            val tableData = ArrayList<AdvanceChargeDataBO>()
+            subData.map { financialSub ->
+                val account = accountService.getById(financialSub.accountId)
+                val record = AdvanceChargeDataBO(
+                    accountId = financialSub.accountId,
+                    accountName = account.accountName,
+                    amount = financialSub.singleAmount,
+                    remark = financialSub.remark,
+                )
+                tableData.add(record)
+            }
+
+            val ids = financialMain.fileId.split(",").map { it.toLong() }
+            val filesData = ArrayList<FileDataBO>()
+            val fileList = fileMapper.selectBatchIds(ids)
+            fileList.map { file ->
+                val fileBo = FileDataBO(
+                    id = file.id,
+                    fileName = file.fileName,
+                    fileUrl = file.fileUrl,
+                    fileType = file.fileType,
+                    fileSize = file.fileSize
+                )
+                filesData.add(fileBo)
+            }
+
+            val resultVO = AdvanceChargeDetailVO(
+                memberName = member?.memberName,
+                receiptNumber = financialMain.receiptNumber,
+                receiptDate = financialMain.receiptTime,
+                financialPersonnel = financialPerson.name,
+                totalAmount = financialMain.totalPrice,
+                collectedAmount = financialMain.changePrice,
+                tableData = tableData,
+                files = filesData
+            );
+        }
+        return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
     }
 
+    @Transactional
     override fun deleteAdvanceChargeById(ids: List<Long>): Response<String> {
-        TODO("Not yet implemented")
+        if (ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+        }
+        val financialMainList = ids.map { id ->
+            FinancialMain.builder()
+                .id(id)
+                .deleteFlag(CommonConstants.DELETED)
+                .build()
+        }
+        val isDeleted = updateBatchById(financialMainList)
+        val financialSubList = financialSubService.lambdaQuery()
+            .`in`(FinancialSub::getFinancialMainId, ids)
+            .list()
+        val financialSubIdList = financialSubList.map { it.id }
+        val isFinancialSubDeleted = financialSubService.updateBatchById(financialSubIdList.map { id ->
+            FinancialSub.builder()
+                .id(id)
+                .deleteFlag(CommonConstants.DELETED)
+                .build()
+        })
+        if (isDeleted && isFinancialSubDeleted) {
+            return Response.responseMsg(FinancialCodeEnum.DELETE_ADVANCE_SUCCESS)
+        }
+        return Response.responseMsg(FinancialCodeEnum.DELETE_ADVANCE_ERROR)
     }
 
+    @Transactional
     override fun updateAdvanceChargeStatusById(ids: List<Long>, status: Int): Response<String> {
-        TODO("Not yet implemented")
+        val financialMainList = ids.map { id ->
+            FinancialMain.builder()
+                .id(id)
+                .status(status)
+                .build()
+        }
+        val isUpdated = updateBatchById(financialMainList)
+        if (isUpdated) {
+            return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_SUCCESS)
+        }
+        return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_ERROR)
     }
 }

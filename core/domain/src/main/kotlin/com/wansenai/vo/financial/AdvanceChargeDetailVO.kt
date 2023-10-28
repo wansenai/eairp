@@ -26,7 +26,7 @@ import java.time.LocalDateTime
 @Data
 data class AdvanceChargeDetailVO (
 
-    var memberName: String,
+    var memberName: String? = null,
 
     var receiptNumber: String,
 

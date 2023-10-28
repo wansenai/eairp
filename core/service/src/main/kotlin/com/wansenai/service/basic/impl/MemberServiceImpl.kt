@@ -200,4 +200,15 @@ open class MemberServiceImpl(
             .set(Member::getAdvancePayment, member.advancePayment.add(amount))
             .update()
     }
+
+    override fun getMemberById(memberId: Long?): Member? {
+        return memberId?.let {
+            val member = getById(memberId)
+            if (member == null) {
+                log.error("Member does not exist, memberId: $memberId")
+                return null;
+            }
+            return member
+        } ?: null
+    }
 }

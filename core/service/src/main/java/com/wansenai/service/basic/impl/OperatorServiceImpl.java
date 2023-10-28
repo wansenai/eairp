@@ -131,4 +131,12 @@ public class OperatorServiceImpl extends ServiceImpl<OperatorMapper, Operator> i
 
         return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_STATUS_SUCCESS);
     }
+
+    @Override
+    public Operator getOperatorById(Long id) {
+        if(id == null) {
+            return null;
+        }
+        return getById(id);
+    }
 }
