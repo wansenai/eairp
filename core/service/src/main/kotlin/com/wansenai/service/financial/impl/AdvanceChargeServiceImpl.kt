@@ -272,7 +272,6 @@ open class AdvanceChargeServiceImpl(
 
     @Transactional
     override fun updateAdvanceChargeStatusById(ids: List<Long>, status: Int): Response<String> {
-        // 批量修改状态
         val financialMainList = ids.map { id ->
             FinancialMain.builder()
                 .id(id)
