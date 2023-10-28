@@ -237,7 +237,8 @@ open class AdvanceChargeServiceImpl(
                 collectedAmount = financialMain.changePrice,
                 tableData = tableData,
                 files = filesData
-            );
+            )
+            return Response.responseData(resultVO);
         }
         return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
     }

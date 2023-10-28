@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/financial/advanceCharge")
+@RequestMapping("/financial/advance-charge")
 class AdvanceChargeController(private val advanceChargeService: AdvanceChargeService) {
 
     @PostMapping("addOrUpdate")
@@ -37,7 +37,7 @@ class AdvanceChargeController(private val advanceChargeService: AdvanceChargeSer
         return advanceChargeService.addOrUpdateAdvanceCharge(advanceChargeDTO)
     }
 
-    @PostMapping("getPageList")
+    @PostMapping("pageList")
     fun getAdvanceChargePageList(@RequestBody advanceChargeDTO: QueryAdvanceChargeDTO) : Response<Page<AdvanceChargeVO>> {
         return advanceChargeService.getAdvanceChargePageList(advanceChargeDTO)
     }
