@@ -1,14 +1,3 @@
-coverage:
-  # Commit status https://docs.codecov.io/docs/commit-status are used
-  # to block PR based on coverage threshold.
-  status:
-    project:
-      default:
-        informational: true
-    patch:
-      # Disable the coverage threshold of the patch, so that PRs are
-      # only failing because of overall project coverage threshold.
-      # See https://docs.codecov.io/docs/commit-status#disabling-a-status.
-      default: false
 comment:
-      layout: "header, files, footer" # remove "new" from "header" and "footer"
+     layout: "header, files, footer" # remove "new" from "header" and "footer"
+      hide_project_coverage: false # set to false
