@@ -36,4 +36,6 @@ interface MemberService: IService<Member> {
     fun getMemberList(): Response<List<MemberVO>>
 
     fun updateAdvanceChargeAmount(memberId: Long?, amount: BigDecimal): Boolean
+
+    fun getMemberById(memberId: Long?): Member?
 }
