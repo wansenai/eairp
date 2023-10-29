@@ -48,7 +48,7 @@ public class OperatorServiceImpl extends ServiceImpl<OperatorMapper, Operator> i
     }
 
     @Override
-    public Response<Page<OperatorVO>> getOperatorPageList(QueryOperatorDTO queryOperatorDTO) {
+    public Response<Page<OperatorVO>> getOperatorList(QueryOperatorDTO queryOperatorDTO) {
         var result = new Page<OperatorVO>();
         var operatorVOS = new ArrayList<OperatorVO>();
 
@@ -138,29 +138,5 @@ public class OperatorServiceImpl extends ServiceImpl<OperatorMapper, Operator> i
             return null;
         }
         return getById(id);
-    }
-
-    @Override
-    public Response<List<OperatorVO>> getOperatorListByType(String type) {
-        if(!StringUtils.hasLength(type)) {
-            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
-        }
-
-        var operatorVOS = new ArrayList<OperatorVO>();
-        var operator = lambdaQuery()
-                .eq(Operator::getType, type)
-                .eq(Operator::getStatus, CommonConstants.STATUS_NORMAL)
-                .eq(Operator::getDeleteFlag, CommonConstants.NOT_DELETED)
-                .list();
-
-        if (operator.isEmpty()) {
-            return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
-        }
-        operator.forEach(item -> {
-            OperatorVO operatorVO = new OperatorVO();
-            BeanUtils.copyProperties(item, operatorVO);
-            operatorVOS.add(operatorVO);
-        });
-        return Response.responseData(operatorVOS);
     }
 }

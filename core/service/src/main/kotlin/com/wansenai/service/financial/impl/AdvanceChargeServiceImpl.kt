@@ -24,7 +24,6 @@ import com.wansenai.dto.financial.AddOrUpdateAdvanceChargeDTO
 import com.wansenai.dto.financial.QueryAdvanceChargeDTO
 import com.wansenai.entities.basic.Member
 import com.wansenai.entities.basic.Operator
-import com.wansenai.entities.system.SysFile
 import com.wansenai.entities.user.SysUser
 import com.wansenai.mappers.financial.FinancialMainMapper
 import com.wansenai.mappers.system.SysFileMapper
@@ -45,7 +44,6 @@ import com.wansenai.vo.financial.AdvanceChargeVO
 import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 
 @Service
 @Slf4j
@@ -81,8 +79,6 @@ open class AdvanceChargeServiceImpl(
                     ?.let { it.parentId ?: it.id }
             }
 
-
-        val fileIdList = ArrayList<Long>()
         if (advanceChargeDTO.id != null) {
             val financialSubList = financialSubService.lambdaQuery()
                 .eq(FinancialSub::getFinancialMainId, advanceChargeDTO.id)
@@ -96,36 +92,13 @@ open class AdvanceChargeServiceImpl(
                     return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_ERROR)
                 }
             }
-
-            // If the id is empty, it is a new addition, otherwise it is a modification
-            if (advanceChargeDTO.files != null) {
-                val financialMain = getById(advanceChargeDTO.id)
-                if (financialMain != null) {
-                    if (!financialMain.fileId.isNullOrEmpty()) {
-                        val ids = financialMain.fileId.split(",").map { it.toLong() }
-                        fileMapper.deleteBatchIds(ids)
-                    }
-                }
-
-                advanceChargeDTO.files?.map { file ->
-                    val fileId = SnowflakeIdUtil.nextId()
-                    val fileEntity = SysFile.builder()
-                        .id(fileId)
-                        .uid(file.uid)
-                        .fileName(file.fileName)
-                        .fileUrl(file.fileUrl)
-                        .fileType(file.fileType)
-                        .fileSize(file.fileSize)
-                        .build()
-                    fileIdList.add(fileId)
-                    fileMapper.insert(fileEntity)
-                }
-            }
         }
-        val fileIds = fileIdList.map { it }.joinToString(",")
+
+        // If the id is empty, it is a new addition, otherwise it is a modification
+        val fileIds = advanceChargeDTO.files?.map { it.id }?.joinToString(",")
 
         if (advanceChargeDTO.tableData.isNotEmpty()) {
-            val financialMainId = advanceChargeDTO.id ?: SnowflakeIdUtil.nextId()
+            val financialMainId = SnowflakeIdUtil.nextId()
             val financialMain = FinancialMain.builder()
                 .id(financialMainId)
                 .organizationId(deptId)
@@ -138,17 +111,8 @@ open class AdvanceChargeServiceImpl(
                 .receiptSource(0)
                 .receiptTime(TimeUtil.parse(advanceChargeDTO.receiptDate))
                 .fileId(fileIds)
-                .status(CommonConstants.UNAUDITED)
-                .createBy(userId)
                 .remark(advanceChargeDTO.remark)
                 .build()
-
-            if (advanceChargeDTO.id == null) {
-                financialMain.createTime = LocalDateTime.now()
-            } else {
-                financialMain.updateBy = userId
-                financialMain.updateTime = LocalDateTime.now()
-            }
 
             val isFinancialMainAdded = saveOrUpdate(financialMain)
 
@@ -203,13 +167,13 @@ open class AdvanceChargeServiceImpl(
     }
 
     // Extension function to convert FinancialMain to AdvanceChargeVO
-    private fun FinancialMain.toAdvanceChargeVO(member: Member?, operator: SysUser, financialPerson: Operator?): AdvanceChargeVO {
+    private fun FinancialMain.toAdvanceChargeVO(member: Member?, operator: SysUser, financialPerson: Operator): AdvanceChargeVO {
         return AdvanceChargeVO(
             id = this.id,
             receiptNumber = this.receiptNumber,
             receiptDate = this.receiptTime,
             operator = operator.name,
-            financialPersonnel = financialPerson?.name ?: "",
+            financialPersonnel = financialPerson.name,
             memberName = member?.memberName,
             totalAmount = this.totalPrice,
             collectedAmount = this.changePrice,
@@ -232,10 +196,10 @@ open class AdvanceChargeServiceImpl(
         val financialMain = getById(id)
         if(financialMain != null) {
             val member = memberService.getMemberById(financialMain.memberId)
-
             val financialPerson = operatorService.getOperatorById(financialMain.handsPersonId)
+
             val subData = financialSubService.lambdaQuery()
-                .eq(FinancialSub::getFinancialMainId, id)
+                .eq(FinancialSub::getFinancialMainId, financialPerson.id)
                 .list()
 
             val tableData = ArrayList<AdvanceChargeDataBO>()
@@ -250,35 +214,30 @@ open class AdvanceChargeServiceImpl(
                 tableData.add(record)
             }
 
+            val ids = financialMain.fileId.split(",").map { it.toLong() }
             val filesData = ArrayList<FileDataBO>()
-            if(!financialMain.fileId.isNullOrEmpty()) {
-                val ids = financialMain.fileId.split(",").map { it.toLong() }
-                val fileList = fileMapper.selectBatchIds(ids)
-                fileList.map { file ->
-                    val fileBo = FileDataBO(
-                        id = file.id,
-                        fileName = file.fileName,
-                        fileUrl = file.fileUrl,
-                        fileType = file.fileType,
-                        fileSize = file.fileSize
-                    )
-                    filesData.add(fileBo)
-                }
+            val fileList = fileMapper.selectBatchIds(ids)
+            fileList.map { file ->
+                val fileBo = FileDataBO(
+                    id = file.id,
+                    fileName = file.fileName,
+                    fileUrl = file.fileUrl,
+                    fileType = file.fileType,
+                    fileSize = file.fileSize
+                )
+                filesData.add(fileBo)
             }
 
             val resultVO = AdvanceChargeDetailVO(
-                memberId = financialMain.memberId,
                 memberName = member?.memberName,
                 receiptNumber = financialMain.receiptNumber,
                 receiptDate = financialMain.receiptTime,
-                financialPersonnel = financialPerson?.name ?: "",
-                financialPersonnelId = financialPerson?.id,
+                financialPersonnel = financialPerson.name,
                 totalAmount = financialMain.totalPrice,
                 collectedAmount = financialMain.changePrice,
                 tableData = tableData,
                 files = filesData
-            )
-            return Response.responseData(resultVO);
+            );
         }
         return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
     }

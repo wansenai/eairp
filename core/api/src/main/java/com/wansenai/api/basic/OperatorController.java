@@ -20,9 +20,9 @@ public class OperatorController {
         this.operatorService = operatorService;
     }
 
-    @PostMapping("pageList")
-    public Response<Page<OperatorVO>> getOperatorPageList(@RequestBody QueryOperatorDTO queryOperatorDTO) {
-        return operatorService.getOperatorPageList(queryOperatorDTO);
+    @PostMapping("list")
+    public Response<Page<OperatorVO>> getOperatorList(@RequestBody QueryOperatorDTO queryOperatorDTO) {
+        return operatorService.getOperatorList(queryOperatorDTO);
     }
 
     @PostMapping("addOrUpdate")
@@ -40,8 +40,4 @@ public class OperatorController {
         return operatorService.updateOperatorStatus(ids, status);
     }
 
-    @GetMapping("list/{type}")
-    public Response<List<OperatorVO>> getOperatorList(@PathVariable String type) {
-        return operatorService.getOperatorListByType(type);
-    }
 }

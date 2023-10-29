@@ -30,8 +30,4 @@ public interface CommonConstants {
     int IS_DEFAULT = 1;
 
     int NOT_DEFAULT = 0;
-
-    int UNAUDITED = 0;
-
-    int REVIEWED = 1;
 }

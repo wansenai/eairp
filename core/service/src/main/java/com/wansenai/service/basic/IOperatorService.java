@@ -24,7 +24,7 @@ import java.util.List;
 
 public interface IOperatorService extends IService<Operator> {
 
-    Response<Page<OperatorVO>> getOperatorPageList(QueryOperatorDTO queryOperatorDTO);
+    Response<Page<OperatorVO>> getOperatorList(QueryOperatorDTO queryOperatorDTO);
 
     Response<String> addOrUpdateOperator(AddOrUpdateOperatorDTO addOrUpdateOperatorDTO);
 
@@ -34,5 +34,5 @@ public interface IOperatorService extends IService<Operator> {
 
     Operator getOperatorById(Long id);
 
-    Response<List<OperatorVO>> getOperatorListByType(String type);
+
 }

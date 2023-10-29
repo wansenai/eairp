@@ -28,6 +28,4 @@ public interface CommonService {
     File exportExcel(String type);
 
     Response<List<String>> uploadOss(List<MultipartFile> files);
-
-    Response<String> generateSnowflakeId(String type);
 }

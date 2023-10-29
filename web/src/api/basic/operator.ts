@@ -9,17 +9,16 @@ import {
 
 
 enum API {
-    PageList = '/basic/operator/pageList',
+    List = '/basic/operator/list',
     AddOrUpdateOperator = '/basic/operator/addOrUpdate',
     DeleteBatch = '/basic/operator/delete',
     UpdateStatus = '/basic/operator/updateStatus',
-    List = '/basic/operator/list',
 }
 
-export function getOperatorPageList(params: QueryOperatorReq, mode: ErrorMessageMode = 'notice') {
+export function getOperatorList(params: QueryOperatorReq, mode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseDataResp<OperatorResp>>(
         {
-            url: API.PageList,
+            url: API.List,
             params,
         },
         {
@@ -59,14 +58,6 @@ export function deleteBatchOperator(ids: number[], mode: ErrorMessageMode = 'not
         },
         {
             errorMessageMode: mode,
-        },
-    );
-}
-
-export function getOperatorList(type: string) {
-    return defHttp.get<BaseDataResp<OperatorResp[]>>(
-        {
-            url: `${API.List}/${type}`
         },
     );
 }

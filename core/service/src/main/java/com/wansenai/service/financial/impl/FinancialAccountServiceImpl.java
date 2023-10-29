@@ -49,7 +49,7 @@ public class FinancialAccountServiceImpl extends ServiceImpl<FinancialAccountMap
 
 
     @Override
-    public Response<Page<AccountVO>> getAccountPageList(QueryAccountDTO queryAccountDTO) {
+    public Response<Page<AccountVO>> getAccountList(QueryAccountDTO queryAccountDTO) {
         var result = new Page<AccountVO>();
         var accountVos = new ArrayList<AccountVO>();
 
@@ -155,22 +155,5 @@ public class FinancialAccountServiceImpl extends ServiceImpl<FinancialAccountMap
         }
 
         return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_STATUS_SUCCESS);
-    }
-
-    @Override
-    public Response<List<AccountVO>> getAccountList() {
-        var accountList = lambdaQuery()
-                .eq(FinancialAccount::getDeleteFlag, CommonConstants.NOT_DELETED)
-                .list();
-        if(accountList.isEmpty()) {
-            return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
-        }
-        var accountVos = new ArrayList<AccountVO>();
-        accountList.forEach(item -> {
-            AccountVO accountVO = new AccountVO();
-            BeanUtils.copyProperties(item, accountVO);
-            accountVos.add(accountVO);
-        });
-        return Response.responseData(accountVos);
     }
 }

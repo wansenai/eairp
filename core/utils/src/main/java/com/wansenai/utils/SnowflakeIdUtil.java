@@ -21,7 +21,7 @@ public class SnowflakeIdUtil {
     /**
      * 开始时间截 (2015-01-01)
      */
-    private final static long starTimeCutoff = 1420041600000L;
+    private final static long twepoch = 1420041600000L;
 
     /**
      * 机器id所占的位数
@@ -36,12 +36,12 @@ public class SnowflakeIdUtil {
     /**
      * 支持的最大机器id，结果是31 (这个移位算法可以很快的计算出几位二进制数所能表示的最大十进制数)
      */
-    private final static long maxWorkerId = ~(-1L << workerIdBits);
+    private final static long maxWorkerId = -1L ^ (-1L << workerIdBits);
 
     /**
      * 支持的最大数据标识id，结果是31
      */
-    private final static long maxDatacenterId = ~(-1L << datacenterIdBits);
+    private final static long maxDatacenterId = -1L ^ (-1L << datacenterIdBits);
 
     /**
      * 序列在id中占的位数
@@ -66,7 +66,7 @@ public class SnowflakeIdUtil {
     /**
      * 生成序列的掩码，这里为4095 (0b111111111111=0xfff=4095)
      */
-    private final static long sequenceMask = ~(-1L << sequenceBits);
+    private final static long sequenceMask = -1L ^ (-1L << sequenceBits);
 
     /**
      * 工作机器ID(0~31)
@@ -103,8 +103,8 @@ public class SnowflakeIdUtil {
         if (datacenterId > maxDatacenterId || datacenterId < 0) {
             throw new IllegalArgumentException(String.format("datacenter Id can't be greater than %d or less than 0", maxDatacenterId));
         }
-        SnowflakeIdUtil.workerId = workerId;
-        SnowflakeIdUtil.datacenterId = datacenterId;
+        this.workerId = workerId;
+        this.datacenterId = datacenterId;
     }
 
     // ==============================Methods==========================================
@@ -140,7 +140,7 @@ public class SnowflakeIdUtil {
         lastTimestamp = timestamp;
 
         //移位并通过或运算拼到一起组成64位的ID
-        return ((timestamp - starTimeCutoff) << timestampLeftShift)
+        return ((timestamp - twepoch) << timestampLeftShift)
                 | (datacenterId << datacenterIdShift)
                 | (workerId << workerIdShift)
                 | sequence;
@@ -167,5 +167,21 @@ public class SnowflakeIdUtil {
      */
     protected static long timeGen() {
         return System.currentTimeMillis();
+    }
+
+    //==============================Test=============================================
+
+    /**
+     * 测试
+     */
+    public static void main(String[] args) {
+        long start = System.currentTimeMillis();
+        SnowflakeIdUtil idWorker = new SnowflakeIdUtil(1, 3);
+        for (int i = 0; i < 50; i++) {
+            long id = idWorker.nextId();
+            System.out.println(id);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
     }
 }

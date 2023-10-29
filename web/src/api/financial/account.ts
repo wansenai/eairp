@@ -9,17 +9,16 @@ import {
 
 
 enum API {
-    PageList = '/financial/account/pageList',
+    List = '/financial/account/list',
     AddOrUpdateAccount = '/financial/account/addOrUpdate',
     DeleteBatch = '/financial/account/delete',
     UpdateStatus = '/financial/account/updateStatus',
-    List = '/financial/account/list',
 }
 
-export function getAccountPageList(params: QueryAccountReq, mode: ErrorMessageMode = 'notice') {
+export function getAccountList(params: QueryAccountReq, mode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseDataResp<AccountResp>>(
         {
-            url: API.PageList,
+            url: API.List,
             params,
         },
         {
@@ -60,13 +59,5 @@ export function deleteBatchAccount(ids: number[], mode: ErrorMessageMode = 'noti
         {
             errorMessageMode: mode,
         },
-    );
-}
-
-export function getAccountList() {
-    return defHttp.get<BaseDataResp<AccountResp>>(
-        {
-            url: API.List,
-        }
     );
 }
