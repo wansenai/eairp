@@ -33,9 +33,9 @@ public class FinancialAccountController {
         this.accountService = accountService;
     }
 
-    @PostMapping("list")
-    public Response<Page<AccountVO>> getAccountList(@RequestBody QueryAccountDTO queryAccountDTO) {
-        return accountService.getAccountList(queryAccountDTO);
+    @PostMapping("pageList")
+    public Response<Page<AccountVO>> getAccountPageList(@RequestBody QueryAccountDTO queryAccountDTO) {
+        return accountService.getAccountPageList(queryAccountDTO);
     }
 
     @PostMapping("addOrUpdate")
@@ -53,4 +53,8 @@ public class FinancialAccountController {
         return accountService.updateAccountStatus(ids, status);
     }
 
+    @GetMapping("list")
+    public Response<List<AccountVO>> getAccountList() {
+        return accountService.getAccountList();
+    }
 }

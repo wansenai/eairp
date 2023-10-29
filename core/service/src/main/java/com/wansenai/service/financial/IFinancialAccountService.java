@@ -29,11 +29,13 @@ import java.util.List;
  */
 public interface IFinancialAccountService extends IService<FinancialAccount> {
 
-    Response<Page<AccountVO>> getAccountList(QueryAccountDTO queryAccountDTO);
+    Response<Page<AccountVO>> getAccountPageList(QueryAccountDTO queryAccountDTO);
 
     Response<String> addOrUpdateAccount(AddOrUpdateAccountDTO addOrUpdateAccountDTO);
 
     Response<String> deleteBatchAccount(List<Long> ids);
 
     Response<String> updateAccountStatus(List<Long> ids, Integer status);
+
+    Response<List<AccountVO>> getAccountList();
 }
