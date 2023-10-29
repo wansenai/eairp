@@ -98,17 +98,22 @@ export default defineComponent({
         createMessage.warn('请选择一条数据');
         return;
       }
+      const ids = data.map((item) => item.id);
+      const {code} = await deleteBatchAdvance(ids);
+      if (code === "F0007") {
+        await reload();
+      }
     }
 
     async function handleEdit(record: Recordable) {
-      openModal(true, {
-        record,
-        isUpdate: true,
-      });
+      advanceChargeModalRef.value.openAdvanceChargeModal(record.id);
     }
 
     async function handleDelete(record: Recordable) {
-
+      const {code} = await deleteBatchAdvance([record.id]);
+      if (code === "F0007") {
+        await reload();
+      }
     }
 
     async function handleSuccess() {

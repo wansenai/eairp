@@ -11,29 +11,29 @@
       switchFullscreen
       v-model:open="open"
       @cancel="handleCancelModal"
-      @ok="handleOkModal"
       style="left: 5%; height: 75%;">
     <template #footer >
-      <a-button @click="">取消</a-button>
+      <a-button @click="handleCancelModal">取消</a-button>
       <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="">保存</a-button>
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk">保存</a-button>
     </template>
     <a-spin :spinning="confirmLoading">
-      <a-form ref="formRef" :model="formState" style="margin-top: 35px">
+      <a-form ref="formRef" :model="formState" style="  margin-top: 35px">
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="会员卡号" data-step="1"
+            <a-input v-model:value="formState.id" v-show="false"/>
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="付款会员" data-step="1"
                          data-title="付款会员" :rules="[{ required: true}]">
-              <a-select placeholder="选择会员卡号" v-model:value="formState.memberId" showSearch  @change="">
+              <a-select v-model:value="formState.memberId" placeholder="选择付款会员">
                 <a-select-option v-for="(item,index) in memberList" :key="index" :value="item.id">
-                  {{ item.member }}
+                  {{ item.memberName }}
                 </a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker show-time placeholder="选择时间" @change="dateChange" @ok="dateOk"/>
+              <a-date-picker v-model:value="formState.receiptDate" show-time placeholder="选择时间" @change="dateChange"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
@@ -47,8 +47,8 @@
                          data-title="财务人员">
               <a-select placeholder="请财务人员" v-model:value="formState.financialPersonnelId"
                         :dropdownMatchSelectWidth="false">
-                <a-select-option v-for="(item,index) in payTypeList" :key="index" :value="item.value">
-                  {{ item.text }}
+                <a-select-option v-for="(item,index) in operatorList" :key="index" :value="item.id">
+                  {{ item.name }}
                 </a-select-option>
               </a-select>
             </a-form-item>
@@ -74,23 +74,27 @@
                    :scroll="{y: 240 }">
             <template #bodyCell="{record, column }">
               <template v-if="column.key === 'accountId'">
-                <a-select v-model="editableData[record.key][column.key]" style="width: 100%" placeholder="请选择账户名称">
-                  <a-select-option value="option1">Option 1</a-select-option>
-                  <a-select-option value="option2">Option 2</a-select-option>
-                  <a-select-option value="option3">Option 3</a-select-option>
+                <a-select
+                    v-model:value="editableData[record.key][column.key]"
+                    style="width: 100%"
+                    placeholder="请选择账户名称"
+                    @change="handleAccountChange(record.key, column.key, $event)">
+                  <a-select-option v-for="(item,index) in accountList" :key="index" :value="item.id">
+                    {{ item.accountName }}
+                  </a-select-option>
                 </a-select>
               </template>
               <template v-else>
                 <template v-if="column.key !== 'accountId'">
                   <a-input v-model:value="editableData[record.key][column.key]"
-                           :placeholder="`请输入${getColumnTitle(column)}`" />
+                           :placeholder="`请输入${getColumnTitle(column)}`" @change="valueChange"/>
                 </template>
                 <template v-else>
                   {{ record[column.key] }}
                 </template>
               </template>
             </template>
-            <template #footer >总计: $1438,130,00</template>
+            <template #footer >总计: {{totalPrice}}</template>
           </a-table>
         <a-row class="form-row" :gutter="24">
           <a-col :lg="24" :md="24" :sm="24">
@@ -103,12 +107,12 @@
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="合计金额">
-              <a-input placeholder="请输入合计收款" v-model:value="formState.totalPrice" :readOnly="true"/>
+              <a-input placeholder="请输入合计收款" v-model:value="formState.totalAmount" :readOnly="true"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="收款金额">
-              <a-input placeholder="请输入收款金额" v-model:value="formState.changeAmount" :readOnly="true"/>
+              <a-input placeholder="请输入收款金额" v-model:value="formState.collectedAmount" :readOnly="true"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -117,7 +121,11 @@
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="附件" data-step="9"
                          data-title="附件"
                          data-intro="可以上传与单据相关的图片、文档，支持多个文件">
-              <a-upload v-model:file-list="fileList" action="">
+              <a-upload
+                  v-model:file-list="fileList"
+                  :custom-request="uploadFiles"
+                  :before-upload="beforeUpload"
+                  multiple>
                 <a-button>
                   <upload-outlined/>
                   点击上传附件
@@ -134,13 +142,12 @@
 <script lang="ts">
 import {computed, defineComponent, reactive, ref} from 'vue';
 import {UploadOutlined} from '@ant-design/icons-vue';
-import {Dayjs} from 'dayjs';
+import dayjs from 'dayjs';
 import {
-  Textarea,
-  DatePicker,
   Button,
   Checkbox,
   Col,
+  DatePicker,
   Form,
   FormItem,
   Input,
@@ -153,12 +160,23 @@ import {
   Table,
   TabPane,
   Tabs,
+  Textarea,
   Tooltip,
   TreeSelect,
   Upload,
 } from "ant-design-vue";
 import {formState, tableColumns} from '@/views/financial/advance-charge/advance.data'
 import {cloneDeep} from "lodash-es";
+import {getMemberList} from "@/api/basic/member"
+import {generateId, uploadOss} from "@/api/basic/common"
+import {getOperatorList} from "@/api/basic/operator";
+import {getAccountList} from "@/api/financial/account";
+import {MemberResp} from "@/api/basic/model/memberModel";
+import {OperatorResp} from "@/api/basic/model/operatorModel";
+import {AccountResp} from "@/api/financial/model/accountModel";
+import {useMessage} from "@/hooks/web/useMessage";
+import {addOrUpdateAdvance, getAdvanceDetail} from "@/api/financial/advance";
+import {AddOrUpdateAdvanceReq, AdvanceChargeData} from "@/api/financial/model/advanceModel";
 
 export default defineComponent({
   name: 'AdvanceChargeModal',
@@ -187,6 +205,8 @@ export default defineComponent({
     'upload-outlined': UploadOutlined,
   },
   setup(_, context) {
+    const {createMessage} = useMessage();
+    const formRef = ref();
     const confirmLoading = ref<boolean>(false);
     const open = ref<boolean>(false);
     const checkFlag = ref<boolean>(true);
@@ -201,7 +221,6 @@ export default defineComponent({
     const showScanPressEnter = ref(false);
     const prefixNo = ref('LSCK');
     const fileList = ref([]);
-    const payTypeList = ref([]);
     const minWidth = ref(1100);
     const model = ref({});
     const tableData = ref([
@@ -216,23 +235,167 @@ export default defineComponent({
     });
     const refKey = ref(['productDataTable']);
     const activeKey = ref('productDataTable');
-    const memberList = ref([])
-    const accountList = ref([]);
+    const memberList = ref<MemberResp[]>([])
+    const operatorList = ref<OperatorResp[]>([]);
+    const accountList = ref<AccountResp[]>([]);
+    const totalPrice = ref<number>(0.00);
 
     function handleCancelModal() {
       close();
       open.value = false;
       context.emit('cancel');
+      clearData();
     }
 
     function openAdvanceChargeModal(id: string | undefined) {
       open.value = true
-      console.info(id)
+      loadMemberList();
+      loadOperatorList();
+      loadAccountList();
+      if (id) {
+        title.value = '编辑-收预付款单';
+        loadAdvanceChargeData(id)
+        formState.id = id;
+      } else {
+        title.value = '新增-收预付款单';
+        loadGenerateId();
+      }
     }
 
-    function handleOkModal() {
-
+    function loadMemberList() {
+      getMemberList().then(res => {
+        memberList.value = res.data
+      })
     }
+
+    function loadOperatorList() {
+      getOperatorList("财务员").then(res => {
+        operatorList.value = res.data
+      })
+    }
+
+    function loadAccountList() {
+      getAccountList().then(res => {
+        accountList.value = res.data
+      })
+    }
+
+    function loadGenerateId() {
+      generateId("收预付款").then(res => {
+        formState.receiptNumber = res.data
+      })
+    }
+
+    async function loadAdvanceChargeData(id: string) {
+      const res = await getAdvanceDetail(id);
+      // 赋值给formState的数据
+      if (res.data) {
+        const data = res.data
+        const formattedDate = dayjs(data.receiptDate);
+        formState.receiptNumber = data.receiptNumber;
+        formState.receiptDate = formattedDate;
+        formState.memberId = data.memberId;
+        formState.financialPersonnelId = data.financialPersonnelId;
+        formState.remark = data.remark;
+        formState.totalAmount = data.totalAmount;
+        formState.collectedAmount = data.collectedAmount;
+        totalPrice.value = data.totalAmount;
+
+        if(data.tableData) {
+          tableData.value = [];
+          for (const key in editableData) {
+            delete editableData[key];
+          }
+          const tableDataArray = data.tableData;
+          for (let i = 0; i < tableDataArray.length; i++) {
+            const tableDataItem = tableDataArray[i];
+            const tableDataItemObj = {
+              key: i,
+              accountId: tableDataItem.accountId,
+              amount: tableDataItem.amount,
+              remark: tableDataItem.remark,
+            }
+            tableData.value.push(tableDataItemObj);
+            editableData[tableDataItemObj.key] = cloneDeep(tableDataItemObj);
+            editableData[tableDataItemObj.key]['accountId'] = tableDataItem.accountId;
+          }
+        }
+      }
+    }
+
+    async function handleOk() {
+      if (!formState.memberId) {
+        createMessage.error('请选择付款会员');
+        return;
+      }
+      if (!formState.receiptDate) {
+        createMessage.error('请选择单据日期');
+        return;
+      }
+      if (tableData.value.length === 0) {
+        createMessage.error('请插入一行数据，录入收预付款信息');
+        return;
+      }
+
+      const files = [];
+      if (fileList && fileList.value) {
+        for (let i = 0; i < fileList.value.length; i++) {
+          if (fileList.value[i].url) {
+            const file = {
+              uid: fileList.value[i].uid,
+              fileType: null,
+              fileName: fileList.value[i].name,
+              fileUrl: fileList.value[i].url || null,
+              fileSize: null,
+            }
+            files.push(file)
+          } else {
+            const file = {
+              uid: fileList.value[i].uid,
+              fileType: fileList.value[i].type,
+              fileName: fileList.value[i].name,
+              fileUrl: fileList.value[i].response.data[0] as string,
+              fileSize: fileList.value[i].size,
+            }
+            files.push(file)
+          }
+        }
+      }
+      const dataArray: AdvanceChargeData[] = Object.values(editableData).map((item: any) => ({
+        accountId: item.accountId,
+        accountName: '',
+        amount: Number(item.amount),
+        remark: item.remark
+      }));
+
+      const params: AddOrUpdateAdvanceReq = {
+        ...formState,
+        tableData: dataArray,
+        files: files,
+      }
+      const result = await addOrUpdateAdvance(params);
+      if (result.code === 'F0005') {
+        createMessage.success('操作成功');
+        handleCancelModal();
+        clearData();
+      } else {
+        createMessage.error('操作失败');
+      }
+    }
+
+    const clearData = () => {
+      formRef.value.resetFields();
+      formState.receiptNumber = '';
+      formState.receiptDate = undefined;
+      formState.memberId = '';
+      formState.financialPersonnelId = '';
+      formState.remark = '';
+      formState.totalAmount = 0.00;
+      formState.collectedAmount = 0.00;
+      tableData.value = [];
+      fileList.value = [];
+      totalPrice.value = 0.00;
+    };
 
     const editableData = reactive({});
     function addRow() {
@@ -240,7 +403,7 @@ export default defineComponent({
           {
             key: Date.now(),
             accountId: '',
-            amount: undefined,
+            amount: 0.00,
             remark: '',
           };
       editableData[newRow.key] = cloneDeep(newRow);
@@ -266,16 +429,32 @@ export default defineComponent({
       const selectedKeys = rowSelection.value.selectedRowKeys;
       tableData.value = tableData.value.filter(row => !selectedKeys.includes(row.key));
       rowSelection.value.selectedRowKeys = [];
+      // 获取row.key的数据进行对应editableData的删除
+      selectedKeys.forEach((key) => {
+        delete editableData[key];
+      });
+
     }
 
-    const dateChange = (value: Dayjs, dateString: string) => {
-      console.log('Selected Time: ', value);
-      console.log('Formatted Selected Time: ', dateString);
+    const dateChange = (dateString: string) => {
+      formState.receiptDate = dateString;
     };
 
-    const dateOk = (value: Dayjs) => {
-      console.log('onOk: ', value);
+    const valueChange = () => {
+      let total = 0.00;
+      for (const key in editableData) {
+        if (editableData[key].amount) {
+          total += parseFloat(editableData[key].amount);
+        }
+      }
+      totalPrice.value = parseFloat(total.toFixed(2));
+      formState.collectedAmount = parseFloat(total.toFixed(2));
+      formState.totalAmount = parseFloat(total.toFixed(2));
     };
+
+    const handleAccountChange = (recordKey: string, columnKey: string, selectedAccountId: string) => {
+      editableData[recordKey][columnKey] = selectedAccountId;
+    }
 
     const getColumnTitle = (column) => {
       return column.title.replace(/<[^>]+>/g, '');
@@ -283,19 +462,48 @@ export default defineComponent({
 
     const hasSelected = computed(() =>  rowSelection.value.selectedRowKeys.length > 0);
 
+    function beforeUpload(file: any) {
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        createMessage.error(`${file.name}，该文件超过2MB大小限制`);
+        return isLt2M || Upload.LIST_IGNORE
+      }
+    }
+
+    const uploadFiles = (options) => {
+      const { file, onSuccess, onError, onProgress } = options;
+      const formData = new FormData();
+      formData.append('files', file);
+      // 调用 uploadOss 方法进行上传
+      uploadOss(formData, {
+        onUploadProgress: ({total, loaded}) => {
+          onProgress(
+              {percent: Math.round((loaded / total) * 100).toFixed(2)},
+              file
+          );
+        },
+      }).then((res) => {
+        onSuccess(res, file);
+      }).catch((error) => {
+        onError(error);
+      });
+    }
+
     return {
       open,
+      formRef,
       checkFlag,
       tableColumns,
       editableData,
       formState,
+      dateChange,
       isCanCheck,
       isTenant,
       scanStatus,
       confirmLoading,
       handleCancelModal,
       openAdvanceChargeModal,
-      handleOkModal,
+      handleOk,
       tableData,
       title,
       width,
@@ -303,15 +511,13 @@ export default defineComponent({
       addDefaultRowNum,
       prefixNo,
       fileList,
-      payTypeList,
+      operatorList,
       minWidth,
       model,
       labelCol,
       wrapperCol,
       refKey,
       activeKey,
-      dateChange,
-      dateOk,
       memberList,
       accountList,
       showScanButton,
@@ -320,7 +526,12 @@ export default defineComponent({
       getColumnTitle,
       rowSelection,
       deleteRows,
-      hasSelected
+      hasSelected,
+      valueChange,
+      totalPrice,
+      handleAccountChange,
+      uploadFiles,
+      beforeUpload,
     };
   },
 });

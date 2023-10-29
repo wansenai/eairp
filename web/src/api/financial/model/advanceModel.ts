@@ -49,10 +49,13 @@ interface AdvanceChargeResp {
 }
 
 interface AdvanceChargeDetailResp {
+    memberId: string;
     memberName: string;
     receiptNumber: string;
     receiptDate: string;
     financialPersonnel: string;
+    financialPersonnelId: string;
+    remark: string;
     totalAmount: number;
     collectedAmount: number;
     tableData: AdvanceChargeData[];
