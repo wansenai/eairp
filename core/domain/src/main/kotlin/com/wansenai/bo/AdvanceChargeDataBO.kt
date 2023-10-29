@@ -12,6 +12,8 @@
  */
 package com.wansenai.bo
 
+import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.wansenai.NoArg
 import lombok.Data
 import java.math.BigDecimal
@@ -20,10 +22,12 @@ import java.math.BigDecimal
 @Data
 data class AdvanceChargeDataBO(
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     val accountId: Long,
 
     val accountName: String,
 
+    @JsonSerialize(using = BigDecimalSerializerBO::class)
     val amount : BigDecimal,
 
     val remark : String? = null,
