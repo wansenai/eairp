@@ -49,7 +49,9 @@ public enum BaseCodeEnum {
 
     OSS_KEY_NOT_EXIST("T0500", "腾讯云OSS对象存储key不存在"),
 
-    OSS_GET_INSTANCE_ERROR("T0501", "腾讯云OSS对象存储实例获取失败");
+    OSS_GET_INSTANCE_ERROR("T0501", "腾讯云OSS对象存储实例获取失败"),
+
+    SNOWFLAKE_ID_GENERATE_ERROR("B0009", "雪花算法生成ID失败");
 
     /**
      * 响应状态码
