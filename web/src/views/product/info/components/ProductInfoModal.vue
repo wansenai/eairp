@@ -786,7 +786,6 @@ export default defineComponent({
               meTable.dataSource.forEach(row => {
                 edit(row.key);
               });
-              console.info(meTable.dataSource)
             }
             if (data.stockList) {
               stock.dataSource = [];
