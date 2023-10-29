@@ -74,4 +74,9 @@ public class CommonController {
     public Response<List<String>> uploadOss(@RequestParam("files") List<MultipartFile> files) {
         return commonService.uploadOss(files);
     }
+
+    @GetMapping("nextId/{type}")
+    public Response<String> nextId(@PathVariable String type) {
+        return commonService.generateSnowflakeId(type);
+    }
 }

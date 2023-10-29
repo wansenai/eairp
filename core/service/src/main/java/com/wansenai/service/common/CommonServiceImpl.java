@@ -640,12 +640,48 @@ public class CommonServiceImpl implements CommonService{
                 keys.add("temp" + "_" + SnowflakeIdUtil.nextId() + "_" + file.getOriginalFilename());
             });
             var result = instance.uploadBatch(FileUtil.convertMultipartFilesToFiles(files), keys);
-            log.info("上传图片信息: " + result);
+            log.info("上传文件信息: " + result);
             return Response.responseData(result);
         }catch (Exception e) {
-            log.error("上传图片失败: " + e.getMessage());
+            log.error("上传文件失败: " + e.getMessage());
             return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
         }
+    }
+
+    @Override
+    public Response<String> generateSnowflakeId(String type) {
+        if (!StringUtils.hasText(type)) {
+            return Response.responseMsg(BaseCodeEnum.SNOWFLAKE_ID_GENERATE_ERROR);
+        }
+        var id = SnowflakeIdUtil.nextId();
+        StringBuilder idStr = new StringBuilder(String.valueOf(id));
+        var idLength = idStr.length();
+        if (idLength < 18) {
+            var zero = 18 - idLength;
+            for (int i = 0; i < zero; ++i) {
+                idStr.insert(0, "0");
+            }
+        }
+        var idPrefix = switch (type) {
+            case "供应商" -> "S";
+            case "客户" -> "C";
+            case "会员" -> "V";
+            case "商品" -> "P";
+            case "订单" -> "O";
+            case "采购单" -> "CGD";
+            case "销售单" -> "XSD";
+            case "退货单" -> "THD";
+            case "入库单" -> "RKD";
+            case "出库单" -> "CKD";
+            case "调拨单" -> "DBD";
+            case "盘点单" -> "PDD";
+            case "报损单" -> "BSD";
+            case "报溢单" -> "BZD";
+            case "调价单" -> "DJD";
+            case "收预付款" -> "ACD";
+            default -> "";
+        };
+        return Response.responseData(idPrefix + idStr);
     }
 
     private String getCellValue(Cell cell, DataFormatter dataFormatter) {
