@@ -4,7 +4,7 @@ import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     AdvanceChargeResp,
     AddOrUpdateAdvanceReq,
-    QueryAdvanceReq,
+    QueryAdvanceReq, AdvanceChargeDetailResp,
 } from "@/api/financial/model/advanceModel";
 
 enum API {
@@ -52,7 +52,7 @@ export function updateAdvanceStatus(ids: number[], status: number, mode: ErrorMe
 }
 
 export function deleteBatchAdvance(ids: number[], mode: ErrorMessageMode = 'notice') {
-    return defHttp.delete<BaseResp>(
+    return defHttp.put<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`
         },
@@ -63,7 +63,7 @@ export function deleteBatchAdvance(ids: number[], mode: ErrorMessageMode = 'noti
 }
 
 export function getAdvanceDetail(id: number | string, mode: ErrorMessageMode = 'notice') {
-    return defHttp.get<BaseDataResp<AdvanceChargeResp>>(
+    return defHttp.get<BaseDataResp<AdvanceChargeDetailResp>>(
         {
             url: `${API.GetDetail}/${id}`
         },

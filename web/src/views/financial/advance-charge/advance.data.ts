@@ -1,9 +1,10 @@
 import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
-import {h, reactive} from 'vue';
+import {h, reactive, UnwrapRef} from 'vue';
 import {Switch} from "ant-design-vue";
 import {useMessage} from "@/hooks/web/useMessage";
 import {useI18n} from "@/hooks/web/useI18n";
+import dayjs, {Dayjs} from "dayjs";
 
 const {t} = useI18n();
 
@@ -142,20 +143,24 @@ export const tableColumns = [
 ]
 
 interface FormState {
+    id: string;
     memberId: string;
     receiptNumber: string;
     financialPersonnelId: string;
+    receiptDate: string | undefined | Dayjs;
     remark: string;
-    totalPrice: number;
-    changeAmount: number;
+    totalAmount: number;
+    collectedAmount: number;
 }
 
-export const formState = reactive<FormState>({
+export const formState: UnwrapRef<FormState> = reactive<FormState>({
+    id: '',
     memberId: '',
     receiptNumber: '',
     financialPersonnelId: '',
+    receiptDate: undefined,
     remark: '',
-    totalPrice: 0,
-    changeAmount: 0,
+    totalAmount: 0,
+    collectedAmount: 0,
 
 });
