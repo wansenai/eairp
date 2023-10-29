@@ -51,7 +51,7 @@ export const columns: BasicColumn[] = [
     },
     {
         title: '状态',
-        dataIndex: 'createTime',
+        dataIndex: 'status',
         width: 100,
     }
 ]
@@ -162,5 +162,4 @@ export const formState: UnwrapRef<FormState> = reactive<FormState>({
     remark: '',
     totalAmount: 0,
     collectedAmount: 0,
-
 });

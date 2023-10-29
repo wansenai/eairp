@@ -4,8 +4,8 @@
       <template #toolbar>
         <a-button type="primary" @click="handleCreate"> 新增</a-button>
         <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
-        <a-button type="primary" @click="handleOnStatus(0)"> 批量审核</a-button>
-        <a-button type="primary" @click="handleOnStatus(1)"> 批量反审核</a-button>
+        <a-button type="primary" @click="handleOnStatus(1)"> 批量审核</a-button>
+        <a-button type="primary" @click="handleOnStatus(0)"> 批量反审核</a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -33,7 +33,7 @@
         </template>
         <template v-else-if="column.key === 'status'">
           <Tag :color="record.status === 1 ? 'green' : 'red'">
-            {{ record.status === 1 ? '未审核' : '已审核' }}
+            {{ record.status === 1 ? '已审核' : '未审核' }}
           </Tag>
         </template>
       </template>
@@ -125,6 +125,12 @@ export default defineComponent({
       if (data.length === 0) {
         createMessage.warn('请选择一条数据');
         return;
+      }
+
+      const ids = data.map((item) => item.id);
+      const {code} = await updateAdvanceStatus(ids, newStatus);
+      if (code === "F0006") {
+        await reload();
       }
     }
 
