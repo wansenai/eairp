@@ -24,6 +24,7 @@ interface AddOrUpdateAdvanceReq {
     remark: string;
     tableData: AdvanceChargeData[];
     fileDataList: FileData[];
+    review: number;
 }
 
 interface QueryAdvanceReq {

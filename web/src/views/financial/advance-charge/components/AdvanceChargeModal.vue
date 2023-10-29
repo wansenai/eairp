@@ -14,8 +14,8 @@
       style="left: 5%; height: 75%;">
     <template #footer >
       <a-button @click="handleCancelModal">取消</a-button>
-      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="handleOk">保存</a-button>
+      <a-button :loading="confirmLoading" @click="handleOk(1)">保存并审核</a-button>
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
     </template>
     <a-spin :spinning="confirmLoading">
       <a-form ref="formRef" :model="formState" style="  margin-top: 35px">
@@ -223,6 +223,7 @@ export default defineComponent({
     const fileList = ref([]);
     const minWidth = ref(1100);
     const model = ref({});
+    const reviewStatus = ref(0);
     const tableData = ref([
     ])
     const labelCol = ref({
@@ -320,10 +321,25 @@ export default defineComponent({
             editableData[tableDataItemObj.key]['accountId'] = tableDataItem.accountId;
           }
         }
+        if(data.files) {
+          fileList.value = [];
+          for (let i = 0; i < data.files.length; i++) {
+            const file = data.files[i];
+            const fileObj = {
+              uid: file.uid,
+              name: file.fileName,
+              status: 'done',
+              url: file.fileUrl,
+              type: file.fileType,
+              size: file.fileSize,
+            }
+            fileList.value.push(fileObj);
+          }
+        }
       }
     }
 
-    async function handleOk() {
+    async function handleOk(review: number) {
       if (!formState.memberId) {
         createMessage.error('请选择付款会员');
         return;
@@ -343,10 +359,10 @@ export default defineComponent({
           if (fileList.value[i].url) {
             const file = {
               uid: fileList.value[i].uid,
-              fileType: null,
+              fileType: fileList.value[i].type,
               fileName: fileList.value[i].name,
               fileUrl: fileList.value[i].url || null,
-              fileSize: null,
+              fileSize: fileList.value[i].size,
             }
             files.push(file)
           } else {
@@ -372,6 +388,7 @@ export default defineComponent({
         ...formState,
         tableData: dataArray,
         files: files,
+        review: review,
       }
       const result = await addOrUpdateAdvance(params);
       if (result.code === 'F0005') {
@@ -531,7 +548,7 @@ export default defineComponent({
       totalPrice,
       handleAccountChange,
       uploadFiles,
-      beforeUpload,
+      beforeUpload
     };
   },
 });
