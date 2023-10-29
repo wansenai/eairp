@@ -4,13 +4,17 @@
       <template #toolbar>
         <a-button type="primary" @click="handleCreate"> 新增</a-button>
         <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
-        <a-button type="primary" @click="handleOnStatus(0)"> 批量启用</a-button>
-        <a-button type="primary" @click="handleOnStatus(1)"> 批量禁用</a-button>
+        <a-button type="primary" @click="handleOnStatus(0)"> 批量审核</a-button>
+        <a-button type="primary" @click="handleOnStatus(1)"> 批量反审核</a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
           <TableAction
               :actions="[
+              {
+                icon: 'clarity:view-line',
+                onClick: handleEdit.bind(null, record),
+              },
               {
                 icon: 'clarity:note-edit-line',
                 onClick: handleEdit.bind(null, record),
@@ -27,38 +31,39 @@
             ]"
           />
         </template>
-        <template v-else-if="column.key === 'isDefault'">
-          <Tag :color="record.isDefault === 1 ? 'green' : 'red'">
-            {{ record.isDefault === 1 ? '是' : '否' }}
+        <template v-else-if="column.key === 'status'">
+          <Tag :color="record.status === 1 ? 'green' : 'red'">
+            {{ record.status === 1 ? '未审核' : '已审核' }}
           </Tag>
         </template>
       </template>
     </BasicTable>
-    <FinancialAccountModal @register="registerModal" @success="handleSuccess" />
+    <AdvanceChargeModal ref="advanceChargeModalRef" @cancel="handleCancel"></AdvanceChargeModal>
   </div>
 </template>
 <div>
 </div>
 
 <script lang="ts">
-import {defineComponent} from "vue";
+import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useModal} from "@/components/Modal";
 import {useMessage} from "@/hooks/web/useMessage";
-import {columns, searchFormSchema} from "@/views/basic/settlement-account/financialAccount.data";
-import {getAccountPageList, deleteBatchAccount, updateAccountStatus} from "@/api/financial/account";
-import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
-import { Tag } from 'ant-design-vue';
+import {columns, searchFormSchema} from "@/views/financial/advance-charge/advance.data";
+import {getAdvancePageList, deleteBatchAdvance, updateAdvanceStatus} from "@/api/financial/advance";
+import AdvanceChargeModal from "@/views/financial/advance-charge/components/AdvanceChargeModal.vue";
+import {Tag} from "ant-design-vue";
 
 export default defineComponent({
-  name: 'financialAccount',
-  components: {TableAction, BasicTable, Tag, FinancialAccountModal },
+  name: 'advanceCharge',
+  components: {Tag, TableAction, BasicTable, AdvanceChargeModal },
   setup() {
     const [registerModal, {openModal}] = useModal();
     const { createMessage } = useMessage();
+    const advanceChargeModalRef = ref(null);
     const [registerTable, { reload, getSelectRows }] = useTable({
-      title: '结算账户列表',
-      api: getAccountPageList,
+      title: '收预付款列表',
+      api: getAdvancePageList,
       rowKey: 'id',
       columns: columns,
       rowSelection: {
@@ -84,9 +89,7 @@ export default defineComponent({
     });
 
     async function handleCreate() {
-      openModal(true, {
-        isUpdate: false,
-      });
+      advanceChargeModalRef.value.openAdvanceChargeModal();
     }
 
     async function handleBatchDelete(record: Recordable) {
@@ -96,22 +99,19 @@ export default defineComponent({
         return;
       }
       const ids = data.map((item) => item.id);
-      const result = await deleteBatchAccount(ids)
-      if (result.code === 'F0003') {
+      const {code} = await deleteBatchAdvance(ids);
+      if (code === "F0007") {
         await reload();
       }
     }
 
     async function handleEdit(record: Recordable) {
-      openModal(true, {
-        record,
-        isUpdate: true,
-      });
+      advanceChargeModalRef.value.openAdvanceChargeModal(record.id);
     }
 
     async function handleDelete(record: Recordable) {
-      const result = await deleteBatchAccount([record.id])
-      if (result.code === 'F0003') {
+      const {code} = await deleteBatchAdvance([record.id]);
+      if (code === "F0007") {
         await reload();
       }
     }
@@ -125,11 +125,6 @@ export default defineComponent({
       if (data.length === 0) {
         createMessage.warn('请选择一条数据');
         return;
-      }
-      const ids = data.map((item) => item.id);
-      const result = await updateAccountStatus(ids,newStatus )
-      if (result.code === 'F0004') {
-        await reload();
       }
     }
 
@@ -147,6 +142,7 @@ export default defineComponent({
       handleSuccess,
       handleOnStatus,
       handleCancel,
+      advanceChargeModalRef
     }
   }
 })

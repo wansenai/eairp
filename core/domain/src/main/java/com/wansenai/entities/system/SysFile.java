@@ -37,7 +37,7 @@ public class SysFile implements Serializable {
     @TableId(value = "id", type = IdType.NONE)
     private Long id;
 
-    private String uId;
+    private String uid;
 
     private String fileName;
 

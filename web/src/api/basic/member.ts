@@ -62,3 +62,11 @@ export function deleteBatchMember(ids: number[], mode: ErrorMessageMode = 'notic
         },
     );
 }
+
+export function getMemberList() {
+    return defHttp.get<BaseDataResp<MemberResp>>(
+        {
+            url: API.List
+        }
+    );
+}

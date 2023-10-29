@@ -26,6 +26,9 @@ import java.time.LocalDateTime
 @Data
 data class AdvanceChargeDetailVO (
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    var memberId: Long? = null,
+
     var memberName: String? = null,
 
     var receiptNumber: String,
@@ -34,6 +37,9 @@ data class AdvanceChargeDetailVO (
     var receiptDate: LocalDateTime,
 
     var financialPersonnel: String,
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    var financialPersonnelId: Long? = null,
 
     @JsonSerialize(using = BigDecimalSerializerBO::class)
     var totalAmount : BigDecimal,

@@ -786,7 +786,6 @@ export default defineComponent({
               meTable.dataSource.forEach(row => {
                 edit(row.key);
               });
-              console.info(meTable.dataSource)
             }
             if (data.stockList) {
               stock.dataSource = [];
@@ -1159,9 +1158,6 @@ export default defineComponent({
         createMessage.warn('系统检查到您没有仓库信息，请在基本资料菜单栏->添加至少1条仓库信息');
         return;
       }
-
-      console.info(editableData)
-      console.info(editStockData)
 
       const imageList: AddProductImageReq[] = [];
       if (fileList && fileList.value) {
