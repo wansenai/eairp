@@ -7,6 +7,7 @@ enum Api {
     UploadXlsx = '/v2/common/upload/excel',
     ExportXlsx = '/v2/common/export/excel',
     UploadOss = '/v2/common/uploadOss',
+    GenerateId = '/v2/common/nextId',
 }
 
 export interface UploadFileParams {
@@ -57,5 +58,13 @@ export function uploadOss(params: UploadFileParams, mode: ErrorMessageMode = 'no
         {
             errorMessageMode: mode,
         },
+    );
+}
+
+export function generateId(type: string) {
+    return defHttp.get<BaseDataResp<number>>(
+        {
+            url: `${Api.GenerateId}/${type}`,
+        }
     );
 }
