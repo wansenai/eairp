@@ -46,7 +46,7 @@ import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useModal} from "@/components/Modal";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/basic/settlement-account/financialAccount.data";
-import {getAccountList, deleteBatchAccount, updateAccountStatus} from "@/api/financial/account";
+import {getAccountPageList, deleteBatchAccount, updateAccountStatus} from "@/api/financial/account";
 import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
 import { Tag } from 'ant-design-vue';
 
@@ -58,7 +58,7 @@ export default defineComponent({
     const { createMessage } = useMessage();
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '结算账户列表',
-      api: getAccountList,
+      api: getAccountPageList,
       rowKey: 'id',
       columns: columns,
       rowSelection: {

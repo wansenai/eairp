@@ -41,7 +41,7 @@ import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useModal} from "@/components/Modal";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/basic/operator/operator.data";
-import {getOperatorList, deleteBatchOperator, updateOperatorStatus} from "@/api/basic/operator";
+import {getOperatorPageList, deleteBatchOperator, updateOperatorStatus} from "@/api/basic/operator";
 import OperatorModal from "@/views/basic/operator/components/OperatorModal.vue";
 
 export default defineComponent({
@@ -52,7 +52,7 @@ export default defineComponent({
     const { createMessage } = useMessage();
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '操作员/经办人列表',
-      api: getOperatorList,
+      api: getOperatorPageList,
       rowKey: 'id',
       columns: columns,
       rowSelection: {
