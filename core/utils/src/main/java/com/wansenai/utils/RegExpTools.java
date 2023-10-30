@@ -29,16 +29,16 @@ public class RegExpTools {
     public static String regexp(List<String> search) {
         if (search == null || search.isEmpty())
             return null;
-        String regexp = "";
+        StringBuilder regexp = new StringBuilder();
         for (String s : search) {
             if (!regexp.isEmpty()) {
-                regexp = regexp + "|";
+                regexp.append("|");
             }
-            regexp = regexp + ".*";
-            regexp = regexp + s.replaceAll("\\.", "\\\\.");
-            regexp = regexp + ".*";
+            regexp.append(".*");
+            regexp.append(s.replaceAll("\\.", "\\\\."));
+            regexp.append(".*");
         }
-        return regexp;
+        return regexp.toString();
     }
 
     /**
@@ -51,7 +51,7 @@ public class RegExpTools {
             return null;
         StringBuilder sb = new StringBuilder();
         for (String s : search) {
-            if (sb.length() == 0) {
+            if (sb.isEmpty()) {
                 sb.append(".*\\\"").append(key).append("\\\":\\\"[a-zA-Z0-9]*(");
             } else {
                 sb.append("|");
@@ -77,14 +77,12 @@ public class RegExpTools {
             return this;
         }
 
-        public RegExp lftParen() {
+        public void lftParen() {
             builder.append(LFT_PAREN);
-            return this;
         }
 
-        public RegExp rhtParen() {
+        public void rhtParen() {
             builder.append(RHT_PAREN);
-            return this;
         }
 
         public RegExp colon() {
@@ -134,30 +132,6 @@ public class RegExpTools {
         @Override
         public String toString() {
             return builder.toString();
-        }
-
-        public static void main(String[] args) {
-            List<String> values = new ArrayList<String>();
-
-            values.add("310");
-            values.add(String.valueOf(2));
-            values.add(String.valueOf(3));
-
-            RegExp exp = new RegExp();
-
-            exp.any();
-            exp.quote("fullKbNum").colon()
-                    .quote()
-                    .value("[a-zA-Z0-9]*").or(values).value("[a-zA-Z0-9]*")
-                    .quote();
-            exp.or();
-            exp.quote("gbId[a-f0-9-]{36}").colon()
-                    .quote()
-                    .value("[0-9]*").or(values).value("[0-9]*")
-                    .quote();
-            exp.any();
-
-            System.out.println(exp);
         }
 
     }

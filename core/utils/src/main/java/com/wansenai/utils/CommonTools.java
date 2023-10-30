@@ -720,32 +720,4 @@ public class CommonTools {
         return valSb.toString();
     }
 
-//	/**
-//	 * 过滤html文件中的图片文件
-//	 * @param content
-//	 * @return
-//	 */
-//	public static String filterImg(String content)
-//	{
-//		return content.matches("/<img(?:.|\\s)*?>/g");
-//	}
-
-    public static void main(String[] args) {
-        String aa = "的付的反对法的发的说法";
-        char[] bb = aa.toCharArray();
-        for (char c : bb) {
-            System.out.println(c);
-        }
-        System.out.println(getBeforeMonth(1));
-
-        System.out.println(md5Encryp("guest"));
-        System.out.println(md5Encryp("admin"));
-
-        String value = "2333";
-        System.out.println(checkStrIsNum(value));
-
-        for (int i = 0; i < 100; i++) {
-            System.out.print(getRandomChar() + "  ||    ");
-        }
-    }
 }

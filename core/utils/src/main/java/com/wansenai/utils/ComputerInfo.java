@@ -158,11 +158,4 @@ public abstract class ComputerInfo {
     private ComputerInfo() {
 
     }
-
-    public static void main(String[] args) throws IOException {
-        System.out.println(ComputerInfo.getMacAddress());
-        System.out.println(ComputerInfo.getComputerName());
-        System.out.println(ComputerInfo.getIpAddr());
-        System.out.println(ComputerInfo.getIpAddrAndName());
-    }
 }
