@@ -17,7 +17,7 @@ data class FileDataBO(
 
     var fileUrl : String,
 
-    var fileType : String,
+    var fileType : String? = null,
 
     var fileSize : Long? = null,
 )

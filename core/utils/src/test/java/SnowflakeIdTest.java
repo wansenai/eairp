@@ -1,6 +1,8 @@
 import com.wansenai.utils.SnowflakeIdUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 public class SnowflakeIdTest {
 
     @Test
@@ -9,9 +11,9 @@ public class SnowflakeIdTest {
         SnowflakeIdUtil idWorker = new SnowflakeIdUtil(5, 9);
         for (int i = 0; i < 50; i++) {
             long id = idWorker.nextId();
-            System.out.println(id);
+            log.info(String.valueOf(id));
         }
         long end = System.currentTimeMillis();
-        System.out.println(end - start);
+        log.info(String.valueOf(end - start));
     }
 }

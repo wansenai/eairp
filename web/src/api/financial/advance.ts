@@ -40,8 +40,8 @@ export function addOrUpdateAdvance(params: AddOrUpdateAdvanceReq, mode: ErrorMes
     );
 }
 
-export function updateAdvanceStatus(ids: number[], status: number, mode: ErrorMessageMode = 'notice') {
-    return defHttp.post<BaseResp>(
+export function updateAdvanceStatus(ids: number[] | string[], status: number, mode: ErrorMessageMode = 'notice') {
+    return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`
         },

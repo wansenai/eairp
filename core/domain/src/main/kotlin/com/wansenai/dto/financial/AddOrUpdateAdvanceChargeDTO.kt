@@ -39,4 +39,6 @@ data class AddOrUpdateAdvanceChargeDTO(
     val remark: String? = null,
 
     val files: List<FileDataBO>? = null,
+
+    val review: Int? = null,
 )

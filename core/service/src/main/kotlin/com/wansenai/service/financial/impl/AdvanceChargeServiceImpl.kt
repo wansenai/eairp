@@ -44,6 +44,7 @@ import com.wansenai.vo.financial.AdvanceChargeDetailVO
 import com.wansenai.vo.financial.AdvanceChargeVO
 import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
@@ -138,7 +139,7 @@ open class AdvanceChargeServiceImpl(
                 .receiptSource(0)
                 .receiptTime(TimeUtil.parse(advanceChargeDTO.receiptDate))
                 .fileId(fileIds)
-                .status(CommonConstants.UNAUDITED)
+                .status(advanceChargeDTO.review ?: CommonConstants.UNAUDITED)
                 .createBy(userId)
                 .remark(advanceChargeDTO.remark)
                 .build()
@@ -276,6 +277,7 @@ open class AdvanceChargeServiceImpl(
                 totalAmount = financialMain.totalPrice,
                 collectedAmount = financialMain.changePrice,
                 tableData = tableData,
+                remark = financialMain.remark,
                 files = filesData
             )
             return Response.responseData(resultVO);
@@ -311,7 +313,7 @@ open class AdvanceChargeServiceImpl(
         return Response.responseMsg(FinancialCodeEnum.DELETE_ADVANCE_ERROR)
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     override fun updateAdvanceChargeStatusById(ids: List<Long>, status: Int): Response<String> {
         val financialMainList = ids.map { id ->
             FinancialMain.builder()
