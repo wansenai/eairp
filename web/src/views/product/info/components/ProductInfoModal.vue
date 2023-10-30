@@ -10,9 +10,9 @@
       v-model:open="open"
       @cancel="handleCancel"
       @ok="handleOk"
-      style="top:20%;height: 95%;">
+      style="top:10%;height: 95%;">
     <a-spin :spinning="confirmLoading">
-      <a-form ref="productFormRef" :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol">
+      <a-form ref="productFormRef" :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol" style="margin-top: 20px; margin-right: 20px; margin-left: 20px">
         <a-tabs default-active-key="1" size="small">
           <a-tab-pane key="1" tab="基本信息" id="materialHeadModal" forceRender>
             <a-row class="form-row" :gutter="24">
@@ -372,7 +372,7 @@ import {getWarehouse} from "@/api/basic/warehouse";
 import UnitModal from "@/views/product/units/components/UnitModal.vue";
 import {useModal} from "@/components/Modal";
 
-import {AddProductImageReq, AddProductReq, AddProductStockReq} from "@/api/product/model/productModel";
+import {AddProductImageReq, AddProductReq} from "@/api/product/model/productModel";
 import {ProductCategoryResp} from '/@/api/product/model/productCategoryModel';
 import {ProductAttributeListReq} from "@/api/product/model/productAttributeModel";
 import {ProductAttributeModel, ProductStockModel, Unit} from "@/views/product/info/model/productInfoModel";
