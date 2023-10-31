@@ -21,49 +21,54 @@
   <a href="#">
     <img alt="GitHub last commit (branch)" src="https://img.shields.io/github/last-commit/wansenai/wansenerp/master">
   </a>
+   <a href="">
+    <img src="https://img.shields.io/github/repo-size/wansenai/eairp"/>
+  </a>
 </div>
 <br />
 
-On the basis of ERP business, we have expanded GPT-3.5. individually or company can fine tune your model through our system and deploy it through Docker or other methods. 
-
+On the basis of ERP business, we have expanded GPT-3.5. individually or company can fine tune your model through our system. 
 You can provide fully automated business form submission operations through your simple description, and you can chat, interact, and consult information with GPT.
+You can deploy through Docker to quickly start and use.
 
-**Note: This is a front-end and back-end separated project. This repository stores backend code, please browse [here](https://github.com/wansenai/wansenerpui) for the front-end repository.**
+It's completely free, if this project is helpful to you, please click on Star. Thank you.
 
-[Enginsh](https://github.com/wansenai/wansen-erp/blob/master/README.md) / [简体中文](https://github.com/wansenai/wansen-erp/blob/master/README_ZH.md)
+## Project
+[Enginsh](https://github.com/wansenai/eairp/blob/master/README.md) / [简体中文](https://github.com/wansenai/eairp/blob/master/README_ZH.md)
 
 ## Online preview
 - [eairp preview / 在线预览](https://erp.wansen.cloud/)
 - test account (测试账号): wansen
 - test password (测试密码): 123456
 
-Some functional modules are being developed and improved, please refer to our [to-do list](https://github.com/wansenai/eairp-web/issues/41). It's not easy to generate electricity with love.
-If this project is helpful to you, please click on Star. Thank you.
-
-## Other Repository
-- [eairp-web](https://github.com/wansenai/eairp-web)
-- [eairp-app](https://github.com/wansenai/eairp-app) Note: (App is currently in the development stag)
+Some functional modules are being developed and improved, please refer to our [to-do list](https://github.com/wansenai/eairp/issues/118) / [开发清单](https://github.com/wansenai/eairp/issues/124). It's not easy to generate electricity with love.
 
 ## Quick Start
-You need to first install the Docker environment and already have the Redis and MySQL8.0 environments
-
-### Pull images
 ```shell
 docker pull wansenai/eairp:2.0.3
+
+docker pull wansenai/eairp-web:2.0.3
 ```
-### Run Server
-You can customize and modify port 8080, please ensure that the service ports monitored by your front-end are consistent
+## Run Server
+You can customize and modify port 8080, please ensure that the service ports monitored by your front-end are consistent.
+If you want to deploy to your domain name, the local host needs to be modified to your domain name.
+
+We will use the Docker Compose method for integration and deployment next it is coming soon :)
+
 ```shell
 docker run --name eairp -d -p 8080:8088 wansenai/eairp:2.0.3
+
+docker run --name eairp-web -d -p 3000:80 -e API_BASE_URL=http://localhost:8080/erp-api wansenai/eairp-web:2.0.3
 ```
-At present, we are preparing to package all the environments into a `docker-compose`, and this plan may need to be postponed later
 
 ## System screenshot (only part)
 ![](images/login-page-en.png)
-![](images/home-page-zh.png)
 ![](images/user-manage-zh.png)
 ![](images/add-menu-zh.png)
 ![](images/role-permission-zh.png)
+
+## Other Repository
+- [eairp-app](https://github.com/wansenai/eairp-app)  **Note:** (The application currently needs to wait for the web side to be fully developed before proceeding)
 
 ## License
 
