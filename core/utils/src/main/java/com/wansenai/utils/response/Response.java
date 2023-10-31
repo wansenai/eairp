@@ -124,6 +124,13 @@ public class Response<T> implements Serializable {
         return baseResponse;
     }
 
+    public static <T> Response<T> responseMsg(RetailCodeEnum retailCodeEnum) {
+        Response<T> baseResponse = new Response<T>();
+        baseResponse.setCode(retailCodeEnum.getCode());
+        baseResponse.setMsg(retailCodeEnum.getMsg());
+        return baseResponse;
+    }
+
     public static <T> Response<T> responseData(T data) {
         Response<T> baseResponse = new Response<T>();
         baseResponse.setCode(BaseCodeEnum.SUCCESS.getCode());

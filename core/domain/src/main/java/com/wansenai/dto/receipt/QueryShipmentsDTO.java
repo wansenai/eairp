@@ -10,16 +10,34 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.service.warehouse;
+package com.wansenai.dto.receipt;
 
-import com.wansenai.entities.warehouse.WarehouseHead;
-import com.baomidou.mybatisplus.extension.service.IService;
+import lombok.Data;
 
-/**
- * <p>
- * 单据主表 服务类
- * </p>
- */
-public interface IWarehouseHeadService extends IService<WarehouseHead> {
+@Data
+public class QueryShipmentsDTO {
 
+    private String receiptNumber;
+
+    private String productInfo;
+
+    private Long memberId;
+
+    private Long warehouseId;
+
+    private Long accountId;
+
+    private Long operatorId;
+
+    private Integer status;
+
+    private String remark;
+
+    private String startDate;
+
+    private String endDate;
+
+    private Long page;
+
+    private Long pageSize;
 }

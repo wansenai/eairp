@@ -14,6 +14,7 @@ enum API {
     DeleteBatch = '/basic/warehouse/delete',
     UpdateStatus = '/basic/warehouse/updateStatus',
     GetWarehouse = '/basic/warehouse/getWarehouse',
+    List = '/basic/warehouse/list',
 }
 
 export function getWarehousePageList(params: QueryWarehouseReq, mode: ErrorMessageMode = 'notice') {
@@ -67,6 +68,14 @@ export function getWarehouse() {
     return defHttp.get<BaseDataResp<WarehouseResp>>(
         {
             url: API.GetWarehouse,
+        }
+    );
+}
+
+export function getWarehouseList() {
+    return defHttp.get<BaseDataResp<WarehouseResp[]>>(
+        {
+            url: API.List,
         }
     );
 }
