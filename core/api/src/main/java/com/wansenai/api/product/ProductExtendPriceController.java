@@ -12,9 +12,20 @@
  */
 package com.wansenai.api.product;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.product.QueryProductExtendPriceDTO;
+import com.wansenai.service.product.ProductExtendPriceService;
+import com.wansenai.utils.enums.BaseCodeEnum;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.product.ProductExtendPriceVO;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * <p>
@@ -25,7 +36,21 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2023-09-05
  */
 @RestController
-@RequestMapping("/product-extend-price")
+@RequestMapping("/product/extend-price")
 public class ProductExtendPriceController {
 
+    private final ProductExtendPriceService productExtendPriceService;
+
+    public ProductExtendPriceController(ProductExtendPriceService productExtendPriceService) {
+        this.productExtendPriceService = productExtendPriceService;
+    }
+
+    @PostMapping("pageList")
+    public Response<IPage<ProductExtendPriceVO>> getProductExtendPrice(@RequestBody QueryProductExtendPriceDTO priceDTO) {
+        var result = productExtendPriceService.getProductExtendPriceInfo(priceDTO);
+        if(result != null) {
+            return Response.responseData(result);
+        }
+        return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
+    }
 }
