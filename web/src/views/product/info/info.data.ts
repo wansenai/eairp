@@ -111,6 +111,70 @@ const columns: BasicColumn[] = [
     }
 ]
 
+
+const extendPriceColumn: BasicColumn[] = [
+    {
+        title: '条码',
+        dataIndex: 'barCode',
+        width: 80,
+    },
+    {
+        title: '名称',
+        dataIndex: 'productName',
+        width: 100,
+    },
+    {
+        title: '分类',
+        dataIndex: 'productCategoryName',
+        width: 100,
+    },
+    {
+        title: '所属仓库',
+        dataIndex: 'warehouseName',
+        width: 100,
+    },
+    {
+        title: '规格',
+        dataIndex: 'productStandard',
+        width: 80,
+    },
+    {
+        title: '型号',
+        dataIndex: 'productModel',
+        width: 100,
+    },
+    {
+        title: '颜色',
+        dataIndex: 'productColor',
+        width: 60,
+    },
+    {
+        title: '类别',
+        dataIndex: 'productCategoryName',
+        width: 80,
+    },
+    {
+        title: '单位',
+        dataIndex: 'productUnit',
+        width: 80,
+    },
+    {
+        title: '库存',
+        dataIndex: 'stock',
+        width: 60,
+    },
+    {
+        title: '零售价',
+        dataIndex: 'retailPrice',
+        width: 60,
+    },
+    {
+        title: '扩展信息',
+        dataIndex: 'extendInfo',
+        width: 60,
+    },
+]
+
 const searchFormSchema: FormSchema[] = [
     {
         label: '商品类别',
@@ -339,6 +403,7 @@ const productInfo: ProductInfo = reactive({
 
 export {
     columns,
+    extendPriceColumn,
     searchFormSchema,
     meTable,
     stock,
