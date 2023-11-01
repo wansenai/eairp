@@ -12,8 +12,13 @@
  */
 package com.wansenai.mappers.product;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.wansenai.dto.product.QueryProductExtendPriceDTO;
 import com.wansenai.entities.product.ProductExtendPrice;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.wansenai.vo.product.ProductExtendPriceVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -21,5 +26,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  */
 public interface ProductExtendPriceMapper extends BaseMapper<ProductExtendPrice> {
+
+    IPage<ProductExtendPriceVO> getProductExtendPriceList(IPage<QueryProductExtendPriceDTO> pageObject, QueryProductExtendPriceDTO queryProductExtendPriceDTO);
+
 
 }
