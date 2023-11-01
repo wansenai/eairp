@@ -223,7 +223,6 @@ export default defineComponent({
     const fileList = ref([]);
     const minWidth = ref(1100);
     const model = ref({});
-    const reviewStatus = ref(0);
     const tableData = ref([
     ])
     const labelCol = ref({
