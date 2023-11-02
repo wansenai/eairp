@@ -44,4 +44,14 @@
         </where>
     </select>
 
+    <select id="getProductExtendPriceByBarCode" resultMap="productResultMap">
+        SELECT pep.id, p.id AS productId, p.product_category_id, p.product_name, p.product_model, p.product_standard, p.product_color,
+               pep.product_bar_code, pep.multi_attribute, pep.product_unit, pep.retail_price, p.product_manufacturer,
+               pc.category_name
+        FROM product_extend_price AS pep
+                 LEFT JOIN product AS p ON pep.product_id = p.id
+                 LEFT JOIN product_category AS pc ON p.product_category_id = pc.id
+        WHERE pep.product_bar_code = #{barCode}
+    </select>
+
 </mapper>
