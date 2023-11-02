@@ -182,8 +182,25 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
             }
         } else {
             var id = SnowflakeIdUtil.nextId();
-            var fileIds = shipmentsDTO.getFiles().stream()
-                    .map(FileDataBO::getId)
+
+            var fid = new ArrayList<>();
+            if (!shipmentsDTO.getFiles().isEmpty()) {
+                shipmentsDTO.getFiles().forEach(item -> {
+                    var file = SysFile.builder()
+                            .id(item.getId())
+                            .uid(item.getUid())
+                            .fileName(item.getFileName())
+                            .fileType(item.getFileType())
+                            .fileSize(item.getFileSize())
+                            .fileUrl(item.getFileUrl())
+                            .build();
+                    var result = fileMapper.insert(file);
+                    if(result > 0) {
+                        fid.add(file.getId());
+                    }
+                });
+            }
+            var fileIds = fid.stream()
                     .map(String::valueOf)
                     .collect(Collectors.joining(","));
 
@@ -220,20 +237,6 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                     .collect(Collectors.toList());
 
             var saveSubResult = receiptSubService.saveBatch(receiptList);
-
-            if (!shipmentsDTO.getFiles().isEmpty()) {
-                shipmentsDTO.getFiles().forEach(item -> {
-                    var file = SysFile.builder()
-                            .id(item.getId())
-                            .uid(item.getUid())
-                            .fileName(item.getFileName())
-                            .fileType(item.getFileType())
-                            .fileSize(item.getFileSize())
-                            .fileUrl(item.getFileUrl())
-                            .build();
-                    fileMapper.insert(file);
-                });
-            }
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_SUCCESS);
