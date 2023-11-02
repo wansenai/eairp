@@ -1,5 +1,6 @@
 package com.wansenai.service.receipt.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
@@ -57,9 +58,9 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
     @Override
     public Response<Page<RetailShipmentsVO>> getRetailShipments(QueryShipmentsDTO shipmentsDTO) {
         var result = new Page<RetailShipmentsVO>();
-
+        var retailShipmentsVOList = new ArrayList<RetailShipmentsVO>();
         var page = new Page<ReceiptMain>(shipmentsDTO.getPage(), shipmentsDTO.getPageSize());
-        var queryWrapper = lambdaQuery()
+        var queryWrapper = new LambdaQueryWrapper<ReceiptMain>()
                 .eq(StringUtils.hasText(shipmentsDTO.getReceiptNumber()), ReceiptMain::getReceiptNumber, shipmentsDTO.getReceiptNumber())
                 .like(StringUtils.hasText(shipmentsDTO.getRemark()), ReceiptMain::getRemark, shipmentsDTO.getRemark())
                 .eq(shipmentsDTO.getMemberId() != null, ReceiptMain::getMemberId, shipmentsDTO.getMemberId())
@@ -105,9 +106,9 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                     .backAmount(item.getBackAmount())
                     .status(item.getStatus())
                     .build();
-
-            result.setRecords(List.of(retailShipmentsVO));
+            retailShipmentsVOList.add(retailShipmentsVO);
         });
+        result.setRecords(retailShipmentsVOList);
         result.setTotal(queryResult.getTotal());
         result.setCurrent(queryResult.getCurrent());
         result.setSize(queryResult.getSize());
@@ -117,18 +118,19 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
 
     @Override
     @Transactional
-    public Response<String> addorUpdateRetailShipments(RetailShipmentsDTO shipmentsDTO) {
+    public Response<String> addOrUpdateRetailShipments(RetailShipmentsDTO shipmentsDTO) {
         var userId = userService.getCurrentUserId();
-        if (shipmentsDTO.getId() != null) {
+        var isUpdate = shipmentsDTO.getId() != null;
 
+        if (isUpdate) {
             var updateMainResult = lambdaUpdate()
                     .eq(ReceiptMain::getId, shipmentsDTO.getId())
-                    .set(shipmentsDTO.getMemberId()!= null, ReceiptMain::getMemberId, shipmentsDTO.getMemberId())
-                    .set(shipmentsDTO.getAccountId()!= null, ReceiptMain::getAccountId, shipmentsDTO.getAccountId())
+                    .set(shipmentsDTO.getMemberId() != null, ReceiptMain::getMemberId, shipmentsDTO.getMemberId())
+                    .set(shipmentsDTO.getAccountId() != null, ReceiptMain::getAccountId, shipmentsDTO.getAccountId())
                     .set(StringUtils.hasText(shipmentsDTO.getReceiptType()), ReceiptMain::getReceiptType, shipmentsDTO.getReceiptType())
-                    .set(shipmentsDTO.getCollectionAmount()!= null, ReceiptMain::getChangeAmount, shipmentsDTO.getCollectionAmount())
-                    .set(shipmentsDTO.getReceiptAmount()!= null, ReceiptMain::getTotalPrice, shipmentsDTO.getReceiptAmount())
-                    .set(shipmentsDTO.getBackAmount()!= null, ReceiptMain::getBackAmount, shipmentsDTO.getBackAmount())
+                    .set(shipmentsDTO.getCollectAmount() != null, ReceiptMain::getChangeAmount, shipmentsDTO.getCollectAmount())
+                    .set(shipmentsDTO.getReceiptAmount() != null, ReceiptMain::getTotalPrice, shipmentsDTO.getReceiptAmount())
+                    .set(shipmentsDTO.getBackAmount() != null, ReceiptMain::getBackAmount, shipmentsDTO.getBackAmount())
                     .set(StringUtils.hasText(shipmentsDTO.getRemark()), ReceiptMain::getRemark, shipmentsDTO.getRemark())
                     .set(ReceiptMain::getUpdateBy, userId)
                     .set(ReceiptMain::getUpdateTime, LocalDateTime.now())
@@ -139,25 +141,23 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                     .remove();
 
             var receiptSubList = shipmentsDTO.getTableData();
-            var receiptList = new ArrayList<ReceiptSub>(receiptSubList.size() + 3);
-            receiptSubList.forEach(item -> {
-                var receiptSub = ReceiptSub.builder()
-                        .receiptMainId(shipmentsDTO.getId())
-                        .productId(item.getProductId())
-                        .productNumber(item.getProductNumber())
-                        .productPrice(item.getUnitPrice())
-                        .productTotalPrice(item.getAmount())
-                        .productRemark(item.getRemark())
-                        .build();
-                receiptList.add(receiptSub);
-            });
+            var receiptList = receiptSubList.stream()
+                    .map(item -> ReceiptSub.builder()
+                            .receiptMainId(shipmentsDTO.getId())
+                            .productId(item.getProductId())
+                            .productNumber(item.getProductNumber())
+                            .productPrice(item.getUnitPrice())
+                            .productTotalPrice(item.getAmount())
+                            .warehouseId(item.getWarehouseId())
+                            .build())
+                    .collect(Collectors.toList());
+
             var updateSubResult = receiptSubService.saveBatch(receiptList);
 
-            if(!shipmentsDTO.getFiles().isEmpty()) {
+            if (!shipmentsDTO.getFiles().isEmpty()) {
                 var receiptMain = getById(shipmentsDTO.getId());
                 if (receiptMain != null) {
-                    String[] idStrings = receiptMain.getFileId().split(",");
-                    List<Long> ids = Arrays.stream(idStrings)
+                    var ids = Arrays.stream(receiptMain.getFileId().split(","))
                             .map(Long::parseLong)
                             .collect(Collectors.toList());
                     fileMapper.deleteBatchIds(ids);
@@ -175,21 +175,17 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                 });
             }
 
-            if(updateMainResult && updateSubResult) {
+            if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS);
             } else {
                 return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR);
             }
-
         } else {
             var id = SnowflakeIdUtil.nextId();
-            var fileIds = "";
-            if (!shipmentsDTO.getFiles().isEmpty()) {
-                fileIds = shipmentsDTO.getFiles().stream()
-                        .map(FileDataBO::getId)
-                        .map(String::valueOf)
-                        .collect(Collectors.joining(","));
-            }
+            var fileIds = shipmentsDTO.getFiles().stream()
+                    .map(FileDataBO::getId)
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
 
             var receiptMain = ReceiptMain.builder()
                     .id(id)
@@ -200,7 +196,7 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                     .memberId(shipmentsDTO.getMemberId())
                     .accountId(shipmentsDTO.getAccountId())
                     .receiptType(shipmentsDTO.getReceiptType())
-                    .changeAmount(shipmentsDTO.getCollectionAmount())
+                    .changeAmount(shipmentsDTO.getCollectAmount())
                     .totalPrice(shipmentsDTO.getReceiptAmount())
                     .backAmount(shipmentsDTO.getBackAmount())
                     .remark(shipmentsDTO.getRemark())
@@ -212,22 +208,20 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
             var saveMainResult = save(receiptMain);
 
             var receiptSubList = shipmentsDTO.getTableData();
-            var receiptList = new ArrayList<ReceiptSub>(receiptSubList.size() + 3);
-            receiptSubList.forEach(item -> {
-                var receiptSub = ReceiptSub.builder()
-                        .receiptMainId(id)
-                        .productId(item.getProductId())
-                        .productNumber(item.getProductNumber())
-                        .productPrice(item.getUnitPrice())
-                        .productTotalPrice(item.getAmount())
-                        .productRemark(item.getRemark())
-                        .build();
-                receiptList.add(receiptSub);
-            });
+            var receiptList = receiptSubList.stream()
+                    .map(item -> ReceiptSub.builder()
+                            .receiptMainId(id)
+                            .productId(item.getProductId())
+                            .productNumber(item.getProductNumber())
+                            .productPrice(item.getUnitPrice())
+                            .productTotalPrice(item.getAmount())
+                            .warehouseId(item.getWarehouseId())
+                            .build())
+                    .collect(Collectors.toList());
 
             var saveSubResult = receiptSubService.saveBatch(receiptList);
 
-            if(!shipmentsDTO.getFiles().isEmpty()) {
+            if (!shipmentsDTO.getFiles().isEmpty()) {
                 shipmentsDTO.getFiles().forEach(item -> {
                     var file = SysFile.builder()
                             .id(item.getId())
@@ -241,7 +235,7 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                 });
             }
 
-            if(saveMainResult && saveSubResult) {
+            if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_SUCCESS);
             } else {
                 return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_ERROR);

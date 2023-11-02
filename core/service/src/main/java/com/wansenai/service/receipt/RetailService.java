@@ -45,7 +45,7 @@ public interface RetailService extends IService<ReceiptMain> {
      * @return Returns the result of the addition
      *         返回新增结果
      */
-    Response<String> addorUpdateRetailShipments(RetailShipmentsDTO shipmentsDTO);
+    Response<String> addOrUpdateRetailShipments(RetailShipmentsDTO shipmentsDTO);
 
     /**
      * Batch delete retail shipment orders.
