@@ -17,8 +17,11 @@ import com.wansenai.dto.receipt.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
 import com.wansenai.service.receipt.RetailService;
 import com.wansenai.utils.response.Response;
+import com.wansenai.vo.receipt.RetailShipmentsDetailVO;
 import com.wansenai.vo.receipt.RetailShipmentsVO;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/retail")
@@ -38,5 +41,20 @@ public class RetailController {
     @PostMapping("/shipments/addOrUpdate")
     public Response<String> addOrUpdate(@RequestBody RetailShipmentsDTO retailShipmentsDTO) {
         return retailService.addOrUpdateRetailShipments(retailShipmentsDTO);
+    }
+
+    @PostMapping("/shipments/deleteByIds")
+    public Response<String> deleteByIds(@RequestParam("ids") List<Long> ids) {
+        return retailService.deleteRetailShipments(ids);
+    }
+
+    @PostMapping("/shipments/updateStatus")
+    public Response<String> updateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
+        return retailService.updateRetailShipmentsStatus(ids, status);
+    }
+
+    @GetMapping("/shipments/detail/{id}")
+    public Response<RetailShipmentsDetailVO> detail(@PathVariable("id") Long id) {
+        return retailService.getRetailShipmentsDetail(id);
     }
 }
