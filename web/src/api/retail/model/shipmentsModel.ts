@@ -8,12 +8,11 @@ interface FileData {
 
 interface ShipmentsData {
     warehouseId: number | string;
-    barcode: string;
+    barcode: string | number;
     productId: number | string;
     productNumber: number;
     unitPrice: number;
     amount: number;
-    remark: string;
 }
 
 interface AddOrUpdateShipmentsReq {
