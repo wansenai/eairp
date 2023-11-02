@@ -18,10 +18,7 @@ import com.wansenai.dto.receipt.RetailShipmentsDTO;
 import com.wansenai.service.receipt.RetailService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.RetailShipmentsVO;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/retail")
@@ -40,6 +37,6 @@ public class RetailController {
 
     @PostMapping("/shipments/addOrUpdate")
     public Response<String> addOrUpdate(@RequestBody RetailShipmentsDTO retailShipmentsDTO) {
-        return retailService.addorUpdateRetailShipments(retailShipmentsDTO);
+        return retailService.addOrUpdateRetailShipments(retailShipmentsDTO);
     }
 }
