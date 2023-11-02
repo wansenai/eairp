@@ -29,5 +29,5 @@ public interface ProductExtendPriceMapper extends BaseMapper<ProductExtendPrice>
 
     IPage<ProductExtendPriceVO> getProductExtendPriceList(IPage<QueryProductExtendPriceDTO> pageObject, QueryProductExtendPriceDTO queryProductExtendPriceDTO);
 
-
+    ProductExtendPriceVO getProductExtendPriceByBarCode(Long barCode);
 }

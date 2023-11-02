@@ -12,6 +12,8 @@ public class ShipmentsDataBO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long warehouseId;
 
+    private String productCode;
+
     private String barcode;
 
     private Long productId;

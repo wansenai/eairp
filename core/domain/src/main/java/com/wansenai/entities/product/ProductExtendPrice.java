@@ -59,7 +59,7 @@ public class ProductExtendPrice implements Serializable {
     /**
      * 商品条码
      */
-    private Integer productBarCode;
+    private Long productBarCode;
 
     /**
      * 商品单位

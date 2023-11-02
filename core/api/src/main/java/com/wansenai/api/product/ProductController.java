@@ -42,9 +42,9 @@ public class ProductController {
         this.extendPriceService = extendPriceService;
     }
 
-    @GetMapping("getBarCode")
-    public Response<Integer> getBarCode() {
-        return extendPriceService.getBarCode();
+    @GetMapping("getProductCode")
+    public Response<Long> getProductCode() {
+        return extendPriceService.getProductCode();
     }
 
     @PostMapping("addOrUpdateProduct")

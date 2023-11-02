@@ -362,7 +362,7 @@ import {getUnitList} from "/@/api/product/productUnit";
 import {getCategoryList} from "/@/api/product/productCategory";
 import {ProductUnitQueryReq} from "/@/api/product/model/productUnitModel";
 import {DefaultOptionType} from "ant-design-vue/es/vc-tree-select/TreeSelect";
-import {getBarCode, getProductInfoDetail, addOrUpdateProduct} from "@/api/product/product";
+import {getProductCode, getProductInfoDetail, addOrUpdateProduct} from "@/api/product/product";
 import {getAttributeById, getAttributeList} from "@/api/product/productAttribute";
 import {useMessage} from "@/hooks/web/useMessage";
 import BatchSetPriceModal from "@/views/product/info/components/BatchSetPriceModal.vue";
@@ -436,7 +436,7 @@ export default defineComponent({
 
     const unitStatus = ref<boolean>(false);
     const switchDisabled = ref<boolean>(false);
-    const barCodeSwitch = ref<boolean>(false);
+    const productCodeSwitch = ref<boolean>(false);
 
     const skuOneTitle = ref<string>('属性1');
     const skuTwoTitle = ref<string>('属性2');
@@ -449,7 +449,6 @@ export default defineComponent({
     const priceModalForm = ref<BatchSetPriceModal>();
     const stockModalForm = ref<BatchSetStockModal>();
     const [registerModal, {openModal}] = useModal();
-    const maxBarCodeInfo = ref();
 
     const model = ref({});
 
@@ -483,7 +482,6 @@ export default defineComponent({
 
     function openProductInfoModal(id: string | undefined) {
       open.value = true
-      loadBarCode()
       loadUnitListData()
       loadCategoryTreeData()
       loadAttributeTreeData()
@@ -625,27 +623,6 @@ export default defineComponent({
           }
         }
       }
-
-      getBarCode().then(res => {
-        if (res && res.code === '00000') {
-          let maxBarCode = res.data
-          for (let i = 0; i < meTable.dataSource.length; i++) {
-            meTable.dataSource[i].barCode = maxBarCode + i
-            if (i === 0) {
-              meTable.dataSource[i].productUnit = basicUnit
-            } else if (i === 1) {
-              meTable.dataSource[i].productUnit = otherUnit
-            } else if (i === 2) {
-              meTable.dataSource[i].productUnit = otherUnitTwo
-            } else if (i === 3) {
-              meTable.dataSource[i].productUnit = otherUnitThree
-            }
-          }
-          for (let i = 0; i < meTable.dataSource.length; i++) {
-            editableData[meTable.dataSource[i].key] = meTable.dataSource[i]
-          }
-        }
-      })
     }
 
     const skuOneData: Ref<string[]>  = ref([]);
@@ -702,31 +679,12 @@ export default defineComponent({
         }
 
         skuArr.value = arr;
-        loadBarCode();
       } else {
         createMessage.warn('如果使用多属性，请填写单位（注意不要勾选多单位）');
-        barCodeSwitch.value = false
+        productCodeSwitch.value = false
       }
     }
 
-    function loadBarCode() {
-      getBarCode().then(res => {
-        if (res && res.code === '00000') {
-          let maxBarCode = res.data
-          if (skuArr.value.length > 0) {
-            meTable.dataSource = [] // 清空meTableData数组
-            for (let i = 0; i < skuArr.value.length; i++) {
-              let currentBarCode = maxBarCode + i
-              const newRowData = {key: i, productUnit: formState.productUnit, barCode: currentBarCode, multiAttribute: skuArr.value[i]}
-              meTable.dataSource.push(newRowData);
-            }
-            meTable.dataSource.forEach(row => {
-              edit(row.key);
-            });
-          }
-        }
-      })
-    }
 
     function loadProductInfoDetail(id) {
       getProductInfoDetail(id).then(res => {
@@ -969,21 +927,10 @@ export default defineComponent({
 
     const addRow = () => {
       // Create a new row with a unique key
-      const newRow: { key: number; productUnit?: string; barCode?: number } = { key: Date.now() };
+      const newRow: { key: number; productUnit?: string;} = { key: Date.now() };
       editableData[newRow.key] = cloneDeep(newRow);
       if (formState.productUnit) {
         newRow.productUnit = formState.productUnit
-      }
-      if(maxBarCodeInfo.value) {
-        maxBarCodeInfo.value++
-        newRow.barCode = maxBarCodeInfo.value + 1
-      } else {
-        getBarCode().then(res => {
-          if (res && res.code === '00000') {
-            maxBarCodeInfo.value = res.data
-            newRow.barCode = maxBarCodeInfo.value
-          }
-        })
       }
       meTable.dataSource.push(newRow);
       edit(newRow.key);
@@ -1121,7 +1068,7 @@ export default defineComponent({
       manySkuStatus.value = false
       unitStatus.value = false
       switchDisabled.value = false
-      barCodeSwitch.value = false
+      productCodeSwitch.value = false
       // 清除所有的sku
       manySkuSelected.value = 0
       skuOneList.value = []
@@ -1254,7 +1201,7 @@ export default defineComponent({
       manySkuStatus,
       manySkuItem,
       switchDisabled,
-      barCodeSwitch,
+      productCodeSwitch,
       onSkuChange,
       unitList,
       skuOneList,

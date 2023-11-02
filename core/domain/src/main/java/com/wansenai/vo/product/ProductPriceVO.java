@@ -19,7 +19,8 @@ public class ProductPriceVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productPriceId;
 
-    private Integer barCode;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long barCode;
 
     private String productUnit;
 

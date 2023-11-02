@@ -39,7 +39,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,8 +53,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     private final ProductStockService productStockService;
 
-    private final ProductExtendPropertyService productExtendPropertyService;
-
     private final ProductCategoryService productCategoryService;
 
     private final ProductImageService productImageService;
@@ -63,11 +61,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     private final BaseService baseService;
 
-    public ProductServiceImpl(ProductMapper productMapper, ProductExtendPriceService productExtendPriceService, ProductStockService productStockService, ProductExtendPropertyService productExtendPropertyService, ProductCategoryService productCategoryService, ProductImageService productImageService, ProductUnitService productUnitService, BaseService baseService) {
+    public ProductServiceImpl(ProductMapper productMapper, ProductExtendPriceService productExtendPriceService, ProductStockService productStockService, ProductCategoryService productCategoryService, ProductImageService productImageService, ProductUnitService productUnitService, BaseService baseService) {
         this.productMapper = productMapper;
         this.productExtendPriceService = productExtendPriceService;
         this.productStockService = productStockService;
-        this.productExtendPropertyService = productExtendPropertyService;
         this.productCategoryService = productCategoryService;
         this.productImageService = productImageService;
         this.productUnitService = productUnitService;
@@ -101,24 +98,20 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
 
-        var barCodeList = productDTO.getPriceList().stream()
-                .map(ProductPriceDTO::getBarCode)
-                .toList();
-        var barCodeSet = new HashSet<>(barCodeList);
-        boolean existBarCode;
-        if (productDTO.getProductId() == null) {
-            existBarCode = productExtendPriceService.lambdaQuery()
-                    .in(ProductExtendPrice::getProductBarCode, barCodeList)
-                    .exists();
-        } else {
-            existBarCode = productExtendPriceService.lambdaQuery()
-                    .in(ProductExtendPrice::getProductBarCode, barCodeList)
-                    .ne(ProductExtendPrice::getProductId, productDTO.getProductId())
-                    .exists();
-
-        }
-        if (barCodeList.size() != barCodeSet.size() || existBarCode) {
-            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_EXIST);
+        if (!productDTO.getPriceList().isEmpty()) {
+            var barCodeList = productDTO.getPriceList().stream()
+                    .map(ProductPriceDTO::getBarCode)
+                    .filter(Objects::nonNull) // 检查字符串是否为空或具有长度
+                    .toList();
+            if (!barCodeList.isEmpty()) {
+                boolean existBarCode = productExtendPriceService.lambdaQuery()
+                        .in(ProductExtendPrice::getProductBarCode, barCodeList)
+                        .ne(productDTO.getProductId() != null, ProductExtendPrice::getProductId, productDTO.getProductId())
+                        .exists();
+                if (existBarCode) {
+                    return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_EXIST);
+                }
+            }
         }
 
         var userId = baseService.getCurrentUserId();
