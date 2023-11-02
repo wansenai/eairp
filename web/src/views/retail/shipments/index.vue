@@ -53,7 +53,7 @@ import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/retail/shipments/shipments.data";
 import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
-import {getShipmentsPageList} from "@/api/retail/shipments";
+import {getShipmentsPageList, deleteShipments} from "@/api/retail/shipments";
 import AddEditModal from "@/views/retail/shipments/components/AddEditModal.vue"
 import {Tag} from "ant-design-vue";
 export default defineComponent({
@@ -89,7 +89,6 @@ export default defineComponent({
     });
 
     function handleCreate() {
-      addEditModalRef.value.title = '新增-零售出库';
       addEditModalRef.value.openAddEditModal();
     }
 
@@ -99,12 +98,22 @@ export default defineComponent({
         createMessage.warn('请选择一条数据');
         return;
       }
+      const ids = data.map((item) => item.id);
+      const result = await deleteShipments(ids);
+      if (result.code === 'R0003') {
+        await reload();
+      }
     }
 
     function handleEdit(record: Recordable) {
+      addEditModalRef.value.openAddEditModal(record.id);
     }
 
     async function handleDelete(record: Recordable) {
+      const result = await deleteShipments([record.id]);
+      if (result.code === 'R0003') {
+        await reload();
+      }
     }
 
     async function handleSuccess() {
