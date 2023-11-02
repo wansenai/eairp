@@ -21,7 +21,9 @@ public class ProductPriceDTO {
 
     private Long productPriceId;
 
-    private Integer barCode;
+    private Integer productCode;
+
+    private Long barCode;
 
     private String productUnit;
 
