@@ -1,5 +1,6 @@
 package com.wansenai.vo.product;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
 import lombok.Builder;
@@ -28,7 +29,8 @@ public class ExportProductVO {
 
     private String productUnit;
 
-    private Integer productBarcode;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long productBarcode;
 
     private String multiAttribute;
 

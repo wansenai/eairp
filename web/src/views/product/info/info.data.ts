@@ -292,10 +292,6 @@ const meTable: MeTable = reactive({
             key: 'barCode',
             type: 'inputNumber',
             placeholder: '请输入${title}',
-            validateRules: [
-                { required: true, message: '条码不能为空' },
-                { pattern: /^.{4,40}$/, message: '长度为4到40位' },
-            ],
         },
         {
             title: '单位',

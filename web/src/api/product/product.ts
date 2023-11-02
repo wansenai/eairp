@@ -11,7 +11,7 @@ import {
 import {ErrorMessageMode} from "#/axios";
 
 enum Api {
-    getBarCode = '/product/getBarCode',
+    getProductCode = '/product/getProductCode',
     addProduct = '/product/addOrUpdateProduct',
     getProductInfo = '/product/getProductInfo',
     getProductInfoDetail = '/product/getProductInfoDetail',
@@ -21,10 +21,10 @@ enum Api {
     getProductExtendPrice = '/product/extend-price/pageList'
 }
 
-export function getBarCode() {
+export function getProductCode() {
     return defHttp.get<BaseDataResp<number>>(
         {
-            url: Api.getBarCode,
+            url: Api.getProductCode,
         }
     );
 }

@@ -391,7 +391,7 @@ public class CommonServiceImpl implements CommonService{
             var productPrice = ProductExtendPrice.builder()
                     .id(SnowflakeIdUtil.nextId())
                     .productId(productId)
-                    .productBarCode(Integer.parseInt(productCode))
+                    .productBarCode(Long.valueOf(productCode))
                     .multiAttribute(getCellValue(row.getCell(11), dataFormatter))
                     .purchasePrice(getNumericCellValue(row.getCell(12)))
                     .retailPrice(getNumericCellValue(row.getCell(13)))
