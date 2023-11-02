@@ -7,62 +7,60 @@ export const { t } = useI18n();
 export const columns: BasicColumn[] = [
     {
         title: '会员',
-        dataIndex: 'productBarcode',
-        width: 80,
+        dataIndex: 'memberName',
+        width: 60,
     },
     {
         title: '单据编号',
-        dataIndex: 'productName',
-        width: 100,
+        dataIndex: 'receiptNumber',
+        width: 130,
     },
     {
         title: '商品信息',
-        dataIndex: 'productStandard',
+        dataIndex: 'productInfo',
         width: 80,
     },
     {
         title: '数量',
-        dataIndex: 'productModel',
-        width: 100,
+        dataIndex: 'productNumber',
+        width: 60,
     },
     {
         title: '金额合计',
-        dataIndex: 'productColor',
+        dataIndex: 'totalPrice',
         width: 60,
     },
     {
         title: '收款金额',
-        dataIndex: 'productCategoryName',
+        dataIndex: 'collectionAmount',
         width: 80,
     },
     {
         title: '找零金额',
-        dataIndex: 'productUnit',
+        dataIndex: 'backAmount',
         width: 80,
     },
     {
         title: '单据日期',
-        dataIndex: 'productStock',
-        width: 60,
+        dataIndex: 'receiptDate',
+        width: 130,
     },
     {
         title: '操作员',
-        dataIndex: 'purchasePrice',
+        dataIndex: 'operator',
         width: 60,
     },
     {
         title: '状态',
         dataIndex: 'status',
         width: 80,
-        customRender: ({ record }) => {
-        }
     },
 ]
 
 export const searchFormSchema: FormSchema[] = [
     {
         label: '单据编号',
-        field: 'productCategoryId',
+        field: 'receiptDate',
         component: 'ApiTreeSelect',
         colProps: {
             xl: 8,
@@ -71,7 +69,7 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         label: '商品信息',
-        field: 'keywords',
+        field: 'productInfo',
         component: 'Input',
         colProps: {
             xl: 8,
@@ -90,7 +88,7 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         label: '会员卡号',
-        field: 'warehouseManager',
+        field: 'memberId',
         component: 'ApiSelect',
         componentProps: {
          //   api: test,
@@ -105,7 +103,7 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         label: '仓库',
-        field: 'warehouseManager',
+        field: 'warehouseId',
         component: 'ApiSelect',
         componentProps: {
       //      api: test,
@@ -120,7 +118,7 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         label: '操作员',
-        field: 'warehouseManager',
+        field: 'operator',
         component: 'ApiSelect',
         componentProps: {
       //      api: test,
@@ -135,7 +133,7 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         label: '结算账户',
-        field: 'warehouseManager',
+        field: 'accountId',
         component: 'ApiSelect',
         componentProps: {
     //        api: test,
@@ -165,7 +163,7 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         label: '单据备注',
-        field: 'warehouseShelves',
+        field: 'remark',
         component: 'Input',
         colProps: {
             xl: 8,

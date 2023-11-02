@@ -9,6 +9,7 @@ export interface WarehouseResp {
     status: number;
     remark: string;
     sort: number;
+    isDefault: number;
     createTime: string;
 }
 
