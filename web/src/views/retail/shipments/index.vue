@@ -33,6 +33,11 @@
             ]"
           />
         </template>
+        <template v-else-if="column.key === 'status'">
+          <Tag :color="record.status === 1 ? 'green' : 'red'">
+            {{ record.status === 1 ? '已审核' : '未审核' }}
+          </Tag>
+        </template>
       </template>
     </BasicTable>
     <AddEditModal ref="addEditModalRef" @cancel="handleCancel"></AddEditModal>
@@ -48,11 +53,12 @@ import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/retail/shipments/shipments.data";
 import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
+import {getShipmentsPageList} from "@/api/retail/shipments";
 import AddEditModal from "@/views/retail/shipments/components/AddEditModal.vue"
-
+import {Tag} from "ant-design-vue";
 export default defineComponent({
   name: 'Shipments',
-  components: {TableAction, BasicTable, AddEditModal},
+  components: {Tag, TableAction, BasicTable, AddEditModal},
   setup() {
     const { t } = useI18n();
     const { createMessage } = useMessage();
@@ -60,6 +66,7 @@ export default defineComponent({
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '零售出库列表',
       rowKey: 'id',
+      api: getShipmentsPageList,
       columns: columns,
       rowSelection: {
         type: 'checkbox',

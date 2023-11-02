@@ -5,17 +5,15 @@
       :confirm-loading="confirmLoading"
       v-bind:prefixNo="prefixNo"
       :id="prefixNo"
-      :keyboard="false"
+      @keyboard="handleKeyboard"
       :forceRender="true"
       switchHelp
       switchFullscreen
       v-model:open="open"
-      @cancel="handleCancelModal"
-      @ok="handleOkModal"
       style="left: 5%; height: 95%;">
     <template #footer>
-      <a-button @click="">取消</a-button>
-      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="">保存并审核</a-button>
+      <a-button @click="handleCancelModal">取消</a-button>
+      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)">保存并审核</a-button>
       <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
       <!--发起多级审核-->
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
@@ -70,19 +68,24 @@
         </a-row>
         <a-row class="form-row" :gutter="24">
           <a-col :lg="18" :md="12" :sm="24" style="margin-bottom: 150px;">
-                <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
-                <a-input v-if="showScanPressEnter" placeholder="请扫条码并回车" style="width: 150px; margin-right: 10px" v-model:value="formState.scanBarCode"
-                         @pressEnter="scanPressEnter" ref="scanBarCode"/>
-                <a-button v-if="showScanPressEnter" @click="stopScan">收起扫码</a-button>
             <div class="table-operations">
-              <vxe-grid ref='xGrid' v-bind="gridOptions" v-on="gridEvent">
-                <template #product_number_edit="{ row, column }">
+              <vxe-grid ref='xGrid' v-bind="gridOptions">
+                <template #toolbar_buttons="{ row }">
+                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
+                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="formState.scanBarCode"
+                           @pressEnter="scanPressEnter" ref="scanBarCode"/>
+                  <a-button v-if="showScanPressEnter"  style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
+                  <a-button @click="productModal" style="margin-right: 10px">批量添加出库商品</a-button>
+                  <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
+                  <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                </template>
+                <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber"></vxe-input>
                 </template>
-                <template #amount_edit="{ row, column }">
+                <template #amount_edit="{ row }">
                   <vxe-input v-model="row.amount"></vxe-input>
                 </template>
-                <template #barcode_edit="{ row, column }">
+                <template #barCode_edit="{ row }">
                   <vxe-input type="search" clearable v-model="row.barcode" @search-click="productModal"></vxe-input>
                 </template>
               </vxe-grid>
@@ -123,7 +126,7 @@
                     <template #label>
                       <span style="font-size: 20px;line-height:20px">单据金额</span>
                     </template>
-                    <a-input v-model:value="sumValue" :style="{color:'purple', height:'35px'}"
+                    <a-input v-model:value="receiptAmount" :style="{color:'purple', height:'35px'}"
                              :readOnly="true"/>
                   </a-form-item>
                 </a-col>
@@ -133,7 +136,7 @@
                     <template #label>
                       <span style="font-size: 20px;line-height:20px">收款金额</span>
                     </template>
-                    <a-input v-model:value="sumValue" :style="{color:'red', height:'35px'}"
+                    <a-input v-model:value="collectAmount" :style="{color:'red', height:'35px'}"
                              defaultValue="0"
                              @change="onChangePaymentAmount"/>
                   </a-form-item>
@@ -144,7 +147,7 @@
                     <template #label>
                       <span style="font-size: 20px;line-height:20px">找零</span>
                     </template>
-                    <a-input v-model:value="formState.backAmount" :style="{color:'green', height:'35px'}"
+                    <a-input v-model:value="backAmount" :style="{color:'green', height:'35px'}"
                              :readOnly="true"
                              defaultValue="0"/>
                   </a-form-item>
@@ -177,15 +180,15 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <MemberModal @register="memberModal" @success="handleMemberModalSuccess"/>
-  <FinancialAccountModal @register="accountModal" @success="handleAccountModalSuccess"/>
+  <MemberModal @register="memberModal"/>
+  <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from 'vue';
+import {defineComponent, ref, onMounted} from 'vue';
 import {PlusOutlined, UploadOutlined} from '@ant-design/icons-vue';
-import {Dayjs} from 'dayjs';
+import dayjs, {Dayjs} from 'dayjs';
 import {
   Textarea,
   DatePicker,
@@ -208,7 +211,13 @@ import {
   TreeSelect,
   Upload,
 } from "ant-design-vue";
-import {formState, gridOptions, xGrid, sumValue, tableData} from '/@/views/retail/shipments/model/addEditModel';
+import {
+  formState,
+  gridOptions,
+  xGrid,
+  receiptAmount,
+  collectAmount,
+} from '/@/views/retail/shipments/model/addEditModel';
 import {getMemberList} from "@/api/basic/member";
 import {MemberResp} from "@/api/basic/model/memberModel";
 import {getAccountList} from "@/api/financial/account";
@@ -219,11 +228,13 @@ import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
 import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-import {VXETable, VxeGrid, VxeInput, VxeButton, VxeTableEvents} from 'vxe-table'
+import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
 import { addOrUpdateShipments } from "@/api/retail/shipments"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
-import {defineStore} from "pinia";
+import {getProductExtendPriceByBarCode} from "@/api/product/product";
+import XEUtils from "xe-utils";
+import {ProductExtendPriceResp} from "@/api/product/model/productModel";
 const VNodes = {
   props: {
     vnodes: {
@@ -307,6 +318,7 @@ export default defineComponent({
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
 
+
     function handleCancelModal() {
       close();
       open.value = false;
@@ -353,16 +365,19 @@ export default defineComponent({
           if (warehouseColumn && warehouseColumn.editRender) {
             warehouseColumn.editRender.options?.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
           }
+          warehouseList.value = res.data
         }
       })
     }
 
-    function handleOkModal() {
-
-    }
-
+    const backAmount = ref('￥0.00');
     function onChangePaymentAmount() {
-
+      const sum = receiptAmount.value
+      const collect = collectAmount.value
+      const sumNumber = sum.replace(/,/g, '').replace(/￥/g, '')
+      const collectNumber = collect.replace(/,/g, '').replace(/￥/g, '')
+      const numberAmount = Number(collectNumber) - Number(sumNumber)
+      backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(numberAmount), { digits: 2 })}`
     }
 
     const dateChange = (value: Dayjs, dateString: string) => {
@@ -373,7 +388,44 @@ export default defineComponent({
     };
 
     function scanPressEnter() {
-
+      getProductExtendPriceByBarCode(formState.scanBarCode).then(res => {
+        const {columns} = gridOptions
+        if (columns) {
+          const {data} = res
+          if (data) {
+            const productExtendPrice : ProductExtendPriceResp = data
+            const table = xGrid.value
+            if (table) {
+              //根据productExtendPrice.id判断表格中如果是同一个商品，数量加1 否则新增一行
+              const tableData = table.getTableData().tableData
+              const index = tableData.findIndex(item => item.id === productExtendPrice.id)
+              const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
+              const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
+              if (index > -1) {
+                const row = tableData[index]
+                row.productNumber = row.productNumber + 1
+                row.amount = row.productNumber * row.retailPrice
+                table.updateData(index, row)
+              } else {
+                table.insert({
+                  id: productExtendPrice.id,
+                  warehouseId: warehouseId,
+                  productId: productExtendPrice.productId,
+                  barCode: productExtendPrice.barCode,
+                  productName: productExtendPrice.productName,
+                  retailPrice: productExtendPrice.retailPrice,
+                  productStandard: productExtendPrice.productStandard,
+                  productUnit: productExtendPrice.productUnit,
+                  stock: productExtendPrice.stock,
+                  productNumber: 1,
+                })
+              }
+            }
+          }
+        }
+      })
+      // 清除扫码框的值
+      formState.scanBarCode = ''
     }
 
     function scanEnter() {
@@ -413,9 +465,7 @@ export default defineComponent({
       });
     }
 
-    async function handleOk() {
-      const form = formState;
-      console.info(form)
+    async function handleOk(type: number) {
       const table = xGrid.value
       if (!formState.receiptDate) {
         createMessage.error('请选择单据日期');
@@ -423,82 +473,90 @@ export default defineComponent({
       }
       if(table) {
         const insertRecords = table.getInsertRecords()
-        console.info(insertRecords)
         if(insertRecords.length === 0) {
           createMessage.error("请添加一行数据")
+          return;
         }
-        insertRecords.forEach(item => {
-          if(!item.warehouseId || !item.barcode) {
-            createMessage.error("请填写红色*的必填参数")
-          }
-        })
-
-        const files = [];
-        if (fileList && fileList.value) {
-          for (let i = 0; i < fileList.value.length; i++) {
-            if (fileList.value[i].url) {
-              const file = {
-                uid: fileList.value[i].uid,
-                fileType: fileList.value[i].type,
-                fileName: fileList.value[i].name,
-                fileUrl: fileList.value[i].url || null,
-                fileSize: fileList.value[i].size,
-              }
-              files.push(file)
-            } else {
-              const file = {
-                uid: fileList.value[i].uid,
-                fileType: fileList.value[i].type,
-                fileName: fileList.value[i].name,
-                fileUrl: fileList.value[i].response.data[0] as string,
-                fileSize: fileList.value[i].size,
-              }
-              files.push(file)
+      }
+      const files = [];
+      if (fileList && fileList.value) {
+        for (let i = 0; i < fileList.value.length; i++) {
+          if (fileList.value[i].url) {
+            const file = {
+              uid: fileList.value[i].uid,
+              fileType: fileList.value[i].type,
+              fileName: fileList.value[i].name,
+              fileUrl: fileList.value[i].url || null,
+              fileSize: fileList.value[i].size,
             }
+            files.push(file)
+          } else {
+            const file = {
+              uid: fileList.value[i].uid,
+              fileType: fileList.value[i].type,
+              fileName: fileList.value[i].name,
+              fileUrl: fileList.value[i].response.data[0] as string,
+              fileSize: fileList.value[i].size,
+            }
+            files.push(file)
           }
         }
-        const dataArray = []
-        insertRecords.forEach(item => {
-          const data: ShipmentsData = {
-            warehouseId: item.warehouseId,
-            barcode: item.barcode,
-            productNumber: item.productNumber,
-            unitPrice: item.unitPrice,
-            amount: item.amount,
-            remark: item.remark,
-          }
-          dataArray.push(data)
-        })
-
-        const params: AddOrUpdateShipmentsReq = {
-          ...formState,
-          tableData: dataArray,
-          files: files,
+      }
+      const dataArray = []
+      table.getInsertRecords().forEach(item => {
+        const data: ShipmentsData = {
+          warehouseId: item.warehouseId,
+          barcode: item.barCode,
+          productId: item.productId,
+          productNumber: item.productNumber,
+          unitPrice: item.retailPrice,
+          amount: item.amount,
         }
+        dataArray.push(data)
+      })
 
-        const result = await addOrUpdateShipments(params)
-        if (result.code === 'R0001' || 'R0002') {
-          createMessage.success('操作成功');
-          handleCancelModal();
-          // clearData();
-        } else {
-          createMessage.error('操作失败');
-        }
+      const sum = receiptAmount.value
+      const collect = collectAmount.value
+      const sumNumber = sum.replace(/,/g, '').replace(/￥/g, '')
+      const collectNumber = collect.replace(/,/g, '').replace(/￥/g, '')
+      const backAmount = Number(collectNumber) - Number(sumNumber)
+      formState.collectAmount = Number(collectNumber)
+      formState.receiptAmount = Number(sumNumber)
+      formState.backAmount = backAmount
+
+      const params: AddOrUpdateShipmentsReq = {
+        ...formState,
+        tableData: dataArray,
+        files: files,
+      }
+
+      const result = await addOrUpdateShipments(params)
+      if (result.code === 'R0001' || 'R0002') {
+        createMessage.success('操作成功');
+        handleCancelModal();
+        clearData();
+      } else {
+        createMessage.error('操作失败');
       }
     }
 
-    function handleMemberModalSuccess() {
-      loadMemberList()
-    }
+    function clearData() {
+      formState.receiptNumber = ''
+      formState.memberId = ''
+      formState.paymentType = ''
+      formState.accountReceivable = ''
+      formState.remark = ''
+      formState.scanBarCode = ''
+      receiptAmount.value = ''
+      collectAmount.value = ''
+      backAmount.value = ''
+      fileList.value = []
+      const table = xGrid.value
+      if(table) {
+        // 清空表格数据
+        table.reloadData()
 
-    function handleAccountModalSuccess() {
-      loadAccountList()
-    }
-
-    function addWarehouse() {
-    }
-
-    function handleBatchSetWarehouse() {
+      }
     }
 
     function beforeUpload(file: any) {
@@ -535,10 +593,45 @@ export default defineComponent({
     }
 
     function handleCheckSuccess(data) {
-      // 将data数据数组添加到表格中
       const table = xGrid.value
       if(table) {
+        const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
+        const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
+        data.forEach(item => {
+          item.productNumber = 1,
+          item.warehouseId = warehouseId
+        })
         table.insert(data)
+      }
+    }
+
+    function addRowData() {
+      const table = xGrid.value
+      const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
+      const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
+      if(table) {
+        table.insert({productNumber: 1, warehouseId: warehouseId})
+      }
+    }
+
+    async function deleteRowData() {
+      // 删除选中行
+      const type = await VXETable.modal.confirm('确定要删除选中的数据?')
+      const table = xGrid.value
+      // 获取VXETable选中行
+      const selectRow = table.getCheckboxRecords()
+      if (table) {
+        if (type === 'confirm') {
+          await table.remove(selectRow)
+        }
+      }
+    }
+
+    const handleKeyboard = (e) => {
+      if (e.keyCode === 32) {
+        handleOk(0)
+      } else if (e.keyCode === 27) {
+        handleCancelModal()
       }
     }
 
@@ -551,7 +644,6 @@ export default defineComponent({
       confirmLoading,
       handleCancelModal,
       openAddEditModal,
-      handleOkModal,
       formState,
       title,
       width,
@@ -575,28 +667,29 @@ export default defineComponent({
       memberList,
       accountList,
       warehouseList,
-      addWarehouse,
-      handleBatchSetWarehouse,
       showScanButton,
       showScanPressEnter,
       memberModal,
       addMember,
-      handleMemberModalSuccess,
       onMemberChange,
       accountModal,
       addAccount,
-      handleAccountModalSuccess,
       handleOk,
       beforeUpload,
       uploadFiles,
       gridOptions,
       xGrid,
-      sumValue,
+      receiptAmount,
+      collectAmount,
+      backAmount,
       SelectProductModal,
       selectProductModal,
       openProductModal,
       productModal,
-      handleCheckSuccess
+      handleCheckSuccess,
+      addRowData,
+      deleteRowData,
+      handleKeyboard
     };
   },
 });
