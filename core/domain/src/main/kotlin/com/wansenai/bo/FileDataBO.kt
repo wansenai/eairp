@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.wansenai.NoArg
 import lombok.Data
 
-@Data
 @NoArg
 data class FileDataBO(
 
@@ -20,4 +19,20 @@ data class FileDataBO(
     var fileType : String? = null,
 
     var fileSize : Long? = null,
-)
+) {
+    companion object {
+        @JvmStatic
+        @JvmOverloads
+        fun builder(
+            fileName: String,
+            fileUrl: String,
+            id: Long? = null,
+            uid: String? = null,
+            fileType: String? = null,
+            fileSize: Long? = null
+        ): FileDataBO {
+            return FileDataBO(id, uid, fileName, fileUrl, fileType, fileSize)
+        }
+    }
+
+}

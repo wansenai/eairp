@@ -11,7 +11,11 @@ public enum RetailCodeEnum {
 
     UPDATE_RETAIL_SHIPMENTS_SUCCESS("R0002", "修改零售出库单成功"),
 
-    UPDATE_RETAIL_SHIPMENTS_ERROR("R0501", "修改零售出库单失败");
+    UPDATE_RETAIL_SHIPMENTS_ERROR("R0501", "修改零售出库单失败"),
+
+    DELETE_RETAIL_SHIPMENTS_SUCCESS("R0003", "删除零售出库单成功"),
+
+    DELETE_RETAIL_SHIPMENTS_ERROR("R0502", "删除零售出库单失败");
 
 
     /**
