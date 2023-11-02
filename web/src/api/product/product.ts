@@ -4,7 +4,9 @@ import {
     AddProductReq,
     ProductInfoDetailResp,
     QueryProductReq,
-    UpdateBatchProductInfoReq
+    UpdateBatchProductInfoReq,
+    ProductExtendPriceResp,
+    QueryProductExtendPriceReq,
 } from "@/api/product/model/productModel";
 import {ErrorMessageMode} from "#/axios";
 
@@ -16,6 +18,7 @@ enum Api {
     deleteProduct = '/product/deleteProduct',
     updateProductStatus = '/product/updateProductStatus',
     updateBatchProductInfo = '/product/updateBatchProductInfo',
+    getProductExtendPrice = '/product/extend-price/pageList'
 }
 
 export function getBarCode() {
@@ -85,6 +88,15 @@ export function updateBatchProductInfo(params: UpdateBatchProductInfoReq, mode: 
             params
         },{
             errorMessageMode: mode,
+        }
+    );
+}
+
+export function getProductExtendPricePage(params: QueryProductExtendPriceReq) {
+    return defHttp.post<BaseResp>(
+        {
+            url: Api.getProductExtendPrice,
+            params
         }
     );
 }

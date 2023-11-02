@@ -1,45 +1,46 @@
 import {reactive, ref} from "vue";
 import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridListeners, VxeGridProps, VXETable} from "vxe-table";
+import {Dayjs} from "dayjs";
 
 interface FormState {
     memberId: string;
     receiptNumber: string;
     paymentType: string;
     remark: string;
-    receiptAmount: number;
+    receiptAmount: number | string;
     scanBarCode: string;
     paymentAmount: number;
     backAmount: number;
     accountReceivable: string;
+    receiptDate: string | undefined | Dayjs;
 }
 
 
-interface RowVO {
-    [key: string]: any
+export interface RowVO {
+    [key: string]: any,
+    warehouseId: number | string,
+    barcode: number,
+    productName:string,
+    productStandard: string,
+    stockNumber: number,
+    productUnit: string,
+    productNumber: number,
+    unitPrice: number,
+    amount: number,
+    remark: string
 }
 
-const serveApiUrl = 'https://api.vxetable.cn/demo'
-
+const serveApiUrl = ''
 const xGrid = ref<VxeGridInstance<RowVO>>()
-
-const gridEvent: VxeGridListeners<RowVO> = {
-    proxyQuery () {
-        console.log('数据代理查询事件')
-    },
-    proxyDelete () {
-        console.log('数据代理删除事件')
-    },
-    proxySave () {
-        console.log('数据代理保存事件')
-    }
-}
+const tableData = ref<RowVO[]>([])
 const gridOptions = reactive<VxeGridProps<RowVO>>({
     border: true,
     showHeaderOverflow: true,
     showOverflow: true,
+    showFooter: true,
     keepSource: true,
-    id: 'full_edit_1',
+    id: 'full_edit',
     height: 400,
     rowConfig: {
         keyField: 'id',
@@ -48,22 +49,18 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     columnConfig: {
         resizable: true
     },
-    customConfig: {
-        storage: true,
-        checkMethod ({ column }) {
-            if (['nickname', 'role'].includes(column.field)) {
-                return false
-            }
-            return true
-        }
-    },
     printConfig: {
         columns: [
-            { field: 'name' },
-            { field: 'email' },
-            { field: 'nickname' },
-            { field: 'age' },
-            { field: 'amount' }
+            { field: 'warehouseId' },
+            { field: 'barcode' },
+            { field: 'productName' },
+            { field: 'productStandard' },
+            { field: 'stockNumber' },
+            { field: 'productUnit' },
+            { field: 'productNumber' },
+            { field: 'unitPrice' },
+            { field: 'amount' },
+            { field: 'remark' }
         ]
     },
     sortConfig: {
@@ -86,10 +83,9 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     },
     toolbarConfig: {
         buttons: [
-            { code: 'insert_actived', name: '新增' },
+            { code: 'insert_actived', name: '插入一行', status: 'success'},
             { code: 'delete', name: '直接删除' },
             { code: 'mark_cancel', name: '临时删除/取消' },
-            { code: 'save', name: '保存数据', status: 'success' }
         ],
         refresh: true, // 显示刷新按钮
         export: true, // 显示导出按钮
@@ -99,8 +95,8 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     },
     proxyConfig: {
         seq: true, // 启用动态序号代理，每一页的序号会根据当前页数变化
-        sort: true, // 启用排序代理，当点击排序时会自动触发 query 行为
-        filter: true, // 启用筛选代理，当点击筛选时会自动触发 query 行为
+        sort: false, // 启用排序代理，当点击排序时会自动触发 query 行为
+        filter: false, // 启用筛选代理，当点击筛选时会自动触发 query 行为
         form: true, // 启用表单代理，当点击表单提交按钮时会自动触发 reload 行为
         props: {
             // 对应响应结果 Promise<{ result: [], page: { total: 100 } }>
@@ -139,19 +135,26 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         {
             field: 'warehouseId',
             title: '仓库名称',
-            width: 100,
+            width: 130,
             editRender: { name: '$select', options: [], props: { placeholder: '请选择仓库' } }
         },
-        { field: 'barcode', title: '条码', sortable: true, titlePrefix: { message: '输入条码商品信息自动带出！' }, editRender: { name: 'input', attrs: { placeholder: '请输入条码' } } },
+        {   field: 'barcode',
+            width:165,
+            title: '条码',
+            slots: { edit: 'barcode_edit' },
+            sortable: true,
+            titlePrefix: { content: '输入条码商品信息自动带出！' },
+            editRender: { name: 'input', attrs: { placeholder: '请输入条码/商品名称' } } },
         {
             field: 'productName',
             title: '名称',
-
         },
-        { field: 'productStandard', title: '规格', width: 90,  },
+        { field: 'productStandard', title: '规格', width: 70,  },
         { field: 'stockNumber', title: '库存',  width: 50},
         { field: 'productUnit', title: '单位',  width: 50},
-        { field: 'productNumber', title: '数量',  sortable: true, editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } } },
+        { field: 'productNumber', title: '数量',  sortable: true,
+            slots: { edit: 'product_number_edit' },
+            editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } }, },
         {
             field: 'unitPrice',
             title: '单价',
@@ -166,11 +169,46 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             formatter ({ cellValue }) {
                 return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
+            slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
         },
-        { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
+        // { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
 
     ],
+    footerMethod ({ columns, data }) {
+        return [
+            columns.map((column, columnIndex) => {
+                if (columnIndex === 0) {
+                    return '总计'
+                }
+                if (['amount', 'rate'].includes(column.field)) {
+                    // 设置单价 = 金额 / 数量 设置保留两位小数
+                    data.forEach(item => {
+                        const price = item.amount / item.productNumber
+                        item.unitPrice = XEUtils.toFixed(price, 2)
+                    })
+                    sumValue.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                }
+                if (['productNumber', 'rate'].includes(column.field)) {
+                    // 设置单价 = 金额 / 数量
+                    data.forEach(item => {
+                        const price = item.amount / item.productNumber
+                        item.unitPrice = XEUtils.toFixed(price, 2)
+                    })
+                    return sumNum(data, column.field)
+                }
+                if (['productUnit', 'rate'].includes(column.field)) {
+                    // 获取单价和数量进相乘计算赋值给金额 保留两位小数
+                    data.forEach(item => {
+                        const amount = item.productNumber * item.unitPrice
+                        item.amount = XEUtils.toFixed(amount, 2)
+                    })
+                }
+                return ''
+            })
+        ]
+    },
     exportConfig: {
         remote: true,
         types: ['xlsx'],
@@ -235,6 +273,14 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         showStatus: true
     }
 })
+const sumValue = ref<string>('');
+const sumNum = (list: RowVO[], field: string) => {
+    let count = 0
+    list.forEach(item => {
+        count += Number(item[field])
+    })
+    return count
+}
 
 const formState = reactive<FormState>({
     memberId: '',
@@ -246,11 +292,13 @@ const formState = reactive<FormState>({
     paymentAmount: 0,
     backAmount: 0,
     accountReceivable: '',
+    receiptDate: undefined,
 });
 
 export {
     formState,
     gridOptions,
     xGrid,
-    gridEvent
+    sumValue,
+    tableData
 }

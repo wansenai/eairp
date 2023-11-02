@@ -125,3 +125,27 @@ export interface UpdateBatchProductInfoReq {
     enableBatchNumber: string;
     remark: string;
 }
+
+export interface QueryProductExtendPriceReq {
+    productCategoryId: number | string;
+    warehouseId: number | string;
+    productName: string;
+    enableSerialNumber: number;
+    enableBatchNumber: number;
+}
+
+export interface ProductExtendPriceResp {
+    id: number | string;
+    productId: number | string;
+    productCategoryId: number | string;
+    barCode: string;
+    productName: string;
+    productStandard: string;
+    productModel: string;
+    productColor: string;
+    productUnit: string;
+    multiAttribute: string;
+    stock: number;
+    extendInfo: string;
+    retailPrice: number;
+}

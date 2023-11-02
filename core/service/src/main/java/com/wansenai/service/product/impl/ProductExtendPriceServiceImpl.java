@@ -12,11 +12,15 @@
  */
 package com.wansenai.service.product.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.product.QueryProductExtendPriceDTO;
 import com.wansenai.service.product.ProductExtendPriceService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.entities.product.ProductExtendPrice;
 import com.wansenai.mappers.product.ProductExtendPriceMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansenai.vo.product.ProductExtendPriceVO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,7 +33,14 @@ import java.util.List;
 @Service
 public class ProductExtendPriceServiceImpl extends ServiceImpl<ProductExtendPriceMapper, ProductExtendPrice> implements ProductExtendPriceService {
 
+    private final ProductExtendPriceMapper productExtendPriceMapper;
+
     private static int currentBarcode = 1000;
+
+    public ProductExtendPriceServiceImpl(ProductExtendPriceMapper productExtendPriceMapper) {
+        this.productExtendPriceMapper = productExtendPriceMapper;
+    }
+
     public static int generateBarcode() {
         if (currentBarcode > 9999) {
             throw new IllegalStateException("No more barcodes available.");
@@ -54,5 +65,11 @@ public class ProductExtendPriceServiceImpl extends ServiceImpl<ProductExtendPric
     @Override
     public Boolean checkProductCode(List<String> barCodes) {
         return lambdaQuery().in(ProductExtendPrice::getProductBarCode, barCodes).exists();
+    }
+
+    @Override
+    public IPage<ProductExtendPriceVO> getProductExtendPriceInfo(QueryProductExtendPriceDTO priceDTO) {
+        var page = new Page<QueryProductExtendPriceDTO>(priceDTO.getPage(), priceDTO.getPageSize());
+        return productExtendPriceMapper.getProductExtendPriceList(page, priceDTO);
     }
 }

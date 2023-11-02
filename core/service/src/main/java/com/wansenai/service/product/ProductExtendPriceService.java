@@ -12,9 +12,13 @@
  */
 package com.wansenai.service.product;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.product.QueryProductExtendPriceDTO;
 import com.wansenai.utils.response.Response;
 import com.wansenai.entities.product.ProductExtendPrice;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.vo.product.ProductExtendPriceVO;
 
 import java.util.List;
 
@@ -28,4 +32,6 @@ public interface ProductExtendPriceService extends IService<ProductExtendPrice> 
     Response<Integer> getBarCode();
 
     Boolean checkProductCode(List<String> barCodes);
+
+    IPage<ProductExtendPriceVO> getProductExtendPriceInfo(QueryProductExtendPriceDTO priceDTO);
 }

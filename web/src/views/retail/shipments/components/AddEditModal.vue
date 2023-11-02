@@ -16,7 +16,7 @@
     <template #footer>
       <a-button @click="">取消</a-button>
       <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="">保存</a-button>
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
       <!--发起多级审核-->
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
@@ -44,8 +44,8 @@
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期">
-              <a-date-picker show-time placeholder="选择时间" @change="dateChange" @ok="dateOk"/>
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
+              <a-date-picker v-model:value="formState.receiptDate" show-time placeholder="选择时间" @change="dateChange" @ok="dateOk"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
@@ -70,21 +70,22 @@
         </a-row>
         <a-row class="form-row" :gutter="24">
           <a-col :lg="18" :md="12" :sm="24" style="margin-bottom: 150px;">
+                <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
+                <a-input v-if="showScanPressEnter" placeholder="请扫条码并回车" style="width: 150px; margin-right: 10px" v-model:value="formState.scanBarCode"
+                         @pressEnter="scanPressEnter" ref="scanBarCode"/>
+                <a-button v-if="showScanPressEnter" @click="stopScan">收起扫码</a-button>
             <div class="table-operations">
-              <a-row :gutter="24" style="float:left; margin-bottom: 10px" v-if="showScanPressEnter" data-step="4"
-                     data-title="扫码录入"
-                     data-intro="此功能支持扫码枪扫描商品条码进行录入">
-                <a-col :md="5" :sm="24" style="padding: 0 6px 0 12px">
-                  <a-input placeholder="请扫条码并回车" style="width: 150px;" v-model:value="formState.scanBarCode"
-                           @pressEnter="scanPressEnter" ref="scanBarCode"/>
-                </a-col>
-                <a-col :md="6" :sm="24" style="padding: 0px 600px 0 0">
-                  <a-button @click="stopScan">收起扫码</a-button>
-                </a-col>
-              </a-row>
-            </div>
-            <div class="customer-table">
-              <vxe-grid ref='xGrid' v-bind="gridOptions" v-on="gridEvent"></vxe-grid>
+              <vxe-grid ref='xGrid' v-bind="gridOptions" v-on="gridEvent">
+                <template #product_number_edit="{ row, column }">
+                  <vxe-input v-model="row.productNumber"></vxe-input>
+                </template>
+                <template #amount_edit="{ row, column }">
+                  <vxe-input v-model="row.amount"></vxe-input>
+                </template>
+                <template #barcode_edit="{ row, column }">
+                  <vxe-input type="search" clearable v-model="row.barcode" @search-click="productModal"></vxe-input>
+                </template>
+              </vxe-grid>
             </div>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
@@ -99,7 +100,11 @@
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="附件" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
-                  <a-upload v-model:file-list="fileList" action="">
+                  <a-upload
+                      v-model:file-list="fileList"
+                      :custom-request="uploadFiles"
+                      :before-upload="beforeUpload"
+                      multiple>
                     <a-button>
                       <upload-outlined/>
                       点击上传附件
@@ -118,7 +123,7 @@
                     <template #label>
                       <span style="font-size: 20px;line-height:20px">单据金额</span>
                     </template>
-                    <a-input v-model:value="formState.receiptAmount" :style="{color:'purple', height:'35px'}"
+                    <a-input v-model:value="sumValue" :style="{color:'purple', height:'35px'}"
                              :readOnly="true"/>
                   </a-form-item>
                 </a-col>
@@ -128,7 +133,7 @@
                     <template #label>
                       <span style="font-size: 20px;line-height:20px">收款金额</span>
                     </template>
-                    <a-input v-model:value="formState.paymentAmount" :style="{color:'red', height:'35px'}"
+                    <a-input v-model:value="sumValue" :style="{color:'red', height:'35px'}"
                              defaultValue="0"
                              @change="onChangePaymentAmount"/>
                   </a-form-item>
@@ -174,10 +179,11 @@
   </a-modal>
   <MemberModal @register="memberModal" @success="handleMemberModalSuccess"/>
   <FinancialAccountModal @register="accountModal" @success="handleAccountModalSuccess"/>
+  <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, onMounted} from 'vue';
+import {defineComponent, ref} from 'vue';
 import {PlusOutlined, UploadOutlined} from '@ant-design/icons-vue';
 import {Dayjs} from 'dayjs';
 import {
@@ -202,7 +208,7 @@ import {
   TreeSelect,
   Upload,
 } from "ant-design-vue";
-import {formState, gridOptions, gridEvent, xGrid} from '/@/views/retail/shipments/model/addEditModel';
+import {formState, gridOptions, xGrid, sumValue, tableData} from '/@/views/retail/shipments/model/addEditModel';
 import {getMemberList} from "@/api/basic/member";
 import {MemberResp} from "@/api/basic/model/memberModel";
 import {getAccountList} from "@/api/financial/account";
@@ -210,11 +216,14 @@ import {getWarehouseList} from "@/api/basic/warehouse";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import MemberModal from "@/views/basic/member/components/MemberModal.vue";
 import {useModal} from "@/components/Modal";
-import {generateId} from "@/api/basic/common";
+import {generateId, uploadOss} from "@/api/basic/common";
 import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-import {VXETable, VxeGrid} from 'vxe-table'
-
+import {VXETable, VxeGrid, VxeInput, VxeButton, VxeTableEvents} from 'vxe-table'
+import {useMessage} from "@/hooks/web/useMessage";
+import { addOrUpdateShipments } from "@/api/retail/shipments"
+import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
+import {defineStore} from "pinia";
 const VNodes = {
   props: {
     vnodes: {
@@ -233,6 +242,7 @@ export default defineComponent({
   components: {
     FinancialAccountModal,
     MemberModal,
+    SelectProductModal,
     'plus-outlined': PlusOutlined,
     'a-modal': Modal,
     'a-upload': Upload,
@@ -258,8 +268,11 @@ export default defineComponent({
     'upload-outlined': UploadOutlined,
     'vxe-table': VXETable,
     'vxe-grid': VxeGrid,
+    'vxe-input': VxeInput,
+    'vxe-button': VxeButton
   },
   setup(_, context) {
+    const {createMessage} = useMessage();
     const confirmLoading = ref<boolean>(false);
     const open = ref<boolean>(false);
     const checkFlag = ref<boolean>(true);
@@ -292,6 +305,7 @@ export default defineComponent({
     const warehouseList = ref<WarehouseResp[]>([]);
     const [memberModal, {openModal}] = useModal();
     const [accountModal, {openModal: openAccountModal}] = useModal();
+    const [selectProductModal, {openModal: openProductModal}] = useModal();
 
     function handleCancelModal() {
       close();
@@ -301,7 +315,6 @@ export default defineComponent({
 
     function openAddEditModal(id: string | undefined) {
       open.value = true
-      console.info(id)
       loadMemberList();
       loadAccountList();
       loadWarehouseList();
@@ -353,12 +366,10 @@ export default defineComponent({
     }
 
     const dateChange = (value: Dayjs, dateString: string) => {
-      console.log('Selected Time: ', value);
-      console.log('Formatted Selected Time: ', dateString);
+
     };
 
     const dateOk = (value: Dayjs) => {
-      console.log('onOk: ', value);
     };
 
     function scanPressEnter() {
@@ -402,6 +413,80 @@ export default defineComponent({
       });
     }
 
+    async function handleOk() {
+      const form = formState;
+      console.info(form)
+      const table = xGrid.value
+      if (!formState.receiptDate) {
+        createMessage.error('请选择单据日期');
+        return;
+      }
+      if(table) {
+        const insertRecords = table.getInsertRecords()
+        console.info(insertRecords)
+        if(insertRecords.length === 0) {
+          createMessage.error("请添加一行数据")
+        }
+        insertRecords.forEach(item => {
+          if(!item.warehouseId || !item.barcode) {
+            createMessage.error("请填写红色*的必填参数")
+          }
+        })
+
+        const files = [];
+        if (fileList && fileList.value) {
+          for (let i = 0; i < fileList.value.length; i++) {
+            if (fileList.value[i].url) {
+              const file = {
+                uid: fileList.value[i].uid,
+                fileType: fileList.value[i].type,
+                fileName: fileList.value[i].name,
+                fileUrl: fileList.value[i].url || null,
+                fileSize: fileList.value[i].size,
+              }
+              files.push(file)
+            } else {
+              const file = {
+                uid: fileList.value[i].uid,
+                fileType: fileList.value[i].type,
+                fileName: fileList.value[i].name,
+                fileUrl: fileList.value[i].response.data[0] as string,
+                fileSize: fileList.value[i].size,
+              }
+              files.push(file)
+            }
+          }
+        }
+        const dataArray = []
+        insertRecords.forEach(item => {
+          const data: ShipmentsData = {
+            warehouseId: item.warehouseId,
+            barcode: item.barcode,
+            productNumber: item.productNumber,
+            unitPrice: item.unitPrice,
+            amount: item.amount,
+            remark: item.remark,
+          }
+          dataArray.push(data)
+        })
+
+        const params: AddOrUpdateShipmentsReq = {
+          ...formState,
+          tableData: dataArray,
+          files: files,
+        }
+
+        const result = await addOrUpdateShipments(params)
+        if (result.code === 'R0001' || 'R0002') {
+          createMessage.success('操作成功');
+          handleCancelModal();
+          // clearData();
+        } else {
+          createMessage.error('操作失败');
+        }
+      }
+    }
+
     function handleMemberModalSuccess() {
       loadMemberList()
     }
@@ -414,6 +499,47 @@ export default defineComponent({
     }
 
     function handleBatchSetWarehouse() {
+    }
+
+    function beforeUpload(file: any) {
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        createMessage.error(`${file.name}，该文件超过2MB大小限制`);
+        return isLt2M || Upload.LIST_IGNORE
+      }
+    }
+
+    const uploadFiles = (options) => {
+      const { file, onSuccess, onError, onProgress } = options;
+      const formData = new FormData();
+      formData.append('files', file);
+      // 调用 uploadOss 方法进行上传
+      uploadOss(formData, {
+        onUploadProgress: ({total, loaded}) => {
+          onProgress(
+              {percent: Math.round((loaded / total) * 100).toFixed(2)},
+              file
+          );
+        },
+      }).then((res) => {
+        onSuccess(res, file);
+      }).catch((error) => {
+        onError(error);
+      });
+    }
+
+    function productModal() {
+      openProductModal(true, {
+        isUpdate: false,
+      });
+    }
+
+    function handleCheckSuccess(data) {
+      // 将data数据数组添加到表格中
+      const table = xGrid.value
+      if(table) {
+        table.insert(data)
+      }
     }
 
     return {
@@ -460,9 +586,17 @@ export default defineComponent({
       accountModal,
       addAccount,
       handleAccountModalSuccess,
+      handleOk,
+      beforeUpload,
+      uploadFiles,
       gridOptions,
-      gridEvent,
       xGrid,
+      sumValue,
+      SelectProductModal,
+      selectProductModal,
+      openProductModal,
+      productModal,
+      handleCheckSuccess
     };
   },
 });
