@@ -52,12 +52,12 @@ public class ProductExtendPriceServiceImpl extends ServiceImpl<ProductExtendPric
     }
 
     @Override
-    public Response<Integer> getBarCode() {
+    public Response<Long> getProductCode() {
         var data = lambdaQuery()
                 .orderByDesc(ProductExtendPrice::getProductBarCode)
                 .last("LIMIT 1").one();
         if(data == null){
-            return Response.responseData(1000);
+            return Response.responseData(1000L);
         }
         return Response.responseData(data.getProductBarCode() + 1);
     }
@@ -71,5 +71,14 @@ public class ProductExtendPriceServiceImpl extends ServiceImpl<ProductExtendPric
     public IPage<ProductExtendPriceVO> getProductExtendPriceInfo(QueryProductExtendPriceDTO priceDTO) {
         var page = new Page<QueryProductExtendPriceDTO>(priceDTO.getPage(), priceDTO.getPageSize());
         return productExtendPriceMapper.getProductExtendPriceList(page, priceDTO);
+    }
+
+    @Override
+    public Response<ProductExtendPriceVO> getProductByBarCode(Long barCode) {
+        var data = productExtendPriceMapper.getProductExtendPriceByBarCode(barCode);
+        if (data == null) {
+            return Response.responseData(null);
+        }
+        return Response.responseData(data);
     }
 }

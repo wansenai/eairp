@@ -29,9 +29,11 @@ import java.util.List;
  */
 public interface ProductExtendPriceService extends IService<ProductExtendPrice> {
 
-    Response<Integer> getBarCode();
+    Response<Long> getProductCode();
 
     Boolean checkProductCode(List<String> barCodes);
 
     IPage<ProductExtendPriceVO> getProductExtendPriceInfo(QueryProductExtendPriceDTO priceDTO);
+
+    Response<ProductExtendPriceVO> getProductByBarCode(Long barCode);
 }
