@@ -4,6 +4,7 @@ import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
 
 interface FormState {
+    id: number | string | undefined;
     memberId: string;
     receiptNumber: string;
     paymentType: string;
@@ -12,7 +13,7 @@ interface FormState {
     scanBarCode: string;
     collectAmount: number;
     backAmount: number;
-    accountReceivable: string;
+    accountId: string;
     receiptDate: string | undefined | Dayjs;
 }
 
@@ -115,7 +116,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             slots: { edit: 'barCode_edit' },
             sortable: true,
             titlePrefix: { content: '输入条码商品信息自动带出！' },
-            editRender: { name: 'input', attrs: { placeholder: '请输入条码/商品名称' } }
+            editRender: { name: 'input', attrs: { placeholder: '请输入条码并回车' } }
         },
         {
             field: 'productName',
@@ -216,6 +217,7 @@ const sumNum = (list: RowVO[], field: string) => {
 }
 
 const formState = reactive<FormState>({
+    id: undefined,
     memberId: '',
     receiptNumber: '',
     paymentType: '',
@@ -224,7 +226,7 @@ const formState = reactive<FormState>({
     scanBarCode: '',
     collectAmount: 0,
     backAmount: 0,
-    accountReceivable: '',
+    accountId: '',
     receiptDate: '',
 });
 
