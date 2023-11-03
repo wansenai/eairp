@@ -13,11 +13,9 @@
 package com.wansenai.dto.product;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
-public class QueryProductExtendPriceDTO {
+public class QueryProductStockKeepUnitDTO {
 
     private Long productCategoryId;
 
