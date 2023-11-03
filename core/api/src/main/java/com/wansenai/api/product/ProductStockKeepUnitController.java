@@ -13,11 +13,11 @@
 package com.wansenai.api.product;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.wansenai.dto.product.QueryProductExtendPriceDTO;
-import com.wansenai.service.product.ProductExtendPriceService;
+import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
+import com.wansenai.service.product.ProductStockKeepUnitService;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.product.ProductExtendPriceVO;
+import com.wansenai.vo.product.ProductStockKeepUnitVO;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -29,18 +29,18 @@ import org.springframework.web.bind.annotation.*;
  * @since 2023-09-05
  */
 @RestController
-@RequestMapping("/product/extend-price")
-public class ProductExtendPriceController {
+@RequestMapping("/product/sku")
+public class ProductStockKeepUnitController {
 
-    private final ProductExtendPriceService productExtendPriceService;
+    private final ProductStockKeepUnitService productStockKeepUnitService;
 
-    public ProductExtendPriceController(ProductExtendPriceService productExtendPriceService) {
-        this.productExtendPriceService = productExtendPriceService;
+    public ProductStockKeepUnitController(ProductStockKeepUnitService productStockKeepUnitService) {
+        this.productStockKeepUnitService = productStockKeepUnitService;
     }
 
     @PostMapping("pageList")
-    public Response<IPage<ProductExtendPriceVO>> getProductExtendPrice(@RequestBody QueryProductExtendPriceDTO priceDTO) {
-        var result = productExtendPriceService.getProductExtendPriceInfo(priceDTO);
+    public Response<IPage<ProductStockKeepUnitVO>> getProductExtendPrice(@RequestBody QueryProductStockKeepUnitDTO priceDTO) {
+        var result = productStockKeepUnitService.getProductExtendPriceInfo(priceDTO);
         if(result != null) {
             return Response.responseData(result);
         }
@@ -48,7 +48,7 @@ public class ProductExtendPriceController {
     }
 
     @GetMapping("getProduct/{barCode}")
-    public Response<ProductExtendPriceVO> getProductByBarCode(@PathVariable("barCode") Long barCode) {
-        return productExtendPriceService.getProductByBarCode(barCode);
+    public Response<ProductStockKeepUnitVO> getProductByBarCode(@PathVariable("barCode") Long barCode) {
+        return productStockKeepUnitService.getProductByBarCode(barCode);
     }
 }

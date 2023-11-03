@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2023-09-05
  */
 @RestController
-@RequestMapping("/product-extend-property")
-public class ProductExtendPropertyController {
+@RequestMapping("/product/property")
+public class ProductPropertyController {
 
 }
