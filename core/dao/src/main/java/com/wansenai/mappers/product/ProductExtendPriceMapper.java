@@ -13,21 +13,19 @@
 package com.wansenai.mappers.product;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.wansenai.dto.product.QueryProductExtendPriceDTO;
-import com.wansenai.entities.product.ProductExtendPrice;
+import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
+import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.wansenai.vo.product.ProductExtendPriceVO;
-
-import java.util.List;
+import com.wansenai.vo.product.ProductStockKeepUnitVO;
 
 /**
  * <p>
  * 产品价格扩展 Mapper 接口
  * </p>
  */
-public interface ProductExtendPriceMapper extends BaseMapper<ProductExtendPrice> {
+public interface ProductExtendPriceMapper extends BaseMapper<ProductStockKeepUnit> {
 
-    IPage<ProductExtendPriceVO> getProductExtendPriceList(IPage<QueryProductExtendPriceDTO> pageObject, QueryProductExtendPriceDTO queryProductExtendPriceDTO);
+    IPage<ProductStockKeepUnitVO> getProductExtendPriceList(IPage<QueryProductStockKeepUnitDTO> pageObject, QueryProductStockKeepUnitDTO queryProductStockKeepUnitDTO);
 
-    ProductExtendPriceVO getProductExtendPriceByBarCode(Long barCode);
+    ProductStockKeepUnitVO getProductExtendPriceByBarCode(Long barCode);
 }

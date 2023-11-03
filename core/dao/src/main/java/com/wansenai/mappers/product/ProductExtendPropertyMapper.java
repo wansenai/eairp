@@ -12,7 +12,7 @@
  */
 package com.wansenai.mappers.product;
 
-import com.wansenai.entities.product.ProductExtendProperty;
+import com.wansenai.entities.product.ProductProperty;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -20,6 +20,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 产品扩展字段表 Mapper 接口
  * </p>
  */
-public interface ProductExtendPropertyMapper extends BaseMapper<ProductExtendProperty> {
+public interface ProductExtendPropertyMapper extends BaseMapper<ProductProperty> {
 
 }
