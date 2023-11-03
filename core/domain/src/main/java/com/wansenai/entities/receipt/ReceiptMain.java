@@ -53,8 +53,6 @@ public class ReceiptMain implements Serializable {
 
     private String receiptNumber;
 
-    private String receiptType;
-
     private BigDecimal changeAmount;
 
     private BigDecimal backAmount;
