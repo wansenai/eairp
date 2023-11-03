@@ -611,6 +611,7 @@ export default defineComponent({
       let otherUnitTwo = '';
       let otherUnitThree = '';
 
+      console.info(unitArr)
       for (let i = 0; i < unitArr.length; i++) {
         if (unitArr[i].id === value) {
           basicUnit = unitArr[i].basicUnit;
@@ -622,6 +623,21 @@ export default defineComponent({
             otherUnitThree = unitArr[i].otherUnitThree;
           }
         }
+      }
+
+      for (let i = 0; i < meTable.dataSource.length; i++) {
+        if (i === 0) {
+          meTable.dataSource[i].productUnit = basicUnit
+        } else if (i === 1) {
+          meTable.dataSource[i].productUnit = otherUnit
+        } else if (i === 2) {
+          meTable.dataSource[i].productUnit = otherUnitTwo
+        } else if (i === 3) {
+          meTable.dataSource[i].productUnit = otherUnitThree
+        }
+      }
+      for (let i = 0; i < meTable.dataSource.length; i++) {
+        editableData[meTable.dataSource[i].key] = meTable.dataSource[i]
       }
     }
 
@@ -677,8 +693,20 @@ export default defineComponent({
         } else if (skuThreeData.value.length > 0) {
           arr = skuThreeData.value;
         }
-
         skuArr.value = arr;
+
+        // 设置sku变化插入多属性
+        if (skuArr.value.length > 0) {
+          meTable.dataSource = [] // 清空meTableData数组
+          for (let i = 0; i < skuArr.value.length; i++) {
+            const newRowData = {key: i, productUnit: formState.productUnit, multiAttribute: skuArr.value[i]}
+            meTable.dataSource.push(newRowData);
+          }
+          meTable.dataSource.forEach(row => {
+            edit(row.key);
+          });
+        }
+
       } else {
         createMessage.warn('如果使用多属性，请填写单位（注意不要勾选多单位）');
         productCodeSwitch.value = false
@@ -727,6 +755,7 @@ export default defineComponent({
 
             if (data.priceList) {
               meTable.dataSource = []; // 清空meTableData数组
+              stock.dataSource = []; // 清空stock数组
               for (let i = 0; i < data.priceList.length; i++) {
                 const newRowData = {
                   key: i,
@@ -740,27 +769,25 @@ export default defineComponent({
                   lowSalesPrice: data.priceList[i].lowSalesPrice
                 }
                 meTable.dataSource.push(newRowData);
-              }
-              meTable.dataSource.forEach(row => {
-                edit(row.key);
-              });
-            }
-            if (data.stockList) {
-              stock.dataSource = [];
-              for (let i = 0; i < data.stockList.length; i++) {
-                const newRowData = {
-                  key: i,
-                  productStockId: data.stockList[i].productStockId,
-                  warehouseId: data.stockList[i].warehouseId,
-                  warehouseName: data.stockList[i].warehouseName,
-                  initStockQuantity: data.stockList[i].initStockQuantity,
-                  lowStockQuantity: data.stockList[i].lowStockQuantity,
-                  highStockQuantity: data.stockList[i].highStockQuantity
-                }
-                stock.dataSource.push(newRowData);
+                // 循环遍历stockList，将数据赋值给stock数组 每个data.priceList下都可能包含一个或多个stockList 所以需要再次循环
+                data.priceList[i].stockList.forEach((item, index) => {
+                  const stockData = {
+                    key: index,
+                    productStockId: item.productStockId,
+                    warehouseId: item.warehouseId,
+                    warehouseName: item.warehouseName,
+                    initStockQuantity: item.initStockQuantity,
+                    lowStockQuantity: item.lowStockQuantity,
+                    highStockQuantity: item.highStockQuantity
+                  }
+                  stock.dataSource.push(stockData);
+                })
               }
               stock.dataSource.forEach(row => {
                 editStock(row.key);
+              });
+              meTable.dataSource.forEach(row => {
+                edit(row.key);
               });
             }
             if (data.imageList) {
@@ -1157,9 +1184,6 @@ export default defineComponent({
         stockList: stock.dataSource,
         imageList: imageList
       }
-
-      console.info(meTable.dataSource)
-      console.info(stock.dataSource)
 
       const addOrUpdateProductResult = await addOrUpdateProduct(product);
       if(addOrUpdateProductResult.code === 'P0010') {
