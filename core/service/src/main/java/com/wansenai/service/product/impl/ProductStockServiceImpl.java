@@ -34,11 +34,11 @@ public class ProductStockServiceImpl extends ServiceImpl<ProductInventoryInitial
     }
 
     @Override
-    public List<ProductStockVO> getProductStockList(Long productId) {
+    public List<ProductStockVO> getProductStockList(Long productSukId) {
         var productStockVos = new ArrayList<ProductStockVO>();
 
         var productStocks = lambdaQuery()
-                .eq(ProductStock::getProductId, productId)
+                .eq(ProductStock::getProductSkuId, productSukId)
                 .list();
         productStocks.forEach(productStock -> {
             ProductStockVO productStockVO = new ProductStockVO();

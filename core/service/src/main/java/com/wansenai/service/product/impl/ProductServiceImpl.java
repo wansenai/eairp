@@ -49,7 +49,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     private final ProductMapper productMapper;
 
-    private final ProductExtendPriceService productExtendPriceService;
+    private final ProductStockKeepUnitService productStockKeepUnitService;
 
     private final ProductStockService productStockService;
 
@@ -61,9 +61,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     private final BaseService baseService;
 
-    public ProductServiceImpl(ProductMapper productMapper, ProductExtendPriceService productExtendPriceService, ProductStockService productStockService, ProductCategoryService productCategoryService, ProductImageService productImageService, ProductUnitService productUnitService, BaseService baseService) {
+    public ProductServiceImpl(ProductMapper productMapper, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, ProductImageService productImageService, ProductUnitService productUnitService, BaseService baseService) {
         this.productMapper = productMapper;
-        this.productExtendPriceService = productExtendPriceService;
+        this.productStockKeepUnitService = productStockKeepUnitService;
         this.productStockService = productStockService;
         this.productCategoryService = productCategoryService;
         this.productImageService = productImageService;
@@ -100,13 +100,13 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         if (!productDTO.getPriceList().isEmpty()) {
             var barCodeList = productDTO.getPriceList().stream()
-                    .map(ProductPriceDTO::getBarCode)
+                    .map(ProductStockKeepUnitDTO::getBarCode)
                     .filter(Objects::nonNull) // 检查字符串是否为空或具有长度
                     .toList();
             if (!barCodeList.isEmpty()) {
-                boolean existBarCode = productExtendPriceService.lambdaQuery()
-                        .in(ProductExtendPrice::getProductBarCode, barCodeList)
-                        .ne(productDTO.getProductId() != null, ProductExtendPrice::getProductId, productDTO.getProductId())
+                boolean existBarCode = productStockKeepUnitService.lambdaQuery()
+                        .in(ProductStockKeepUnit::getProductBarCode, barCodeList)
+                        .ne(productDTO.getProductId() != null, ProductStockKeepUnit::getProductId, productDTO.getProductId())
                         .exists();
                 if (existBarCode) {
                     return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_EXIST);
@@ -116,7 +116,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         var userId = baseService.getCurrentUserId();
         var productNumber = productDTO.getPriceList();
-        var productExtendPrices = new ArrayList<ProductExtendPrice>(productNumber.size());
+        var productExtendPrices = new ArrayList<ProductStockKeepUnit>(productNumber.size());
+        var productStocks = new ArrayList<ProductStock>(productDTO.getStockList().size() + 2);
 
         // 如果productId就赋值给productId 否则生成一个id
         var productId = Optional.ofNullable(productDTO.getProductId())
@@ -155,22 +156,23 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         boolean addOrUpdateResult = saveOrUpdate(product);
 
         // 删除原有的价格信息
-        var priceIds = productExtendPriceService.lambdaQuery()
-                .eq(ProductExtendPrice::getProductId, productId)
-                .eq(ProductExtendPrice::getDeleteFlag, CommonConstants.NOT_DELETED)
+        var priceIds = productStockKeepUnitService.lambdaQuery()
+                .eq(ProductStockKeepUnit::getProductId, productId)
+                .eq(ProductStockKeepUnit::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list()
                 .stream()
-                .map(ProductExtendPrice::getId)
+                .map(ProductStockKeepUnit::getId)
                 .toList();
         if (!priceIds.isEmpty()) {
-            productExtendPriceService.removeByIds(priceIds);
+            productStockKeepUnitService.removeByIds(priceIds);
         }
 
-        for (ProductPriceDTO priceDTO : productNumber) {
-            var productPriceId = Optional.ofNullable(priceDTO.getProductPriceId())
+        for (ProductStockKeepUnitDTO priceDTO : productNumber) {
+            var productSkuId = Optional.ofNullable(priceDTO.getProductPriceId())
                     .orElse(SnowflakeIdUtil.nextId());
-            ProductExtendPrice price = ProductExtendPrice.builder()
-                    .id(productPriceId)
+
+            ProductStockKeepUnit price = ProductStockKeepUnit.builder()
+                    .id(productSkuId)
                     .productId(productId)
                     .productBarCode(getNumberValue(priceDTO.getBarCode()))
                     .productUnit(getStringValue(priceDTO.getProductUnit()))
@@ -184,44 +186,32 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                     .createBy(userId)
                     .build();
             productExtendPrices.add(price);
-        }
-        boolean addPriceResult = productExtendPriceService.saveBatch(productExtendPrices);
 
-        var productStocks = new ArrayList<ProductStock>(productDTO.getStockList().size() + 2);
-        if (!productDTO.getStockList().isEmpty()) {
-            // 删除原有的库存信息
-            var stockIds = productStockService.lambdaQuery()
-                    .eq(ProductStock::getProductId, productId)
-                    .eq(ProductStock::getDeleteFlag, CommonConstants.NOT_DELETED)
-                    .list()
-                    .stream()
-                    .map(ProductStock::getId)
-                    .toList();
-            if (!stockIds.isEmpty()) {
-                productStockService.removeByIds(stockIds);
-            }
+            if (!productDTO.getStockList().isEmpty()) {
+                for (ProductStockDTO productStockDTO : productDTO.getStockList()) {
+                    var productStockId = Optional.ofNullable(productStockDTO.getProductStockId())
+                            .orElse(SnowflakeIdUtil.nextId());
+                    ProductStock productStock = ProductStock.builder()
+                            .id(productStockId)
+                            .productSkuId(productSkuId)
+                            .warehouseId(getNumberValue(productStockDTO.getWarehouseId()))
+                            .initStockQuantity(getBigDecimalValue(productStockDTO.getInitStockQuantity()))
+                            // 把当前库存数量设置成初始库存数量
+                            .currentStockQuantity(getBigDecimalValue(productStockDTO.getInitStockQuantity()))
+                            .lowStockQuantity(getBigDecimalValue(productStockDTO.getLowStockQuantity()))
+                            .highStockQuantity(getBigDecimalValue(productStockDTO.getHighStockQuantity()))
+                            .createBy(userId)
+                            .createTime(LocalDateTime.now())
+                            .build();
 
-            for (ProductStockDTO productStockDTO : productDTO.getStockList()) {
-                var productStockId = Optional.ofNullable(productStockDTO.getProductStockId())
-                        .orElse(SnowflakeIdUtil.nextId());
-                ProductStock productStock = ProductStock.builder()
-                        .id(productStockId)
-                        .productId(productId)
-                        .warehouseId(getNumberValue(productStockDTO.getWarehouseId()))
-                        .initStockQuantity(getBigDecimalValue(productStockDTO.getInitStockQuantity()))
-                        // 把当前库存数量设置成初始库存数量
-                        .currentStockQuantity(getBigDecimalValue(productStockDTO.getInitStockQuantity()))
-                        .lowStockQuantity(getBigDecimalValue(productStockDTO.getLowStockQuantity()))
-                        .highStockQuantity(getBigDecimalValue(productStockDTO.getHighStockQuantity()))
-                        .createBy(userId)
-                        .createTime(LocalDateTime.now())
-                        .build();
-
-                productStocks.add(productStock);
+                    productStocks.add(productStock);
+                }
             }
         }
-        boolean addStockResult = productStockService.saveBatch(productStocks);
+        boolean addPriceResult = productStockKeepUnitService.saveBatch(productExtendPrices);
+        boolean addStockResult = productStockService.saveOrUpdateBatch(productStocks);
 
+        // image
         if (!productDTO.getImageList().isEmpty()) {
             var imageIds = productImageService.lambdaQuery()
                     .eq(ProductImage::getProductId, productId)
@@ -295,9 +285,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             productVO.setProductCategoryName(productCategoryName);
 
             // 查询价格 如果是多个结果获取第一个
-            var price = productExtendPriceService.lambdaQuery()
-                    .eq(ProductExtendPrice::getProductId, item.getId())
-                    .eq(ProductExtendPrice::getDeleteFlag, CommonConstants.NOT_DELETED)
+            var price = productStockKeepUnitService.lambdaQuery()
+                    .eq(ProductStockKeepUnit::getProductId, item.getId())
+                    .eq(ProductStockKeepUnit::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .list()
                     .stream()
                     .findFirst()
@@ -309,18 +299,18 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 productVO.setRetailPrice(price.getRetailPrice());
                 productVO.setSalePrice(price.getSalePrice());
                 productVO.setLowPrice(price.getLowPrice());
-            }
 
-            // 查询库存如果不为空计算所有当前库存数量
-            var stock = productStockService.lambdaQuery()
-                    .eq(ProductStock::getProductId, item.getId())
-                    .eq(ProductStock::getDeleteFlag, CommonConstants.NOT_DELETED)
-                    .list();
-            if (!stock.isEmpty()) {
-                var currentStockQuantity = stock.stream()
-                        .map(ProductStock::getCurrentStockQuantity)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-                productVO.setProductStock(currentStockQuantity);
+                // 查询库存如果不为空计算所有当前库存数量
+                var stock = productStockService.lambdaQuery()
+                        .eq(ProductStock::getProductSkuId, price.getId())
+                        .eq(ProductStock::getDeleteFlag, CommonConstants.NOT_DELETED)
+                        .list();
+                if (!stock.isEmpty()) {
+                    var currentStockQuantity = stock.stream()
+                            .map(ProductStock::getCurrentStockQuantity)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    productVO.setProductStock(currentStockQuantity);
+                }
             }
             productVos.add(productVO);
         });
@@ -360,14 +350,14 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             productDetailVO.setProductUnit(product.getProductUnit());
         }
 
-        var prices = productExtendPriceService.lambdaQuery()
-                .eq(ProductExtendPrice::getProductId, productId)
-                .eq(ProductExtendPrice::getDeleteFlag, CommonConstants.NOT_DELETED)
+        var prices = productStockKeepUnitService.lambdaQuery()
+                .eq(ProductStockKeepUnit::getProductId, productId)
+                .eq(ProductStockKeepUnit::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list();
 
         if (prices != null && !prices.isEmpty()) {
             var productPrices = new ArrayList<ProductPriceVO>();
-            for (ProductExtendPrice price : prices) {
+            for (ProductStockKeepUnit price : prices) {
                 ProductPriceVO productPriceVO = ProductPriceVO.builder()
                         .productPriceId(price.getId())
                         .barCode(price.getProductBarCode())
@@ -377,15 +367,11 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                         .salesPrice(price.getSalePrice())
                         .retailPrice(price.getRetailPrice())
                         .lowSalesPrice(price.getLowPrice())
+                        .stockList(productStockService.getProductStockList(price.getId()))
                         .build();
                 productPrices.add(productPriceVO);
             }
             productDetailVO.setPriceList(productPrices);
-        }
-
-        var productStocks = productStockService.getProductStockList(productId);
-        if (productStocks != null && !productStocks.isEmpty()) {
-            productDetailVO.setStockList(productStocks);
         }
 
         var productImages = productImageService.lambdaQuery()
@@ -424,19 +410,19 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             productImageService.removeByIds(imageIds);
         }
 
-        var priceIds = productExtendPriceService.lambdaQuery()
-                .in(ProductExtendPrice::getProductId, productIds)
-                .eq(ProductExtendPrice::getDeleteFlag, CommonConstants.NOT_DELETED)
+        var skuIds = productStockKeepUnitService.lambdaQuery()
+                .in(ProductStockKeepUnit::getProductId, productIds)
+                .eq(ProductStockKeepUnit::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list()
                 .stream()
-                .map(ProductExtendPrice::getId)
+                .map(ProductStockKeepUnit::getId)
                 .toList();
-        if (!priceIds.isEmpty()) {
-            productExtendPriceService.removeByIds(priceIds);
+        if (!skuIds.isEmpty()) {
+            productStockKeepUnitService.removeByIds(skuIds);
         }
 
         var stockIds = productStockService.lambdaQuery()
-                .in(ProductStock::getProductId, productIds)
+                .in(ProductStock::getProductSkuId, skuIds)
                 .eq(ProductStock::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list()
                 .stream()

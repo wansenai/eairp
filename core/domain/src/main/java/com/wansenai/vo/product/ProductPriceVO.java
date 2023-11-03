@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -37,4 +38,7 @@ public class ProductPriceVO {
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal lowSalesPrice;
+
+    // Product stock information
+    private List<ProductStockVO> stockList;
 }

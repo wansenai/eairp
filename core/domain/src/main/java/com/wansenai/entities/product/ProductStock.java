@@ -52,9 +52,9 @@ public class ProductStock implements Serializable {
     private Long tenantId;
 
     /**
-     * 产品id
+     * 产品SKU id
      */
-    private Long productId;
+    private Long productSkuId;
 
     /**
      * 仓库id
