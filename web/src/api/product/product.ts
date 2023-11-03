@@ -18,8 +18,8 @@ enum Api {
     deleteProduct = '/product/deleteProduct',
     updateProductStatus = '/product/updateProductStatus',
     updateBatchProductInfo = '/product/updateBatchProductInfo',
-    getProductExtendPrice = '/product/extend-price/pageList',
-    getProductExtendPriceByBarCode = '/product/extend-price/getProduct',
+    getProductSku = '/product/sku/pageList',
+    getProductSkuByBarCode = '/product/sku/getProduct',
 }
 
 export function getProductCode() {
@@ -93,19 +93,19 @@ export function updateBatchProductInfo(params: UpdateBatchProductInfoReq, mode: 
     );
 }
 
-export function getProductExtendPricePage(params: QueryProductExtendPriceReq) {
+export function getProductSkuPage(params: QueryProductExtendPriceReq) {
     return defHttp.post<BaseResp>(
         {
-            url: Api.getProductExtendPrice,
+            url: Api.getProductSku,
             params
         }
     );
 }
 
-export function getProductExtendPriceByBarCode(barCode: number | string) {
+export function getProductSkuByBarCode(barCode: number | string) {
     return defHttp.get<BaseDataResp<ProductExtendPriceResp>>(
         {
-            url: `${Api.getProductExtendPriceByBarCode}/${barCode}`,
+            url: `${Api.getProductSkuByBarCode}/${barCode}`,
         }
     );
 }

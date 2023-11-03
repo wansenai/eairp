@@ -233,7 +233,7 @@ import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
 import { addOrUpdateShipments, getShipmentsDetail} from "@/api/retail/shipments"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
-import {getProductExtendPriceByBarCode} from "@/api/product/product";
+import {getProductSkuByBarCode} from "@/api/product/product";
 import XEUtils from "xe-utils";
 import {ProductExtendPriceResp} from "@/api/product/model/productModel";
 const VNodes = {
@@ -434,7 +434,7 @@ export default defineComponent({
     };
 
     function scanPressEnter() {
-      getProductExtendPriceByBarCode(formState.scanBarCode).then(res => {
+      getProductSkuByBarCode(formState.scanBarCode).then(res => {
         const {columns} = gridOptions
         if (columns) {
           const {data} = res

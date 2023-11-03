@@ -19,7 +19,7 @@ import { defineStore } from 'pinia';
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {extendPriceColumn, searchFormSchema} from "@/views/product/info/info.data";
-import {getProductExtendPricePage} from "@/api/product/product";
+import {getProductSkuPage} from "@/api/product/product";
 import {BasicModal, useModalInner} from "@/components/Modal";
 export default defineComponent({
   name: 'productModal',
@@ -32,7 +32,7 @@ export default defineComponent({
       title: '商品列表',
       rowKey: 'id',
       columns: extendPriceColumn,
-      api: getProductExtendPricePage,
+      api: getProductSkuPage,
       rowSelection: {
         type: 'checkbox',
       },
