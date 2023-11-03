@@ -14,13 +14,13 @@ package com.wansenai.service.product.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansenai.dto.product.QueryProductExtendPriceDTO;
-import com.wansenai.service.product.ProductExtendPriceService;
+import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
+import com.wansenai.service.product.ProductStockKeepUnitService;
 import com.wansenai.utils.response.Response;
-import com.wansenai.entities.product.ProductExtendPrice;
+import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.wansenai.mappers.product.ProductExtendPriceMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.wansenai.vo.product.ProductExtendPriceVO;
+import com.wansenai.vo.product.ProductStockKeepUnitVO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,13 +31,13 @@ import java.util.List;
  * </p>
  */
 @Service
-public class ProductExtendPriceServiceImpl extends ServiceImpl<ProductExtendPriceMapper, ProductExtendPrice> implements ProductExtendPriceService {
+public class ProductStockKeepUnitServiceImpl extends ServiceImpl<ProductExtendPriceMapper, ProductStockKeepUnit> implements ProductStockKeepUnitService {
 
     private final ProductExtendPriceMapper productExtendPriceMapper;
 
     private static int currentBarcode = 1000;
 
-    public ProductExtendPriceServiceImpl(ProductExtendPriceMapper productExtendPriceMapper) {
+    public ProductStockKeepUnitServiceImpl(ProductExtendPriceMapper productExtendPriceMapper) {
         this.productExtendPriceMapper = productExtendPriceMapper;
     }
 
@@ -54,7 +54,7 @@ public class ProductExtendPriceServiceImpl extends ServiceImpl<ProductExtendPric
     @Override
     public Response<Long> getProductCode() {
         var data = lambdaQuery()
-                .orderByDesc(ProductExtendPrice::getProductBarCode)
+                .orderByDesc(ProductStockKeepUnit::getProductBarCode)
                 .last("LIMIT 1").one();
         if(data == null){
             return Response.responseData(1000L);
@@ -64,17 +64,17 @@ public class ProductExtendPriceServiceImpl extends ServiceImpl<ProductExtendPric
 
     @Override
     public Boolean checkProductCode(List<String> barCodes) {
-        return lambdaQuery().in(ProductExtendPrice::getProductBarCode, barCodes).exists();
+        return lambdaQuery().in(ProductStockKeepUnit::getProductBarCode, barCodes).exists();
     }
 
     @Override
-    public IPage<ProductExtendPriceVO> getProductExtendPriceInfo(QueryProductExtendPriceDTO priceDTO) {
-        var page = new Page<QueryProductExtendPriceDTO>(priceDTO.getPage(), priceDTO.getPageSize());
+    public IPage<ProductStockKeepUnitVO> getProductExtendPriceInfo(QueryProductStockKeepUnitDTO priceDTO) {
+        var page = new Page<QueryProductStockKeepUnitDTO>(priceDTO.getPage(), priceDTO.getPageSize());
         return productExtendPriceMapper.getProductExtendPriceList(page, priceDTO);
     }
 
     @Override
-    public Response<ProductExtendPriceVO> getProductByBarCode(Long barCode) {
+    public Response<ProductStockKeepUnitVO> getProductByBarCode(Long barCode) {
         var data = productExtendPriceMapper.getProductExtendPriceByBarCode(barCode);
         if (data == null) {
             return Response.responseData(null);

@@ -14,10 +14,8 @@ package com.wansenai.dto.product;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 @Data
-public class ProductPriceDTO {
+public class ProductStockKeepUnitDTO {
 
     private Long productPriceId;
 
