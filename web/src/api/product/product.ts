@@ -102,10 +102,10 @@ export function getProductSkuPage(params: QueryProductExtendPriceReq) {
     );
 }
 
-export function getProductSkuByBarCode(barCode: number | string) {
+export function getProductSkuByBarCode(barCode: number | string, warehouseId: number | string) {
     return defHttp.get<BaseDataResp<ProductExtendPriceResp>>(
         {
-            url: `${Api.getProductSkuByBarCode}/${barCode}`,
+            url: `${Api.getProductSkuByBarCode}/${barCode}/${warehouseId}`,
         }
     );
 }

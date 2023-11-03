@@ -8,6 +8,7 @@ import {updateProductStatus} from "@/api/product/product";
 import {getCategoryList} from "@/api/product/productCategory";
 import {MeTable, ProductInfo, Stock} from "@/views/product/info/model/productInfoModel";
 import {AddProductReq} from "@/api/product/model/productModel";
+import {getWarehouseList} from "@/api/basic/warehouse";
 
 const { t } = useI18n();
 
@@ -201,30 +202,6 @@ const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '颜色',
-        field: 'productColor',
-        component: 'Input',
-        colProps: {
-            xl: 8,
-            xxl: 8,
-        },
-    },
-    {
-        label: '状态',
-        field: 'status',
-        component: 'Select',
-        colProps: {
-            xl: 12,
-            xxl: 8,
-        },
-        componentProps: {
-            options: [
-                { label: '启用', value: 0, key: 0 },
-                { label: '停用', value: 1, key: 1 },
-            ],
-        },
-    },
-    {
         label: '序列号',
         field: 'enableSerialNumber',
         component: 'Select',
@@ -255,30 +232,18 @@ const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '仓位货架',
-        field: 'warehouseShelves',
-        component: 'Input',
+        label: '仓库',
+        field: 'warehouseId',
+        component: 'ApiTreeSelect',
         colProps: {
             xl: 12,
             xxl: 8,
         },
-    },
-    {
-        label: '扩展信息',
-        field: 'extendInfo',
-        component: 'Input',
-        colProps: {
-            xl: 12,
-            xxl: 8,
-        },
-    },
-    {
-        label: '备注',
-        field: 'name',
-        component: 'Input',
-        colProps: {
-            xl: 12,
-            xxl: 8,
+        componentProps: {
+            api: getWarehouseList,
+            resultField: 'data',
+            labelField: 'warehouseName',
+            valueField: 'id',
         },
     },
 ]
@@ -343,7 +308,7 @@ const stock: Stock = reactive({
     dataSource: ref([]),
     columns: [
         {
-            title: '仓库',
+            title: '仓库 (商品名称规格)',
             key: 'warehouseName',
             type: 'input',
         },
