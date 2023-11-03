@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wansenai.mappers.product.ProductStockKeepUnitMapper">
+    <resultMap id="productResultMap" type="com.wansenai.vo.product.ProductStockKeepUnitVO">
+        <id property="id" column="id" />
+        <result property="productId" column="productId" />
+        <result property="productCategoryId" column="product_category_id" />
+        <result property="barCode" column="product_bar_code" />
+        <result property="productName" column="product_name" />
+        <result property="productCategoryName" column="category_name" />
+        <result property="productStandard" column="product_standard" />
+        <result property="productModel" column="product_model" />
+        <result property="productColor" column="product_color" />
+        <result property="productUnit" column="product_unit" />
+        <result property="multiAttribute" column="multi_attribute" />
+        <result property="stock" column="current_stock_quantity" />
+        <result property="extendInfo" column="product_manufacturer" />
+        <result property="retailPrice" column="retail_price" />
+    </resultMap>
+
+    <select id="getProductSkuList" resultMap="productResultMap" parameterType="com.baomidou.mybatisplus.core.metadata.IPage">
+        SELECT ps.id, p.id AS productId, p.product_category_id, p.product_name, p.product_model, p.product_standard, p.product_color,
+        sku.product_bar_code, sku.multi_attribute, sku.product_unit, sku.retail_price, p.product_manufacturer,pc.category_name,
+        ps.current_stock_quantity, w.warehouse_name
+        FROM product_stock AS ps
+            LEFT JOIN warehouse as w ON ps.warehouse_id = w.id
+            LEFT JOIN product_sku AS sku ON sku.id = ps.product_sku_id
+            LEFT JOIN product AS p ON sku.product_id = p.id
+            LEFT JOIN product_category AS pc ON p.product_category_id = pc.id
+        <where>
+            <if test="queryProductStockKeepUnitDTO.productCategoryId != null">
+                AND p.product_category_id = #{queryProductStockKeepUnitDTO.productCategoryId}
+            </if>
+            <if test="queryProductStockKeepUnitDTO.warehouseId != null">
+                AND ps.warehouse_id = #{queryProductStockKeepUnitDTO.warehouseId}
+            </if>
+            <if test="queryProductStockKeepUnitDTO.productName != null">
+                AND p.product_name = #{queryProductStockKeepUnitDTO.productName}
+            </if>
+            <if test="queryProductStockKeepUnitDTO.enableSerialNumber != null">
+                AND p.enable_serial_number = #{queryProductStockKeepUnitDTO.enableSerialNumber}
+            </if>
+            <if test="queryProductStockKeepUnitDTO.enableBatchNumber != null">
+                AND p.enable_batch_number = #{queryProductStockKeepUnitDTO.enableBatchNumber}
+            </if>
+        </where>
+    </select>
+
+    <select id="getProductSkuByBarCode" resultMap="productResultMap">
+        SELECT sku.id, p.id AS productId, p.product_category_id, p.product_name, p.product_model, p.product_standard, p.product_color,
+               sku.product_bar_code, sku.multi_attribute, sku.product_unit, sku.retail_price, p.product_manufacturer,
+               pc.category_name, ps.current_stock_quantity
+        FROM product_stock AS ps
+                 LEFT JOIN product_sku AS sku ON sku.id = ps.product_sku_id
+                 LEFT JOIN product AS p ON sku.product_id = p.id
+                 LEFT JOIN product_category AS pc ON p.product_category_id = pc.id
+        WHERE sku.product_bar_code = #{barCode} AND ps.warehouse_id = #{warehouseId}
+    </select>
+
+    <select id="getProductSkuByProductId" resultMap="productResultMap">
+        SELECT sku.id, p.id AS productId, p.product_category_id, p.product_name, p.product_model, p.product_standard, p.product_color,
+               sku.product_bar_code, sku.multi_attribute, sku.product_unit, sku.retail_price, p.product_manufacturer,
+               pc.category_name, ps.current_stock_quantity
+        FROM product_stock AS ps
+                 LEFT JOIN product_sku AS sku ON sku.id = ps.product_sku_id
+                 LEFT JOIN product AS p ON sku.product_id = p.id
+                 LEFT JOIN product_category AS pc ON p.product_category_id = pc.id
+        WHERE p.id= #{productId} AND ps.warehouse_id = #{warehouseId}
+    </select>
+
+</mapper>
