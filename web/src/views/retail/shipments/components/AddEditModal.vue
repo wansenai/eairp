@@ -23,6 +23,7 @@
       <a-form ref="formRef" :model="formState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
+            <a-input v-model:value="formState.id" v-show="false"/>
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="会员卡号" data-step="1"
                          data-title="会员卡号"
                          data-intro="如果发现需要选择的会员卡号尚未录入，可以在下拉框中点击新增会员信息进行录入">
@@ -160,7 +161,7 @@
                       <span style="font-size: 20px;line-height:20px">收款账户</span>
                     </template>
                     <a-select placeholder="选择收款账户" style="font-size:20px;"
-                              v-model:value="formState.accountReceivable" :dropdownMatchSelectWidth="false"
+                              v-model:value="formState.accountId" :dropdownMatchSelectWidth="false"
                               :options="accountList.map(item => ({ value: item.id, label: item.accountName }))">
                       <template #dropdownRender="{ menuNode: menu }">
                         <v-nodes :vnodes="menu"/>
@@ -319,7 +320,6 @@ export default defineComponent({
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
 
-
     function handleCancelModal() {
       close();
       clearData();
@@ -378,13 +378,13 @@ export default defineComponent({
         const result = await getShipmentsDetail(id)
         if(result) {
           const data = result.data
+          formState.id = id
           formState.memberId = data.memberId
        //   formState.receiptDate = data.receiptDate
-          formState.accountReceivable = data.accountId
+          formState.accountId = data.accountId
           formState.receiptNumber = data.receiptNumber
-          formState.paymentType = data.paymentType
           formState.remark = data.remark
-          formState.paymentType = data.receiptType
+          formState.paymentType = data.paymentType
           receiptAmount.value = data.receiptAmount
           collectAmount.value = data.collectAmount
           backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.backAmount), { digits: 2 })}`
@@ -434,7 +434,8 @@ export default defineComponent({
     };
 
     function scanPressEnter() {
-      getProductSkuByBarCode(formState.scanBarCode).then(res => {
+      const warehouseDefaultId = warehouseList.value.find(item => item.isDefault === 1)?.id || warehouseList.value[0].id
+      getProductSkuByBarCode(formState.scanBarCode, warehouseDefaultId).then(res => {
         const {columns} = gridOptions
         if (columns) {
           const {data} = res
@@ -575,7 +576,6 @@ export default defineComponent({
         tableData: dataArray,
         files: files,
       }
-
       const result = await addOrUpdateShipments(params)
       if (result.code === 'R0001' || 'R0002') {
         createMessage.success('操作成功');
@@ -587,10 +587,11 @@ export default defineComponent({
     }
 
     function clearData() {
+      formState.id = undefined
       formState.receiptNumber = ''
       formState.memberId = ''
       formState.paymentType = ''
-      formState.accountReceivable = ''
+      formState.accountId = ''
       formState.remark = ''
       formState.scanBarCode = ''
       receiptAmount.value = ''

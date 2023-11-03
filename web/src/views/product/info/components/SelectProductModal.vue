@@ -41,6 +41,8 @@ export default defineComponent({
         schemas: searchFormSchema,
       },
       bordered: true,
+      showTableSetting: true,
+      canResize: true,
       tableSetting: { fullScreen: true },
       useSearchForm: true,
       clickToRowSelect: true,
