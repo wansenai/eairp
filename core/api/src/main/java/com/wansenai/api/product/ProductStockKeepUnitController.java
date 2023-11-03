@@ -47,8 +47,8 @@ public class ProductStockKeepUnitController {
         return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
     }
 
-    @GetMapping("getProduct/{barCode}")
-    public Response<ProductStockKeepUnitVO> getProductByBarCode(@PathVariable("barCode") Long barCode) {
-        return productStockKeepUnitService.getProductByBarCode(barCode);
+    @GetMapping("getProduct/{barCode}/{warehouseId}")
+    public Response<ProductStockKeepUnitVO> getProductByBarCode(@PathVariable("barCode") Long barCode, @PathVariable("warehouseId")Long warehouseId) {
+        return productStockKeepUnitService.getProductByBarCode(barCode, warehouseId);
     }
 }

@@ -18,7 +18,7 @@ import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
 import com.wansenai.service.product.ProductStockKeepUnitService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.entities.product.ProductStockKeepUnit;
-import com.wansenai.mappers.product.ProductExtendPriceMapper;
+import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.vo.product.ProductStockKeepUnitVO;
 import org.springframework.stereotype.Service;
@@ -31,14 +31,14 @@ import java.util.List;
  * </p>
  */
 @Service
-public class ProductStockKeepUnitServiceImpl extends ServiceImpl<ProductExtendPriceMapper, ProductStockKeepUnit> implements ProductStockKeepUnitService {
+public class ProductStockKeepUnitServiceImpl extends ServiceImpl<ProductStockKeepUnitMapper, ProductStockKeepUnit> implements ProductStockKeepUnitService {
 
-    private final ProductExtendPriceMapper productExtendPriceMapper;
+    private final ProductStockKeepUnitMapper productSkuMapper;
 
     private static int currentBarcode = 1000;
 
-    public ProductStockKeepUnitServiceImpl(ProductExtendPriceMapper productExtendPriceMapper) {
-        this.productExtendPriceMapper = productExtendPriceMapper;
+    public ProductStockKeepUnitServiceImpl(ProductStockKeepUnitMapper productSkuMapper) {
+        this.productSkuMapper = productSkuMapper;
     }
 
     public static int generateBarcode() {
@@ -70,12 +70,12 @@ public class ProductStockKeepUnitServiceImpl extends ServiceImpl<ProductExtendPr
     @Override
     public IPage<ProductStockKeepUnitVO> getProductExtendPriceInfo(QueryProductStockKeepUnitDTO priceDTO) {
         var page = new Page<QueryProductStockKeepUnitDTO>(priceDTO.getPage(), priceDTO.getPageSize());
-        return productExtendPriceMapper.getProductExtendPriceList(page, priceDTO);
+        return productSkuMapper.getProductSkuList(page, priceDTO);
     }
 
     @Override
-    public Response<ProductStockKeepUnitVO> getProductByBarCode(Long barCode) {
-        var data = productExtendPriceMapper.getProductExtendPriceByBarCode(barCode);
+    public Response<ProductStockKeepUnitVO> getProductByBarCode(Long barCode, Long warehouseId) {
+        var data = productSkuMapper.getProductSkuByBarCode(barCode, warehouseId);
         if (data == null) {
             return Response.responseData(null);
         }
