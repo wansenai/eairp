@@ -191,9 +191,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 for (ProductStockDTO productStockDTO : productDTO.getStockList()) {
                     var productStockId = Optional.ofNullable(productStockDTO.getProductStockId())
                             .orElse(SnowflakeIdUtil.nextId());
+
                     ProductStock productStock = ProductStock.builder()
                             .id(productStockId)
-                            .productSkuId(productSkuId)
                             .warehouseId(getNumberValue(productStockDTO.getWarehouseId()))
                             .initStockQuantity(getBigDecimalValue(productStockDTO.getInitStockQuantity()))
                             // 把当前库存数量设置成初始库存数量
@@ -203,7 +203,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                             .createBy(userId)
                             .createTime(LocalDateTime.now())
                             .build();
-
+                    // 如果是新增就设置skuId 否则就不设置
+                    if (productStockDTO.getProductStockId() == null) {
+                        productStock.setProductSkuId(productSkuId);
+                    }
                     productStocks.add(productStock);
                 }
             }
