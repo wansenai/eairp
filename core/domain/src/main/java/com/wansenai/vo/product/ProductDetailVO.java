@@ -80,9 +80,6 @@ public class ProductDetailVO {
 
     private String otherFieldThree;
 
-    // Product stock information
-    private List<ProductStockVO> stockList;
-
     // Image list information
     private List<ProductImageVO> imageList;
 }
