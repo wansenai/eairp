@@ -34,7 +34,7 @@ public class RetailShipmentsDTO {
 
     private String receiptNumber;
 
-    private String receiptType;
+    private String paymentType;
 
     private BigDecimal collectAmount;
 

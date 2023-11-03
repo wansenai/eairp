@@ -34,5 +34,5 @@ public interface ProductStockKeepUnitService extends IService<ProductStockKeepUn
 
     IPage<ProductStockKeepUnitVO> getProductExtendPriceInfo(QueryProductStockKeepUnitDTO priceDTO);
 
-    Response<ProductStockKeepUnitVO> getProductByBarCode(Long barCode);
+    Response<ProductStockKeepUnitVO> getProductByBarCode(Long barCode, Long warehouseId);
 }

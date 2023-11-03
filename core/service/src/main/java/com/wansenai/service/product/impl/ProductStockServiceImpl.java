@@ -14,7 +14,7 @@ package com.wansenai.service.product.impl;
 
 import com.wansenai.service.product.ProductStockService;
 import com.wansenai.entities.product.ProductStock;
-import com.wansenai.mappers.product.ProductInventoryInitialMapper;
+import com.wansenai.mappers.product.ProductStockMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.service.warehouse.WarehouseService;
 import com.wansenai.vo.product.ProductStockVO;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ProductStockServiceImpl extends ServiceImpl<ProductInventoryInitialMapper, ProductStock> implements ProductStockService {
+public class ProductStockServiceImpl extends ServiceImpl<ProductStockMapper, ProductStock> implements ProductStockService {
 
     private final WarehouseService warehouseService;
 

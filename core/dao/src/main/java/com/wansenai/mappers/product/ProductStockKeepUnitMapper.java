@@ -23,9 +23,11 @@ import com.wansenai.vo.product.ProductStockKeepUnitVO;
  * 产品价格扩展 Mapper 接口
  * </p>
  */
-public interface ProductExtendPriceMapper extends BaseMapper<ProductStockKeepUnit> {
+public interface ProductStockKeepUnitMapper extends BaseMapper<ProductStockKeepUnit> {
 
-    IPage<ProductStockKeepUnitVO> getProductExtendPriceList(IPage<QueryProductStockKeepUnitDTO> pageObject, QueryProductStockKeepUnitDTO queryProductStockKeepUnitDTO);
+    IPage<ProductStockKeepUnitVO> getProductSkuList(IPage<QueryProductStockKeepUnitDTO> pageObject, QueryProductStockKeepUnitDTO queryProductStockKeepUnitDTO);
 
-    ProductStockKeepUnitVO getProductExtendPriceByBarCode(Long barCode);
+    ProductStockKeepUnitVO getProductSkuByBarCode(Long barCode, Long warehouseId);
+
+    ProductStockKeepUnitVO getProductSkuByProductId(Long productId, Long warehouseId);
 }

@@ -12,7 +12,8 @@
       @ok="handleOk"
       style="top:10%;height: 95%;">
     <a-spin :spinning="confirmLoading">
-      <a-form ref="productFormRef" :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol" style="margin-top: 20px; margin-right: 20px; margin-left: 20px">
+      <a-form ref="productFormRef" :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol"
+              style="margin-top: 20px; margin-right: 20px; margin-left: 20px">
         <a-tabs default-active-key="1" size="small">
           <a-tab-pane key="1" tab="基本信息" id="materialHeadModal" forceRender>
             <a-row class="form-row" :gutter="24">
@@ -62,12 +63,13 @@
                                 v-if="unitChecked"
                                 :options="unitList.map(item => ({ value: item.id, label: item.computeUnit }))">
                         <template #dropdownRender="{ menuNode: menu }">
-                          <v-nodes :vnodes="menu" />
-                          <a-divider style="margin: 4px 0" />
+                          <v-nodes :vnodes="menu"/>
+                          <a-divider style="margin: 4px 0"/>
                           <div style="padding: 4px 8px; cursor: pointer;"
                                @mousedown="e => e.preventDefault()" @click="addUnit">
-                            <plus-outlined />
-                            新增计量单位</div>
+                            <plus-outlined/>
+                            新增计量单位
+                          </div>
                         </template>
                       </a-select>
                     </a-col>
@@ -89,14 +91,16 @@
                 <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="基础重量" data-step="6"
                              data-title="基础重量"
                              data-intro="请填写基本单位对应的重量，用于计算按重量分摊费用时单据中各行商品分摊的费用成本">
-                  <a-input-number style="width: 100%" placeholder="请输入基础重量(kg)" v-model:value="formState.productWeight"/>
+                  <a-input-number style="width: 100%" placeholder="请输入基础重量(kg)"
+                                  v-model:value="formState.productWeight"/>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
                 <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="保质期" data-step="7"
                              data-title="保质期"
                              data-intro="保质期指的是商品的保质期(天)，主要针对带生产日期的，此类商品一般有批号">
-                  <a-input-number style="width: 100%" placeholder="请输入保质期(天)" v-model:value="formState.productExpiryNum"/>
+                  <a-input-number style="width: 100%" placeholder="请输入保质期(天)"
+                                  v-model:value="formState.productExpiryNum"/>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
@@ -105,7 +109,8 @@
                              data-step="8" data-title="类别"
                              data-intro="类别需要在【商品类别】页面进行录入，录入之后在此处进行调用">
                   <a-tree-select style="width:100%" :dropdownStyle="{maxHeight:'200px',overflow:'auto'}" allow-clear
-                                 :treeData="categoryTree.value" v-model:value="formState.productCategoryId" placeholder="请选择类别">
+                                 :treeData="categoryTree.value" v-model:value="formState.productCategoryId"
+                                 placeholder="请选择类别">
                   </a-tree-select>
                 </a-form-item>
               </a-col>
@@ -151,7 +156,8 @@
                     <a-tag class="tag-info" v-if="!manySkuStatus">需要先录入单位才能激活</a-tag>
                     <a-select mode="multiple" showSearch optionFilterProp="children"
                               placeholder="请选择多属性（可多选）" @change="onManySkuChange" v-show="manySkuStatus">
-                      <a-select-option v-for="(item,index) in productAttributeList" :key="index" :value="item.id" :disabled="item.disabled">
+                      <a-select-option v-for="(item,index) in productAttributeList" :key="index" :value="item.id"
+                                       :disabled="item.disabled">
                         {{ item.attributeName }}
                       </a-select-option>
                     </a-select>
@@ -217,7 +223,8 @@
                   <template #bodyCell="{ column, record }">
                     <template v-if="editableData[record.key]">
                       <a-input v-model:value="editableData[record.key][column.key]"
-                               :placeholder="`请输入${getColumnTitle(column)}`" @change="meTableValueChange(record.key)"/>
+                               :placeholder="`请输入${getColumnTitle(column)}`"
+                               @change="meTableValueChange(record.key)"/>
                     </template>
                   </template>
                 </a-table>
@@ -281,7 +288,8 @@
                   </template>
                   <template v-else-if="editStockData[record.key]">
                     <a-input v-model:value="editStockData[record.key][column.key]"
-                             :placeholder="`请输入${getColumnTitle(column)}`" @change="stockTableValueChange(record.key)"/>
+                             :placeholder="`请输入${getColumnTitle(column)}`"
+                             @change="stockTableValueChange(record.key)"/>
                   </template>
                 </template>
               </a-table>
@@ -309,7 +317,7 @@
                     </div>
                   </a-upload>
                   <a-modal :open="previewVisible" :title="previewTitle" :footer="null" @cancel="handleImageViewCancel">
-                    <img alt="example" style="width: 100%" :src="previewImage" />
+                    <img alt="example" style="width: 100%" :src="previewImage"/>
                   </a-modal>
                 </a-form-item>
               </a-col>
@@ -329,7 +337,7 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <UnitModal @register="registerModal" @success="handleUnitSuccess" />
+  <UnitModal @register="registerModal" @success="handleUnitSuccess"/>
 </template>
 
 <script lang="ts">
@@ -582,6 +590,7 @@ export default defineComponent({
     }
 
     const categoryTree: DefaultOptionType[] = reactive([]);
+
     async function loadCategoryTreeData() {
       const categoryTreeResult = await getCategoryList();
       if (categoryTreeResult) {
@@ -591,6 +600,7 @@ export default defineComponent({
     }
 
     const productAttributeList = ref<ProductAttributeModel[]>([]);
+
     async function loadAttributeTreeData() {
       const attributeObject: ProductAttributeListReq = {
         attributeName: undefined,
@@ -604,6 +614,7 @@ export default defineComponent({
     }
 
     const unitList = ref<Unit[]>([])
+
     function manyUnitOnChange(value: number | string) {
       let unitArr = unitList.value;
       let basicUnit = '';
@@ -641,7 +652,7 @@ export default defineComponent({
       }
     }
 
-    const skuOneData: Ref<string[]>  = ref([]);
+    const skuOneData: Ref<string[]> = ref([]);
     const skuTwoData: Ref<string[]> = ref([]);
     const skuThreeData: Ref<string[]> = ref([]);
     const skuArr: Ref<string[]> = ref([]);
@@ -659,7 +670,7 @@ export default defineComponent({
 
     function autoSkuList() {
       let arr: string[] = [];
-      if(formState.productUnit) {
+      if (formState.productUnit) {
         if (skuOneData.value.length > 0 && skuTwoData.value.length > 0 && skuThreeData.value.length > 0) {
           for (let i = 0; i < skuOneData.value.length; i++) {
             for (let j = 0; j < skuTwoData.value.length; j++) {
@@ -739,7 +750,7 @@ export default defineComponent({
             formState.otherFieldThree = data.otherFieldThree
             formState.remark = data.remark
 
-            if(data.productUnitId) {
+            if (data.productUnitId) {
               // 说明是多属性 选中多属性的checkbox 赋值给下拉框3
               unitStatus.value = true;
               manyUnitStatus.value = false;
@@ -769,23 +780,20 @@ export default defineComponent({
                   lowSalesPrice: data.priceList[i].lowSalesPrice
                 }
                 meTable.dataSource.push(newRowData);
-                // 循环遍历stockList，将数据赋值给stock数组 每个data.priceList下都可能包含一个或多个stockList 所以需要再次循环
                 data.priceList[i].stockList.forEach((item, index) => {
                   const stockData = {
-                    key: index,
+                    key: item.productStockId,
                     productStockId: item.productStockId,
                     warehouseId: item.warehouseId,
-                    warehouseName: item.warehouseName,
+                    warehouseName: item.warehouseName + '(' + data.productName + '/' + data.priceList[i].productUnit + ')',
                     initStockQuantity: item.initStockQuantity,
                     lowStockQuantity: item.lowStockQuantity,
                     highStockQuantity: item.highStockQuantity
                   }
                   stock.dataSource.push(stockData);
+                  editStock(stockData.key);
                 })
               }
-              stock.dataSource.forEach(row => {
-                editStock(row.key);
-              });
               meTable.dataSource.forEach(row => {
                 edit(row.key);
               });
@@ -811,11 +819,11 @@ export default defineComponent({
 
     function loadWarehouse() {
       getWarehouse().then(res => {
-        if(res && res.code === '00000') {
+        if (res && res.code === '00000') {
           let warehouseList: ProductStockModel[] = res.data
-          if(warehouseList.length > 0) {
+          if (warehouseList.length > 0) {
             stock.dataSource = [] as ProductStockModel[];
-            for(let i = 0; i < warehouseList.length; i++) {
+            for (let i = 0; i < warehouseList.length; i++) {
               const rowData = {
                 key: warehouseList[i].id,
                 warehouseId: warehouseList[i].id,
@@ -897,7 +905,7 @@ export default defineComponent({
       }
     }
 
-    function batchSetStock(type : string) {
+    function batchSetStock(type: string) {
       stockModalForm.value!.add(type);
       stockModalForm.value!.openStockModal = true;
     }
@@ -954,7 +962,7 @@ export default defineComponent({
 
     const addRow = () => {
       // Create a new row with a unique key
-      const newRow: { key: number; productUnit?: string;} = { key: Date.now() };
+      const newRow: { key: number; productUnit?: string; } = {key: Date.now()};
       editableData[newRow.key] = cloneDeep(newRow);
       if (formState.productUnit) {
         newRow.productUnit = formState.productUnit
@@ -1033,13 +1041,13 @@ export default defineComponent({
       }
     }
 
-    const handleChange = ({ file, fileList }: UploadChangeParam) => {
+    const handleChange = ({file, fileList}: UploadChangeParam) => {
       if (file.status !== 'uploading') {
       }
     };
 
     function uploadImage(options) {
-      const { file, onSuccess, onError, onProgress } = options;
+      const {file, onSuccess, onError, onProgress} = options;
       const formData = new FormData();
       formData.append('files', file);
       // 调用 uploadOss 方法进行上传
@@ -1071,7 +1079,7 @@ export default defineComponent({
       previewTitle.value = '';
     }
 
-    function clearData(){
+    function clearData() {
       formState.productId = ''
       formState.productName = ''
       formState.productStandard = ''
@@ -1119,7 +1127,7 @@ export default defineComponent({
           createMessage.error('请选择商品单位');
           return;
         }
-      } else if (!formState.productUnit){
+      } else if (!formState.productUnit) {
         createMessage.error('请输入商品单位');
         return;
       }
@@ -1161,7 +1169,7 @@ export default defineComponent({
         }
       }
 
-      const product : AddProductReq = {
+      const product: AddProductReq = {
         productId: formState.productId,
         productName: formState.productName,
         productStandard: formState.productStandard,
@@ -1186,7 +1194,7 @@ export default defineComponent({
       }
 
       const addOrUpdateProductResult = await addOrUpdateProduct(product);
-      if(addOrUpdateProductResult.code === 'P0010') {
+      if (addOrUpdateProductResult.code === 'P0010') {
         createMessage.success('新增商品成功');
         context.emit('success');
         closeModal();
