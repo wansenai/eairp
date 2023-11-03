@@ -39,7 +39,7 @@ public class RetailShipmentsDetailVO {
 
     private String receiptNumber;
 
-    private String receiptType;
+    private String paymentType;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal collectAmount;
