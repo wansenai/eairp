@@ -21,7 +21,7 @@
     <select id="getProductSkuList" resultMap="productResultMap" parameterType="com.baomidou.mybatisplus.core.metadata.IPage">
         SELECT ps.id, p.id AS productId, p.product_category_id, p.product_name, p.product_model, p.product_standard, p.product_color,
         sku.product_bar_code, sku.multi_attribute, sku.product_unit, sku.retail_price, p.product_manufacturer,pc.category_name,
-        ps.current_stock_quantity, w.warehouse_name
+        ps.current_stock_quantity, w.warehouse_name, ps.warehouse_id
         FROM product_stock AS ps
             LEFT JOIN warehouse as w ON ps.warehouse_id = w.id
             LEFT JOIN product_sku AS sku ON sku.id = ps.product_sku_id
@@ -49,7 +49,7 @@
     <select id="getProductSkuByBarCode" resultMap="productResultMap">
         SELECT sku.id, p.id AS productId, p.product_category_id, p.product_name, p.product_model, p.product_standard, p.product_color,
                sku.product_bar_code, sku.multi_attribute, sku.product_unit, sku.retail_price, p.product_manufacturer,
-               pc.category_name, ps.current_stock_quantity
+               pc.category_name, ps.current_stock_quantity, ps.warehouse_id
         FROM product_stock AS ps
                  LEFT JOIN product_sku AS sku ON sku.id = ps.product_sku_id
                  LEFT JOIN product AS p ON sku.product_id = p.id
@@ -57,15 +57,15 @@
         WHERE sku.product_bar_code = #{barCode} AND ps.warehouse_id = #{warehouseId}
     </select>
 
-    <select id="getProductSkuByProductId" resultMap="productResultMap">
+    <select id="getProductSkuDetail" resultMap="productResultMap">
         SELECT sku.id, p.id AS productId, p.product_category_id, p.product_name, p.product_model, p.product_standard, p.product_color,
                sku.product_bar_code, sku.multi_attribute, sku.product_unit, sku.retail_price, p.product_manufacturer,
-               pc.category_name, ps.current_stock_quantity
+               pc.category_name, ps.current_stock_quantity, ps.warehouse_id
         FROM product_stock AS ps
                  LEFT JOIN product_sku AS sku ON sku.id = ps.product_sku_id
                  LEFT JOIN product AS p ON sku.product_id = p.id
                  LEFT JOIN product_category AS pc ON p.product_category_id = pc.id
-        WHERE p.id= #{productId} AND ps.warehouse_id = #{warehouseId}
+        WHERE p.id= #{productId} AND ps.warehouse_id = #{warehouseId} AND sku.product_bar_code = #{barCode}
     </select>
 
 </mapper>
