@@ -19,6 +19,7 @@ import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.sms.v20190711.SmsClient;
 import com.tencentcloudapi.sms.v20190711.models.SendSmsRequest;
 import com.wansenai.service.BaseService;
+import com.wansenai.service.product.ProductStockKeepUnitService;
 import com.wansenai.utils.ExcelUtil;
 import com.wansenai.utils.FileUtil;
 import com.wansenai.utils.SnowflakeIdUtil;
@@ -32,7 +33,7 @@ import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
 import com.wansenai.entities.basic.Supplier;
 import com.wansenai.entities.product.Product;
-import com.wansenai.entities.product.ProductExtendPrice;
+import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.system.SysPlatformConfig;
 import com.wansenai.middleware.oss.TencentOSS;
@@ -40,7 +41,6 @@ import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.basic.SupplierService;
 import com.wansenai.service.product.ProductCategoryService;
-import com.wansenai.service.product.ProductExtendPriceService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.service.product.ProductStockService;
 import com.wansenai.service.system.ISysPlatformConfigService;
@@ -90,7 +90,7 @@ public class CommonServiceImpl implements CommonService{
 
     private final ProductService productService;
 
-    private final ProductExtendPriceService productExtendPriceService;
+    private final ProductStockKeepUnitService productStockKeepUnitService;
 
     private final ProductStockService productStockService;
 
@@ -98,7 +98,7 @@ public class CommonServiceImpl implements CommonService{
 
     private final WarehouseService warehouseService;
 
-    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService, ProductService productService, ProductExtendPriceService productExtendPriceService, ProductStockService productStockService, ProductCategoryService productCategoryService, WarehouseService warehouseService, BaseService baseService) {
+    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService, ProductService productService, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, WarehouseService warehouseService, BaseService baseService) {
         this.redisUtil = redisUtil;
         this.producer = producer;
         this.supplierService = supplierService;
@@ -106,7 +106,7 @@ public class CommonServiceImpl implements CommonService{
         this.memberService = memberService;
         this.platformConfigService = platformConfigService;
         this.productService = productService;
-        this.productExtendPriceService = productExtendPriceService;
+        this.productStockKeepUnitService = productStockKeepUnitService;
         this.productStockService = productStockService;
         this.productCategoryService = productCategoryService;
         this.warehouseService = warehouseService;
@@ -334,7 +334,7 @@ public class CommonServiceImpl implements CommonService{
 
     private boolean readProductFromExcel(MultipartFile file) throws IOException {
         List<Product> products = new ArrayList<>();
-        List<ProductExtendPrice> productExtendPrices = new ArrayList<>();
+        List<ProductStockKeepUnit> productStockKeepUnits = new ArrayList<>();
         List<ProductStock> productStocks = new ArrayList<>();
 
         Workbook workbook = new HSSFWorkbook(file.getInputStream());
@@ -353,7 +353,7 @@ public class CommonServiceImpl implements CommonService{
             var productCode = getCellValue(row.getCell(9), dataFormatter);
 
             // 检查商品条码是否重复存在于数据库中 重复则不导入 比较商品条码是否有重复
-            if (productExtendPriceService.checkProductCode(List.of(productCode))) {
+            if (productStockKeepUnitService.checkProductCode(List.of(productCode))) {
                 return false;
             }
 
@@ -388,7 +388,7 @@ public class CommonServiceImpl implements CommonService{
                     .build();
             products.add(product);
 
-            var productPrice = ProductExtendPrice.builder()
+            var productPrice = ProductStockKeepUnit.builder()
                     .id(SnowflakeIdUtil.nextId())
                     .productId(productId)
                     .productBarCode(Long.valueOf(productCode))
@@ -400,11 +400,11 @@ public class CommonServiceImpl implements CommonService{
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();
-            productExtendPrices.add(productPrice);
+            productStockKeepUnits.add(productPrice);
 
             var productStock = ProductStock.builder()
                     .id(SnowflakeIdUtil.nextId())
-                    .productId(productId)
+                    .productSkuId(productPrice.getId())
                     .warehouseId(warehouseId)
                     .initStockQuantity(getNumericCellValue(row.getCell(24)))
                     .currentStockQuantity(getNumericCellValue(row.getCell(24)))
@@ -415,7 +415,7 @@ public class CommonServiceImpl implements CommonService{
             workbook.close();
         }
         boolean addProductResult = productService.batchAddProduct(products);
-        boolean addProductPriceResult = productExtendPriceService.saveBatch(productExtendPrices);
+        boolean addProductPriceResult = productStockKeepUnitService.saveBatch(productStockKeepUnits);
         boolean addProductStockResult = productStockService.saveBatch(productStocks);
 
         return addProductResult && addProductPriceResult && addProductStockResult;
@@ -529,7 +529,7 @@ public class CommonServiceImpl implements CommonService{
         } else if (type.contains("商品")) {
             List<Product> products = productService.list();
             List<ExportProductVO> productVOS = new ArrayList<>(products.size() + 1);
-            List<ProductExtendPrice> productExtendPrices = productExtendPriceService.list();
+            List<ProductStockKeepUnit> productStockKeepUnits = productStockKeepUnitService.list();
             List<ProductStock> productStocks = productStockService.list();
 
             for (Product product : products) {
@@ -541,7 +541,7 @@ public class CommonServiceImpl implements CommonService{
                     productCategoryName = productCategory.getCategoryName();
                 }
 
-                var productPrice = productExtendPrices.stream()
+                var productPrice = productStockKeepUnits.stream()
                         .filter(item -> item.getProductId().equals(product.getId()))
                         .findFirst()
                         .orElse(null);
@@ -572,7 +572,7 @@ public class CommonServiceImpl implements CommonService{
                     productVO.setOtherFieldThree(product.getOtherFieldThree());
                 }
                 productStocks.stream()
-                        .filter(item -> item.getProductId().equals(product.getId()))
+                        .filter(item -> item.getProductSkuId().equals(productPrice.getId()))
                         .findFirst().ifPresent(productStock -> productVO.setStock(productStock.getCurrentStockQuantity()));
 
                 productVOS.add(productVO);
