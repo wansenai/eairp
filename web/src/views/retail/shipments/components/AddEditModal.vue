@@ -88,7 +88,7 @@
                   <vxe-input v-model="row.amount"></vxe-input>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-input type="search" clearable v-model="row.barcode" @search-click="productModal"></vxe-input>
+                  <vxe-input type="search" clearable v-model="row.barCode" @search-click="productModal"></vxe-input>
                 </template>
               </vxe-grid>
             </div>
@@ -302,6 +302,7 @@ export default defineComponent({
     const fileList = ref([]);
     const payTypeList = ref<any>([]);
     const minWidth = ref(1100);
+    const backAmount = ref('￥0.00');
     const model = ref({});
     const labelCol = ref({
       xs: {span: 24},
@@ -406,6 +407,10 @@ export default defineComponent({
                 warehouseId: item.warehouseId,
                 productId: item.productId,
                 barCode: item.barCode,
+                productName: item.productName,
+                productStandard: item.productStandard,
+                productUnit: item.productUnit,
+                stock: item.stock,
                 productNumber: item.productNumber,
                 amount: item.amount,
                 retailPrice: item.unitPrice,
@@ -416,7 +421,6 @@ export default defineComponent({
         }
     }
 
-    const backAmount = ref('￥0.00');
     function onChangePaymentAmount() {
       const sum = receiptAmount.value
       const collect = collectAmount.value
@@ -445,9 +449,7 @@ export default defineComponent({
             if (table) {
               //根据productExtendPrice.id判断表格中如果是同一个商品，数量加1 否则新增一行
               const tableData = table.getTableData().tableData
-              const index = tableData.findIndex(item => item.id === productExtendPrice.id)
-              const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
-              const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
+              const index = tableData.findIndex(item => item.barCode === productExtendPrice.barCode && item.warehouseId === productExtendPrice.warehouseId)
               if (index > -1) {
                 const row = tableData[index]
                 row.productNumber = row.productNumber + 1
@@ -456,7 +458,7 @@ export default defineComponent({
               } else {
                 table.insert({
                   id: productExtendPrice.id,
-                  warehouseId: warehouseId,
+                  warehouseId: productExtendPrice.warehouseId,
                   productId: productExtendPrice.productId,
                   barCode: productExtendPrice.barCode,
                   productName: productExtendPrice.productName,
@@ -473,6 +475,7 @@ export default defineComponent({
       })
       // 清除扫码框的值
       formState.scanBarCode = ''
+      onChangePaymentAmount()
     }
 
     function scanEnter() {
@@ -553,7 +556,7 @@ export default defineComponent({
       table.getInsertRecords().forEach(item => {
         const data: ShipmentsData = {
           warehouseId: item.warehouseId,
-          barcode: item.barCode,
+          barCode: item.barCode,
           productId: item.productId,
           productNumber: item.productNumber,
           unitPrice: item.retailPrice,
@@ -596,7 +599,7 @@ export default defineComponent({
       formState.scanBarCode = ''
       receiptAmount.value = ''
       collectAmount.value = ''
-      backAmount.value = ''
+      backAmount.value = '￥0.00'
       fileList.value = []
       const table = xGrid.value
       if(table) {
@@ -642,11 +645,8 @@ export default defineComponent({
     function handleCheckSuccess(data) {
       const table = xGrid.value
       if(table) {
-        const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
-        const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
         data.forEach(item => {
-          item.productNumber = 1,
-          item.warehouseId = warehouseId
+          item.productNumber = 1
         })
         table.insert(data)
       }

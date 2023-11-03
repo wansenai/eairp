@@ -138,6 +138,7 @@ export interface ProductExtendPriceResp {
     id: number | string;
     productId: number | string;
     productCategoryId: number | string;
+    warehouseId: number | string;
     barCode: string;
     productName: string;
     productStandard: string;
