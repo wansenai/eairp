@@ -10,16 +10,24 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.service.product;
+package com.wansenai.dto.product;
 
-import com.wansenai.entities.product.ProductExtendProperty;
-import com.baomidou.mybatisplus.extension.service.IService;
+import lombok.Data;
 
-/**
- * <p>
- * 产品扩展字段表 服务类
- * </p>
- */
-public interface ProductExtendPropertyService extends IService<ProductExtendProperty> {
+@Data
+public class QueryProductStockKeepUnitDTO {
 
+    private Long productCategoryId;
+
+    private Long warehouseId;
+
+    private String productName;
+
+    private Integer enableSerialNumber;
+
+    private Integer enableBatchNumber;
+
+    private Long page;
+
+    private Long pageSize;
 }

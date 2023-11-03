@@ -13,12 +13,11 @@
 package com.wansenai.service.product;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansenai.dto.product.QueryProductExtendPriceDTO;
+import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
 import com.wansenai.utils.response.Response;
-import com.wansenai.entities.product.ProductExtendPrice;
+import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansenai.vo.product.ProductExtendPriceVO;
+import com.wansenai.vo.product.ProductStockKeepUnitVO;
 
 import java.util.List;
 
@@ -27,13 +26,13 @@ import java.util.List;
  * 产品价格扩展 服务类
  * </p>
  */
-public interface ProductExtendPriceService extends IService<ProductExtendPrice> {
+public interface ProductStockKeepUnitService extends IService<ProductStockKeepUnit> {
 
     Response<Long> getProductCode();
 
     Boolean checkProductCode(List<String> barCodes);
 
-    IPage<ProductExtendPriceVO> getProductExtendPriceInfo(QueryProductExtendPriceDTO priceDTO);
+    IPage<ProductStockKeepUnitVO> getProductExtendPriceInfo(QueryProductStockKeepUnitDTO priceDTO);
 
-    Response<ProductExtendPriceVO> getProductByBarCode(Long barCode);
+    Response<ProductStockKeepUnitVO> getProductByBarCode(Long barCode);
 }

@@ -34,8 +34,8 @@ import lombok.experimental.Accessors;
 @Builder
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("product_extend_price")
-public class ProductExtendPrice implements Serializable {
+@TableName("product_sku")
+public class ProductStockKeepUnit implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 7891651633323L;

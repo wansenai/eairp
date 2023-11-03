@@ -57,7 +57,7 @@ public class AddOrUpdateProductDTO {
     private String otherFieldThree;
 
     // 对应多个商品价格集合
-    private List<ProductPriceDTO> priceList;
+    private List<ProductStockKeepUnitDTO> priceList;
 
     // 多仓库库存集合
     private List<ProductStockDTO> stockList;

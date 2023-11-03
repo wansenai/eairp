@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
+import com.wansenai.bo.ShipmentsDataBO;
 import com.wansenai.dto.receipt.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
 import com.wansenai.entities.receipt.ReceiptMain;
@@ -16,6 +17,7 @@ import com.wansenai.service.receipt.ReceiptSubService;
 import com.wansenai.service.receipt.RetailService;
 import com.wansenai.service.user.ISysUserService;
 import com.wansenai.utils.SnowflakeIdUtil;
+import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.RetailCodeEnum;
 import com.wansenai.utils.response.Response;
@@ -67,6 +69,7 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                 .eq(shipmentsDTO.getAccountId() != null, ReceiptMain::getAccountId, shipmentsDTO.getAccountId())
                 .eq(shipmentsDTO.getOperatorId() != null, ReceiptMain::getCreateBy, shipmentsDTO.getOperatorId())
                 .eq(shipmentsDTO.getStatus() != null, ReceiptMain::getStatus, shipmentsDTO.getStatus())
+                .eq(ReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .ge(StringUtils.hasText(shipmentsDTO.getStartDate()), ReceiptMain::getCreateTime, shipmentsDTO.getStartDate())
                 .le(StringUtils.hasText(shipmentsDTO.getEndDate()), ReceiptMain::getCreateTime, shipmentsDTO.getEndDate());
 
@@ -74,14 +77,14 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
 
         queryResult.getRecords().forEach(item -> {
             String memberName = null;
-            if(item.getMemberId() != null) {
+            if (item.getMemberId() != null) {
                 var member = memberService.getMemberById(item.getMemberId());
                 if (member != null) {
                     memberName = member.getMemberName();
                 }
             }
             String crateBy = null;
-            if(item.getCreateBy() != null) {
+            if (item.getCreateBy() != null) {
                 var user = userService.getById(item.getCreateBy());
                 if (user != null) {
                     crateBy = user.getName();
@@ -195,7 +198,7 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                             .fileUrl(item.getFileUrl())
                             .build();
                     var result = fileMapper.insert(file);
-                    if(result > 0) {
+                    if (result > 0) {
                         fid.add(file.getId());
                     }
                 });
@@ -251,7 +254,21 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
         if (ids.isEmpty()) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
-        return null;
+        var updateResult = lambdaUpdate()
+                .in(ReceiptMain::getId, ids)
+                .set(ReceiptMain::getDeleteFlag, CommonConstants.DELETED)
+                .update();
+
+        receiptSubService.lambdaUpdate()
+                .in(ReceiptSub::getReceiptMainId, ids)
+                .set(ReceiptSub::getDeleteFlag, CommonConstants.DELETED)
+                .update();
+
+        if (updateResult) {
+            return Response.responseMsg(RetailCodeEnum.DELETE_RETAIL_SHIPMENTS_SUCCESS);
+        } else {
+            return Response.responseMsg(RetailCodeEnum.DELETE_RETAIL_SHIPMENTS_ERROR);
+        }
     }
 
     @Override
@@ -260,11 +277,69 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
         var shipment = getById(id);
-      return null;
+
+        List<FileDataBO> fileList = new ArrayList<>();
+        if (StringUtils.hasLength(shipment.getFileId())) {
+            List<Long> ids = Arrays.stream(shipment.getFileId().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            fileList.addAll(fileMapper.selectBatchIds(ids)
+                    .stream()
+                    .map(item ->
+                            FileDataBO.builder(
+                                    item.getFileName(),
+                                    item.getFileUrl(),
+                                    item.getId(),
+                                    item.getUid(),
+                                    item.getFileType(),
+                                    item.getFileSize()
+                            ))
+                    .toList());
+        }
+
+        var receiptSubList = receiptSubService.lambdaQuery()
+                .eq(ReceiptSub::getReceiptMainId, id)
+                .list();
+        var tableData = receiptSubList.stream()
+                .map(item -> ShipmentsDataBO.builder()
+                        .productId(item.getProductId())
+                        .productNumber(item.getProductNumber())
+                        .unitPrice(item.getProductPrice())
+                        .amount(item.getProductTotalPrice())
+                        .warehouseId(item.getWarehouseId())
+                        .build())
+                .toList();
+
+        var retailShipmentsDetailVO = RetailShipmentsDetailVO.builder()
+                .receiptNumber(shipment.getReceiptNumber())
+                .receiptDate(shipment.getCreateTime())
+                .memberId(shipment.getMemberId())
+                .accountId(shipment.getAccountId())
+                .receiptType(shipment.getReceiptType())
+                .collectAmount(shipment.getChangeAmount())
+                .receiptAmount(shipment.getTotalPrice())
+                .backAmount(shipment.getBackAmount())
+                .remark(shipment.getRemark())
+                .tableData(tableData)
+                .files(fileList)
+                .build();
+
+        return Response.responseData(retailShipmentsDetailVO);
     }
 
     @Override
-    public Response<String> updateRetailShipmentsStatus(List<Long> id, Integer status) {
-        return null;
+    public Response<String> updateRetailShipmentsStatus(List<Long> ids, Integer status) {
+        if (ids.isEmpty() || status == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var updateResult = lambdaUpdate()
+                .in(ReceiptMain::getId, ids)
+                .set(ReceiptMain::getStatus, status)
+                .update();
+        if (updateResult) {
+            return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS);
+        } else {
+            return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR);
+        }
     }
 }

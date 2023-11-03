@@ -31,6 +31,9 @@ public class RetailShipmentsDetailVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long memberId;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long accountId;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime receiptDate;
 
@@ -39,7 +42,7 @@ public class RetailShipmentsDetailVO {
     private String receiptType;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal collectionAmount;
+    private BigDecimal collectAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal receiptAmount;
@@ -49,7 +52,7 @@ public class RetailShipmentsDetailVO {
 
     private String remark;
 
-    private List<ShipmentsDataBO> shipmentsDataBO;
+    private List<ShipmentsDataBO> tableData;
 
-    private List<FileDataBO> fileDataBO;
+    private List<FileDataBO> files;
 }

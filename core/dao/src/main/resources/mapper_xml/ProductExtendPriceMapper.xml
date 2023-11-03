@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.wansenai.mappers.product.ProductExtendPriceMapper">
-    <resultMap id="productResultMap" type="com.wansenai.vo.product.ProductExtendPriceVO">
+    <resultMap id="productResultMap" type="com.wansenai.vo.product.ProductStockKeepUnitVO">
         <id property="id" column="id" />
         <result property="productId" column="productId" />
         <result property="productCategoryId" column="product_category_id" />
@@ -25,20 +25,20 @@
         LEFT JOIN product AS p ON pep.product_id = p.id
         LEFT JOIN product_category AS pc ON p.product_category_id = pc.id
         <where>
-            <if test="queryProductExtendPriceDTO.productCategoryId != null">
-                AND p.product_category_id = #{queryProductExtendPriceDTO.productCategoryId}
+            <if test="queryProductStockKeepUnitDTO.productCategoryId != null">
+                AND p.product_category_id = #{queryProductStockKeepUnitDTO.productCategoryId}
             </if>
-            <if test="queryProductExtendPriceDTO.warehouseId != null">
-                AND p.warehouse_id = #{queryProductExtendPriceDTO.warehouseId}
+            <if test="queryProductStockKeepUnitDTO.warehouseId != null">
+                AND p.warehouse_id = #{queryProductStockKeepUnitDTO.warehouseId}
             </if>
-            <if test="queryProductExtendPriceDTO.productName != null">
-                AND p.product_name = #{queryProductExtendPriceDTO.productName}
+            <if test="queryProductStockKeepUnitDTO.productName != null">
+                AND p.product_name = #{queryProductStockKeepUnitDTO.productName}
             </if>
-            <if test="queryProductExtendPriceDTO.enableSerialNumber != null">
-                AND p.enable_serial_number = #{queryProductExtendPriceDTO.enableSerialNumber}
+            <if test="queryProductStockKeepUnitDTO.enableSerialNumber != null">
+                AND p.enable_serial_number = #{queryProductStockKeepUnitDTO.enableSerialNumber}
             </if>
-            <if test="queryProductExtendPriceDTO.enableBatchNumber != null">
-                AND p.enable_batch_number = #{queryProductExtendPriceDTO.enableBatchNumber}
+            <if test="queryProductStockKeepUnitDTO.enableBatchNumber != null">
+                AND p.enable_batch_number = #{queryProductStockKeepUnitDTO.enableBatchNumber}
             </if>
         </where>
     </select>

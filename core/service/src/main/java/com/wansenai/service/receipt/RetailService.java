@@ -74,13 +74,13 @@ public interface RetailService extends IService<ReceiptMain> {
      * <p>
      * 根据id集合和状态批量修改零售出库单状态
      *
-     * @param id     retail shipment order primary key id
+     * @param ids     retail shipment order primary key id
      *               零售出库单主键id
      * @param status Status
      *               状态
      * @return Returns the modification result
      *         返回修改结果
      */
-    Response<String> updateRetailShipmentsStatus(List<Long> id, Integer status);
+    Response<String> updateRetailShipmentsStatus(List<Long> ids, Integer status);
 
 }

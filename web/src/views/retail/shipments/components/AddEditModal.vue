@@ -5,10 +5,11 @@
       :confirm-loading="confirmLoading"
       v-bind:prefixNo="prefixNo"
       :id="prefixNo"
-      @keyboard="handleKeyboard"
       :forceRender="true"
+      :keyboard="true"
       switchHelp
       switchFullscreen
+      @cancel="handleCancelModal"
       v-model:open="open"
       style="left: 5%; height: 95%;">
     <template #footer>
@@ -186,9 +187,9 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, onMounted} from 'vue';
+import {defineComponent, ref} from 'vue';
 import {PlusOutlined, UploadOutlined} from '@ant-design/icons-vue';
-import dayjs, {Dayjs} from 'dayjs';
+import {Dayjs} from 'dayjs';
 import {
   Textarea,
   DatePicker,
@@ -216,7 +217,7 @@ import {
   gridOptions,
   xGrid,
   receiptAmount,
-  collectAmount,
+  collectAmount, RowVO,
 } from '/@/views/retail/shipments/model/addEditModel';
 import {getMemberList} from "@/api/basic/member";
 import {MemberResp} from "@/api/basic/model/memberModel";
@@ -230,9 +231,9 @@ import FinancialAccountModal from "@/views/basic/settlement-account/components/F
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
-import { addOrUpdateShipments } from "@/api/retail/shipments"
+import { addOrUpdateShipments, getShipmentsDetail} from "@/api/retail/shipments"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
-import {getProductExtendPriceByBarCode} from "@/api/product/product";
+import {getProductSkuByBarCode} from "@/api/product/product";
 import XEUtils from "xe-utils";
 import {ProductExtendPriceResp} from "@/api/product/model/productModel";
 const VNodes = {
@@ -321,6 +322,7 @@ export default defineComponent({
 
     function handleCancelModal() {
       close();
+      clearData();
       open.value = false;
       context.emit('cancel');
     }
@@ -332,6 +334,7 @@ export default defineComponent({
       loadWarehouseList();
       if (id) {
         title.value = '编辑-零售出库'
+        loadShipmentsDetail(id);
       } else {
         title.value = '新增-零售出库'
         loadGenerateId();
@@ -370,6 +373,49 @@ export default defineComponent({
       })
     }
 
+    async function loadShipmentsDetail(id) {
+        clearData();
+        const result = await getShipmentsDetail(id)
+        if(result) {
+          const data = result.data
+          formState.memberId = data.memberId
+       //   formState.receiptDate = data.receiptDate
+          formState.accountReceivable = data.accountId
+          formState.receiptNumber = data.receiptNumber
+          formState.paymentType = data.paymentType
+          formState.remark = data.remark
+          formState.paymentType = data.receiptType
+          receiptAmount.value = data.receiptAmount
+          collectAmount.value = data.collectAmount
+          backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.backAmount), { digits: 2 })}`
+          // file
+          fileList.value = data.files.map(item => ({
+            id: item.id,
+            uid: item.uid,
+            name: item.fileName,
+            status: 'done',
+            url: item.fileUrl,
+            type: item.fileType,
+            size: item.fileSize,
+          }))
+          // table
+          const table = xGrid.value
+          if(table) {
+            data.tableData.forEach(item => {
+              const tableData : RowVO = {
+                warehouseId: item.warehouseId,
+                productId: item.productId,
+                barCode: item.barCode,
+                productNumber: item.productNumber,
+                amount: item.amount,
+                retailPrice: item.unitPrice,
+              };
+              table.insert(tableData)
+            })
+          }
+        }
+    }
+
     const backAmount = ref('￥0.00');
     function onChangePaymentAmount() {
       const sum = receiptAmount.value
@@ -388,7 +434,7 @@ export default defineComponent({
     };
 
     function scanPressEnter() {
-      getProductExtendPriceByBarCode(formState.scanBarCode).then(res => {
+      getProductSkuByBarCode(formState.scanBarCode).then(res => {
         const {columns} = gridOptions
         if (columns) {
           const {data} = res
@@ -627,14 +673,6 @@ export default defineComponent({
       }
     }
 
-    const handleKeyboard = (e) => {
-      if (e.keyCode === 32) {
-        handleOk(0)
-      } else if (e.keyCode === 27) {
-        handleCancelModal()
-      }
-    }
-
     return {
       open,
       checkFlag,
@@ -688,8 +726,7 @@ export default defineComponent({
       productModal,
       handleCheckSuccess,
       addRowData,
-      deleteRowData,
-      handleKeyboard
+      deleteRowData
     };
   },
 });

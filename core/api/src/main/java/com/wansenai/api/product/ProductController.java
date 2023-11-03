@@ -16,7 +16,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.product.AddOrUpdateProductDTO;
 import com.wansenai.dto.product.QueryProductDTO;
 import com.wansenai.dto.product.UpdateBatchProductDTO;
-import com.wansenai.service.product.ProductExtendPriceService;
+import com.wansenai.service.product.ProductStockKeepUnitService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.product.ProductDetailVO;
@@ -35,9 +35,9 @@ public class ProductController {
 
     private final ProductService productService;
 
-    private final ProductExtendPriceService extendPriceService;
+    private final ProductStockKeepUnitService extendPriceService;
 
-    public ProductController(ProductService productService, ProductExtendPriceService extendPriceService) {
+    public ProductController(ProductService productService, ProductStockKeepUnitService extendPriceService) {
         this.productService = productService;
         this.extendPriceService = extendPriceService;
     }

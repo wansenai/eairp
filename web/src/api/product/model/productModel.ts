@@ -85,7 +85,6 @@ export interface ProductInfoDetailResp {
     otherFieldThree: string;
     remark: string;
     priceList: ProductPriceResp[];
-    stockList: ProductStockResp[];
     imageList: ProductImageResp[];
 }
 
@@ -104,6 +103,7 @@ export interface ProductPriceResp {
     retailPrice: number;
     salesPrice: number;
     lowSalesPrice: number;
+    stockList: ProductStockResp[];
 }
 
 export interface ProductStockResp {

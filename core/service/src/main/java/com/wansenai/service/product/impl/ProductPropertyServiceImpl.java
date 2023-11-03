@@ -12,8 +12,8 @@
  */
 package com.wansenai.service.product.impl;
 
-import com.wansenai.service.product.ProductExtendPropertyService;
-import com.wansenai.entities.product.ProductExtendProperty;
+import com.wansenai.service.product.ProductPropertyService;
+import com.wansenai.entities.product.ProductProperty;
 import com.wansenai.mappers.product.ProductExtendPropertyMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,6 @@ import org.springframework.stereotype.Service;
  * </p>
  */
 @Service
-public class ProductExtendPropertyServiceImpl extends ServiceImpl<ProductExtendPropertyMapper, ProductExtendProperty> implements ProductExtendPropertyService {
+public class ProductPropertyServiceImpl extends ServiceImpl<ProductExtendPropertyMapper, ProductProperty> implements ProductPropertyService {
 
 }
