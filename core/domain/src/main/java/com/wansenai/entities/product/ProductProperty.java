@@ -31,8 +31,8 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("product_extend_property")
-public class ProductExtendProperty implements Serializable {
+@TableName("product_property")
+public class ProductProperty implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 7916515616516L;
@@ -86,7 +86,7 @@ public class ProductExtendProperty implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }

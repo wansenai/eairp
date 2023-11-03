@@ -12,7 +12,7 @@
  */
 package com.wansenai.service.product;
 
-import com.wansenai.entities.product.ProductExtendProperty;
+import com.wansenai.entities.product.ProductProperty;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -20,6 +20,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 产品扩展字段表 服务类
  * </p>
  */
-public interface ProductExtendPropertyService extends IService<ProductExtendProperty> {
+public interface ProductPropertyService extends IService<ProductProperty> {
 
 }
