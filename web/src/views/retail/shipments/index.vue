@@ -5,8 +5,8 @@
         <a-button type="primary" @click="handleCreate"> 新增</a-button>
         <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
         <a-button type="primary" @click="handleExport"> 导出</a-button>
-        <a-button type="primary" @click=""> 审核</a-button>
-        <a-button type="primary" @click=""> 反审核</a-button>
+        <a-button type="primary" @click="handleOnStatus(1)"> 审核</a-button>
+        <a-button type="primary" @click="handleOnStatus(0)"> 反审核</a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -53,7 +53,7 @@ import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/retail/shipments/shipments.data";
 import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
-import {getShipmentsPageList, deleteShipments} from "@/api/retail/shipments";
+import {getShipmentsPageList, deleteShipments, updateShipmentsStatus} from "@/api/retail/shipments";
 import AddEditModal from "@/views/retail/shipments/components/AddEditModal.vue"
 import {Tag} from "ant-design-vue";
 export default defineComponent({
@@ -106,6 +106,10 @@ export default defineComponent({
     }
 
     function handleEdit(record: Recordable) {
+      if (record.status === 1) {
+        createMessage.warn('抱歉，只有未审核的单据才能编辑！');
+        return;
+      }
       addEditModalRef.value.openAddEditModal(record.id);
     }
 
@@ -120,14 +124,6 @@ export default defineComponent({
       await reload();
     }
 
-    async function handleOnStatus(newStatus: number) {
-      const data = getSelectRows();
-      if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
-        return;
-      }
-    }
-
     async function handleCancel() {
       await reload();
     }
@@ -140,14 +136,6 @@ export default defineComponent({
 
     }
 
-    function handleBatchShipmentsInfo() {
-      const data = getSelectRows();
-      if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
-        return;
-      }
-    }
-
     const getTimestamp = (date) => {
       return (
           date.getFullYear() * 10000000000 +
@@ -158,6 +146,20 @@ export default defineComponent({
           date.getSeconds()
       ).toString();
     };
+
+    async function handleOnStatus(newStatus: number) {
+      const data = getSelectRows();
+      if (data.length === 0) {
+        createMessage.warn('请选择一条数据');
+        return;
+      }
+
+      const ids = data.map((item) => item.id);
+      const {code} = await updateShipmentsStatus(ids, newStatus);
+      if (code === "R0002") {
+        await reload();
+      }
+    }
 
     async function handleExport() {
       const file = await exportXlsx("零售出库列表")
