@@ -1,6 +1,6 @@
 import {defHttp} from '/@/utils/http/axios';
-import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
-import {reportModel} from "@/api/report/model/reportModel";
+import {BaseDataResp} from "@/api/model/baseModel";
+import {reportModel} from "@/api/report/reportModel";
 
 enum API {
     getStatisticalData = '/report/homePage/statistics'
