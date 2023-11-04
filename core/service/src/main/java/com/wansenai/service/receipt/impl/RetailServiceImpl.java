@@ -139,8 +139,10 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                     .set(shipmentsDTO.getCollectAmount() != null, ReceiptMain::getChangeAmount, shipmentsDTO.getCollectAmount())
                     .set(shipmentsDTO.getReceiptAmount() != null, ReceiptMain::getTotalPrice, shipmentsDTO.getReceiptAmount())
                     .set(shipmentsDTO.getBackAmount() != null, ReceiptMain::getBackAmount, shipmentsDTO.getBackAmount())
+                    .set(shipmentsDTO.getStatus() != null, ReceiptMain::getStatus, shipmentsDTO.getStatus())
                     .set(StringUtils.hasText(shipmentsDTO.getPaymentType()), ReceiptMain::getPaymentType, shipmentsDTO.getPaymentType())
                     .set(StringUtils.hasText(shipmentsDTO.getRemark()), ReceiptMain::getRemark, shipmentsDTO.getRemark())
+                    .set(StringUtils.hasText(shipmentsDTO.getReceiptDate()), ReceiptMain::getCreateTime, shipmentsDTO.getReceiptDate())
                     .set(ReceiptMain::getUpdateBy, userId)
                     .set(ReceiptMain::getUpdateTime, LocalDateTime.now())
                     .update();
@@ -229,6 +231,7 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                     .backAmount(shipmentsDTO.getBackAmount())
                     .remark(shipmentsDTO.getRemark())
                     .fileId(fileIds)
+                    .status(shipmentsDTO.getStatus())
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();

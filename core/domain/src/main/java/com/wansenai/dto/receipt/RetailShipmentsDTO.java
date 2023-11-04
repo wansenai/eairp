@@ -44,6 +44,8 @@ public class RetailShipmentsDTO {
 
     private String remark;
 
+    private Integer status;
+
     private List<ShipmentsDataBO> tableData;
 
     private List<FileDataBO> files;
