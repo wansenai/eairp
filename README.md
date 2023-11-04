@@ -63,7 +63,10 @@ docker run --name eairp-web -d -p 3000:80 -e API_BASE_URL=http://localhost:8080/
 
 ## System screenshot (only part)
 ![](images/login-page-en.png)
-![](images/user-manage-zh.png)
+![](images/home-page-zh.png)
+![](images/retail-shipment.png)
+![](images/product-add-one.png)
+![](images/product-add-two.png)
 ![](images/add-menu-zh.png)
 ![](images/role-permission-zh.png)
 
