@@ -1,6 +1,8 @@
 import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
 import {useI18n} from "@/hooks/web/useI18n";
+import {getMemberList} from "@/api/basic/member";
+import {getAccountList} from "@/api/financial/account";
 
 export const { t } = useI18n();
 
@@ -60,16 +62,7 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
     {
         label: '单据编号',
-        field: 'receiptDate',
-        component: 'ApiTreeSelect',
-        colProps: {
-            xl: 8,
-            xxl: 8,
-        },
-    },
-    {
-        label: '商品信息',
-        field: 'productInfo',
+        field: 'receiptNumber',
         component: 'Input',
         colProps: {
             xl: 8,
@@ -87,58 +80,13 @@ export const searchFormSchema: FormSchema[] = [
         colProps: { span: 7 },
     },
     {
-        label: '会员卡号',
-        field: 'memberId',
-        component: 'ApiSelect',
-        componentProps: {
-         //   api: test,
-            resultField: 'data',
-            labelField: 'name',
-            valueField: 'id',
-        },
-        colProps: {
-            xl: 8,
-            xxl: 8,
-        },
-    },
-    {
-        label: '仓库',
-        field: 'warehouseId',
-        component: 'ApiSelect',
-        componentProps: {
-      //      api: test,
-            resultField: 'data',
-            labelField: 'name',
-            valueField: 'id',
-        },
-        colProps: {
-            xl: 8,
-            xxl: 8,
-        },
-    },
-    {
-        label: '操作员',
-        field: 'operator',
-        component: 'ApiSelect',
-        componentProps: {
-      //      api: test,
-            resultField: 'data',
-            labelField: 'name',
-            valueField: 'id',
-        },
-        colProps: {
-            xl: 8,
-            xxl: 8,
-        },
-    },
-    {
         label: '结算账户',
         field: 'accountId',
         component: 'ApiSelect',
         componentProps: {
-    //        api: test,
+            api: getAccountList,
             resultField: 'data',
-            labelField: 'name',
+            labelField: 'accountName',
             valueField: 'id',
         },
         colProps: {
@@ -146,6 +94,45 @@ export const searchFormSchema: FormSchema[] = [
             xxl: 8,
         },
     },
+    {
+        label: '商品信息',
+        field: 'productInfo',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '会员卡号',
+        field: 'memberId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getMemberList,
+            resultField: 'data',
+            labelField: 'memberName',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    // {
+    //     label: '仓库',
+    //     field: 'warehouseId',
+    //     component: 'ApiSelect',
+    //     componentProps: {
+    //         api: getWarehouseList,
+    //         resultField: 'data',
+    //         labelField: 'warehouseName',
+    //         valueField: 'id',
+    //     },
+    //     colProps: {
+    //         xl: 8,
+    //         xxl: 8,
+    //     },
+    // },
     {
         label: '单据状态',
         field: 'status',
