@@ -45,7 +45,7 @@
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="formState.receiptDate" show-time placeholder="选择时间" @change="dateChange" @ok="dateOk"/>
+              <a-date-picker v-model:value="formState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
@@ -76,7 +76,7 @@
                   <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
                   <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="formState.scanBarCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
-                  <a-button v-if="showScanPressEnter"  style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
+                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
                   <a-button @click="productModal" style="margin-right: 10px">批量添加出库商品</a-button>
                   <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
@@ -190,7 +190,12 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
 import {PlusOutlined, UploadOutlined} from '@ant-design/icons-vue';
-import {Dayjs} from 'dayjs';
+import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
+import weekday from "dayjs/plugin/weekday";
+import localeData from "dayjs/plugin/localeData";
+dayjs.extend(weekday);
+dayjs.extend(localeData);
 import {
   Textarea,
   DatePicker,
@@ -248,7 +253,7 @@ const VNodes = {
     return this.vnodes;
   },
 };
-
+dayjs.locale('zh-cn');
 export default defineComponent({
   name: 'AddEditModal',
   emits: ['success', 'cancel', 'error'],
@@ -339,6 +344,8 @@ export default defineComponent({
       } else {
         title.value = '新增-零售出库'
         loadGenerateId();
+        // 获取系统时间然后转成dayjs格式
+        formState.receiptDate = dayjs(new Date());
       }
     }
 
@@ -381,14 +388,11 @@ export default defineComponent({
           const data = result.data
           formState.id = id
           formState.memberId = data.memberId
-       //   formState.receiptDate = data.receiptDate
+          formState.receiptDate = dayjs(data.receiptDate);
           formState.accountId = data.accountId
           formState.receiptNumber = data.receiptNumber
           formState.remark = data.remark
           formState.paymentType = data.paymentType
-          receiptAmount.value = data.receiptAmount
-          collectAmount.value = data.collectAmount
-          backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.backAmount), { digits: 2 })}`
           // file
           fileList.value = data.files.map(item => ({
             id: item.id,
@@ -418,6 +422,9 @@ export default defineComponent({
               table.insert(tableData)
             })
           }
+          receiptAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.receiptAmount), { digits: 2 })}`
+          collectAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.collectAmount), { digits: 2 })}`
+          backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.backAmount), { digits: 2 })}`
         }
     }
 
@@ -429,13 +436,6 @@ export default defineComponent({
       const numberAmount = Number(collectNumber) - Number(sumNumber)
       backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(numberAmount), { digits: 2 })}`
     }
-
-    const dateChange = (value: Dayjs, dateString: string) => {
-
-    };
-
-    const dateOk = (value: Dayjs) => {
-    };
 
     function scanPressEnter() {
       const warehouseDefaultId = warehouseList.value.find(item => item.isDefault === 1)?.id || warehouseList.value[0].id
@@ -578,6 +578,7 @@ export default defineComponent({
         ...formState,
         tableData: dataArray,
         files: files,
+        status: type,
       }
       const result = await addOrUpdateShipments(params)
       if (result.code === 'R0001' || 'R0002') {
@@ -605,8 +606,8 @@ export default defineComponent({
       if(table) {
         // 清空表格数据
         table.reloadData()
-
       }
+      formState.receiptDate = undefined
     }
 
     function beforeUpload(file: any) {
@@ -698,8 +699,6 @@ export default defineComponent({
       refKey,
       activeKey,
       onChangePaymentAmount,
-      dateChange,
-      dateOk,
       scanPressEnter,
       scanEnter,
       stopScan,
@@ -727,7 +726,7 @@ export default defineComponent({
       productModal,
       handleCheckSuccess,
       addRowData,
-      deleteRowData
+      deleteRowData,
     };
   },
 });

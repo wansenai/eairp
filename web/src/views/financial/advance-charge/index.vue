@@ -106,6 +106,10 @@ export default defineComponent({
     }
 
     async function handleEdit(record: Recordable) {
+      if (record.status === 1) {
+        createMessage.warn('抱歉，只有未审核的单据才能编辑！');
+        return;
+      }
       advanceChargeModalRef.value.openAdvanceChargeModal(record.id);
     }
 

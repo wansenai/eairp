@@ -26,6 +26,7 @@ interface AddOrUpdateShipmentsReq {
     receiptAmount: number;
     backAmount: number;
     remark: string;
+    status: number;
     tableData: ShipmentsData[];
     fileDataList: FileData[];
 }

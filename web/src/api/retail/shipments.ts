@@ -43,7 +43,7 @@ export function deleteShipments(ids: string[]) {
 }
 
 export function updateShipmentsStatus(ids: string[], status: number) {
-    return defHttp.post<BaseResp>(
+    return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`,
         }
