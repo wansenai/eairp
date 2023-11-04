@@ -15,7 +15,7 @@ package com.wansenai.api;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
-import com.wansenai.service.receipt.RetailService;
+import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.RetailShipmentsDetailVO;
 import com.wansenai.vo.receipt.RetailShipmentsVO;
@@ -27,34 +27,34 @@ import java.util.List;
 @RequestMapping("/retail")
 public class RetailController {
 
-    private final RetailService retailService;
+    private final ReceiptService receiptService;
 
-    public RetailController(RetailService retailService) {
-        this.retailService = retailService;
+    public RetailController(ReceiptService receiptService) {
+        this.receiptService = receiptService;
     }
 
     @PostMapping("/shipments/pageList")
     public Response<Page<RetailShipmentsVO>> pageList(@RequestBody QueryShipmentsDTO queryShipmentsDTO) {
-        return retailService.getRetailShipments(queryShipmentsDTO);
+        return receiptService.getRetailShipments(queryShipmentsDTO);
     }
 
     @PostMapping("/shipments/addOrUpdate")
     public Response<String> addOrUpdate(@RequestBody RetailShipmentsDTO retailShipmentsDTO) {
-        return retailService.addOrUpdateRetailShipments(retailShipmentsDTO);
+        return receiptService.addOrUpdateRetailShipments(retailShipmentsDTO);
     }
 
     @PostMapping("/shipments/deleteByIds")
     public Response<String> deleteByIds(@RequestParam("ids") List<Long> ids) {
-        return retailService.deleteRetailShipments(ids);
+        return receiptService.deleteRetailShipments(ids);
     }
 
     @PutMapping("/shipments/updateStatus")
     public Response<String> updateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
-        return retailService.updateRetailShipmentsStatus(ids, status);
+        return receiptService.updateRetailShipmentsStatus(ids, status);
     }
 
     @GetMapping("/shipments/detail/{id}")
     public Response<RetailShipmentsDetailVO> detail(@PathVariable("id") Long id) {
-        return retailService.getRetailShipmentsDetail(id);
+        return receiptService.getRetailShipmentsDetail(id);
     }
 }

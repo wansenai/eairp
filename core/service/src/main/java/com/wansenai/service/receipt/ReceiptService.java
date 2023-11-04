@@ -23,7 +23,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 
-public interface RetailService extends IService<ReceiptMain> {
+public interface ReceiptService extends IService<ReceiptMain> {
 
     /**
      * Query retail shipment orders with pagination.

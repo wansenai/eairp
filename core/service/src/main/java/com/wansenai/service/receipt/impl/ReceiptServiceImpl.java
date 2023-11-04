@@ -7,18 +7,15 @@ import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.ShipmentsDataBO;
 import com.wansenai.dto.receipt.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
-import com.wansenai.entities.product.ProductStock;
-import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.wansenai.entities.receipt.ReceiptMain;
 import com.wansenai.entities.receipt.ReceiptSub;
 import com.wansenai.entities.system.SysFile;
 import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
-import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.mappers.receipt.ReceiptMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.receipt.ReceiptSubService;
-import com.wansenai.service.receipt.RetailService;
+import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.service.user.ISysUserService;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.utils.constants.CommonConstants;
@@ -40,7 +37,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMain> implements RetailService {
+public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMain> implements ReceiptService {
 
     private final ReceiptMainMapper receiptMainMapper;
 
@@ -54,7 +51,7 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
 
     private final ProductStockKeepUnitMapper productStockKeepUnitMapper;
 
-    public RetailServiceImpl(ReceiptMainMapper receiptMainMapper, ReceiptSubService receiptSubService, MemberService memberService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper) {
+    public ReceiptServiceImpl(ReceiptMainMapper receiptMainMapper, ReceiptSubService receiptSubService, MemberService memberService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper) {
         this.receiptMainMapper = receiptMainMapper;
         this.receiptSubService = receiptSubService;
         this.memberService = memberService;
