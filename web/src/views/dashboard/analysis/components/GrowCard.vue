@@ -13,13 +13,13 @@
         </template>
 
         <div class="py-4 px-4 flex justify-between items-center">
-          <CountTo prefix="￥" :startVal="1" :endVal="item.value" class="text-2xl" />
+          <CountTo prefix="￥" :startVal=0 :endVal="item.value" :decimals="2" class="text-2xl" />
           <Icon :icon="item.icon" :size="40" />
         </div>
 
         <div class="p-2 px-4 flex justify-between">
           <span>总{{ item.title }}</span>
-          <CountTo prefix="￥" :startVal="1" :endVal="item.total" />
+          <CountTo prefix="￥" :startVal="1" :endVal="item.total" :decimals="2"/>
         </div>
       </Card>
     </template>
