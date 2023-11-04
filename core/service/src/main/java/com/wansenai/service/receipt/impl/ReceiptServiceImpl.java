@@ -24,12 +24,19 @@ import com.wansenai.utils.enums.RetailCodeEnum;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.RetailShipmentsDetailVO;
 import com.wansenai.vo.receipt.RetailShipmentsVO;
+import com.wansenai.vo.receipt.RetailStatisticalDataVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -365,4 +372,73 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
             return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR);
         }
     }
+
+    @Override
+    public Response<RetailStatisticalDataVO> getRetailStatistics() {
+        var now = LocalDateTime.now();
+
+        var retailData = lambdaQuery()
+                .eq(ReceiptMain::getType, "出库")
+                .in(ReceiptMain::getSubType, "零售出库")
+                .eq(ReceiptMain::getStatus, 1)
+                .eq(ReceiptMain::getDeleteFlag, 0)
+                .list();
+
+        var salesData = lambdaQuery()
+                .eq(ReceiptMain::getType, "出库")
+                .in(ReceiptMain::getSubType, "销售出库")
+                .eq(ReceiptMain::getStatus, 1)
+                .eq(ReceiptMain::getDeleteFlag, 0)
+                .list();
+
+        var purchaseData = lambdaQuery()
+                .eq(ReceiptMain::getType, "入库")
+                .eq(ReceiptMain::getSubType, "采购入库")
+                .eq(ReceiptMain::getStatus, 1)
+                .eq(ReceiptMain::getDeleteFlag, 0)
+                .list();
+
+        var todayRetailSales = calculateTotalPrice(retailData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yesterdayRetailSales = calculateTotalPrice(retailData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
+        var monthRetailSales = calculateTotalPrice(retailData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yearRetailSales = calculateTotalPrice(retailData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+
+        var todaySales = calculateTotalPrice(salesData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yesterdaySales = calculateTotalPrice(salesData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
+        var monthSales = calculateTotalPrice(salesData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yearSales = calculateTotalPrice(salesData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+
+        var todayPurchase = calculateTotalPrice(purchaseData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yesterdayPurchase = calculateTotalPrice(purchaseData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
+        var monthPurchase = calculateTotalPrice(purchaseData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yearPurchase = calculateTotalPrice(purchaseData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+
+        var retailStatisticalDataVO = RetailStatisticalDataVO.builder()
+                .todayRetailSales(todayRetailSales)
+                .yesterdayRetailSales(yesterdayRetailSales)
+                .monthRetailSales(monthRetailSales)
+                .yearRetailSales(yearRetailSales)
+
+                .todaySales(todaySales)
+                .yesterdaySales(yesterdaySales)
+                .monthSales(monthSales)
+                .yearSales(yearSales)
+
+                .todayPurchase(todayPurchase)
+                .yesterdayPurchase(yesterdayPurchase)
+                .monthPurchase(monthPurchase)
+                .yearPurchase(yearPurchase)
+                .build();
+
+        return Response.responseData(retailStatisticalDataVO);
+    }
+
+    private BigDecimal calculateTotalPrice(List<ReceiptMain> data, LocalDateTime start, LocalDateTime end) {
+        return data.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptMain::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
 }
