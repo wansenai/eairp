@@ -20,9 +20,18 @@ public class ShipmentsDataBO {
 
     private String productCode;
 
-    private String barcode;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long barCode;
 
     private Long productId;
+
+    private String productName;
+
+    private String productUnit;
+
+    private String productStandard;
+
+    private Integer stock;
 
     private Integer productNumber;
 
@@ -31,6 +40,4 @@ public class ShipmentsDataBO {
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal amount;
-
-    private String remark;
 }

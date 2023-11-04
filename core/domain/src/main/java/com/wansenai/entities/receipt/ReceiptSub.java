@@ -45,6 +45,10 @@ public class ReceiptSub implements Serializable {
 
     private Long productId;
 
+    private Long warehouseId;
+
+    private Long productBarcode;
+
     private Integer productNumber;
 
     private BigDecimal productPrice;
@@ -54,8 +58,6 @@ public class ReceiptSub implements Serializable {
     private String productRemark;
 
     private Long productExtendId;
-
-    private Long warehouseId;
 
     private Long anotherWarehouseId;
 

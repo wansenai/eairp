@@ -29,5 +29,5 @@ public interface ProductStockKeepUnitMapper extends BaseMapper<ProductStockKeepU
 
     ProductStockKeepUnitVO getProductSkuByBarCode(Long barCode, Long warehouseId);
 
-    ProductStockKeepUnitVO getProductSkuByProductId(Long productId, Long warehouseId);
+    ProductStockKeepUnitVO getProductSkuDetail(Long productId, Long warehouseId, Long barCode);
 }

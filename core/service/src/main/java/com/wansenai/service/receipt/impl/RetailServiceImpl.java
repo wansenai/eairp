@@ -54,16 +54,13 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
 
     private final ProductStockKeepUnitMapper productStockKeepUnitMapper;
 
-    private final ProductStockMapper productStockMapper;
-
-    public RetailServiceImpl(ReceiptMainMapper receiptMainMapper, ReceiptSubService receiptSubService, MemberService memberService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductStockMapper productStockMapper) {
+    public RetailServiceImpl(ReceiptMainMapper receiptMainMapper, ReceiptSubService receiptSubService, MemberService memberService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper) {
         this.receiptMainMapper = receiptMainMapper;
         this.receiptSubService = receiptSubService;
         this.memberService = memberService;
         this.userService = userService;
         this.fileMapper = fileMapper;
         this.productStockKeepUnitMapper = productStockKeepUnitMapper;
-        this.productStockMapper = productStockMapper;
     }
 
     @Override
@@ -139,7 +136,6 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                     .eq(ReceiptMain::getId, shipmentsDTO.getId())
                     .set(shipmentsDTO.getMemberId() != null, ReceiptMain::getMemberId, shipmentsDTO.getMemberId())
                     .set(shipmentsDTO.getAccountId() != null, ReceiptMain::getAccountId, shipmentsDTO.getAccountId())
-                    .set(StringUtils.hasText(shipmentsDTO.getPaymentType()), ReceiptMain::getReceiptType, shipmentsDTO.getPaymentType())
                     .set(shipmentsDTO.getCollectAmount() != null, ReceiptMain::getChangeAmount, shipmentsDTO.getCollectAmount())
                     .set(shipmentsDTO.getReceiptAmount() != null, ReceiptMain::getTotalPrice, shipmentsDTO.getReceiptAmount())
                     .set(shipmentsDTO.getBackAmount() != null, ReceiptMain::getBackAmount, shipmentsDTO.getBackAmount())
@@ -161,6 +157,7 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                             .productNumber(item.getProductNumber())
                             .productPrice(item.getUnitPrice())
                             .productTotalPrice(item.getAmount())
+                            .productBarcode(item.getBarCode())
                             .warehouseId(item.getWarehouseId())
                             .build())
                     .collect(Collectors.toList());
@@ -246,6 +243,7 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
                             .productNumber(item.getProductNumber())
                             .productPrice(item.getUnitPrice())
                             .productTotalPrice(item.getAmount())
+                            .productBarcode(item.getBarCode())
                             .warehouseId(item.getWarehouseId())
                             .build())
                     .collect(Collectors.toList());
@@ -314,32 +312,23 @@ public class RetailServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMai
 
         var tableData = new ArrayList<ShipmentsDataBO>(receiptSubList.size() + 1);
         for (ReceiptSub item : receiptSubList) {
-
-            var wrapper = new LambdaQueryWrapper<ProductStockKeepUnit>()
-                    .eq(ProductStockKeepUnit::getProductId, item.getProductId());
-            var skuList = productStockKeepUnitMapper.selectList(wrapper);
-//            if(!skuList.isEmpty()) {
-//               var stocksWrapper = new LambdaQueryWrapper<ProductStock>()
-//                       .in(ProductStock::getProductSkuId, skuList.stream().map(ProductStockKeepUnit::getId).toList())
-//                       .eq(ProductStock::getWarehouseId, item.getWarehouseId());
-//
-//               var stocks = productStockMapper.selectList(stocksWrapper);
-//               for (ProductStock stock : stocks) {
-//                   var data = productStockKeepUnitMapper.getProductSkuByProductId(item.getProductId(), item.getWarehouseId());
-//                 //  System.err.println(data);
-//               }
-//            }
-
-            var data = productStockKeepUnitMapper.getProductSkuByProductId(item.getProductId(), item.getWarehouseId());
-            System.err.println(data);
-
             var shipmentBo = ShipmentsDataBO.builder()
                     .productId(item.getProductId())
+                    .barCode(item.getProductBarcode())
                     .productNumber(item.getProductNumber())
                     .unitPrice(item.getProductPrice())
                     .amount(item.getProductTotalPrice())
                     .warehouseId(item.getWarehouseId())
                     .build();
+
+            var data = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            if(data != null) {
+                shipmentBo.setProductName(data.getProductName());
+                shipmentBo.setProductStandard(data.getProductStandard());
+                shipmentBo.setProductUnit(data.getProductUnit());
+                shipmentBo.setStock(data.getStock());
+
+            }
 
             tableData.add(shipmentBo);
         }

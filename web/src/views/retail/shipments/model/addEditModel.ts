@@ -29,7 +29,6 @@ export interface RowVO {
     productNumber: number,
     retailPrice: number,
     amount: number,
-    remark: string
 }
 
 const xGrid = ref<VxeGridInstance<RowVO>>()
