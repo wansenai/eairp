@@ -21,7 +21,7 @@ import java.math.RoundingMode
 class BigDecimalSerializerBO : JsonSerializer<BigDecimal>() {
     override fun serialize(value: BigDecimal?, gen: JsonGenerator, serializers: SerializerProvider) {
         if (value != null) {
-            val scaledValue = value.setScale(3, RoundingMode.HALF_UP)
+            val scaledValue = value.setScale(2, RoundingMode.HALF_UP)
             if (scaledValue.stripTrailingZeros().scale() <= 0) {
                 gen.writeNumber(scaledValue.toBigInteger())
             } else {
