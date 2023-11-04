@@ -48,7 +48,7 @@ public class RetailController {
         return retailService.deleteRetailShipments(ids);
     }
 
-    @PostMapping("/shipments/updateStatus")
+    @PutMapping("/shipments/updateStatus")
     public Response<String> updateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return retailService.updateRetailShipmentsStatus(ids, status);
     }
