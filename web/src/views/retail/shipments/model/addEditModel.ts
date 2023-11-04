@@ -10,6 +10,7 @@ interface FormState {
     paymentType: string;
     remark: string;
     receiptAmount: number;
+
     scanBarCode: string;
     collectAmount: number;
     backAmount: number;

@@ -13,10 +13,13 @@
 package com.wansenai.api;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.receipt.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.QueryShipmentsDTO;
+import com.wansenai.dto.receipt.RetailRefundDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
 import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
+import com.wansenai.vo.receipt.RetailRefundVO;
 import com.wansenai.vo.receipt.RetailShipmentsDetailVO;
 import com.wansenai.vo.receipt.RetailShipmentsVO;
 import org.springframework.web.bind.annotation.*;
@@ -57,4 +60,15 @@ public class RetailController {
     public Response<RetailShipmentsDetailVO> detail(@PathVariable("id") Long id) {
         return receiptService.getRetailShipmentsDetail(id);
     }
+
+    @PostMapping("/refund/pageList")
+    public Response<Page<RetailRefundVO>> refundPageList(@RequestBody QueryRetailRefundDTO refundDTO) {
+        return receiptService.getRetailRefund(refundDTO);
+    }
+
+    @PostMapping("/refund/addOrUpdate")
+    public Response<String> refundAddOrUpdate(@RequestBody RetailRefundDTO refundDTO) {
+        return receiptService.addOrUpdateRetailRefund(refundDTO);
+    }
+
 }

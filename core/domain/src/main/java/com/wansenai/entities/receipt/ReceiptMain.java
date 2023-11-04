@@ -87,7 +87,7 @@ public class ReceiptMain implements Serializable {
 
     private Integer source;
 
-    private String orderNumber;
+    private String otherReceipt;
 
     /**
      * 创建时间

@@ -13,8 +13,11 @@
 package com.wansenai.service.receipt;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.dto.receipt.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.QueryShipmentsDTO;
+import com.wansenai.dto.receipt.RetailRefundDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
+import com.wansenai.vo.receipt.RetailRefundVO;
 import com.wansenai.vo.receipt.RetailShipmentsDetailVO;
 import com.wansenai.entities.receipt.ReceiptMain;
 import com.wansenai.utils.response.Response;
@@ -94,4 +97,27 @@ public interface ReceiptService extends IService<ReceiptMain> {
      *         返回首页数据汇总
      */
     Response<RetailStatisticalDataVO> getRetailStatistics();
+
+
+    /**
+     * Query retail refund orders with pagination.
+     * 分页查询零售退货单
+     *
+     * @param refundDTO Query common conditions
+     *                    查询公共条件
+     * @return Returns paginated data
+     *         返回分页数据
+     */
+    Response<Page<RetailRefundVO>> getRetailRefund(QueryRetailRefundDTO refundDTO);
+
+    /**
+     * Add/modify retail shipment orders.
+     * 新增/修改 零售退货单
+     *
+     * @param refundDTO Retail shipment order data
+     *                     零售退货单数据
+     * @return Returns the result of the addition
+     *         返回新增结果
+     */
+    Response<String> addOrUpdateRetailRefund(RetailRefundDTO refundDTO);
 }

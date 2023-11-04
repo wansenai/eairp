@@ -40,4 +40,6 @@ public class ShipmentsDataBO {
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal amount;
+
+    private String remark;
 }
