@@ -8,6 +8,7 @@ import {
 
 enum API {
     PageList = '/retail/shipments/pageList',
+    List = '/retail/shipments/list',
     AddOrUpdate = '/retail/shipments/addOrUpdate',
     DeleteBatch = '/retail/shipments/deleteByIds',
     UpdateStatus = '/retail/shipments/updateStatus',
@@ -18,6 +19,15 @@ export function getShipmentsPageList(params: QueryShipmentsReq) {
     return defHttp.post<BaseDataResp<ShipmentsResp>>(
         {
             url: API.PageList,
+            params,
+        }
+    );
+}
+
+export function getShipmentsList(params: QueryShipmentsReq) {
+    return defHttp.post<BaseDataResp<ShipmentsResp>>(
+        {
+            url: API.List,
             params,
         }
     );
