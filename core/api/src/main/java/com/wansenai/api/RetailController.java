@@ -38,7 +38,12 @@ public class RetailController {
 
     @PostMapping("/shipments/pageList")
     public Response<Page<RetailShipmentsVO>> pageList(@RequestBody QueryShipmentsDTO queryShipmentsDTO) {
-        return receiptService.getRetailShipments(queryShipmentsDTO);
+        return receiptService.getRetailShipmentsPage(queryShipmentsDTO);
+    }
+
+    @PostMapping("/shipments/list")
+    public Response<List<RetailShipmentsVO>> getList(@RequestBody QueryShipmentsDTO queryShipmentsDTO) {
+        return receiptService.getRetailShipmentsList(queryShipmentsDTO);
     }
 
     @PostMapping("/shipments/addOrUpdate")
