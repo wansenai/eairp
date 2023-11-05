@@ -56,11 +56,10 @@
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="收款类型" data-step="3"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联单据" data-step="3"
                          data-title="关联单据"
                          data-intro="">
-              <a-input placeholder="请选择关联单据" v-model:value="formState.otherReceipt"
-                         search/>
+              <a-input-search readonly="true" placeholder="请选择关联单据" v-model:value="formState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -132,7 +131,7 @@
                     <template #label>
                       <span style="font-size: 20px;line-height:20px">付款金额</span>
                     </template>
-                    <a-input v-model:value="collectAmount" :style="{color:'red', height:'35px'}"
+                    <a-input v-model:value="paymentAmount" :style="{color:'red', height:'35px'}"
                              defaultValue="0"
                              @change="onChangePaymentAmount"/>
                   </a-form-item>
@@ -177,6 +176,7 @@
   <MemberModal @register="memberModal"/>
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
+  <RetailShipmentsModal @register="retailShipmentsModal" @handleRadioSuccess="handleRadioSuccess"/>
 </template>
 
 <script lang="ts">
@@ -186,8 +186,6 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
-dayjs.extend(weekday);
-dayjs.extend(localeData);
 import {
   Textarea,
   DatePicker,
@@ -215,7 +213,7 @@ import {
   gridOptions,
   xGrid,
   receiptAmount,
-  collectAmount, RowVO,
+  paymentAmount, RowVO,
 } from '/@/views/retail/shipments/model/addEditModel';
 import {getMemberList} from "@/api/basic/member";
 import {MemberResp} from "@/api/basic/model/memberModel";
@@ -230,11 +228,12 @@ import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
 import { addOrUpdateRefund} from "@/api/retail/refund"
-import {AddOrUpdateRefundReq, RefundResp} from "@/api/retail/model/refundModel"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
 import {getProductSkuByBarCode} from "@/api/product/product";
 import XEUtils from "xe-utils";
 import {ProductExtendPriceResp} from "@/api/product/model/productModel";
+import {AddOrUpdateRefundReq} from "@/api/retail/model/refundModel";
+import RetailShipmentsModal from "@/views/retail/refund/components/RetailShipmentsModal.vue";
 const VNodes = {
   props: {
     vnodes: {
@@ -246,6 +245,8 @@ const VNodes = {
     return this.vnodes;
   },
 };
+dayjs.extend(weekday);
+dayjs.extend(localeData);
 dayjs.locale('zh-cn');
 export default defineComponent({
   name: 'AddEditModal',
@@ -254,6 +255,7 @@ export default defineComponent({
     FinancialAccountModal,
     MemberModal,
     SelectProductModal,
+    RetailShipmentsModal,
     'plus-outlined': PlusOutlined,
     'a-modal': Modal,
     'a-upload': Upload,
@@ -318,6 +320,7 @@ export default defineComponent({
     const [memberModal, {openModal}] = useModal();
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
+    const [retailShipmentsModal, {openModal: openRetailShipmentsModal}] = useModal();
 
     function handleCancelModal() {
       close();
@@ -416,14 +419,14 @@ export default defineComponent({
     //       })
     //     }
     //     receiptAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.receiptAmount), { digits: 2 })}`
-    //     collectAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.collectAmount), { digits: 2 })}`
+    //     paymentAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.paymentAmount), { digits: 2 })}`
     //     backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.backAmount), { digits: 2 })}`
     //   }
     // }
 
     function onChangePaymentAmount() {
       const sum = receiptAmount.value
-      const collect = collectAmount.value
+      const collect = paymentAmount.value
       const sumNumber = sum.replace(/,/g, '').replace(/￥/g, '')
       const collectNumber = collect.replace(/,/g, '').replace(/￥/g, '')
       const numberAmount = Number(collectNumber) - Number(sumNumber)
@@ -559,11 +562,11 @@ export default defineComponent({
       })
 
       const sum = receiptAmount.value
-      const collect = collectAmount.value
+      const payment = paymentAmount.value
       const sumNumber = sum.replace(/,/g, '').replace(/￥/g, '')
-      const collectNumber = collect.replace(/,/g, '').replace(/￥/g, '')
-      const backAmount = Number(collectNumber) - Number(sumNumber)
-      formState.collectAmount = Number(collectNumber)
+      const paymentNumber = payment.replace(/,/g, '').replace(/￥/g, '')
+      const backAmount = Number(paymentNumber) - Number(sumNumber)
+      formState.paymentAmount = Number(paymentNumber)
       formState.receiptAmount = Number(sumNumber)
       formState.backAmount = backAmount
 
@@ -591,8 +594,9 @@ export default defineComponent({
       formState.accountId = ''
       formState.remark = ''
       formState.scanBarCode = ''
+      formState.otherReceipt = ''
       receiptAmount.value = ''
-      collectAmount.value = ''
+      paymentAmount.value = ''
       backAmount.value = '￥0.00'
       fileList.value = []
       const table = xGrid.value
@@ -646,6 +650,12 @@ export default defineComponent({
       }
     }
 
+    function handleRadioSuccess(data: string) {
+      if(data){
+        formState.otherReceipt = data
+      }
+    }
+
     function addRowData() {
       const table = xGrid.value
       const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
@@ -666,6 +676,12 @@ export default defineComponent({
           await table.remove(selectRow)
         }
       }
+    }
+
+    function onSearch() {
+      openRetailShipmentsModal(true, {
+        isUpdate: false,
+      });
     }
 
     return {
@@ -711,15 +727,19 @@ export default defineComponent({
       gridOptions,
       xGrid,
       receiptAmount,
-      collectAmount,
+      paymentAmount,
       backAmount,
       SelectProductModal,
       selectProductModal,
       openProductModal,
+      retailShipmentsModal,
+      openRetailShipmentsModal,
       productModal,
       handleCheckSuccess,
+      handleRadioSuccess,
       addRowData,
       deleteRowData,
+      onSearch,
     };
   },
 });
