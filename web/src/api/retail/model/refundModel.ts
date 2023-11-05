@@ -1,6 +1,6 @@
 import {ShipmentsData, FileDta} from './shipmentsModel';
 
-interface AddOrUpdateRefundReq {
+export interface AddOrUpdateRefundReq {
     id: number | string | undefined;
     memberId: number | string;
     accountId: number | string;
@@ -16,7 +16,7 @@ interface AddOrUpdateRefundReq {
     fileDataList: FileData[];
 }
 
-interface RefundResp {
+export interface RefundResp {
     id: number | string;
     memberName: string;
     receiptNumber: string;

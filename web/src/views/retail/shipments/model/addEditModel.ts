@@ -10,8 +10,9 @@ interface FormState {
     paymentType: string;
     remark: string;
     receiptAmount: number;
-
+    paymentAmount: number;
     scanBarCode: string;
+    otherReceipt: string;
     collectAmount: number;
     backAmount: number;
     accountId: string;
@@ -163,6 +164,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
                     })
                     receiptAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                     collectAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    paymentAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                     return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
                 if (['productNumber', 'rate'].includes(column.field)) {
@@ -208,6 +210,8 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
 })
 const receiptAmount = ref<string>('');
 const collectAmount = ref<string>('');
+
+const paymentAmount = ref<string>('');
 const sumNum = (list: RowVO[], field: string) => {
     let count = 0
     list.forEach(item => {
@@ -225,9 +229,11 @@ const formState = reactive<FormState>({
     receiptAmount: 0,
     scanBarCode: '',
     collectAmount: 0,
+    paymentAmount: 0,
     backAmount: 0,
     accountId: '',
     receiptDate: '',
+    otherReceipt: '',
 });
 
 export {
@@ -236,5 +242,6 @@ export {
     xGrid,
     receiptAmount,
     collectAmount,
+    paymentAmount,
     tableData
 }

@@ -69,7 +69,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
     }
 
     @Override
-    public Response<Page<RetailShipmentsVO>> getRetailShipments(QueryShipmentsDTO shipmentsDTO) {
+    public Response<Page<RetailShipmentsVO>> getRetailShipmentsPage(QueryShipmentsDTO shipmentsDTO) {
         var result = new Page<RetailShipmentsVO>();
         var retailShipmentsVOList = new ArrayList<RetailShipmentsVO>();
         var page = new Page<ReceiptMain>(shipmentsDTO.getPage(), shipmentsDTO.getPageSize());
@@ -129,6 +129,63 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
         result.setCurrent(queryResult.getCurrent());
         result.setSize(queryResult.getSize());
 
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<List<RetailShipmentsVO>> getRetailShipmentsList(QueryShipmentsDTO shipmentsDTO) {
+        var query = lambdaQuery()
+                .eq(ReceiptMain::getType, ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
+                .in(ReceiptMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_RETAIL_SHIPMENTS)
+                .eq(StringUtils.hasText(shipmentsDTO.getReceiptNumber()), ReceiptMain::getReceiptNumber, shipmentsDTO.getReceiptNumber())
+                .like(StringUtils.hasText(shipmentsDTO.getRemark()), ReceiptMain::getRemark, shipmentsDTO.getRemark())
+                .eq(shipmentsDTO.getMemberId() != null, ReceiptMain::getMemberId, shipmentsDTO.getMemberId())
+                .eq(shipmentsDTO.getAccountId() != null, ReceiptMain::getAccountId, shipmentsDTO.getAccountId())
+                .eq(shipmentsDTO.getOperatorId() != null, ReceiptMain::getCreateBy, shipmentsDTO.getOperatorId())
+                .eq(shipmentsDTO.getStatus() != null, ReceiptMain::getStatus, shipmentsDTO.getStatus())
+                .eq(ReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(shipmentsDTO.getStartDate()), ReceiptMain::getCreateTime, shipmentsDTO.getStartDate())
+                .le(StringUtils.hasText(shipmentsDTO.getEndDate()), ReceiptMain::getCreateTime, shipmentsDTO.getEndDate())
+                .list();
+
+        var result = new ArrayList<RetailShipmentsVO>(query.size() + 2);
+        for (ReceiptMain receiptMain : query) {
+
+            String memberName = "";
+            if (receiptMain.getMemberId() != null) {
+                var member = memberService.getMemberById(receiptMain.getMemberId());
+                if (member != null) {
+                    memberName = member.getMemberName();
+                }
+            }
+            String crateBy = null;
+            if (receiptMain.getCreateBy() != null) {
+                var user = userService.getById(receiptMain.getCreateBy());
+                if (user != null) {
+                    crateBy = user.getName();
+                }
+            }
+            var productNumber = receiptSubService.lambdaQuery()
+                    .eq(ReceiptSub::getReceiptMainId, receiptMain.getId())
+                    .list()
+                    .stream()
+                    .mapToInt(ReceiptSub::getProductNumber)
+                    .sum();
+            var retailShipmentsVO = RetailShipmentsVO.builder()
+                    .id(receiptMain.getId())
+                    .memberName(memberName)
+                    .receiptNumber(receiptMain.getReceiptNumber())
+                    .receiptDate(receiptMain.getCreateTime())
+                    .productInfo(receiptMain.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalPrice(receiptMain.getTotalPrice())
+                    .collectionAmount(receiptMain.getTotalPrice())
+                    .backAmount(receiptMain.getBackAmount())
+                    .status(receiptMain.getStatus())
+                    .build();
+            result.add(retailShipmentsVO);
+        }
         return Response.responseData(result);
     }
 
