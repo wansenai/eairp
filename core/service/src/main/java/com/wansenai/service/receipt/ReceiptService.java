@@ -38,7 +38,18 @@ public interface ReceiptService extends IService<ReceiptMain> {
      * @return Returns paginated data
      *         返回分页数据
      */
-    Response<Page<RetailShipmentsVO>> getRetailShipments(QueryShipmentsDTO shipmentsDTO);
+    Response<Page<RetailShipmentsVO>> getRetailShipmentsPage(QueryShipmentsDTO shipmentsDTO);
+
+    /**
+     * Query retail shipment orders with pagination.
+     * Query Retail Delivery Order Collection List Data
+     *
+     * @param shipmentsDTO Query common conditions
+     *                    查询公共条件
+     * @return Returns List data
+     *         返回集合数据
+     */
+    Response<List<RetailShipmentsVO>> getRetailShipmentsList(QueryShipmentsDTO shipmentsDTO);
 
     /**
      * Add/modify retail shipment orders.
