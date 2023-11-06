@@ -9,6 +9,7 @@ import com.wansenai.dto.receipt.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.RetailRefundDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
+import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.wansenai.entities.receipt.ReceiptMain;
 import com.wansenai.entities.receipt.ReceiptSub;
 import com.wansenai.entities.system.SysFile;
@@ -16,6 +17,7 @@ import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
 import com.wansenai.mappers.receipt.ReceiptMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.basic.MemberService;
+import com.wansenai.service.product.ProductService;
 import com.wansenai.service.receipt.ReceiptSubService;
 import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.service.user.ISysUserService;
@@ -25,10 +27,7 @@ import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.RetailCodeEnum;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.RetailRefundVO;
-import com.wansenai.vo.receipt.RetailShipmentsDetailVO;
-import com.wansenai.vo.receipt.RetailShipmentsVO;
-import com.wansenai.vo.receipt.RetailStatisticalDataVO;
+import com.wansenai.vo.receipt.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,13 +58,16 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
 
     private final ProductStockKeepUnitMapper productStockKeepUnitMapper;
 
-    public ReceiptServiceImpl(ReceiptMainMapper receiptMainMapper, ReceiptSubService receiptSubService, MemberService memberService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper) {
+    private final ProductService productService;
+
+    public ReceiptServiceImpl(ReceiptMainMapper receiptMainMapper, ReceiptSubService receiptSubService, MemberService memberService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductService productService) {
         this.receiptMainMapper = receiptMainMapper;
         this.receiptSubService = receiptSubService;
         this.memberService = memberService;
         this.userService = userService;
         this.fileMapper = fileMapper;
         this.productStockKeepUnitMapper = productStockKeepUnitMapper;
+        this.productService = productService;
     }
 
     @Override
@@ -440,36 +442,56 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
         var retailData = lambdaQuery()
                 .eq(ReceiptMain::getType, ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
                 .in(ReceiptMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_RETAIL_SHIPMENTS)
-                .eq(ReceiptMain::getStatus, 1)
+                // .eq(ReceiptMain::getStatus, 1)
                 .eq(ReceiptMain::getDeleteFlag, 0)
                 .list();
+        var retailRefundData = lambdaQuery()
+                .eq(ReceiptMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .eq(ReceiptMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_RETAIL_REFUND)
+               // .eq(ReceiptMain::getStatus, 1)
+                .eq(ReceiptMain::getDeleteFlag, 0)
+                .list();
+
         var salesData = lambdaQuery()
                 .eq(ReceiptMain::getType, ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
                 .in(ReceiptMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_SALES_SHIPMENTS)
-                .eq(ReceiptMain::getStatus, 1)
+            //    .eq(ReceiptMain::getStatus, 1)
                 .eq(ReceiptMain::getDeleteFlag, 0)
                 .list();
+        var salesRefundData = lambdaQuery()
+                .eq(ReceiptMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .eq(ReceiptMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_SALES_REFUND)
+           //     .eq(ReceiptMain::getStatus, 1)
+                .eq(ReceiptMain::getDeleteFlag, 0)
+                .list();
+
         var purchaseData = lambdaQuery()
                 .eq(ReceiptMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
                 .eq(ReceiptMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_PURCHASE_STORAGE)
-                .eq(ReceiptMain::getStatus, 1)
+             //   .eq(ReceiptMain::getStatus, 1)
+                .eq(ReceiptMain::getDeleteFlag, 0)
+                .list();
+        var purchaseRefundData = lambdaQuery()
+                .eq(ReceiptMain::getType, ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
+                .eq(ReceiptMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_PURCHASE_REFUND)
+             //   .eq(ReceiptMain::getStatus, 1)
                 .eq(ReceiptMain::getDeleteFlag, 0)
                 .list();
 
-        var todayRetailSales = calculateTotalPrice(retailData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
-        var yesterdayRetailSales = calculateTotalPrice(retailData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
-        var monthRetailSales = calculateTotalPrice(retailData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
-        var yearRetailSales = calculateTotalPrice(retailData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var todayRetailSales = calculateTotalPrice(retailData, retailRefundData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yesterdayRetailSales = calculateTotalPrice(retailData, retailRefundData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
+        var monthRetailSales = calculateTotalPrice(retailData, retailRefundData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yearRetailSales = calculateTotalPrice(retailData, retailRefundData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
 
-        var todaySales = calculateTotalPrice(salesData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
-        var yesterdaySales = calculateTotalPrice(salesData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
-        var monthSales = calculateTotalPrice(salesData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
-        var yearSales = calculateTotalPrice(salesData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var todaySales = calculateTotalPrice(salesData, salesRefundData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yesterdaySales = calculateTotalPrice(salesData, salesRefundData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
+        var monthSales = calculateTotalPrice(salesData, salesRefundData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yearSales = calculateTotalPrice(salesData, salesRefundData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
 
-        var todayPurchase = calculateTotalPrice(purchaseData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
-        var yesterdayPurchase = calculateTotalPrice(purchaseData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
-        var monthPurchase = calculateTotalPrice(purchaseData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
-        var yearPurchase = calculateTotalPrice(purchaseData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var todayPurchase = calculateTotalPrice(purchaseData, purchaseRefundData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yesterdayPurchase = calculateTotalPrice(purchaseData, purchaseRefundData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
+        var monthPurchase = calculateTotalPrice(purchaseData, purchaseRefundData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yearPurchase = calculateTotalPrice(purchaseData, purchaseRefundData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
 
         var retailStatisticalDataVO = RetailStatisticalDataVO.builder()
                 .todayRetailSales(todayRetailSales)
@@ -489,12 +511,18 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
         return Response.responseData(retailStatisticalDataVO);
     }
 
-    private BigDecimal calculateTotalPrice(List<ReceiptMain> data, LocalDateTime start, LocalDateTime end) {
-        return data.stream()
+    private BigDecimal calculateTotalPrice(List<ReceiptMain> data, List<ReceiptMain> backData, LocalDateTime start, LocalDateTime end) {
+        var dataTotalPrice = data.stream()
                 .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
                 .map(ReceiptMain::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
+        var backDataTotalPrice = backData.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptMain::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        return dataTotalPrice.add(backDataTotalPrice);
     }
 
     @Override
@@ -571,9 +599,9 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                     .eq(ReceiptMain::getId, refundDTO.getId())
                     .set(refundDTO.getMemberId() != null, ReceiptMain::getMemberId, refundDTO.getMemberId())
                     .set(refundDTO.getAccountId() != null, ReceiptMain::getAccountId, refundDTO.getAccountId())
-                    .set(refundDTO.getPaymentAmount() != null, ReceiptMain::getChangeAmount, refundDTO.getPaymentAmount())
-                    .set(refundDTO.getReceiptAmount() != null, ReceiptMain::getTotalPrice, refundDTO.getReceiptAmount())
-                    .set(refundDTO.getBackAmount() != null, ReceiptMain::getBackAmount, refundDTO.getBackAmount())
+                    .set(refundDTO.getPaymentAmount() != null, ReceiptMain::getChangeAmount, refundDTO.getPaymentAmount().negate())
+                    .set(refundDTO.getReceiptAmount() != null, ReceiptMain::getTotalPrice, refundDTO.getReceiptAmount().negate())
+                    .set(refundDTO.getBackAmount() != null, ReceiptMain::getBackAmount, refundDTO.getBackAmount().negate())
                     .set(refundDTO.getStatus() != null, ReceiptMain::getStatus, refundDTO.getStatus())
                     .set(StringUtils.hasText(refundDTO.getOtherReceipt()), ReceiptMain::getOtherReceipt, refundDTO.getOtherReceipt())
                     .set(StringUtils.hasText(refundDTO.getRemark()), ReceiptMain::getRemark, refundDTO.getRemark())
@@ -661,9 +689,9 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                     .accountId(refundDTO.getAccountId())
                     .otherReceipt(refundDTO.getOtherReceipt())
                     .accountId(refundDTO.getAccountId())
-                    .changeAmount(refundDTO.getPaymentAmount())
-                    .totalPrice(refundDTO.getReceiptAmount())
-                    .backAmount(refundDTO.getBackAmount())
+                    .changeAmount(refundDTO.getPaymentAmount().negate())
+                    .totalPrice(refundDTO.getReceiptAmount().negate())
+                    .backAmount(refundDTO.getBackAmount().negate())
                     .remark(refundDTO.getRemark())
                     .fileId(fileIds)
                     .status(refundDTO.getStatus())
@@ -694,6 +722,125 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                 return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_REFUND_ERROR);
             }
         }
+    }
+
+    @Override
+    public Response<List<ReceiptDetailVO>> retailDetail(Long id) {
+        if(id == null) {
+            Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var receiptSubList = receiptSubService.lambdaQuery()
+                .eq(ReceiptSub::getReceiptMainId, id)
+                .eq(ReceiptSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+        var result = new ArrayList<ReceiptDetailVO>(receiptSubList.size() + 1);
+
+        for (ReceiptSub receiptSub : receiptSubList) {
+            var receiptDetail = ReceiptDetailVO.builder()
+                    .id(receiptSub.getId())
+                    .warehouseId(receiptSub.getWarehouseId())
+                    .productId(receiptSub.getProductId())
+                    .productBarcode(receiptSub.getProductBarcode())
+                    .productNumber(receiptSub.getProductNumber())
+                    .productPrice(receiptSub.getProductPrice())
+                    .productTotalPrice(receiptSub.getProductTotalPrice())
+                    .remark(receiptSub.getProductRemark())
+                    .build();
+
+            var receiptMain = getById(id);
+            if(receiptMain != null) {
+                receiptDetail.setMemberId(receiptMain.getMemberId());
+                receiptDetail.setDiscountRate(receiptMain.getDiscountRate());
+                receiptDetail.setDiscountAmount(receiptMain.getDiscountAmount());
+                receiptDetail.setDiscountLastAmount(receiptMain.getDiscountLastAmount());
+            }
+
+            var product = productService.getById(receiptSub.getProductId());
+            if (product != null) {
+                receiptDetail.setProductName(product.getProductName());
+                receiptDetail.setProductStandard(product.getProductStandard());
+                receiptDetail.setProductModel(product.getProductModel());
+
+                var productSku = productStockKeepUnitMapper.selectOne(new LambdaQueryWrapper<ProductStockKeepUnit>()
+                        .eq(ProductStockKeepUnit::getProductBarCode, receiptSub.getProductBarcode())
+                        .eq(ProductStockKeepUnit::getProductId, product.getId()));
+                receiptDetail.setUnit(productSku.getProductUnit());
+            }
+            result.add(receiptDetail);
+        }
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<RetailRefundDetailVO> getRetailRefundDetail(Long id) {
+        if (id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var shipment = getById(id);
+
+        List<FileDataBO> fileList = new ArrayList<>();
+        if (StringUtils.hasLength(shipment.getFileId())) {
+            List<Long> ids = Arrays.stream(shipment.getFileId().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            fileList.addAll(fileMapper.selectBatchIds(ids)
+                    .stream()
+                    .map(item ->
+                            FileDataBO.builder(
+                                    item.getFileName(),
+                                    item.getFileUrl(),
+                                    item.getId(),
+                                    item.getUid(),
+                                    item.getFileType(),
+                                    item.getFileSize()
+                            ))
+                    .toList());
+        }
+
+        var receiptSubList = receiptSubService.lambdaQuery()
+                .eq(ReceiptSub::getReceiptMainId, id)
+                .eq(ReceiptSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var tableData = new ArrayList<ShipmentsDataBO>(receiptSubList.size() + 1);
+        for (ReceiptSub item : receiptSubList) {
+            var shipmentBo = ShipmentsDataBO.builder()
+                    .productId(item.getProductId())
+                    .barCode(item.getProductBarcode())
+                    .productNumber(item.getProductNumber())
+                    .unitPrice(item.getProductPrice())
+                    .amount(item.getProductTotalPrice())
+                    .warehouseId(item.getWarehouseId())
+                    .build();
+
+            var data = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            if(data != null) {
+                shipmentBo.setProductName(data.getProductName());
+                shipmentBo.setProductStandard(data.getProductStandard());
+                shipmentBo.setProductUnit(data.getProductUnit());
+                shipmentBo.setStock(data.getStock());
+
+            }
+
+            tableData.add(shipmentBo);
+        }
+
+        var retailRefundDetailVO = RetailRefundDetailVO.builder()
+                .receiptNumber(shipment.getReceiptNumber())
+                .receiptDate(shipment.getCreateTime())
+                .memberId(shipment.getMemberId())
+                .accountId(shipment.getAccountId())
+                .otherReceipt(shipment.getOtherReceipt())
+                .paymentAmount(shipment.getChangeAmount())
+                .receiptAmount(shipment.getTotalPrice())
+                .backAmount(shipment.getBackAmount())
+                .remark(shipment.getRemark())
+                .tableData(tableData)
+                .files(fileList)
+                .build();
+
+        return Response.responseData(retailRefundDetailVO);
     }
 
 }

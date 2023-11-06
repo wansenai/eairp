@@ -1,6 +1,7 @@
 <template>
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
-  <BasicTable @register="registerTable"/>
+    <BasicTable @register="registerTable">
+    </BasicTable>
   </BasicModal>
 </template>
 
@@ -8,47 +9,54 @@
 import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
-import {extendPriceColumn, searchFormSchema} from "@/views/product/info/info.data";
-import {getProductSkuPage} from "@/api/product/product";
+import {ReceiptDetailColumn} from "@/views/receipt/receipt.data";
 import {BasicModal, useModalInner} from "@/components/Modal";
+import {getReceiptDetail} from "@/api/receipt/receipt";
 export default defineComponent({
-  name: 'productModal',
+  name: 'ReceiptDetailModal',
   components: {BasicModal, BasicTable, TableAction},
   emits: ['selectedRows'],
   setup(_, context) {
-    const getTitle = ref('选择商品');
+    const getTitle = ref('选择单据明细');
     const { createMessage } = useMessage();
+    const id = ref('');
+    const receiptNumber = ref('');
     const [registerTable, { getSelectRows }] = useTable({
-      title: '商品列表',
       rowKey: 'id',
-      columns: extendPriceColumn,
-      api: getProductSkuPage,
+      columns: ReceiptDetailColumn,
+      api: getReceiptDetail,
+      beforeFetch: () => {
+        return id.value;
+      },
       rowSelection: {
         type: 'checkbox',
       },
-      formConfig: {
-        labelWidth: 110,
-        schemas: searchFormSchema,
-      },
       bordered: true,
-      showTableSetting: true,
+      showTableSetting: false,
       canResize: true,
       tableSetting: { fullScreen: true },
-      useSearchForm: true,
+      useSearchForm: false,
       clickToRowSelect: true,
+      showIndexColumn: false,
     });
 
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
-      setModalProps({confirmLoading: false, destroyOnClose: true, width: 1300});
+      setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200});
+      id.value = data.id
+      receiptNumber.value = data.receiptNumber
     });
 
     function handleSubmit() {
       const rows = getSelectRows();
       if (rows.length === 0) {
-        createMessage.error('请选择商品');
+        createMessage.error('请选择需要退货的出库单据');
         return;
       }
-      context.emit('handleCheckSuccess', rows);
+      const dataObject = {
+        receiptNumber: receiptNumber.value,
+        receiptDetailData: rows,
+      }
+      context.emit('handleReceiptSuccess', dataObject);
       closeModal();
     }
 

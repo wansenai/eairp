@@ -13,30 +13,26 @@
       </template>
     </BasicTable>
   </BasicModal>
+  <ReceiptDetailModal @register="receiptDetailModal" @handleReceiptSuccess="handleReceiptSuccess"/>
 </template>
 
 <script lang="ts">
-import {getShipmentsList} from "@/api/retail/shipments";
-
-const store = defineStore('modalStore', {
-  state: () => ({
-    data: null,
-  }),
-});
-
 import {defineComponent, ref} from "vue";
-import { defineStore } from 'pinia';
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {searchRetailShipmentsSchema, RetailShipmentsColumn} from "@/views/retail/refund/refund.data";
-import {BasicModal, useModalInner} from "@/components/Modal";
+import {BasicModal, useModal, useModalInner} from "@/components/Modal";
 import {Tag} from "ant-design-vue";
+import {getShipmentsList} from "@/api/retail/shipments";
+import ReceiptDetailModal from "@/views/receipt/ReceiptDetailModal.vue";
+import {formState} from "@/views/retail/shipments/model/addEditModel";
 export default defineComponent({
-  name: 'productModal',
-  components: {Tag, BasicModal, BasicTable, TableAction},
+  name: 'RetailShipmentsModal',
+  components: {Tag, BasicModal, BasicTable, TableAction, ReceiptDetailModal},
   emits: ['selectedRows'],
   setup(_, context) {
     const getTitle = ref('选择需要退货的出库单');
+    const [receiptDetailModal, {openModal: openReceiptDetailModal}] = useModal();
     const { createMessage } = useMessage();
     const [registerTable, { getSelectRows }] = useTable({
       title: '选择需要退货的出库单',
@@ -62,14 +58,23 @@ export default defineComponent({
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200});
     });
 
+    function handleReceiptSuccess(data) {
+      if(data){
+        context.emit('handleReceiptSuccess', data);
+      }
+    }
+
     function handleSubmit() {
       const rows = getSelectRows();
       if (rows.length === 0) {
         createMessage.error('请选择需要退货的出库单据');
         return;
       }
-      const receiptNumber = rows[0].receiptNumber;
-      context.emit('handleRadioSuccess', receiptNumber);
+      openReceiptDetailModal(true, {
+        isUpdate: false,
+        id: rows[0].id,
+        receiptNumber: rows[0].receiptNumber,
+      });
       closeModal();
     }
 
@@ -78,6 +83,8 @@ export default defineComponent({
       registerModal,
       getTitle,
       handleSubmit,
+      receiptDetailModal,
+      handleReceiptSuccess
     }
   }
 })

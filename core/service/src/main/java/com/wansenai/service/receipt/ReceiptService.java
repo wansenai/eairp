@@ -17,13 +17,10 @@ import com.wansenai.dto.receipt.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.RetailRefundDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
-import com.wansenai.vo.receipt.RetailRefundVO;
-import com.wansenai.vo.receipt.RetailShipmentsDetailVO;
+import com.wansenai.vo.receipt.*;
 import com.wansenai.entities.receipt.ReceiptMain;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.RetailShipmentsVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansenai.vo.receipt.RetailStatisticalDataVO;
 
 import java.util.List;
 
@@ -131,4 +128,25 @@ public interface ReceiptService extends IService<ReceiptMain> {
      *         返回新增结果
      */
     Response<String> addOrUpdateRetailRefund(RetailRefundDTO refundDTO);
+
+    /**
+     * Query the details of the document based on its main table ID (Sub table)
+     * 根据单据主表Id查询单据的明细 (Sub-table)
+     *
+     * @param id primary key id of the receipt_main table
+     *           receipt_main表主键id
+     * @return Return the combined data of the main and sub tables of the product document
+     *          返回产品单据主子表合并数据
+     */
+    Response<List<ReceiptDetailVO>> retailDetail(Long id);
+
+    /**
+     * Query retail return details based on ID
+     * 根据id查询零售退货详情信息
+     * @param id Primary key id of retail shipment order
+     *          零售退货单主键id
+     * @return Returns retail return order data
+     *         返回零售退货单数据
+     */
+    Response<RetailRefundDetailVO> getRetailRefundDetail(Long id);
 }
