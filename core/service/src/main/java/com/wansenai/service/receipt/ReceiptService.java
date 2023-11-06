@@ -143,10 +143,35 @@ public interface ReceiptService extends IService<ReceiptMain> {
     /**
      * Query retail return details based on ID
      * 根据id查询零售退货详情信息
+     *
      * @param id Primary key id of retail shipment order
      *          零售退货单主键id
      * @return Returns retail return order data
      *         返回零售退货单数据
      */
     Response<RetailRefundDetailVO> getRetailRefundDetail(Long id);
+
+    /**
+     * Delete retail return document data based on ID
+     * 根据id删除零售退货单据数据
+     *
+     * @param ids id Retail return order ID List
+     *            零售退货单主键id集合
+     * @return Returns the result of the deletion
+     *       返回删除结果
+     */
+    Response<String> deleteRetailRefund(List<Long> ids);
+
+    /**
+     * Modify retail return document data based on ID and status
+     * 根据id和状态修改零售退货单据数据
+     *
+     * @param ids   id Retail return order ID List
+     *              零售退货单主键id集合
+     * @param status Status
+     *               状态
+     * @return Returns the result of the modification
+     *       返回修改结果
+     */
+    Response<String> updateRetailRefundStatus(List<Long> ids, Integer status);
 }

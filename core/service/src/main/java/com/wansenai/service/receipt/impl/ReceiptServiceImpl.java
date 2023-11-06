@@ -693,6 +693,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                     .totalPrice(refundDTO.getReceiptAmount().negate())
                     .backAmount(refundDTO.getBackAmount().negate())
                     .remark(refundDTO.getRemark())
+                    .status(refundDTO.getStatus())
                     .fileId(fileIds)
                     .status(refundDTO.getStatus())
                     .createBy(userId)
@@ -841,6 +842,39 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                 .build();
 
         return Response.responseData(retailRefundDetailVO);
+    }
+
+    @Override
+    public Response<String> deleteRetailRefund(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var updateResult = lambdaUpdate()
+                .in(ReceiptMain::getId, ids)
+                .set(ReceiptMain::getDeleteFlag, CommonConstants.DELETED)
+                .update();
+
+        if (updateResult) {
+            return Response.responseMsg(RetailCodeEnum.DELETE_RETAIL_REFUND_SUCCESS);
+        } else {
+            return Response.responseMsg(RetailCodeEnum.DELETE_RETAIL_REFUND_ERROR);
+        }
+    }
+
+    @Override
+    public Response<String> updateRetailRefundStatus(List<Long> ids, Integer status) {
+       if (ids.isEmpty() || status == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var updateResult = lambdaUpdate()
+                .in(ReceiptMain::getId, ids)
+                .set(ReceiptMain::getStatus, status)
+                .update();
+        if (updateResult) {
+            return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS);
+        } else {
+            return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR);
+        }
     }
 
 }
