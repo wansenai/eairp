@@ -46,7 +46,6 @@ export function deleteShipments(ids: string[]) {
     return defHttp.post<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`,
-            params: ids,
         }
     );
 }

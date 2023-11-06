@@ -78,4 +78,14 @@ public class RetailController {
     public Response<RetailRefundDetailVO> refundDetail(@PathVariable("id") Long id) {
         return receiptService.getRetailRefundDetail(id);
     }
+
+    @PostMapping("/refund/deleteByIds")
+    public Response<String> refundDeleteByIds(@RequestParam("ids") List<Long> ids) {
+        return receiptService.deleteRetailRefund(ids);
+    }
+
+    @PutMapping("/refund/updateStatus")
+    public Response<String> refundUpdateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
+        return receiptService.updateRetailRefundStatus(ids, status);
+    }
 }
