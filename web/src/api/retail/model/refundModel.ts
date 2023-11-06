@@ -2,8 +2,8 @@ import {ShipmentsData, FileDta} from './shipmentsModel';
 
 export interface AddOrUpdateRefundReq {
     id: number | string | undefined;
-    memberId: number | string;
-    accountId: number | string;
+    memberId: string;
+    accountId: string;
     receiptDate: string;
     receiptNumber: string;
     otherReceipt: string;

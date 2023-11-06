@@ -9,6 +9,7 @@ import {
 enum API {
     PageList = '/retail/refund/pageList',
     AddOrUpdate = '/retail/refund/addOrUpdate',
+    GetDetail = '/retail/refund/detail',
 }
 
 export function getRefundPageList(params: QueryShipmentsReq) {
@@ -25,6 +26,14 @@ export function addOrUpdateRefund(params: AddOrUpdateRefundReq) {
         {
             url: API.AddOrUpdate,
             params,
+        }
+    );
+}
+
+export function getRefundDetail(id: string) {
+    return defHttp.get<BaseDataResp<AddOrUpdateRefundReq>>(
+        {
+            url: `${API.GetDetail}/${id}`,
         }
     );
 }
