@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
+import com.wansenai.bo.SalesDataBO;
 import com.wansenai.bo.ShipmentsDataBO;
 import com.wansenai.dto.receipt.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.RetailRefundDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
+import com.wansenai.dto.receipt.sale.QuerySaleOrderDTO;
+import com.wansenai.dto.receipt.sale.SaleOrderDTO;
 import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.wansenai.entities.receipt.ReceiptMain;
 import com.wansenai.entities.receipt.ReceiptSub;
@@ -16,6 +19,7 @@ import com.wansenai.entities.system.SysFile;
 import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
 import com.wansenai.mappers.receipt.ReceiptMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
+import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.service.receipt.ReceiptSubService;
@@ -26,8 +30,11 @@ import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.RetailCodeEnum;
+import com.wansenai.utils.enums.SaleCodeEnum;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.*;
+import com.wansenai.vo.receipt.sale.SaleOrderDetailVO;
+import com.wansenai.vo.receipt.sale.SaleOrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +67,9 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
 
     private final ProductService productService;
 
-    public ReceiptServiceImpl(ReceiptMainMapper receiptMainMapper, ReceiptSubService receiptSubService, MemberService memberService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductService productService) {
+    private final CustomerService customerService;
+
+    public ReceiptServiceImpl(ReceiptMainMapper receiptMainMapper, ReceiptSubService receiptSubService, MemberService memberService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductService productService, CustomerService customerService) {
         this.receiptMainMapper = receiptMainMapper;
         this.receiptSubService = receiptSubService;
         this.memberService = memberService;
@@ -68,6 +77,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
         this.fileMapper = fileMapper;
         this.productStockKeepUnitMapper = productStockKeepUnitMapper;
         this.productService = productService;
+        this.customerService = customerService;
     }
 
     @Override
@@ -874,6 +884,314 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
             return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS);
         } else {
             return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR);
+        }
+    }
+
+    @Override
+    public Response<Page<SaleOrderVO>> getSaleOrderPage(QuerySaleOrderDTO querySaleOrderDTO) {
+        var result = new Page<SaleOrderVO>();
+        var saleOrderVOList = new ArrayList<SaleOrderVO>();
+        var page = new Page<ReceiptMain>(querySaleOrderDTO.getPage(), querySaleOrderDTO.getPageSize());
+        var queryWrapper = new LambdaQueryWrapper<ReceiptMain>()
+                .eq(ReceiptMain::getType, ReceiptConstants.RECEIPT_TYPE_ORDER)
+                .in(ReceiptMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_SALES_ORDER)
+                .eq(StringUtils.hasText(querySaleOrderDTO.getReceiptNumber()), ReceiptMain::getReceiptNumber, querySaleOrderDTO.getReceiptNumber())
+                .like(StringUtils.hasText(querySaleOrderDTO.getRemark()), ReceiptMain::getRemark, querySaleOrderDTO.getRemark())
+                .eq(querySaleOrderDTO.getCustomerId() != null, ReceiptMain::getMemberId, querySaleOrderDTO.getCustomerId())
+                .eq(querySaleOrderDTO.getOperatorId() != null, ReceiptMain::getCreateBy, querySaleOrderDTO.getOperatorId())
+                .eq(querySaleOrderDTO.getStatus() != null, ReceiptMain::getStatus, querySaleOrderDTO.getStatus())
+                .eq(ReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(querySaleOrderDTO.getStartDate()), ReceiptMain::getCreateTime, querySaleOrderDTO.getStartDate())
+                .le(StringUtils.hasText(querySaleOrderDTO.getEndDate()), ReceiptMain::getCreateTime, querySaleOrderDTO.getEndDate());
+
+        var queryResult = receiptMainMapper.selectPage(page, queryWrapper);
+
+        queryResult.getRecords().forEach(item -> {
+            String customerName = null;
+            if (item.getCustomerId() != null) {
+                var customer = customerService.getById(item.getCustomerId());
+                if (customer != null) {
+                    customerName = customer.getCustomerName();
+                }
+            }
+            String crateBy = null;
+            if (item.getCreateBy() != null) {
+                var user = userService.getById(item.getCreateBy());
+                if (user != null) {
+                    crateBy = user.getName();
+                }
+            }
+            var productNumber = receiptSubService.lambdaQuery()
+                    .eq(ReceiptSub::getReceiptMainId, item.getId())
+                    .list()
+                    .stream()
+                    .mapToInt(ReceiptSub::getProductNumber)
+                    .sum();
+            var saleOrderVO = SaleOrderVO.builder()
+                    .id(item.getId())
+                    .customerName(customerName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getCreateTime())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalPrice(item.getTotalPrice())
+                    .taxRateTotalPrice(item.getTotalPrice())
+                    .deposit(item.getDeposit())
+                    .status(item.getStatus())
+                    .build();
+            saleOrderVOList.add(saleOrderVO);
+        });
+        result.setRecords(saleOrderVOList);
+        result.setTotal(queryResult.getTotal());
+        result.setCurrent(queryResult.getCurrent());
+        result.setSize(queryResult.getSize());
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<SaleOrderDetailVO> getSaleOrderDetail(Long id) {
+        if (id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var sale = getById(id);
+
+        List<FileDataBO> fileList = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getFileId())) {
+            List<Long> ids = Arrays.stream(sale.getFileId().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            fileList.addAll(fileMapper.selectBatchIds(ids)
+                    .stream()
+                    .map(item ->
+                            FileDataBO.builder(
+                                    item.getFileName(),
+                                    item.getFileUrl(),
+                                    item.getId(),
+                                    item.getUid(),
+                                    item.getFileType(),
+                                    item.getFileSize()
+                            ))
+                    .toList());
+        }
+
+        var receiptSubList = receiptSubService.lambdaQuery()
+                .eq(ReceiptSub::getReceiptMainId, id)
+                .list();
+
+        var tableData = new ArrayList<SalesDataBO>(receiptSubList.size() + 1);
+        for (ReceiptSub item : receiptSubList) {
+            var saleData = SalesDataBO.builder()
+                    .productId(item.getProductId())
+                    .barCode(item.getProductBarcode())
+                    .productNumber(item.getProductNumber())
+                    .unitPrice(item.getProductPrice())
+                    .amount(item.getProductTotalPrice())
+                    .taxRate(item.getTaxRate())
+                    .taxAmount(item.getTaxAmount())
+                    .taxTotalPrice(item.getTaxTotalPrice())
+                    .warehouseId(item.getWarehouseId())
+                    .build();
+
+            var data = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            if(data != null) {
+                saleData.setProductName(data.getProductName());
+                saleData.setProductStandard(data.getProductStandard());
+                saleData.setProductUnit(data.getProductUnit());
+                saleData.setStock(data.getStock());
+
+            }
+
+            tableData.add(saleData);
+        }
+
+        // 获取sale的多账户信息 分隔字符串 放到一个Long类型的list中 如果为空 则返回空list
+
+        List<Long> accountIds = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getMultipleAccount())) {
+            accountIds = Arrays.stream(sale.getMultipleAccount().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+        }
+
+        List<Long> operatorIds = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getOperatorId())) {
+            operatorIds = Arrays.stream(sale.getOperatorId().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+        }
+
+        var saleOrderDetailVO = SaleOrderDetailVO.builder()
+                .receiptNumber(sale.getReceiptNumber())
+                .receiptDate(sale.getCreateTime())
+                .customerId(sale.getCustomerId())
+                .accountIds(accountIds)
+                .operatorIds(operatorIds)
+                .discountRate(sale.getDiscountRate())
+                .discountAmount(sale.getDiscountAmount())
+                .discountLastAmount(sale.getDiscountLastAmount())
+                .deposit(sale.getDeposit())
+                .remark(sale.getRemark())
+                .tableData(tableData)
+                .files(fileList)
+                .build();
+
+        return Response.responseData(saleOrderDetailVO);
+    }
+
+    @Override
+    public Response<String> addOrUpdateSaleOrder(SaleOrderDTO saleOrderDTO) {
+        var userId = userService.getCurrentUserId();
+        var isUpdate = saleOrderDTO.getId() != null;
+
+        var operatorIds = new StringBuilder();
+        if (saleOrderDTO.getOperatorIds() != null) {
+            var operatorList = saleOrderDTO.getOperatorIds();
+            for (Long aLong : operatorList) {
+                operatorIds.append(aLong).append(",");
+            }
+        }
+        var accountIds = new StringBuilder();
+        if (saleOrderDTO.getAccountIds() != null) {
+            var accountList = saleOrderDTO.getAccountIds();
+            for (Long aLong : accountList) {
+                accountIds.append(aLong).append(",");
+            }
+        }
+        if (isUpdate) {
+            var updateMainResult = lambdaUpdate()
+                    .eq(ReceiptMain::getId, saleOrderDTO.getId())
+                    .set(saleOrderDTO.getCustomerId() != null, ReceiptMain::getCustomerId, saleOrderDTO.getCustomerId())
+                    .set(saleOrderDTO.getDiscountRate() != null, ReceiptMain::getDiscountRate, saleOrderDTO.getDiscountRate())
+                    .set(saleOrderDTO.getDiscountAmount() != null, ReceiptMain::getDiscountAmount, saleOrderDTO.getDiscountAmount())
+                    .set(saleOrderDTO.getDiscountLastAmount() != null, ReceiptMain::getDiscountLastAmount, saleOrderDTO.getDiscountLastAmount())
+                    .set(saleOrderDTO.getDeposit() != null, ReceiptMain::getDeposit, saleOrderDTO.getDeposit())
+                    .set(saleOrderDTO.getStatus() != null, ReceiptMain::getStatus, saleOrderDTO.getStatus())
+                    .set(!operatorIds.isEmpty(), ReceiptMain::getOperatorId, String.valueOf(operatorIds))
+                    .set(!accountIds.isEmpty(), ReceiptMain::getMultipleAccount, String.valueOf(accountIds))
+                    .set(ReceiptMain::getUpdateBy, userId)
+                    .set(ReceiptMain::getUpdateTime, LocalDateTime.now())
+                    .update();
+
+            receiptSubService.lambdaUpdate()
+                    .eq(ReceiptSub::getReceiptMainId, saleOrderDTO.getId())
+                    .remove();
+
+            var receiptSubList = saleOrderDTO.getTableData();
+            var receiptList = receiptSubList.stream()
+                    .map(item -> ReceiptSub.builder()
+                            .receiptMainId(saleOrderDTO.getId())
+                            .productId(item.getProductId())
+                            .productNumber(item.getProductNumber())
+                            .productPrice(item.getUnitPrice())
+                            .productTotalPrice(item.getAmount())
+                            .productBarcode(item.getBarCode())
+                            .warehouseId(item.getWarehouseId())
+                            .taxRate(item.getTaxRate())
+                            .taxAmount(item.getTaxAmount())
+                            .taxTotalPrice(item.getTaxTotalPrice())
+                            .build())
+                    .collect(Collectors.toList());
+
+            var updateSubResult = receiptSubService.saveBatch(receiptList);
+
+            if (!saleOrderDTO.getFiles().isEmpty()) {
+                var receiptMain = getById(saleOrderDTO.getId());
+                if (receiptMain != null) {
+                    var ids = Arrays.stream(receiptMain.getFileId().split(","))
+                            .map(Long::parseLong)
+                            .collect(Collectors.toList());
+                    fileMapper.deleteBatchIds(ids);
+                }
+                saleOrderDTO.getFiles().forEach(item -> {
+                    var file = SysFile.builder()
+                            .id(item.getId())
+                            .uid(item.getUid())
+                            .fileName(item.getFileName())
+                            .fileType(item.getFileType())
+                            .fileSize(item.getFileSize())
+                            .fileUrl(item.getFileUrl())
+                            .build();
+                    fileMapper.insert(file);
+                });
+            }
+
+            if (updateMainResult && updateSubResult) {
+                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_SUCCESS);
+            } else {
+                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_ERROR);
+            }
+        } else {
+            var id = SnowflakeIdUtil.nextId();
+
+            var fid = new ArrayList<>();
+            if (!saleOrderDTO.getFiles().isEmpty()) {
+                saleOrderDTO.getFiles().forEach(item -> {
+                    var file = SysFile.builder()
+                            .id(item.getId())
+                            .uid(item.getUid())
+                            .fileName(item.getFileName())
+                            .fileType(item.getFileType())
+                            .fileSize(item.getFileSize())
+                            .fileUrl(item.getFileUrl())
+                            .build();
+                    var result = fileMapper.insert(file);
+                    if (result > 0) {
+                        fid.add(file.getId());
+                    }
+                });
+            }
+            var fileIds = fid.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+
+            var receiptMain = ReceiptMain.builder()
+                    .id(id)
+                    .type(ReceiptConstants.RECEIPT_TYPE_ORDER)
+                    .subType(ReceiptConstants.RECEIPT_SUB_TYPE_SALES_ORDER)
+                    .initReceiptNumber(saleOrderDTO.getReceiptNumber())
+                    .receiptNumber(saleOrderDTO.getReceiptNumber())
+                    .customerId(saleOrderDTO.getCustomerId())
+                    // 这里设置多账户而非单账户
+                    .multipleAccount(String.valueOf(accountIds))
+                    .operatorId(String.valueOf(operatorIds))
+                    .discountRate(saleOrderDTO.getDiscountRate())
+                    .discountAmount(saleOrderDTO.getDiscountAmount())
+                    .discountLastAmount(saleOrderDTO.getDiscountLastAmount())
+                    .deposit(saleOrderDTO.getDeposit())
+                    .remark(saleOrderDTO.getRemark())
+                    .fileId(fileIds)
+                    .status(saleOrderDTO.getStatus())
+                    .createBy(userId)
+                    .createTime(LocalDateTime.now())
+                    .build();
+
+            var saveMainResult = save(receiptMain);
+
+            var receiptSubList = saleOrderDTO.getTableData();
+            var receiptList = receiptSubList.stream()
+                    .map(item -> ReceiptSub.builder()
+                            .receiptMainId(id)
+                            .productId(item.getProductId())
+                            .productNumber(item.getProductNumber())
+                            .productPrice(item.getUnitPrice())
+                            .productTotalPrice(item.getAmount())
+                            .productBarcode(item.getBarCode())
+                            .warehouseId(item.getWarehouseId())
+                            .taxRate(item.getTaxRate())
+                            .taxAmount(item.getTaxAmount())
+                            .taxTotalPrice(item.getTaxTotalPrice())
+                            .build())
+                    .collect(Collectors.toList());
+
+            var saveSubResult = receiptSubService.saveBatch(receiptList);
+
+            if (saveMainResult && saveSubResult) {
+                return Response.responseMsg(SaleCodeEnum.ADD_SALE_ORDER_SUCCESS);
+            } else {
+                return Response.responseMsg(SaleCodeEnum.ADD_SALE_ORDER_ERROR);
+            }
         }
     }
 
