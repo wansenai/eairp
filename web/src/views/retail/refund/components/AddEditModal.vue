@@ -27,7 +27,7 @@
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="会员卡号" data-step="1"
                          data-title="会员卡号"
                          data-intro="如果发现需要选择的会员卡号尚未录入，可以在下拉框中点击新增会员信息进行录入">
-              <a-select placeholder="选择会员卡号" v-model:value="formState.memberId"
+              <a-select placeholder="选择会员卡号" v-model:value="formState.memberId" :disabled= "disabledStatus"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
                         @change="onMemberChange"
                         :options="memberList.map(item => ({ value: item.id, label: item.memberName }))">
@@ -83,6 +83,9 @@
                 </template>
                 <template #barCode_edit="{ row }">
                   <vxe-input type="search" clearable v-model="row.barCode" @search-click="productModal"></vxe-input>
+                </template>
+                <template #return_number_edit="{ row }">
+                  <vxe-input v-model="row.returnNumber"></vxe-input>
                 </template>
               </vxe-grid>
             </div>
@@ -176,7 +179,7 @@
   <MemberModal @register="memberModal"/>
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
-  <RetailShipmentsModal @register="retailShipmentsModal" @handleRadioSuccess="handleRadioSuccess"/>
+  <RetailShipmentsModal @register="retailShipmentsModal" @handleReceiptSuccess="handleReceiptSuccess"/>
 </template>
 
 <script lang="ts">
@@ -227,7 +230,7 @@ import FinancialAccountModal from "@/views/basic/settlement-account/components/F
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
-import { addOrUpdateRefund} from "@/api/retail/refund"
+import { addOrUpdateRefund, getRefundDetail} from "@/api/retail/refund"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
 import {getProductSkuByBarCode} from "@/api/product/product";
 import XEUtils from "xe-utils";
@@ -304,6 +307,7 @@ export default defineComponent({
     const minWidth = ref(1100);
     const backAmount = ref('￥0.00');
     const model = ref({});
+    const disabledStatus = ref(false);
     const labelCol = ref({
       xs: {span: 24},
       sm: {span: 8},
@@ -321,6 +325,7 @@ export default defineComponent({
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
     const [retailShipmentsModal, {openModal: openRetailShipmentsModal}] = useModal();
+    const [receiptDetailModal, {openModal: openReceiptDetailModal}] = useModal();
 
     function handleCancelModal() {
       close();
@@ -336,11 +341,12 @@ export default defineComponent({
       loadWarehouseList();
       if (id) {
         title.value = '编辑-零售退货'
-       // loadShipmentsDetail(id);
+        loadRefundDetail(id);
+        disabledStatus.value = true
       } else {
         title.value = '新增-零售退货'
         loadGenerateId();
-        // 获取系统时间然后转成dayjs格式
+        disabledStatus.value = false
         formState.receiptDate = dayjs(new Date());
       }
     }
@@ -358,7 +364,7 @@ export default defineComponent({
     }
 
     function loadGenerateId() {
-      generateId("零售出库").then(res => {
+      generateId("零售退货").then(res => {
         formState.receiptNumber = res.data
       })
     }
@@ -377,52 +383,53 @@ export default defineComponent({
       })
     }
 
-    // async function loadShipmentsDetail(id) {
-    //   clearData();
-    //   const result = await getShipmentsDetail(id)
-    //   if(result) {
-    //     const data = result.data
-    //     formState.id = id
-    //     formState.memberId = data.memberId
-    //     formState.receiptDate = dayjs(data.receiptDate);
-    //     formState.accountId = data.accountId
-    //     formState.receiptNumber = data.receiptNumber
-    //     formState.remark = data.remark
-    //     formState.paymentType = data.paymentType
-    //     // file
-    //     fileList.value = data.files.map(item => ({
-    //       id: item.id,
-    //       uid: item.uid,
-    //       name: item.fileName,
-    //       status: 'done',
-    //       url: item.fileUrl,
-    //       type: item.fileType,
-    //       size: item.fileSize,
-    //     }))
-    //     // table
-    //     const table = xGrid.value
-    //     if(table) {
-    //       data.tableData.forEach(item => {
-    //         const tableData : RowVO = {
-    //           warehouseId: item.warehouseId,
-    //           productId: item.productId,
-    //           barCode: item.barCode,
-    //           productName: item.productName,
-    //           productStandard: item.productStandard,
-    //           productUnit: item.productUnit,
-    //           stock: item.stock,
-    //           productNumber: item.productNumber,
-    //           amount: item.amount,
-    //           retailPrice: item.unitPrice,
-    //         };
-    //         table.insert(tableData)
-    //       })
-    //     }
-    //     receiptAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.receiptAmount), { digits: 2 })}`
-    //     paymentAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.paymentAmount), { digits: 2 })}`
-    //     backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.backAmount), { digits: 2 })}`
-    //   }
-    // }
+    async function loadRefundDetail(id) {
+      clearData();
+      const result = await getRefundDetail(id)
+      if(result) {
+        const data = result.data
+        formState.id = id
+        formState.memberId = data.memberId
+        formState.receiptDate = dayjs(data.receiptDate);
+        formState.accountId = data.accountId
+        formState.receiptNumber = data.receiptNumber
+        formState.remark = data.remark
+        formState.otherReceipt = data.otherReceipt
+        // file
+        fileList.value = data.files.map(item => ({
+          id: item.id,
+          uid: item.uid,
+          name: item.fileName,
+          status: 'done',
+          url: item.fileUrl,
+          type: item.fileType,
+          size: item.fileSize,
+        }))
+        // table
+        const table = xGrid.value
+        if(table) {
+          data.tableData.forEach(item => {
+            const tableData : RowVO = {
+              warehouseId: item.warehouseId,
+              productId: item.productId,
+              barCode: item.barCode,
+              productName: item.productName,
+              productStandard: item.productStandard,
+              productUnit: item.productUnit,
+              stock: item.stock,
+              productNumber: item.productNumber,
+              amount: item.amount,
+              retailPrice: item.unitPrice,
+            };
+            table.insert(tableData)
+          })
+        }
+        formState.memberId.disabled = true
+        receiptAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.receiptAmount), { digits: 2 })}`
+        paymentAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.paymentAmount), { digits: 2 })}`
+        backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.backAmount), { digits: 2 })}`
+      }
+    }
 
     function onChangePaymentAmount() {
       const sum = receiptAmount.value
@@ -517,6 +524,10 @@ export default defineComponent({
         createMessage.error('请选择单据日期');
         return;
       }
+      if (!formState.accountId) {
+        createMessage.error('请选择付款账户');
+        return;
+      }
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
@@ -524,6 +535,7 @@ export default defineComponent({
           return;
         }
       }
+
       const files = [];
       if (fileList && fileList.value) {
         for (let i = 0; i < fileList.value.length; i++) {
@@ -602,7 +614,7 @@ export default defineComponent({
       const table = xGrid.value
       if(table) {
         // 清空表格数据
-        table.reloadData()
+        table.remove()
       }
       formState.receiptDate = undefined
     }
@@ -650,9 +662,34 @@ export default defineComponent({
       }
     }
 
-    function handleRadioSuccess(data: string) {
-      if(data){
-        formState.otherReceipt = data
+    function handleReceiptSuccess(data) {
+      const table = xGrid.value
+      if(data && table) {
+        formState.otherReceipt = data.receiptNumber;
+        // 设置table的columns的return和returnNumber字段的visible为true
+        // const {columns} = gridOptions
+        // if (columns) {
+        //   columns[8].visible = true
+        //   columns[9].visible = true
+        //   table.refreshColumn()
+        // }
+        table.remove()
+        data.receiptDetailData.forEach(item => {
+          const tableData : RowVO = {
+            warehouseId: item.warehouseId,
+            productId: item.productId,
+            barCode: item.productBarcode,
+            productName: item.productName,
+            productStandard: item.productStandard,
+            productUnit: item.unit,
+            stock: 0,
+            productNumber: item.productNumber,
+            amount: item.productTotalPrice,
+            retailPrice: item.productPrice,
+          };
+          table.insert(tableData)
+        })
+        formState.memberId = data.receiptDetailData[0].memberId
       }
     }
 
@@ -729,17 +766,18 @@ export default defineComponent({
       receiptAmount,
       paymentAmount,
       backAmount,
-      SelectProductModal,
       selectProductModal,
       openProductModal,
       retailShipmentsModal,
       openRetailShipmentsModal,
       productModal,
       handleCheckSuccess,
-      handleRadioSuccess,
       addRowData,
       deleteRowData,
       onSearch,
+      receiptDetailModal,
+      handleReceiptSuccess,
+      disabledStatus
     };
   },
 });
