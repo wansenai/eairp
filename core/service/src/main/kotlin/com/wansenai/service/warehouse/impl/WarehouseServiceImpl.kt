@@ -208,4 +208,30 @@ open class WarehouseServiceImpl (
         }
         return Response.responseData(warehouseList)
     }
+
+    override fun getDefaultWarehouse(): Response<WarehouseVO> {
+        val warehouse = lambdaQuery()
+            .eq(Warehouse::getIsDefault, CommonConstants.IS_DEFAULT)
+            .eq(Warehouse::getDeleteFlag, CommonConstants.NOT_DELETED)
+            .one()
+        return if (warehouse != null) {
+            val warehouseVO = WarehouseVO(
+                id = warehouse.id,
+                warehouseName = warehouse.warehouseName,
+                warehouseManager = warehouse.warehouseManager,
+                address = warehouse.address,
+                price = warehouse.price,
+                truckage = warehouse.truckage,
+                type = warehouse.type,
+                status = warehouse.status,
+                remark = warehouse.remark,
+                sort = warehouse.sort,
+                isDefault = warehouse.isDefault,
+                createTime = warehouse.createTime
+            )
+            Response.responseData(warehouseVO)
+        } else {
+            Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
+        }
+    }
 }

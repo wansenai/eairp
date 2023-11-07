@@ -79,6 +79,7 @@ export const searchFormSchema: FormSchema[] = [
             options: [
                 { label: '业务员', value: '业务员', key: 0 },
                 { label: '财务员', value: '财务员', key: 1 },
+                { label: '销售员', value: '销售员', key: 2 },
             ],
         },
     }
@@ -99,6 +100,7 @@ export const formSchema: FormSchema[] = [
             options: [
                 { label: '业务员', value: '业务员', key: 0 },
                 { label: '财务员', value: '财务员', key: 1 },
+                { label: '销售员', value: '销售员', key: 2 },
             ],
         },
         required: true,

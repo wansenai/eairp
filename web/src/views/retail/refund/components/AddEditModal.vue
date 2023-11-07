@@ -237,6 +237,7 @@ import XEUtils from "xe-utils";
 import {ProductExtendPriceResp} from "@/api/product/model/productModel";
 import {AddOrUpdateRefundReq} from "@/api/retail/model/refundModel";
 import RetailShipmentsModal from "@/views/retail/refund/components/RetailShipmentsModal.vue";
+import {FileData, ShipmentsData} from "@/api/retail/model/shipmentsModel";
 const VNodes = {
   props: {
     vnodes: {
@@ -302,7 +303,7 @@ export default defineComponent({
     const showScanButton = ref(true);
     const showScanPressEnter = ref(false);
     const prefixNo = ref('LSTH');
-    const fileList = ref([]);
+    const fileList = ref<FileData[]>([]);
     const payTypeList = ref<any>([]);
     const minWidth = ref(1100);
     const backAmount = ref('￥0.00');

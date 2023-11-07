@@ -63,9 +63,13 @@ public class WarehouseController {
         return warehouseService.updateBatchStatus(ids, status);
     }
 
-
     @GetMapping("list")
     public Response<List<WarehouseVO>> getWarehouseList() {
         return warehouseService.getWarehouseList();
+    }
+
+    @GetMapping("getDefaultWarehouse")
+    public Response<WarehouseVO> getDefaultWarehouse() {
+        return warehouseService.getDefaultWarehouse();
     }
 }

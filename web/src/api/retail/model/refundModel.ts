@@ -1,4 +1,4 @@
-import {ShipmentsData, FileDta} from './shipmentsModel';
+import {ShipmentsData, FileData} from '/@/api/retail/model/shipmentsModel';
 
 export interface AddOrUpdateRefundReq {
     id: number | string | undefined;
@@ -13,7 +13,7 @@ export interface AddOrUpdateRefundReq {
     remark: string;
     status: number;
     tableData: ShipmentsData[];
-    fileDataList: FileData[];
+    files: FileData[];
 }
 
 export interface RefundResp {

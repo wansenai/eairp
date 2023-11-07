@@ -208,21 +208,6 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
         var isUpdate = shipmentsDTO.getId() != null;
 
         if (isUpdate) {
-            var updateMainResult = lambdaUpdate()
-                    .eq(ReceiptMain::getId, shipmentsDTO.getId())
-                    .set(shipmentsDTO.getMemberId() != null, ReceiptMain::getMemberId, shipmentsDTO.getMemberId())
-                    .set(shipmentsDTO.getAccountId() != null, ReceiptMain::getAccountId, shipmentsDTO.getAccountId())
-                    .set(shipmentsDTO.getCollectAmount() != null, ReceiptMain::getChangeAmount, shipmentsDTO.getCollectAmount())
-                    .set(shipmentsDTO.getReceiptAmount() != null, ReceiptMain::getTotalPrice, shipmentsDTO.getReceiptAmount())
-                    .set(shipmentsDTO.getBackAmount() != null, ReceiptMain::getBackAmount, shipmentsDTO.getBackAmount())
-                    .set(shipmentsDTO.getStatus() != null, ReceiptMain::getStatus, shipmentsDTO.getStatus())
-                    .set(StringUtils.hasText(shipmentsDTO.getPaymentType()), ReceiptMain::getPaymentType, shipmentsDTO.getPaymentType())
-                    .set(StringUtils.hasText(shipmentsDTO.getRemark()), ReceiptMain::getRemark, shipmentsDTO.getRemark())
-                    .set(StringUtils.hasText(shipmentsDTO.getReceiptDate()), ReceiptMain::getCreateTime, shipmentsDTO.getReceiptDate())
-                    .set(ReceiptMain::getUpdateBy, userId)
-                    .set(ReceiptMain::getUpdateTime, LocalDateTime.now())
-                    .update();
-
             receiptSubService.lambdaUpdate()
                     .eq(ReceiptSub::getReceiptMainId, shipmentsDTO.getId())
                     .remove();
@@ -242,12 +227,15 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
 
             var updateSubResult = receiptSubService.saveBatch(receiptList);
 
+            var fid = new ArrayList<>();
             if (!shipmentsDTO.getFiles().isEmpty()) {
                 var receiptMain = getById(shipmentsDTO.getId());
-                if (receiptMain != null) {
+                if (StringUtils.hasLength(receiptMain.getFileId())) {
                     var ids = Arrays.stream(receiptMain.getFileId().split(","))
                             .map(Long::parseLong)
                             .collect(Collectors.toList());
+
+
                     fileMapper.deleteBatchIds(ids);
                 }
                 shipmentsDTO.getFiles().forEach(item -> {
@@ -259,9 +247,31 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                             .fileSize(item.getFileSize())
                             .fileUrl(item.getFileUrl())
                             .build();
-                    fileMapper.insert(file);
+                    var result = fileMapper.insert(file);
+                    if (result > 0) {
+                        fid.add(file.getId());
+                    }
                 });
             }
+            var fileIds = fid.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+
+            var updateMainResult = lambdaUpdate()
+                    .eq(ReceiptMain::getId, shipmentsDTO.getId())
+                    .set(shipmentsDTO.getMemberId() != null, ReceiptMain::getMemberId, shipmentsDTO.getMemberId())
+                    .set(shipmentsDTO.getAccountId() != null, ReceiptMain::getAccountId, shipmentsDTO.getAccountId())
+                    .set(shipmentsDTO.getCollectAmount() != null, ReceiptMain::getChangeAmount, shipmentsDTO.getCollectAmount())
+                    .set(shipmentsDTO.getReceiptAmount() != null, ReceiptMain::getTotalPrice, shipmentsDTO.getReceiptAmount())
+                    .set(shipmentsDTO.getBackAmount() != null, ReceiptMain::getBackAmount, shipmentsDTO.getBackAmount())
+                    .set(shipmentsDTO.getStatus() != null, ReceiptMain::getStatus, shipmentsDTO.getStatus())
+                    .set(StringUtils.hasText(shipmentsDTO.getPaymentType()), ReceiptMain::getPaymentType, shipmentsDTO.getPaymentType())
+                    .set(StringUtils.hasText(shipmentsDTO.getRemark()), ReceiptMain::getRemark, shipmentsDTO.getRemark())
+                    .set(StringUtils.hasText(shipmentsDTO.getReceiptDate()), ReceiptMain::getCreateTime, shipmentsDTO.getReceiptDate())
+                    .set(StringUtils.hasLength(fileIds), ReceiptMain::getFileId, fileIds)
+                    .set(ReceiptMain::getUpdateBy, userId)
+                    .set(ReceiptMain::getUpdateTime, LocalDateTime.now())
+                    .update();
 
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS);
@@ -1059,6 +1069,23 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                 accountIds.append(aLong).append(",");
             }
         }
+
+        var multipleAccountIds = new StringBuilder();
+        if (saleOrderDTO.getMultipleAccountIds() != null) {
+            var multipleAccountList = saleOrderDTO.getMultipleAccountIds();
+            for (Long aLong : multipleAccountList) {
+                multipleAccountIds.append(aLong).append(",");
+            }
+        }
+
+        var multipleAccountAmounts = new StringBuilder();
+        if (saleOrderDTO.getMultipleAccountAmounts() != null) {
+            var multipleAccountList = saleOrderDTO.getMultipleAccountAmounts();
+            for (Long amount : multipleAccountList) {
+                multipleAccountAmounts.append(amount).append(",");
+            }
+        }
+
         if (isUpdate) {
             var updateMainResult = lambdaUpdate()
                     .eq(ReceiptMain::getId, saleOrderDTO.getId())
@@ -1068,6 +1095,8 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                     .set(saleOrderDTO.getDiscountLastAmount() != null, ReceiptMain::getDiscountLastAmount, saleOrderDTO.getDiscountLastAmount())
                     .set(saleOrderDTO.getDeposit() != null, ReceiptMain::getDeposit, saleOrderDTO.getDeposit())
                     .set(saleOrderDTO.getStatus() != null, ReceiptMain::getStatus, saleOrderDTO.getStatus())
+                    .set(!multipleAccountIds.isEmpty(), ReceiptMain::getMultipleAccount, String.valueOf(multipleAccountIds))
+                    .set(!multipleAccountAmounts.isEmpty(), ReceiptMain::getMultipleAccountAmount, String.valueOf(multipleAccountAmounts))
                     .set(!operatorIds.isEmpty(), ReceiptMain::getOperatorId, String.valueOf(operatorIds))
                     .set(!accountIds.isEmpty(), ReceiptMain::getMultipleAccount, String.valueOf(accountIds))
                     .set(ReceiptMain::getUpdateBy, userId)
@@ -1192,6 +1221,40 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
             } else {
                 return Response.responseMsg(SaleCodeEnum.ADD_SALE_ORDER_ERROR);
             }
+        }
+    }
+
+    @Override
+    public Response<String> deleteSaleOrder(List<Long> ids) {
+        if(ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        var updateResult = lambdaUpdate()
+                .in(ReceiptMain::getId, ids)
+                .set(ReceiptMain::getDeleteFlag, CommonConstants.DELETED)
+                .update();
+        if (updateResult) {
+            return Response.responseMsg(SaleCodeEnum.DELETE_SALE_ORDER_SUCCESS);
+        } else {
+            return Response.responseMsg(SaleCodeEnum.DELETE_SALE_ORDER_ERROR);
+        }
+
+    }
+
+    @Override
+    public Response<String> updateSaleOrderStatus(List<Long> ids, Integer status) {
+        if (ids.isEmpty() || status == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var updateResult = lambdaUpdate()
+                .in(ReceiptMain::getId, ids)
+                .set(ReceiptMain::getStatus, status)
+                .update();
+        if (updateResult) {
+            return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_SUCCESS);
+        } else {
+            return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_ERROR);
         }
     }
 

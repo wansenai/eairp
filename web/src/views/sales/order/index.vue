@@ -34,13 +34,13 @@
           />
         </template>
         <template v-else-if="column.key === 'status'">
-          <Tag :color="record.status === 1 ? 'green' : 'red'">
-            {{ record.status === 1 ? '已审核' : '未审核' }}
+          <Tag :color="record.status === 1 ? 'green' : (record.status === 2 ? 'blue' : (record.status === 3 ? 'yellow' : 'red'))">
+            {{ record.status === 1 ? '已审核' : (record.status === 2 ? '部分销售' : (record.status === 3 ? '完成销售' : '未审核')) }}
           </Tag>
         </template>
       </template>
     </BasicTable>
-    <AddEditModal ref="addEditModalRef" @cancel="handleCancel"></AddEditModal>
+    <AddEditModal ref="addEditModalRef"/>
   </div>
 </template>
 <div>
@@ -53,20 +53,20 @@ import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/sales/order/sales.data";
 import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
-import AddEditModal from "@/views/retail/refund/components/AddEditModal.vue"
 import {Tag} from "ant-design-vue";
-import {getRefundPageList, updateRefundStatus, deleteRefund} from "@/api/retail/refund";
+import {getSaleOrderPageList, updateSaleOrderStatus, deleteSaleOrder} from "@/api/sale/order";
+import AddEditModal from "@/views/sales/order/components/AddEditModal.vue";
 export default defineComponent({
   name: 'Shipments',
-  components: {Tag, TableAction, BasicTable, AddEditModal},
+  components: {AddEditModal, Tag, TableAction, BasicTable},
   setup() {
     const { t } = useI18n();
-    const { createMessage } = useMessage();
     const addEditModalRef = ref(null);
+    const { createMessage } = useMessage();
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '销售订单列表',
       rowKey: 'id',
-      api: getRefundPageList,
+      api: getSaleOrderPageList,
       columns: columns,
       rowSelection: {
         type: 'checkbox',
@@ -89,7 +89,7 @@ export default defineComponent({
     });
 
     function handleCreate() {
-      addEditModalRef.value.openAddEditModal();
+      addEditModalRef.value?.openAddEditModal();
     }
 
     async function handleBatchDelete() {
@@ -98,8 +98,8 @@ export default defineComponent({
         createMessage.warn('请选择一条数据');
         return;
       }
-      const result = await deleteRefund(data.map((item) => item.id));
-      if (result.code === 'R0006') {
+      const result = await deleteSaleOrder(data.map((item) => item.id));
+      if (result.code === 'S0003') {
         createMessage.success('删除成功');
         await reload();
       }
@@ -110,12 +110,12 @@ export default defineComponent({
         createMessage.warn('抱歉，只有未审核的单据才能编辑！');
         return;
       }
-      addEditModalRef.value.openAddEditModal(record.id);
+
     }
 
     async function handleDelete(record: Recordable) {
-      const result = await deleteRefund([record.id]);
-      if (result.code === 'R0006') {
+      const result = await deleteSaleOrder([record.id]);
+      if (result.code === 'S0003') {
         createMessage.success('删除成功');
         await reload();
       }
@@ -156,20 +156,20 @@ export default defineComponent({
       }
 
       const ids = data.map((item) => item.id);
-      const {code} = await updateRefundStatus(ids, newStatus);
-      if (code === 'R0005') {
+      const {code} = await updateSaleOrderStatus(ids, newStatus);
+      if (code === 'S0002') {
         createMessage.success('修改状态成功');
         await reload();
       }
     }
 
     async function handleExport() {
-      const file = await exportXlsx("零售退货列表")
+      const file = await exportXlsx("销售订单列表")
       const blob = new Blob([file]);
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       const timestamp = getTimestamp(new Date());
-      link.download = "零售退货数据" + timestamp + ".xlsx";
+      link.download = "销售订单数据" + timestamp + ".xlsx";
       link.target = "_blank";
       link.click();
     }

@@ -41,7 +41,7 @@ open class CustomerServiceImpl(
     private val customerMapper: CustomerMapper
 ) : ServiceImpl<CustomerMapper, Customer>(), CustomerService {
 
-    override fun getCustomerList(queryCustomerDTO: QueryCustomerDTO?): Response<Page<CustomerVO>> {
+    override fun getCustomerPageList(queryCustomerDTO: QueryCustomerDTO?): Response<Page<CustomerVO>> {
         val page = queryCustomerDTO?.run { Page<Customer>(page ?: 1, pageSize ?: 10) }
         val wrapper = LambdaQueryWrapper<Customer>().apply {
             queryCustomerDTO?.customerName?.let { like(Customer::getCustomerName, it) }
@@ -86,6 +86,37 @@ open class CustomerServiceImpl(
         }
         return result.let { Response.responseData(it) } ?: Response.responseMsg(
             BaseCodeEnum.QUERY_DATA_EMPTY)
+    }
+
+    override fun getCustomerList(): Response<List<CustomerVO>> {
+        val wrapper = LambdaQueryWrapper<Customer>().apply {
+            eq(Customer::getDeleteFlag, CommonConstants.NOT_DELETED)
+        }
+        val list = customerMapper.selectList(wrapper)
+        val listVo = list.map { customer ->
+            CustomerVO(
+                id = customer.id,
+                customerName = customer.customerName,
+                contact = customer.contact,
+                phoneNumber = customer.phoneNumber,
+                email = customer.email,
+                firstQuarterAccountReceivable = customer.firstQuarterAccountReceivable,
+                secondQuarterAccountReceivable = customer.secondQuarterAccountReceivable,
+                thirdQuarterAccountReceivable = customer.thirdQuarterAccountReceivable,
+                fourthQuarterAccountReceivable = customer.fourthQuarterAccountReceivable,
+                totalAccountReceivable = customer.totalAccountReceivable,
+                address = customer.address,
+                taxNumber = customer.taxNumber,
+                bankName = customer.bankName,
+                accountNumber = customer.accountNumber,
+                taxRate = customer.taxRate,
+                status = customer.status,
+                remark = customer.remark,
+                sort = customer.sort,
+                createTime = customer.createTime,
+            )
+        }
+        return Response.responseData(listVo)
     }
 
     open fun calculateTotalAccount(list: List<BigDecimal?>): BigDecimal {

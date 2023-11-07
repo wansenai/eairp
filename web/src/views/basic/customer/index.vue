@@ -44,7 +44,7 @@ import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useModal} from "@/components/Modal";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/basic/customer/customer.data";
-import {getCustomerList, deleteBatchCustomer, updateCustomerStatus} from "@/api/basic/customer";
+import {getCustomerPageList, deleteBatchCustomer, updateCustomerStatus} from "@/api/basic/customer";
 import CustomerModal from "@/views/basic/customer/components/CustomerModal.vue";
 import ImportFileModal from '@/components/Tools/ImportFileModal.vue';
 import { exportXlsx } from '@/api/basic/common';
@@ -60,7 +60,7 @@ export default defineComponent({
     const importModalRef = ref(null);
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '客户信息列表',
-      api: getCustomerList,
+      api: getCustomerPageList,
       rowKey: 'id',
       columns: columns,
       rowSelection: {

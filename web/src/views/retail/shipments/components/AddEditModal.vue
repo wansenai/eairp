@@ -242,6 +242,7 @@ import SelectProductModal from "@/views/product/info/components/SelectProductMod
 import {getProductSkuByBarCode} from "@/api/product/product";
 import XEUtils from "xe-utils";
 import {ProductExtendPriceResp} from "@/api/product/model/productModel";
+import {AddOrUpdateShipmentsReq} from "@/api/retail/model/shipmentsModel";
 const VNodes = {
   props: {
     vnodes: {
