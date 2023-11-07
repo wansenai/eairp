@@ -1,10 +1,10 @@
 import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
-import { h } from 'vue';
+import {h, ref} from 'vue';
 import {Switch} from "ant-design-vue";
 import {useMessage} from "@/hooks/web/useMessage";
 import {useI18n} from "@/hooks/web/useI18n";
-import {updateAccountStatus} from "@/api/financial/account";
+import {getAccountList, updateAccountStatus} from "@/api/financial/account";
 
 const { t } = useI18n();
 
@@ -144,4 +144,108 @@ export const formSchema: FormSchema[] = [
         field: 'sort',
         component: 'InputNumber',
     }
+]
+
+// const accountList :LabelValueOptions = ref([]);
+//
+// getAccountList().then((res) => {
+//     accountList.value = [];
+//     res.data.forEach((item) => {
+//         accountList.value.push({
+//             label: item.accountName,
+//             value: item.id,
+//         });
+//     });
+//     console.info(accountList.value);
+// });
+
+export const multipleAccountForm: FormSchema[] = [
+    {
+        label: '结算账户一',
+        field: 'accountOne',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getAccountList,
+            resultField: 'data',
+            labelField: 'accountName',
+            valueField: 'id',
+            placeholder: '请输入结算账户',
+        },
+        required: true,
+        colProps: {
+            span: 13,
+        },
+    },
+    {
+        label: '',
+        field: 'accountPriceOne',
+        component: 'InputNumber',
+        labelWidth: 10,
+        componentProps: {
+            addonAfter: '￥',
+            placeholder: '请输入结算金额',
+        },
+        required: true,
+        colProps: {
+            span: 11,
+        },
+    },
+    {
+        label: '结算账户二',
+        field: 'accountTwo',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getAccountList,
+            resultField: 'data',
+            labelField: 'accountName',
+            valueField: 'id',
+            placeholder: '请输入结算账户',
+        },
+        required: true,
+        colProps: {
+            span: 13,
+        },
+    },
+    {
+        label: '',
+        field: 'accountPriceTwo',
+        component: 'InputNumber',
+        labelWidth: 10,
+        componentProps: {
+            addonAfter: '￥',
+            placeholder: '请输入结算金额',
+        },
+        required: true,
+        colProps: {
+            span: 11,
+        },
+    },
+    {
+        label: '结算账户三',
+        field: 'accountThree',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getAccountList,
+            resultField: 'data',
+            labelField: 'accountName',
+            valueField: 'id',
+            placeholder: '请输入结算账户',
+        },
+        colProps: {
+            span: 13,
+        },
+    },
+    {
+        label: '',
+        field: 'accountPriceThree',
+        component: 'InputNumber',
+        labelWidth: 10,
+        componentProps: {
+            addonAfter: '￥',
+            placeholder: '请输入结算金额',
+        },
+        colProps: {
+            span: 11,
+        },
+    },
 ]
