@@ -18,6 +18,7 @@ import com.wansenai.service.basic.CustomerService
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.CustomerVO
 import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -28,9 +29,14 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/basic/customer")
 class CustomerController (private val customerService: CustomerService){
 
-    @PostMapping("/list")
-    fun customerList(@RequestBody queryCustomerDTO: QueryCustomerDTO?) : Response<Page<CustomerVO>> {
-        return customerService.getCustomerList(queryCustomerDTO)
+    @PostMapping("/pageList")
+    fun customerPageList(@RequestBody queryCustomerDTO: QueryCustomerDTO?) : Response<Page<CustomerVO>> {
+        return customerService.getCustomerPageList(queryCustomerDTO)
+    }
+
+    @GetMapping("list")
+    fun customerList() : Response<List<CustomerVO>> {
+        return customerService.getCustomerList()
     }
 
     @PostMapping("/addOrUpdate")
