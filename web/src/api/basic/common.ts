@@ -62,7 +62,7 @@ export function uploadOss(params: UploadFileParams, mode: ErrorMessageMode = 'no
 }
 
 export function generateId(type: string) {
-    return defHttp.get<BaseDataResp<number>>(
+    return defHttp.get<BaseDataResp<string>>(
         {
             url: `${Api.GenerateId}/${type}`,
         }
