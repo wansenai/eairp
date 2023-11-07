@@ -15,6 +15,7 @@ enum API {
     UpdateStatus = '/basic/warehouse/updateStatus',
     GetWarehouse = '/basic/warehouse/getWarehouse',
     List = '/basic/warehouse/list',
+    GetDefaultWarehouse = '/basic/warehouse/getDefaultWarehouse',
 }
 
 export function getWarehousePageList(params: QueryWarehouseReq, mode: ErrorMessageMode = 'notice') {
@@ -76,6 +77,14 @@ export function getWarehouseList() {
     return defHttp.get<BaseDataResp<WarehouseResp[]>>(
         {
             url: API.List,
+        }
+    );
+}
+
+export function getDefaultWarehouse() {
+    return defHttp.get<BaseDataResp<WarehouseResp>>(
+        {
+            url: API.GetDefaultWarehouse,
         }
     );
 }
