@@ -17,10 +17,14 @@ import com.wansenai.dto.receipt.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.RetailRefundDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
+import com.wansenai.dto.receipt.sale.QuerySaleOrderDTO;
+import com.wansenai.dto.receipt.sale.SaleOrderDTO;
 import com.wansenai.vo.receipt.*;
 import com.wansenai.entities.receipt.ReceiptMain;
 import com.wansenai.utils.response.Response;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.vo.receipt.sale.SaleOrderDetailVO;
+import com.wansenai.vo.receipt.sale.SaleOrderVO;
 
 import java.util.List;
 
@@ -174,4 +178,37 @@ public interface ReceiptService extends IService<ReceiptMain> {
      *       返回修改结果
      */
     Response<String> updateRetailRefundStatus(List<Long> ids, Integer status);
+
+    /**
+     * Paging sales order data based on public query criteria
+     * 根据公共查询条件分页销售订单数据
+     *
+     * @param querySaleOrderDTO Query common conditions
+     *                          查询公共条件
+     * @return Returns paginated data
+     *        返回分页数据
+     */
+    Response<Page<SaleOrderVO>> getSaleOrderPage(QuerySaleOrderDTO querySaleOrderDTO);
+
+    /**
+     * Query sales order details data based on document ID
+     * 根据单据id查询销售订单详情数据
+     *
+     * @param id Primary key id of sales order
+     *           销售订单主键id
+     * @return Returns sales order details data
+     *          返回销售订单详情数据
+     */
+    Response<SaleOrderDetailVO> getSaleOrderDetail(Long id);
+
+    /**
+     * Add/Update Sales Order Data
+     * 新增/修改 销售订单数据
+     *
+     * @param saleOrderDTO Sales order data
+     *                     销售订单数据
+     * @return Returns the result of the addition
+     *         返回新增/修改结果
+     */
+    Response<String> addOrUpdateSaleOrder(SaleOrderDTO saleOrderDTO);
 }

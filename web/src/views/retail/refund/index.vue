@@ -55,7 +55,7 @@ import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 import AddEditModal from "@/views/retail/refund/components/AddEditModal.vue"
 import {Tag} from "ant-design-vue";
-import {getRefundPageList} from "@/api/retail/refund";
+import {getRefundPageList, updateRefundStatus, deleteRefund} from "@/api/retail/refund";
 export default defineComponent({
   name: 'Shipments',
   components: {Tag, TableAction, BasicTable, AddEditModal},
@@ -98,6 +98,11 @@ export default defineComponent({
         createMessage.warn('请选择一条数据');
         return;
       }
+      const result = await deleteRefund(data.map((item) => item.id));
+      if (result.code === 'R0006') {
+        createMessage.success('删除成功');
+        await reload();
+      }
     }
 
     function handleEdit(record: Recordable) {
@@ -109,7 +114,11 @@ export default defineComponent({
     }
 
     async function handleDelete(record: Recordable) {
-
+      const result = await deleteRefund([record.id]);
+      if (result.code === 'R0006') {
+        createMessage.success('删除成功');
+        await reload();
+      }
     }
 
     async function handleSuccess() {
@@ -147,6 +156,11 @@ export default defineComponent({
       }
 
       const ids = data.map((item) => item.id);
+      const {code} = await updateRefundStatus(ids, newStatus);
+      if (code === 'R0005') {
+        createMessage.success('修改状态成功');
+        await reload();
+      }
     }
 
     async function handleExport() {

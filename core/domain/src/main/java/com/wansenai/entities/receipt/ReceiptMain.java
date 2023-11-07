@@ -43,6 +43,10 @@ public class ReceiptMain implements Serializable {
 
     private Long memberId;
 
+    private Long customerId;
+
+    private Long supplierId;
+
     private Long accountId;
 
     private String type;
