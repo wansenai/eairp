@@ -41,7 +41,7 @@ public class OperatorController {
     }
 
     @GetMapping("list/{type}")
-    public Response<List<OperatorVO>> getOperatorList(@PathVariable String type) {
+    public Response<List<OperatorVO>> getOperatorList(@PathVariable("type") String type) {
         return operatorService.getOperatorListByType(type);
     }
 }
