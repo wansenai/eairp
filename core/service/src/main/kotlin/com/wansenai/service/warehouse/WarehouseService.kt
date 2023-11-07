@@ -23,4 +23,6 @@ interface WarehouseService : IService<Warehouse> {
     fun getWarehouseByName(name: String?): Warehouse
 
     fun getWarehouseList(): Response<List<WarehouseVO>>
+
+    fun getDefaultWarehouse(): Response<WarehouseVO>
 }
