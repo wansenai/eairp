@@ -211,4 +211,27 @@ public interface ReceiptService extends IService<ReceiptMain> {
      *         返回新增/修改结果
      */
     Response<String> addOrUpdateSaleOrder(SaleOrderDTO saleOrderDTO);
+
+    /**
+     * Batch delete sales order data based on ID set (logical deletion modification status)
+     * 根据id集合批量删除销售订单数据 (逻辑删除修改状态)
+     *
+     * @param ids Sales order ID List
+     *            销售订单主键id集合
+     * @return Returns the result of the deletion
+     *        返回删除结果
+     */
+    Response<String> deleteSaleOrder(List<Long> ids);
+
+    /**
+     * Batch modify the status of sales orders based on the ID set and new status
+     * 根据id集合和新状态批量修改销售订单状态
+     *
+     * @param ids   Sales order ID List
+     *              销售订单主键id集合
+     * @param status Status
+     *               状态
+     * @return Returns the result of the modification
+     */
+    Response<String> updateSaleOrderStatus(List<Long> ids, Integer status);
 }
