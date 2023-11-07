@@ -3,13 +3,15 @@ import {BasicColumn} from "@/components/Table";
 import {useI18n} from "@/hooks/web/useI18n";
 import {h, Text} from "vue";
 import {Input} from "ant-design-vue";
+import {getOperatorList} from "@/api/basic/operator";
+import {getCustomerList} from "@/api/basic/customer";
 
 export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
         title: '客户',
-        dataIndex: 'memberName',
+        dataIndex: 'customerName',
         width: 60,
     },
     {
@@ -77,16 +79,19 @@ export const searchFormSchema: FormSchema[] = [
             format: 'YYYY/MM/DD',
             placeholder: ['开始日期', '结束日期'],
         },
-        colProps: { span: 7 },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
     },
     {
         label: '客户',
-        field: 'accountId',
+        field: 'customerId',
         component: 'ApiSelect',
         componentProps: {
-            api: getAccountList,
+            api: getCustomerList,
             resultField: 'data',
-            labelField: 'accountName',
+            labelField: 'customerName',
             valueField: 'id',
         },
         colProps: {

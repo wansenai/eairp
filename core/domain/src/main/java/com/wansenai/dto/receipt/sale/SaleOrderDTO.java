@@ -42,6 +42,10 @@ public class SaleOrderDTO {
 
     private List<Long> accountIds;
 
+    private List<Long> multipleAccountAmounts;
+
+    private List<Long> multipleAccountIds;
+
     private List<SalesDataBO> tableData;
 
     private List<FileDataBO> files;
