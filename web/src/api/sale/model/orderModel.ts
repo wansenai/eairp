@@ -37,7 +37,7 @@ export interface AddOrUpdateReceiptReq {
     discountAmount: number;
     discountLastAmount: number;
     deposit: number;
-    accountIds: number[];
+    accountId: number | string;
     multipleAccountIds: number[];
     multipleAccountAmounts: number[];
     status: number;

@@ -31,7 +31,7 @@ interface FormState {
     operatorIds: number[] | undefined;
     receiptDate: string | undefined | Dayjs;
     warehouseId: number | string;
-    accountId: number | undefined;
+    accountId: string | undefined;
     multipleAccountIds: number[] | undefined;
     multipleAccountAmounts: number[] | undefined;
 }
