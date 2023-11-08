@@ -35,12 +35,12 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.*;
 import com.wansenai.vo.receipt.sale.SaleOrderDetailVO;
 import com.wansenai.vo.receipt.sale.SaleOrderVO;
+import com.wansenai.vo.receipt.sale.SaleRefundVO;
+import com.wansenai.vo.receipt.sale.SaleShipmentsVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -49,7 +49,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -1278,6 +1277,56 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
         } else {
             return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_ERROR);
         }
+    }
+
+    @Override
+    public Response<Page<SaleShipmentsVO>> getSaleShipmentsPage(QueryShipmentsDTO shipmentsDTO) {
+        return null;
+    }
+
+    @Override
+    public Response<SaleOrderDetailVO> getSaleShipmentsDetail(Long id) {
+        return null;
+    }
+
+    @Override
+    public Response<String> addOrUpdateSaleShipments(RetailShipmentsDTO shipmentsDTO) {
+        return null;
+    }
+
+    @Override
+    public Response<String> updateSaleShipmentsStatus(List<Long> ids, Integer status) {
+        return null;
+    }
+
+    @Override
+    public Response<String> deleteSaleShipments(List<Long> ids) {
+        return null;
+    }
+
+    @Override
+    public Response<Page<SaleRefundVO>> getSaleRefundPage(QueryRetailRefundDTO refundDTO) {
+        return null;
+    }
+
+    @Override
+    public Response<SaleOrderDetailVO> getSaleRefundDetail(Long id) {
+        return null;
+    }
+
+    @Override
+    public Response<String> addOrUpdateSaleRefund(RetailRefundDTO refundDTO) {
+        return null;
+    }
+
+    @Override
+    public Response<String> deleteSaleRefund(List<Long> ids) {
+        return null;
+    }
+
+    @Override
+    public Response<String> updateSaleRefundStatus(List<Long> ids, Integer status) {
+        return null;
     }
 
 }
