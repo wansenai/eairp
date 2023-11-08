@@ -5,17 +5,7 @@
 </template>
 
 <script lang="ts">
-
-// 创建一个pinia store
-const store = defineStore('modalStore', {
-  state: () => ({
-    data: null,
-  }),
-});
-
-
 import {defineComponent, ref} from "vue";
-import { defineStore } from 'pinia';
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {extendPriceColumn, searchFormSchema} from "@/views/product/info/info.data";

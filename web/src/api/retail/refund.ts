@@ -9,6 +9,9 @@ import {
 enum API {
     PageList = '/retail/refund/pageList',
     AddOrUpdate = '/retail/refund/addOrUpdate',
+    GetDetail = '/retail/refund/detail',
+    UpdateStatus = '/retail/refund/updateStatus',
+    Delete = '/retail/refund/deleteByIds',
 }
 
 export function getRefundPageList(params: QueryShipmentsReq) {
@@ -25,6 +28,30 @@ export function addOrUpdateRefund(params: AddOrUpdateRefundReq) {
         {
             url: API.AddOrUpdate,
             params,
+        }
+    );
+}
+
+export function getRefundDetail(id: string) {
+    return defHttp.get<BaseDataResp<AddOrUpdateRefundReq>>(
+        {
+            url: `${API.GetDetail}/${id}`,
+        }
+    );
+}
+
+export function updateRefundStatus(ids: string[], status: number) {
+    return defHttp.put<BaseResp>(
+        {
+            url: `${API.UpdateStatus}?ids=${ids}&status=${status}`,
+        }
+    );
+}
+
+export function deleteRefund(ids: string[]) {
+    return defHttp.post<BaseResp>(
+        {
+            url: `${API.Delete}?ids=${ids}`,
         }
     );
 }

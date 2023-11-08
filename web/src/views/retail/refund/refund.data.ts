@@ -144,6 +144,12 @@ export const searchFormSchema: FormSchema[] = [
 
 export const RetailShipmentsColumn: BasicColumn[] = [
     {
+        title: '单据主ID',
+        dataIndex: 'id',
+        width: 60,
+        ifShow: false,
+    },
+    {
         title: '会员',
         dataIndex: 'memberName',
         width: 60,

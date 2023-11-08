@@ -12,6 +12,7 @@ import {formSchema} from "@/views/product/units/units.data";
 import {AddOrUpdateProductUnitReq} from "@/api/product/model/productUnitModel";
 import {addOrUpdateUnit} from "@/api/product/productUnit";
 import {useMessage} from "@/hooks/web/useMessage";
+import {multipleAccountForm} from "@/views/basic/settlement-account/financialAccount.data";
 
 export default defineComponent({
   name: 'UnitModal',
@@ -25,7 +26,7 @@ export default defineComponent({
     const [registerForm, {setFieldsValue, resetFields, validate}] = useForm({
       labelWidth: 100,
       baseColProps: {span: 24},
-      schemas: formSchema,
+      schemas: multipleAccountForm,
       showActionButtonGroup: false,
       actionColOptions: {
         span: 23,

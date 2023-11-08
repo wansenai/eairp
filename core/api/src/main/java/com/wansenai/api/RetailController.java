@@ -19,9 +19,7 @@ import com.wansenai.dto.receipt.RetailRefundDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
 import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.RetailRefundVO;
-import com.wansenai.vo.receipt.RetailShipmentsDetailVO;
-import com.wansenai.vo.receipt.RetailShipmentsVO;
+import com.wansenai.vo.receipt.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -76,4 +74,18 @@ public class RetailController {
         return receiptService.addOrUpdateRetailRefund(refundDTO);
     }
 
+    @GetMapping("/refund/detail/{id}")
+    public Response<RetailRefundDetailVO> refundDetail(@PathVariable("id") Long id) {
+        return receiptService.getRetailRefundDetail(id);
+    }
+
+    @PostMapping("/refund/deleteByIds")
+    public Response<String> refundDeleteByIds(@RequestParam("ids") List<Long> ids) {
+        return receiptService.deleteRetailRefund(ids);
+    }
+
+    @PutMapping("/refund/updateStatus")
+    public Response<String> refundUpdateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
+        return receiptService.updateRetailRefundStatus(ids, status);
+    }
 }

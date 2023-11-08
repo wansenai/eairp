@@ -55,6 +55,12 @@ public class ReceiptSub implements Serializable {
 
     private BigDecimal productTotalPrice;
 
+    private BigDecimal taxRate;
+
+    private BigDecimal taxAmount;
+
+    private BigDecimal taxTotalPrice;
+
     private String productRemark;
 
     private Long productExtendId;

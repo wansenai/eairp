@@ -17,13 +17,14 @@ import com.wansenai.dto.receipt.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.RetailRefundDTO;
 import com.wansenai.dto.receipt.RetailShipmentsDTO;
-import com.wansenai.vo.receipt.RetailRefundVO;
-import com.wansenai.vo.receipt.RetailShipmentsDetailVO;
+import com.wansenai.dto.receipt.sale.QuerySaleOrderDTO;
+import com.wansenai.dto.receipt.sale.SaleOrderDTO;
+import com.wansenai.vo.receipt.*;
 import com.wansenai.entities.receipt.ReceiptMain;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.RetailShipmentsVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansenai.vo.receipt.RetailStatisticalDataVO;
+import com.wansenai.vo.receipt.sale.SaleOrderDetailVO;
+import com.wansenai.vo.receipt.sale.SaleOrderVO;
 
 import java.util.List;
 
@@ -131,4 +132,106 @@ public interface ReceiptService extends IService<ReceiptMain> {
      *         返回新增结果
      */
     Response<String> addOrUpdateRetailRefund(RetailRefundDTO refundDTO);
+
+    /**
+     * Query the details of the document based on its main table ID (Sub table)
+     * 根据单据主表Id查询单据的明细 (Sub-table)
+     *
+     * @param id primary key id of the receipt_main table
+     *           receipt_main表主键id
+     * @return Return the combined data of the main and sub tables of the product document
+     *          返回产品单据主子表合并数据
+     */
+    Response<List<ReceiptDetailVO>> retailDetail(Long id);
+
+    /**
+     * Query retail return details based on ID
+     * 根据id查询零售退货详情信息
+     *
+     * @param id Primary key id of retail shipment order
+     *          零售退货单主键id
+     * @return Returns retail return order data
+     *         返回零售退货单数据
+     */
+    Response<RetailRefundDetailVO> getRetailRefundDetail(Long id);
+
+    /**
+     * Delete retail return document data based on ID
+     * 根据id删除零售退货单据数据
+     *
+     * @param ids id Retail return order ID List
+     *            零售退货单主键id集合
+     * @return Returns the result of the deletion
+     *       返回删除结果
+     */
+    Response<String> deleteRetailRefund(List<Long> ids);
+
+    /**
+     * Modify retail return document data based on ID and status
+     * 根据id和状态修改零售退货单据数据
+     *
+     * @param ids   id Retail return order ID List
+     *              零售退货单主键id集合
+     * @param status Status
+     *               状态
+     * @return Returns the result of the modification
+     *       返回修改结果
+     */
+    Response<String> updateRetailRefundStatus(List<Long> ids, Integer status);
+
+    /**
+     * Paging sales order data based on public query criteria
+     * 根据公共查询条件分页销售订单数据
+     *
+     * @param querySaleOrderDTO Query common conditions
+     *                          查询公共条件
+     * @return Returns paginated data
+     *        返回分页数据
+     */
+    Response<Page<SaleOrderVO>> getSaleOrderPage(QuerySaleOrderDTO querySaleOrderDTO);
+
+    /**
+     * Query sales order details data based on document ID
+     * 根据单据id查询销售订单详情数据
+     *
+     * @param id Primary key id of sales order
+     *           销售订单主键id
+     * @return Returns sales order details data
+     *          返回销售订单详情数据
+     */
+    Response<SaleOrderDetailVO> getSaleOrderDetail(Long id);
+
+    /**
+     * Add/Update Sales Order Data
+     * 新增/修改 销售订单数据
+     *
+     * @param saleOrderDTO Sales order data
+     *                     销售订单数据
+     * @return Returns the result of the addition
+     *         返回新增/修改结果
+     */
+    Response<String> addOrUpdateSaleOrder(SaleOrderDTO saleOrderDTO);
+
+    /**
+     * Batch delete sales order data based on ID set (logical deletion modification status)
+     * 根据id集合批量删除销售订单数据 (逻辑删除修改状态)
+     *
+     * @param ids Sales order ID List
+     *            销售订单主键id集合
+     * @return Returns the result of the deletion
+     *        返回删除结果
+     */
+    Response<String> deleteSaleOrder(List<Long> ids);
+
+    /**
+     * Batch modify the status of sales orders based on the ID set and new status
+     * 根据id集合和新状态批量修改销售订单状态
+     *
+     * @param ids   Sales order ID List
+     *              销售订单主键id集合
+     * @param status Status
+     *               状态
+     * @return Returns the result of the modification
+     */
+    Response<String> updateSaleOrderStatus(List<Long> ids, Integer status);
 }

@@ -22,6 +22,8 @@ public interface ReceiptConstants {
 
     String RECEIPT_TYPE_STORAGE = "入库";
 
+    String RECEIPT_TYPE_ORDER = "订单";
+
     String RECEIPT_SUB_TYPE_RETAIL_SHIPMENTS = "零售出库";
 
     String RECEIPT_SUB_TYPE_RETAIL_REFUND = "零售退货";

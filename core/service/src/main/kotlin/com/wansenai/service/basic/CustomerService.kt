@@ -22,7 +22,9 @@ import com.wansenai.vo.basic.CustomerVO
 
 interface CustomerService: IService<Customer> {
 
-    fun getCustomerList(queryCustomerDTO: QueryCustomerDTO?): Response<Page<CustomerVO>>
+    fun getCustomerPageList(queryCustomerDTO: QueryCustomerDTO?): Response<Page<CustomerVO>>
+
+    fun getCustomerList(): Response<List<CustomerVO>>
 
     fun addOrUpdateCustomer(addOrUpdateCustomerDTO: AddOrUpdateCustomerDTO): Response<String>
 

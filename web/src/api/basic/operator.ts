@@ -64,9 +64,9 @@ export function deleteBatchOperator(ids: number[], mode: ErrorMessageMode = 'not
 }
 
 export function getOperatorList(type: string) {
-    return defHttp.get<BaseDataResp<OperatorResp[]>>(
+    return defHttp.get<BaseDataResp<OperatorResp>>(
         {
-            url: `${API.List}/${type}`
-        },
+            url: `${API.List}/${type}`,
+        }
     );
 }

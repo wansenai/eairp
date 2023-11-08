@@ -9,22 +9,31 @@ import {
 
 
 enum API {
+    PageList = '/basic/customer/pageList',
     List = '/basic/customer/list',
     AddOrUpdateCustomer = '/basic/customer/addOrUpdate',
     DeleteBatch = '/basic/customer/deleteBatch',
     UpdateStatus = '/basic/customer/updateStatus',
 }
 
-export function getCustomerList(params: QueryCustomerReq, mode: ErrorMessageMode = 'notice') {
+export function getCustomerPageList(params: QueryCustomerReq, mode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseDataResp<CustomerResp>>(
         {
-            url: API.List,
+            url: API.PageList,
             params,
         },
         {
             errorMessageMode: mode,
             successMessageMode: mode,
         },
+    );
+}
+
+export function getCustomerList() {
+    return defHttp.get<BaseDataResp<CustomerResp>>(
+        {
+            url: API.List
+        }
     );
 }
 

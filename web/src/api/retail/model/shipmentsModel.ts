@@ -1,21 +1,27 @@
-interface FileData {
+export interface FileData {
     id: number | string;
+    uid: string;
     fileName: string;
     fileUrl: string;
     fileType: string;
     fileSize: number;
+    status: string;
 }
 
-interface ShipmentsData {
+export interface ShipmentsData {
     warehouseId: number | string;
-    barcode: string | number;
+    barCode: string | number;
     productId: number | string;
+    productName: string;
+    productStandard: string;
+    productUnit: string;
+    stock: number;
     productNumber: number;
     unitPrice: number;
     amount: number;
 }
 
-interface AddOrUpdateShipmentsReq {
+export interface AddOrUpdateShipmentsReq {
     id: number | string | undefined;
     memberId: number | string;
     accountId: number | string;
@@ -31,7 +37,7 @@ interface AddOrUpdateShipmentsReq {
     fileDataList: FileData[];
 }
 
-interface QueryShipmentsReq {
+export interface QueryShipmentsReq {
     receiptNumber: string;
     productInfo: string;
     memberId: number | string;
@@ -42,7 +48,7 @@ interface QueryShipmentsReq {
     remark: string;
 }
 
-interface ShipmentsResp {
+export interface ShipmentsResp {
     id: number | string;
     memberName: string;
     receiptNumber: string;
