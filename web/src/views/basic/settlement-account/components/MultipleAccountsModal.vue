@@ -3,7 +3,8 @@
     <a-form ref="formRef">
       <a-row class="form-row" :gutter="24">
         <a-col :lg="12" :md="12" :sm="24">
-          <a-form-item label="结算账户一" :label-col="labelCol" :wrapper-col="wrapperCol">
+          <a-form-item label="结算账户一" :label-col="labelCol" :wrapper-col="wrapperCol"
+                       :rules="[{ required: true, message: '请选择结算账户' }]">
             <a-select v-model:value="multipleAccounts.accountOne"
                       placeholder="请选择结算账户"
                       :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
@@ -11,7 +12,8 @@
           </a-form-item>
         </a-col>
         <a-col :lg="12" :md="12" :sm="24">
-          <a-form-item label="结算金额一" :label-col="labelCol" :wrapper-col="wrapperCol">
+          <a-form-item label="结算金额一" :label-col="labelCol" :wrapper-col="wrapperCol"
+                       :rules="[{ required: true, message: '请选择金额' }]">
             <a-input-number v-model:value="multipleAccounts.accountPriceOne" placeholder="请输入结算金额" min="0" max="9999999999.99"
                             step="0.01"/>
           </a-form-item>
@@ -19,7 +21,8 @@
       </a-row>
       <a-row class="form-row" :gutter="24">
         <a-col :lg="12" :md="12" :sm="24">
-          <a-form-item label="结算账户二" :label-col="labelCol" :wrapper-col="wrapperCol">
+          <a-form-item label="结算账户二" :label-col="labelCol" :wrapper-col="wrapperCol"
+                       :rules="[{ required: true, message: '请选择结算账户' }]">
             <a-select v-model:value="multipleAccounts.accountTwo"
                       placeholder="请选择结算账户"
                       :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
@@ -27,7 +30,8 @@
           </a-form-item>
         </a-col>
         <a-col :lg="12" :md="12" :sm="24">
-          <a-form-item label="结算金额二" :label-col="labelCol" :wrapper-col="wrapperCol">
+          <a-form-item label="结算金额二" :label-col="labelCol" :wrapper-col="wrapperCol"
+                       :rules="[{ required: true, message: '请选择金额' }]">
             <a-input-number v-model:value="multipleAccounts.accountPriceTwo" placeholder="请输入结算金额" min="0" max="9999999999.99"
                             step="0.01"/>
           </a-form-item>
@@ -59,6 +63,7 @@ import {BasicForm, useForm} from '/@/components/Form/index';
 import {getAccountList} from "@/api/financial/account";
 import {Spin, Row, Col, Form, FormItem, InputNumber, Select, SelectOption} from "ant-design-vue";
 import {AccountResp} from "@/api/financial/model/accountModel";
+import {useMessage} from "@/hooks/web/useMessage";
 
 export default defineComponent({
   name: 'MultipleAccountsModal',
@@ -77,6 +82,7 @@ export default defineComponent({
   emits: ['success', 'register'],
   setup(_, {emit}) {
     const getTitle = ref('多账户结算');
+    const { createMessage } = useMessage();
     const accountList = ref<AccountResp[]>([]);
     const labelCol = ref({
       xs: {span: 12},
@@ -95,7 +101,7 @@ export default defineComponent({
       accountPriceThree: '',
     });
 
-    const [registerForm, {resetFields, validate}] = useForm({
+    const [registerForm,] = useForm({
       labelWidth: 100,
       baseColProps: {span: 24},
       showActionButtonGroup: false,
@@ -120,14 +126,15 @@ export default defineComponent({
     });
 
     async function handleSubmit() {
-      const values = await validate();
-      setModalProps({confirmLoading: true});
-      if (values) {
-        setModalProps({confirmLoading: false,});
-        emit('handleAccountSuccess', values);
-        // 关闭弹窗
-        closeModal();
+      // 判断是否选择了结算账户
+      if (!multipleAccounts.value.accountOne || !multipleAccounts.value.accountTwo
+          || !multipleAccounts.value.accountPriceOne || !multipleAccounts.value.accountPriceTwo) {
+        createMessage.warn('请选择结算账户和金额，至少两个账户')
+        return;
       }
+      setModalProps({confirmLoading: false,});
+      emit('handleAccountSuccess', multipleAccounts.value);
+      closeModal();
     }
 
     return {
