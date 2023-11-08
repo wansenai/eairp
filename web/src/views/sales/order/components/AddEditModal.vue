@@ -133,7 +133,7 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="结算账户" data-step="2"
                              data-title="结算账户">
-                  <a-select v-model:value="formState.accountIds"
+                  <a-select v-model:value="formState.accountId"
                             placeholder="请选择结算账户"
                             :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
                             @change="selectAccountChange"/>
@@ -404,7 +404,7 @@ export default defineComponent({
         formState.id = id
         formState.customerId = data.customerId
         formState.receiptDate = dayjs(data.receiptDate);
-        formState.accountIds = data.accountIds
+        formState.accountId = data.accountId
         formState.receiptNumber = data.receiptNumber
         formState.remark = data.remark
         formState.operatorIds = data.operatorIds
@@ -577,8 +577,8 @@ export default defineComponent({
       })
 
       // 判断是否是多账户 0是多账户 如果是多账户需要把accountIds置空 如果不是需要把multipleAccountIds 和 multipleAccountAmounts 置空
-      if (formState.accountIds === 0) {
-        formState.accountIds = []
+      if (formState.accountId === 0) {
+        formState.accountId = undefined
         formState.multipleAccountIds = []
         formState.multipleAccountAmounts = []
         if(multipleAccounts.value.accountOne) {
@@ -616,6 +616,7 @@ export default defineComponent({
         createMessage.success('操作成功');
         handleCancelModal();
         clearData();
+
       } else {
         createMessage.error('操作失败');
       }
@@ -630,7 +631,7 @@ export default defineComponent({
       formState.discountAmount = 0
       formState.discountLastAmount = 0
       formState.deposit = 0
-      formState.accountIds = []
+      formState.accountId = undefined
       formState.operatorIds = []
       barCode.value = ''
       formState.remark = ''

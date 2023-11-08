@@ -40,7 +40,7 @@
         </template>
       </template>
     </BasicTable>
-    <AddEditModal ref="addEditModalRef"/>
+    <AddEditModal ref="addEditModalRef" @cancel="handleCancel"/>
   </div>
 </template>
 <div>
