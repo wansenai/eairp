@@ -34,7 +34,7 @@
           />
         </template>
         <template v-else-if="column.key === 'status'">
-          <Tag :color="record.status === 1 ? 'green' : (record.status === 2 ? 'blue' : (record.status === 3 ? 'yellow' : 'red'))">
+          <Tag :color="record.status === 1 ? 'green' : (record.status === 2 ? 'yellow' : (record.status === 3 ? 'blue' : 'red'))">
             {{ record.status === 1 ? '已审核' : (record.status === 2 ? '部分销售' : (record.status === 3 ? '完成销售' : '未审核')) }}
           </Tag>
         </template>
@@ -110,7 +110,7 @@ export default defineComponent({
         createMessage.warn('抱歉，只有未审核的单据才能编辑！');
         return;
       }
-
+      addEditModalRef.value.openAddEditModal(record.id);
     }
 
     async function handleDelete(record: Recordable) {

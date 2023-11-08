@@ -404,14 +404,30 @@ export default defineComponent({
         formState.id = id
         formState.customerId = data.customerId
         formState.receiptDate = dayjs(data.receiptDate);
-        formState.accountId = data.accountId
         formState.receiptNumber = data.receiptNumber
         formState.remark = data.remark
         formState.operatorIds = data.operatorIds
         formState.discountRate = data.discountRate
         formState.discountAmount = data.discountAmount
-        formState.discountLastAmount = data.discountLastAmount
+        formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.discountLastAmount), { digits: 2 })}`
         formState.deposit = data.deposit
+        // 判断多账户渲染
+        if(data.multipleAccountAmounts.length > 0 && data.multipleAccountIds.length > 0) {
+          manyAccountBtnStatus.value = true
+          formState.accountId = 0
+          multipleAccounts.value = {
+            accountOne: data.multipleAccountIds[0],
+            accountTwo: data.multipleAccountIds[1],
+            accountThree: data.multipleAccountIds[2],
+            accountPriceOne: data.multipleAccountAmounts[0],
+            accountPriceTwo: data.multipleAccountAmounts[1],
+            accountPriceThree: data.multipleAccountAmounts[2],
+          }
+        } else {
+          manyAccountBtnStatus.value = false
+          formState.accountId = data.accountId
+        }
+
         // file
         fileList.value = data.files.map(item => ({
           id: item.id,
@@ -437,6 +453,10 @@ export default defineComponent({
               productNumber: item.productNumber,
               amount: item.amount,
               unitPrice: item.unitPrice,
+              taxRate: item.taxRate,
+              taxAmount: item.taxAmount,
+              taxTotalPrice: item.taxTotalPrice,
+              remark: item.remark,
             };
             table.insert(tableData)
           })
@@ -636,6 +656,7 @@ export default defineComponent({
       barCode.value = ''
       formState.remark = ''
       fileList.value = []
+      multipleAccounts.value = {}
       const table = xGrid.value
       if(table) {
         table.remove()
@@ -831,6 +852,7 @@ export default defineComponent({
     function handleManyAccount() {
       openManyAccountModal(true, {
         isUpdate: false,
+        multipleAccounts: multipleAccounts.value
       });
     }
 

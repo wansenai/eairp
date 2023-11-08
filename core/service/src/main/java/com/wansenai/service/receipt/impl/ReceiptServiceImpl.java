@@ -654,7 +654,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
 
             if (!refundDTO.getFiles().isEmpty()) {
                 var receiptMain = getById(refundDTO.getId());
-                if (receiptMain != null) {
+                if (StringUtils.hasLength(receiptMain.getFileId())) {
                     var ids = Arrays.stream(receiptMain.getFileId().split(","))
                             .map(Long::parseLong)
                             .collect(Collectors.toList());
@@ -910,7 +910,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                 .in(ReceiptMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_SALES_ORDER)
                 .eq(StringUtils.hasText(querySaleOrderDTO.getReceiptNumber()), ReceiptMain::getReceiptNumber, querySaleOrderDTO.getReceiptNumber())
                 .like(StringUtils.hasText(querySaleOrderDTO.getRemark()), ReceiptMain::getRemark, querySaleOrderDTO.getRemark())
-                .eq(querySaleOrderDTO.getCustomerId() != null, ReceiptMain::getMemberId, querySaleOrderDTO.getCustomerId())
+                .eq(querySaleOrderDTO.getCustomerId() != null, ReceiptMain::getCustomerId, querySaleOrderDTO.getCustomerId())
                 .eq(querySaleOrderDTO.getOperatorId() != null, ReceiptMain::getCreateBy, querySaleOrderDTO.getOperatorId())
                 .eq(querySaleOrderDTO.getStatus() != null, ReceiptMain::getStatus, querySaleOrderDTO.getStatus())
                 .eq(ReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
@@ -1036,18 +1036,22 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
             tableData.add(saleData);
         }
 
-        // 获取sale的多账户信息 分隔字符串 放到一个Long类型的list中 如果为空 则返回空list
-
-        List<Long> accountIds = new ArrayList<>();
-        if (StringUtils.hasLength(sale.getMultipleAccount())) {
-            accountIds = Arrays.stream(sale.getMultipleAccount().split(","))
+        List<Long> operatorIds = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getOperatorId())) {
+            operatorIds = Arrays.stream(sale.getOperatorId().split(","))
                     .map(Long::parseLong)
                     .collect(Collectors.toList());
         }
 
-        List<Long> operatorIds = new ArrayList<>();
-        if (StringUtils.hasLength(sale.getOperatorId())) {
-            operatorIds = Arrays.stream(sale.getOperatorId().split(","))
+        List<Long> multipleAccountIds = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getMultipleAccount())) {
+            multipleAccountIds = Arrays.stream(sale.getMultipleAccount().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+        }
+        List<Long> multipleAccountAmounts = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getMultipleAccountAmount())) {
+            multipleAccountAmounts = Arrays.stream(sale.getMultipleAccountAmount().split(","))
                     .map(Long::parseLong)
                     .collect(Collectors.toList());
         }
@@ -1056,11 +1060,13 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                 .receiptNumber(sale.getReceiptNumber())
                 .receiptDate(sale.getCreateTime())
                 .customerId(sale.getCustomerId())
-                .accountIds(accountIds)
+                .accountId(sale.getAccountId())
                 .operatorIds(operatorIds)
                 .discountRate(sale.getDiscountRate())
                 .discountAmount(sale.getDiscountAmount())
                 .discountLastAmount(sale.getDiscountLastAmount())
+                .multipleAccountIds(multipleAccountIds)
+                .multipleAccountAmounts(multipleAccountAmounts)
                 .deposit(sale.getDeposit())
                 .remark(sale.getRemark())
                 .tableData(tableData)
@@ -1089,6 +1095,8 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
             for (Long aLong : multipleAccountList) {
                 multipleAccountIds.append(aLong).append(",");
             }
+        } else {
+            multipleAccountIds.append("");
         }
 
         var multipleAccountAmounts = new StringBuilder();
@@ -1097,7 +1105,39 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
             for (Long amount : multipleAccountList) {
                 multipleAccountAmounts.append(amount).append(",");
             }
+        } else {
+            multipleAccountAmounts.append("");
         }
+        String accountId = null;
+        if (saleOrderDTO.getAccountId() != null) {
+            accountId = String.valueOf(saleOrderDTO.getAccountId());
+        }
+
+        var fid = new ArrayList<>();
+        if (!saleOrderDTO.getFiles().isEmpty()) {
+            var receiptMain = getById(saleOrderDTO.getId());
+            if (StringUtils.hasLength(receiptMain.getFileId())) {
+                var ids = Arrays.stream(receiptMain.getFileId().split(","))
+                        .map(Long::parseLong)
+                        .collect(Collectors.toList());
+                fileMapper.deleteBatchIds(ids);
+            }
+            saleOrderDTO.getFiles().forEach(item -> {
+                var file = SysFile.builder()
+                        .id(SnowflakeIdUtil.nextId())
+                        .uid(item.getUid())
+                        .fileName(item.getFileName())
+                        .fileType(item.getFileType())
+                        .fileSize(item.getFileSize())
+                        .fileUrl(item.getFileUrl())
+                        .build();
+                fileMapper.insert(file);
+                fid.add(file.getId());
+            });
+        }
+        var fileIds = fid.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
 
         if (isUpdate) {
             var updateMainResult = lambdaUpdate()
@@ -1108,10 +1148,13 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                     .set(saleOrderDTO.getDiscountLastAmount() != null, ReceiptMain::getDiscountLastAmount, saleOrderDTO.getDiscountLastAmount())
                     .set(saleOrderDTO.getDeposit() != null, ReceiptMain::getDeposit, saleOrderDTO.getDeposit())
                     .set(saleOrderDTO.getStatus() != null, ReceiptMain::getStatus, saleOrderDTO.getStatus())
-                    .set(!multipleAccountIds.isEmpty(), ReceiptMain::getMultipleAccount, String.valueOf(multipleAccountIds))
-                    .set(!multipleAccountAmounts.isEmpty(), ReceiptMain::getMultipleAccountAmount, String.valueOf(multipleAccountAmounts))
+                    .set(StringUtils.hasText(saleOrderDTO.getReceiptDate()), ReceiptMain::getCreateTime, saleOrderDTO.getReceiptDate())
+                    .set(StringUtils.hasText(saleOrderDTO.getRemark()), ReceiptMain::getRemark, saleOrderDTO.getRemark())
+                    .set(ReceiptMain::getAccountId, accountId)
+                    .set(ReceiptMain::getFileId, fileIds)
+                    .set(ReceiptMain::getMultipleAccount, String.valueOf(multipleAccountIds))
+                    .set(ReceiptMain::getMultipleAccountAmount, String.valueOf(multipleAccountAmounts))
                     .set(!operatorIds.isEmpty(), ReceiptMain::getOperatorId, String.valueOf(operatorIds))
-                    .set(saleOrderDTO.getAccountId() != null, ReceiptMain::getMultipleAccount, saleOrderDTO.getAccountId())
                     .set(ReceiptMain::getUpdateBy, userId)
                     .set(ReceiptMain::getUpdateTime, LocalDateTime.now())
                     .update();
@@ -1138,27 +1181,6 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
 
             var updateSubResult = receiptSubService.saveBatch(receiptList);
 
-            if (!saleOrderDTO.getFiles().isEmpty()) {
-                var receiptMain = getById(saleOrderDTO.getId());
-                if (receiptMain != null) {
-                    var ids = Arrays.stream(receiptMain.getFileId().split(","))
-                            .map(Long::parseLong)
-                            .collect(Collectors.toList());
-                    fileMapper.deleteBatchIds(ids);
-                }
-                saleOrderDTO.getFiles().forEach(item -> {
-                    var file = SysFile.builder()
-                            .id(item.getId())
-                            .uid(item.getUid())
-                            .fileName(item.getFileName())
-                            .fileType(item.getFileType())
-                            .fileSize(item.getFileSize())
-                            .fileUrl(item.getFileUrl())
-                            .build();
-                    fileMapper.insert(file);
-                });
-            }
-
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_SUCCESS);
             } else {
@@ -1166,28 +1188,6 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
             }
         } else {
             var id = SnowflakeIdUtil.nextId();
-
-            var fid = new ArrayList<>();
-            if (!saleOrderDTO.getFiles().isEmpty()) {
-                saleOrderDTO.getFiles().forEach(item -> {
-                    var file = SysFile.builder()
-                            .id(item.getId())
-                            .uid(item.getUid())
-                            .fileName(item.getFileName())
-                            .fileType(item.getFileType())
-                            .fileSize(item.getFileSize())
-                            .fileUrl(item.getFileUrl())
-                            .build();
-                    var result = fileMapper.insert(file);
-                    if (result > 0) {
-                        fid.add(file.getId());
-                    }
-                });
-            }
-            var fileIds = fid.stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(","));
-
             var receiptMain = ReceiptMain.builder()
                     .id(id)
                     .type(ReceiptConstants.RECEIPT_TYPE_ORDER)
@@ -1246,12 +1246,17 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
         if(ids.isEmpty()) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
-
         var updateResult = lambdaUpdate()
                 .in(ReceiptMain::getId, ids)
                 .set(ReceiptMain::getDeleteFlag, CommonConstants.DELETED)
                 .update();
-        if (updateResult) {
+
+        var updateSubResult = receiptSubService.lambdaUpdate()
+                .in(ReceiptSub::getReceiptMainId, ids)
+                .set(ReceiptSub::getDeleteFlag, CommonConstants.DELETED)
+                .update();
+
+        if (updateResult && updateSubResult) {
             return Response.responseMsg(SaleCodeEnum.DELETE_SALE_ORDER_SUCCESS);
         } else {
             return Response.responseMsg(SaleCodeEnum.DELETE_SALE_ORDER_ERROR);
