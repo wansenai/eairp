@@ -40,7 +40,7 @@ public class SaleOrderDTO {
 
     private BigDecimal deposit;
 
-    private List<Long> accountIds;
+    private Long accountId;
 
     private List<Long> multipleAccountAmounts;
 

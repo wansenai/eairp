@@ -36,12 +36,12 @@ export const columns: BasicColumn[] = [
     },
     {
         title: '含税合计',
-        dataIndex: 'paymentAmount',
+        dataIndex: 'taxRateTotalPrice',
         width: 80,
     },
     {
         title: '收取定金',
-        dataIndex: 'backAmount',
+        dataIndex: 'deposit',
         width: 80,
     },
     {

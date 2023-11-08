@@ -39,6 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -47,6 +49,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -937,6 +940,23 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                     .stream()
                     .mapToInt(ReceiptSub::getProductNumber)
                     .sum();
+
+            var taxAmount = receiptSubService.lambdaQuery()
+                    .eq(ReceiptSub::getReceiptMainId, item.getId())
+                    .list()
+                    .stream()
+                    .map(ReceiptSub::getTaxAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            var taxRateTotalPrice = receiptSubService.lambdaQuery()
+                    .eq(ReceiptSub::getReceiptMainId, item.getId())
+                    .list()
+                    .stream()
+                    .map(ReceiptSub::getTaxTotalPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .setScale(2, RoundingMode.HALF_UP);
+
             var saleOrderVO = SaleOrderVO.builder()
                     .id(item.getId())
                     .customerName(customerName)
@@ -945,8 +965,8 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                     .productInfo(item.getRemark())
                     .operator(crateBy)
                     .productNumber(productNumber)
-                    .totalPrice(item.getTotalPrice())
-                    .taxRateTotalPrice(item.getTotalPrice())
+                    .totalPrice(taxAmount)
+                    .taxRateTotalPrice(taxRateTotalPrice)
                     .deposit(item.getDeposit())
                     .status(item.getStatus())
                     .build();
@@ -1056,22 +1076,15 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
         var isUpdate = saleOrderDTO.getId() != null;
 
         var operatorIds = new StringBuilder();
-        if (saleOrderDTO.getOperatorIds() != null) {
+        if (!saleOrderDTO.getOperatorIds().isEmpty()) {
             var operatorList = saleOrderDTO.getOperatorIds();
             for (Long aLong : operatorList) {
                 operatorIds.append(aLong).append(",");
             }
         }
-        var accountIds = new StringBuilder();
-        if (saleOrderDTO.getAccountIds() != null) {
-            var accountList = saleOrderDTO.getAccountIds();
-            for (Long aLong : accountList) {
-                accountIds.append(aLong).append(",");
-            }
-        }
 
         var multipleAccountIds = new StringBuilder();
-        if (saleOrderDTO.getMultipleAccountIds() != null) {
+        if (!saleOrderDTO.getMultipleAccountIds().isEmpty()) {
             var multipleAccountList = saleOrderDTO.getMultipleAccountIds();
             for (Long aLong : multipleAccountList) {
                 multipleAccountIds.append(aLong).append(",");
@@ -1079,7 +1092,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
         }
 
         var multipleAccountAmounts = new StringBuilder();
-        if (saleOrderDTO.getMultipleAccountAmounts() != null) {
+        if (!saleOrderDTO.getMultipleAccountAmounts().isEmpty()) {
             var multipleAccountList = saleOrderDTO.getMultipleAccountAmounts();
             for (Long amount : multipleAccountList) {
                 multipleAccountAmounts.append(amount).append(",");
@@ -1098,7 +1111,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                     .set(!multipleAccountIds.isEmpty(), ReceiptMain::getMultipleAccount, String.valueOf(multipleAccountIds))
                     .set(!multipleAccountAmounts.isEmpty(), ReceiptMain::getMultipleAccountAmount, String.valueOf(multipleAccountAmounts))
                     .set(!operatorIds.isEmpty(), ReceiptMain::getOperatorId, String.valueOf(operatorIds))
-                    .set(!accountIds.isEmpty(), ReceiptMain::getMultipleAccount, String.valueOf(accountIds))
+                    .set(saleOrderDTO.getAccountId() != null, ReceiptMain::getMultipleAccount, saleOrderDTO.getAccountId())
                     .set(ReceiptMain::getUpdateBy, userId)
                     .set(ReceiptMain::getUpdateTime, LocalDateTime.now())
                     .update();
@@ -1182,10 +1195,9 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                     .initReceiptNumber(saleOrderDTO.getReceiptNumber())
                     .receiptNumber(saleOrderDTO.getReceiptNumber())
                     .customerId(saleOrderDTO.getCustomerId())
-                    // 这里设置多账户而非单账户
-                    .multipleAccount(String.valueOf(accountIds))
                     .operatorId(String.valueOf(operatorIds))
                     .discountRate(saleOrderDTO.getDiscountRate())
+                    .accountId(saleOrderDTO.getAccountId())
                     .discountAmount(saleOrderDTO.getDiscountAmount())
                     .discountLastAmount(saleOrderDTO.getDiscountLastAmount())
                     .deposit(saleOrderDTO.getDeposit())
@@ -1195,7 +1207,12 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();
-
+            if(StringUtils.hasLength(multipleAccountIds)) {
+                receiptMain.setMultipleAccount(String.valueOf(multipleAccountIds));
+            }
+            if(StringUtils.hasLength(multipleAccountAmounts)) {
+                receiptMain.setMultipleAccountAmount(String.valueOf(multipleAccountAmounts));
+            }
             var saveMainResult = save(receiptMain);
 
             var receiptSubList = saleOrderDTO.getTableData();
