@@ -1036,18 +1036,22 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
             tableData.add(saleData);
         }
 
-        // 获取sale的多账户信息 分隔字符串 放到一个Long类型的list中 如果为空 则返回空list
-
-        List<Long> accountIds = new ArrayList<>();
-        if (StringUtils.hasLength(sale.getMultipleAccount())) {
-            accountIds = Arrays.stream(sale.getMultipleAccount().split(","))
+        List<Long> operatorIds = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getOperatorId())) {
+            operatorIds = Arrays.stream(sale.getOperatorId().split(","))
                     .map(Long::parseLong)
                     .collect(Collectors.toList());
         }
 
-        List<Long> operatorIds = new ArrayList<>();
-        if (StringUtils.hasLength(sale.getOperatorId())) {
-            operatorIds = Arrays.stream(sale.getOperatorId().split(","))
+        List<Long> multipleAccountIds = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getMultipleAccount())) {
+            multipleAccountIds = Arrays.stream(sale.getMultipleAccount().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+        }
+        List<Long> multipleAccountAmounts = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getMultipleAccountAmount())) {
+            multipleAccountAmounts = Arrays.stream(sale.getMultipleAccountAmount().split(","))
                     .map(Long::parseLong)
                     .collect(Collectors.toList());
         }
@@ -1056,11 +1060,13 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMainMapper, ReceiptMa
                 .receiptNumber(sale.getReceiptNumber())
                 .receiptDate(sale.getCreateTime())
                 .customerId(sale.getCustomerId())
-                .accountIds(accountIds)
+                .accountId(sale.getAccountId())
                 .operatorIds(operatorIds)
                 .discountRate(sale.getDiscountRate())
                 .discountAmount(sale.getDiscountAmount())
                 .discountLastAmount(sale.getDiscountLastAmount())
+                .multipleAccountIds(multipleAccountIds)
+                .multipleAccountAmounts(multipleAccountAmounts)
                 .deposit(sale.getDeposit())
                 .remark(sale.getRemark())
                 .tableData(tableData)

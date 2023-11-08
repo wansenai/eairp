@@ -35,6 +35,9 @@ public class SaleOrderDetailVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long customerId;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long accountId;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime receiptDate;
 
@@ -42,6 +45,12 @@ public class SaleOrderDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private List<Long> operatorIds;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private List<Long> multipleAccountAmounts;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private List<Long> multipleAccountIds;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal discountRate;
@@ -54,9 +63,6 @@ public class SaleOrderDetailVO {
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal deposit;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private List<Long> accountIds;
 
     private List<SalesDataBO> tableData;
 
