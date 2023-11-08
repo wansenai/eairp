@@ -409,7 +409,7 @@ export default defineComponent({
         formState.operatorIds = data.operatorIds
         formState.discountRate = data.discountRate
         formState.discountAmount = data.discountAmount
-        formState.discountLastAmount = data.discountLastAmount
+        formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.discountLastAmount), { digits: 2 })}`
         formState.deposit = data.deposit
         // 判断多账户渲染
         if(data.multipleAccountAmounts.length > 0 && data.multipleAccountIds.length > 0) {
@@ -656,6 +656,7 @@ export default defineComponent({
       barCode.value = ''
       formState.remark = ''
       fileList.value = []
+      multipleAccounts.value = {}
       const table = xGrid.value
       if(table) {
         table.remove()
