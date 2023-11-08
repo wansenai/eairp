@@ -25,6 +25,8 @@ import com.wansenai.utils.response.Response;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.vo.receipt.sale.SaleOrderDetailVO;
 import com.wansenai.vo.receipt.sale.SaleOrderVO;
+import com.wansenai.vo.receipt.sale.SaleRefundVO;
+import com.wansenai.vo.receipt.sale.SaleShipmentsVO;
 
 import java.util.List;
 
@@ -234,4 +236,118 @@ public interface ReceiptService extends IService<ReceiptMain> {
      * @return Returns the result of the modification
      */
     Response<String> updateSaleOrderStatus(List<Long> ids, Integer status);
+
+    /**
+     * Pagination query of sales shipments data
+     * 销售出货数据分页查询
+     *
+     * @param shipmentsDTO Query common conditions
+     *                     查询公共条件
+     * @return Returns paginated data
+     *       返回分页数据
+     */
+    Response<Page<SaleShipmentsVO>> getSaleShipmentsPage(QueryShipmentsDTO shipmentsDTO);
+
+    /**
+     * Query the detailed data of sales outbound based on the document ID (primary key)
+     * 根据单据id(主键)查询销售出货详细数据
+     *
+     * @param id Primary key id of sales shipments
+     *           销售出货主键id
+     * @return  Returns sales shipments details data
+     *        返回销售出货详情数据
+     */
+    Response<SaleOrderDetailVO> getSaleShipmentsDetail(Long id);
+
+    /**
+     * Add or modify sales delivery orders
+     * 新增或修改销售出货单
+     *
+     * @param shipmentsDTO Sales delivery order data
+     *                     销售出货单数据
+     * @return Returns the result of the addition
+     *          返回新增结果
+     */
+    Response<String> addOrUpdateSaleShipments(RetailShipmentsDTO shipmentsDTO);
+
+    /**
+     * Modify document data based on receipt ID set and status
+     * 根据单据id集合和状态修改单据数据
+     *
+     * @param ids   Receipt ID List (primary key)
+     *              单据id集合(主键)
+     * @param status    Status
+     *                  状态
+     * @return  Returns the result of the modification
+     *          返回修改结果
+     */
+    Response<String> updateSaleShipmentsStatus(List<Long> ids, Integer status);
+
+    /**
+     * Logical deletion of data based on document ID set (modification of deletion identification status)
+     * 根据单据id集合逻辑删除数据(修改删除标识状态)
+     *
+     * @param ids  Receipt ID List (primary key)
+     *             单据id集合(主键)
+     * @return  Returns the result of the deletion
+     *          返回删除结果
+     */
+    Response<String> deleteSaleShipments(List<Long> ids);
+
+    /**
+     * Query sales return pagination data
+     * 查询销售退货分页数据
+     *
+     * @param refundDTO Query common conditions
+     *                  查询公共条件
+     * @return Returns paginated data
+     *         返回分页数据
+     */
+    Response<Page<SaleRefundVO>> getSaleRefundPage(QueryRetailRefundDTO refundDTO);
+
+    /**
+     * Query sales refund data based on receipt ID
+     * 根据单据id查询销售退货数据
+     *
+     * @param id Primary key id of sales refund
+     *           销售退货主键id
+     * @return  Returns sales refund data
+     *         返回销售退货数据
+     */
+    Response<SaleOrderDetailVO> getSaleRefundDetail(Long id);
+
+    /**
+     * Add or modify sales refund orders
+     * 新增或修改销售退货单
+     *
+     * @param refundDTO Sales refund order data
+     *                  销售退货单数据
+     * @return  Returns the result of the addition
+     *        返回新增/修改结果
+     */
+    Response<String> addOrUpdateSaleRefund(RetailRefundDTO refundDTO);
+
+    /**
+     * Logical deletion of sales refund data based on sales receipt ID list
+     * 根据销售单据id集合逻辑删除销售退货数据
+     *
+     * @param ids Sales order ID List
+     *            销售订单主键id集合
+     * @return  Returns the result of the deletion
+     *         返回删除结果
+     */
+    Response<String> deleteSaleRefund(List<Long> ids);
+
+    /**
+     * Modify sales refund data based on sales receipt ID list and status
+     * 根据销售单据id集合和状态修改销售退货数据
+     *
+     * @param ids  Sales order ID List
+     *             销售订单主键id集合
+     * @param status Status
+     *               状态
+     * @return Returns the result of the modification
+     *        返回修改结果
+     */
+    Response<String> updateSaleRefundStatus(List<Long> ids, Integer status);
 }
