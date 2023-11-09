@@ -15,7 +15,8 @@ package com.wansenai.api;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.sale.QuerySaleOrderDTO;
 import com.wansenai.dto.receipt.sale.SaleOrderDTO;
-import com.wansenai.service.receipt.ReceiptService;
+import com.wansenai.service.receipt.ReceiptRetailService;
+import com.wansenai.service.receipt.ReceiptSaleService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.sale.SaleOrderDetailVO;
 import com.wansenai.vo.receipt.sale.SaleOrderVO;
@@ -27,34 +28,34 @@ import java.util.List;
 @RequestMapping("sale")
 public class SalesController {
 
-    private final ReceiptService receiptService;
+    private final ReceiptSaleService receiptSaleService;
 
-    public SalesController(ReceiptService receiptService) {
-        this.receiptService = receiptService;
+    public SalesController(ReceiptSaleService receiptSaleService) {
+        this.receiptSaleService = receiptSaleService;
     }
 
     @GetMapping("/order/pageList")
     public Response<Page<SaleOrderVO>> pageList(@ModelAttribute QuerySaleOrderDTO querySaleOrderDTO) {
-        return receiptService.getSaleOrderPage(querySaleOrderDTO);
+        return receiptSaleService.getSaleOrderPage(querySaleOrderDTO);
     }
 
     @PostMapping("/order/addOrUpdate")
     public Response<String> addOrUpdate(@RequestBody SaleOrderDTO saleOrderDTO) {
-        return receiptService.addOrUpdateSaleOrder(saleOrderDTO);
+        return receiptSaleService.addOrUpdateSaleOrder(saleOrderDTO);
     }
 
     @GetMapping("/order/detail/{id}")
     public Response<SaleOrderDetailVO> detail(@PathVariable("id") Long id) {
-        return receiptService.getSaleOrderDetail(id);
+        return receiptSaleService.getSaleOrderDetail(id);
     }
 
     @PutMapping("/order/updateStatus/{ids}/{status}")
     public Response<String> updateStatus(@PathVariable("ids") List<Long> ids, @PathVariable("status") Integer status) {
-        return receiptService.updateSaleOrderStatus(ids, status);
+        return receiptSaleService.updateSaleOrderStatus(ids, status);
     }
 
     @PutMapping("/order/delete/{ids}")
     public Response<String> delete(@PathVariable("ids") List<Long> ids) {
-        return receiptService.deleteSaleOrder(ids);
+        return receiptSaleService.deleteSaleOrder(ids);
     }
 }

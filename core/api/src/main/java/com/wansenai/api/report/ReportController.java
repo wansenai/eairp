@@ -12,9 +12,9 @@
  */
 package com.wansenai.api.report;
 
-import com.wansenai.service.receipt.ReceiptService;
+import com.wansenai.service.receipt.ReceiptRetailService;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.RetailStatisticalDataVO;
+import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,14 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/report")
 public class ReportController {
 
-    private final ReceiptService receiptService;
+    private final ReceiptRetailService receiptRetailService;
 
-    public ReportController(ReceiptService receiptService) {
-        this.receiptService = receiptService;
+    public ReportController(ReceiptRetailService receiptRetailService) {
+        this.receiptRetailService = receiptRetailService;
     }
 
     @GetMapping("homePage/statistics")
     public Response<RetailStatisticalDataVO> getStatisticalData() {
-        return receiptService.getRetailStatistics();
+        return receiptRetailService.getRetailStatistics();
     }
 }
