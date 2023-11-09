@@ -17,10 +17,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansenai.dto.receipt.sale.*;
 import com.wansenai.entities.receipt.ReceiptSaleMain;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.sale.SaleOrderDetailVO;
-import com.wansenai.vo.receipt.sale.SaleOrderVO;
-import com.wansenai.vo.receipt.sale.SaleRefundVO;
-import com.wansenai.vo.receipt.sale.SaleShipmentsVO;
+import com.wansenai.vo.receipt.sale.*;
 
 import java.util.List;
 
@@ -102,7 +99,7 @@ public interface ReceiptSaleService extends IService<ReceiptSaleMain> {
      * @return  Returns sales shipments details data
      *        返回销售出货详情数据
      */
-    Response<SaleOrderDetailVO> getSaleShipmentsDetail(Long id);
+    Response<SaleShipmentsDetailVO> getSaleShipmentsDetail(Long id);
 
     /**
      * Add or modify sales delivery orders
@@ -159,7 +156,7 @@ public interface ReceiptSaleService extends IService<ReceiptSaleMain> {
      * @return  Returns sales refund data
      *         返回销售退货数据
      */
-    Response<SaleOrderDetailVO> getSaleRefundDetail(Long id);
+    Response<SaleRefundDetailVO> getSaleRefundDetail(Long id);
 
     /**
      * Add or modify sales refund orders
