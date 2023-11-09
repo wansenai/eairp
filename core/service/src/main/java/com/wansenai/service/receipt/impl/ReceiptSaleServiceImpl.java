@@ -282,7 +282,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         var fid = new ArrayList<>();
         if (!saleOrderDTO.getFiles().isEmpty()) {
             var receiptMain = getById(saleOrderDTO.getId());
-            if (StringUtils.hasLength(receiptMain.getFileId())) {
+            if (receiptMain != null && StringUtils.hasLength(receiptMain.getFileId())) {
                 var ids = Arrays.stream(receiptMain.getFileId().split(","))
                         .map(Long::parseLong)
                         .collect(Collectors.toList());
@@ -677,7 +677,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         var fid = new ArrayList<>();
         if (!shipmentsDTO.getFiles().isEmpty()) {
             var receiptMain = getById(shipmentsDTO.getId());
-            if (StringUtils.hasLength(receiptMain.getFileId())) {
+            if (receiptMain != null && StringUtils.hasLength(receiptMain.getFileId())) {
                 var ids = Arrays.stream(receiptMain.getFileId().split(","))
                         .map(Long::parseLong)
                         .collect(Collectors.toList());
@@ -758,8 +758,8 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
 
             var receiptSaleShipmentMain = ReceiptSaleMain.builder()
                     .id(id)
-                    .type(ReceiptConstants.RECEIPT_TYPE_ORDER)
-                    .subType(ReceiptConstants.RECEIPT_SUB_TYPE_SALES_ORDER)
+                    .type(ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
+                    .subType(ReceiptConstants.RECEIPT_SUB_TYPE_SALES_SHIPMENTS)
                     .initReceiptNumber(shipmentsDTO.getReceiptNumber())
                     .receiptNumber(shipmentsDTO.getReceiptNumber())
                     .receiptDate(TimeUtil.parse(shipmentsDTO.getReceiptDate()))
