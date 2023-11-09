@@ -15,7 +15,11 @@ package com.wansenai.entities.receipt;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.*;
+import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serial;
@@ -29,92 +33,44 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("receipt_main")
-public class ReceiptMain implements Serializable {
+@TableName("receipt_purchase_sub")
+public class ReceiptPurchaseSub implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 514516533L;
+    private static final long serialVersionUID = 36998651326533L;
 
-    /**
-     * 主键
-     */
     @TableId(value = "id", type = IdType.NONE)
     private Long id;
 
-    private Long memberId;
+    private Long receiptPurchaseMainId;
 
-    private Long customerId;
+    private Long productId;
 
-    private Long supplierId;
+    private Long warehouseId;
 
-    private Long accountId;
+    private Long productBarcode;
 
-    private String type;
+    private Integer productNumber;
 
-    private String subType;
+    private BigDecimal unitPrice;
 
-    private String initReceiptNumber;
+    private BigDecimal totalAmount;
 
-    private String receiptNumber;
+    private BigDecimal taxRate;
 
-    private BigDecimal changeAmount;
+    private BigDecimal taxAmount;
 
-    private BigDecimal backAmount;
-
-    private BigDecimal totalPrice;
-
-    private String paymentType;
+    private BigDecimal taxIncludedAmount;
 
     private String remark;
 
-    private String fileId;
-
-    private String operatorId;
-
-    private String multipleAccount;
-
-    private String multipleAccountAmount;
-
-    private BigDecimal discountRate;
-
-    private BigDecimal discountAmount;
-
-    private BigDecimal discountLastAmount;
-
-    private BigDecimal otherAmount;
-
-    private BigDecimal deposit;
-
-    private Integer status;
-
-    private Integer purchaseStatus;
-
-    private Integer source;
-
-    private String otherReceipt;
-
-    /**
-     * 创建时间
-     */
     private LocalDateTime createTime;
 
-    /**
-     * 更新时间
-     */
     private LocalDateTime updateTime;
 
-    /**
-     * 创建人
-     */
     private Long createBy;
 
-    /**
-     * 修改人
-     */
     private Long updateBy;
 
-    /**
-     * 删除标记，0未删除，1删除
-     */
     private Integer deleteFlag;
 }

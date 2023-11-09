@@ -15,7 +15,11 @@ package com.wansenai.entities.receipt;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.*;
+import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serial;
@@ -29,68 +33,64 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("receipt_sub")
-public class ReceiptSub implements Serializable {
+@TableName("receipt_purchase_main")
+public class ReceiptPurchaseMain implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 89165156375123L;
+    private static final long serialVersionUID = 7916561623533L;
 
-    /**
-     * 主键
-     */
     @TableId(value = "id", type = IdType.NONE)
     private Long id;
 
-    private Long receiptMainId;
+    private Long supplierId;
 
-    private Long productId;
+    private Long accountId;
 
-    private Long warehouseId;
+    private String type;
 
-    private Long productBarcode;
+    private String subType;
 
-    private Integer productNumber;
+    private String initReceiptNumber;
 
-    private BigDecimal productPrice;
+    private String receiptNumber;
 
-    private BigDecimal productTotalPrice;
+    private String receiptDate;
 
-    private BigDecimal taxRate;
+    private BigDecimal changeAmount;
 
-    private BigDecimal taxAmount;
+    private BigDecimal totalAmount;
 
-    private BigDecimal taxTotalPrice;
+    private BigDecimal discountRate;
 
-    private String productRemark;
+    private BigDecimal discountAmount;
 
-    private Long productExtendId;
+    private BigDecimal discountLastAmount;
 
-    private Long anotherWarehouseId;
+    private BigDecimal arrearsAmount;
 
-    private Long correlationId;
+    private BigDecimal otherAmount;
 
-    /**
-     * 创建时间
-     */
+    private BigDecimal deposit;
+
+    private String fileId;
+
+    private String operatorId;
+
+    private String multipleAccount;
+
+    private String multipleAccountAmount;
+
+    private String remark;
+
+    private Integer status;
+
     private LocalDateTime createTime;
 
-    /**
-     * 更新时间
-     */
     private LocalDateTime updateTime;
 
-    /**
-     * 创建人
-     */
     private Long createBy;
 
-    /**
-     * 修改人
-     */
     private Long updateBy;
 
-    /**
-     * 删除标记，0未删除，1删除
-     */
     private Integer deleteFlag;
 }

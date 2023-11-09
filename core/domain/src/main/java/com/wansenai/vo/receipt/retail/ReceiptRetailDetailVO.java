@@ -10,49 +10,54 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.receipt;
+package com.wansenai.vo.receipt.retail;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
-import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.ShipmentsDataBO;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
-public class RetailShipmentsDetailVO {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ReceiptRetailDetailVO {
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long productBarcode;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long productId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long memberId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long accountId;
+    private Long warehouseId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime receiptDate;
+    private String productName;
 
-    private String receiptNumber;
+    private String productStandard;
 
-    private String paymentType;
+    private String productModel;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal collectAmount;
+    private String unit;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal receiptAmount;
+    private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal backAmount;
+    private BigDecimal productPrice;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal productTotalPrice;
 
     private String remark;
-
-    private List<ShipmentsDataBO> tableData;
-
-    private List<FileDataBO> files;
 }

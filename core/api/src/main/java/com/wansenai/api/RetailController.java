@@ -13,13 +13,16 @@
 package com.wansenai.api;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansenai.dto.receipt.QueryRetailRefundDTO;
-import com.wansenai.dto.receipt.QueryShipmentsDTO;
-import com.wansenai.dto.receipt.RetailRefundDTO;
-import com.wansenai.dto.receipt.RetailShipmentsDTO;
-import com.wansenai.service.receipt.ReceiptService;
+import com.wansenai.dto.receipt.retail.QueryRetailRefundDTO;
+import com.wansenai.dto.receipt.retail.QueryShipmentsDTO;
+import com.wansenai.dto.receipt.retail.RetailRefundDTO;
+import com.wansenai.dto.receipt.retail.RetailShipmentsDTO;
+import com.wansenai.service.receipt.ReceiptRetailService;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.*;
+import com.wansenai.vo.receipt.retail.RetailRefundDetailVO;
+import com.wansenai.vo.receipt.retail.RetailRefundVO;
+import com.wansenai.vo.receipt.retail.RetailShipmentsDetailVO;
+import com.wansenai.vo.receipt.retail.RetailShipmentsVO;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,64 +31,64 @@ import java.util.List;
 @RequestMapping("/retail")
 public class RetailController {
 
-    private final ReceiptService receiptService;
+    private final ReceiptRetailService receiptRetailService;
 
-    public RetailController(ReceiptService receiptService) {
-        this.receiptService = receiptService;
+    public RetailController(ReceiptRetailService receiptRetailService) {
+        this.receiptRetailService = receiptRetailService;
     }
 
     @PostMapping("/shipments/pageList")
     public Response<Page<RetailShipmentsVO>> pageList(@RequestBody QueryShipmentsDTO queryShipmentsDTO) {
-        return receiptService.getRetailShipmentsPage(queryShipmentsDTO);
+        return receiptRetailService.getRetailShipmentsPage(queryShipmentsDTO);
     }
 
     @PostMapping("/shipments/list")
     public Response<List<RetailShipmentsVO>> getList(@RequestBody QueryShipmentsDTO queryShipmentsDTO) {
-        return receiptService.getRetailShipmentsList(queryShipmentsDTO);
+        return receiptRetailService.getRetailShipmentsList(queryShipmentsDTO);
     }
 
     @PostMapping("/shipments/addOrUpdate")
     public Response<String> addOrUpdate(@RequestBody RetailShipmentsDTO retailShipmentsDTO) {
-        return receiptService.addOrUpdateRetailShipments(retailShipmentsDTO);
+        return receiptRetailService.addOrUpdateRetailShipments(retailShipmentsDTO);
     }
 
     @PostMapping("/shipments/deleteByIds")
     public Response<String> deleteByIds(@RequestParam("ids") List<Long> ids) {
-        return receiptService.deleteRetailShipments(ids);
+        return receiptRetailService.deleteRetailShipments(ids);
     }
 
     @PutMapping("/shipments/updateStatus")
     public Response<String> updateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
-        return receiptService.updateRetailShipmentsStatus(ids, status);
+        return receiptRetailService.updateRetailShipmentsStatus(ids, status);
     }
 
     @GetMapping("/shipments/detail/{id}")
     public Response<RetailShipmentsDetailVO> detail(@PathVariable("id") Long id) {
-        return receiptService.getRetailShipmentsDetail(id);
+        return receiptRetailService.getRetailShipmentsDetail(id);
     }
 
     @PostMapping("/refund/pageList")
     public Response<Page<RetailRefundVO>> refundPageList(@RequestBody QueryRetailRefundDTO refundDTO) {
-        return receiptService.getRetailRefund(refundDTO);
+        return receiptRetailService.getRetailRefund(refundDTO);
     }
 
     @PostMapping("/refund/addOrUpdate")
     public Response<String> refundAddOrUpdate(@RequestBody RetailRefundDTO refundDTO) {
-        return receiptService.addOrUpdateRetailRefund(refundDTO);
+        return receiptRetailService.addOrUpdateRetailRefund(refundDTO);
     }
 
     @GetMapping("/refund/detail/{id}")
     public Response<RetailRefundDetailVO> refundDetail(@PathVariable("id") Long id) {
-        return receiptService.getRetailRefundDetail(id);
+        return receiptRetailService.getRetailRefundDetail(id);
     }
 
     @PostMapping("/refund/deleteByIds")
     public Response<String> refundDeleteByIds(@RequestParam("ids") List<Long> ids) {
-        return receiptService.deleteRetailRefund(ids);
+        return receiptRetailService.deleteRetailRefund(ids);
     }
 
     @PutMapping("/refund/updateStatus")
     public Response<String> refundUpdateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
-        return receiptService.updateRetailRefundStatus(ids, status);
+        return receiptRetailService.updateRetailRefundStatus(ids, status);
     }
 }

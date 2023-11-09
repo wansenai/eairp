@@ -10,34 +10,10 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.dto.receipt;
+package com.wansenai.mappers.receipt;
 
-import lombok.Data;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.wansenai.entities.receipt.ReceiptRetailSub;
 
-@Data
-public class QueryRetailRefundDTO {
-
-    private String receiptNumber;
-
-    private String productInfo;
-
-    private Long memberId;
-
-    private Long warehouseId;
-
-    private Long accountId;
-
-    private Long operatorId;
-
-    private Integer status;
-
-    private String remark;
-
-    private String startDate;
-
-    private String endDate;
-
-    private Long page;
-
-    private Long pageSize;
+public interface ReceiptRetailSubMapper extends BaseMapper<ReceiptRetailSub> {
 }

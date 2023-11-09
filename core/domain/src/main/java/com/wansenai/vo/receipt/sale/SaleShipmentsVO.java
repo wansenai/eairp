@@ -46,10 +46,10 @@ public class SaleShipmentsVO {
     private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal totalPrice;
+    private BigDecimal totalAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal taxRateTotalPrice;
+    private BigDecimal taxIncludedAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal shipmentsTotalPrice;

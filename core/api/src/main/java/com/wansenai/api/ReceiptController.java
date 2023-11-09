@@ -12,9 +12,9 @@
  */
 package com.wansenai.api;
 
-import com.wansenai.service.receipt.ReceiptService;
+import com.wansenai.service.receipt.ReceiptRetailService;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.ReceiptDetailVO;
+import com.wansenai.vo.receipt.retail.ReceiptRetailDetailVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,14 +26,14 @@ import java.util.List;
 @RequestMapping("/receipt")
 public class ReceiptController {
 
-    private final ReceiptService receiptService;
+    private final ReceiptRetailService receiptRetailService;
 
-    public ReceiptController(ReceiptService receiptService) {
-        this.receiptService = receiptService;
+    public ReceiptController(ReceiptRetailService receiptRetailService) {
+        this.receiptRetailService = receiptRetailService;
     }
 
     @GetMapping("/detail/{id}")
-    public Response<List<ReceiptDetailVO>> getRetailDetail(@PathVariable("id") Long id) {
-        return receiptService.retailDetail(id);
+    public Response<List<ReceiptRetailDetailVO>> getRetailDetail(@PathVariable("id") Long id) {
+        return receiptRetailService.retailDetail(id);
     }
 }
