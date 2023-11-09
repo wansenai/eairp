@@ -23,7 +23,7 @@ export const columns: BasicColumn[] = [
     },
     {
         title: '数量',
-        dataIndex: 'productInfo',
+        dataIndex: 'productNumber',
         width: 80,
     },
     {
