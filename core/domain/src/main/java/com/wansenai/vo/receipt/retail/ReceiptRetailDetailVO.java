@@ -10,7 +10,7 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.receipt;
+package com.wansenai.vo.receipt.retail;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReceiptDetailVO {
+public class ReceiptRetailDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
@@ -58,15 +58,6 @@ public class ReceiptDetailVO {
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal productTotalPrice;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal discountRate;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal discountAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal discountLastAmount;
 
     private String remark;
 }

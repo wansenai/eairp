@@ -29,8 +29,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("receipt_sub")
-public class ReceiptSub implements Serializable {
+@TableName("receipt_retail_sub")
+public class ReceiptRetailSub implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 89165156375123L;
@@ -51,21 +51,11 @@ public class ReceiptSub implements Serializable {
 
     private Integer productNumber;
 
-    private BigDecimal productPrice;
+    private BigDecimal unitPrice;
 
-    private BigDecimal productTotalPrice;
+    private BigDecimal totalAmount;
 
-    private BigDecimal taxRate;
-
-    private BigDecimal taxAmount;
-
-    private BigDecimal taxTotalPrice;
-
-    private String productRemark;
-
-    private Long productExtendId;
-
-    private Long anotherWarehouseId;
+    private String remark;
 
     private Long correlationId;
 

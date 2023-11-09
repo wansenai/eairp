@@ -29,11 +29,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("receipt_main")
-public class ReceiptMain implements Serializable {
+@TableName("receipt_retail_main")
+public class ReceiptRetailMain implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 514516533L;
+    private static final long serialVersionUID = 5145165989133L;
 
     /**
      * 主键
@@ -42,10 +42,6 @@ public class ReceiptMain implements Serializable {
     private Long id;
 
     private Long memberId;
-
-    private Long customerId;
-
-    private Long supplierId;
 
     private Long accountId;
 
@@ -57,11 +53,13 @@ public class ReceiptMain implements Serializable {
 
     private String receiptNumber;
 
+    private LocalDateTime receiptDate;
+
     private BigDecimal changeAmount;
 
     private BigDecimal backAmount;
 
-    private BigDecimal totalPrice;
+    private BigDecimal totalAmount;
 
     private String paymentType;
 
@@ -71,23 +69,7 @@ public class ReceiptMain implements Serializable {
 
     private String operatorId;
 
-    private String multipleAccount;
-
-    private String multipleAccountAmount;
-
-    private BigDecimal discountRate;
-
-    private BigDecimal discountAmount;
-
-    private BigDecimal discountLastAmount;
-
-    private BigDecimal otherAmount;
-
-    private BigDecimal deposit;
-
     private Integer status;
-
-    private Integer purchaseStatus;
 
     private Integer source;
 
