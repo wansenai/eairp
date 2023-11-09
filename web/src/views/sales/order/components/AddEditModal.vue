@@ -125,7 +125,7 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠后金额" data-step="2"
                              data-title="优惠后金额">
-                  <a-input-number placeholder="请输入优惠后金额" v-model:value="formState.discountLastAmount" :readOnly="true"/>
+                  <a-input placeholder="请输入优惠后金额" v-model:value="formState.discountLastAmount" :readOnly="true"/>
                 </a-form-item>
               </a-col>
             </a-row>
@@ -181,7 +181,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, h} from 'vue';
+import {defineComponent, ref, h, watch} from 'vue';
 import {AccountBookTwoTone} from '@ant-design/icons-vue';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
@@ -216,7 +216,7 @@ import {
   tableData,
   gridOptions,
   getTaxTotalPrice,
-} from '/@/views/sales/order/model/addEditModel';
+} from '/src/views/sales/model/addEditModel';
 import {getCustomerList} from "@/api/basic/customer";
 import {CustomerResp} from "@/api/basic/model/customerModel";
 import {getOperatorList} from "@/api/basic/operator";
@@ -500,9 +500,9 @@ export default defineComponent({
                   productNumber: 1,
                   amount: sale.retailPrice,
                   unitPrice: sale.retailPrice,
+                  taxTotalPrice: sale.retailPrice,
                   taxRate: 0,
                   taxAmount: 0,
-                  taxTotalPrice: sale.retailPrice,
                 };
                 table.insert(tableData)
               }
@@ -819,6 +819,13 @@ export default defineComponent({
         table.updateData()
       }
     }
+
+    watch(getTaxTotalPrice, (newValue, oldValue) => {
+      formState.discountLastAmount = newValue
+      formState.thisCollectAmount = newValue
+      // 重新调用本次收款
+      discountAmountChange()
+    });
 
     function discountRateChange() {
       const price = getTaxTotalPrice.value;

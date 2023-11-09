@@ -52,7 +52,7 @@ public class SaleShipmentsVO {
     private BigDecimal taxIncludedAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal shipmentsTotalPrice;
+    private BigDecimal totalCollectAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal thisCollectAmount;

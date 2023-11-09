@@ -23,10 +23,14 @@ interface FormState {
     id: number | string | undefined;
     customerId: string;
     receiptNumber: string;
+    otherReceipt: string;
     discountRate: number;
     discountAmount: number;
     discountLastAmount: number | string;
     deposit: number;
+    otherAmount: number;
+    thisCollectAmount: number;
+    thisArrearsAmount: number;
     remark: string;
     operatorIds: number[] | undefined;
     receiptDate: string | undefined | Dayjs;
@@ -220,11 +224,15 @@ const formState = reactive<FormState>({
     id: undefined,
     customerId: '',
     receiptNumber: '',
+    otherReceipt: '',
     remark: '',
     discountRate: 0,
     discountAmount: 0,
     discountLastAmount: 0,
     deposit: 0,
+    otherAmount: 0,
+    thisCollectAmount: 0,
+    thisArrearsAmount: 0,
     accountId: undefined,
     operatorIds: undefined,
     receiptDate: '',

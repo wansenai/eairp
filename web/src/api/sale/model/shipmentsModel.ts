@@ -1,25 +1,26 @@
 import {FileData} from '/@/api/retail/model/shipmentsModel';
 
-export interface QuerySaleOrderReq {
+export interface QuerySaleShipmentsReq {
     receiptNumber: string;
     productInfo: string;
     customerId: number | string;
     operatorId: number | string;
+    otherReceipt: string;
+    arrearsStatus: number;
     status: number;
     remark: string;
 }
 
-export interface SalesData {
+export interface tableData {
     warehouseId: number | string;
     productId: number | string;
     barCode: number | string;
-    productCode: string;
     productName: string;
     productUnit: string;
     productStandard: string;
     stock: number;
     productNumber: number;
-    retailPrice: number;
+    unitPrice: number;
     amount: number;
     taxRate: number;
     taxAmount: number;
@@ -27,36 +28,43 @@ export interface SalesData {
     remark: string;
 }
 
-export interface AddOrUpdateReceiptReq {
+export interface AddOrUpdateReceiptSaleShipmentsReq {
     id: number | string | undefined;
     customerId: string;
     receiptNumber: string;
     receiptDate: string;
+    otherReceipt: string;
     operatorIds: number[];
-    discountRate: number;
-    discountAmount: number;
-    discountLastAmount: number;
-    deposit: number;
+    collectOfferRate: number;
+    collectOfferAmount: number;
+    collectOfferLastAmount: number;
+    otherAmount: number;
+    thisCollectAmount: number;
+    thisArrearsAmount: number;
     accountId: number | string;
     multipleAccountIds: number[];
     multipleAccountAmounts: number[];
     status: number;
     remark: string;
-    tableData: SalesData[];
+    tableData: tableData[];
     files: FileData[];
 }
 
-export interface SaleDetailData {
+export interface SaleShipmentDetailData {
     customerId: number | string;
     receiptDate: string;
     receiptNumber: string;
     operatorIds: number[];
-    discountRate: number;
-    discountAmount: number;
-    discountLastAmount: number;
-    deposit: number;
+    collectOfferRate: number;
+    collectOfferAmount: number;
+    collectOfferLastAmount: number;
+    otherAmount: number;
+    thisCollectAmount: number;
+    thisArrearsAmount: number;
     accountIds: number;
+    multipleAccountAmounts: number[];
+    multipleAccountIds: number[];
     remark: string;
-    tableData: SalesData[];
+    tableData: tableData[];
     files: FileData[];
 }

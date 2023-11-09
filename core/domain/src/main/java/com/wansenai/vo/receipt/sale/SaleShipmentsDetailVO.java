@@ -23,6 +23,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -37,7 +38,7 @@ public class SaleShipmentsDetailVO {
     private String receiptNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private String receiptDate;
+    private LocalDateTime receiptDate;
 
     private String otherReceipt;
 
@@ -74,8 +75,6 @@ public class SaleShipmentsDetailVO {
     private List<SalesDataBO> tableData;
 
     private List<FileDataBO> files;
-
-    private Integer status;
 
     private String remark;
 }
