@@ -29,9 +29,11 @@ interface FormState {
     deposit: number;
     remark: string;
     operatorIds: number[] | undefined;
-    accountIds: number[] | undefined;
     receiptDate: string | undefined | Dayjs;
     warehouseId: number | string;
+    accountId: string | undefined;
+    multipleAccountIds: number[] | undefined;
+    multipleAccountAmounts: number[] | undefined;
 }
 
 const xGrid = ref<VxeGridInstance<RowVO>>()
@@ -223,10 +225,12 @@ const formState = reactive<FormState>({
     discountAmount: 0,
     discountLastAmount: 0,
     deposit: 0,
-    accountIds: undefined,
+    accountId: undefined,
     operatorIds: undefined,
     receiptDate: '',
     warehouseId: '',
+    multipleAccountIds: undefined,
+    multipleAccountAmounts: undefined,
 });
 
 export {

@@ -1,9 +1,6 @@
 import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
 import {useI18n} from "@/hooks/web/useI18n";
-import {h, Text} from "vue";
-import {Input} from "ant-design-vue";
-import {getOperatorList} from "@/api/basic/operator";
 import {getCustomerList} from "@/api/basic/customer";
 
 export const { t } = useI18n();
@@ -36,12 +33,12 @@ export const columns: BasicColumn[] = [
     },
     {
         title: '含税合计',
-        dataIndex: 'paymentAmount',
+        dataIndex: 'taxRateTotalPrice',
         width: 80,
     },
     {
         title: '收取定金',
-        dataIndex: 'backAmount',
+        dataIndex: 'deposit',
         width: 80,
     },
     {

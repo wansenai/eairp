@@ -12,46 +12,35 @@
  */
 package com.wansenai.dto.receipt.sale;
 
-import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.SalesDataBO;
 import lombok.Data;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 @Data
-public class SaleOrderDTO {
-
-    private Long id;
-
-    private Long customerId;
+public class QuerySaleShipmentsDTO {
 
     private String receiptNumber;
 
-    private String receiptDate;
+    private String productInfo;
 
-    private List<Long> operatorIds;
+    private Long customerId;
 
-    private BigDecimal discountRate;
+    private Long operatorId;
 
-    private BigDecimal discountAmount;
+    private Long warehouseId;
 
-    private BigDecimal discountLastAmount;
+    private String otherReceipt;
 
-    private BigDecimal deposit;
-
-    private Long accountId;
-
-    private List<Long> multipleAccountAmounts;
-
-    private List<Long> multipleAccountIds;
-
-    private List<SalesDataBO> tableData;
-
-    private List<FileDataBO> files;
+    // 有无欠款
+    private Integer arrearsStatus;
 
     private Integer status;
 
     private String remark;
-}
 
+    private String startDate;
+
+    private String endDate;
+
+    private Long page;
+
+    private Long pageSize;
+}

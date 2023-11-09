@@ -49,7 +49,7 @@ export function updateSaleOrderStatus(ids: number[], status: number ) {
 }
 
 export function deleteSaleOrder(ids: number[]) {
-    return defHttp.delete<BaseResp>(
+    return defHttp.put<BaseResp>(
         {
             url: `${API.Delete}/${ids}`,
         }

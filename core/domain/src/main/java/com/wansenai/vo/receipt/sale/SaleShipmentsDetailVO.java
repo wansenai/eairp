@@ -23,28 +23,44 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SaleOrderDetailVO {
+public class SaleShipmentsDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long customerId;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long accountId;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime receiptDate;
-
     private String receiptNumber;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private String receiptDate;
+
+    private String otherReceipt;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal collectOfferRate;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal collectOfferAmount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal collectOfferLastAmount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal otherAmount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal thisCollectAmount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal thisArrearsAmount;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private List<Long> operatorIds;
+    private Long accountId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private List<Long> multipleAccountAmounts;
@@ -52,21 +68,14 @@ public class SaleOrderDetailVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private List<Long> multipleAccountIds;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal discountRate;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal discountAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal discountLastAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal deposit;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private List<Long> operatorIds;
 
     private List<SalesDataBO> tableData;
 
     private List<FileDataBO> files;
+
+    private Integer status;
 
     private String remark;
 }

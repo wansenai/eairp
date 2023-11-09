@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Data
-public class SaleOrderDTO {
+public class SaleShipmentsDTO {
 
     private Long id;
 
@@ -30,21 +30,27 @@ public class SaleOrderDTO {
 
     private String receiptDate;
 
-    private List<Long> operatorIds;
+    private String otherReceipt;
 
-    private BigDecimal discountRate;
+    private BigDecimal collectOfferRate;
 
-    private BigDecimal discountAmount;
+    private BigDecimal collectOfferAmount;
 
-    private BigDecimal discountLastAmount;
+    private BigDecimal collectOfferLastAmount;
 
-    private BigDecimal deposit;
+    private BigDecimal otherAmount;
+
+    private BigDecimal thisCollectAmount;
+
+    private BigDecimal thisArrearsAmount;
 
     private Long accountId;
 
     private List<Long> multipleAccountAmounts;
 
     private List<Long> multipleAccountIds;
+
+    private List<Long> operatorIds;
 
     private List<SalesDataBO> tableData;
 
@@ -54,4 +60,3 @@ public class SaleOrderDTO {
 
     private String remark;
 }
-

@@ -15,8 +15,6 @@ package com.wansenai.vo.receipt.sale;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
-import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.SalesDataBO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,49 +22,43 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SaleOrderDetailVO {
+public class SaleShipmentsVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long customerId;
+    private Long id;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long accountId;
+    private String customerName;
+
+    private String receiptNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime receiptDate;
 
-    private String receiptNumber;
+    private String productInfo;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private List<Long> operatorIds;
+    private String operator;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private List<Long> multipleAccountAmounts;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private List<Long> multipleAccountIds;
+    private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal discountRate;
+    private BigDecimal totalPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal discountAmount;
+    private BigDecimal taxRateTotalPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal discountLastAmount;
+    private BigDecimal shipmentsTotalPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal deposit;
+    private BigDecimal thisCollectAmount;
 
-    private List<SalesDataBO> tableData;
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal thisArrearsAmount;
 
-    private List<FileDataBO> files;
-
-    private String remark;
+    private Integer status;
 }
