@@ -19,7 +19,7 @@ export interface SalesData {
     productStandard: string;
     stock: number;
     productNumber: number;
-    unitPrice: number;
+    retailPrice: number;
     amount: number;
     taxRate: number;
     taxAmount: number;
