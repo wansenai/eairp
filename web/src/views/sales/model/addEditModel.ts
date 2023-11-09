@@ -19,23 +19,23 @@ export interface RowVO {
     remark: string,
 }
 
-interface FormState {
+interface SaleShipmentsFormState {
     id: number | string | undefined;
     customerId: string;
+    accountId: number | string | undefined;
     receiptNumber: string;
+    receiptDate: string | undefined | Dayjs;
     otherReceipt: string;
-    discountRate: number;
-    discountAmount: number;
-    discountLastAmount: number | string;
-    deposit: number;
+    collectOfferRate: number;
+    collectOfferAmount: number;
+    collectOfferLastAmount: number | string;
     otherAmount: number;
     thisCollectAmount: number;
     thisArrearsAmount: number;
     remark: string;
+    status: number | undefined;
     operatorIds: number[] | undefined;
-    receiptDate: string | undefined | Dayjs;
     warehouseId: number | string;
-    accountId: string | undefined;
     multipleAccountIds: number[] | undefined;
     multipleAccountAmounts: number[] | undefined;
 }
@@ -220,19 +220,19 @@ const sumNum = (list: RowVO[], field: string) => {
 }
 
 const getTaxTotalPrice = ref('');
-const formState = reactive<FormState>({
+const saleShipmentsFormState = reactive<SaleShipmentsFormState>({
     id: undefined,
     customerId: '',
     receiptNumber: '',
     otherReceipt: '',
     remark: '',
-    discountRate: 0,
-    discountAmount: 0,
-    discountLastAmount: 0,
-    deposit: 0,
+    collectOfferRate: 0,
+    collectOfferAmount: 0,
+    collectOfferLastAmount: 0,
     otherAmount: 0,
     thisCollectAmount: 0,
     thisArrearsAmount: 0,
+    status: undefined,
     accountId: undefined,
     operatorIds: undefined,
     receiptDate: '',
@@ -246,6 +246,6 @@ export {
     sumNum,
     tableData,
     gridOptions,
-    formState,
+    saleShipmentsFormState,
     getTaxTotalPrice,
 }

@@ -14,7 +14,7 @@ export const columns: BasicColumn[] = [
     {
         title: '单据编号',
         dataIndex: 'receiptNumber',
-        width: 130,
+        width: 140,
     },
     {
         title: '商品信息',
