@@ -57,7 +57,7 @@ import {Tag} from "ant-design-vue";
 import {getSaleOrderPageList, updateSaleOrderStatus, deleteSaleOrder} from "@/api/sale/order";
 import AddEditModal from "@/views/sales/order/components/AddEditModal.vue";
 export default defineComponent({
-  name: 'Shipments',
+  name: 'SaleOrderModal',
   components: {AddEditModal, Tag, TableAction, BasicTable},
   setup() {
     const { t } = useI18n();

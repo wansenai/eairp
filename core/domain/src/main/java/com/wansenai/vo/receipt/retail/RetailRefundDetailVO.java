@@ -10,17 +10,15 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.receipt.sale;
+package com.wansenai.vo.receipt.retail;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
 import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.SalesDataBO;
-import lombok.AllArgsConstructor;
+import com.wansenai.bo.ShipmentsDataBO;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,53 +26,33 @@ import java.util.List;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class SaleShipmentsDetailVO {
+public class RetailRefundDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long customerId;
-
-    private String receiptNumber;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime receiptDate;
-
-    private String otherReceipt;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal collectOfferRate;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal collectOfferAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal collectOfferLastAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal otherAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal thisCollectAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal thisArrearsAmount;
+    private Long memberId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long accountId;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private List<Long> multipleAccountAmounts;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime receiptDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private List<Long> multipleAccountIds;
+    private String receiptNumber;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private List<Long> operatorIds;
+    private String otherReceipt;
 
-    private List<SalesDataBO> tableData;
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal paymentAmount;
 
-    private List<FileDataBO> files;
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal receiptAmount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal backAmount;
 
     private String remark;
+
+    private List<ShipmentsDataBO> tableData;
+
+    private List<FileDataBO> files;
 }

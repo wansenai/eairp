@@ -28,17 +28,27 @@ export const columns: BasicColumn[] = [
     },
     {
         title: '金额合计',
-        dataIndex: 'totalPrice',
+        dataIndex: 'totalAmount',
         width: 60,
     },
     {
         title: '含税合计',
-        dataIndex: 'taxRateTotalPrice',
+        dataIndex: 'taxIncludedAmount',
         width: 80,
     },
     {
-        title: '收取定金',
-        dataIndex: 'deposit',
+        title: '待收金额',
+        dataIndex: 'totalCollectAmount',
+        width: 80,
+    },
+    {
+        title: '本次收款',
+        dataIndex: 'thisCollectAmount',
+        width: 80,
+    },
+    {
+        title: '本次欠款',
+        dataIndex: 'thisArrearsAmount',
         width: 80,
     },
     {
@@ -117,8 +127,6 @@ export const searchFormSchema: FormSchema[] = [
             options: [
                 { label: '未审核', value: 0, key: 0 },
                 { label: '已审核', value: 1, key: 1 },
-                { label: '部分销售', value: 2, key: 2 },
-                { label: '完成销售', value: 3, key: 3 },
             ],
         },
     },

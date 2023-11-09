@@ -14,11 +14,16 @@ package com.wansenai.api;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.sale.QuerySaleOrderDTO;
+import com.wansenai.dto.receipt.sale.QuerySaleShipmentsDTO;
 import com.wansenai.dto.receipt.sale.SaleOrderDTO;
-import com.wansenai.service.receipt.ReceiptService;
+import com.wansenai.dto.receipt.sale.SaleShipmentsDTO;
+import com.wansenai.service.receipt.ReceiptRetailService;
+import com.wansenai.service.receipt.ReceiptSaleService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.sale.SaleOrderDetailVO;
 import com.wansenai.vo.receipt.sale.SaleOrderVO;
+import com.wansenai.vo.receipt.sale.SaleShipmentsDetailVO;
+import com.wansenai.vo.receipt.sale.SaleShipmentsVO;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,34 +32,59 @@ import java.util.List;
 @RequestMapping("sale")
 public class SalesController {
 
-    private final ReceiptService receiptService;
+    private final ReceiptSaleService receiptSaleService;
 
-    public SalesController(ReceiptService receiptService) {
-        this.receiptService = receiptService;
+    public SalesController(ReceiptSaleService receiptSaleService) {
+        this.receiptSaleService = receiptSaleService;
     }
 
     @GetMapping("/order/pageList")
     public Response<Page<SaleOrderVO>> pageList(@ModelAttribute QuerySaleOrderDTO querySaleOrderDTO) {
-        return receiptService.getSaleOrderPage(querySaleOrderDTO);
+        return receiptSaleService.getSaleOrderPage(querySaleOrderDTO);
     }
 
     @PostMapping("/order/addOrUpdate")
     public Response<String> addOrUpdate(@RequestBody SaleOrderDTO saleOrderDTO) {
-        return receiptService.addOrUpdateSaleOrder(saleOrderDTO);
+        return receiptSaleService.addOrUpdateSaleOrder(saleOrderDTO);
     }
 
     @GetMapping("/order/detail/{id}")
     public Response<SaleOrderDetailVO> detail(@PathVariable("id") Long id) {
-        return receiptService.getSaleOrderDetail(id);
+        return receiptSaleService.getSaleOrderDetail(id);
     }
 
     @PutMapping("/order/updateStatus/{ids}/{status}")
     public Response<String> updateStatus(@PathVariable("ids") List<Long> ids, @PathVariable("status") Integer status) {
-        return receiptService.updateSaleOrderStatus(ids, status);
+        return receiptSaleService.updateSaleOrderStatus(ids, status);
     }
 
     @PutMapping("/order/delete/{ids}")
     public Response<String> delete(@PathVariable("ids") List<Long> ids) {
-        return receiptService.deleteSaleOrder(ids);
+        return receiptSaleService.deleteSaleOrder(ids);
+    }
+
+    @GetMapping("/shipments/pageList")
+    public Response<Page<SaleShipmentsVO>> shipmentsPageList(@ModelAttribute QuerySaleShipmentsDTO shipmentsDTO) {
+        return receiptSaleService.getSaleShipmentsPage(shipmentsDTO);
+    }
+
+    @PostMapping("/shipments/addOrUpdate")
+    public Response<String> addOrUpdateShipments(@RequestBody SaleShipmentsDTO shipmentsDTO) {
+        return receiptSaleService.addOrUpdateSaleShipments(shipmentsDTO);
+    }
+
+    @GetMapping("/shipments/detail/{id}")
+    public Response<SaleShipmentsDetailVO> shipmentsDetail(@PathVariable("id") Long id) {
+        return receiptSaleService.getSaleShipmentsDetail(id);
+    }
+
+    @PutMapping("/shipments/updateStatus/{ids}/{status}")
+    public Response<String> updateShipmentsStatus(@PathVariable("ids") List<Long> ids, @PathVariable("status") Integer status) {
+        return receiptSaleService.updateSaleShipmentsStatus(ids, status);
+    }
+
+    @PutMapping("/shipments/delete/{ids}")
+    public Response<String> deleteShipments(@PathVariable("ids") List<Long> ids) {
+        return receiptSaleService.deleteSaleShipments(ids);
     }
 }
