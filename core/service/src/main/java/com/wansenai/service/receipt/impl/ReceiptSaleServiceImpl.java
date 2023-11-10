@@ -850,26 +850,394 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
 
     @Override
     public Response<Page<SaleRefundVO>> getSaleRefundPage(QuerySaleRefundDTO refundDTO) {
-        return null;
+        var result = new Page<SaleRefundVO>();
+        var saleRefundVOList = new ArrayList<SaleRefundVO>();
+        var page = new Page<ReceiptSaleMain>(refundDTO.getPage(), refundDTO.getPageSize());
+        var queryWrapper = new LambdaQueryWrapper<ReceiptSaleMain>()
+                .eq(ReceiptSaleMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .in(ReceiptSaleMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_SALES_REFUND)
+                .eq(StringUtils.hasText(refundDTO.getReceiptNumber()), ReceiptSaleMain::getReceiptNumber, refundDTO.getReceiptNumber())
+                .like(StringUtils.hasText(refundDTO.getRemark()), ReceiptSaleMain::getRemark, refundDTO.getRemark())
+                .eq(refundDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, refundDTO.getCustomerId())
+                .eq(refundDTO.getOperatorId() != null, ReceiptSaleMain::getCreateBy, refundDTO.getOperatorId())
+                .eq(refundDTO.getStatus() != null, ReceiptSaleMain::getStatus, refundDTO.getStatus())
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(refundDTO.getStartDate()), ReceiptSaleMain::getCreateTime, refundDTO.getStartDate())
+                .le(StringUtils.hasText(refundDTO.getEndDate()), ReceiptSaleMain::getCreateTime, refundDTO.getEndDate());
+
+        var queryResult = receiptSaleMainMapper.selectPage(page, queryWrapper);
+
+        queryResult.getRecords().forEach(item -> {
+            String customerName = null;
+            if (item.getCustomerId() != null) {
+                var customer = customerService.getById(item.getCustomerId());
+                if (customer != null) {
+                    customerName = customer.getCustomerName();
+                }
+            }
+            String crateBy = null;
+            if (item.getCreateBy() != null) {
+                var user = userService.getById(item.getCreateBy());
+                if (user != null) {
+                    crateBy = user.getName();
+                }
+            }
+            var productNumber = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .list()
+                    .stream()
+                    .mapToInt(ReceiptSaleSub::getProductNumber)
+                    .sum();
+
+            var taxAmount = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .list()
+                    .stream()
+                    .map(ReceiptSaleSub::getTaxAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            var taxRateTotalPrice = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .list()
+                    .stream()
+                    .map(ReceiptSaleSub::getTaxIncludedAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            var totalRefundAmount = item.getArrearsAmount().add(item.getChangeAmount());
+
+            var saleRefundVO = SaleRefundVO.builder()
+                    .id(item.getId())
+                    .customerName(customerName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalAmount(taxAmount)
+                    .taxIncludedAmount(taxRateTotalPrice)
+                    .refundTotalAmount(totalRefundAmount)
+                    .thisRefundAmount(item.getChangeAmount())
+                    .thisArrearsAmount(item.getArrearsAmount())
+                    .status(item.getStatus())
+                    .build();
+            saleRefundVOList.add(saleRefundVO);
+        });
+        result.setRecords(saleRefundVOList);
+        result.setTotal(queryResult.getTotal());
+        result.setCurrent(queryResult.getCurrent());
+        result.setSize(queryResult.getSize());
+
+        return Response.responseData(result);
     }
 
     @Override
     public Response<SaleRefundDetailVO> getSaleRefundDetail(Long id) {
-        return null;
+        if (id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var sale = getById(id);
+
+        List<FileDataBO> fileList = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getFileId())) {
+            List<Long> ids = Arrays.stream(sale.getFileId().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            fileList.addAll(fileMapper.selectBatchIds(ids)
+                    .stream()
+                    .map(item ->
+                            FileDataBO.builder(
+                                    item.getFileName(),
+                                    item.getFileUrl(),
+                                    item.getId(),
+                                    item.getUid(),
+                                    item.getFileType(),
+                                    item.getFileSize()
+                            ))
+                    .toList());
+        }
+
+        var receiptSaleSubs = receiptSaleSubService.lambdaQuery()
+                .eq(ReceiptSaleSub::getReceiptSaleMainId, id)
+                .list();
+
+        var tableData = new ArrayList<SalesDataBO>(receiptSaleSubs.size() + 1);
+        for (ReceiptSaleSub item : receiptSaleSubs) {
+            var saleData = SalesDataBO.builder()
+                    .productId(item.getProductId())
+                    .barCode(item.getProductBarcode())
+                    .productNumber(item.getProductNumber())
+                    .unitPrice(item.getUnitPrice())
+                    .amount(item.getTotalAmount())
+                    .taxRate(item.getTaxRate())
+                    .taxAmount(item.getTaxAmount())
+                    .taxTotalPrice(item.getTaxIncludedAmount())
+                    .warehouseId(item.getWarehouseId())
+                    .build();
+
+            var data = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            if(data != null) {
+                saleData.setProductName(data.getProductName());
+                saleData.setProductStandard(data.getProductStandard());
+                saleData.setProductUnit(data.getProductUnit());
+                saleData.setStock(data.getStock());
+
+            }
+
+            tableData.add(saleData);
+        }
+
+        List<Long> operatorIds = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getOperatorId())) {
+            operatorIds = Arrays.stream(sale.getOperatorId().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+        }
+
+        List<Long> multipleAccountIds = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getMultipleAccount())) {
+            multipleAccountIds = Arrays.stream(sale.getMultipleAccount().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+        }
+        List<Long> multipleAccountAmounts = new ArrayList<>();
+        if (StringUtils.hasLength(sale.getMultipleAccountAmount())) {
+            multipleAccountAmounts = Arrays.stream(sale.getMultipleAccountAmount().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+        }
+
+        var saleRefundDetail = SaleRefundDetailVO.builder()
+                .receiptNumber(sale.getReceiptNumber())
+                .receiptDate(sale.getReceiptDate())
+                .customerId(sale.getCustomerId())
+                .accountId(sale.getAccountId())
+                .operatorIds(operatorIds)
+                .refundOfferRate(sale.getDiscountRate())
+                .refundOfferAmount(sale.getDiscountAmount())
+                .refundLastAmount(sale.getDiscountLastAmount())
+                .otherAmount(sale.getOtherAmount())
+                .thisRefundAmount(sale.getChangeAmount())
+                .thisArrearsAmount(sale.getArrearsAmount())
+                .multipleAccountIds(multipleAccountIds)
+                .multipleAccountAmounts(multipleAccountAmounts)
+                .remark(sale.getRemark())
+                .tableData(tableData)
+                .files(fileList)
+                .build();
+
+        return Response.responseData(saleRefundDetail);
     }
 
     @Override
     public Response<String> addOrUpdateSaleRefund(SaleRefundDTO refundDTO) {
-        return null;
+        var userId = userService.getCurrentUserId();
+        var isUpdate = refundDTO.getId() != null;
+
+        var operatorIds = new StringBuilder();
+        if (!refundDTO.getOperatorIds().isEmpty()) {
+            var operatorList = refundDTO.getOperatorIds();
+            for (Long aLong : operatorList) {
+                operatorIds.append(aLong).append(",");
+            }
+        }
+
+        var multipleAccountIds = new StringBuilder();
+        if (!refundDTO.getMultipleAccountIds().isEmpty()) {
+            var multipleAccountList = refundDTO.getMultipleAccountIds();
+            for (Long aLong : multipleAccountList) {
+                multipleAccountIds.append(aLong).append(",");
+            }
+        } else {
+            multipleAccountIds.append("");
+        }
+
+        var multipleAccountAmounts = new StringBuilder();
+        if (!refundDTO.getMultipleAccountAmounts().isEmpty()) {
+            var multipleAccountList = refundDTO.getMultipleAccountAmounts();
+            for (Long amount : multipleAccountList) {
+                multipleAccountAmounts.append(amount).append(",");
+            }
+        } else {
+            multipleAccountAmounts.append("");
+        }
+        String accountId = null;
+        if (refundDTO.getAccountId() != null) {
+            accountId = String.valueOf(refundDTO.getAccountId());
+        }
+
+        var fid = new ArrayList<>();
+        if (!refundDTO.getFiles().isEmpty()) {
+            var receiptMain = getById(refundDTO.getId());
+            if (receiptMain != null && StringUtils.hasLength(receiptMain.getFileId())) {
+                var ids = Arrays.stream(receiptMain.getFileId().split(","))
+                        .map(Long::parseLong)
+                        .collect(Collectors.toList());
+                fileMapper.deleteBatchIds(ids);
+            }
+            refundDTO.getFiles().forEach(item -> {
+                var file = SysFile.builder()
+                        .id(SnowflakeIdUtil.nextId())
+                        .uid(item.getUid())
+                        .fileName(item.getFileName())
+                        .fileType(item.getFileType())
+                        .fileSize(item.getFileSize())
+                        .fileUrl(item.getFileUrl())
+                        .createBy(userId)
+                        .createTime(LocalDateTime.now())
+                        .build();
+                fileMapper.insert(file);
+                fid.add(file.getId());
+            });
+        }
+        var fileIds = fid.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+
+        if (isUpdate) {
+            var updateMainResult = lambdaUpdate()
+                    .eq(ReceiptSaleMain::getId, refundDTO.getId())
+                    .set(refundDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, refundDTO.getCustomerId())
+                    .set(refundDTO.getRefundOfferRate() != null, ReceiptSaleMain::getDiscountRate, refundDTO.getRefundOfferRate())
+                    .set(refundDTO.getRefundOfferAmount() != null, ReceiptSaleMain::getDiscountAmount, refundDTO.getRefundOfferAmount())
+                    .set(refundDTO.getRefundLastAmount() != null, ReceiptSaleMain::getDiscountLastAmount, refundDTO.getRefundLastAmount())
+                    .set(refundDTO.getOtherAmount() != null, ReceiptSaleMain::getOtherAmount, refundDTO.getOtherAmount())
+                    .set(refundDTO.getThisRefundAmount() != null, ReceiptSaleMain::getChangeAmount, refundDTO.getThisRefundAmount())
+                    .set(refundDTO.getThisArrearsAmount() != null, ReceiptSaleMain::getArrearsAmount, refundDTO.getThisArrearsAmount())
+                    .set(refundDTO.getStatus() != null, ReceiptSaleMain::getStatus, refundDTO.getStatus())
+                    .set(StringUtils.hasText(refundDTO.getReceiptDate()), ReceiptSaleMain::getReceiptDate, refundDTO.getReceiptDate())
+                    .set(StringUtils.hasText(refundDTO.getRemark()), ReceiptSaleMain::getRemark, refundDTO.getRemark())
+                    .set(ReceiptSaleMain::getAccountId, accountId)
+                    .set(ReceiptSaleMain::getFileId, fileIds)
+                    .set(ReceiptSaleMain::getMultipleAccount, String.valueOf(multipleAccountIds))
+                    .set(ReceiptSaleMain::getMultipleAccountAmount, String.valueOf(multipleAccountAmounts))
+                    .set(!operatorIds.isEmpty(), ReceiptSaleMain::getOperatorId, String.valueOf(operatorIds))
+                    .set(ReceiptSaleMain::getUpdateBy, userId)
+                    .set(ReceiptSaleMain::getUpdateTime, LocalDateTime.now())
+                    .update();
+
+            receiptSaleSubService.lambdaUpdate()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, refundDTO.getId())
+                    .remove();
+
+            var tableData = refundDTO.getTableData();
+            var receiptSaleList = tableData.stream()
+                    .map(item -> ReceiptSaleSub.builder()
+                            .receiptSaleMainId(refundDTO.getId())
+                            .productId(item.getProductId())
+                            .productNumber(item.getProductNumber())
+                            .unitPrice(item.getUnitPrice())
+                            .totalAmount(item.getAmount())
+                            .productBarcode(item.getBarCode())
+                            .warehouseId(item.getWarehouseId())
+                            .taxRate(item.getTaxRate())
+                            .taxAmount(item.getTaxAmount())
+                            .taxIncludedAmount(item.getTaxTotalPrice())
+                            .updateBy(userId)
+                            .updateTime(LocalDateTime.now())
+                            .build())
+                    .collect(Collectors.toList());
+
+            var updateSubResult = receiptSaleSubService.saveBatch(receiptSaleList);
+
+            if (updateMainResult && updateSubResult) {
+                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS);
+            } else {
+                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_ERROR);
+            }
+        } else {
+            var id = SnowflakeIdUtil.nextId();
+
+            var receiptSaleShipmentMain = ReceiptSaleMain.builder()
+                    .id(id)
+                    .type(ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                    .subType(ReceiptConstants.RECEIPT_SUB_TYPE_SALES_REFUND)
+                    .initReceiptNumber(refundDTO.getReceiptNumber())
+                    .receiptNumber(refundDTO.getReceiptNumber())
+                    .receiptDate(TimeUtil.parse(refundDTO.getReceiptDate()))
+                    .customerId(refundDTO.getCustomerId())
+                    .operatorId(String.valueOf(operatorIds))
+                    .accountId(refundDTO.getAccountId())
+                    .discountRate(refundDTO.getRefundOfferRate())
+                    .discountAmount(refundDTO.getRefundOfferAmount())
+                    .discountLastAmount(refundDTO.getRefundLastAmount())
+                    .otherAmount(refundDTO.getOtherAmount())
+                    .changeAmount(refundDTO.getThisRefundAmount())
+                    .arrearsAmount(refundDTO.getThisArrearsAmount())
+                    .remark(refundDTO.getRemark())
+                    .fileId(fileIds)
+                    .status(refundDTO.getStatus())
+                    .createBy(userId)
+                    .createTime(LocalDateTime.now())
+                    .build();
+            if(StringUtils.hasLength(multipleAccountIds)) {
+                receiptSaleShipmentMain.setMultipleAccount(String.valueOf(multipleAccountIds));
+            }
+            if(StringUtils.hasLength(multipleAccountAmounts)) {
+                receiptSaleShipmentMain.setMultipleAccountAmount(String.valueOf(multipleAccountAmounts));
+            }
+            var saveMainResult = save(receiptSaleShipmentMain);
+
+            var receiptSubList = refundDTO.getTableData();
+            var receiptList = receiptSubList.stream()
+                    .map(item -> ReceiptSaleSub.builder()
+                            .receiptSaleMainId(id)
+                            .productId(item.getProductId())
+                            .productNumber(item.getProductNumber())
+                            .unitPrice(item.getUnitPrice())
+                            .totalAmount(item.getAmount())
+                            .productBarcode(item.getBarCode())
+                            .warehouseId(item.getWarehouseId())
+                            .taxRate(item.getTaxRate())
+                            .taxAmount(item.getTaxAmount())
+                            .taxIncludedAmount(item.getTaxTotalPrice())
+                            .createBy(userId)
+                            .createTime(LocalDateTime.now())
+                            .build())
+                    .collect(Collectors.toList());
+
+            var saveSubResult = receiptSaleSubService.saveBatch(receiptList);
+
+            if (saveMainResult && saveSubResult) {
+                return Response.responseMsg(SaleCodeEnum.ADD_SALE_REFUND_SUCCESS);
+            } else {
+                return Response.responseMsg(SaleCodeEnum.ADD_SALE_REFUND_ERROR);
+            }
+        }
     }
 
     @Override
     public Response<String> deleteSaleRefund(List<Long> ids) {
-        return null;
+        if (ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var updateStatusResult = lambdaUpdate()
+                .in(ReceiptSaleMain::getId, ids)
+                .set(ReceiptSaleMain::getDeleteFlag, CommonConstants.DELETED)
+                .update();
+        if (updateStatusResult) {
+            return Response.responseMsg(SaleCodeEnum.DELETE_SALE_REFUND_SUCCESS);
+        } else {
+            return Response.responseMsg(SaleCodeEnum.DELETE_SALE_REFUND_ERROR);
+        }
     }
 
     @Override
     public Response<String> updateSaleRefundStatus(List<Long> ids, Integer status) {
-        return null;
+        if (ids.isEmpty() || status == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var updateResult = lambdaUpdate()
+                .in(ReceiptSaleMain::getId, ids)
+                .set(ReceiptSaleMain::getStatus, status)
+                .set(ReceiptSaleMain::getUpdateBy, userService.getCurrentUserId())
+                .set(ReceiptSaleMain::getUpdateTime, LocalDateTime.now())
+                .update();
+        if (updateResult) {
+            return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS);
+        } else {
+            return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_ERROR);
+        }
     }
 }
