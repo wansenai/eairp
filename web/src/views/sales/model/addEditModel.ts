@@ -56,6 +56,27 @@ interface SaleShipmentsFormState {
     multipleAccountAmounts: number[] | undefined;
 }
 
+interface SaleRefundFormState {
+    id: number | string | undefined;
+    customerId: string;
+    accountId: number | string | undefined;
+    receiptNumber: string;
+    receiptDate: string | undefined | Dayjs;
+    otherReceipt: string;
+    refundOfferRate: number;
+    refundOfferAmount: number;
+    refundLastAmount: number | string;
+    otherAmount: number;
+    thisRefundAmount: number;
+    thisArrearsAmount: number;
+    remark: string;
+    status: number | undefined;
+    operatorIds: number[] | undefined;
+    warehouseId: number | string;
+    multipleAccountIds: number[] | undefined;
+    multipleAccountAmounts: number[] | undefined;
+}
+
 const xGrid = ref<VxeGridInstance<RowVO>>()
 const tableData = ref<RowVO[]>([])
 const gridOptions = reactive<VxeGridProps<RowVO>>({
@@ -275,6 +296,27 @@ const saleShipmentsFormState = reactive<SaleShipmentsFormState>({
     multipleAccountAmounts: undefined,
 });
 
+const saleRefundFormState = reactive<SaleRefundFormState>({
+    id: undefined,
+    customerId: '',
+    receiptNumber: '',
+    otherReceipt: '',
+    remark: '',
+    refundOfferRate: 0,
+    refundOfferAmount: 0,
+    refundLastAmount: 0,
+    otherAmount: 0,
+    thisRefundAmount: 0,
+    thisArrearsAmount: 0,
+    status: undefined,
+    accountId: undefined,
+    operatorIds: undefined,
+    receiptDate: '',
+    warehouseId: '',
+    multipleAccountIds: undefined,
+    multipleAccountAmounts: undefined,
+});
+
 export {
     xGrid,
     sumNum,
@@ -282,5 +324,6 @@ export {
     gridOptions,
     formState,
     saleShipmentsFormState,
+    saleRefundFormState,
     getTaxTotalPrice,
 }
