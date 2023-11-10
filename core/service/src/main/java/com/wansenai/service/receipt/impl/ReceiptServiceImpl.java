@@ -26,14 +26,21 @@ import com.wansenai.service.product.ProductStockKeepUnitService;
 import com.wansenai.service.receipt.*;
 import com.wansenai.service.user.ISysUserService;
 import com.wansenai.utils.constants.CommonConstants;
+import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
+import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -76,6 +83,118 @@ public class ReceiptServiceImpl implements ReceiptService {
         this.userService = userService;
         this.productService = productService;
         this.productStockKeepUnitService = productStockKeepUnitService;
+    }
+
+    @Override
+    public Response<RetailStatisticalDataVO> getRetailStatistics() {
+        var now = LocalDateTime.now();
+
+        var retailData = receiptRetailService.lambdaQuery()
+                .eq(ReceiptRetailMain::getType, ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
+                .in(ReceiptRetailMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_RETAIL_SHIPMENTS)
+                .eq(ReceiptRetailMain::getDeleteFlag, 0)
+                .list();
+        var retailRefundData = receiptRetailService.lambdaQuery()
+                .eq(ReceiptRetailMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .eq(ReceiptRetailMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_RETAIL_REFUND)
+                .eq(ReceiptRetailMain::getDeleteFlag, 0)
+                .list();
+
+        var salesData = receiptSaleService.lambdaQuery()
+                .eq(ReceiptSaleMain::getType, ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
+                .in(ReceiptSaleMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_SALES_SHIPMENTS)
+                .eq(ReceiptSaleMain::getDeleteFlag, 0)
+                .list();
+        var salesRefundData = receiptSaleService.lambdaQuery()
+                .eq(ReceiptSaleMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .eq(ReceiptSaleMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_SALES_REFUND)
+                .eq(ReceiptSaleMain::getDeleteFlag, 0)
+                .list();
+
+        var purchaseData = receiptPurchaseService.lambdaQuery()
+                .eq(ReceiptPurchaseMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .eq(ReceiptPurchaseMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_PURCHASE_STORAGE)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, 0)
+                .list();
+        var purchaseRefundData = receiptPurchaseService.lambdaQuery()
+                .eq(ReceiptPurchaseMain::getType, ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
+                .eq(ReceiptPurchaseMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_PURCHASE_REFUND)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, 0)
+                .list();
+
+        var todayRetailSales = calculateRetailTotalPrice(retailData, retailRefundData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yesterdayRetailSales = calculateRetailTotalPrice(retailData, retailRefundData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
+        var monthRetailSales = calculateRetailTotalPrice(retailData, retailRefundData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yearRetailSales = calculateRetailTotalPrice(retailData, retailRefundData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+
+        var todaySales = calculateSaleTotalPrice(salesData, salesRefundData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yesterdaySales = calculateSaleTotalPrice(salesData, salesRefundData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
+        var monthSales = calculateSaleTotalPrice(salesData, salesRefundData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yearSales = calculateSaleTotalPrice(salesData, salesRefundData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+
+        var todayPurchase = calculatePurchaseTotalPrice(purchaseData, purchaseRefundData, now.with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yesterdayPurchase = calculatePurchaseTotalPrice(purchaseData, purchaseRefundData, now.minusDays(1).with(LocalTime.MIN), now.minusDays(1).with(LocalTime.MAX));
+        var monthPurchase = calculatePurchaseTotalPrice(purchaseData, purchaseRefundData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+        var yearPurchase = calculatePurchaseTotalPrice(purchaseData, purchaseRefundData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
+
+        var retailStatisticalDataVO = RetailStatisticalDataVO.builder()
+                .todayRetailSales(todayRetailSales)
+                .yesterdayRetailSales(yesterdayRetailSales)
+                .monthRetailSales(monthRetailSales)
+                .yearRetailSales(yearRetailSales)
+                .todaySales(todaySales)
+                .yesterdaySales(yesterdaySales)
+                .monthSales(monthSales)
+                .yearSales(yearSales)
+                .todayPurchase(todayPurchase)
+                .yesterdayPurchase(yesterdayPurchase)
+                .monthPurchase(monthPurchase)
+                .yearPurchase(yearPurchase)
+                .build();
+
+        return Response.responseData(retailStatisticalDataVO);
+    }
+
+    private BigDecimal calculateRetailTotalPrice(List<ReceiptRetailMain> data, List<ReceiptRetailMain> backData, LocalDateTime start, LocalDateTime end) {
+        var dataTotalPrice = data.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptRetailMain::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        var backDataTotalPrice = backData.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptRetailMain::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        return dataTotalPrice.add(backDataTotalPrice);
+    }
+
+    private BigDecimal calculateSaleTotalPrice(List<ReceiptSaleMain> data, List<ReceiptSaleMain> backData, LocalDateTime start, LocalDateTime end) {
+        var dataTotalPrice = data.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptSaleMain::getDiscountLastAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        var backDataTotalPrice = backData.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptSaleMain::getDiscountLastAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        return dataTotalPrice.add(backDataTotalPrice);
+    }
+
+    private BigDecimal calculatePurchaseTotalPrice(List<ReceiptPurchaseMain> data, List<ReceiptPurchaseMain> backData, LocalDateTime start, LocalDateTime end) {
+        var dataTotalPrice = data.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptPurchaseMain::getDiscountLastAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        var backDataTotalPrice = backData.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptPurchaseMain::getDiscountLastAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        return dataTotalPrice.add(backDataTotalPrice);
     }
 
     @Override
