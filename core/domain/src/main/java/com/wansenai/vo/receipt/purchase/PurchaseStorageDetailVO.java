@@ -30,7 +30,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseRefundDetailVO {
+public class PurchaseStorageDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long supplierId;
@@ -43,19 +43,19 @@ public class PurchaseRefundDetailVO {
     private String otherReceipt;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal refundOfferRate;
+    private BigDecimal paymentRate;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal refundOfferAmount;
+    private BigDecimal paymentAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal refundLastAmount;
+    private BigDecimal paymentLastAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal otherAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal thisRefundAmount;
+    private BigDecimal thisPaymentAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal thisArrearsAmount;

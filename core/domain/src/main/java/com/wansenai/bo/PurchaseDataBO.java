@@ -10,55 +10,56 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.receipt.purchase;
+package com.wansenai.bo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.wansenai.bo.BigDecimalSerializerBO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseRefundVO {
+public class PurchaseDataBO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long id;
+    private Long warehouseId;
 
-    private String supplierName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long barCode;
 
-    private String receiptNumber;
+    private Long productId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime receiptDate;
+    private String productName;
 
-    private String productInfo;
+    private String productUnit;
 
-    private String operator;
+    private String productStandard;
+
+    private Integer stock;
 
     private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal totalAmount;
+    private BigDecimal unitPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal taxIncludedAmount;
+    private BigDecimal amount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal refundTotalAmount;
+    private BigDecimal taxRate;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal thisRefundAmount;
+    private BigDecimal taxAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal thisArrearsAmount;
+    private BigDecimal taxTotalPrice;
 
-    private Integer status;
+    private String remark;
+
 }

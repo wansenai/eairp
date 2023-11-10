@@ -12,5 +12,61 @@
  */
 package com.wansenai.vo.receipt.purchase;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.bo.FileDataBO;
+import com.wansenai.bo.SalesDataBO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PurchaseOrderDetailVO {
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long supplierId;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long accountId;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime receiptDate;
+
+    private String receiptNumber;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private List<Long> operatorIds;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private List<Long> multipleAccountAmounts;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private List<Long> multipleAccountIds;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal discountRate;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal discountAmount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal discountLastAmount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal deposit;
+
+    private List<SalesDataBO> tableData;
+
+    private List<FileDataBO> files;
+
+    private String remark;
 }

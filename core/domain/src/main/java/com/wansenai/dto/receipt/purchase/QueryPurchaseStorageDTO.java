@@ -15,5 +15,31 @@ package com.wansenai.dto.receipt.purchase;
 import lombok.Data;
 
 @Data
-public class PurchaseShipmentsDTO {
+public class QueryPurchaseStorageDTO {
+
+    private String receiptNumber;
+
+    private String productInfo;
+
+    private Long supplierId;
+
+    private Long operatorId;
+
+    private Long warehouseId;
+
+    private Long accountId;
+
+    private String otherReceipt;
+
+    private Integer status;
+
+    private String remark;
+
+    private String startDate;
+
+    private String endDate;
+
+    private Long page;
+
+    private Long pageSize;
 }
