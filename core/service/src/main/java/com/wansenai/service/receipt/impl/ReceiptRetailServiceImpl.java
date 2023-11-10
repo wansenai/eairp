@@ -234,7 +234,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
             var fid = new ArrayList<>();
             if (!shipmentsDTO.getFiles().isEmpty()) {
                 var receiptMain = getById(shipmentsDTO.getId());
-                if (StringUtils.hasLength(receiptMain.getFileId())) {
+                if (receiptMain != null && StringUtils.hasLength(receiptMain.getFileId())) {
                     var ids = Arrays.stream(receiptMain.getFileId().split(","))
                             .map(Long::parseLong)
                             .collect(Collectors.toList());
@@ -660,7 +660,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
             if (!refundDTO.getFiles().isEmpty()) {
                 var receiptMain = getById(refundDTO.getId());
-                if (StringUtils.hasLength(receiptMain.getFileId())) {
+                if (receiptMain != null && StringUtils.hasLength(receiptMain.getFileId())) {
                     var ids = Arrays.stream(receiptMain.getFileId().split(","))
                             .map(Long::parseLong)
                             .collect(Collectors.toList());
