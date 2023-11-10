@@ -25,7 +25,8 @@
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="saleShipmentsFormState.id" v-show="false"/>
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="客户" data-step="1"
-                         data-title="客户卡号">
+                         data-title="客户卡号"
+                         :rules="[{ required: true}]">
               <a-select v-model:value="saleShipmentsFormState.customerId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
                         placeholder="请选择客户"
@@ -260,7 +261,6 @@ import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
 import MultipleAccountsModal from "@/views/basic/settlement-account/components/MultipleAccountsModal.vue";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
-import {formState} from "@/views/retail/shipments/model/addEditModel";
 const VNodes = {
   props: {
     vnodes: {
@@ -954,7 +954,7 @@ export default defineComponent({
       console.info(data)
       const table = xGrid.value
       if(data && table) {
-        formState.otherReceipt = data.receiptNumber;
+        saleShipmentsFormState.otherReceipt = data.receiptNumber;
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {
@@ -976,7 +976,7 @@ export default defineComponent({
           };
           table.insert(tableData)
         })
-        formState.memberId = data.receiptDetailData[0].memberId
+        saleShipmentsFormState.customerId = data.receiptDetailData[0].memberId
       }
     }
 
