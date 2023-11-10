@@ -12,5 +12,8 @@
  */
 package com.wansenai.service.receipt;
 
-public interface ReceiptPurchaseSubService {
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.entities.receipt.ReceiptPurchaseSub;
+
+public interface ReceiptPurchaseSubService extends IService<ReceiptPurchaseSub> {
 }
