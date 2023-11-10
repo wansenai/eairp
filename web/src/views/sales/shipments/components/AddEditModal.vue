@@ -655,9 +655,7 @@ export default defineComponent({
 
       saleShipmentsFormState.thisCollectAmount = saleShipmentsFormState.thisCollectAmount.toString().replace(/,/g, '').replace(/￥/g, '');
       saleShipmentsFormState.collectOfferLastAmount = saleShipmentsFormState.collectOfferLastAmount.replace(/,/g, '').replace(/￥/g, '')
-      if (saleShipmentsFormState.thisArrearsAmount != 0) {
-        saleShipmentsFormState.thisArrearsAmount = saleShipmentsFormState.thisArrearsAmount.replace(/,/g, '').replace(/￥/g, '')
-      }
+      saleShipmentsFormState.thisArrearsAmount = saleShipmentsFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(/￥/g, '')
       const params: AddOrUpdateReceiptReq = {
         ...saleShipmentsFormState,
         tableData: dataArray,
