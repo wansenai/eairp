@@ -17,10 +17,21 @@ import com.wansenai.dto.receipt.QueryReceiptDTO;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
+import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
 
 import java.util.List;
 
 public interface ReceiptService {
+
+    /**
+     * Query the data summary of the six columns on the tenant's homepage.
+     * <p>
+     * 根据id集合和状态批量修改零售出库单状态
+     *
+     * @return Return to homepage data summary
+     *         返回首页数据汇总
+     */
+    Response<RetailStatisticalDataVO> getRetailStatistics();
 
     Response<Page<ReceiptVO>> otherReceipt(QueryReceiptDTO receiptDTO);
 

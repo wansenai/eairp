@@ -96,18 +96,6 @@ public interface ReceiptRetailService extends IService<ReceiptRetailMain> {
      */
     Response<String> updateRetailShipmentsStatus(List<Long> ids, Integer status);
 
-
-    /**
-     * Query the data summary of the six columns on the tenant's homepage.
-     * <p>
-     * 根据id集合和状态批量修改零售出库单状态
-     *
-     * @return Return to homepage data summary
-     *         返回首页数据汇总
-     */
-    Response<RetailStatisticalDataVO> getRetailStatistics();
-
-
     /**
      * Query retail refund orders with pagination.
      * 分页查询零售退货单
