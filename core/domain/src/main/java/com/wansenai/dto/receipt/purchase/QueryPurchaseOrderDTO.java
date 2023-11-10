@@ -16,4 +16,26 @@ import lombok.Data;
 
 @Data
 public class QueryPurchaseOrderDTO {
+
+    private String receiptNumber;
+
+    private String productInfo;
+
+    private Long supplierId;
+
+    private Long warehouseId;
+
+    private Long operatorId;
+
+    private Integer status;
+
+    private String remark;
+
+    private String startDate;
+
+    private String endDate;
+
+    private Long page;
+
+    private Long pageSize;
 }

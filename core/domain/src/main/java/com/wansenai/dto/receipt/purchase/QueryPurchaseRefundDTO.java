@@ -16,4 +16,30 @@ import lombok.Data;
 
 @Data
 public class QueryPurchaseRefundDTO {
+
+    private String receiptNumber;
+
+    private String productInfo;
+
+    private Long supplierId;
+
+    private Long operatorId;
+
+    private Long warehouseId;
+
+    private String otherReceipt;
+
+    private Integer arrearsStatus;
+
+    private Integer status;
+
+    private String remark;
+
+    private String startDate;
+
+    private String endDate;
+
+    private Long page;
+
+    private Long pageSize;
 }
