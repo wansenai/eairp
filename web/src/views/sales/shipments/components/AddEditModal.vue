@@ -200,6 +200,7 @@
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
+  <LinkReceiptModal @register="linkReceiptModal" @handleReceiptSuccess="handleReceiptSuccess"/>
 </template>
 
 <script lang="ts">
@@ -258,6 +259,8 @@ import {getAccountList} from "@/api/financial/account";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
 import MultipleAccountsModal from "@/views/basic/settlement-account/components/MultipleAccountsModal.vue";
+import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
+import {formState} from "@/views/retail/shipments/model/addEditModel";
 const VNodes = {
   props: {
     vnodes: {
@@ -278,6 +281,7 @@ export default defineComponent({
   components: {
     MultipleAccountsModal,
     FinancialAccountModal,
+    LinkReceiptModal,
     CustomerModal,
     SelectProductModal,
     'a-modal': Modal,
@@ -345,6 +349,7 @@ export default defineComponent({
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
     const [multipleAccountModal, {openModal: openManyAccountModal}] = useModal();
+    const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
     function handleCancelModal() {
       close();
       clearData();
@@ -660,8 +665,6 @@ export default defineComponent({
         status: type,
       }
 
-      console.info(params)
-
       const result = await addOrUpdateSaleShipments(params)
       if (result.code === 'S0004' || 'S0005') {
         createMessage.success('操作成功');
@@ -940,7 +943,41 @@ export default defineComponent({
     }
 
     function onSearch() {
+      openLinkReceiptModal(true, {
+        type: '销售',
+        subType: '销售订单',
+        title: '选择销售订单'
+      });
+    }
 
+    function handleReceiptSuccess(data) {
+      console.info(data)
+      const table = xGrid.value
+      if(data && table) {
+        formState.otherReceipt = data.receiptNumber;
+        table.remove()
+        data.receiptDetailData.forEach(item => {
+          const tableData : RowVO = {
+            id: item.id,
+            warehouseId: item.warehouseId,
+            productId: item.productId,
+            barCode: item.productBarcode,
+            productName: item.productName,
+            productModel: item.productModel,
+            productStandard: item.productStandard,
+            productUnit: item.unit,
+            stock: item.stock,
+            productNumber: item.productNumber,
+            unitPrice: item.unitPrice,
+            amount: item.amount,
+            taxRate: item.taxRate,
+            taxAmount: item.taxAmount,
+            taxTotalPrice: item.taxIncludedAmount,
+          };
+          table.insert(tableData)
+        })
+        formState.memberId = data.receiptDetailData[0].memberId
+      }
     }
 
     return {
@@ -1007,7 +1044,10 @@ export default defineComponent({
       handleManyAccount,
       multipleAccountModal,
       handleAccountSuccess,
-      onSearch
+      onSearch,
+      linkReceiptModal,
+      openLinkReceiptModal,
+      handleReceiptSuccess
     };
   },
 });
