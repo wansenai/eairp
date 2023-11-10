@@ -39,6 +39,7 @@ import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.RetailCodeEnum;
 import com.wansenai.utils.response.Response;
+import com.wansenai.vo.receipt.ReceiptRetailDetailVO;
 import com.wansenai.vo.receipt.retail.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

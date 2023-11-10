@@ -54,7 +54,7 @@ public class ReceiptPurchaseMain implements Serializable {
 
     private String receiptNumber;
 
-    private String receiptDate;
+    private LocalDateTime receiptDate;
 
     private BigDecimal changeAmount;
 

@@ -20,6 +20,7 @@ import com.wansenai.dto.receipt.retail.RetailShipmentsDTO;
 import com.wansenai.entities.receipt.ReceiptRetailMain;
 import com.wansenai.utils.response.Response;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.vo.receipt.ReceiptRetailDetailVO;
 import com.wansenai.vo.receipt.retail.*;
 
 import java.util.List;

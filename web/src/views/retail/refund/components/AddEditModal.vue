@@ -179,7 +179,7 @@
   <MemberModal @register="memberModal"/>
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
-  <RetailShipmentsModal @register="retailShipmentsModal" @handleReceiptSuccess="handleReceiptSuccess"/>
+  <LinkReceiptModal @register="linkReceiptModal" @handleReceiptSuccess="handleReceiptSuccess"/>
 </template>
 
 <script lang="ts">
@@ -236,8 +236,8 @@ import {getProductSkuByBarCode} from "@/api/product/product";
 import XEUtils from "xe-utils";
 import {ProductExtendPriceResp} from "@/api/product/model/productModel";
 import {AddOrUpdateRefundReq} from "@/api/retail/model/refundModel";
-import RetailShipmentsModal from "@/views/retail/refund/components/RetailShipmentsModal.vue";
 import {FileData, ShipmentsData} from "@/api/retail/model/shipmentsModel";
+import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 const VNodes = {
   props: {
     vnodes: {
@@ -256,10 +256,10 @@ export default defineComponent({
   name: 'AddEditModal',
   emits: ['success', 'cancel', 'error'],
   components: {
+    LinkReceiptModal,
     FinancialAccountModal,
     MemberModal,
     SelectProductModal,
-    RetailShipmentsModal,
     'plus-outlined': PlusOutlined,
     'a-modal': Modal,
     'a-upload': Upload,
@@ -325,8 +325,7 @@ export default defineComponent({
     const [memberModal, {openModal}] = useModal();
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
-    const [retailShipmentsModal, {openModal: openRetailShipmentsModal}] = useModal();
-    const [receiptDetailModal, {openModal: openReceiptDetailModal}] = useModal();
+    const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
 
     function handleCancelModal() {
       close();
@@ -667,13 +666,6 @@ export default defineComponent({
       const table = xGrid.value
       if(data && table) {
         formState.otherReceipt = data.receiptNumber;
-        // 设置table的columns的return和returnNumber字段的visible为true
-        // const {columns} = gridOptions
-        // if (columns) {
-        //   columns[8].visible = true
-        //   columns[9].visible = true
-        //   table.refreshColumn()
-        // }
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {
@@ -683,10 +675,10 @@ export default defineComponent({
             productName: item.productName,
             productStandard: item.productStandard,
             productUnit: item.unit,
-            stock: 0,
+            stock: item.stock,
             productNumber: item.productNumber,
-            amount: item.productTotalPrice,
-            retailPrice: item.productPrice,
+            amount: item.amount,
+            retailPrice: item.unitPrice,
           };
           table.insert(tableData)
         })
@@ -717,8 +709,10 @@ export default defineComponent({
     }
 
     function onSearch() {
-      openRetailShipmentsModal(true, {
-        isUpdate: false,
+      openLinkReceiptModal(true, {
+        type: '零售',
+        subType: '零售出库',
+        title: '选择零售出库订单'
       });
     }
 
@@ -769,16 +763,14 @@ export default defineComponent({
       backAmount,
       selectProductModal,
       openProductModal,
-      retailShipmentsModal,
-      openRetailShipmentsModal,
       productModal,
       handleCheckSuccess,
       addRowData,
       deleteRowData,
       onSearch,
-      receiptDetailModal,
       handleReceiptSuccess,
-      disabledStatus
+      disabledStatus,
+      linkReceiptModal
     };
   },
 });

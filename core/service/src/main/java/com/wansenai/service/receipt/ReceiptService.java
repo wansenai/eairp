@@ -12,8 +12,17 @@
  */
 package com.wansenai.service.receipt;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansenai.entities.receipt.ReceiptPurchaseSub;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.receipt.QueryReceiptDTO;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.receipt.ReceiptDetailVO;
+import com.wansenai.vo.receipt.ReceiptVO;
 
-public interface ReceiptPurchaseSubService extends IService<ReceiptPurchaseSub> {
+import java.util.List;
+
+public interface ReceiptService {
+
+    Response<Page<ReceiptVO>> otherReceipt(QueryReceiptDTO receiptDTO);
+
+    Response<Page<ReceiptDetailVO>> getOtherDetail(QueryReceiptDTO receiptDTO);
 }

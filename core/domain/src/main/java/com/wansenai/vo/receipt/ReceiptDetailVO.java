@@ -10,9 +10,10 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.receipt.retail;
+package com.wansenai.vo.receipt;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
 import lombok.AllArgsConstructor;
@@ -26,22 +27,20 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReceiptRetailDetailVO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ReceiptDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long warehouseId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productBarcode;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productId;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long memberId;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long warehouseId;
 
     private String productName;
 
@@ -53,11 +52,22 @@ public class ReceiptRetailDetailVO {
 
     private Integer productNumber;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal productPrice;
+    private Integer stock;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal productTotalPrice;
+    private BigDecimal unitPrice;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal amount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal taxRate;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal taxAmount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal taxIncludedAmount;
 
     private String remark;
 }
