@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
 import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.SalesDataBO;
+import com.wansenai.bo.PurchaseDataBO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,9 +44,6 @@ public class PurchaseOrderDetailVO {
     private String receiptNumber;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private List<Long> operatorIds;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private List<Long> multipleAccountAmounts;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -64,7 +61,7 @@ public class PurchaseOrderDetailVO {
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal deposit;
 
-    private List<SalesDataBO> tableData;
+    private List<PurchaseDataBO> tableData;
 
     private List<FileDataBO> files;
 
