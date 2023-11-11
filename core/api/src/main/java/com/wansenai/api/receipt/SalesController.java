@@ -10,20 +10,14 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.api;
+package com.wansenai.api.receipt;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansenai.dto.receipt.sale.QuerySaleOrderDTO;
-import com.wansenai.dto.receipt.sale.QuerySaleShipmentsDTO;
-import com.wansenai.dto.receipt.sale.SaleOrderDTO;
-import com.wansenai.dto.receipt.sale.SaleShipmentsDTO;
+import com.wansenai.dto.receipt.sale.*;
 import com.wansenai.service.receipt.ReceiptRetailService;
 import com.wansenai.service.receipt.ReceiptSaleService;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.sale.SaleOrderDetailVO;
-import com.wansenai.vo.receipt.sale.SaleOrderVO;
-import com.wansenai.vo.receipt.sale.SaleShipmentsDetailVO;
-import com.wansenai.vo.receipt.sale.SaleShipmentsVO;
+import com.wansenai.vo.receipt.sale.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -86,5 +80,30 @@ public class SalesController {
     @PutMapping("/shipments/delete/{ids}")
     public Response<String> deleteShipments(@PathVariable("ids") List<Long> ids) {
         return receiptSaleService.deleteSaleShipments(ids);
+    }
+
+    @GetMapping("/refund/pageList")
+    public Response<Page<SaleRefundVO>> refundPageList(@ModelAttribute QuerySaleRefundDTO refundDTO) {
+        return receiptSaleService.getSaleRefundPage(refundDTO);
+    }
+
+    @PostMapping("/refund/addOrUpdate")
+    public Response<String> addOrUpdateRefund(@RequestBody SaleRefundDTO refundDTO) {
+        return receiptSaleService.addOrUpdateSaleRefund(refundDTO);
+    }
+
+    @GetMapping("/refund/detail/{id}")
+    public Response<SaleRefundDetailVO> refundDetail(@PathVariable("id") Long id) {
+        return receiptSaleService.getSaleRefundDetail(id);
+    }
+
+    @PutMapping("/refund/updateStatus/{ids}/{status}")
+    public Response<String> updateRefundStatus(@PathVariable("ids") List<Long> ids, @PathVariable("status") Integer status) {
+        return receiptSaleService.updateSaleRefundStatus(ids, status);
+    }
+
+    @PutMapping("/refund/delete/{ids}")
+    public Response<String> deleteRefund(@PathVariable("ids") List<Long> ids) {
+        return receiptSaleService.deleteSaleRefund(ids);
     }
 }

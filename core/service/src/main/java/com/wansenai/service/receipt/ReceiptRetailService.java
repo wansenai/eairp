@@ -20,6 +20,7 @@ import com.wansenai.dto.receipt.retail.RetailShipmentsDTO;
 import com.wansenai.entities.receipt.ReceiptRetailMain;
 import com.wansenai.utils.response.Response;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.vo.receipt.ReceiptRetailDetailVO;
 import com.wansenai.vo.receipt.retail.*;
 
 import java.util.List;
@@ -94,18 +95,6 @@ public interface ReceiptRetailService extends IService<ReceiptRetailMain> {
      *         返回修改结果
      */
     Response<String> updateRetailShipmentsStatus(List<Long> ids, Integer status);
-
-
-    /**
-     * Query the data summary of the six columns on the tenant's homepage.
-     * <p>
-     * 根据id集合和状态批量修改零售出库单状态
-     *
-     * @return Return to homepage data summary
-     *         返回首页数据汇总
-     */
-    Response<RetailStatisticalDataVO> getRetailStatistics();
-
 
     /**
      * Query retail refund orders with pagination.

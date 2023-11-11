@@ -10,9 +10,10 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.receipt.purchase;
+package com.wansenai.vo.receipt;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
 import lombok.AllArgsConstructor;
@@ -21,44 +22,52 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseRefundVO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ReceiptDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
-    private String supplierName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long warehouseId;
 
-    private String receiptNumber;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long productBarcode;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime receiptDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long productId;
 
-    private String productInfo;
+    private String productName;
 
-    private String operator;
+    private String productStandard;
+
+    private String productModel;
+
+    private String unit;
 
     private Integer productNumber;
 
+    private Integer stock;
+
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal totalAmount;
+    private BigDecimal unitPrice;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal amount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal taxRate;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal taxAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal taxIncludedAmount;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal refundTotalAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal thisRefundAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal thisArrearsAmount;
-
-    private Integer status;
+    private String remark;
 }

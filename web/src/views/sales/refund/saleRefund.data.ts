@@ -37,13 +37,13 @@ export const columns: BasicColumn[] = [
         width: 80,
     },
     {
-        title: '待收金额',
-        dataIndex: 'totalCollectAmount',
+        title: '待退金额',
+        dataIndex: 'refundTotalAmount',
         width: 80,
     },
     {
-        title: '本次收款',
-        dataIndex: 'thisCollectAmount',
+        title: '本次退款',
+        dataIndex: 'thisRefundAmount',
         width: 80,
     },
     {

@@ -12,8 +12,49 @@
  */
 package com.wansenai.dto.receipt.purchase;
 
+import com.wansenai.bo.FileDataBO;
+import com.wansenai.bo.PurchaseDataBO;
 import lombok.Data;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class PurchaseRefundDTO {
+
+    private Long id;
+
+    private Long supplierId;
+
+    private String receiptNumber;
+
+    private String receiptDate;
+
+    private String otherReceipt;
+
+    private BigDecimal refundOfferRate;
+
+    private BigDecimal refundOfferAmount;
+
+    private BigDecimal refundLastAmount;
+
+    private BigDecimal otherAmount;
+
+    private BigDecimal thisRefundAmount;
+
+    private BigDecimal thisArrearsAmount;
+
+    private Long accountId;
+
+    private List<Long> multipleAccountAmounts;
+
+    private List<Long> multipleAccountIds;
+
+    private List<PurchaseDataBO> tableData;
+
+    private List<FileDataBO> files;
+
+    private Integer status;
+
+    private String remark;
 }

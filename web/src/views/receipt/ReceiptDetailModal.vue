@@ -19,15 +19,11 @@ export default defineComponent({
   setup(_, context) {
     const getTitle = ref('选择单据明细');
     const { createMessage } = useMessage();
-    const id = ref('');
     const receiptNumber = ref('');
-    const [registerTable, { getSelectRows }] = useTable({
+    const [registerTable, { getSelectRows, reload}] = useTable({
       rowKey: 'id',
       columns: ReceiptDetailColumn,
       api: getReceiptDetail,
-      beforeFetch: () => {
-        return id.value;
-      },
       rowSelection: {
         type: 'checkbox',
       },
@@ -38,18 +34,24 @@ export default defineComponent({
       useSearchForm: false,
       clickToRowSelect: true,
       showIndexColumn: false,
+      immediate: false,
     });
 
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200});
-      id.value = data.id
       receiptNumber.value = data.receiptNumber
+      reload({
+        searchInfo: {
+          "id": data.id,
+          "type": data.type,
+        }
+      });
     });
 
     function handleSubmit() {
       const rows = getSelectRows();
       if (rows.length === 0) {
-        createMessage.error('请选择需要退货的出库单据');
+        createMessage.error('请选择单据');
         return;
       }
       const dataObject = {

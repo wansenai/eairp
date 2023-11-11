@@ -20,13 +20,14 @@
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
     <a-spin :spinning="confirmLoading">
-      <a-form ref="formRef" :model="formState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
+      <a-form ref="formRef" :model="saleShipmentsFormState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
-            <a-input v-model:value="formState.id" v-show="false"/>
+            <a-input v-model:value="saleShipmentsFormState.id" v-show="false"/>
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="客户" data-step="1"
-                         data-title="客户卡号">
-              <a-select v-model:value="formState.customerId"
+                         data-title="客户卡号"
+                         :rules="[{ required: true}]">
+              <a-select v-model:value="saleShipmentsFormState.customerId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
                         placeholder="请选择客户"
                         :options="customerList.map(item => ({ value: item.id, label: item.customerName }))">
@@ -44,21 +45,21 @@
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="formState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
+              <a-date-picker v-model:value="saleShipmentsFormState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="formState.receiptNumber" :readOnly="true"/>
+              <a-input placeholder="请输入单据编号" v-model:value="saleShipmentsFormState.receiptNumber" :readOnly="true"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联订单" data-step="3"
                          data-title="关联订单"
                          data-intro="">
-              <a-input-search readonly="true" placeholder="请选择关联订单" v-model:value="formState.otherReceipt" @search="onSearch"/>
+              <a-input-search readonly="true" placeholder="请选择关联订单" v-model:value="saleShipmentsFormState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -101,7 +102,7 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-textarea :rows="1" placeholder="请输入备注" v-model:value="formState.remark"
+                  <a-textarea :rows="1" placeholder="请输入备注" v-model:value="saleShipmentsFormState.remark"
                               style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
@@ -110,25 +111,25 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
                              data-title="优惠率">
-                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" suffix="%" v-model:value="formState.discountRate"/>
+                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" suffix="%" v-model:value="saleShipmentsFormState.collectOfferRate"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="收款优惠" data-step="2"
                              data-title="收款优惠">
-                  <a-input-number placeholder="请输入收款优惠" @change="discountAmountChange" v-model:value="formState.discountAmount"/>
+                  <a-input-number placeholder="请输入收款优惠" @change="discountAmountChange" v-model:value="saleShipmentsFormState.collectOfferAmount"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠后金额" data-step="2"
                              data-title="优惠后金额">
-                  <a-input placeholder="请输入优惠后金额" v-model:value="formState.discountLastAmount" :readOnly="true"/>
+                  <a-input placeholder="请输入优惠后金额" v-model:value="saleShipmentsFormState.collectOfferLastAmount" :readOnly="true"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="其他费用" data-step="2"
                              data-title="其他费用">
-                  <a-input-number placeholder="请输入其他费用" @change="otherAmountChange" v-model:value="formState.otherAmount" :readOnly="true"/>
+                  <a-input-number placeholder="请输入其他费用" @change="otherAmountChange" v-model:value="saleShipmentsFormState.otherAmount" :readOnly="true"/>
                 </a-form-item>
               </a-col>
             </a-row>
@@ -136,7 +137,7 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="结算账户" data-step="2"
                              data-title="结算账户">
-                  <a-select v-model:value="formState.accountId"
+                  <a-select v-model:value="saleShipmentsFormState.accountId"
                             placeholder="请选择结算账户"
                             :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
                             @change="selectAccountChange"/>
@@ -151,13 +152,13 @@
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次收款" data-step="2"
                              data-title="本次收款"
                              :rules="[{ required: true}]">
-                  <a-input-number placeholder="请输入本次收款金额" @change="thisCollectAmountChange" v-model:value="formState.thisCollectAmount"/>
+                  <a-input-number placeholder="请输入本次收款金额" @change="thisCollectAmountChange" v-model:value="saleShipmentsFormState.thisCollectAmount"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24" >
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次欠款" data-step="2"
                              data-title="本次欠款">
-                  <a-input placeholder="请输入本次欠款金额" :readOnly="true" v-model:value="formState.thisArrearsAmount"/>
+                  <a-input placeholder="请输入本次欠款金额" :readOnly="true" v-model:value="saleShipmentsFormState.thisArrearsAmount"/>
                 </a-form-item>
               </a-col>
             </a-row>
@@ -166,7 +167,7 @@
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="销售人员" data-step="3"
                              data-title="销售人员"
                              data-intro="">
-                  <a-select v-model:value="formState.operatorIds"
+                  <a-select v-model:value="saleShipmentsFormState.operatorIds"
                             placeholder="请选择销售人员"
                             mode="multiple"
                             :options="salePersonalList.map(item => ({ value: item.id, label: item.name }))"/>
@@ -200,6 +201,7 @@
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
+  <LinkReceiptModal @register="linkReceiptModal" @handleReceiptSuccess="handleReceiptSuccess"/>
 </template>
 
 <script lang="ts">
@@ -232,7 +234,7 @@ import {
   Upload,
 } from "ant-design-vue";
 import {
-  formState,
+  saleShipmentsFormState,
   RowVO,
   xGrid,
   tableData,
@@ -258,6 +260,7 @@ import {getAccountList} from "@/api/financial/account";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
 import MultipleAccountsModal from "@/views/basic/settlement-account/components/MultipleAccountsModal.vue";
+import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 const VNodes = {
   props: {
     vnodes: {
@@ -278,6 +281,7 @@ export default defineComponent({
   components: {
     MultipleAccountsModal,
     FinancialAccountModal,
+    LinkReceiptModal,
     CustomerModal,
     SelectProductModal,
     'a-modal': Modal,
@@ -345,6 +349,7 @@ export default defineComponent({
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
     const [multipleAccountModal, {openModal: openManyAccountModal}] = useModal();
+    const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
     function handleCancelModal() {
       close();
       clearData();
@@ -364,7 +369,7 @@ export default defineComponent({
       } else {
         title.value = '新增-销售出库单'
         loadGenerateId();
-        formState.receiptDate = dayjs(new Date());
+        saleShipmentsFormState.receiptDate = dayjs(new Date());
       }
     }
 
@@ -372,7 +377,7 @@ export default defineComponent({
       getDefaultWarehouse().then(res => {
         const data = res.data
         if(data) {
-          formState.warehouseId = data.id
+          saleShipmentsFormState.warehouseId = data.id
         }
       })
     }
@@ -413,7 +418,7 @@ export default defineComponent({
 
     function loadGenerateId() {
       generateId("销售出库").then(res => {
-        formState.receiptNumber = res.data
+        saleShipmentsFormState.receiptNumber = res.data
       })
     }
 
@@ -422,22 +427,22 @@ export default defineComponent({
       const result = await getSaleShipmentsDetail(id)
       if(result) {
         const data = result.data
-        formState.id = id
-        formState.customerId = data.customerId
-        formState.receiptDate = dayjs(data.receiptDate);
-        formState.receiptNumber = data.receiptNumber
-        formState.remark = data.remark
-        formState.operatorIds = data.operatorIds
-        formState.discountRate = data.collectOfferRate
-        formState.discountAmount = data.collectOfferAmount
-        formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.collectOfferLastAmount), { digits: 2 })}`
-        formState.otherAmount = data.otherAmount
-        formState.thisCollectAmount = data.thisCollectAmount
-        formState.thisArrearsAmount = data.thisArrearsAmount
+        saleShipmentsFormState.id = id
+        saleShipmentsFormState.customerId = data.customerId
+        saleShipmentsFormState.receiptDate = dayjs(data.receiptDate);
+        saleShipmentsFormState.receiptNumber = data.receiptNumber
+        saleShipmentsFormState.remark = data.remark
+        saleShipmentsFormState.operatorIds = data.operatorIds
+        saleShipmentsFormState.collectOfferRate = data.collectOfferRate
+        saleShipmentsFormState.collectOfferAmount = data.collectOfferAmount
+        saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.collectOfferLastAmount), { digits: 2 })}`
+        saleShipmentsFormState.otherAmount = data.otherAmount
+        saleShipmentsFormState.thisCollectAmount = data.thisCollectAmount
+        saleShipmentsFormState.thisArrearsAmount = data.thisArrearsAmount
         // 判断多账户渲染
         if(data.multipleAccountAmounts.length > 0 && data.multipleAccountIds.length > 0) {
           manyAccountBtnStatus.value = true
-          formState.accountId = 0
+          saleShipmentsFormState.accountId = 0
           multipleAccounts.value = {
             accountOne: data.multipleAccountIds[0],
             accountTwo: data.multipleAccountIds[1],
@@ -448,7 +453,7 @@ export default defineComponent({
           }
         } else {
           manyAccountBtnStatus.value = false
-          formState.accountId = data.accountId
+          saleShipmentsFormState.accountId = data.accountId
         }
 
         // file
@@ -488,7 +493,7 @@ export default defineComponent({
     }
 
     function scanPressEnter() {
-      getProductSkuByBarCode(barCode.value, formState.warehouseId).then(res => {
+      getProductSkuByBarCode(barCode.value, saleShipmentsFormState.warehouseId).then(res => {
         const {columns} = gridOptions
         if (columns) {
           const {data} = res
@@ -528,8 +533,8 @@ export default defineComponent({
                 };
                 table.insert(tableData)
               }
-              formState.discountLastAmount = tableData.taxTotalPrice.value
-              formState.thisCollectAmount = tableData.taxTotalPrice.value
+              saleShipmentsFormState.discountLastAmount = tableData.taxTotalPrice.value
+              saleShipmentsFormState.thisCollectAmount = tableData.taxTotalPrice.value
             }
           }
         }
@@ -562,11 +567,11 @@ export default defineComponent({
 
     async function handleOk(type: number) {
       const table = xGrid.value
-      if (!formState.customerId) {
+      if (!saleShipmentsFormState.customerId) {
         createMessage.error('请选择客户');
         return;
       }
-      if (!formState.thisCollectAmount) {
+      if (!saleShipmentsFormState.thisCollectAmount) {
         createMessage.error('请输入本次收款金额');
         return;
       }
@@ -621,76 +626,76 @@ export default defineComponent({
       })
 
       // 判断是否是多账户 0是多账户 如果是多账户需要把accountIds置空 如果不是需要把multipleAccountIds 和 multipleAccountAmounts 置空
-      if (formState.accountId === 0) {
-        formState.accountId = undefined
-        formState.multipleAccountIds = []
-        formState.multipleAccountAmounts = []
+      if (saleShipmentsFormState.accountId === 0) {
+        saleShipmentsFormState.accountId = undefined
+        saleShipmentsFormState.multipleAccountIds = []
+        saleShipmentsFormState.multipleAccountAmounts = []
         if(multipleAccounts.value.accountOne) {
-          formState.multipleAccountIds.push(multipleAccounts.value.accountOne)
+          saleShipmentsFormState.multipleAccountIds.push(multipleAccounts.value.accountOne)
         }
         if(multipleAccounts.value.accountTwo){
-          formState.multipleAccountIds.push(multipleAccounts.value.accountTwo)
+          saleShipmentsFormState.multipleAccountIds.push(multipleAccounts.value.accountTwo)
         }
         if(multipleAccounts.value.accountThree) {
-          formState.multipleAccountIds.push(multipleAccounts.value.accountThree)
+          saleShipmentsFormState.multipleAccountIds.push(multipleAccounts.value.accountThree)
         }
         if(multipleAccounts.value.accountOne) {
-          formState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceOne)
+          saleShipmentsFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceOne)
         }
         if(multipleAccounts.value.accountTwo){
-          formState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceTwo)
+          saleShipmentsFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceTwo)
         }
         if(multipleAccounts.value.accountThree) {
-          formState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceThree)
+          saleShipmentsFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceThree)
         }
       } else {
-        formState.multipleAccountIds = []
-        formState.multipleAccountAmounts = []
+        saleShipmentsFormState.multipleAccountIds = []
+        saleShipmentsFormState.multipleAccountAmounts = []
       }
 
-      formState.discountLastAmount = formState.discountLastAmount.replace(/,/g, '').replace(/￥/g, '')
+      saleShipmentsFormState.thisCollectAmount = saleShipmentsFormState.thisCollectAmount.toString().replace(/,/g, '').replace(/￥/g, '');
+      saleShipmentsFormState.collectOfferLastAmount = saleShipmentsFormState.collectOfferLastAmount.replace(/,/g, '').replace(/￥/g, '')
+      saleShipmentsFormState.thisArrearsAmount = saleShipmentsFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(/￥/g, '')
       const params: AddOrUpdateReceiptReq = {
-        ...formState,
+        ...saleShipmentsFormState,
         tableData: dataArray,
         files: files,
         status: type,
       }
 
-      console.info(params)
+      const result = await addOrUpdateSaleShipments(params)
+      if (result.code === 'S0004' || 'S0005') {
+        createMessage.success('操作成功');
+        handleCancelModal();
+        clearData();
 
-      // const result = await addOrUpdateSaleShipments(params)
-      // if (result.code === 'S0001' || 'S0002') {
-      //   createMessage.success('操作成功');
-      //   handleCancelModal();
-      //   clearData();
-      //
-      // } else {
-      //   createMessage.error('操作失败');
-      // }
-      // clearData();
+      } else {
+        createMessage.error('操作失败');
+      }
+      clearData();
     }
 
     function clearData() {
-      formState.id = undefined
-      formState.receiptNumber = ''
-      formState.customerId = ''
-      formState.discountRate = 0
-      formState.discountAmount = 0
-      formState.discountLastAmount = 0
-      formState.otherAmount = 0
-      formState.thisCollectAmount = 0
-      formState.thisArrearsAmount = 0
-      formState.accountId = undefined
-      formState.operatorIds = []
+      saleShipmentsFormState.id = undefined
+      saleShipmentsFormState.receiptNumber = ''
+      saleShipmentsFormState.customerId = ''
+      saleShipmentsFormState.collectOfferRate = 0
+      saleShipmentsFormState.collectOfferAmount = 0
+      saleShipmentsFormState.collectOfferLastAmount = 0
+      saleShipmentsFormState.otherAmount = 0
+      saleShipmentsFormState.thisCollectAmount = 0
+      saleShipmentsFormState.thisArrearsAmount = 0
+      saleShipmentsFormState.accountId = undefined
+      saleShipmentsFormState.operatorIds = []
       barCode.value = ''
-      formState.remark = ''
+      saleShipmentsFormState.remark = ''
       fileList.value = []
       multipleAccounts.value = {}
       const table = xGrid.value
       if(table) {
         table.remove()
       }
-      formState.receiptDate = undefined
+      saleShipmentsFormState.receiptDate = undefined
     }
 
     function beforeUpload(file: any) {
@@ -745,8 +750,8 @@ export default defineComponent({
         tableData.forEach(item => {
           total += item.taxTotalPrice
         })
-        formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
-        formState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
+        saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
+        saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
       }
     }
 
@@ -849,63 +854,68 @@ export default defineComponent({
     }
 
     watch(getTaxTotalPrice, (newValue, oldValue) => {
-      formState.discountLastAmount = newValue
-      formState.thisCollectAmount = newValue
+      saleShipmentsFormState.collectOfferLastAmount = newValue
+      saleShipmentsFormState.thisCollectAmount = newValue
       // 重新调用本次收款
-      discountAmountChange()
-      thisCollectAmountChange()
+
+      console.info(oldValue)
+      // 判断如果是查询详情的方法就不调用 重新计算本次收款 和 本次欠款 的两个方法 因为查询详情的时候已经计算过了
+      if(oldValue !== '￥0.00') {
+        discountAmountChange()
+        thisCollectAmountChange()
+      }
     });
 
     function discountRateChange() {
       const price = getTaxTotalPrice.value;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
-      const discountRate = formState.discountRate
+      const discountRate = saleShipmentsFormState.collectOfferRate
       const discountAmount = discountLastAmount * discountRate / 100
-      const otherAmount = formState.otherAmount
+      const otherAmount = saleShipmentsFormState.otherAmount
 
       const lastAmount = Number((discountLastAmount - discountAmount + otherAmount));
 
-      formState.thisArrearsAmount = 0
-      formState.discountAmount = Number(discountAmount.toFixed(2))
-      formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
-      formState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
+      saleShipmentsFormState.thisArrearsAmount = 0
+      saleShipmentsFormState.collectOfferAmount = Number(discountAmount.toFixed(2))
+      saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
 
     }
 
     function discountAmountChange() {
       const price = getTaxTotalPrice.value;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
-      const discountAmount = formState.discountAmount
-      const otherAmount = formState.otherAmount
+      const discountAmount = saleShipmentsFormState.collectOfferAmount
+      const otherAmount = saleShipmentsFormState.otherAmount
       const discountRate = discountAmount / discountLastAmount * 100
       const lastAmount = Number((discountLastAmount - discountAmount + otherAmount));
 
-      formState.thisArrearsAmount = 0
-      formState.discountRate = Number(discountRate.toFixed(2))
-      formState.discountAmount = Number(discountAmount.toFixed(2))
-      formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
-      formState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
+      saleShipmentsFormState.thisArrearsAmount = 0
+      saleShipmentsFormState.collectOfferRate = Number(discountRate.toFixed(2))
+      saleShipmentsFormState.collectOfferAmount = Number(discountAmount.toFixed(2))
+      saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
 
     }
 
     function otherAmountChange() {
       // 计算本次收款(thisCollectAmount) = 优惠金额 + 其他费用
-      const price = formState.discountLastAmount;
+      const price = saleShipmentsFormState.collectOfferLastAmount;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
-      const otherAmount = formState.otherAmount
+      const otherAmount = saleShipmentsFormState.otherAmount
       const lastAmount =  Number((discountLastAmount + otherAmount));
-      formState.thisArrearsAmount = 0
-      formState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleShipmentsFormState.thisArrearsAmount = 0
+      saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
     }
 
     function thisCollectAmountChange() {
-      const price = formState.discountLastAmount;
+      const price = saleShipmentsFormState.collectOfferLastAmount;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
-      const otherAmount = formState.otherAmount
-      const thisCollectAmount = formState.thisCollectAmount
+      const otherAmount = saleShipmentsFormState.otherAmount
+      const thisCollectAmount = saleShipmentsFormState.thisCollectAmount
       const lastAmount = Number((discountLastAmount + otherAmount - thisCollectAmount));
 
-      formState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleShipmentsFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
     }
 
     const selectAccountChange = (value: number) => {
@@ -931,7 +941,41 @@ export default defineComponent({
     }
 
     function onSearch() {
+      openLinkReceiptModal(true, {
+        type: '销售',
+        subType: '销售订单',
+        title: '选择销售订单'
+      });
+    }
 
+    function handleReceiptSuccess(data) {
+      console.info(data)
+      const table = xGrid.value
+      if(data && table) {
+        saleShipmentsFormState.otherReceipt = data.receiptNumber;
+        table.remove()
+        data.receiptDetailData.forEach(item => {
+          const tableData : RowVO = {
+            id: item.id,
+            warehouseId: item.warehouseId,
+            productId: item.productId,
+            barCode: item.productBarcode,
+            productName: item.productName,
+            productModel: item.productModel,
+            productStandard: item.productStandard,
+            productUnit: item.unit,
+            stock: item.stock,
+            productNumber: item.productNumber,
+            unitPrice: item.unitPrice,
+            amount: item.amount,
+            taxRate: item.taxRate,
+            taxAmount: item.taxAmount,
+            taxTotalPrice: item.taxIncludedAmount,
+          };
+          table.insert(tableData)
+        })
+        saleShipmentsFormState.customerId = data.receiptDetailData[0].memberId
+      }
     }
 
     return {
@@ -945,7 +989,7 @@ export default defineComponent({
       confirmLoading,
       handleCancelModal,
       openAddEditModal,
-      formState,
+      saleShipmentsFormState,
       title,
       width,
       moreStatus,
@@ -998,7 +1042,10 @@ export default defineComponent({
       handleManyAccount,
       multipleAccountModal,
       handleAccountSuccess,
-      onSearch
+      onSearch,
+      linkReceiptModal,
+      openLinkReceiptModal,
+      handleReceiptSuccess
     };
   },
 });

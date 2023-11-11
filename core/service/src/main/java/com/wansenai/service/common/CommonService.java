@@ -12,6 +12,7 @@
  */
 package com.wansenai.service.common;
 
+import com.wansenai.bo.FileDataBO;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.CaptchaVO;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,4 +31,6 @@ public interface CommonService {
     Response<List<String>> uploadOss(List<MultipartFile> files);
 
     Response<String> generateSnowflakeId(String type);
+
+    List<FileDataBO> getFileList(String fileId);
 }

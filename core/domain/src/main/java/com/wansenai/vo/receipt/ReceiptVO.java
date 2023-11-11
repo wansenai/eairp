@@ -10,13 +10,12 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.receipt.purchase;
+package com.wansenai.vo.receipt;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
-import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.PurchaseDataBO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,53 +23,36 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseRefundDetailVO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ReceiptVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long supplierId;
+    private Long id;
+
+    // 供应商名称 客户名称 会员名称 三者公用字段
+    private String name;
 
     private String receiptNumber;
+
+    private String productInfo;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime receiptDate;
 
-    private String otherReceipt;
+    private String operator;
+
+    private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal refundOfferRate;
+    private BigDecimal totalAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal refundOfferAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal refundLastAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal otherAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal thisRefundAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal thisArrearsAmount;
-
-    private Long accountId;
-
-    private List<Long> multipleAccountAmounts;
-
-    private List<Long> multipleAccountIds;
-
-    private List<PurchaseDataBO> tableData;
-
-    private List<FileDataBO> files;
+    private BigDecimal taxRateTotalAmount;
 
     private Integer status;
-
-    private String remark;
 }

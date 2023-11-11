@@ -20,62 +20,75 @@
 import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
-import {searchRetailShipmentsSchema, RetailShipmentsColumn} from "@/views/retail/refund/refund.data";
 import {BasicModal, useModal, useModalInner} from "@/components/Modal";
 import {Tag} from "ant-design-vue";
-import {getShipmentsList} from "@/api/retail/shipments";
+import {getReceipt} from "@/api/receipt/receipt";
 import ReceiptDetailModal from "@/views/receipt/ReceiptDetailModal.vue";
-import {formState} from "@/views/retail/shipments/model/addEditModel";
+import {ReceiptColumn, searchSchema} from "@/views/receipt/receipt.data"
 export default defineComponent({
-  name: 'RetailShipmentsModal',
+  name: 'LinkReceiptModal',
   components: {Tag, BasicModal, BasicTable, TableAction, ReceiptDetailModal},
   emits: ['selectedRows'],
   setup(_, context) {
-    const getTitle = ref('选择需要退货的出库单');
+    const getTitle = ref('操作');
     const [receiptDetailModal, {openModal: openReceiptDetailModal}] = useModal();
     const { createMessage } = useMessage();
-    const [registerTable, { getSelectRows }] = useTable({
-      title: '选择需要退货的出库单',
+    const type = ref('');
+    const subType = ref('');
+    const [registerTable, { getSelectRows, reload}] = useTable({
+      title: '操作',
       rowKey: 'id',
-      columns: RetailShipmentsColumn,
-      api: getShipmentsList,
+      columns: ReceiptColumn,
+      api: getReceipt,
       rowSelection: {
         type: 'radio',
       },
       formConfig: {
         labelWidth: 110,
-        schemas: searchRetailShipmentsSchema,
+        schemas: searchSchema,
       },
+      showIndexColumn: false,
       bordered: true,
       showTableSetting: true,
       canResize: true,
       tableSetting: { fullScreen: true },
       useSearchForm: true,
       clickToRowSelect: true,
+      immediate: false,
     });
 
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200});
+      type.value = data.type
+      subType.value = data.subType
+      getTitle.value = data.title
+      searchSchema[0].defaultValue = data.type
+      searchSchema[1].defaultValue = data.subType
+      reload({
+        searchInfo: {
+          "type": type.value,
+          "subType": subType.value,
+        }
+      });
     });
-
-    function handleReceiptSuccess(data) {
-      if(data){
-        context.emit('handleReceiptSuccess', data);
-      }
-    }
 
     function handleSubmit() {
       const rows = getSelectRows();
       if (rows.length === 0) {
-        createMessage.error('请选择需要退货的出库单据');
+        createMessage.error('请选择单据');
         return;
       }
       openReceiptDetailModal(true, {
         isUpdate: false,
         id: rows[0].id,
         receiptNumber: rows[0].receiptNumber,
+        type: type.value,
       });
       closeModal();
+    }
+
+    function handleReceiptSuccess(data) {
+      context.emit('handleReceiptSuccess', data);
     }
 
     return {
@@ -84,7 +97,7 @@ export default defineComponent({
       getTitle,
       handleSubmit,
       receiptDetailModal,
-      handleReceiptSuccess
+      handleReceiptSuccess,
     }
   }
 })

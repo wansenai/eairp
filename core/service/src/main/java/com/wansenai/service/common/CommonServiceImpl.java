@@ -18,6 +18,8 @@ import com.tencentcloudapi.common.profile.ClientProfile;
 import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.sms.v20190711.SmsClient;
 import com.tencentcloudapi.sms.v20190711.models.SendSmsRequest;
+import com.wansenai.bo.FileDataBO;
+import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.BaseService;
 import com.wansenai.service.product.ProductStockKeepUnitService;
 import com.wansenai.utils.ExcelUtil;
@@ -98,7 +100,9 @@ public class CommonServiceImpl implements CommonService{
 
     private final WarehouseService warehouseService;
 
-    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService, ProductService productService, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, WarehouseService warehouseService, BaseService baseService) {
+    private final SysFileMapper fileMapper;
+
+    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService, ProductService productService, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, WarehouseService warehouseService, BaseService baseService, SysFileMapper fileMapper) {
         this.redisUtil = redisUtil;
         this.producer = producer;
         this.supplierService = supplierService;
@@ -111,6 +115,7 @@ public class CommonServiceImpl implements CommonService{
         this.productCategoryService = productCategoryService;
         this.warehouseService = warehouseService;
         this.baseService = baseService;
+        this.fileMapper = fileMapper;
     }
 
     private SmsInfoBO getSmsInfo() {
@@ -688,6 +693,29 @@ public class CommonServiceImpl implements CommonService{
             default -> "";
         };
         return Response.responseData(idPrefix + idStr);
+    }
+
+    @Override
+    public List<FileDataBO> getFileList(String fileId) {
+        List<FileDataBO> fileList = new ArrayList<>();
+        if (StringUtils.hasLength(fileId)) {
+            List<Long> ids = Arrays.stream(fileId.split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            fileList.addAll(fileMapper.selectBatchIds(ids)
+                    .stream()
+                    .map(item ->
+                            FileDataBO.builder(
+                                    item.getFileName(),
+                                    item.getFileUrl(),
+                                    item.getId(),
+                                    item.getUid(),
+                                    item.getFileType(),
+                                    item.getFileSize()
+                            ))
+                    .toList());
+        }
+        return fileList;
     }
 
     private String getCellValue(Cell cell, DataFormatter dataFormatter) {
