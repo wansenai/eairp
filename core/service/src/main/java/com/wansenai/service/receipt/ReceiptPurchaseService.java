@@ -12,6 +12,7 @@
  */
 package com.wansenai.service.receipt;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansenai.dto.receipt.purchase.PurchaseOrderDTO;
 import com.wansenai.dto.receipt.purchase.QueryPurchaseOrderDTO;
@@ -19,7 +20,6 @@ import com.wansenai.entities.receipt.ReceiptPurchaseMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.purchase.PurchaseOrderDetailVO;
 import com.wansenai.vo.receipt.purchase.PurchaseOrderVO;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 

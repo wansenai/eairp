@@ -74,8 +74,6 @@ public class ReceiptPurchaseMain implements Serializable {
 
     private String fileId;
 
-    private String operatorId;
-
     private String multipleAccount;
 
     private String multipleAccountAmount;
