@@ -549,7 +549,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .set(ReceiptSaleMain::getFileId, fileIds)
                     .set(ReceiptSaleMain::getMultipleAccount, String.valueOf(multipleAccountIds))
                     .set(ReceiptSaleMain::getMultipleAccountAmount, String.valueOf(multipleAccountAmounts))
-                    .set(!operatorIds.isEmpty(), ReceiptSaleMain::getOperatorId, String.valueOf(operatorIds))
+                    .set(!operatorIds.isEmpty(), ReceiptSaleMain::getOperatorId, operatorIds)
                     .set(ReceiptSaleMain::getUpdateBy, userId)
                     .set(ReceiptSaleMain::getUpdateTime, LocalDateTime.now())
                     .update();
