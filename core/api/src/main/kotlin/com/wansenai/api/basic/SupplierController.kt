@@ -21,6 +21,7 @@ import com.wansenai.service.basic.SupplierService
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.SupplierVO
 import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -31,9 +32,14 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/basic/supplier")
 class SupplierController (private val supplierService: SupplierService){
 
-    @PostMapping("/list")
-    fun supplierList(@RequestBody querySupplierDTO: QuerySupplierDTO) : Response<Page<SupplierVO>> {
-        return supplierService.getSupplierList(querySupplierDTO)
+    @PostMapping("/pageList")
+    fun supplierPageList(@RequestBody querySupplierDTO: QuerySupplierDTO) : Response<Page<SupplierVO>> {
+        return supplierService.getSupplierPageList(querySupplierDTO)
+    }
+
+    @GetMapping("/list")
+    fun supplierList() : Response<List<SupplierVO>> {
+        return supplierService.getSupplierList()
     }
 
     @PostMapping("/add")

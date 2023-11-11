@@ -33,12 +33,22 @@ export const columns: BasicColumn[] = [
     },
     {
         title: '含税合计',
-        dataIndex: 'taxRateTotalAmount',
+        dataIndex: 'taxIncludedAmount',
         width: 80,
     },
     {
-        title: '收取定金',
-        dataIndex: 'deposit',
+        title: '待付金额',
+        dataIndex: 'totalPaymentAmount',
+        width: 80,
+    },
+    {
+        title: '本次付款',
+        dataIndex: 'thisPaymentAmount',
+        width: 80,
+    },
+    {
+        title: '本次欠款',
+        dataIndex: 'thisArrearsAmount',
         width: 80,
     },
     {
@@ -87,7 +97,7 @@ export const searchFormSchema: FormSchema[] = [
         component: 'ApiSelect',
         componentProps: {
             api: getSupplierList,
-            resultField: 'data',
+            resultField: 'data.records',
             labelField: 'supplierName',
             valueField: 'id',
         },

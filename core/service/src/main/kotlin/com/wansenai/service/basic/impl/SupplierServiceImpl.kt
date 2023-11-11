@@ -40,7 +40,7 @@ open class SupplierServiceImpl(
     private val supplierMapper: SystemSupplierMapper
 ) : ServiceImpl<SystemSupplierMapper, Supplier>(), SupplierService {
 
-    override fun getSupplierList(supplier: QuerySupplierDTO?): Response<Page<SupplierVO>> {
+    override fun getSupplierPageList(supplier: QuerySupplierDTO?): Response<Page<SupplierVO>> {
         val page = supplier?.run { Page<Supplier>(page ?: 1, pageSize ?: 10) }
         val wrapper = LambdaQueryWrapper<Supplier>().apply {
             supplier?.supplierName?.let { like(Supplier::getSupplierName, it) }
@@ -124,6 +124,39 @@ open class SupplierServiceImpl(
         } else {
             Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR)
         }
+    }
+
+    override fun getSupplierList(): Response<List<SupplierVO>> {
+        val wrapper = LambdaQueryWrapper<Supplier>().apply {
+            eq(Supplier::getDeleteFlag, CommonConstants.NOT_DELETED)
+        }
+        val list = supplierMapper.selectList(wrapper)
+        val listVo = list.map { supplier ->
+            SupplierVO(
+                id = supplier.id,
+                supplierName = supplier.supplierName,
+                contact = supplier.contact,
+                contactNumber = supplier.contactNumber,
+                phoneNumber = supplier.phoneNumber,
+                address = supplier.address,
+                email = supplier.email,
+                status = supplier.status,
+                firstQuarterAccountPayment = supplier.firstQuarterAccountPayment,
+                secondQuarterAccountPayment = supplier.secondQuarterAccountPayment,
+                thirdQuarterAccountPayment = supplier.thirdQuarterAccountPayment,
+                fourthQuarterAccountPayment = supplier.fourthQuarterAccountPayment,
+                totalAccountPayment = supplier.totalAccountPayment,
+                fax = supplier.fax,
+                taxNumber = supplier.taxNumber,
+                bankName = supplier.bankName,
+                accountNumber = supplier.accountNumber,
+                taxRate = supplier.taxRate,
+                sort = supplier.sort,
+                remark = supplier.remark,
+                createTime = supplier.createTime
+            )
+        }
+        return Response.responseData(listVo)
     }
 
     @Transactional
