@@ -87,7 +87,7 @@ export const searchFormSchema: FormSchema[] = [
         component: 'ApiSelect',
         componentProps: {
             api: getSupplierList,
-            resultField: 'data.records',
+            resultField: 'data',
             labelField: 'supplierName',
             valueField: 'id',
         },
