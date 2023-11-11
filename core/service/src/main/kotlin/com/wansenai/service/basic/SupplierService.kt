@@ -24,9 +24,11 @@ import com.wansenai.vo.basic.SupplierVO
 
 interface SupplierService : IService<Supplier> {
 
-    fun getSupplierList(supplier: QuerySupplierDTO?): Response<Page<SupplierVO>>
+    fun getSupplierPageList(supplier: QuerySupplierDTO?): Response<Page<SupplierVO>>
 
     fun addSupplier(supplier: AddSupplierDTO?): Response<String>
+
+    fun getSupplierList(): Response<List<SupplierVO>>
 
     /**
      * 内部使用方法
