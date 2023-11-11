@@ -138,6 +138,14 @@ public class Response<T> implements Serializable {
         return baseResponse;
     }
 
+    public static <T> Response<T> responseMsg(PurchaseCodeEnum purchaseCodeEnum) {
+        Response<T> baseResponse = new Response<T>();
+        baseResponse.setCode(purchaseCodeEnum.getCode());
+        baseResponse.setMsg(purchaseCodeEnum.getMsg());
+        return baseResponse;
+    }
+
+
     public static <T> Response<T> responseData(T data) {
         Response<T> baseResponse = new Response<T>();
         baseResponse.setCode(BaseCodeEnum.SUCCESS.getCode());
