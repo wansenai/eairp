@@ -15,11 +15,15 @@ package com.wansenai.api.receipt;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.purchase.PurchaseOrderDTO;
+import com.wansenai.dto.receipt.purchase.PurchaseStorageDTO;
 import com.wansenai.dto.receipt.purchase.QueryPurchaseOrderDTO;
+import com.wansenai.dto.receipt.purchase.QueryPurchaseStorageDTO;
 import com.wansenai.service.receipt.ReceiptPurchaseService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.purchase.PurchaseOrderDetailVO;
 import com.wansenai.vo.receipt.purchase.PurchaseOrderVO;
+import com.wansenai.vo.receipt.purchase.PurchaseStorageDetailVO;
+import com.wansenai.vo.receipt.purchase.PurchaseStorageVO;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,5 +68,30 @@ public class PurchaseController {
     @PutMapping("/order/delete/{ids}")
     public Response<String> delete(@PathVariable("ids") List<Long> ids) {
         return purchaseService.deletePurchaseOrder(ids);
+    }
+
+    @GetMapping("/storage/pageList")
+    public Response<Page<PurchaseStorageVO>> getPurchaseStoragePageList(@ModelAttribute QueryPurchaseStorageDTO queryPurchaseStorageDTO) {
+        return purchaseService.getPurchaseStoragePage(queryPurchaseStorageDTO);
+    }
+
+    @PostMapping("/storage/addOrUpdate")
+    public Response<String> addOrUpdatePurchaseStorage(@RequestBody PurchaseStorageDTO purchaseStorageDTO) {
+        return purchaseService.addOrUpdatePurchaseStorage(purchaseStorageDTO);
+    }
+
+    @GetMapping("/storage/detail/{id}")
+    public Response<PurchaseStorageDetailVO> purchaseStorageDetail(@PathVariable("id") Long id) {
+        return purchaseService.getPurchaseStorageDetail(id);
+    }
+
+    @PutMapping("/storage/updateStatus/{ids}/{status}")
+    public Response<String> updatePurchaseStorageStatus(@PathVariable("ids") List<Long> ids, @PathVariable("status") Integer status) {
+        return purchaseService.updatePurchaseStorageStatus(ids, status);
+    }
+
+    @PutMapping("/storage/delete/{ids}")
+    public Response<String> deletePurchaseStorage(@PathVariable("ids") List<Long> ids) {
+        return purchaseService.deletePurchaseStorage(ids);
     }
 }
