@@ -868,7 +868,6 @@ export default defineComponent({
       saleRefundFormState.thisRefundAmount = newValue
       if(oldValue !== '￥0.00') {
         discountAmountChange()
-        thisRefundAmountChange()
       }
     });
 
@@ -894,7 +893,7 @@ export default defineComponent({
       const discountAmount = saleRefundFormState.refundOfferAmount
       const otherAmount = saleRefundFormState.otherAmount
       const discountRate = discountAmount / discountLastAmount * 100
-      const lastAmount = Number((discountLastAmount - discountAmount + otherAmount));
+      const lastAmount = Number((discountLastAmount - discountAmount));
 
       saleRefundFormState.thisArrearsAmount = 0
       saleRefundFormState.refundOfferRate = Number(discountRate.toFixed(2))

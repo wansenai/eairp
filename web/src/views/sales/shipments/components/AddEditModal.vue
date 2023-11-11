@@ -862,7 +862,6 @@ export default defineComponent({
       // 判断如果是查询详情的方法就不调用 重新计算本次收款 和 本次欠款 的两个方法 因为查询详情的时候已经计算过了
       if(oldValue !== '￥0.00') {
         discountAmountChange()
-        thisCollectAmountChange()
       }
     });
 
@@ -888,7 +887,7 @@ export default defineComponent({
       const discountAmount = saleShipmentsFormState.collectOfferAmount
       const otherAmount = saleShipmentsFormState.otherAmount
       const discountRate = discountAmount / discountLastAmount * 100
-      const lastAmount = Number((discountLastAmount - discountAmount + otherAmount));
+      const lastAmount = Number((discountLastAmount - discountAmount));
 
       saleShipmentsFormState.thisArrearsAmount = 0
       saleShipmentsFormState.collectOfferRate = Number(discountRate.toFixed(2))
