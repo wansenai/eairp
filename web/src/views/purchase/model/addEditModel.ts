@@ -45,8 +45,8 @@ interface PurchaseStorageFormState {
     paymentAmount: number;
     paymentLastAmount: number | string;
     otherAmount: number;
-    thisPaymentAmount: number;
-    thisArrearsAmount: number;
+    thisPaymentAmount: number | string;
+    thisArrearsAmount: number | string;
     remark: string;
     status: number | undefined;
     warehouseId: number | string;

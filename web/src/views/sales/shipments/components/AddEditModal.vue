@@ -854,13 +854,10 @@ export default defineComponent({
     }
 
     watch(getTaxTotalPrice, (newValue, oldValue) => {
-      saleShipmentsFormState.collectOfferLastAmount = newValue
-      saleShipmentsFormState.thisCollectAmount = newValue
-      // 重新调用本次收款
-
-      console.info(oldValue)
       // 判断如果是查询详情的方法就不调用 重新计算本次收款 和 本次欠款 的两个方法 因为查询详情的时候已经计算过了
       if(oldValue !== '￥0.00') {
+        saleShipmentsFormState.collectOfferLastAmount = newValue
+        saleShipmentsFormState.thisCollectAmount = newValue
         discountAmountChange()
       }
     });

@@ -366,7 +366,7 @@ export default defineComponent({
 
     function loadSupplierList() {
       getSupplierList().then(res => {
-        supplierList.value = res.data.records
+        supplierList.value = res.data
       })
     }
 

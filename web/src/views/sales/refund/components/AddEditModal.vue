@@ -663,9 +663,8 @@ export default defineComponent({
 
       saleRefundFormState.thisRefundAmount = saleRefundFormState.thisRefundAmount.toString().replace(/,/g, '').replace(/￥/g, '');
       saleRefundFormState.refundLastAmount = saleRefundFormState.refundLastAmount.replace(/,/g, '').replace(/￥/g, '')
-      if (saleRefundFormState.thisArrearsAmount != 0) {
-        saleRefundFormState.thisArrearsAmount = saleRefundFormState.thisArrearsAmount.replace(/,/g, '').replace(/￥/g, '')
-      }
+      saleRefundFormState.thisArrearsAmount = saleRefundFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+
       const params: AddOrUpdateReceiptSaleRefundReq = {
         ...saleRefundFormState,
         tableData: dataArray,
@@ -864,9 +863,9 @@ export default defineComponent({
     }
 
     watch(getTaxTotalPrice, (newValue, oldValue) => {
-      saleRefundFormState.refundLastAmount = newValue
-      saleRefundFormState.thisRefundAmount = newValue
       if(oldValue !== '￥0.00') {
+        saleRefundFormState.refundLastAmount = newValue
+        saleRefundFormState.thisRefundAmount = newValue
         discountAmountChange()
       }
     });
