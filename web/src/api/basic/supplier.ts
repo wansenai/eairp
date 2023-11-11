@@ -10,6 +10,7 @@ import {
 
 
 enum API {
+    PageList = '/basic/supplier/pageList',
     List = '/basic/supplier/list',
     AddSupplier = '/basic/supplier/add',
     UpdateSupplier = '/basic/supplier/update',
@@ -17,16 +18,24 @@ enum API {
     UpdateStatus = '/basic/supplier/updateStatus',
 }
 
-export function getSupplierList(params: QuerySupplierReq, mode: ErrorMessageMode = 'notice') {
+export function getSupplierPageList(params: QuerySupplierReq, mode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseDataResp<SupplierResp>>(
         {
-            url: API.List,
+            url: API.PageList,
             params,
         },
         {
             errorMessageMode: mode,
             successMessageMode: mode,
         },
+    );
+}
+
+export function getSupplierList() {
+    return defHttp.get<BaseDataResp<SupplierResp>>(
+        {
+            url: API.List
+        }
     );
 }
 
