@@ -35,6 +35,7 @@ export interface AddOrUpdatePurchaseStorageReq {
     paymentAmount: number;
     paymentLastAmount: number;
     otherAmount: number;
+    otherReceipt: string;
     thisPaymentAmount: number;
     thisArrearsAmount: number;
     accountId: number | string;

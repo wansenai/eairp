@@ -414,6 +414,7 @@ export default defineComponent({
         purchaseStorageFormState.paymentRate = data.paymentRate
         purchaseStorageFormState.paymentAmount = data.paymentAmount
         purchaseStorageFormState.paymentLastAmount = data.paymentLastAmount
+        purchaseStorageFormState.otherReceipt = data.otherReceipt
         purchaseStorageFormState.otherAmount = data.otherAmount
         purchaseStorageFormState.thisPaymentAmount = data.thisPaymentAmount
         purchaseStorageFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.thisArrearsAmount), { digits: 2 })}`
@@ -666,6 +667,7 @@ export default defineComponent({
       purchaseStorageFormState.otherAmount = 0
       purchaseStorageFormState.thisPaymentAmount = 0
       purchaseStorageFormState.thisArrearsAmount = 0
+      purchaseStorageFormState.otherReceipt = ''
       purchaseStorageFormState.accountId = undefined
       barCode.value = ''
       purchaseStorageFormState.remark = ''
