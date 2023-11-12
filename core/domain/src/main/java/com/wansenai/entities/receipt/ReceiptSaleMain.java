@@ -80,6 +80,10 @@ public class ReceiptSaleMain implements Serializable {
 
     private String multipleAccountAmount;
 
+    private Integer receiptSource;
+
+    private String otherReceipt;
+
     private String remark;
 
     private Integer status;
