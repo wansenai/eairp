@@ -5,6 +5,7 @@ import {
     QueryShipmentsReq,
     ShipmentsResp
 } from "@/api/retail/model/shipmentsModel"
+import {ErrorMessageMode} from "#/axios";
 
 enum API {
     PageList = '/retail/shipments/pageList',
@@ -15,12 +16,16 @@ enum API {
     GetDetail = '/retail/shipments/detail',
 }
 
-export function getShipmentsPageList(params: QueryShipmentsReq) {
+export function getShipmentsPageList(params: QueryShipmentsReq, mode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseDataResp<ShipmentsResp>>(
         {
             url: API.PageList,
             params,
-        }
+        },
+        {
+            errorMessageMode: mode,
+            successMessageMode: mode,
+        },
     );
 }
 
