@@ -13,15 +13,19 @@
 package com.wansenai.service.receipt.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.SalesDataBO;
 import com.wansenai.dto.receipt.sale.*;
+import com.wansenai.entities.product.ProductStock;
+import com.wansenai.entities.receipt.ReceiptRetailSub;
 import com.wansenai.entities.receipt.ReceiptSaleMain;
 import com.wansenai.entities.receipt.ReceiptSaleSub;
 import com.wansenai.entities.system.SysFile;
 import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
+import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.mappers.receipt.ReceiptSaleMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.basic.CustomerService;
@@ -38,6 +42,7 @@ import com.wansenai.utils.enums.SaleCodeEnum;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.sale.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -58,8 +63,9 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
     private final SysFileMapper fileMapper;
     private final ProductStockKeepUnitMapper productStockKeepUnitMapper;
     private final CommonService commonService;
+    private final ProductStockMapper productStockMapper;
 
-    public ReceiptSaleServiceImpl(ReceiptSaleMainMapper receiptSaleMainMapper, CustomerService customerService, ISysUserService userService, ReceiptSaleSubService receiptSaleSubService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, CommonService commonService) {
+    public ReceiptSaleServiceImpl(ReceiptSaleMainMapper receiptSaleMainMapper, CustomerService customerService, ISysUserService userService, ReceiptSaleSubService receiptSaleSubService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, CommonService commonService, ProductStockMapper productStockMapper) {
         this.receiptSaleMainMapper = receiptSaleMainMapper;
         this.customerService = customerService;
         this.userService = userService;
@@ -67,6 +73,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         this.fileMapper = fileMapper;
         this.productStockKeepUnitMapper = productStockKeepUnitMapper;
         this.commonService = commonService;
+        this.productStockMapper = productStockMapper;
     }
 
     private final Map<Long, List<ReceiptSaleSub>> receiptSubListCache = new ConcurrentHashMap<>();
@@ -201,6 +208,38 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         }
     }
 
+    private void updateProductStock(List<ReceiptSaleSub> receiptSaleSubList, int stockType) {
+        var stockMap = new ConcurrentHashMap<Long, Integer>();
+
+        receiptSaleSubList.forEach(item -> {
+            var stock = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            if (stock != null) {
+                var stockNumber = stock.getStock();
+                var productNumber = item.getProductNumber();
+                if (stockType == 1) {
+                    stockNumber += productNumber;
+                } else if (stockType == 2) {
+                    stockNumber -= productNumber;
+                }
+                stockMap.put(stock.getId(), stockNumber);
+            }
+        });
+        receiptSaleSubList.forEach(item2 -> {
+            stockMap.forEach((key, value) -> {
+                var stock = ProductStock.builder()
+                        .productSkuId(key)
+                        .warehouseId(item2.getWarehouseId())
+                        .currentStockQuantity(BigDecimal.valueOf(value))
+                        .build();
+                var wrapper = new LambdaUpdateWrapper<ProductStock>()
+                        .eq(ProductStock::getProductSkuId, stock.getProductSkuId())
+                        .eq(ProductStock::getWarehouseId, stock.getWarehouseId())
+                        .set(ProductStock::getCurrentStockQuantity, BigDecimal.valueOf(value));
+                productStockMapper.update(stock, wrapper);
+            });
+        });
+    }
+
 
     @Override
     public Response<Page<SaleOrderVO>> getSaleOrderPage(QuerySaleOrderDTO querySaleOrderDTO) {
@@ -222,8 +261,11 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         var queryResult = receiptSaleMainMapper.selectPage(page, queryWrapper);
 
         queryResult.getRecords().forEach(item -> {
-            var receiptSubList = getReceiptSubList(item.getId());
+            var receiptSubList = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .list();
             var productNumber = calculateProductNumber(receiptSubList);
+
             var customerName = getCustomerName(item.getCustomerId());
             var crateBy = getUserName(item.getCreateBy());
             var totalAmount = calculateTotalAmount(receiptSubList, ReceiptSaleSub::getTotalAmount);
@@ -296,6 +338,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
     }
 
     @Override
+    @Transactional
     public Response<String> addOrUpdateSaleOrder(SaleOrderDTO saleOrderDTO) {
         var userId = userService.getCurrentUserId();
         var isUpdate = saleOrderDTO.getId() != null;
@@ -442,7 +485,9 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         var queryResult = receiptSaleMainMapper.selectPage(page, queryWrapper);
 
         queryResult.getRecords().forEach(item -> {
-            var receiptSubList = getReceiptSubList(item.getId());
+            var receiptSubList = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .list();
             var productNumber = calculateProductNumber(receiptSubList);
             var customerName = getCustomerName(item.getCustomerId());
             var crateBy = getUserName(item.getCreateBy());
@@ -522,6 +567,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
     }
 
     @Override
+    @Transactional
     public Response<String> addOrUpdateSaleShipments(SaleShipmentsDTO shipmentsDTO) {
         var userId = userService.getCurrentUserId();
         var isUpdate = shipmentsDTO.getId() != null;
@@ -535,6 +581,12 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
 
         if (isUpdate) {
+            var beforeReceipt = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, shipmentsDTO.getId())
+                    .list();
+            if (!beforeReceipt.isEmpty()) {
+                updateProductStock(beforeReceipt, 1);
+            }
             var updateMainResult = lambdaUpdate()
                     .eq(ReceiptSaleMain::getId, shipmentsDTO.getId())
                     .set(shipmentsDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, shipmentsDTO.getCustomerId())
@@ -579,6 +631,9 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .collect(Collectors.toList());
 
             var updateSubResult = receiptSaleSubService.saveBatch(receiptSaleList);
+            shipmentsDTO.getTableData().forEach(item -> {
+                updateProductStock(receiptSaleList, 2);
+            });
 
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_SHIPMENTS_SUCCESS);
@@ -633,6 +688,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .collect(Collectors.toList());
 
             var saveSubResult = receiptSaleSubService.saveBatch(receiptList);
+            updateProductStock(receiptList, 2);
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(SaleCodeEnum.ADD_SALE_SHIPMENTS_SUCCESS);
@@ -673,7 +729,9 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         var queryResult = receiptSaleMainMapper.selectPage(page, queryWrapper);
 
         queryResult.getRecords().forEach(item -> {
-            var receiptSubList = getReceiptSubList(item.getId());
+            var receiptSubList = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .list();
             var productNumber = calculateProductNumber(receiptSubList);
             var customerName = getCustomerName(item.getCustomerId());
             var crateBy = getUserName(item.getCreateBy());
@@ -753,6 +811,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
     }
 
     @Override
+    @Transactional
     public Response<String> addOrUpdateSaleRefund(SaleRefundDTO refundDTO) {
         var userId = userService.getCurrentUserId();
         var isUpdate = refundDTO.getId() != null;
@@ -766,6 +825,12 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
 
         if (isUpdate) {
+            var beforeReceipt = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, refundDTO.getId())
+                    .list();
+            if (!beforeReceipt.isEmpty()) {
+                updateProductStock(beforeReceipt, 2);
+            }
             var updateMainResult = lambdaUpdate()
                     .eq(ReceiptSaleMain::getId, refundDTO.getId())
                     .set(refundDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, refundDTO.getCustomerId())
@@ -810,6 +875,9 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .collect(Collectors.toList());
 
             var updateSubResult = receiptSaleSubService.saveBatch(receiptSaleList);
+            refundDTO.getTableData().forEach(item -> {
+                updateProductStock(receiptSaleList, 1);
+            });
 
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS);
@@ -864,6 +932,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .collect(Collectors.toList());
 
             var saveSubResult = receiptSaleSubService.saveBatch(receiptList);
+            updateProductStock(receiptList,1);
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(SaleCodeEnum.ADD_SALE_REFUND_SUCCESS);
