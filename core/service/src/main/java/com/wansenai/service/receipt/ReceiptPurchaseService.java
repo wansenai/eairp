@@ -12,14 +12,18 @@
  */
 package com.wansenai.service.receipt;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansenai.dto.receipt.purchase.PurchaseOrderDTO;
+import com.wansenai.dto.receipt.purchase.PurchaseStorageDTO;
 import com.wansenai.dto.receipt.purchase.QueryPurchaseOrderDTO;
+import com.wansenai.dto.receipt.purchase.QueryPurchaseStorageDTO;
 import com.wansenai.entities.receipt.ReceiptPurchaseMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.purchase.PurchaseOrderDetailVO;
 import com.wansenai.vo.receipt.purchase.PurchaseOrderVO;
-import org.springframework.data.domain.Page;
+import com.wansenai.vo.receipt.purchase.PurchaseStorageDetailVO;
+import com.wansenai.vo.receipt.purchase.PurchaseStorageVO;
 
 import java.util.List;
 
@@ -81,4 +85,61 @@ public interface ReceiptPurchaseService extends IService<ReceiptPurchaseMain> {
      *         返回修改状态结果
      */
     Response<String> updatePurchaseOrderStatus(List<Long> ids, Integer status);
+
+    /**
+     * Pagination query of purchase receipt warehousing based on public conditions
+     * 根据公共条件分页查询采购入库单数据
+     *
+     * @param queryPurchaseStorageDTO Query common conditions
+     *                                查询公共条件
+     * @return Returns paginated data
+     *        返回分页数据
+     */
+    Response<Page<PurchaseStorageVO>> getPurchaseStoragePage(QueryPurchaseStorageDTO queryPurchaseStorageDTO);
+
+    /**
+     * Query the detailed data of the purchase receipt order based on the ID
+     * 根据ID查询采购入库单详情数据
+     *
+     * @param id Purchase receipt order ID
+     *           采购入库单ID
+     * @return Returns purchase receipt order details data
+     *      返回采购入库单详情数据
+     */
+    Response<PurchaseStorageDetailVO> getPurchaseStorageDetail(Long id);
+
+    /**
+     * Add/Modify Purchase Receipt Data
+     * 添加/修改采购入库数据
+     *
+     * @param purchaseStorageDTO Purchase receipt data object
+     *                         采购入库数据对象
+     * @return Return to Add/Modify Status Results
+     *      返回添加/修改状态结果
+     */
+    Response<String> addOrUpdatePurchaseStorage(PurchaseStorageDTO purchaseStorageDTO);
+
+    /**
+     * Batch delete purchase receipt order data based on ID (logical deletion, modification, and deletion identification)
+     * 根据ID批量删除采购入库单数据（逻辑删除，修改删除标识）
+     *
+     * @param ids Purchase receipt order ID set
+     *            采购入库单ID集合
+     * @return Return to delete status results
+     *       返回删除状态结果
+     */
+    Response<String> deletePurchaseStorage(List<Long> ids);
+
+    /**
+     * Modify the purchase receipt order data based on the ID set
+     * 根据ID集合修改采购入库单数据
+     *
+     * @param ids Purchase receipt order ID set
+     *            采购入库单ID集合
+     *
+     * @param status Status to be modified
+     *               要修改的状态
+     * @return Return to modify status results
+     */
+    Response<String> updatePurchaseStorageStatus(List<Long> ids, Integer status);
 }

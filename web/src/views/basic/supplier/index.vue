@@ -43,7 +43,7 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useModal} from "@/components/Modal";
 import {useMessage} from "@/hooks/web/useMessage";
-import {getSupplierList} from "@/api/basic/supplier";
+import {getSupplierPageList} from "@/api/basic/supplier";
 import {columns, searchFormSchema} from "@/views/basic/supplier/supplier.data";
 import {deleteBatchSuppliers, updateSupplierStatus} from "@/api/basic/supplier";
 import SupplierModal from "@/views/basic/supplier/components/SupplierModal.vue";
@@ -61,7 +61,7 @@ export default defineComponent({
     const importModalRef = ref(null);
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '供应商列表',
-      api: getSupplierList,
+      api: getSupplierPageList,
       rowKey: 'id',
       columns: columns,
       rowSelection: {

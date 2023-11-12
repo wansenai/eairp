@@ -60,10 +60,13 @@ public class PurchaseStorageDetailVO {
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal thisArrearsAmount;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long accountId;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private List<Long> multipleAccountAmounts;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private List<Long> multipleAccountIds;
 
     private List<PurchaseDataBO> tableData;

@@ -822,7 +822,6 @@ export default defineComponent({
 
     watch(getTaxTotalPrice, (newValue, oldValue) => {
       formState.discountLastAmount = newValue
-      formState.thisCollectAmount = newValue
       // 重新调用本次收款
       discountAmountChange()
     });

@@ -50,23 +50,23 @@
 import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
-import {columns, searchFormSchema} from "@/views/purchase/order/purchaseOrder.data";
+import {columns, searchFormSchema} from "@/views/purchase/storage/purchaseStorage.data";
 import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
-import {getPurchaseOrderPageList, updatePurchaseOrderStatus, deletePurchaseOrder} from "@/api/purchase/order";
-import AddEditModal from "@/views/purchase/order/components/AddEditModal.vue";
+import {getPurchaseStoragePageList, updatePurchaseStorageStatus, deletePurchaseStorage} from "@/api/purchase/storage";
+import AddEditModal from "@/views/purchase/storage/components/AddEditModal.vue";
 export default defineComponent({
-  name: 'PurchaseOrderModal',
+  name: 'PurchaseStorageModal',
   components: {AddEditModal, Tag, TableAction, BasicTable},
   setup() {
     const { t } = useI18n();
     const addEditModalRef = ref(null);
     const { createMessage } = useMessage();
     const [registerTable, { reload, getSelectRows }] = useTable({
-      title: '采购订单列表',
+      title: '采购入库列表',
       rowKey: 'id',
-      api: getPurchaseOrderPageList,
+      api: getPurchaseStoragePageList,
       columns: columns,
       rowSelection: {
         type: 'checkbox',
@@ -89,7 +89,7 @@ export default defineComponent({
     });
 
     function handleCreate() {
-     addEditModalRef.value?.openAddEditModal();
+      addEditModalRef.value?.openAddEditModal();
     }
 
     async function handleBatchDelete() {
@@ -98,8 +98,8 @@ export default defineComponent({
         createMessage.warn('请选择一条数据');
         return;
       }
-      const result = await deletePurchaseOrder(data.map((item) => item.id));
-      if (result.code === 'P0017') {
+      const result = await deletePurchaseStorage(data.map((item) => item.id));
+      if (result.code === 'P0020') {
         createMessage.success('删除成功');
         await reload();
       }
@@ -114,8 +114,8 @@ export default defineComponent({
     }
 
     async function handleDelete(record: Recordable) {
-      const result = await deletePurchaseOrder([record.id]);
-      if (result.code === 'P0017') {
+      const result = await deletePurchaseStorage([record.id]);
+      if (result.code === 'P0020') {
         createMessage.success('删除成功');
         await reload();
       }
@@ -156,20 +156,20 @@ export default defineComponent({
       }
 
       const ids = data.map((item) => item.id);
-      const {code} = await updatePurchaseOrderStatus(ids, newStatus);
-      if (code === 'P0016') {
+      const {code} = await updatePurchaseStorageStatus(ids, newStatus);
+      if (code === 'P0019') {
         createMessage.success('修改状态成功');
         await reload();
       }
     }
 
     async function handleExport() {
-      const file = await exportXlsx("采购订单列表")
+      const file = await exportXlsx("采购入库列表")
       const blob = new Blob([file]);
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       const timestamp = getTimestamp(new Date());
-      link.download = "采购订单数据" + timestamp + ".xlsx";
+      link.download = "采购入库单数据" + timestamp + ".xlsx";
       link.target = "_blank";
       link.click();
     }
