@@ -67,8 +67,6 @@ public class ReceiptRetailMain implements Serializable {
 
     private String fileId;
 
-    private String operatorId;
-
     private Integer status;
 
     private Integer source;
