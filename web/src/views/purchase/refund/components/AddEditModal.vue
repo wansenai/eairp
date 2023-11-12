@@ -3,8 +3,6 @@
       :title="title"
       :width="width"
       :confirm-loading="confirmLoading"
-      v-bind:prefixNo="prefixNo"
-      :id="prefixNo"
       :forceRender="true"
       :keyboard="true"
       switchHelp
@@ -20,24 +18,23 @@
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
     <a-spin :spinning="confirmLoading">
-      <a-form ref="formRef" :model="saleShipmentsFormState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
+      <a-form ref="formRef" :model="purchaseRefundFormState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
-            <a-input v-model:value="saleShipmentsFormState.id" v-show="false"/>
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="客户" data-step="1"
-                         data-title="客户卡号"
-                         :rules="[{ required: true}]">
-              <a-select v-model:value="saleShipmentsFormState.customerId"
+            <a-input v-model:value="purchaseRefundFormState.id" v-show="false"/>
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="供应商" data-step="1"
+                         data-title="供应商">
+              <a-select v-model:value="purchaseRefundFormState.supplierId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
-                        placeholder="请选择客户"
-                        :options="customerList.map(item => ({ value: item.id, label: item.customerName }))">
+                        placeholder="请选择供应商"
+                        :options="Array.isArray(supplierList) ? supplierList.map(item => ({ value: item.id, label: item.supplierName })) : []">
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
                   <div style="padding: 4px 8px; cursor: pointer;"
-                       @mousedown="e => e.preventDefault()" @click="addCustomer">
+                       @mousedown="e => e.preventDefault()" @click="addSupplier">
                     <plus-outlined/>
-                    新增客户
+                    新增供应商
                   </div>
                 </template>
               </a-select>
@@ -45,21 +42,21 @@
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="saleShipmentsFormState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
+              <a-date-picker v-model:value="purchaseRefundFormState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="saleShipmentsFormState.receiptNumber" :readOnly="true"/>
+              <a-input placeholder="请输入单据编号" v-model:value="purchaseRefundFormState.receiptNumber" :readOnly="true"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联订单" data-step="3"
-                         data-title="关联订单"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联单据" data-step="3"
+                         data-title="关联单据"
                          data-intro="">
-              <a-input-search readonly="true" placeholder="请选择关联订单" v-model:value="saleShipmentsFormState.otherReceipt" @search="onSearch"/>
+              <a-input-search readonly="true" placeholder="请选择关联单据" v-model:value="purchaseRefundFormState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -72,7 +69,7 @@
                   <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="barCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
                   <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
-                  <a-button @click="productModal" style="margin-right: 10px">选择添加退货商品</a-button>
+                  <a-button @click="productModal" style="margin-right: 10px">选择添加采购商品</a-button>
                   <a-button @click="" style="margin-right: 10px">历史单据</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
                 </template>
@@ -102,7 +99,7 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-textarea :rows="1" placeholder="请输入备注" v-model:value="saleShipmentsFormState.remark"
+                  <a-textarea :rows="1" placeholder="请输入备注" v-model:value="purchaseRefundFormState.remark"
                               style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
@@ -111,33 +108,34 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
                              data-title="优惠率">
-                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" suffix="%" v-model:value="saleShipmentsFormState.collectOfferRate"/>
+                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" suffix="%" v-model:value="purchaseRefundFormState.refundOfferRate"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="收款优惠" data-step="2"
-                             data-title="收款优惠">
-                  <a-input-number placeholder="请输入收款优惠" @change="discountAmountChange" v-model:value="saleShipmentsFormState.collectOfferAmount"/>
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="退款优惠" data-step="2"
+                             data-title="退款优惠">
+                  <a-input-number placeholder="请输入退款优惠" @change="discountAmountChange" v-model:value="purchaseRefundFormState.refundOfferAmount"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠后金额" data-step="2"
                              data-title="优惠后金额">
-                  <a-input placeholder="请输入优惠后金额" v-model:value="saleShipmentsFormState.collectOfferLastAmount" :readOnly="true"/>
+                  <a-input placeholder="请输入优惠后金额" v-model:value="purchaseRefundFormState.refundLastAmount" :readOnly="true"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="其他费用" data-step="2"
                              data-title="其他费用">
-                  <a-input-number placeholder="请输入其他费用" @change="otherAmountChange" v-model:value="saleShipmentsFormState.otherAmount" :readOnly="true"/>
+                  <a-input-number placeholder="请输入其他费用" @change="otherAmountChange" v-model:value="purchaseRefundFormState.otherAmount" :readOnly="true"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="结算账户" data-step="2"
-                             data-title="结算账户">
-                  <a-select v-model:value="saleShipmentsFormState.accountId"
+                             data-title="结算账户"
+                             :rules="[{ required: true}]">
+                  <a-select v-model:value="purchaseRefundFormState.accountId"
                             placeholder="请选择结算账户"
                             :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
                             @change="selectAccountChange"/>
@@ -149,28 +147,16 @@
                 </a-tooltip>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次收款" data-step="2"
-                             data-title="本次收款"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次退款" data-step="2"
+                             data-title="本次退款"
                              :rules="[{ required: true}]">
-                  <a-input-number placeholder="请输入本次收款金额" @change="thisCollectAmountChange" v-model:value="saleShipmentsFormState.thisCollectAmount"/>
+                  <a-input-number placeholder="请输入本次退款金额" @change="thisPaymentAmountChange" v-model:value="purchaseRefundFormState.thisRefundAmount"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24" >
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次欠款" data-step="2"
                              data-title="本次欠款">
-                  <a-input placeholder="请输入本次欠款金额" :readOnly="true" v-model:value="saleShipmentsFormState.thisArrearsAmount"/>
-                </a-form-item>
-              </a-col>
-            </a-row>
-            <a-row class="form-row" :gutter="24">
-              <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="销售人员" data-step="3"
-                             data-title="销售人员"
-                             data-intro="">
-                  <a-select v-model:value="saleShipmentsFormState.operatorIds"
-                            placeholder="请选择销售人员"
-                            mode="multiple"
-                            :options="salePersonalList.map(item => ({ value: item.id, label: item.name }))"/>
+                  <a-input placeholder="请输入本次欠款金额" :readOnly="true" v-model:value="purchaseRefundFormState.thisArrearsAmount"/>
                 </a-form-item>
               </a-col>
             </a-row>
@@ -197,7 +183,7 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <CustomerModal @register="customerModal"/>
+  <SupplierModal @register="supplierModal"/>
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
@@ -206,7 +192,7 @@
 
 <script lang="ts">
 import {defineComponent, ref, h, watch} from 'vue';
-import {AccountBookTwoTone} from '@ant-design/icons-vue';
+import {AccountBookTwoTone, PlusOutlined, UploadOutlined} from '@ant-design/icons-vue';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import weekday from "dayjs/plugin/weekday";
@@ -234,32 +220,31 @@ import {
   Upload,
 } from "ant-design-vue";
 import {
-  saleShipmentsFormState,
+  purchaseRefundFormState,
   RowVO,
   xGrid,
   tableData,
-  gridOptions, getTaxTotalPrice,
-} from '/src/views/sales/model/addEditModel';
-import {getCustomerList} from "@/api/basic/customer";
-import {CustomerResp} from "@/api/basic/model/customerModel";
-import {getOperatorList} from "@/api/basic/operator";
-import {OperatorResp} from "@/api/basic/model/operatorModel";
-import CustomerModal from "@/views/basic/customer/components/CustomerModal.vue";
+  gridOptions,
+  getTaxTotalPrice,
+} from '/src/views/purchase/model/addEditModel';
 import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
 import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
 import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
-import { addOrUpdateSaleShipments, getSaleShipmentsDetail} from "@/api/sale/shipments"
+import { addOrUpdatePurchaseRefund, getPurchaseRefundDetail} from "@/api/purchase/refund"
+import SupplierModal from "@/views/basic/supplier/components/SupplierModal.vue"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
 import {getProductSkuByBarCode} from "@/api/product/product";
 import {getDefaultWarehouse} from "@/api/basic/warehouse";
-import {AddOrUpdateReceiptReq, SalesData} from "@/api/sale/model/orderModel";
+import {AddOrUpdatePurchaseRefundReq, PurchaseRefundData} from "@/api/purchase/model/refundModel";
 import {FileData} from '/@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
 import MultipleAccountsModal from "@/views/basic/settlement-account/components/MultipleAccountsModal.vue";
+import {SupplierResp} from "@/api/basic/model/supplierModel";
+import {addSupplier, getSupplierList} from "@/api/basic/supplier";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 const VNodes = {
   props: {
@@ -276,13 +261,14 @@ dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
 export default defineComponent({
-  name: 'SaleShipmentsAddEditModal',
+  name: 'AddEditPurchaseRefundModal',
+  methods: {addSupplier},
   emits: ['success', 'cancel', 'error'],
   components: {
+    LinkReceiptModal,
     MultipleAccountsModal,
     FinancialAccountModal,
-    LinkReceiptModal,
-    CustomerModal,
+    SupplierModal,
     SelectProductModal,
     'a-modal': Modal,
     'a-upload': Upload,
@@ -308,7 +294,9 @@ export default defineComponent({
     'vxe-table': VXETable,
     'vxe-grid': VxeGrid,
     'vxe-input': VxeInput,
-    'vxe-button': VxeButton
+    'vxe-button': VxeButton,
+    'plus-outlined': PlusOutlined,
+    'upload-outlined': UploadOutlined,
   },
   setup(_, context) {
     const {createMessage} = useMessage();
@@ -325,12 +313,12 @@ export default defineComponent({
     const showScanButton = ref(true);
     const showScanPressEnter = ref(false);
     const manyAccountBtnStatus = ref(false);
-    const prefixNo = ref('LSTH');
     const fileList = ref<FileData[]>([]);
     const payTypeList = ref<any>([]);
     const minWidth = ref(1100);
     const model = ref({});
     const barCode = ref('');
+    const formRef = ref('');
     const labelCol = ref({
       xs: {span: 24},
       sm: {span: 8},
@@ -341,35 +329,33 @@ export default defineComponent({
     });
     const refKey = ref(['productDataTable']);
     const activeKey = ref('productDataTable');
-    const customerList = ref<CustomerResp[]>([])
-    const salePersonalList = ref<OperatorResp[]>([]);
+    const supplierList = ref<SupplierResp[]>([])
     const accountList = ref<AccountResp[]>([]);
     const multipleAccounts = ref();
-    const [customerModal, {openModal}] = useModal();
+    const [supplierModal, {openModal}] = useModal();
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
     const [multipleAccountModal, {openModal: openManyAccountModal}] = useModal();
     const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');
+      Modal.destroyAll();
     }
 
     function openAddEditModal(id: string | undefined) {
       open.value = true
-      loadCustomerList();
-      loadSalePersonalList();
+      loadSupplierList();
       loadDefaultWarehouse();
       loadAccountList();
       if (id) {
-        title.value = '编辑-销售出库单'
-        loadSaleShipmentDetail(id);
+        title.value = '编辑-采购退货'
+        loadRefundDetail(id);
       } else {
-        title.value = '新增-销售出库单'
+        title.value = '新增-采购退货'
         loadGenerateId();
-        saleShipmentsFormState.receiptDate = dayjs(new Date());
+        purchaseRefundFormState.receiptDate = dayjs(new Date());
       }
     }
 
@@ -377,7 +363,7 @@ export default defineComponent({
       getDefaultWarehouse().then(res => {
         const data = res.data
         if(data) {
-          saleShipmentsFormState.warehouseId = data.id
+          purchaseRefundFormState.warehouseId = data.id
         }
       })
     }
@@ -404,46 +390,38 @@ export default defineComponent({
       })
     }
 
-    function loadCustomerList() {
-      getCustomerList().then(res => {
-        customerList.value = res.data
-      })
-    }
-
-    function loadSalePersonalList() {
-      getOperatorList("销售员").then(res => {
-        salePersonalList.value = res.data
+    function loadSupplierList() {
+      getSupplierList().then(res => {
+        supplierList.value = res.data
       })
     }
 
     function loadGenerateId() {
-      generateId("销售出库").then(res => {
-        saleShipmentsFormState.receiptNumber = res.data
+      generateId("采购退货").then(res => {
+        purchaseRefundFormState.receiptNumber = res.data
       })
     }
 
-    async function loadSaleShipmentDetail(id) {
-      clearData();
-      const result = await getSaleShipmentsDetail(id)
+    async function loadRefundDetail(id) {
+      const result = await getPurchaseRefundDetail(id)
       if(result) {
         const data = result.data
-        saleShipmentsFormState.id = id
-        saleShipmentsFormState.customerId = data.customerId
-        saleShipmentsFormState.receiptDate = dayjs(data.receiptDate);
-        saleShipmentsFormState.receiptNumber = data.receiptNumber
-        saleShipmentsFormState.remark = data.remark
-        saleShipmentsFormState.operatorIds = data.operatorIds
-        saleShipmentsFormState.collectOfferRate = data.collectOfferRate
-        saleShipmentsFormState.collectOfferAmount = data.collectOfferAmount
-        saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.collectOfferLastAmount), { digits: 2 })}`
-        saleShipmentsFormState.otherReceipt = data.otherReceipt
-        saleShipmentsFormState.otherAmount = data.otherAmount
-        saleShipmentsFormState.thisCollectAmount = data.thisCollectAmount
-        saleShipmentsFormState.thisArrearsAmount = data.thisArrearsAmount
+        purchaseRefundFormState.id = id
+        purchaseRefundFormState.supplierId = data.supplierId
+        purchaseRefundFormState.receiptDate = dayjs(data.receiptDate);
+        purchaseRefundFormState.receiptNumber = data.receiptNumber
+        purchaseRefundFormState.remark = data.remark
+        purchaseRefundFormState.refundOfferRate = data.refundOfferRate
+        purchaseRefundFormState.refundOfferAmount = data.refundOfferAmount
+        purchaseRefundFormState.refundLastAmount = data.refundLastAmount
+        purchaseRefundFormState.otherReceipt = data.otherReceipt
+        purchaseRefundFormState.otherAmount = data.otherAmount
+        purchaseRefundFormState.thisRefundAmount = data.thisRefundAmount
+        purchaseRefundFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.thisArrearsAmount), { digits: 2 })}`
         // 判断多账户渲染
         if(data.multipleAccountAmounts.length > 0 && data.multipleAccountIds.length > 0) {
           manyAccountBtnStatus.value = true
-          saleShipmentsFormState.accountId = 0
+          purchaseRefundFormState.accountId = 0
           multipleAccounts.value = {
             accountOne: data.multipleAccountIds[0],
             accountTwo: data.multipleAccountIds[1],
@@ -454,7 +432,7 @@ export default defineComponent({
           }
         } else {
           manyAccountBtnStatus.value = false
-          saleShipmentsFormState.accountId = data.accountId
+          purchaseRefundFormState.accountId = data.accountId
         }
 
         // file
@@ -494,17 +472,17 @@ export default defineComponent({
     }
 
     function scanPressEnter() {
-      getProductSkuByBarCode(barCode.value, saleShipmentsFormState.warehouseId).then(res => {
+      getProductSkuByBarCode(barCode.value, purchaseRefundFormState.warehouseId).then(res => {
         const {columns} = gridOptions
         if (columns) {
           const {data} = res
           if (data) {
-            const sale : SalesData = data
+            const purchase : PurchaseRefundData = data
             const table = xGrid.value
             if (table) {
               //根据productExtendPrice.id判断表格中如果是同一个商品，数量加1 否则新增一行
               const tableData = table.getTableData().tableData
-              const index = tableData.findIndex(item => item.barCode === sale.barCode)
+              const index = tableData.findIndex(item => item.barCode === purchase.barCode)
               if (index > -1) {
                 const row = tableData[index]
                 row.productNumber = Number(row.productNumber) + 1
@@ -515,27 +493,27 @@ export default defineComponent({
                 row.amount = Number(row.amount.toFixed(2))
                 row.taxAmount = Number(row.taxAmount.toFixed(2))
                 row.taxTotalPrice = Number(row.taxTotalPrice.toFixed(2))
+
                 table.updateData()
               } else {
                 const tableData : RowVO = {
-                  warehouseId: sale.warehouseId,
-                  productId: sale.productId,
-                  barCode: sale.barCode,
-                  productName: sale.productName,
-                  productStandard: sale.productStandard,
-                  productUnit: sale.productUnit,
-                  stock: sale.stock,
+                  warehouseId: purchase.warehouseId,
+                  productId: purchase.productId,
+                  barCode: purchase.barCode,
+                  productName: purchase.productName,
+                  productStandard: purchase.productStandard,
+                  productUnit: purchase.productUnit,
+                  stock: purchase.stock,
                   productNumber: 1,
-                  amount: sale.retailPrice,
-                  unitPrice: sale.retailPrice,
-                  taxTotalPrice: sale.retailPrice,
+                  amount: purchase.retailPrice,
+                  unitPrice: purchase.retailPrice,
+                  taxTotalPrice: purchase.retailPrice,
                   taxRate: 0,
                   taxAmount: 0,
                 };
                 table.insert(tableData)
               }
-              saleShipmentsFormState.discountLastAmount = tableData.taxTotalPrice.value
-              saleShipmentsFormState.thisCollectAmount = tableData.taxTotalPrice.value
+              purchaseRefundFormState.refundLastAmount = getTaxTotalPrice.value
             }
           }
         }
@@ -554,7 +532,7 @@ export default defineComponent({
       showScanPressEnter.value = !showScanPressEnter.value;
     }
 
-    function addCustomer() {
+    function addSupplier() {
       openModal(true, {
         isUpdate: false,
       });
@@ -568,12 +546,8 @@ export default defineComponent({
 
     async function handleOk(type: number) {
       const table = xGrid.value
-      if (!saleShipmentsFormState.customerId) {
-        createMessage.error('请选择客户');
-        return;
-      }
-      if (!saleShipmentsFormState.thisCollectAmount) {
-        createMessage.error('请输入本次收款金额');
+      if (!purchaseRefundFormState.supplierId) {
+        createMessage.error('请选择供应商');
         return;
       }
       if(table) {
@@ -611,7 +585,7 @@ export default defineComponent({
 
       const dataArray = []
       table.getInsertRecords().forEach(item => {
-        const data: SalesData = {
+        const data: PurchaseRefundData = {
           warehouseId: item.warehouseId,
           barCode: item.barCode,
           productId: item.productId,
@@ -627,45 +601,45 @@ export default defineComponent({
       })
 
       // 判断是否是多账户 0是多账户 如果是多账户需要把accountIds置空 如果不是需要把multipleAccountIds 和 multipleAccountAmounts 置空
-      if (saleShipmentsFormState.accountId === 0) {
-        saleShipmentsFormState.accountId = undefined
-        saleShipmentsFormState.multipleAccountIds = []
-        saleShipmentsFormState.multipleAccountAmounts = []
+      if (purchaseRefundFormState.accountId === 0) {
+        purchaseRefundFormState.accountId = undefined
+        purchaseRefundFormState.multipleAccountIds = []
+        purchaseRefundFormState.multipleAccountAmounts = []
         if(multipleAccounts.value.accountOne) {
-          saleShipmentsFormState.multipleAccountIds.push(multipleAccounts.value.accountOne)
+          purchaseRefundFormState.multipleAccountIds.push(multipleAccounts.value.accountOne)
         }
         if(multipleAccounts.value.accountTwo){
-          saleShipmentsFormState.multipleAccountIds.push(multipleAccounts.value.accountTwo)
+          purchaseRefundFormState.multipleAccountIds.push(multipleAccounts.value.accountTwo)
         }
         if(multipleAccounts.value.accountThree) {
-          saleShipmentsFormState.multipleAccountIds.push(multipleAccounts.value.accountThree)
+          purchaseRefundFormState.multipleAccountIds.push(multipleAccounts.value.accountThree)
         }
         if(multipleAccounts.value.accountOne) {
-          saleShipmentsFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceOne)
+          purchaseRefundFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceOne)
         }
         if(multipleAccounts.value.accountTwo){
-          saleShipmentsFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceTwo)
+          purchaseRefundFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceTwo)
         }
         if(multipleAccounts.value.accountThree) {
-          saleShipmentsFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceThree)
+          purchaseRefundFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceThree)
         }
       } else {
-        saleShipmentsFormState.multipleAccountIds = []
-        saleShipmentsFormState.multipleAccountAmounts = []
+        purchaseRefundFormState.multipleAccountIds = []
+        purchaseRefundFormState.multipleAccountAmounts = []
       }
 
-      saleShipmentsFormState.thisCollectAmount = saleShipmentsFormState.thisCollectAmount.toString().replace(/,/g, '').replace(/￥/g, '');
-      saleShipmentsFormState.collectOfferLastAmount = saleShipmentsFormState.collectOfferLastAmount.replace(/,/g, '').replace(/￥/g, '')
-      saleShipmentsFormState.thisArrearsAmount = saleShipmentsFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(/￥/g, '')
-      const params: AddOrUpdateReceiptReq = {
-        ...saleShipmentsFormState,
+      purchaseRefundFormState.thisRefundAmount = purchaseRefundFormState.thisRefundAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      purchaseRefundFormState.refundLastAmount = purchaseRefundFormState.refundLastAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      purchaseRefundFormState.thisArrearsAmount = purchaseRefundFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      const params: AddOrUpdatePurchaseRefundReq = {
+        ...purchaseRefundFormState,
         tableData: dataArray,
         files: files,
         status: type,
       }
 
-      const result = await addOrUpdateSaleShipments(params)
-      if (result.code === 'S0004' || 'S0005') {
+      const result = await addOrUpdatePurchaseRefund(params)
+      if (result.code === 'P0021' || 'P0022') {
         createMessage.success('操作成功');
         handleCancelModal();
         clearData();
@@ -676,27 +650,31 @@ export default defineComponent({
       clearData();
     }
 
-    function clearData() {
-      saleShipmentsFormState.id = undefined
-      saleShipmentsFormState.receiptNumber = ''
-      saleShipmentsFormState.customerId = ''
-      saleShipmentsFormState.collectOfferRate = 0
-      saleShipmentsFormState.collectOfferAmount = 0
-      saleShipmentsFormState.collectOfferLastAmount = 0
-      saleShipmentsFormState.otherAmount = 0
-      saleShipmentsFormState.thisCollectAmount = 0
-      saleShipmentsFormState.thisArrearsAmount = 0
-      saleShipmentsFormState.accountId = undefined
-      saleShipmentsFormState.operatorIds = []
-      barCode.value = ''
-      saleShipmentsFormState.remark = ''
-      fileList.value = []
-      multipleAccounts.value = {}
+    function clearTable() {
       const table = xGrid.value
       if(table) {
         table.remove()
       }
-      saleShipmentsFormState.receiptDate = undefined
+    }
+
+    function clearData() {
+      purchaseRefundFormState.id = undefined
+      purchaseRefundFormState.receiptNumber = ''
+      purchaseRefundFormState.supplierId = ''
+      purchaseRefundFormState.refundOfferRate = 0
+      purchaseRefundFormState.refundOfferAmount = 0
+      purchaseRefundFormState.refundLastAmount = 0
+      purchaseRefundFormState.otherAmount = 0
+      purchaseRefundFormState.thisRefundAmount = 0
+      purchaseRefundFormState.thisArrearsAmount = 0
+      purchaseRefundFormState.otherReceipt = ''
+      purchaseRefundFormState.accountId = undefined
+      barCode.value = ''
+      purchaseRefundFormState.remark = ''
+      fileList.value = []
+      multipleAccounts.value = {}
+      purchaseRefundFormState.receiptDate = undefined
+      clearTable()
     }
 
     function beforeUpload(file: any) {
@@ -751,8 +729,7 @@ export default defineComponent({
         tableData.forEach(item => {
           total += item.taxTotalPrice
         })
-        saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
-        saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
+        purchaseRefundFormState.refundLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
       }
     }
 
@@ -764,8 +741,10 @@ export default defineComponent({
     }
 
     async function deleteRowData() {
+      // 删除选中行
       const type = await VXETable.modal.confirm('确定要删除选中的数据?')
       const table = xGrid.value
+      // 获取VXETable选中行
       const selectRow = table.getCheckboxRecords()
       if (table) {
         if (type === 'confirm') {
@@ -855,64 +834,73 @@ export default defineComponent({
     }
 
     watch(getTaxTotalPrice, (newValue, oldValue) => {
-      // 判断如果是查询详情的方法就不调用 重新计算本次收款 和 本次欠款 的两个方法 因为查询详情的时候已经计算过了
       if(oldValue !== '￥0.00') {
-        saleShipmentsFormState.collectOfferLastAmount = newValue
-        saleShipmentsFormState.thisCollectAmount = newValue
         discountAmountChange()
+        purchaseRefundFormState.refundLastAmount = newValue
+        purchaseRefundFormState.thisRefundAmount = newValue
       }
     });
+
+    function onSearch() {
+      openLinkReceiptModal(true, {
+        type: '采购',
+        subType: '采购入库',
+        title: '选择采购入库单'
+      });
+    }
+
 
     function discountRateChange() {
       const price = getTaxTotalPrice.value;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
-      const discountRate = saleShipmentsFormState.collectOfferRate
+      const discountRate = purchaseRefundFormState.refundOfferRate
       const discountAmount = discountLastAmount * discountRate / 100
-      const otherAmount = saleShipmentsFormState.otherAmount
+      const otherAmount = purchaseRefundFormState.otherAmount
 
       const lastAmount = Number((discountLastAmount - discountAmount + otherAmount));
 
-      saleShipmentsFormState.thisArrearsAmount = 0
-      saleShipmentsFormState.collectOfferAmount = Number(discountAmount.toFixed(2))
-      saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
-      saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
+      purchaseRefundFormState.thisArrearsAmount = 0
+      purchaseRefundFormState.refundOfferAmount = Number(discountAmount.toFixed(2))
+      purchaseRefundFormState.refundLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      purchaseRefundFormState.thisRefundAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
 
     }
 
     function discountAmountChange() {
       const price = getTaxTotalPrice.value;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
-      const discountAmount = saleShipmentsFormState.collectOfferAmount
-      const otherAmount = saleShipmentsFormState.otherAmount
+      const discountAmount = purchaseRefundFormState.refundOfferAmount
+      const otherAmount = purchaseRefundFormState.otherAmount
       const discountRate = discountAmount / discountLastAmount * 100
       const lastAmount = Number((discountLastAmount - discountAmount));
 
-      saleShipmentsFormState.thisArrearsAmount = 0
-      saleShipmentsFormState.collectOfferRate = Number(discountRate.toFixed(2))
-      saleShipmentsFormState.collectOfferAmount = Number(discountAmount.toFixed(2))
-      saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
-      saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
+      purchaseRefundFormState.thisArrearsAmount = 0
+      purchaseRefundFormState.refundOfferRate = Number(discountRate.toFixed(2))
+      purchaseRefundFormState.refundOfferAmount = Number(discountAmount.toFixed(2))
+      purchaseRefundFormState.refundLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      purchaseRefundFormState.thisRefundAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
 
     }
 
     function otherAmountChange() {
-      // 计算本次收款(thisCollectAmount) = 优惠金额 + 其他费用
-      const price = saleShipmentsFormState.collectOfferLastAmount;
+      const price = purchaseRefundFormState.refundLastAmount;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
-      const otherAmount = saleShipmentsFormState.otherAmount
+      const otherAmount = purchaseRefundFormState.otherAmount
       const lastAmount =  Number((discountLastAmount + otherAmount));
-      saleShipmentsFormState.thisArrearsAmount = 0
-      saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+
+      purchaseRefundFormState.thisArrearsAmount = 0
+      purchaseRefundFormState.thisRefundAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
     }
 
-    function thisCollectAmountChange() {
-      const price = saleShipmentsFormState.collectOfferLastAmount;
+    function thisPaymentAmountChange() {
+      const price = purchaseRefundFormState.refundLastAmount;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
-      const otherAmount = saleShipmentsFormState.otherAmount
-      const thisCollectAmount = saleShipmentsFormState.thisCollectAmount
+      const otherAmount = purchaseRefundFormState.otherAmount
+      const thisCollectAmount = purchaseRefundFormState.thisRefundAmount
       const lastAmount = Number((discountLastAmount + otherAmount - thisCollectAmount));
 
-      saleShipmentsFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      purchaseRefundFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+
     }
 
     const selectAccountChange = (value: number) => {
@@ -937,19 +925,10 @@ export default defineComponent({
       multipleAccounts.value = data;
     }
 
-    function onSearch() {
-      openLinkReceiptModal(true, {
-        type: '销售',
-        subType: '销售订单',
-        title: '选择销售订单'
-      });
-    }
-
     function handleReceiptSuccess(data) {
-      console.info(data)
       const table = xGrid.value
       if(data && table) {
-        saleShipmentsFormState.otherReceipt = data.receiptNumber;
+        purchaseRefundFormState.otherReceipt = data.receiptNumber;
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {
@@ -971,12 +950,12 @@ export default defineComponent({
           };
           table.insert(tableData)
         })
-        saleShipmentsFormState.customerId = data.receiptDetailData[0].memberId
       }
     }
 
     return {
       h,
+      formRef,
       AccountBookTwoTone,
       open,
       checkFlag,
@@ -986,12 +965,11 @@ export default defineComponent({
       confirmLoading,
       handleCancelModal,
       openAddEditModal,
-      saleShipmentsFormState,
+      purchaseRefundFormState,
       title,
       width,
       moreStatus,
       addDefaultRowNum,
-      prefixNo,
       fileList,
       payTypeList,
       minWidth,
@@ -1003,12 +981,11 @@ export default defineComponent({
       scanPressEnter,
       scanEnter,
       stopScan,
-      customerList,
-      salePersonalList,
+      supplierList,
       showScanButton,
       showScanPressEnter,
-      customerModal,
-      addCustomer,
+      supplierModal,
+      addSupplier,
       accountModal,
       addAccount,
       accountList,
@@ -1018,6 +995,7 @@ export default defineComponent({
       gridOptions,
       xGrid,
       tableData,
+      getTaxTotalPrice,
       selectProductModal,
       openProductModal,
       productModal,
@@ -1033,12 +1011,12 @@ export default defineComponent({
       discountRateChange,
       discountAmountChange,
       selectAccountChange,
-      otherAmountChange,
-      thisCollectAmountChange,
       manyAccountBtnStatus,
       handleManyAccount,
       multipleAccountModal,
       handleAccountSuccess,
+      otherAmountChange,
+      thisPaymentAmountChange,
       onSearch,
       linkReceiptModal,
       openLinkReceiptModal,
