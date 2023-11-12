@@ -14,16 +14,10 @@ package com.wansenai.service.receipt;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.wansenai.dto.receipt.purchase.PurchaseOrderDTO;
-import com.wansenai.dto.receipt.purchase.PurchaseStorageDTO;
-import com.wansenai.dto.receipt.purchase.QueryPurchaseOrderDTO;
-import com.wansenai.dto.receipt.purchase.QueryPurchaseStorageDTO;
+import com.wansenai.dto.receipt.purchase.*;
 import com.wansenai.entities.receipt.ReceiptPurchaseMain;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.purchase.PurchaseOrderDetailVO;
-import com.wansenai.vo.receipt.purchase.PurchaseOrderVO;
-import com.wansenai.vo.receipt.purchase.PurchaseStorageDetailVO;
-import com.wansenai.vo.receipt.purchase.PurchaseStorageVO;
+import com.wansenai.vo.receipt.purchase.*;
 
 import java.util.List;
 
@@ -142,4 +136,61 @@ public interface ReceiptPurchaseService extends IService<ReceiptPurchaseMain> {
      * @return Return to modify status results
      */
     Response<String> updatePurchaseStorageStatus(List<Long> ids, Integer status);
+
+    /**
+     * Pagination query of purchase return order data based on public query criteria
+     * 根据公共查询条件分页查询采购退货单数据
+     *
+     * @param queryPurchaseRefundDTO Query common conditions
+     *                               查询公共条件
+     * @return Returns paginated data
+     *       返回分页数据
+     */
+    Response<Page<PurchaseRefundVO>> getPurchaseRefundPage(QueryPurchaseRefundDTO queryPurchaseRefundDTO);
+
+    /**
+     * Query purchase return details data based on receipt ID
+     * 根据单据ID查询采购退货详情数据
+     *
+     * @param id Receipt ID
+     *           单据ID
+     * @return Returns purchase return details data
+     *     返回采购退货详情数据
+     */
+    Response<PurchaseRefundDetailVO> getPurchaseRefundDetail(Long id);
+
+    /**
+     * Add/Modify Purchase Return Order Data
+     * 添加/修改采购退货单数据
+     *
+     * @param purchaseRefundDTO Purchase return order data object
+     *                          采购退货单数据对象
+     * @return Return to Add/Modify Status Results
+     *          返回添加/修改状态结果
+     */
+    Response<String> addOrUpdatePurchaseRefund(PurchaseRefundDTO purchaseRefundDTO);
+
+    /**
+     * Batch delete purchase return data based on purchase return document ID (logical deletion, modification, and deletion identification)
+     * 根据采购退货单据ID批量删除采购退货数据（逻辑删除，修改删除标识）
+     *
+     * @param ids Purchase return document ID set
+     *            采购退货单据ID集合
+     * @return Return to delete status results
+     *       返回删除状态结果
+     */
+    Response<String> deletePurchaseRefund(List<Long> ids);
+
+    /**
+     * Batch modify status based on purchase return document ID
+     * 根据采购退货单据ID批量修改状态
+     *
+     * @param ids Purchase return document ID set
+     *            采购退货单据ID集合
+     * @param status Status to be modified
+     *               要修改的状态
+     * @return  Return to modify status results
+     *         返回修改状态结果
+     */
+    Response<String> updatePurchaseRefundStatus(List<Long> ids, Integer status);
 }

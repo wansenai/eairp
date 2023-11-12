@@ -238,7 +238,7 @@ import {
   RowVO,
   xGrid,
   tableData,
-  gridOptions, getTaxTotalPrice,
+  gridOptions, getTaxTotalPrice, saleShipmentsFormState,
 } from '/src/views/sales/model/addEditModel';
 import {getCustomerList} from "@/api/basic/customer";
 import {CustomerResp} from "@/api/basic/model/customerModel";
@@ -436,6 +436,7 @@ export default defineComponent({
         saleRefundFormState.refundOfferRate = data.refundOfferRate
         saleRefundFormState.refundOfferAmount = data.refundOfferAmount
         saleRefundFormState.refundLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.refundLastAmount), { digits: 2 })}`
+        saleRefundFormState.otherReceipt = data.otherReceipt
         saleRefundFormState.otherAmount = data.otherAmount
         saleRefundFormState.thisRefundAmount = data.thisRefundAmount
         saleRefundFormState.thisArrearsAmount = data.thisArrearsAmount

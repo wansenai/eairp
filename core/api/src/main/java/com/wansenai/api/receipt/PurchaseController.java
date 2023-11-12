@@ -14,16 +14,10 @@ package com.wansenai.api.receipt;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansenai.dto.receipt.purchase.PurchaseOrderDTO;
-import com.wansenai.dto.receipt.purchase.PurchaseStorageDTO;
-import com.wansenai.dto.receipt.purchase.QueryPurchaseOrderDTO;
-import com.wansenai.dto.receipt.purchase.QueryPurchaseStorageDTO;
+import com.wansenai.dto.receipt.purchase.*;
 import com.wansenai.service.receipt.ReceiptPurchaseService;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.purchase.PurchaseOrderDetailVO;
-import com.wansenai.vo.receipt.purchase.PurchaseOrderVO;
-import com.wansenai.vo.receipt.purchase.PurchaseStorageDetailVO;
-import com.wansenai.vo.receipt.purchase.PurchaseStorageVO;
+import com.wansenai.vo.receipt.purchase.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -93,5 +87,30 @@ public class PurchaseController {
     @PutMapping("/storage/delete/{ids}")
     public Response<String> deletePurchaseStorage(@PathVariable("ids") List<Long> ids) {
         return purchaseService.deletePurchaseStorage(ids);
+    }
+
+    @GetMapping("/refund/pageList")
+    public Response<Page<PurchaseRefundVO>> getPurchaseRefundPageList(@ModelAttribute QueryPurchaseRefundDTO queryPurchaseRefundDTO) {
+        return purchaseService.getPurchaseRefundPage(queryPurchaseRefundDTO);
+    }
+
+    @PostMapping("/refund/addOrUpdate")
+    public Response<String> addOrUpdatePurchaseRefund(@RequestBody PurchaseRefundDTO purchaseRefundDTO) {
+        return purchaseService.addOrUpdatePurchaseRefund(purchaseRefundDTO);
+    }
+
+    @GetMapping("/refund/detail/{id}")
+    public Response<PurchaseRefundDetailVO> purchaseRefundDetail(@PathVariable("id") Long id) {
+        return purchaseService.getPurchaseRefundDetail(id);
+    }
+
+    @PutMapping("/refund/updateStatus/{ids}/{status}")
+    public Response<String> updatePurchaseRefundStatus(@PathVariable("ids") List<Long> ids, @PathVariable("status") Integer status) {
+        return purchaseService.updatePurchaseRefundStatus(ids, status);
+    }
+
+    @PutMapping("/refund/delete/{ids}")
+    public Response<String> deletePurchaseRefund(@PathVariable("ids") List<Long> ids) {
+        return purchaseService.deletePurchaseRefund(ids);
     }
 }

@@ -1,6 +1,6 @@
 import {FileData} from '/@/api/retail/model/shipmentsModel';
 
-export interface QueryPurchaseStorageReq {
+export interface QueryPurchaseRefundReq {
     receiptNumber: string;
     productInfo: string;
     supplierId: number | string;
@@ -9,7 +9,7 @@ export interface QueryPurchaseStorageReq {
     remark: string;
 }
 
-export interface PurchaseData {
+export interface PurchaseRefundData {
     warehouseId: number | string;
     productId: number | string;
     barCode: number | string;
@@ -26,41 +26,42 @@ export interface PurchaseData {
     remark: string;
 }
 
-export interface AddOrUpdatePurchaseStorageReq {
+export interface AddOrUpdatePurchaseRefundReq {
     id: number | string | undefined;
     supplierId: string;
     receiptNumber: string;
     receiptDate: string;
-    paymentRate: number;
-    paymentAmount: number;
-    paymentLastAmount: number;
+    refundOfferRate: number;
+    refundOfferAmount: number;
+    refundLastAmount: number;
     otherAmount: number;
     otherReceipt: string;
-    thisPaymentAmount: number;
+    thisRefundAmount: number;
     thisArrearsAmount: number;
     accountId: number | string;
     multipleAccountIds: number[];
     multipleAccountAmounts: number[];
     status: number;
     remark: string;
-    tableData: PurchaseData[];
+    tableData: PurchaseRefundData[];
     files: FileData[];
 }
 
-export interface PurchaseStorageDetailData {
+export interface PurchaseRefundDetailData {
     supplierId: number | string;
     accountId: number;
+    otherReceipt: string;
     receiptDate: string;
     receiptNumber: string;
     multipleAccountAmounts: number[];
     multipleAccountIds: number[];
-    paymentRate: number;
-    paymentAmount: number;
-    paymentLastAmount: number;
+    refundOfferRate: number;
+    refundOfferAmount: number;
+    refundLastAmount: number;
     otherAmount: number;
-    thisPaymentAmount: number;
+    thisRefundAmount: number;
     thisArrearsAmount: number;
     remark: string;
-    tableData: PurchaseData[];
+    tableData: PurchaseRefundData[];
     files: FileData[];
 }

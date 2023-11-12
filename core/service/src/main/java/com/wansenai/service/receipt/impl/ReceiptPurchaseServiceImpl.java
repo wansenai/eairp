@@ -17,14 +17,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.PurchaseDataBO;
-import com.wansenai.dto.receipt.purchase.PurchaseOrderDTO;
-import com.wansenai.dto.receipt.purchase.PurchaseStorageDTO;
-import com.wansenai.dto.receipt.purchase.QueryPurchaseOrderDTO;
-import com.wansenai.dto.receipt.purchase.QueryPurchaseStorageDTO;
+import com.wansenai.dto.receipt.purchase.*;
 import com.wansenai.entities.receipt.ReceiptPurchaseMain;
 import com.wansenai.entities.receipt.ReceiptPurchaseSub;
-import com.wansenai.entities.receipt.ReceiptSaleMain;
-import com.wansenai.entities.receipt.ReceiptSaleSub;
 import com.wansenai.entities.system.SysFile;
 import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
 import com.wansenai.mappers.receipt.ReceiptPurchaseMainMapper;
@@ -40,12 +35,8 @@ import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.PurchaseCodeEnum;
-import com.wansenai.utils.enums.SaleCodeEnum;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.purchase.PurchaseOrderDetailVO;
-import com.wansenai.vo.receipt.purchase.PurchaseOrderVO;
-import com.wansenai.vo.receipt.purchase.PurchaseStorageDetailVO;
-import com.wansenai.vo.receipt.purchase.PurchaseStorageVO;
+import com.wansenai.vo.receipt.purchase.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -500,7 +491,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var multipleAccountIds = parseAndCollectLongList(purchaseMain.getMultipleAccount());
         var multipleAccountAmounts = parseAndCollectLongList(purchaseMain.getMultipleAccountAmount());
 
-        var purchaseOrderDetailVO = PurchaseStorageDetailVO.builder()
+        var purchasesStorageDetailVO = PurchaseStorageDetailVO.builder()
                 .receiptNumber(purchaseMain.getReceiptNumber())
                 .receiptDate(purchaseMain.getReceiptDate())
                 .supplierId(purchaseMain.getSupplierId())
@@ -509,6 +500,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .paymentAmount(purchaseMain.getDiscountAmount())
                 .paymentLastAmount(purchaseMain.getDiscountLastAmount())
                 .otherAmount(purchaseMain.getOtherAmount())
+                .otherReceipt(purchaseMain.getOtherReceipt())
                 .thisPaymentAmount(purchaseMain.getChangeAmount())
                 .thisArrearsAmount(purchaseMain.getArrearsAmount())
                 .multipleAccountIds(multipleAccountIds)
@@ -519,7 +511,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .files(fileList)
                 .build();
 
-        return Response.responseData(purchaseOrderDetailVO);
+        return Response.responseData(purchasesStorageDetailVO);
     }
 
     @Override
@@ -545,6 +537,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .set(purchaseStorageDTO.getThisPaymentAmount() != null, ReceiptPurchaseMain::getChangeAmount, purchaseStorageDTO.getThisPaymentAmount())
                     .set(purchaseStorageDTO.getThisArrearsAmount() != null, ReceiptPurchaseMain::getArrearsAmount, purchaseStorageDTO.getThisArrearsAmount())
                     .set(purchaseStorageDTO.getStatus() != null, ReceiptPurchaseMain::getStatus, purchaseStorageDTO.getStatus())
+                    .set(StringUtils.hasText(purchaseStorageDTO.getOtherReceipt()), ReceiptPurchaseMain::getOtherReceipt, purchaseStorageDTO.getOtherReceipt())
                     .set(StringUtils.hasText(purchaseStorageDTO.getReceiptDate()), ReceiptPurchaseMain::getReceiptDate, purchaseStorageDTO.getReceiptDate())
                     .set(StringUtils.hasText(purchaseStorageDTO.getRemark()), ReceiptPurchaseMain::getRemark, purchaseStorageDTO.getRemark())
                     .set(ReceiptPurchaseMain::getAccountId, accountId)
@@ -560,7 +553,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .remove();
 
             var tableData = purchaseStorageDTO.getTableData();
-            var receiptSaleList = tableData.stream()
+            var receiptPurchaseStorageList = tableData.stream()
                     .map(item -> ReceiptPurchaseSub.builder()
                             .receiptPurchaseMainId(purchaseStorageDTO.getId())
                             .productId(item.getProductId())
@@ -577,7 +570,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                             .build())
                     .collect(Collectors.toList());
 
-            var updateSubResult = receiptPurchaseSubService.saveBatch(receiptSaleList);
+            var updateSubResult = receiptPurchaseSubService.saveBatch(receiptPurchaseStorageList);
 
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS);
@@ -600,6 +593,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .discountAmount(purchaseStorageDTO.getPaymentAmount())
                     .discountLastAmount(purchaseStorageDTO.getPaymentLastAmount())
                     .otherAmount(purchaseStorageDTO.getOtherAmount())
+                    .otherReceipt(purchaseStorageDTO.getOtherReceipt())
                     .changeAmount(purchaseStorageDTO.getThisPaymentAmount())
                     .arrearsAmount(purchaseStorageDTO.getThisArrearsAmount())
                     .multipleAccount(multipleAccountIds)
@@ -649,5 +643,234 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     @Override
     public Response<String> updatePurchaseStorageStatus(List<Long> ids, Integer status) {
         return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_ERROR);
+    }
+
+    @Override
+    public Response<Page<PurchaseRefundVO>> getPurchaseRefundPage(QueryPurchaseRefundDTO queryPurchaseRefundDTO) {
+        var result = new Page<PurchaseRefundVO>();
+        var purchaseRefundVOList = new ArrayList<PurchaseRefundVO>();
+        var page = new Page<ReceiptPurchaseMain>(queryPurchaseRefundDTO.getPage(), queryPurchaseRefundDTO.getPageSize());
+        var queryWrapper = new LambdaQueryWrapper<ReceiptPurchaseMain>()
+                .eq(ReceiptPurchaseMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .in(ReceiptPurchaseMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_PURCHASE_REFUND)
+                .eq(StringUtils.hasText(queryPurchaseRefundDTO.getReceiptNumber()), ReceiptPurchaseMain::getReceiptNumber, queryPurchaseRefundDTO.getReceiptNumber())
+                .like(StringUtils.hasText(queryPurchaseRefundDTO.getRemark()), ReceiptPurchaseMain::getRemark, queryPurchaseRefundDTO.getRemark())
+                .eq(queryPurchaseRefundDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, queryPurchaseRefundDTO.getSupplierId())
+                .eq(queryPurchaseRefundDTO.getOperatorId() != null, ReceiptPurchaseMain::getCreateBy, queryPurchaseRefundDTO.getOperatorId())
+                .eq(queryPurchaseRefundDTO.getStatus() != null, ReceiptPurchaseMain::getStatus, queryPurchaseRefundDTO.getStatus())
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(queryPurchaseRefundDTO.getStartDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseRefundDTO.getStartDate())
+                .le(StringUtils.hasText(queryPurchaseRefundDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseRefundDTO.getEndDate());
+
+        var queryResult = receiptPurchaseMainMapper.selectPage(page, queryWrapper);
+
+        queryResult.getRecords().forEach(item -> {
+            var receiptSubList = getReceiptSubList(item.getId());
+            var productNumber = calculateProductNumber(receiptSubList);
+            var supplierName = getSupplierName(item.getSupplierId());
+            var crateBy = getUserName(item.getCreateBy());
+            var totalAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTotalAmount);
+            var taxIncludedAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTaxIncludedAmount);
+
+            var totalPaymentAmount = Optional.ofNullable(item.getArrearsAmount()).orElse(BigDecimal.ZERO).add(item.getChangeAmount());
+
+            var purchaseRefundVO = PurchaseRefundVO.builder()
+                    .id(item.getId())
+                    .supplierName(supplierName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalAmount(totalAmount)
+                    .taxIncludedAmount(taxIncludedAmount)
+                    .refundTotalAmount(totalPaymentAmount)
+                    .thisRefundAmount(item.getChangeAmount())
+                    .thisArrearsAmount(item.getArrearsAmount())
+                    .status(item.getStatus())
+                    .build();
+            purchaseRefundVOList.add(purchaseRefundVO);
+        });
+        result.setRecords(purchaseRefundVOList);
+        result.setTotal(queryResult.getTotal());
+        result.setCurrent(queryResult.getCurrent());
+        result.setSize(queryResult.getSize());
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<PurchaseRefundDetailVO> getPurchaseRefundDetail(Long id) {
+        if (id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var purchaseMain = getById(id);
+        List<FileDataBO> fileList = commonService.getFileList(purchaseMain.getFileId());
+
+        var receiptSubList = receiptPurchaseSubService.lambdaQuery()
+                .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, id)
+                .list();
+
+        var tableData = new ArrayList<PurchaseDataBO>(receiptSubList.size() + 1);
+        for (ReceiptPurchaseSub item : receiptSubList) {
+            var purchaseData = createPurchaseDataFromReceiptSub(item);
+            tableData.add(purchaseData);
+        }
+
+        var multipleAccountIds = parseAndCollectLongList(purchaseMain.getMultipleAccount());
+        var multipleAccountAmounts = parseAndCollectLongList(purchaseMain.getMultipleAccountAmount());
+
+        var purchaseRefundDetailVO = PurchaseRefundDetailVO.builder()
+                .receiptNumber(purchaseMain.getReceiptNumber())
+                .receiptDate(purchaseMain.getReceiptDate())
+                .supplierId(purchaseMain.getSupplierId())
+                .accountId(purchaseMain.getAccountId())
+                .refundOfferRate(purchaseMain.getDiscountRate())
+                .refundOfferAmount(purchaseMain.getDiscountAmount())
+                .refundLastAmount(purchaseMain.getDiscountLastAmount())
+                .otherAmount(purchaseMain.getOtherAmount())
+                .otherReceipt(purchaseMain.getOtherReceipt())
+                .thisRefundAmount(purchaseMain.getChangeAmount())
+                .thisArrearsAmount(purchaseMain.getArrearsAmount())
+                .multipleAccountIds(multipleAccountIds)
+                .multipleAccountAmounts(multipleAccountAmounts)
+                .remark(purchaseMain.getRemark())
+                .status(purchaseMain.getStatus())
+                .tableData(tableData)
+                .files(fileList)
+                .build();
+
+        return Response.responseData(purchaseRefundDetailVO);
+    }
+
+    @Override
+    public Response<String> addOrUpdatePurchaseRefund(PurchaseRefundDTO purchaseRefundDTO) {
+        var userId = userService.getCurrentUserId();
+        var isUpdate = purchaseRefundDTO.getId() != null;
+
+        var multipleAccountIds = parseIdsToString(purchaseRefundDTO.getMultipleAccountIds());
+        var multipleAccountAmounts = parseIdsToString(purchaseRefundDTO.getMultipleAccountAmounts());
+        String accountId = (purchaseRefundDTO.getAccountId() != null) ? String.valueOf(purchaseRefundDTO.getAccountId()) : null;
+
+        var fid = processFiles(purchaseRefundDTO.getFiles(), purchaseRefundDTO.getId());
+        var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
+
+        if (isUpdate) {
+            var updateMainResult = lambdaUpdate()
+                    .eq(ReceiptPurchaseMain::getId, purchaseRefundDTO.getId())
+                    .set(purchaseRefundDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, purchaseRefundDTO.getSupplierId())
+                    .set(purchaseRefundDTO.getRefundOfferRate() != null, ReceiptPurchaseMain::getDiscountRate, purchaseRefundDTO.getRefundOfferRate())
+                    .set(purchaseRefundDTO.getRefundOfferAmount() != null, ReceiptPurchaseMain::getDiscountAmount, purchaseRefundDTO.getRefundOfferAmount())
+                    .set(purchaseRefundDTO.getRefundLastAmount() != null, ReceiptPurchaseMain::getDiscountLastAmount, purchaseRefundDTO.getRefundLastAmount())
+                    .set(purchaseRefundDTO.getOtherAmount() != null, ReceiptPurchaseMain::getOtherAmount, purchaseRefundDTO.getOtherAmount())
+                    .set(purchaseRefundDTO.getThisRefundAmount() != null, ReceiptPurchaseMain::getChangeAmount, purchaseRefundDTO.getThisRefundAmount())
+                    .set(purchaseRefundDTO.getThisArrearsAmount() != null, ReceiptPurchaseMain::getArrearsAmount, purchaseRefundDTO.getThisArrearsAmount())
+                    .set(purchaseRefundDTO.getStatus() != null, ReceiptPurchaseMain::getStatus, purchaseRefundDTO.getStatus())
+                    .set(StringUtils.hasText(purchaseRefundDTO.getOtherReceipt()), ReceiptPurchaseMain::getOtherReceipt, purchaseRefundDTO.getOtherReceipt())
+                    .set(StringUtils.hasText(purchaseRefundDTO.getReceiptDate()), ReceiptPurchaseMain::getReceiptDate, purchaseRefundDTO.getReceiptDate())
+                    .set(StringUtils.hasText(purchaseRefundDTO.getRemark()), ReceiptPurchaseMain::getRemark, purchaseRefundDTO.getRemark())
+                    .set(ReceiptPurchaseMain::getAccountId, accountId)
+                    .set(ReceiptPurchaseMain::getFileId, fileIds)
+                    .set(ReceiptPurchaseMain::getMultipleAccount, multipleAccountIds)
+                    .set(ReceiptPurchaseMain::getMultipleAccountAmount, multipleAccountAmounts)
+                    .set(ReceiptPurchaseMain::getUpdateBy, userId)
+                    .set(ReceiptPurchaseMain::getUpdateTime, LocalDateTime.now())
+                    .update();
+
+            receiptPurchaseSubService.lambdaUpdate()
+                    .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, purchaseRefundDTO.getId())
+                    .remove();
+
+            var tableData = purchaseRefundDTO.getTableData();
+            var receiptPurchaseRefundList = tableData.stream()
+                    .map(item -> ReceiptPurchaseSub.builder()
+                            .receiptPurchaseMainId(purchaseRefundDTO.getId())
+                            .productId(item.getProductId())
+                            .productNumber(item.getProductNumber())
+                            .unitPrice(item.getUnitPrice())
+                            .totalAmount(item.getAmount())
+                            .productBarcode(item.getBarCode())
+                            .warehouseId(item.getWarehouseId())
+                            .taxRate(item.getTaxRate())
+                            .taxAmount(item.getTaxAmount())
+                            .taxIncludedAmount(item.getTaxTotalPrice())
+                            .updateBy(userId)
+                            .updateTime(LocalDateTime.now())
+                            .build())
+                    .collect(Collectors.toList());
+
+            var updateSubResult = receiptPurchaseSubService.saveBatch(receiptPurchaseRefundList);
+
+            if (updateMainResult && updateSubResult) {
+                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS);
+            } else {
+                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_ERROR);
+            }
+        } else {
+            var id = SnowflakeIdUtil.nextId();
+
+            var receiptMain = ReceiptPurchaseMain.builder()
+                    .id(id)
+                    .type(ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                    .subType(ReceiptConstants.RECEIPT_SUB_TYPE_PURCHASE_REFUND)
+                    .initReceiptNumber(purchaseRefundDTO.getReceiptNumber())
+                    .receiptNumber(purchaseRefundDTO.getReceiptNumber())
+                    .receiptDate(TimeUtil.parse(purchaseRefundDTO.getReceiptDate()))
+                    .supplierId(purchaseRefundDTO.getSupplierId())
+                    .discountRate(purchaseRefundDTO.getRefundOfferRate())
+                    .accountId(purchaseRefundDTO.getAccountId())
+                    .discountAmount(purchaseRefundDTO.getRefundOfferAmount())
+                    .discountLastAmount(purchaseRefundDTO.getRefundLastAmount())
+                    .otherAmount(purchaseRefundDTO.getOtherAmount())
+                    .otherReceipt(purchaseRefundDTO.getOtherReceipt())
+                    .changeAmount(purchaseRefundDTO.getThisRefundAmount())
+                    .arrearsAmount(purchaseRefundDTO.getThisArrearsAmount())
+                    .multipleAccount(multipleAccountIds)
+                    .multipleAccountAmount(multipleAccountAmounts)
+                    .remark(purchaseRefundDTO.getRemark())
+                    .fileId(fileIds)
+                    .status(purchaseRefundDTO.getStatus())
+                    .createBy(userId)
+                    .createTime(LocalDateTime.now())
+                    .build();
+            var saveMainResult = save(receiptMain);
+
+            var receiptSubList = purchaseRefundDTO.getTableData();
+            var receiptList = receiptSubList.stream()
+                    .map(item -> ReceiptPurchaseSub.builder()
+                            .receiptPurchaseMainId(id)
+                            .productId(item.getProductId())
+                            .productNumber(item.getProductNumber())
+                            .unitPrice(item.getUnitPrice())
+                            .totalAmount(item.getAmount())
+                            .productBarcode(item.getBarCode())
+                            .warehouseId(item.getWarehouseId())
+                            .taxRate(item.getTaxRate())
+                            .taxAmount(item.getTaxAmount())
+                            .taxIncludedAmount(item.getTaxTotalPrice())
+                            .remark(item.getRemark())
+                            .createBy(userId)
+                            .createTime(LocalDateTime.now())
+                            .build())
+                    .collect(Collectors.toList());
+
+            var saveSubResult = receiptPurchaseSubService.saveBatch(receiptList);
+
+            if (saveMainResult && saveSubResult) {
+                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_SUCCESS);
+            } else {
+                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_ERROR);
+            }
+        }
+    }
+
+    @Override
+    public Response<String> deletePurchaseRefund(List<Long> ids) {
+        return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_REFUND_SUCCESS, PurchaseCodeEnum.DELETE_PURCHASE_REFUND_ERROR);
+    }
+
+    @Override
+    public Response<String> updatePurchaseRefundStatus(List<Long> ids, Integer status) {
+        return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_ERROR);
     }
 }
