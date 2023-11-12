@@ -436,6 +436,7 @@ export default defineComponent({
         saleShipmentsFormState.collectOfferRate = data.collectOfferRate
         saleShipmentsFormState.collectOfferAmount = data.collectOfferAmount
         saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.collectOfferLastAmount), { digits: 2 })}`
+        saleShipmentsFormState.otherReceipt = data.otherReceipt
         saleShipmentsFormState.otherAmount = data.otherAmount
         saleShipmentsFormState.thisCollectAmount = data.thisCollectAmount
         saleShipmentsFormState.thisArrearsAmount = data.thisArrearsAmount
