@@ -30,6 +30,8 @@ public class PurchaseDataBO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long warehouseId;
 
+    private String warehouseName;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long barCode;
 
@@ -39,7 +41,11 @@ public class PurchaseDataBO {
 
     private String productUnit;
 
+    private String productModel;
+
     private String productStandard;
+
+    private String productColor;
 
     private Integer stock;
 

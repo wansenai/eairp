@@ -70,7 +70,7 @@ import {retailShipmentsTableColumns} from "@/views/retail/shipments/shipments.da
 import ViewShipmentModal from "@/views/retail/shipments/components/ViewShipmentModal.vue";
 
 export default defineComponent({
-  name: 'ReceiptViewModal',
+  name: 'ViewRefundModal',
   components: {
     BasicModal,
     BasicTable,

@@ -47,6 +47,11 @@ public class SalesController {
         return receiptSaleService.getSaleOrderDetail(id);
     }
 
+    @GetMapping("/order/getLinkOrderDetail/{receiptNumber}")
+    public Response<SaleOrderDetailVO> getLinkOrderDetail(@PathVariable("receiptNumber") String receiptNumber) {
+        return receiptSaleService.getLinkSaleOrderDetail(receiptNumber);
+    }
+
     @PutMapping("/order/updateStatus/{ids}/{status}")
     public Response<String> updateStatus(@PathVariable("ids") List<Long> ids, @PathVariable("status") Integer status) {
         return receiptSaleService.updateSaleOrderStatus(ids, status);
@@ -72,6 +77,11 @@ public class SalesController {
         return receiptSaleService.getSaleShipmentsDetail(id);
     }
 
+    @GetMapping("/shipments/getLinkShipmentDetail/{receiptNumber}")
+    public Response<SaleShipmentsDetailVO> getLinkShipmentDetail(@PathVariable("receiptNumber") String receiptNumber) {
+        return receiptSaleService.getLinkSaleShipmentsDetail(receiptNumber);
+    }
+
     @PutMapping("/shipments/updateStatus/{ids}/{status}")
     public Response<String> updateShipmentsStatus(@PathVariable("ids") List<Long> ids, @PathVariable("status") Integer status) {
         return receiptSaleService.updateSaleShipmentsStatus(ids, status);
@@ -95,6 +105,11 @@ public class SalesController {
     @GetMapping("/refund/detail/{id}")
     public Response<SaleRefundDetailVO> refundDetail(@PathVariable("id") Long id) {
         return receiptSaleService.getSaleRefundDetail(id);
+    }
+
+    @GetMapping("/refund/getLinkRefundDetail/{receiptNumber}")
+    public Response<SaleRefundDetailVO> getLinkRefundDetail(@PathVariable("receiptNumber") String receiptNumber) {
+        return receiptSaleService.getLinkSaleRefundDetail(receiptNumber);
     }
 
     @PutMapping("/refund/updateStatus/{ids}/{status}")

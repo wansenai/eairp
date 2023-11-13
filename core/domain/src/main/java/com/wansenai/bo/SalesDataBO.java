@@ -30,6 +30,8 @@ public class SalesDataBO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long warehouseId;
 
+    private String warehouseName;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long barCode;
 
@@ -37,7 +39,11 @@ public class SalesDataBO {
 
     private String productName;
 
+    private String productModel;
+
     private String productUnit;
+
+    private String productColor;
 
     private String productStandard;
 
