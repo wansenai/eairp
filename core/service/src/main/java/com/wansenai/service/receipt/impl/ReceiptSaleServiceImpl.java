@@ -20,7 +20,6 @@ import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.SalesDataBO;
 import com.wansenai.dto.receipt.sale.*;
 import com.wansenai.entities.product.ProductStock;
-import com.wansenai.entities.receipt.ReceiptRetailSub;
 import com.wansenai.entities.receipt.ReceiptSaleMain;
 import com.wansenai.entities.receipt.ReceiptSaleSub;
 import com.wansenai.entities.system.SysFile;
@@ -30,6 +29,7 @@ import com.wansenai.mappers.receipt.ReceiptSaleMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.common.CommonService;
+import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.receipt.ReceiptSaleService;
 import com.wansenai.service.receipt.ReceiptSaleSubService;
 import com.wansenai.service.user.ISysUserService;
@@ -64,8 +64,9 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
     private final ProductStockKeepUnitMapper productStockKeepUnitMapper;
     private final CommonService commonService;
     private final ProductStockMapper productStockMapper;
+    private final IFinancialAccountService accountService;
 
-    public ReceiptSaleServiceImpl(ReceiptSaleMainMapper receiptSaleMainMapper, CustomerService customerService, ISysUserService userService, ReceiptSaleSubService receiptSaleSubService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, CommonService commonService, ProductStockMapper productStockMapper) {
+    public ReceiptSaleServiceImpl(ReceiptSaleMainMapper receiptSaleMainMapper, CustomerService customerService, ISysUserService userService, ReceiptSaleSubService receiptSaleSubService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, CommonService commonService, ProductStockMapper productStockMapper, IFinancialAccountService accountService) {
         this.receiptSaleMainMapper = receiptSaleMainMapper;
         this.customerService = customerService;
         this.userService = userService;
@@ -74,6 +75,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         this.productStockKeepUnitMapper = productStockKeepUnitMapper;
         this.commonService = commonService;
         this.productStockMapper = productStockMapper;
+        this.accountService = accountService;
     }
 
     private final Map<Long, List<ReceiptSaleSub>> receiptSubListCache = new ConcurrentHashMap<>();
@@ -101,6 +103,10 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
 
     private String getCustomerName(Long customerId) {
         return (customerId != null) ? customerService.getById(customerId).getCustomerName() : null;
+    }
+
+    private String getWarehouseName(Long warehouseId) {
+        return (warehouseId != null) ? commonService.getWarehouseName(warehouseId) : null;
     }
 
     private String getUserName(Long userId) {
@@ -131,10 +137,17 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
 
         var data = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
         if (data != null) {
+            saleData.setWarehouseId(data.getWarehouseId());
             saleData.setProductName(data.getProductName());
             saleData.setProductStandard(data.getProductStandard());
+            saleData.setProductColor(data.getProductColor());
+            saleData.setProductModel(data.getProductModel());
             saleData.setProductUnit(data.getProductUnit());
             saleData.setStock(data.getStock());
+
+            if(saleData.getWarehouseId() != null) {
+                saleData.setWarehouseName(getWarehouseName(saleData.getWarehouseId()));
+            }
         }
         return saleData;
     }
@@ -300,34 +313,66 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
         var sale = getById(id);
+        return buildSaleOrderDetailResponse(sale);
+    }
 
+    @Override
+    public Response<SaleOrderDetailVO> getLinkSaleOrderDetail(String receiptNumber) {
+        if (!StringUtils.hasLength(receiptNumber)) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var sale = lambdaQuery()
+                .eq(ReceiptSaleMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+        return buildSaleOrderDetailResponse(sale);
+    }
+
+    private Response<SaleOrderDetailVO> buildSaleOrderDetailResponse(ReceiptSaleMain sale) {
         List<FileDataBO> fileList = commonService.getFileList(sale.getFileId());
 
         var receiptSubList = receiptSaleSubService.lambdaQuery()
-                .eq(ReceiptSaleSub::getReceiptSaleMainId, id)
+                .eq(ReceiptSaleSub::getReceiptSaleMainId, sale.getId())
                 .list();
 
-        var tableData = new ArrayList<SalesDataBO>(receiptSubList.size() + 1);
-        for (ReceiptSaleSub item : receiptSubList) {
-            var saleData = createSalesDataFromReceiptSub(item);
-            tableData.add(saleData);
-        }
+        var tableData = receiptSubList.stream()
+                .map(this::createSalesDataFromReceiptSub)
+                .collect(Collectors.toCollection(ArrayList::new));
 
         var operatorIds = parseAndCollectLongList(sale.getOperatorId());
         var multipleAccountIds = parseAndCollectLongList(sale.getMultipleAccount());
         var multipleAccountAmounts = parseAndCollectLongList(sale.getMultipleAccountAmount());
 
+        var accountName = "";
+        if(!multipleAccountIds.isEmpty() && !multipleAccountAmounts.isEmpty()) {
+            var accountNameList = new ArrayList<String>();
+            for (int i = 0; i < multipleAccountIds.size(); i++) {
+                var account = accountService.getById(multipleAccountIds.get(i));
+                var accountAmount = multipleAccountAmounts.get(i);
+                accountNameList.add(account.getAccountName() + "(" + accountAmount + "元)");
+            }
+            accountName = StringUtils.collectionToCommaDelimitedString(accountNameList);
+        } else {
+            var account = accountService.getById(sale.getAccountId());
+            if (account != null) {
+                accountName = account.getAccountName();
+            }
+        }
+
         var saleOrderDetailVO = SaleOrderDetailVO.builder()
                 .receiptNumber(sale.getReceiptNumber())
                 .receiptDate(sale.getReceiptDate())
                 .customerId(sale.getCustomerId())
+                .customerName(getCustomerName(sale.getCustomerId()))
                 .accountId(sale.getAccountId())
+                .accountName(accountName)
                 .operatorIds(operatorIds)
                 .discountRate(sale.getDiscountRate())
                 .discountAmount(sale.getDiscountAmount())
                 .discountLastAmount(sale.getDiscountLastAmount())
                 .multipleAccountIds(multipleAccountIds)
                 .multipleAccountAmounts(multipleAccountAmounts)
+                .otherReceipt(sale.getOtherReceipt())
                 .deposit(sale.getDeposit())
                 .remark(sale.getRemark())
                 .tableData(tableData)
@@ -520,40 +565,72 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
 
         return Response.responseData(result);
     }
-    
+
     @Override
     public Response<SaleShipmentsDetailVO> getSaleShipmentsDetail(Long id) {
         if (id == null) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
         var sale = getById(id);
+        return buildSaleShipmentsDetailResponse(sale);
+    }
 
+    @Override
+    public Response<SaleShipmentsDetailVO> getLinkSaleShipmentsDetail(String receiptNumber) {
+        if (!StringUtils.hasLength(receiptNumber)) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var sale = lambdaQuery()
+                .eq(ReceiptSaleMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+        return buildSaleShipmentsDetailResponse(sale);
+    }
+
+    private Response<SaleShipmentsDetailVO> buildSaleShipmentsDetailResponse(ReceiptSaleMain sale) {
         List<FileDataBO> fileList = commonService.getFileList(sale.getFileId());
 
         var receiptSaleSubs = receiptSaleSubService.lambdaQuery()
-                .eq(ReceiptSaleSub::getReceiptSaleMainId, id)
+                .eq(ReceiptSaleSub::getReceiptSaleMainId, sale.getId())
                 .list();
 
-        var tableData = new ArrayList<SalesDataBO>(receiptSaleSubs.size() + 1);
-        for (ReceiptSaleSub item : receiptSaleSubs) {
-            var saleData = createSalesDataFromReceiptSub(item);
-            tableData.add(saleData);
-        }
+        var tableData = receiptSaleSubs.stream()
+                .map(this::createSalesDataFromReceiptSub)
+                .collect(Collectors.toCollection(ArrayList::new));
 
         var operatorIds = parseAndCollectLongList(sale.getOperatorId());
         var multipleAccountIds = parseAndCollectLongList(sale.getMultipleAccount());
         var multipleAccountAmounts = parseAndCollectLongList(sale.getMultipleAccountAmount());
 
+        var accountName = "";
+        if(!multipleAccountIds.isEmpty() && !multipleAccountAmounts.isEmpty()) {
+            var accountNameList = new ArrayList<String>();
+            for (int i = 0; i < multipleAccountIds.size(); i++) {
+                var account = accountService.getById(multipleAccountIds.get(i));
+                var accountAmount = multipleAccountAmounts.get(i);
+                accountNameList.add(account.getAccountName() + "(" + accountAmount + "元)");
+            }
+            accountName = StringUtils.collectionToCommaDelimitedString(accountNameList);
+        } else {
+            var account = accountService.getById(sale.getAccountId());
+            if (account != null) {
+                accountName = account.getAccountName();
+            }
+        }
+
         var saleShipmentsDetail = SaleShipmentsDetailVO.builder()
                 .receiptNumber(sale.getReceiptNumber())
                 .receiptDate(sale.getReceiptDate())
                 .customerId(sale.getCustomerId())
+                .customerName(getCustomerName(sale.getCustomerId()))
                 .accountId(sale.getAccountId())
+                .accountName(accountName)
                 .operatorIds(operatorIds)
                 .collectOfferRate(sale.getDiscountRate())
                 .collectOfferAmount(sale.getDiscountAmount())
                 .collectOfferLastAmount(sale.getDiscountLastAmount())
                 .otherAmount(sale.getOtherAmount())
+                .otherReceipt(sale.getOtherReceipt())
                 .thisCollectAmount(sale.getChangeAmount())
                 .thisArrearsAmount(sale.getArrearsAmount())
                 .multipleAccountIds(multipleAccountIds)
@@ -597,6 +674,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .set(shipmentsDTO.getThisCollectAmount() != null, ReceiptSaleMain::getChangeAmount, shipmentsDTO.getThisCollectAmount())
                     .set(shipmentsDTO.getThisArrearsAmount() != null, ReceiptSaleMain::getArrearsAmount, shipmentsDTO.getThisArrearsAmount())
                     .set(shipmentsDTO.getStatus() != null, ReceiptSaleMain::getStatus, shipmentsDTO.getStatus())
+                    .set(StringUtils.hasLength(shipmentsDTO.getOtherReceipt()), ReceiptSaleMain::getOtherReceipt, shipmentsDTO.getOtherReceipt())
                     .set(StringUtils.hasText(shipmentsDTO.getReceiptDate()), ReceiptSaleMain::getReceiptDate, shipmentsDTO.getReceiptDate())
                     .set(StringUtils.hasText(shipmentsDTO.getRemark()), ReceiptSaleMain::getRemark, shipmentsDTO.getRemark())
                     .set(ReceiptSaleMain::getAccountId, accountId)
@@ -657,6 +735,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .discountAmount(shipmentsDTO.getCollectOfferAmount())
                     .discountLastAmount(shipmentsDTO.getCollectOfferLastAmount())
                     .otherAmount(shipmentsDTO.getOtherAmount())
+                    .otherReceipt(shipmentsDTO.getOtherReceipt())
                     .changeAmount(shipmentsDTO.getThisCollectAmount())
                     .arrearsAmount(shipmentsDTO.getThisArrearsAmount())
                     .multipleAccount(multipleAccountIds)
@@ -771,33 +850,64 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
         var sale = getById(id);
+        return getSaleRefundDetailResponse(sale);
+    }
 
+    @Override
+    public Response<SaleRefundDetailVO> getLinkSaleRefundDetail(String receiptNumber) {
+        if (!StringUtils.hasLength(receiptNumber)) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var sale = lambdaQuery()
+                .eq(ReceiptSaleMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+        return getSaleRefundDetailResponse(sale);
+    }
+
+    private Response<SaleRefundDetailVO> getSaleRefundDetailResponse(ReceiptSaleMain sale) {
         List<FileDataBO> fileList = commonService.getFileList(sale.getFileId());
-
         var receiptSaleSubs = receiptSaleSubService.lambdaQuery()
-                .eq(ReceiptSaleSub::getReceiptSaleMainId, id)
+                .eq(ReceiptSaleSub::getReceiptSaleMainId, sale.getId())
                 .list();
 
-        var tableData = new ArrayList<SalesDataBO>(receiptSaleSubs.size() + 1);
-        for (ReceiptSaleSub item : receiptSaleSubs) {
-            var saleData = createSalesDataFromReceiptSub(item);
-            tableData.add(saleData);
-        }
+        var tableData = receiptSaleSubs.stream()
+                .map(this::createSalesDataFromReceiptSub)
+                .collect(Collectors.toCollection(ArrayList::new));
 
         var operatorIds = parseAndCollectLongList(sale.getOperatorId());
         var multipleAccountIds = parseAndCollectLongList(sale.getMultipleAccount());
         var multipleAccountAmounts = parseAndCollectLongList(sale.getMultipleAccountAmount());
 
+        var accountName = "";
+        if(!multipleAccountIds.isEmpty() && !multipleAccountAmounts.isEmpty()) {
+            var accountNameList = new ArrayList<String>();
+            for (int i = 0; i < multipleAccountIds.size(); i++) {
+                var account = accountService.getById(multipleAccountIds.get(i));
+                var accountAmount = multipleAccountAmounts.get(i);
+                accountNameList.add(account.getAccountName() + "(" + accountAmount + "元)");
+            }
+            accountName = StringUtils.collectionToCommaDelimitedString(accountNameList);
+        } else {
+            var account = accountService.getById(sale.getAccountId());
+            if (account != null) {
+                accountName = account.getAccountName();
+            }
+        }
+
         var saleRefundDetail = SaleRefundDetailVO.builder()
                 .receiptNumber(sale.getReceiptNumber())
                 .receiptDate(sale.getReceiptDate())
                 .customerId(sale.getCustomerId())
+                .customerName(getCustomerName(sale.getCustomerId()))
                 .accountId(sale.getAccountId())
+                .accountName(accountName)
                 .operatorIds(operatorIds)
                 .refundOfferRate(sale.getDiscountRate())
                 .refundOfferAmount(sale.getDiscountAmount())
                 .refundLastAmount(sale.getDiscountLastAmount())
                 .otherAmount(sale.getOtherAmount())
+                .otherReceipt(sale.getOtherReceipt())
                 .thisRefundAmount(sale.getChangeAmount())
                 .thisArrearsAmount(sale.getArrearsAmount())
                 .multipleAccountIds(multipleAccountIds)
@@ -841,6 +951,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .set(refundDTO.getThisRefundAmount() != null, ReceiptSaleMain::getChangeAmount, refundDTO.getThisRefundAmount())
                     .set(refundDTO.getThisArrearsAmount() != null, ReceiptSaleMain::getArrearsAmount, refundDTO.getThisArrearsAmount())
                     .set(refundDTO.getStatus() != null, ReceiptSaleMain::getStatus, refundDTO.getStatus())
+                    .set(StringUtils.hasLength(refundDTO.getOtherReceipt()), ReceiptSaleMain::getOtherReceipt, refundDTO.getOtherReceipt())
                     .set(StringUtils.hasText(refundDTO.getReceiptDate()), ReceiptSaleMain::getReceiptDate, refundDTO.getReceiptDate())
                     .set(StringUtils.hasText(refundDTO.getRemark()), ReceiptSaleMain::getRemark, refundDTO.getRemark())
                     .set(ReceiptSaleMain::getAccountId, accountId)
@@ -901,6 +1012,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .discountAmount(refundDTO.getRefundOfferAmount())
                     .discountLastAmount(refundDTO.getRefundLastAmount())
                     .otherAmount(refundDTO.getOtherAmount())
+                    .otherReceipt(refundDTO.getOtherReceipt())
                     .changeAmount(refundDTO.getThisRefundAmount())
                     .arrearsAmount(refundDTO.getThisArrearsAmount())
                     .multipleAccount(multipleAccountIds)
