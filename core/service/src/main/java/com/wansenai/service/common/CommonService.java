@@ -33,4 +33,6 @@ public interface CommonService {
     Response<String> generateSnowflakeId(String type);
 
     List<FileDataBO> getFileList(String fileId);
+
+    String getWarehouseName(Long warehouseId);
 }
