@@ -3,7 +3,8 @@ import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     QuerySaleRefundReq,
     AddOrUpdateReceiptSaleRefundReq,
-    SaleRefundDetailData
+    SaleRefundDetailData,
+    LinkReceiptSaleRefundDetailResp
 } from "@/api/sale/model/refundModel"
 
 enum API {
@@ -12,6 +13,7 @@ enum API {
     GetDetail = '/sale/refund/detail',
     UpdateStatus = '/sale/refund/updateStatus',
     Delete = '/sale/refund/delete',
+    GetLinkRefundDetail = '/sale/refund/getLinkRefundDetail',
 }
 
 export function getSaleRefundPageList(params: QuerySaleRefundReq) {
@@ -52,6 +54,14 @@ export function deleteSaleRefund(ids: number[]) {
     return defHttp.put<BaseResp>(
         {
             url: `${API.Delete}/${ids}`,
+        }
+    );
+}
+
+export function getLinkRefundDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<LinkReceiptSaleRefundDetailResp>>(
+        {
+            url: `${API.GetLinkRefundDetail}/${receiptNumber}`,
         }
     );
 }
