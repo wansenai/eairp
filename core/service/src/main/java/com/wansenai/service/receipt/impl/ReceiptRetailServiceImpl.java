@@ -464,24 +464,17 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         return deleteRetail(ids, RetailCodeEnum.DELETE_RETAIL_SHIPMENTS_SUCCESS, RetailCodeEnum.DELETE_RETAIL_SHIPMENTS_ERROR);
     }
 
-    @Override
-    public Response<RetailShipmentsDetailVO> getRetailShipmentsDetail(Long id) {
-        if (id == null) {
-            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
-        }
-        var shipment = getById(id);
+    private RetailShipmentsDetailVO createRetailShipmentsDetail(ReceiptRetailMain shipment) {
         var fileList = commonService.getFileList(shipment.getFileId());
         var receiptSubList = receiptRetailSubService.lambdaQuery()
-                .eq(ReceiptRetailSub::getReceiptMainId, id)
+                .eq(ReceiptRetailSub::getReceiptMainId, shipment.getId())
                 .list();
 
-        var tableData = new ArrayList<ShipmentsDataBO>(receiptSubList.size() + 1);
-        for (ReceiptRetailSub item : receiptSubList) {
-            var shipmentBo = createShipmentsDataFromReceiptSub(item);
-            tableData.add(shipmentBo);
-        }
+        var tableData = receiptSubList.stream()
+                .map(this::createShipmentsDataFromReceiptSub)
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        var retailShipmentsDetailVO = RetailShipmentsDetailVO.builder()
+        return RetailShipmentsDetailVO.builder()
                 .receiptNumber(shipment.getReceiptNumber())
                 .receiptDate(shipment.getReceiptDate())
                 .memberId(shipment.getMemberId())
@@ -497,7 +490,28 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .files(fileList)
                 .status(shipment.getStatus())
                 .build();
+    }
 
+    @Override
+    public Response<RetailShipmentsDetailVO> getRetailShipmentsDetail(Long id) {
+        if (id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var shipment = getById(id);
+        var retailShipmentsDetailVO = createRetailShipmentsDetail(shipment);
+        return Response.responseData(retailShipmentsDetailVO);
+    }
+
+    @Override
+    public Response<RetailShipmentsDetailVO> getLinkRetailShipmentsDetail(String receiptNumber) {
+        if (!StringUtils.hasLength(receiptNumber)) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var shipment = lambdaQuery()
+                .eq(ReceiptRetailMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+        var retailShipmentsDetailVO = createRetailShipmentsDetail(shipment);
         return Response.responseData(retailShipmentsDetailVO);
     }
 
@@ -711,25 +725,18 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         return Response.responseData(result);
     }
 
-    @Override
-    public Response<RetailRefundDetailVO> getRetailRefundDetail(Long id) {
-        if (id == null) {
-            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
-        }
-        var refund = getById(id);
+    private RetailRefundDetailVO createRetailRefundDetail(ReceiptRetailMain refund) {
         var fileList = commonService.getFileList(refund.getFileId());
         var receiptSubList = receiptRetailSubService.lambdaQuery()
-                .eq(ReceiptRetailSub::getReceiptMainId, id)
+                .eq(ReceiptRetailSub::getReceiptMainId, refund.getId())
                 .eq(ReceiptRetailSub::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list();
 
-        var tableData = new ArrayList<ShipmentsDataBO>(receiptSubList.size() + 1);
-        for (ReceiptRetailSub item : receiptSubList) {
-            var shipmentBo = createShipmentsDataFromReceiptSub(item);
-            tableData.add(shipmentBo);
-        }
+        var tableData = receiptSubList.stream()
+                .map(this::createShipmentsDataFromReceiptSub)
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        var retailRefundDetailVO = RetailRefundDetailVO.builder()
+        return RetailRefundDetailVO.builder()
                 .receiptNumber(refund.getReceiptNumber())
                 .receiptDate(refund.getReceiptDate())
                 .memberId(refund.getMemberId())
@@ -746,7 +753,28 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .files(fileList)
                 .status(refund.getStatus())
                 .build();
+    }
 
+    @Override
+    public Response<RetailRefundDetailVO> getRetailRefundDetail(Long id) {
+        if (id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var refund = getById(id);
+        var retailRefundDetailVO = createRetailRefundDetail(refund);
+        return Response.responseData(retailRefundDetailVO);
+    }
+
+    @Override
+    public Response<RetailRefundDetailVO> getLinkRetailRefundDetail(String receiptNumber) {
+        if (!StringUtils.hasLength(receiptNumber)) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var refund = lambdaQuery()
+                .eq(ReceiptRetailMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+        var retailRefundDetailVO = createRetailRefundDetail(refund);
         return Response.responseData(retailRefundDetailVO);
     }
 
