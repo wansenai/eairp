@@ -69,7 +69,7 @@ import {
 import {retailShipmentsTableColumns} from "@/views/retail/shipments/shipments.data";
 
 export default defineComponent({
-  name: 'ReceiptViewModal',
+  name: 'ViewShipmentModal',
   components: {
     BasicModal,
     BasicTable,
