@@ -16,6 +16,24 @@ export interface AddOrUpdateRefundReq {
     files: FileData[];
 }
 
+export interface AddOrUpdateRefundResp {
+    id: number | string | undefined;
+    memberId: string;
+    memberName: string;
+    accountId: string;
+    accountName: string;
+    receiptDate: string;
+    receiptNumber: string;
+    otherReceipt: string;
+    paymentAmount: number;
+    receiptAmount: number;
+    backAmount: number;
+    remark: string;
+    status: number;
+    tableData: ShipmentsData[];
+    files: FileData[];
+}
+
 export interface RefundResp {
     id: number | string;
     memberName: string;
