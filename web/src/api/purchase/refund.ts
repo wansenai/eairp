@@ -12,6 +12,7 @@ enum API {
     GetDetail = '/purchase/refund/detail',
     UpdateStatus = '/purchase/refund/updateStatus',
     Delete = '/purchase/refund/delete',
+    GetLinkRefundDetail = '/purchase/refund/getLinkRefundDetail',
 }
 
 export function getPurchaseRefundPageList(params: QueryPurchaseRefundReq) {
@@ -52,6 +53,14 @@ export function deletePurchaseRefund(ids: number[]) {
     return defHttp.put<BaseResp>(
         {
             url: `${API.Delete}/${ids}`,
+        }
+    );
+}
+
+export function getLinkRefundDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<PurchaseRefundDetailData>>(
+        {
+            url: `${API.GetLinkRefundDetail}/${receiptNumber}`,
         }
     );
 }
