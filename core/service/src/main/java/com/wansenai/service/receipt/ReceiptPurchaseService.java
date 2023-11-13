@@ -46,6 +46,17 @@ public interface ReceiptPurchaseService extends IService<ReceiptPurchaseMain> {
     Response<PurchaseOrderDetailVO> getPurchaseOrderDetail(Long id);
 
     /**
+     * Query purchase order details data based on purchase order number
+     * 根据采购订单单号查询采购订单详情数据
+     *
+     * @param receiptNumber Purchase order number
+     *                      采购订单单号
+     * @return  Returns purchase order details data
+     *       返回采购订单详情数据
+     */
+    Response<PurchaseOrderDetailVO> getLinkPurchaseOrderDetail(String receiptNumber);
+
+    /**
      * Add/Update Purchase Order Data
      * 添加/修改采购订单数据
      *
@@ -103,6 +114,17 @@ public interface ReceiptPurchaseService extends IService<ReceiptPurchaseMain> {
     Response<PurchaseStorageDetailVO> getPurchaseStorageDetail(Long id);
 
     /**
+     * Query the detailed data of the purchase receipt order based on the purchase receipt order number
+     * 根据采购入库单单号查询采购入库单详情数据
+     *
+     * @param receiptNumber Purchase receipt order number
+     *                      采购入库单单号
+     * @return Returns purchase receipt order details data
+     *     返回采购入库单详情数据
+     */
+    Response<PurchaseStorageDetailVO> getLinkPurchaseStorageDetail(String receiptNumber);
+
+    /**
      * Add/Modify Purchase Receipt Data
      * 添加/修改采购入库数据
      *
@@ -158,6 +180,17 @@ public interface ReceiptPurchaseService extends IService<ReceiptPurchaseMain> {
      *     返回采购退货详情数据
      */
     Response<PurchaseRefundDetailVO> getPurchaseRefundDetail(Long id);
+
+    /**
+     * Query the detailed data of the purchase return order based on the purchase return order number
+     * 根据采购退货单单号查询采购退货单详情数据
+     *
+     * @param receiptNumber Purchase return order number
+     *                      采购退货单单号
+     * @return Returns purchase return order details data
+     *     返回采购退货单详情数据
+     */
+    Response<PurchaseRefundDetailVO> getLinkPurchaseRefundDetail(String receiptNumber);
 
     /**
      * Add/Modify Purchase Return Order Data
