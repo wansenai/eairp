@@ -31,8 +31,12 @@ public class RetailRefundDetailVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long memberId;
 
+    private String memberName;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long accountId;
+
+    private String accountName;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime receiptDate;
@@ -40,6 +44,8 @@ public class RetailRefundDetailVO {
     private String receiptNumber;
 
     private String otherReceipt;
+
+    private String paymentType;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal paymentAmount;
@@ -55,4 +61,6 @@ public class RetailRefundDetailVO {
     private List<ShipmentsDataBO> tableData;
 
     private List<FileDataBO> files;
+
+    private Integer status;
 }
