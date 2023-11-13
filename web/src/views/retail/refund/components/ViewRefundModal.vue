@@ -2,7 +2,7 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="零售出库-详情"
+          title="零售退货入库-详情"
           :sub-title= "receiptNumber">
         <template #extra>
           <a-button key="1">导出</a-button>
@@ -13,13 +13,12 @@
         <a-descriptions size="small" :column="3">
           <a-descriptions-item label="会员">{{ memberName }}</a-descriptions-item>
           <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item label="收款类型">{{ paymentType }}</a-descriptions-item>
           <a-descriptions-item label="单据金额">{{ receiptAmount }}</a-descriptions-item>
-          <a-descriptions-item label="收款金额">{{ collectAmount }}</a-descriptions-item>
+          <a-descriptions-item label="付款金额">{{ paymentAmount }}</a-descriptions-item>
           <a-descriptions-item label="找零">{{ backAmount }}</a-descriptions-item>
-          <a-descriptions-item label="收款账户">{{ accountName }}</a-descriptions-item>
-          <a-descriptions-item label="退货单号">
-            <a>{{  }}</a>
+          <a-descriptions-item label="付款账户">{{ accountName }}</a-descriptions-item>
+          <a-descriptions-item label="关联单据">
+            <a @click="viewShipmentReceipt">{{ otherReceipt }}</a>
           </a-descriptions-item>
           <a-descriptions-item label="备注">
             {{ remark }}
@@ -54,12 +53,13 @@
       </BasicTable>
     </div>
   </BasicModal>
+  <ViewShipmentModal @register="viewShipmentReceiptModal"></ViewShipmentModal>
 </template>
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
 import {BasicTable, useTable} from '/src/components/Table';
-import {BasicModal, useModalInner} from "@/components/Modal";
-import {getShipmentsDetail} from "@/api/retail/shipments";
+import {BasicModal, useModal, useModalInner} from "@/components/Modal";
+import {getLinkRefundDetail} from "@/api/retail/refund";
 import {
   Descriptions,
   DescriptionsItem,
@@ -67,34 +67,36 @@ import {
   Statistic,
 } from 'ant-design-vue';
 import {retailShipmentsTableColumns} from "@/views/retail/shipments/shipments.data";
+import ViewShipmentModal from "@/views/retail/shipments/components/ViewShipmentModal.vue";
 
 export default defineComponent({
   name: 'ReceiptViewModal',
   components: {
     BasicModal,
     BasicTable,
+    ViewShipmentModal,
     'a-page-header': PageHeader,
     'a-descriptions': Descriptions,
     'a-descriptions-item': DescriptionsItem,
     'a-statistic': Statistic,
   },
   setup() {
-    const id = ref('');
     const receiptNumber = ref('');
     const memberName = ref(0);
     const paymentType = ref('');
     const receiptDate = ref('');
     const receiptType = ref('');
     const receiptAmount = ref('');
-    const collectAmount = ref('');
+    const paymentAmount = ref('');
     const backAmount = ref('');
     const accountName = ref('');
     const remark = ref('')
     const status = ref();
-
+    const otherReceipt = ref('');
+    const [viewShipmentReceiptModal, {openModal: openShipmentViewModal}] = useModal();
     const tableData = ref([]);
     const [registerTable] = useTable({
-      title: '出库商品表数据',
+      title: '退货商品表数据',
       columns: retailShipmentsTableColumns,
       dataSource: tableData,
       pagination: false,
@@ -104,8 +106,7 @@ export default defineComponent({
     const getTitle = ref('单据详情');
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200, showOkBtn: false});
-      id.value = data.id
-      const res = await getShipmentsDetail(data.id);
+      const res = await getLinkRefundDetail(data.receiptNumber);
       console.info(res.data);
       tableData.value = res.data.tableData;
       receiptNumber.value = res.data.receiptNumber;
@@ -113,9 +114,10 @@ export default defineComponent({
       paymentType.value = res.data.paymentType;
       receiptDate.value = res.data.receiptDate;
       receiptAmount.value = res.data.receiptAmount;
-      collectAmount.value = res.data.collectAmount;
+      paymentAmount.value = res.data.paymentAmount;
       backAmount.value = res.data.backAmount;
       accountName.value = res.data.accountName;
+      otherReceipt.value = res.data.otherReceipt;
       remark.value = res.data.remark;
       status.value = res.data.status;
     });
@@ -124,11 +126,19 @@ export default defineComponent({
       closeModal();
     }
 
+    function viewShipmentReceipt() {
+      closeModal();
+      openShipmentViewModal(true, {
+        isUpdate: false,
+        receiptNumber: otherReceipt.value
+      });
+    }
+
     return {
       receiptNumber,
       memberName,
       paymentType,
-      collectAmount,
+      paymentAmount,
       receiptDate,
       receiptType,
       receiptAmount,
@@ -139,7 +149,10 @@ export default defineComponent({
       registerTable,
       registerModal,
       getTitle,
-      handleSubmit
+      handleSubmit,
+      otherReceipt,
+      viewShipmentReceipt,
+      viewShipmentReceiptModal
     };
   },
 });
