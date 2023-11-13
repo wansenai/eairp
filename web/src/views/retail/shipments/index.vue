@@ -56,7 +56,7 @@ import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 import {getShipmentsPageList, deleteShipments, updateShipmentsStatus} from "@/api/retail/shipments";
 import AddEditModal from "@/views/retail/shipments/components/AddEditModal.vue"
-import ReceiptViewModal from "@/views/retail/shipments/components/ViewModal.vue";
+import ReceiptViewModal from "@/views/retail/shipments/components/ViewShipmentModal.vue";
 import {Tag} from "ant-design-vue";
 import {useModal} from "@/components/Modal";
 export default defineComponent({
@@ -139,7 +139,7 @@ export default defineComponent({
     function handleView(record: Recordable){
       openReceiptViewModal(true, {
         isUpdate: false,
-        id: record.id,
+        receiptNumber: record.receiptNumber,
       });
     }
 

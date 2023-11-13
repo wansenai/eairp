@@ -58,7 +58,7 @@ import AddEditModal from "@/views/retail/refund/components/AddEditModal.vue"
 import {Tag} from "ant-design-vue";
 import {getRefundPageList, updateRefundStatus, deleteRefund} from "@/api/retail/refund";
 import {useModal} from "@/components/Modal";
-import ViewModal from "@/views/retail/refund/components/ViewModal.vue";
+import ViewModal from "@/views/retail/refund/components/ViewRefundModal.vue";
 export default defineComponent({
   name: 'Shipments',
   components: {Tag, TableAction, BasicTable, AddEditModal, ViewModal},
@@ -140,7 +140,7 @@ export default defineComponent({
     function handleView(record: Recordable){
       openReceiptViewModal(true, {
         isUpdate: false,
-        id: record.id,
+        receiptNumber: record.receiptNumber,
       });
     }
 
