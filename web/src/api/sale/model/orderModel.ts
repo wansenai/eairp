@@ -46,6 +46,27 @@ export interface AddOrUpdateReceiptReq {
     files: FileData[];
 }
 
+export interface LinkReceiptSaleOrderDetailResp {
+    id: number | string | undefined;
+    customerId: string;
+    customerName: string;
+    accountName: string;
+    receiptNumber: string;
+    receiptDate: string;
+    operatorIds: number[];
+    discountRate: number;
+    discountAmount: number;
+    discountLastAmount: number;
+    deposit: number;
+    accountId: number | string;
+    multipleAccountIds: number[];
+    multipleAccountAmounts: number[];
+    status: number;
+    remark: string;
+    tableData: SalesData[];
+    files: FileData[];
+}
+
 export interface SaleDetailData {
     customerId: number | string;
     receiptDate: string;

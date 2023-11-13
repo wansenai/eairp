@@ -3,7 +3,8 @@ import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     QuerySaleOrderReq,
     AddOrUpdateReceiptReq,
-    SaleDetailData
+    SaleDetailData,
+    LinkReceiptSaleOrderDetailResp
 } from "@/api/sale/model/orderModel"
 
 enum API {
@@ -12,6 +13,7 @@ enum API {
     GetDetail = '/sale/order/detail',
     UpdateStatus = '/sale/order/updateStatus',
     Delete = '/sale/order/delete',
+    GetLinkOrderDetail = '/sale/order/getLinkOrderDetail',
 }
 
 export function getSaleOrderPageList(params: QuerySaleOrderReq) {
@@ -52,6 +54,14 @@ export function deleteSaleOrder(ids: number[]) {
     return defHttp.put<BaseResp>(
         {
             url: `${API.Delete}/${ids}`,
+        }
+    );
+}
+
+export function getLinkOrderDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<LinkReceiptSaleOrderDetailResp>>(
+        {
+            url: `${API.GetLinkOrderDetail}/${receiptNumber}`,
         }
     );
 }
