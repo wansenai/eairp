@@ -14,7 +14,7 @@
               :actions="[
               {
                 icon: 'clarity:info-standard-line',
-                tooltip: t('sys.user.viewUserDetails'),
+                tooltip: '查看单据详情',
                 onClick: handleView.bind(null, record),
               },
               {
@@ -41,6 +41,7 @@
       </template>
     </BasicTable>
     <AddEditModal ref="addEditModalRef" @cancel="handleCancel"/>
+    <ViewOrderModal @register="receiptViewOrderModal" />
   </div>
 </template>
 <div>
@@ -56,12 +57,15 @@ import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
 import {getPurchaseOrderPageList, updatePurchaseOrderStatus, deletePurchaseOrder} from "@/api/purchase/order";
 import AddEditModal from "@/views/purchase/order/components/AddEditModal.vue";
+import ViewOrderModal from "@/views/purchase/order/components/ViewOrderModal.vue";
+import {useModal} from "@/components/Modal";
 export default defineComponent({
   name: 'PurchaseOrderModal',
-  components: {AddEditModal, Tag, TableAction, BasicTable},
+  components: {AddEditModal, Tag, TableAction, BasicTable, ViewOrderModal},
   setup() {
     const { t } = useI18n();
     const addEditModalRef = ref(null);
+    const [receiptViewOrderModal, {openModal: openViewOrderModal}] = useModal();
     const { createMessage } = useMessage();
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '采购订单列表',
@@ -133,8 +137,11 @@ export default defineComponent({
       await reload();
     }
 
-    function handleView(){
-
+    function handleView(record: Recordable){
+      openViewOrderModal(true, {
+        isUpdate: false,
+        receiptNumber: record.receiptNumber,
+      });
     }
 
     const getTimestamp = (date) => {
@@ -189,6 +196,7 @@ export default defineComponent({
       handleView,
       handleOk,
       handleExport,
+      receiptViewOrderModal,
     }
   }
 })
