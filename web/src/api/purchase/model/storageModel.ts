@@ -49,7 +49,9 @@ export interface AddOrUpdatePurchaseStorageReq {
 
 export interface PurchaseStorageDetailData {
     supplierId: number | string;
+    supplierName: string;
     accountId: number;
+    accountName: string;
     receiptDate: string;
     receiptNumber: string;
     multipleAccountAmounts: number[];

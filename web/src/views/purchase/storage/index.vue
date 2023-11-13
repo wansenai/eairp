@@ -41,6 +41,7 @@
       </template>
     </BasicTable>
     <AddEditModal ref="addEditModalRef" @cancel="handleCancel"/>
+    <ViewStorageModal @register="viewStorageReceiptModal"/>
   </div>
 </template>
 <div>
@@ -56,13 +57,16 @@ import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
 import {getPurchaseStoragePageList, updatePurchaseStorageStatus, deletePurchaseStorage} from "@/api/purchase/storage";
 import AddEditModal from "@/views/purchase/storage/components/AddEditModal.vue";
+import ViewStorageModal from "@/views/purchase/storage/components/ViewStorageModal.vue";
+import {useModal} from "@/components/Modal";
 export default defineComponent({
   name: 'PurchaseStorageModal',
-  components: {AddEditModal, Tag, TableAction, BasicTable},
+  components: {AddEditModal, Tag, TableAction, BasicTable, ViewStorageModal},
   setup() {
     const { t } = useI18n();
     const addEditModalRef = ref(null);
     const { createMessage } = useMessage();
+    const [viewStorageReceiptModal, {openModal: openViewStorageReceiptModal}] = useModal();
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '采购入库列表',
       rowKey: 'id',
@@ -133,8 +137,13 @@ export default defineComponent({
       await reload();
     }
 
-    function handleView(){
-
+    function handleView(record: Recordable){
+      openViewStorageReceiptModal(
+          true,
+          {
+            receiptNumber: record.receiptNumber,
+          },
+      )
     }
 
     const getTimestamp = (date) => {
@@ -189,6 +198,7 @@ export default defineComponent({
       handleView,
       handleOk,
       handleExport,
+      viewStorageReceiptModal,
     }
   }
 })
