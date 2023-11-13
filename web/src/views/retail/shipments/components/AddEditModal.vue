@@ -328,9 +328,8 @@ export default defineComponent({
     const [selectProductModal, {openModal: openProductModal}] = useModal();
 
     function handleCancelModal() {
-      close();
-      clearData();
       open.value = false;
+      clearData();
       context.emit('cancel');
     }
 
@@ -585,7 +584,6 @@ export default defineComponent({
       if (result.code === 'R0001' || 'R0002') {
         createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
       } else {
         createMessage.error('操作失败');
       }

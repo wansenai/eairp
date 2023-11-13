@@ -37,6 +37,24 @@ export interface AddOrUpdateShipmentsReq {
     fileDataList: FileData[];
 }
 
+export interface AddOrUpdateShipmentsResp {
+    id: number | string | undefined;
+    memberId: number | string;
+    memberName: string;
+    accountId: number | string;
+    accountName: string;
+    receiptDate: string;
+    receiptNumber: string;
+    receiptType: string;
+    collectionAmount: number;
+    receiptAmount: number;
+    backAmount: number;
+    remark: string;
+    status: number;
+    tableData: ShipmentsData[];
+    fileDataList: FileData[];
+}
+
 export interface QueryShipmentsReq {
     receiptNumber: string;
     productInfo: string;

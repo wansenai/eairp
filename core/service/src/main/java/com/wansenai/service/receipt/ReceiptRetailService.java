@@ -83,6 +83,17 @@ public interface ReceiptRetailService extends IService<ReceiptRetailMain> {
     Response<RetailShipmentsDetailVO> getRetailShipmentsDetail(Long id);
 
     /**
+     * Query the detailed data of shipment receipt based on the associated document number
+     * 根据关联单号查询出库单详情数据
+     *
+     * @param receiptNumber associated document number
+     *                     关联单号
+     * @return Returns the detailed data of the shipment receipt
+     *       返回出库单详情数据
+     */
+    Response<RetailShipmentsDetailVO> getLinkRetailShipmentsDetail(String receiptNumber);
+
+    /**
      * According to the id collection and status, the status of the retail shipment order is modified in batches.
      * <p>
      * 根据id集合和状态批量修改零售出库单状态
@@ -139,6 +150,17 @@ public interface ReceiptRetailService extends IService<ReceiptRetailMain> {
      *         返回零售退货单数据
      */
     Response<RetailRefundDetailVO> getRetailRefundDetail(Long id);
+
+    /**
+     * Query return receipt details data based on return order number
+     * 根据退货单号查询退货单详情数据
+     *
+     * @param otherReceipt Return order number
+     *                     退货单号
+     * @return Return order details data
+     *         退货单详情数据
+     */
+    Response<RetailRefundDetailVO> getLinkRetailRefundDetail(String otherReceipt);
 
     /**
      * Delete retail return document data based on ID

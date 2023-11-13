@@ -67,6 +67,11 @@ public class RetailController {
         return receiptRetailService.getRetailShipmentsDetail(id);
     }
 
+    @GetMapping("/shipments/getLinkShipmentDetail/{otherReceipt}")
+    public Response<RetailShipmentsDetailVO> getLinkShipmentDetail(@PathVariable("otherReceipt") String otherReceipt) {
+        return receiptRetailService.getLinkRetailShipmentsDetail(otherReceipt);
+    }
+
     @PostMapping("/refund/pageList")
     public Response<Page<RetailRefundVO>> refundPageList(@RequestBody QueryRetailRefundDTO refundDTO) {
         return receiptRetailService.getRetailRefund(refundDTO);
@@ -80,6 +85,11 @@ public class RetailController {
     @GetMapping("/refund/detail/{id}")
     public Response<RetailRefundDetailVO> refundDetail(@PathVariable("id") Long id) {
         return receiptRetailService.getRetailRefundDetail(id);
+    }
+
+    @GetMapping("/refund/getLinkRefundDetail/{otherReceipt}")
+    public Response<RetailRefundDetailVO> getLinkRefundDetail(@PathVariable("otherReceipt") String otherReceipt) {
+        return receiptRetailService.getLinkRetailRefundDetail(otherReceipt);
     }
 
     @PostMapping("/refund/deleteByIds")

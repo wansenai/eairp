@@ -718,6 +718,11 @@ public class CommonServiceImpl implements CommonService{
         return fileList;
     }
 
+    @Override
+    public String getWarehouseName(Long warehouseId) {
+        return warehouseService.getById(warehouseId).getWarehouseName();
+    }
+
     private String getCellValue(Cell cell, DataFormatter dataFormatter) {
         if (cell != null) {
             String value = dataFormatter.formatCellValue(cell);

@@ -13,15 +13,19 @@
 package com.wansenai.service.receipt.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.PurchaseDataBO;
 import com.wansenai.dto.receipt.purchase.*;
+import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.receipt.ReceiptPurchaseMain;
 import com.wansenai.entities.receipt.ReceiptPurchaseSub;
+import com.wansenai.entities.receipt.ReceiptRetailSub;
 import com.wansenai.entities.system.SysFile;
 import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
+import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.mappers.receipt.ReceiptPurchaseMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.basic.SupplierService;
@@ -58,8 +62,9 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     private final SupplierService supplierService;
     private final ReceiptPurchaseMainMapper receiptPurchaseMainMapper;
     private final ReceiptPurchaseSubService receiptPurchaseSubService;
+    private final ProductStockMapper productStockMapper;
 
-    public ReceiptPurchaseServiceImpl(SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, CommonService commonService, ISysUserService userService, SupplierService supplierService, ReceiptPurchaseMainMapper receiptPurchaseMainMapper, ReceiptPurchaseSubService receiptPurchaseSubService) {
+    public ReceiptPurchaseServiceImpl(SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, CommonService commonService, ISysUserService userService, SupplierService supplierService, ReceiptPurchaseMainMapper receiptPurchaseMainMapper, ReceiptPurchaseSubService receiptPurchaseSubService, ProductStockMapper productStockMapper) {
         this.fileMapper = fileMapper;
         this.productStockKeepUnitMapper = productStockKeepUnitMapper;
         this.commonService = commonService;
@@ -67,6 +72,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         this.supplierService = supplierService;
         this.receiptPurchaseMainMapper = receiptPurchaseMainMapper;
         this.receiptPurchaseSubService = receiptPurchaseSubService;
+        this.productStockMapper = productStockMapper;
     }
     private final Map<Long, List<ReceiptPurchaseSub>> receiptSubListCache = new ConcurrentHashMap<>();
 
@@ -201,6 +207,38 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         }
     }
 
+    private void updateProductStock(List<ReceiptPurchaseSub> receiptSubList, int stockType) {
+        var stockMap = new ConcurrentHashMap<Long, Integer>();
+
+        receiptSubList.forEach(item -> {
+            var stock = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            if (stock != null) {
+                var stockNumber = stock.getStock();
+                var productNumber = item.getProductNumber();
+                if (stockType == 1) {
+                    stockNumber += productNumber;
+                } else if (stockType == 2) {
+                    stockNumber -= productNumber;
+                }
+                stockMap.put(stock.getId(), stockNumber);
+            }
+        });
+        receiptSubList.forEach(item2 -> {
+            stockMap.forEach((key, value) -> {
+                var stock = ProductStock.builder()
+                        .productSkuId(key)
+                        .warehouseId(item2.getWarehouseId())
+                        .currentStockQuantity(BigDecimal.valueOf(value))
+                        .build();
+                var wrapper = new LambdaUpdateWrapper<ProductStock>()
+                        .eq(ProductStock::getProductSkuId, stock.getProductSkuId())
+                        .eq(ProductStock::getWarehouseId, stock.getWarehouseId())
+                        .set(ProductStock::getCurrentStockQuantity, BigDecimal.valueOf(value));
+                productStockMapper.update(stock, wrapper);
+            });
+        });
+    }
+
     @Override
     public Response<Page<PurchaseOrderVO>> getPurchaseOrderPage(QueryPurchaseOrderDTO queryPurchaseOrderDTO) {
         var result = new Page<PurchaseOrderVO>();
@@ -221,7 +259,9 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var queryResult = receiptPurchaseMainMapper.selectPage(page, queryWrapper);
 
         queryResult.getRecords().forEach(item -> {
-            var receiptSubList = getReceiptSubList(item.getId());
+            var receiptSubList = receiptPurchaseSubService.lambdaQuery()
+                    .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
+                    .list();
             var productNumber = calculateProductNumber(receiptSubList);
             var supplierName = getSupplierName(item.getSupplierId());
             var crateBy = getUserName(item.getCreateBy());
@@ -435,7 +475,9 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var queryResult = receiptPurchaseMainMapper.selectPage(page, queryWrapper);
 
         queryResult.getRecords().forEach(item -> {
-            var receiptSubList = getReceiptSubList(item.getId());
+            var receiptSubList = receiptPurchaseSubService.lambdaQuery()
+                    .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
+                    .list();
             var productNumber = calculateProductNumber(receiptSubList);
             var supplierName = getSupplierName(item.getSupplierId());
             var crateBy = getUserName(item.getCreateBy());
@@ -527,6 +569,13 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
 
         if (isUpdate) {
+            var beforeReceipt = receiptPurchaseSubService.lambdaQuery()
+                    .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, purchaseStorageDTO.getId())
+                    .list();
+            if (!beforeReceipt.isEmpty()) {
+                updateProductStock(beforeReceipt, 2);
+            }
+
             var updateMainResult = lambdaUpdate()
                     .eq(ReceiptPurchaseMain::getId, purchaseStorageDTO.getId())
                     .set(purchaseStorageDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, purchaseStorageDTO.getSupplierId())
@@ -571,6 +620,9 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .collect(Collectors.toList());
 
             var updateSubResult = receiptPurchaseSubService.saveBatch(receiptPurchaseStorageList);
+            purchaseStorageDTO.getTableData().forEach(item -> {
+                updateProductStock(receiptPurchaseStorageList, 1);
+            });
 
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS);
@@ -626,6 +678,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .collect(Collectors.toList());
 
             var saveSubResult = receiptPurchaseSubService.saveBatch(receiptList);
+            updateProductStock(receiptList, 1);
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_RECEIPT_SUCCESS);
@@ -665,7 +718,9 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var queryResult = receiptPurchaseMainMapper.selectPage(page, queryWrapper);
 
         queryResult.getRecords().forEach(item -> {
-            var receiptSubList = getReceiptSubList(item.getId());
+            var receiptSubList = receiptPurchaseSubService.lambdaQuery()
+                    .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
+                    .list();
             var productNumber = calculateProductNumber(receiptSubList);
             var supplierName = getSupplierName(item.getSupplierId());
             var crateBy = getUserName(item.getCreateBy());
@@ -756,6 +811,12 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
 
         if (isUpdate) {
+            var beforeReceipt = receiptPurchaseSubService.lambdaQuery()
+                    .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, purchaseRefundDTO.getId())
+                    .list();
+            if (!beforeReceipt.isEmpty()) {
+                updateProductStock(beforeReceipt, 1);
+            }
             var updateMainResult = lambdaUpdate()
                     .eq(ReceiptPurchaseMain::getId, purchaseRefundDTO.getId())
                     .set(purchaseRefundDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, purchaseRefundDTO.getSupplierId())
@@ -800,6 +861,10 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .collect(Collectors.toList());
 
             var updateSubResult = receiptPurchaseSubService.saveBatch(receiptPurchaseRefundList);
+            purchaseRefundDTO.getTableData().forEach(item -> {
+                updateProductStock(receiptPurchaseRefundList, 2);
+            });
+
 
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS);
@@ -855,7 +920,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .collect(Collectors.toList());
 
             var saveSubResult = receiptPurchaseSubService.saveBatch(receiptList);
-
+            updateProductStock(receiptList, 2);
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_SUCCESS);
             } else {
