@@ -118,11 +118,6 @@ export default defineComponent({
     function handleSubmit() {
       closeModal();
     }
-
-    function viewRefundReceipt() {
-      closeModal();
-    }
-
     return {
       receiptNumber,
       otherReceipt,
@@ -138,8 +133,7 @@ export default defineComponent({
       registerTable,
       registerModal,
       getTitle,
-      handleSubmit,
-      viewRefundReceipt
+      handleSubmit
     };
   },
 });

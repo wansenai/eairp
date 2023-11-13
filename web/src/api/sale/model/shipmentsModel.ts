@@ -50,6 +50,30 @@ export interface AddOrUpdateReceiptSaleShipmentsReq {
     files: FileData[];
 }
 
+export interface LinkReceiptSaleShipmentsDetailResp {
+    id: number | string | undefined;
+    customerId: string;
+    customerName: string;
+    accountName: string;
+    receiptNumber: string;
+    receiptDate: string;
+    otherReceipt: string;
+    operatorIds: number[];
+    collectOfferRate: number;
+    collectOfferAmount: number;
+    collectOfferLastAmount: number;
+    otherAmount: number;
+    thisCollectAmount: number;
+    thisArrearsAmount: number;
+    accountId: number | string;
+    multipleAccountIds: number[];
+    multipleAccountAmounts: number[];
+    status: number;
+    remark: string;
+    tableData: tableData[];
+    files: FileData[];
+}
+
 export interface SaleShipmentDetailData {
     customerId: number | string;
     receiptDate: string;
