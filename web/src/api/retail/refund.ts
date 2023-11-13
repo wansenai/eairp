@@ -2,7 +2,7 @@ import {defHttp} from '/@/utils/http/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import { QueryShipmentsReq } from "@/api/retail/model/shipmentsModel"
 import {
-    AddOrUpdateRefundReq,
+    AddOrUpdateRefundReq, AddOrUpdateRefundResp,
     RefundResp
 } from "@/api/retail/model/refundModel"
 
@@ -12,6 +12,7 @@ enum API {
     GetDetail = '/retail/refund/detail',
     UpdateStatus = '/retail/refund/updateStatus',
     Delete = '/retail/refund/deleteByIds',
+    GetLinkRefundDetail = '/retail/refund/getLinkRefundDetail',
 }
 
 export function getRefundPageList(params: QueryShipmentsReq) {
@@ -36,6 +37,14 @@ export function getRefundDetail(id: string) {
     return defHttp.get<BaseDataResp<AddOrUpdateRefundReq>>(
         {
             url: `${API.GetDetail}/${id}`,
+        }
+    );
+}
+
+export function getLinkRefundDetail(otherReceipt: string) {
+    return defHttp.get<BaseDataResp<AddOrUpdateRefundResp>>(
+        {
+            url: `${API.GetLinkRefundDetail}/${otherReceipt}`,
         }
     );
 }

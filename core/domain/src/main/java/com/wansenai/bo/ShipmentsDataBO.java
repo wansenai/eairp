@@ -18,6 +18,8 @@ public class ShipmentsDataBO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long warehouseId;
 
+    private String warehouseName;
+
     private String productCode;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -28,6 +30,10 @@ public class ShipmentsDataBO {
     private String productName;
 
     private String productUnit;
+
+    private String productModel;
+
+    private String productColor;
 
     private String productStandard;
 

@@ -1,7 +1,7 @@
 import {defHttp} from '/@/utils/http/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
-    AddOrUpdateShipmentsReq,
+    AddOrUpdateShipmentsReq, AddOrUpdateShipmentsResp,
     QueryShipmentsReq,
     ShipmentsResp
 } from "@/api/retail/model/shipmentsModel"
@@ -14,6 +14,7 @@ enum API {
     DeleteBatch = '/retail/shipments/deleteByIds',
     UpdateStatus = '/retail/shipments/updateStatus',
     GetDetail = '/retail/shipments/detail',
+    GetLinkShipmentDetail = '/retail/shipments/getLinkShipmentDetail',
 }
 
 export function getShipmentsPageList(params: QueryShipmentsReq, mode: ErrorMessageMode = 'notice') {
@@ -67,6 +68,14 @@ export function getShipmentsDetail(id: string | number) {
     return defHttp.get<BaseDataResp<AddOrUpdateShipmentsReq>>(
         {
             url: `${API.GetDetail}/${id}`,
+        }
+    );
+}
+
+export function getLinkShipmentsDetail(otherReceipt: string) {
+    return defHttp.get<BaseDataResp<AddOrUpdateShipmentsResp>>(
+        {
+            url: `${API.GetLinkShipmentDetail}/${otherReceipt}`,
         }
     );
 }

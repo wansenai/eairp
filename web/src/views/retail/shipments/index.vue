@@ -14,7 +14,7 @@
               :actions="[
               {
                 icon: 'clarity:info-standard-line',
-                tooltip: t('sys.user.viewUserDetails'),
+                tooltip: '查看单据详情',
                 onClick: handleView.bind(null, record),
               },
               {
@@ -41,6 +41,7 @@
       </template>
     </BasicTable>
     <AddEditModal ref="addEditModalRef" @cancel="handleCancel"></AddEditModal>
+    <ReceiptViewModal @register="receiptViewModal" @ok="handleOk"/>
   </div>
 </template>
 <div>
@@ -55,14 +56,17 @@ import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 import {getShipmentsPageList, deleteShipments, updateShipmentsStatus} from "@/api/retail/shipments";
 import AddEditModal from "@/views/retail/shipments/components/AddEditModal.vue"
+import ReceiptViewModal from "@/views/retail/shipments/components/ViewShipmentModal.vue";
 import {Tag} from "ant-design-vue";
+import {useModal} from "@/components/Modal";
 export default defineComponent({
   name: 'Shipments',
-  components: {Tag, TableAction, BasicTable, AddEditModal},
+  components: {Tag, TableAction, BasicTable, AddEditModal, ReceiptViewModal},
   setup() {
     const { t } = useI18n();
     const { createMessage } = useMessage();
     const addEditModalRef = ref(null);
+    const [receiptViewModal, {openModal: openReceiptViewModal}] = useModal();
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '零售出库列表',
       rowKey: 'id',
@@ -132,8 +136,11 @@ export default defineComponent({
       await reload();
     }
 
-    function handleView(){
-
+    function handleView(record: Recordable){
+      openReceiptViewModal(true, {
+        isUpdate: false,
+        receiptNumber: record.receiptNumber,
+      });
     }
 
     const getTimestamp = (date) => {
@@ -175,6 +182,7 @@ export default defineComponent({
 
     return {
       t,
+      receiptViewModal,
       addEditModalRef,
       registerTable,
       handleCreate,
