@@ -33,6 +33,7 @@ import com.wansenai.mappers.receipt.ReceiptRetailMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.common.CommonService;
+import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.service.receipt.ReceiptRetailService;
 import com.wansenai.service.receipt.ReceiptRetailSubService;
@@ -69,6 +70,8 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
     private final MemberService memberService;
 
+    private final IFinancialAccountService accountService;
+
     private final ISysUserService userService;
 
     private final SysFileMapper fileMapper;
@@ -81,10 +84,12 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
     private final CommonService commonService;
 
-    public ReceiptRetailServiceImpl(ReceiptRetailMainMapper receiptRetailMainMapper, ReceiptRetailSubService receiptRetailSubService, MemberService memberService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductStockMapper productStockMapper, ProductService productService, CommonService commonService) {
+
+    public ReceiptRetailServiceImpl(ReceiptRetailMainMapper receiptRetailMainMapper, ReceiptRetailSubService receiptRetailSubService, MemberService memberService, IFinancialAccountService accountService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductStockMapper productStockMapper, ProductService productService, CommonService commonService) {
         this.receiptRetailMainMapper = receiptRetailMainMapper;
         this.receiptRetailSubService = receiptRetailSubService;
         this.memberService = memberService;
+        this.accountService = accountService;
         this.userService = userService;
         this.fileMapper = fileMapper;
         this.productStockKeepUnitMapper = productStockKeepUnitMapper;
@@ -95,6 +100,10 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
     private String getMemberName(Long memberId) {
         return (memberId != null) ? memberService.getById(memberId).getMemberName() : null;
+    }
+
+    private String getAccountName(Long accountId) {
+        return (accountId != null) ? accountService.getById(accountId).getAccountName() : null;
     }
 
     private String getUserName(Long userId) {
@@ -196,10 +205,17 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .build();
         var data = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
         if (data != null) {
+            shipmentBo.setWarehouseId(data.getWarehouseId());
             shipmentBo.setProductName(data.getProductName());
             shipmentBo.setProductStandard(data.getProductStandard());
             shipmentBo.setProductUnit(data.getProductUnit());
+            shipmentBo.setProductModel(data.getProductModel());
+            shipmentBo.setProductColor(data.getProductColor());
             shipmentBo.setStock(data.getStock());
+
+            if (data.getWarehouseId() != null) {
+                shipmentBo.setWarehouseName(commonService.getWarehouseName(data.getWarehouseId()));
+            }
         }
         return shipmentBo;
     }
@@ -469,6 +485,8 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .receiptNumber(shipment.getReceiptNumber())
                 .receiptDate(shipment.getReceiptDate())
                 .memberId(shipment.getMemberId())
+                .memberName(getMemberName(shipment.getMemberId()))
+                .accountName(getAccountName(shipment.getAccountId()))
                 .accountId(shipment.getAccountId())
                 .paymentType(shipment.getPaymentType())
                 .collectAmount(shipment.getChangeAmount())
@@ -477,6 +495,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .remark(shipment.getRemark())
                 .tableData(tableData)
                 .files(fileList)
+                .status(shipment.getStatus())
                 .build();
 
         return Response.responseData(retailShipmentsDetailVO);
@@ -714,14 +733,18 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .receiptNumber(refund.getReceiptNumber())
                 .receiptDate(refund.getReceiptDate())
                 .memberId(refund.getMemberId())
+                .memberName(getMemberName(refund.getMemberId()))
                 .accountId(refund.getAccountId())
+                .accountName(getAccountName(refund.getAccountId()))
                 .otherReceipt(refund.getOtherReceipt())
                 .paymentAmount(refund.getChangeAmount())
+                .paymentType(refund.getPaymentType())
                 .receiptAmount(refund.getTotalAmount())
                 .backAmount(refund.getBackAmount())
                 .remark(refund.getRemark())
                 .tableData(tableData)
                 .files(fileList)
+                .status(refund.getStatus())
                 .build();
 
         return Response.responseData(retailRefundDetailVO);
