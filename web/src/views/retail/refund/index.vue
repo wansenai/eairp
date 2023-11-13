@@ -14,7 +14,7 @@
               :actions="[
               {
                 icon: 'clarity:info-standard-line',
-                tooltip: t('sys.user.viewUserDetails'),
+                tooltip: '查看单据详情',
                 onClick: handleView.bind(null, record),
               },
               {
@@ -41,6 +41,7 @@
       </template>
     </BasicTable>
     <AddEditModal ref="addEditModalRef" @cancel="handleCancel"></AddEditModal>
+    <ViewModal @register="receiptViewModal" @ok="handleOk"/>
   </div>
 </template>
 <div>
@@ -56,13 +57,16 @@ import {useI18n} from "vue-i18n";
 import AddEditModal from "@/views/retail/refund/components/AddEditModal.vue"
 import {Tag} from "ant-design-vue";
 import {getRefundPageList, updateRefundStatus, deleteRefund} from "@/api/retail/refund";
+import {useModal} from "@/components/Modal";
+import ViewModal from "@/views/retail/refund/components/ViewModal.vue";
 export default defineComponent({
   name: 'Shipments',
-  components: {Tag, TableAction, BasicTable, AddEditModal},
+  components: {Tag, TableAction, BasicTable, AddEditModal, ViewModal},
   setup() {
     const { t } = useI18n();
     const { createMessage } = useMessage();
     const addEditModalRef = ref(null);
+    const [receiptViewModal, {openModal: openReceiptViewModal}] = useModal();
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '零售退货列表',
       rowKey: 'id',
@@ -133,8 +137,11 @@ export default defineComponent({
       await reload();
     }
 
-    function handleView(){
-
+    function handleView(record: Recordable){
+      openReceiptViewModal(true, {
+        isUpdate: false,
+        id: record.id,
+      });
     }
 
     const getTimestamp = (date) => {
@@ -189,6 +196,7 @@ export default defineComponent({
       handleView,
       handleOk,
       handleExport,
+      receiptViewModal,
     }
   }
 })
