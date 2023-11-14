@@ -44,6 +44,26 @@ export interface AddOrUpdateReceiptReq {
     files: FileData[];
 }
 
+export interface LinkReceiptDetailResp {
+    id: number | string | undefined;
+    supplierId: string;
+    supplierName: string;
+    receiptNumber: string;
+    receiptDate: string;
+    discountRate: number;
+    discountAmount: number;
+    discountLastAmount: number;
+    deposit: number;
+    accountId: number | string;
+    accountName: string;
+    multipleAccountIds: number[];
+    multipleAccountAmounts: number[];
+    status: number;
+    remark: string;
+    tableData: PurchaseData[];
+    files: FileData[];
+}
+
 export interface PurchaseDetailData {
     supplierId: number | string;
     accountId: number;

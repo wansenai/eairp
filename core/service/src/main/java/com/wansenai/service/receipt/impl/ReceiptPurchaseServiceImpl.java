@@ -22,7 +22,6 @@ import com.wansenai.dto.receipt.purchase.*;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.receipt.ReceiptPurchaseMain;
 import com.wansenai.entities.receipt.ReceiptPurchaseSub;
-import com.wansenai.entities.receipt.ReceiptRetailSub;
 import com.wansenai.entities.system.SysFile;
 import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
 import com.wansenai.mappers.product.ProductStockMapper;
@@ -30,6 +29,7 @@ import com.wansenai.mappers.receipt.ReceiptPurchaseMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.basic.SupplierService;
 import com.wansenai.service.common.CommonService;
+import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.receipt.ReceiptPurchaseService;
 import com.wansenai.service.receipt.ReceiptPurchaseSubService;
 import com.wansenai.service.user.ISysUserService;
@@ -63,8 +63,9 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     private final ReceiptPurchaseMainMapper receiptPurchaseMainMapper;
     private final ReceiptPurchaseSubService receiptPurchaseSubService;
     private final ProductStockMapper productStockMapper;
+    private final IFinancialAccountService accountService;
 
-    public ReceiptPurchaseServiceImpl(SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, CommonService commonService, ISysUserService userService, SupplierService supplierService, ReceiptPurchaseMainMapper receiptPurchaseMainMapper, ReceiptPurchaseSubService receiptPurchaseSubService, ProductStockMapper productStockMapper) {
+    public ReceiptPurchaseServiceImpl(SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, CommonService commonService, ISysUserService userService, SupplierService supplierService, ReceiptPurchaseMainMapper receiptPurchaseMainMapper, ReceiptPurchaseSubService receiptPurchaseSubService, ProductStockMapper productStockMapper, IFinancialAccountService accountService) {
         this.fileMapper = fileMapper;
         this.productStockKeepUnitMapper = productStockKeepUnitMapper;
         this.commonService = commonService;
@@ -73,6 +74,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         this.receiptPurchaseMainMapper = receiptPurchaseMainMapper;
         this.receiptPurchaseSubService = receiptPurchaseSubService;
         this.productStockMapper = productStockMapper;
+        this.accountService = accountService;
     }
     private final Map<Long, List<ReceiptPurchaseSub>> receiptSubListCache = new ConcurrentHashMap<>();
 
@@ -105,6 +107,10 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         return (userId != null) ? userService.getById(userId).getName() : null;
     }
 
+    private String getWarehouseName(Long warehouseId) {
+        return (warehouseId != null) ? commonService.getWarehouseName(warehouseId) : null;
+    }
+
     private List<Long> parseAndCollectLongList(String input) {
         if (StringUtils.hasLength(input)) {
             return Arrays.stream(input.split(","))
@@ -131,9 +137,16 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var data = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
         if (data != null) {
             purchaseData.setProductName(data.getProductName());
+            purchaseData.setProductModel(data.getProductModel());
             purchaseData.setProductStandard(data.getProductStandard());
+            purchaseData.setProductColor(data.getProductColor());
             purchaseData.setProductUnit(data.getProductUnit());
+            purchaseData.setProductStandard(data.getProductStandard());
             purchaseData.setStock(data.getStock());
+
+            if(purchaseData.getWarehouseId() != null) {
+                purchaseData.setWarehouseName(getWarehouseName(purchaseData.getWarehouseId()));
+            }
         }
         return purchaseData;
     }
@@ -291,32 +304,43 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         return Response.responseData(result);
     }
 
-    @Override
-    public Response<PurchaseOrderDetailVO> getPurchaseOrderDetail(Long id) {
-        if (id == null) {
-            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
-        }
-        var purchaseMain = getById(id);
+    private PurchaseOrderDetailVO createPurchaseOrderDetail(ReceiptPurchaseMain purchaseMain) {
         List<FileDataBO> fileList = commonService.getFileList(purchaseMain.getFileId());
 
         var receiptSubList = receiptPurchaseSubService.lambdaQuery()
-                .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, id)
+                .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, purchaseMain.getId())
                 .list();
 
-        var tableData = new ArrayList<PurchaseDataBO>(receiptSubList.size() + 1);
-        for (ReceiptPurchaseSub item : receiptSubList) {
-            var purchaseData = createPurchaseDataFromReceiptSub(item);
-            tableData.add(purchaseData);
-        }
+        var tableData = receiptSubList.stream()
+                .map(this::createPurchaseDataFromReceiptSub)
+                .collect(Collectors.toCollection(ArrayList::new));
 
         var multipleAccountIds = parseAndCollectLongList(purchaseMain.getMultipleAccount());
         var multipleAccountAmounts = parseAndCollectLongList(purchaseMain.getMultipleAccountAmount());
 
-        var purchaseOrderDetailVO = PurchaseOrderDetailVO.builder()
+        var accountName = "";
+        if(!multipleAccountIds.isEmpty() && !multipleAccountAmounts.isEmpty()) {
+            var accountNameList = new ArrayList<String>();
+            for (int i = 0; i < multipleAccountIds.size(); i++) {
+                var account = accountService.getById(multipleAccountIds.get(i));
+                var accountAmount = multipleAccountAmounts.get(i);
+                accountNameList.add(account.getAccountName() + "(" + accountAmount + "元)");
+            }
+            accountName = StringUtils.collectionToCommaDelimitedString(accountNameList);
+        } else {
+            var account = accountService.getById(purchaseMain.getAccountId());
+            if (account != null) {
+                accountName = account.getAccountName();
+            }
+        }
+
+        return PurchaseOrderDetailVO.builder()
                 .receiptNumber(purchaseMain.getReceiptNumber())
                 .receiptDate(purchaseMain.getReceiptDate())
                 .supplierId(purchaseMain.getSupplierId())
+                .supplierName(getSupplierName(purchaseMain.getSupplierId()))
                 .accountId(purchaseMain.getAccountId())
+                .accountName(accountName)
                 .discountRate(purchaseMain.getDiscountRate())
                 .discountAmount(purchaseMain.getDiscountAmount())
                 .discountLastAmount(purchaseMain.getDiscountLastAmount())
@@ -326,8 +350,31 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .remark(purchaseMain.getRemark())
                 .tableData(tableData)
                 .files(fileList)
+                .status(purchaseMain.getStatus())
                 .build();
+    }
 
+    @Override
+    public Response<PurchaseOrderDetailVO> getPurchaseOrderDetail(Long id) {
+        if (id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var purchaseMain = getById(id);
+        var purchaseOrderDetailVO = createPurchaseOrderDetail(purchaseMain);
+        return Response.responseData(purchaseOrderDetailVO);
+    }
+
+    @Override
+    public Response<PurchaseOrderDetailVO> getLinkPurchaseOrderDetail(String receiptNumber) {
+        if (!StringUtils.hasLength(receiptNumber)) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var purchaseMain = lambdaQuery()
+                .eq(ReceiptPurchaseMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+
+        var purchaseOrderDetailVO = createPurchaseOrderDetail(purchaseMain);
         return Response.responseData(purchaseOrderDetailVO);
     }
 
@@ -512,31 +559,36 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         return Response.responseData(result);
     }
 
-    @Override
-    public Response<PurchaseStorageDetailVO> getPurchaseStorageDetail(Long id) {
-        if (id == null) {
-            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+    private PurchaseStorageDetailVO createPurchaseStorageDetail(ReceiptPurchaseMain purchaseMain) {
+        if (purchaseMain == null) {
+            throw new IllegalArgumentException("purchaseMain cannot be null");
         }
-        var purchaseMain = getById(id);
-        List<FileDataBO> fileList = commonService.getFileList(purchaseMain.getFileId());
 
-        var receiptSubList = receiptPurchaseSubService.lambdaQuery()
-                .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, id)
+        List<FileDataBO> fileList = commonService.getFileList(purchaseMain.getFileId());
+        List<ReceiptPurchaseSub> receiptSubList = receiptPurchaseSubService.lambdaQuery()
+                .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, purchaseMain.getId())
                 .list();
 
-        var tableData = new ArrayList<PurchaseDataBO>(receiptSubList.size() + 1);
-        for (ReceiptPurchaseSub item : receiptSubList) {
-            var purchaseData = createPurchaseDataFromReceiptSub(item);
-            tableData.add(purchaseData);
-        }
+        var tableData = receiptSubList.stream()
+                .map(this::createPurchaseDataFromReceiptSub)
+                .collect(Collectors.toCollection(ArrayList::new));
 
         var multipleAccountIds = parseAndCollectLongList(purchaseMain.getMultipleAccount());
         var multipleAccountAmounts = parseAndCollectLongList(purchaseMain.getMultipleAccountAmount());
 
-        var purchasesStorageDetailVO = PurchaseStorageDetailVO.builder()
+        var accountName = createAccountName(multipleAccountIds, multipleAccountAmounts);
+        if (!StringUtils.hasLength(accountName)) {
+            var account = accountService.getById(purchaseMain.getAccountId());
+            if (account != null) {
+                accountName = account.getAccountName();
+            }
+        }
+
+        return PurchaseStorageDetailVO.builder()
                 .receiptNumber(purchaseMain.getReceiptNumber())
                 .receiptDate(purchaseMain.getReceiptDate())
                 .supplierId(purchaseMain.getSupplierId())
+                .supplierName(getSupplierName(purchaseMain.getSupplierId()))
                 .accountId(purchaseMain.getAccountId())
                 .paymentRate(purchaseMain.getDiscountRate())
                 .paymentAmount(purchaseMain.getDiscountAmount())
@@ -547,12 +599,47 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .thisArrearsAmount(purchaseMain.getArrearsAmount())
                 .multipleAccountIds(multipleAccountIds)
                 .multipleAccountAmounts(multipleAccountAmounts)
+                .accountName(accountName)
                 .remark(purchaseMain.getRemark())
                 .status(purchaseMain.getStatus())
                 .tableData(tableData)
                 .files(fileList)
                 .build();
+    }
 
+    private String createAccountName(List<Long> multipleAccountIds, List<Long> multipleAccountAmounts) {
+        if (multipleAccountIds.isEmpty() || multipleAccountAmounts.isEmpty()) {
+            return "";
+        }
+        var accountNameList = new ArrayList<String>();
+        for (int i = 0; i < multipleAccountIds.size(); i++) {
+            var account = accountService.getById(multipleAccountIds.get(i));
+            var accountAmount = multipleAccountAmounts.get(i);
+            accountNameList.add(account.getAccountName() + "(" + accountAmount + "元)");
+        }
+        return StringUtils.collectionToCommaDelimitedString(accountNameList);
+    }
+
+    @Override
+    public Response<PurchaseStorageDetailVO> getPurchaseStorageDetail(Long id) {
+        if (id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var purchaseMain = getById(id);
+        var purchasesStorageDetailVO = createPurchaseStorageDetail(purchaseMain);
+        return Response.responseData(purchasesStorageDetailVO);
+    }
+
+    @Override
+    public Response<PurchaseStorageDetailVO> getLinkPurchaseStorageDetail(String receiptNumber) {
+        if (!StringUtils.hasLength(receiptNumber)) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var purchaseMain = lambdaQuery()
+                .eq(ReceiptPurchaseMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+        var purchasesStorageDetailVO = createPurchaseStorageDetail(purchaseMain);
         return Response.responseData(purchasesStorageDetailVO);
     }
 
@@ -760,25 +847,53 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
         var purchaseMain = getById(id);
-        List<FileDataBO> fileList = commonService.getFileList(purchaseMain.getFileId());
+        var purchasesStorageDetailVO = getPurchaseRefundDetail(purchaseMain);
+        return Response.responseData(purchasesStorageDetailVO);
+    }
 
-        var receiptSubList = receiptPurchaseSubService.lambdaQuery()
-                .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, id)
+    @Override
+    public Response<PurchaseRefundDetailVO> getLinkPurchaseRefundDetail(String receiptNumber) {
+        if (!StringUtils.hasLength(receiptNumber)) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var purchaseMain = lambdaQuery()
+                .eq(ReceiptPurchaseMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+        var PurchaseRefundDetailVO = getPurchaseRefundDetail(purchaseMain);
+        return Response.responseData(PurchaseRefundDetailVO);
+    }
+
+    private PurchaseRefundDetailVO getPurchaseRefundDetail(ReceiptPurchaseMain purchaseMain) {
+        if (purchaseMain == null) {
+            throw new IllegalArgumentException("purchaseMain cannot be null");
+        }
+
+        List<FileDataBO> fileList = commonService.getFileList(purchaseMain.getFileId());
+        List<ReceiptPurchaseSub> receiptSubList = receiptPurchaseSubService.lambdaQuery()
+                .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, purchaseMain.getId())
                 .list();
 
-        var tableData = new ArrayList<PurchaseDataBO>(receiptSubList.size() + 1);
-        for (ReceiptPurchaseSub item : receiptSubList) {
-            var purchaseData = createPurchaseDataFromReceiptSub(item);
-            tableData.add(purchaseData);
-        }
+        var tableData = receiptSubList.stream()
+                .map(this::createPurchaseDataFromReceiptSub)
+                .collect(Collectors.toCollection(ArrayList::new));
 
         var multipleAccountIds = parseAndCollectLongList(purchaseMain.getMultipleAccount());
         var multipleAccountAmounts = parseAndCollectLongList(purchaseMain.getMultipleAccountAmount());
 
-        var purchaseRefundDetailVO = PurchaseRefundDetailVO.builder()
+        var accountName = createAccountName(multipleAccountIds, multipleAccountAmounts);
+        if (!StringUtils.hasLength(accountName)) {
+            var account = accountService.getById(purchaseMain.getAccountId());
+            if (account != null) {
+                accountName = account.getAccountName();
+            }
+        }
+
+        return PurchaseRefundDetailVO.builder()
                 .receiptNumber(purchaseMain.getReceiptNumber())
                 .receiptDate(purchaseMain.getReceiptDate())
                 .supplierId(purchaseMain.getSupplierId())
+                .supplierName(getSupplierName(purchaseMain.getSupplierId()))
                 .accountId(purchaseMain.getAccountId())
                 .refundOfferRate(purchaseMain.getDiscountRate())
                 .refundOfferAmount(purchaseMain.getDiscountAmount())
@@ -789,13 +904,21 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .thisArrearsAmount(purchaseMain.getArrearsAmount())
                 .multipleAccountIds(multipleAccountIds)
                 .multipleAccountAmounts(multipleAccountAmounts)
+                .accountName(accountName)
                 .remark(purchaseMain.getRemark())
                 .status(purchaseMain.getStatus())
                 .tableData(tableData)
                 .files(fileList)
                 .build();
+    }
 
-        return Response.responseData(purchaseRefundDetailVO);
+    private List<PurchaseDataBO> createTableDataList(List<ReceiptPurchaseSub> receiptSubList) {
+        var tableData = new ArrayList<PurchaseDataBO>(receiptSubList.size() + 1);
+        for (ReceiptPurchaseSub item : receiptSubList) {
+            var purchaseData = createPurchaseDataFromReceiptSub(item);
+            tableData.add(purchaseData);
+        }
+        return tableData;
     }
 
     @Override

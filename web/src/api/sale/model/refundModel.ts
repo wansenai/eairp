@@ -50,6 +50,30 @@ export interface AddOrUpdateReceiptSaleRefundReq {
     files: FileData[];
 }
 
+export interface LinkReceiptSaleRefundDetailResp {
+    id: number | string | undefined;
+    customerId: string;
+    customerName: string;
+    accountName: string;
+    receiptNumber: string;
+    receiptDate: string;
+    otherReceipt: string;
+    operatorIds: number[];
+    refundOfferRate: number;
+    refundOfferAmount: number;
+    refundLastAmount: number;
+    otherAmount: number;
+    thisRefundAmount: number;
+    thisArrearsAmount: number;
+    accountId: number | string;
+    multipleAccountIds: number[];
+    multipleAccountAmounts: number[];
+    status: number;
+    remark: string;
+    tableData: SaleRefundTableData[];
+    files: FileData[];
+}
+
 export interface SaleRefundDetailData {
     customerId: number | string;
     receiptDate: string;

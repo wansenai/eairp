@@ -54,6 +54,11 @@ public class PurchaseController {
         return purchaseService.getPurchaseOrderDetail(id);
     }
 
+    @GetMapping("/order/getLinkOrderDetail/{receiptNumber}")
+    public Response<PurchaseOrderDetailVO> getLinkPurchaseOrderDetail(@PathVariable("receiptNumber") String receiptNumber) {
+        return purchaseService.getLinkPurchaseOrderDetail(receiptNumber);
+    }
+
     @PutMapping("/order/updateStatus/{ids}/{status}")
     public Response<String> updateStatus(@PathVariable("ids") List<Long> ids, @PathVariable("status") Integer status) {
         return purchaseService.updatePurchaseOrderStatus(ids, status);
@@ -79,6 +84,11 @@ public class PurchaseController {
         return purchaseService.getPurchaseStorageDetail(id);
     }
 
+    @GetMapping("/storage/getLinkStorageDetail/{receiptNumber}")
+    public Response<PurchaseStorageDetailVO> getLinkPurchaseStorageDetail(@PathVariable("receiptNumber") String receiptNumber) {
+        return purchaseService.getLinkPurchaseStorageDetail(receiptNumber);
+    }
+
     @PutMapping("/storage/updateStatus/{ids}/{status}")
     public Response<String> updatePurchaseStorageStatus(@PathVariable("ids") List<Long> ids, @PathVariable("status") Integer status) {
         return purchaseService.updatePurchaseStorageStatus(ids, status);
@@ -102,6 +112,11 @@ public class PurchaseController {
     @GetMapping("/refund/detail/{id}")
     public Response<PurchaseRefundDetailVO> purchaseRefundDetail(@PathVariable("id") Long id) {
         return purchaseService.getPurchaseRefundDetail(id);
+    }
+
+    @GetMapping("/refund/getLinkRefundDetail/{receiptNumber}")
+    public Response<PurchaseRefundDetailVO> getLinkPurchaseRefundDetail(@PathVariable("receiptNumber") String receiptNumber) {
+        return purchaseService.getLinkPurchaseRefundDetail(receiptNumber);
     }
 
     @PutMapping("/refund/updateStatus/{ids}/{status}")

@@ -49,7 +49,9 @@ export interface AddOrUpdatePurchaseRefundReq {
 
 export interface PurchaseRefundDetailData {
     supplierId: number | string;
+    supplierName: string;
     accountId: number;
+    accountName: string;
     otherReceipt: string;
     receiptDate: string;
     receiptNumber: string;

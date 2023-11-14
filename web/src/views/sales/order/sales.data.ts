@@ -133,3 +133,81 @@ export const searchFormSchema: FormSchema[] = [
 
     }
 ]
+
+export const TableColumns: BasicColumn[] = [
+    {
+        title: '仓库名称',
+        dataIndex: 'warehouseName',
+        width: 100,
+    },
+    {
+        title: '条码',
+        dataIndex: 'barCode',
+        width: 100,
+    },
+    {
+        title: '商品名称',
+        dataIndex: 'productName',
+        width: 120,
+    },
+    {
+        title: '规格',
+        dataIndex: 'productStandard',
+        width: 120,
+    },
+    {
+        title: '型号',
+        dataIndex: 'productModel',
+        width: 120,
+    },
+    {
+        title: '颜色',
+        dataIndex: 'productColor',
+        width: 70,
+    },
+    {
+        title: '库存',
+        dataIndex: 'stock',
+        width: 80,
+    },
+    {
+        title: '单位',
+        dataIndex: 'productUnit',
+        width: 60,
+    },
+    {
+        title: '数量',
+        dataIndex: 'productNumber',
+        width: 60,
+    },
+    {
+        title: '单价',
+        dataIndex: 'unitPrice',
+        width: 60,
+    },
+    {
+        title: '金额',
+        dataIndex: 'amount',
+        width: 60,
+    },
+    {
+        title: '税率(%)',
+        dataIndex: 'taxRate',
+        width: 60,
+    },
+    {
+        title: '税额',
+        dataIndex: 'taxAmount',
+        width: 60,
+    },
+    {
+        title: '税额',
+        dataIndex: 'taxTotalPrice',
+        width: 60,
+    },
+    {
+        title: '备注',
+        dataIndex: 'remark',
+        width: 100,
+    },
+]

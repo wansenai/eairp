@@ -35,6 +35,8 @@ public class PurchaseRefundDetailVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long supplierId;
 
+    private String supplierName;
+
     private String receiptNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -68,6 +70,8 @@ public class PurchaseRefundDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private List<Long> multipleAccountIds;
+
+    private String accountName;
 
     private List<PurchaseDataBO> tableData;
 

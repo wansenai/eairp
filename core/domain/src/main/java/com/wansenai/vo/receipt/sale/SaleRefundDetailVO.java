@@ -35,6 +35,10 @@ public class SaleRefundDetailVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long customerId;
 
+    private String customerName;
+
+    private String accountName;
+
     private String receiptNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

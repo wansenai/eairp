@@ -35,6 +35,8 @@ public class PurchaseOrderDetailVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long supplierId;
 
+    private String supplierName;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long accountId;
 
@@ -48,6 +50,8 @@ public class PurchaseOrderDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private List<Long> multipleAccountIds;
+
+    private String accountName;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal discountRate;
@@ -66,4 +70,6 @@ public class PurchaseOrderDetailVO {
     private List<FileDataBO> files;
 
     private String remark;
+
+    private Integer status;
 }

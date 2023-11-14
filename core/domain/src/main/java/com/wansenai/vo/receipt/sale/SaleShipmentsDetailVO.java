@@ -37,6 +37,10 @@ public class SaleShipmentsDetailVO {
 
     private String receiptNumber;
 
+    private String customerName;
+
+    private String accountName;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime receiptDate;
 
@@ -77,4 +81,6 @@ public class SaleShipmentsDetailVO {
     private List<FileDataBO> files;
 
     private String remark;
+
+    private Integer status;
 }

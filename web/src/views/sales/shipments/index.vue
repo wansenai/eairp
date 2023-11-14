@@ -41,6 +41,7 @@
       </template>
     </BasicTable>
     <AddEditModal ref="addEditModalRef" @cancel="handleCancel"/>
+    <ViewShipmentModal @register="viewShipmentReceiptModal"/>
   </div>
 </template>
 <div>
@@ -56,13 +57,16 @@ import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
 import {getSaleShipmentsPageList, updateSaleShipmentsStatus, deleteSaleShipments} from "@/api/sale/shipments";
 import AddEditModal from "@/views/sales/shipments/components/AddEditModal.vue";
+import ViewShipmentModal from "@/views/sales/shipments/components/ViewShipmentsModal.vue";
+import {useModal} from "@/components/Modal";
 export default defineComponent({
   name: 'SaleShipmentsModal',
-  components: {AddEditModal, Tag, TableAction, BasicTable},
+  components: {ViewShipmentModal, AddEditModal, Tag, TableAction, BasicTable},
   setup() {
     const { t } = useI18n();
     const addEditModalRef = ref(null);
     const { createMessage } = useMessage();
+    const [viewShipmentReceiptModal, {openModal: openViewShipmentReceiptModal}] = useModal()
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '销售出库列表',
       rowKey: 'id',
@@ -133,8 +137,10 @@ export default defineComponent({
       await reload();
     }
 
-    function handleView(){
-
+    function handleView(record: Recordable){
+      openViewShipmentReceiptModal(true, {
+        receiptNumber: record.receiptNumber
+      });
     }
 
     const getTimestamp = (date) => {
@@ -189,6 +195,7 @@ export default defineComponent({
       handleView,
       handleOk,
       handleExport,
+      viewShipmentReceiptModal,
     }
   }
 })

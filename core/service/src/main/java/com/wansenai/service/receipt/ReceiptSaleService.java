@@ -46,6 +46,17 @@ public interface ReceiptSaleService extends IService<ReceiptSaleMain> {
     Response<SaleOrderDetailVO> getSaleOrderDetail(Long id);
 
     /**
+     * Query sales order details data based on sales order number
+     * 根据销售订单编号查询销售订单详情数据
+     *
+     * @param receiptNumber Sales order number
+     *                      销售订单编号
+     * @return  Returns sales order details data
+     *         返回销售订单详情数据
+     */
+    Response<SaleOrderDetailVO> getLinkSaleOrderDetail(String receiptNumber);
+
+    /**
      * Add/Update Sales Order Data
      * 新增/修改 销售订单数据
      *
@@ -100,6 +111,17 @@ public interface ReceiptSaleService extends IService<ReceiptSaleMain> {
      *        返回销售出货详情数据
      */
     Response<SaleShipmentsDetailVO> getSaleShipmentsDetail(Long id);
+
+    /**
+     * Query sales delivery order details data based on sales delivery order number
+     * 根据销售出货单编号查询销售出货单详情数据
+     *
+     * @param receiptNumber Sales delivery order number
+     *                      销售出货单编号
+     * @return Returns sales delivery order details data
+     *        返回销售出货单详情数据
+     */
+    Response<SaleShipmentsDetailVO> getLinkSaleShipmentsDetail(String receiptNumber);
 
     /**
      * Add or modify sales delivery orders
@@ -157,6 +179,17 @@ public interface ReceiptSaleService extends IService<ReceiptSaleMain> {
      *         返回销售退货数据
      */
     Response<SaleRefundDetailVO> getSaleRefundDetail(Long id);
+
+    /**
+     * Query sales return order details data based on sales return order number
+     * 根据销售退货单编号查询销售退货单详情数据
+     *
+     * @param receiptNumber Sales return order number
+     *                      销售退货单编号
+     * @return Returns sales return order details data
+     *        返回销售退货单详情数据
+     */
+    Response<SaleRefundDetailVO> getLinkSaleRefundDetail(String receiptNumber);
 
     /**
      * Add or modify sales refund orders
