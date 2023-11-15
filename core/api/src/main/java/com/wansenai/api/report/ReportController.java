@@ -12,13 +12,14 @@
  */
 package com.wansenai.api.report;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.report.QueryProductStock;
 import com.wansenai.service.receipt.ReceiptRetailService;
 import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.wansenai.vo.report.ProductStockVO;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/report")
@@ -33,5 +34,10 @@ public class ReportController {
     @GetMapping("homePage/statistics")
     public Response<RetailStatisticalDataVO> getStatisticalData() {
         return receiptService.getRetailStatistics();
+    }
+
+    @PostMapping("productStock")
+    public Response<Page<ProductStockVO>> getProductStock(@RequestBody QueryProductStock queryProductStock) {
+        return receiptService.getProductStock(queryProductStock);
     }
 }
