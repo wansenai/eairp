@@ -14,15 +14,16 @@ package com.wansenai.service.receipt.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
+import com.wansenai.dto.report.QueryProductStock;
 import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
 import com.wansenai.entities.basic.Supplier;
 import com.wansenai.entities.receipt.*;
+import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.basic.SupplierService;
 import com.wansenai.service.product.ProductService;
-import com.wansenai.service.product.ProductStockKeepUnitService;
 import com.wansenai.service.receipt.*;
 import com.wansenai.service.user.ISysUserService;
 import com.wansenai.utils.constants.CommonConstants;
@@ -32,6 +33,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
+import com.wansenai.vo.report.ProductStockVO;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -68,9 +70,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     private final ProductService productService;
 
-    private final ProductStockKeepUnitService productStockKeepUnitService;
+    private final ProductStockMapper productStockMapper;
 
-    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockKeepUnitService productStockKeepUnitService) {
+    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper) {
         this.receiptRetailService = receiptRetailService;
         this.receiptRetailSubService = receiptRetailSubService;
         this.receiptSaleService = receiptSaleService;
@@ -82,7 +84,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         this.supplierService = supplierService;
         this.userService = userService;
         this.productService = productService;
-        this.productStockKeepUnitService = productStockKeepUnitService;
+        this.productStockMapper = productStockMapper;
     }
 
     @Override
@@ -424,9 +426,9 @@ public class ReceiptServiceImpl implements ReceiptService {
                 receiptDetailVO.setUnit(productVO.getProductUnit());
             }
             // 查询库存
-            var stock = productStockKeepUnitService.getProductByBarCode(item.getProductBarcode(), item.getWarehouseId());
-            if (stock != null && stock.getData() != null) {
-                receiptDetailVO.setStock(stock.getData().getStock());
+            var stock = productStockMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            if (stock != null) {
+                receiptDetailVO.setStock(stock.getStock());
             }
 
             receiptDetailVos.add(receiptDetailVO);
@@ -477,9 +479,9 @@ public class ReceiptServiceImpl implements ReceiptService {
                 receiptDetailVO.setUnit(productVO.getProductUnit());
             }
             // 查询库存
-            var stock = productStockKeepUnitService.getProductByBarCode(item.getProductBarcode(), item.getWarehouseId());
-            if (stock != null && stock.getData() != null) {
-                receiptDetailVO.setStock(stock.getData().getStock());
+            var stock = productStockMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            if (stock != null) {
+                receiptDetailVO.setStock(stock.getStock());
             }
             receiptDetailVos.add(receiptDetailVO);
         });
@@ -528,9 +530,9 @@ public class ReceiptServiceImpl implements ReceiptService {
                 receiptDetailVO.setUnit(productVO.getProductUnit());
             }
             // 查询库存
-            var stock = productStockKeepUnitService.getProductByBarCode(item.getProductBarcode(), item.getWarehouseId());
-            if (stock != null && stock.getData() != null) {
-                receiptDetailVO.setStock(stock.getData().getStock());
+            var stock = productStockMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            if (stock != null) {
+                receiptDetailVO.setStock(stock.getStock());
             }
             receiptDetailVos.add(receiptDetailVO);
         });
@@ -541,5 +543,10 @@ public class ReceiptServiceImpl implements ReceiptService {
         result.setCurrent(receiptPurchaseDetails.getCurrent());
 
         return result;
+    }
+
+    @Override
+    public Response<Page<ProductStockVO>> getProductStock(QueryProductStock queryProductStock) {
+        return null;
     }
 }

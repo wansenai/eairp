@@ -14,10 +14,12 @@ package com.wansenai.service.receipt;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
+import com.wansenai.dto.report.QueryProductStock;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
+import com.wansenai.vo.report.ProductStockVO;
 
 import java.util.List;
 
@@ -36,4 +38,6 @@ public interface ReceiptService {
     Response<Page<ReceiptVO>> otherReceipt(QueryReceiptDTO receiptDTO);
 
     Response<Page<ReceiptDetailVO>> getOtherDetail(QueryReceiptDTO receiptDTO);
+
+    Response<Page<ProductStockVO>> getProductStock(QueryProductStock queryProductStock);
 }

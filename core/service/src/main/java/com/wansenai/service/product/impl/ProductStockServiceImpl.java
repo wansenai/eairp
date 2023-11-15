@@ -12,11 +12,16 @@
  */
 package com.wansenai.service.product.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
 import com.wansenai.service.product.ProductStockService;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.service.warehouse.WarehouseService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.product.ProductStockKeepUnitVO;
 import com.wansenai.vo.product.ProductStockVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -29,8 +34,26 @@ public class ProductStockServiceImpl extends ServiceImpl<ProductStockMapper, Pro
 
     private final WarehouseService warehouseService;
 
-    public ProductStockServiceImpl(WarehouseService warehouseService) {
+    private final ProductStockMapper productStockMapper;
+
+    public ProductStockServiceImpl(WarehouseService warehouseService, ProductStockMapper productStockMapper) {
         this.warehouseService = warehouseService;
+        this.productStockMapper = productStockMapper;
+    }
+
+    @Override
+    public IPage<ProductStockKeepUnitVO> getProductExtendPriceInfo(QueryProductStockKeepUnitDTO priceDTO) {
+        var page = new Page<QueryProductStockKeepUnitDTO>(priceDTO.getPage(), priceDTO.getPageSize());
+        return productStockMapper.getProductSkuList(page, priceDTO);
+    }
+
+    @Override
+    public Response<ProductStockKeepUnitVO> getProductByBarCode(Long barCode, Long warehouseId) {
+        var data = productStockMapper.getProductSkuByBarCode(barCode, warehouseId);
+        if (data == null) {
+            return Response.responseData(null);
+        }
+        return Response.responseData(data);
     }
 
     @Override
