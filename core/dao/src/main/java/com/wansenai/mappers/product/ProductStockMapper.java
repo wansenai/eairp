@@ -13,6 +13,7 @@
 package com.wansenai.mappers.product;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
 import com.wansenai.dto.report.QueryProductStock;
 import com.wansenai.entities.product.ProductStock;
@@ -33,6 +34,6 @@ public interface ProductStockMapper extends BaseMapper<ProductStock> {
 
     ProductStockKeepUnitVO getProductSkuDetail(Long productId, Long warehouseId, Long barCode);
 
-    IPage<ProductStockVO> getProductStock(IPage<QueryProductStock> pageObject, QueryProductStock queryProductStock);
+    Page<ProductStockVO> getProductStock(IPage<QueryProductStock> pageObject, QueryProductStock queryProductStock);
 
 }
