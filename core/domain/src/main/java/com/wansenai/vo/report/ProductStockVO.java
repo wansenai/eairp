@@ -27,6 +27,8 @@ public class ProductStockVO {
 
     private String productBarcode;
 
+    private String warehouseName;
+
     private String productName;
 
     private String productCategoryName;

@@ -24,4 +24,8 @@ public class QueryProductStock {
     private Long productCategoryId;
 
     private String warehouseShelves;
+
+    private Long page;
+
+    private Long pageSize;
 }
