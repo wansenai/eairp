@@ -12,8 +12,13 @@
  */
 package com.wansenai.mappers.product;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
+import com.wansenai.dto.report.QueryProductStock;
 import com.wansenai.entities.product.ProductStock;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.wansenai.vo.product.ProductStockKeepUnitVO;
+import com.wansenai.vo.report.ProductStockVO;
 
 /**
  * <p>
@@ -21,5 +26,13 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  */
 public interface ProductStockMapper extends BaseMapper<ProductStock> {
+
+    IPage<ProductStockKeepUnitVO> getProductSkuList(IPage<QueryProductStockKeepUnitDTO> pageObject, QueryProductStockKeepUnitDTO queryProductStockKeepUnitDTO);
+
+    ProductStockKeepUnitVO getProductSkuByBarCode(Long barCode, Long warehouseId);
+
+    ProductStockKeepUnitVO getProductSkuDetail(Long productId, Long warehouseId, Long barCode);
+
+    IPage<ProductStockVO> getProductStock(IPage<QueryProductStock> pageObject, QueryProductStock queryProductStock);
 
 }
