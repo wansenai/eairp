@@ -12,6 +12,7 @@
  */
 package com.wansenai.service.receipt;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
 import com.wansenai.dto.report.QueryProductStock;
@@ -39,5 +40,5 @@ public interface ReceiptService {
 
     Response<Page<ReceiptDetailVO>> getOtherDetail(QueryReceiptDTO receiptDTO);
 
-    Response<Page<ProductStockVO>> getProductStock(QueryProductStock queryProductStock);
+    Response<IPage<ProductStockVO>> getProductStock(QueryProductStock queryProductStock);
 }

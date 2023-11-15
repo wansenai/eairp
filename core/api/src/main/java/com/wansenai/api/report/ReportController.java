@@ -12,6 +12,7 @@
  */
 package com.wansenai.api.report;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.report.QueryProductStock;
 import com.wansenai.service.receipt.ReceiptRetailService;
@@ -37,7 +38,7 @@ public class ReportController {
     }
 
     @PostMapping("productStock")
-    public Response<Page<ProductStockVO>> getProductStock(@RequestBody QueryProductStock queryProductStock) {
+    public Response<IPage<ProductStockVO>> getProductStock(@RequestBody QueryProductStock queryProductStock) {
         return receiptService.getProductStock(queryProductStock);
     }
 }
