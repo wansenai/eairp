@@ -76,24 +76,24 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
     private final SysFileMapper fileMapper;
 
-    private final ProductStockKeepUnitMapper productStockKeepUnitMapper;
-
     private final ProductStockMapper productStockMapper;
+
+    private final ProductStockKeepUnitMapper productStockKeepUnitMapper;
 
     private final ProductService productService;
 
     private final CommonService commonService;
 
 
-    public ReceiptRetailServiceImpl(ReceiptRetailMainMapper receiptRetailMainMapper, ReceiptRetailSubService receiptRetailSubService, MemberService memberService, IFinancialAccountService accountService, ISysUserService userService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductStockMapper productStockMapper, ProductService productService, CommonService commonService) {
+    public ReceiptRetailServiceImpl(ReceiptRetailMainMapper receiptRetailMainMapper, ReceiptRetailSubService receiptRetailSubService, MemberService memberService, IFinancialAccountService accountService, ISysUserService userService, SysFileMapper fileMapper, ProductStockMapper productStockMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductService productService, CommonService commonService) {
         this.receiptRetailMainMapper = receiptRetailMainMapper;
         this.receiptRetailSubService = receiptRetailSubService;
         this.memberService = memberService;
         this.accountService = accountService;
         this.userService = userService;
         this.fileMapper = fileMapper;
-        this.productStockKeepUnitMapper = productStockKeepUnitMapper;
         this.productStockMapper = productStockMapper;
+        this.productStockKeepUnitMapper = productStockKeepUnitMapper;
         this.productService = productService;
         this.commonService = commonService;
     }
@@ -166,7 +166,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         var stockMap = new ConcurrentHashMap<Long, Integer>();
 
         receiptSubList.forEach(item -> {
-            var stock = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            var stock = productStockMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
             if (stock != null) {
                 var stockNumber = stock.getStock();
                 var productNumber = item.getProductNumber();
@@ -203,7 +203,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .amount(item.getTotalAmount())
                 .warehouseId(item.getWarehouseId())
                 .build();
-        var data = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+        var data = productStockMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
         if (data != null) {
             shipmentBo.setWarehouseId(data.getWarehouseId());
             shipmentBo.setProductName(data.getProductName());

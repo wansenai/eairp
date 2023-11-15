@@ -134,7 +134,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .remark(item.getRemark())
                 .build();
 
-        var data = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+        var data = productStockMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
         if (data != null) {
             purchaseData.setProductName(data.getProductName());
             purchaseData.setProductModel(data.getProductModel());
@@ -224,7 +224,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var stockMap = new ConcurrentHashMap<Long, Integer>();
 
         receiptSubList.forEach(item -> {
-            var stock = productStockKeepUnitMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
+            var stock = productStockMapper.getProductSkuByBarCode(item.getProductBarcode(), item.getWarehouseId());
             if (stock != null) {
                 var stockNumber = stock.getStock();
                 var productNumber = item.getProductNumber();

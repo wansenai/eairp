@@ -15,6 +15,7 @@ package com.wansenai.api.product;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
 import com.wansenai.service.product.ProductStockKeepUnitService;
+import com.wansenai.service.product.ProductStockService;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.product.ProductStockKeepUnitVO;
@@ -32,15 +33,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/product/sku")
 public class ProductStockKeepUnitController {
 
-    private final ProductStockKeepUnitService productStockKeepUnitService;
+    private final ProductStockService productStockService;
 
-    public ProductStockKeepUnitController(ProductStockKeepUnitService productStockKeepUnitService) {
-        this.productStockKeepUnitService = productStockKeepUnitService;
+    public ProductStockKeepUnitController(ProductStockService productStockService) {
+        this.productStockService = productStockService;
     }
 
     @PostMapping("pageList")
     public Response<IPage<ProductStockKeepUnitVO>> getProductExtendPrice(@RequestBody QueryProductStockKeepUnitDTO priceDTO) {
-        var result = productStockKeepUnitService.getProductExtendPriceInfo(priceDTO);
+        var result = productStockService.getProductExtendPriceInfo(priceDTO);
         if(result != null) {
             return Response.responseData(result);
         }
@@ -49,6 +50,6 @@ public class ProductStockKeepUnitController {
 
     @GetMapping("getProduct/{barCode}/{warehouseId}")
     public Response<ProductStockKeepUnitVO> getProductByBarCode(@PathVariable("barCode") Long barCode, @PathVariable("warehouseId")Long warehouseId) {
-        return productStockKeepUnitService.getProductByBarCode(barCode, warehouseId);
+        return productStockService.getProductByBarCode(barCode, warehouseId);
     }
 }

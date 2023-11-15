@@ -10,15 +10,18 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.mappers.product;
-import com.wansenai.entities.product.ProductStockKeepUnit;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+package com.wansenai.dto.report;
 
-/**
- * <p>
- * 产品价格扩展 Mapper 接口
- * </p>
- */
-public interface ProductStockKeepUnitMapper extends BaseMapper<ProductStockKeepUnit> {
+import lombok.Data;
 
+@Data
+public class QueryProductStock {
+
+    private Long warehouseId;
+
+    private String productInfo;
+
+    private Long productCategoryId;
+
+    private String warehouseShelves;
 }

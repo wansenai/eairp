@@ -66,19 +66,4 @@ public class ProductStockKeepUnitServiceImpl extends ServiceImpl<ProductStockKee
     public Boolean checkProductCode(List<String> barCodes) {
         return lambdaQuery().in(ProductStockKeepUnit::getProductBarCode, barCodes).exists();
     }
-
-    @Override
-    public IPage<ProductStockKeepUnitVO> getProductExtendPriceInfo(QueryProductStockKeepUnitDTO priceDTO) {
-        var page = new Page<QueryProductStockKeepUnitDTO>(priceDTO.getPage(), priceDTO.getPageSize());
-        return productSkuMapper.getProductSkuList(page, priceDTO);
-    }
-
-    @Override
-    public Response<ProductStockKeepUnitVO> getProductByBarCode(Long barCode, Long warehouseId) {
-        var data = productSkuMapper.getProductSkuByBarCode(barCode, warehouseId);
-        if (data == null) {
-            return Response.responseData(null);
-        }
-        return Response.responseData(data);
-    }
 }
