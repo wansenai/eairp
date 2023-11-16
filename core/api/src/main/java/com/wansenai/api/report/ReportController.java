@@ -14,12 +14,13 @@ package com.wansenai.api.report;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansenai.dto.report.QueryProductStock;
-import com.wansenai.service.receipt.ReceiptRetailService;
+import com.wansenai.dto.report.QueryProductStockDTO;
+import com.wansenai.dto.report.QueryStockFlowDTO;
 import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
 import com.wansenai.vo.report.ProductStockVO;
+import com.wansenai.vo.report.StockFlowVO;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -38,7 +39,13 @@ public class ReportController {
     }
 
     @PostMapping("productStock")
-    public Response<IPage<ProductStockVO>> getProductStock(@RequestBody QueryProductStock queryProductStock) {
-        return receiptService.getProductStock(queryProductStock);
+    public Response<IPage<ProductStockVO>> getProductStock(@RequestBody QueryProductStockDTO queryProductStockDTO) {
+        return receiptService.getProductStock(queryProductStockDTO);
     }
+
+    @PostMapping("stockFlow")
+    public Response<Page<StockFlowVO>> getStockFlow(@RequestBody QueryStockFlowDTO stockFlowDTO) {
+        return receiptService.getStockFlow(stockFlowDTO);
+    }
+
 }
