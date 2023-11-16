@@ -83,11 +83,11 @@
         LEFT JOIN product AS p ON sku.product_id = p.id
         LEFT JOIN product_category AS pc ON p.product_category_id = pc.id
         <where>
-            <if test="queryProductStock.productCategoryId != null">
-                AND p.product_category_id = #{queryProductStock.productCategoryId}
+            <if test="queryProductStockDTO.productCategoryId != null">
+                AND p.product_category_id = #{queryProductStockDTO.productCategoryId}
             </if>
-            <if test="queryProductStock.warehouseId != null">
-                AND ps.warehouse_id = #{queryProductStock.warehouseId}
+            <if test="queryProductStockDTO.warehouseId != null">
+                AND ps.warehouse_id = #{queryProductStockDTO.warehouseId}
             </if>
         </where>
     </select>
