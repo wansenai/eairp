@@ -15,7 +15,7 @@ package com.wansenai.dto.report;
 import lombok.Data;
 
 @Data
-public class QueryProductStock {
+public class QueryProductStockDTO {
 
     private Long warehouseId;
 
