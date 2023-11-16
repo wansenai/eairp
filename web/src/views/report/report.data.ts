@@ -1,9 +1,26 @@
 import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
+import { h } from 'vue';
 import {getWarehouseList} from "@/api/basic/warehouse";
 import {getCategoryList} from "@/api/product/productCategory";
 
 export const productStockColumns: BasicColumn[] = [
+    {
+        title: '库存流水',
+        dataIndex: 'id',
+        width: 80,
+        customRender: ({ record }) => {
+            return h(
+            'a',
+                {
+                    onClick: () => {
+                        console.info(record)
+                    },
+                },
+                record.key !== '0' ? "流水" : undefined
+            )
+        }
+    },
     {
         title: '商品条码',
         dataIndex: 'productBarcode',
@@ -111,6 +128,53 @@ export const searchProductStockSchema: FormSchema[] = [
         label: '仓位货架',
         field: 'warehouseShelves',
         component: 'Input',
+        colProps: { span: 5 },
+    },
+]
+
+export const stockFlowColumns: BasicColumn[] = [
+    {
+        title: '单据编号',
+        dataIndex: 'receiptNumber',
+        width: 120,
+    },
+    {
+        title: '类型',
+        dataIndex: 'subType',
+        width: 120,
+    },
+    {
+        title: '商品名称',
+        dataIndex: 'productName',
+        width: 120,
+    },
+    {
+        title: '数量',
+        dataIndex: 'productNumber',
+        width: 120,
+    },
+    {
+        title: '日期',
+        dataIndex: 'receiptDate',
+        width: 120,
+    }
+]
+
+export const searchStockFlowSchema: FormSchema[] = [
+    {
+        label: '单据编号',
+        field: 'receiptNumber',
+        component: 'Input',
+        colProps: { span: 5 },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '单据日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
         colProps: { span: 5 },
     },
 ]
