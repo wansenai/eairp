@@ -15,7 +15,8 @@ package com.wansenai.service.receipt.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
-import com.wansenai.dto.report.QueryProductStock;
+import com.wansenai.dto.report.QueryProductStockDTO;
+import com.wansenai.dto.report.QueryStockFlowDTO;
 import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
 import com.wansenai.entities.basic.Supplier;
@@ -36,6 +37,7 @@ import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
 import com.wansenai.vo.report.ProductStockVO;
+import com.wansenai.vo.report.StockFlowVO;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -551,14 +553,20 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    public Response<IPage<ProductStockVO>> getProductStock(QueryProductStock queryProductStock) {
-        var page = new Page<QueryProductStock>(queryProductStock.getPage(), queryProductStock.getPageSize());
+    public Response<IPage<ProductStockVO>> getProductStock(QueryProductStockDTO queryProductStockDTO) {
+        var page = new Page<QueryProductStockDTO>(queryProductStockDTO.getPage(), queryProductStockDTO.getPageSize());
         // 获取默认仓库
 //        var warehouse = warehouseService.getDefaultWarehouse();
 //        if(warehouse.getData() != null) {
 //            queryProductStock.setWarehouseId(warehouse.getData().getId());
 //        }
-        var result = productStockMapper.getProductStock(page, queryProductStock);
+        var result = productStockMapper.getProductStock(page, queryProductStockDTO);
         return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<StockFlowVO>> getStockFlow(QueryStockFlowDTO queryStockFlowDTO) {
+
+        return null;
     }
 }
