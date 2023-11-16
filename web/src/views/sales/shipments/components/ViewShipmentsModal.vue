@@ -24,6 +24,7 @@
           <a-descriptions-item label="本次收款">{{ thisCollectAmount }}</a-descriptions-item>
           <a-descriptions-item label="本次欠款">{{ thisArrearsAmount }}</a-descriptions-item>
           <a-descriptions-item label="销售人员">{{  }}</a-descriptions-item>
+          <a-descriptions-item ></a-descriptions-item>
           <a-descriptions-item label="备注">
             {{ remark }}
           </a-descriptions-item>
