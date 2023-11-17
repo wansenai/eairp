@@ -23,9 +23,11 @@ import java.math.BigDecimal;
 public class ProductStockVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long Id;
+    private Long id;
 
     private String productBarcode;
+
+    private String warehouseName;
 
     private String productName;
 

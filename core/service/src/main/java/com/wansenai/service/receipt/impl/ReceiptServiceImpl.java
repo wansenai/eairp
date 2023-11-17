@@ -12,9 +12,11 @@
  */
 package com.wansenai.service.receipt.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
-import com.wansenai.dto.report.QueryProductStock;
+import com.wansenai.dto.report.QueryProductStockDTO;
+import com.wansenai.dto.report.QueryStockFlowDTO;
 import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
 import com.wansenai.entities.basic.Supplier;
@@ -26,6 +28,7 @@ import com.wansenai.service.basic.SupplierService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.service.receipt.*;
 import com.wansenai.service.user.ISysUserService;
+import com.wansenai.service.warehouse.WarehouseService;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
@@ -34,6 +37,7 @@ import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
 import com.wansenai.vo.report.ProductStockVO;
+import com.wansenai.vo.report.StockFlowVO;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -72,7 +76,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     private final ProductStockMapper productStockMapper;
 
-    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper) {
+    private final WarehouseService warehouseService;
+
+    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper, WarehouseService warehouseService) {
         this.receiptRetailService = receiptRetailService;
         this.receiptRetailSubService = receiptRetailSubService;
         this.receiptSaleService = receiptSaleService;
@@ -85,6 +91,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         this.userService = userService;
         this.productService = productService;
         this.productStockMapper = productStockMapper;
+        this.warehouseService = warehouseService;
     }
 
     @Override
@@ -546,7 +553,20 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    public Response<Page<ProductStockVO>> getProductStock(QueryProductStock queryProductStock) {
+    public Response<IPage<ProductStockVO>> getProductStock(QueryProductStockDTO queryProductStockDTO) {
+        var page = new Page<QueryProductStockDTO>(queryProductStockDTO.getPage(), queryProductStockDTO.getPageSize());
+        // 获取默认仓库
+//        var warehouse = warehouseService.getDefaultWarehouse();
+//        if(warehouse.getData() != null) {
+//            queryProductStock.setWarehouseId(warehouse.getData().getId());
+//        }
+        var result = productStockMapper.getProductStock(page, queryProductStockDTO);
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<StockFlowVO>> getStockFlow(QueryStockFlowDTO queryStockFlowDTO) {
+
         return null;
     }
 }
