@@ -2,7 +2,7 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="销售出库-详情"
+          title="销售退货-详情"
           :sub-title= "receiptNumber">
         <template #extra>
           <a-button key="1">导出</a-button>
@@ -13,18 +13,17 @@
         <a-descriptions size="small" :column="4">
           <a-descriptions-item label="供应商">{{ customerName }}</a-descriptions-item>
           <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item label="订单单据">
-            <a @click="viewOrderReceipt">{{ otherReceipt }}</a>
+          <a-descriptions-item label="出库单据">
+            <a @click="viewShipmentReceipt">{{ otherReceipt }}</a>
           </a-descriptions-item>
-          <a-descriptions-item label="优惠率">{{ collectOfferRate }}</a-descriptions-item>
-          <a-descriptions-item label="收款优惠">{{ collectOfferAmount }}</a-descriptions-item>
-          <a-descriptions-item label="优惠后金额">{{ collectOfferLastAmount }}</a-descriptions-item>
+          <a-descriptions-item label="优惠率">{{ refundOfferRate }}</a-descriptions-item>
+          <a-descriptions-item label="收款优惠">{{ refundOfferAmount }}</a-descriptions-item>
+          <a-descriptions-item label="优惠后金额">{{ refundLastAmount }}</a-descriptions-item>
           <a-descriptions-item label="其它费用">{{ otherAmount }}</a-descriptions-item>
           <a-descriptions-item label="结算账户">{{ accountName }}</a-descriptions-item>
-          <a-descriptions-item label="本次收款">{{ thisCollectAmount }}</a-descriptions-item>
+          <a-descriptions-item label="本次收款">{{ thisRefundAmount }}</a-descriptions-item>
           <a-descriptions-item label="本次欠款">{{ thisArrearsAmount }}</a-descriptions-item>
           <a-descriptions-item label="销售人员">{{  }}</a-descriptions-item>
-          <a-descriptions-item ></a-descriptions-item>
           <a-descriptions-item label="备注">
             {{ remark }}
           </a-descriptions-item>
@@ -50,7 +49,7 @@
             <a-statistic title="单据金额"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
-                         :value="collectOfferLastAmount"/>
+                         :value="refundLastAmount"/>
           </div>
         </div>
       </a-page-header>
@@ -58,15 +57,15 @@
       </BasicTable>
     </div>
   </BasicModal>
-  <ViewOrderModal @register="viewOrderReceiptModal"/>
+  <ViewShipmentsModal @register="viewShipmentsReceiptModal"/>
 </template>
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
 import {BasicTable, useTable} from '/src/components/Table';
 import {BasicModal, useModal, useModalInner} from "@/components/Modal";
-import {getLinkShipmentsDetail} from "@/api/sale/shipments";
+import {getLinkRefundDetail} from "@/api/sale/refund";
 import {TableColumns} from "@/views/sales/order/sales.data";
-import ViewOrderModal from "@/views/sales/order/components/ViewOrderModal.vue";
+import ViewShipmentsModal from "@/views/sales/shipments/components/ViewSaleShipmentsModal.vue";
 import {
   Descriptions,
   DescriptionsItem,
@@ -75,11 +74,11 @@ import {
 } from 'ant-design-vue';
 
 export default defineComponent({
-  name: 'ViewSaleShipmentsModal',
+  name: 'ViewSaleRefundModal',
   components: {
     BasicModal,
     BasicTable,
-    ViewOrderModal,
+    ViewShipmentsModal,
     'a-page-header': PageHeader,
     'a-descriptions': Descriptions,
     'a-descriptions-item': DescriptionsItem,
@@ -89,20 +88,20 @@ export default defineComponent({
     const receiptNumber = ref('');
     const otherReceipt = ref('');
     const customerName = ref(0);
-    const collectOfferRate = ref('');
+    const refundOfferRate = ref('');
     const receiptDate = ref('');
-    const collectOfferAmount = ref('');
-    const collectOfferLastAmount = ref('');
+    const refundOfferAmount = ref('');
+    const refundLastAmount = ref('');
     const otherAmount = ref('');
-    const thisCollectAmount = ref('');
+    const thisRefundAmount = ref('');
     const thisArrearsAmount = ref('');
     const accountName = ref('');
     const remark = ref('')
     const status = ref();
-    const [viewOrderReceiptModal, {openModal: openViewOrderModal}] = useModal();
+    const [viewShipmentsReceiptModal, {openModal: openViewShipmentsReceiptModal}] = useModal();
     const tableData = ref([]);
     const [registerTable] = useTable({
-      title: '销售出库表数据',
+      title: '销售退货表数据',
       columns: TableColumns,
       dataSource: tableData,
       pagination: false,
@@ -112,16 +111,16 @@ export default defineComponent({
     const getTitle = ref('单据详情');
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200, showOkBtn: false});
-      const res = await getLinkShipmentsDetail(data.receiptNumber);
+      const res = await getLinkRefundDetail(data.receiptNumber);
       tableData.value = res.data.tableData;
       receiptNumber.value = res.data.receiptNumber;
       customerName.value = res.data.customerName;
       receiptDate.value = res.data.receiptDate;
-      collectOfferRate.value = res.data.collectOfferRate;
-      collectOfferAmount.value = res.data.collectOfferAmount;
-      collectOfferLastAmount.value = res.data.collectOfferLastAmount;
+      refundOfferRate.value = res.data.refundOfferRate;
+      refundOfferAmount.value = res.data.refundOfferAmount;
+      refundLastAmount.value = res.data.refundLastAmount;
       otherAmount.value = res.data.otherAmount;
-      thisCollectAmount.value = res.data.thisCollectAmount;
+      thisRefundAmount.value = res.data.thisRefundAmount;
       thisArrearsAmount.value = res.data.thisArrearsAmount;
       accountName.value = res.data.accountName;
       otherReceipt.value = res.data.otherReceipt;
@@ -129,9 +128,9 @@ export default defineComponent({
       status.value = res.data.status;
     });
 
-    function viewOrderReceipt() {
+    function viewShipmentReceipt() {
       closeModal();
-      openViewOrderModal(true, {
+      openViewShipmentsReceiptModal(true, {
         receiptNumber: otherReceipt.value
       });
     }
@@ -144,12 +143,12 @@ export default defineComponent({
       receiptNumber,
       otherReceipt,
       customerName,
-      collectOfferRate,
+      refundOfferRate,
       receiptDate,
-      collectOfferAmount,
-      collectOfferLastAmount,
+      refundOfferAmount,
+      refundLastAmount,
       otherAmount,
-      thisCollectAmount,
+      thisRefundAmount,
       thisArrearsAmount,
       accountName,
       remark,
@@ -158,8 +157,8 @@ export default defineComponent({
       registerModal,
       getTitle,
       handleSubmit,
-      viewOrderReceiptModal,
-      viewOrderReceipt
+      viewShipmentsReceiptModal,
+      viewShipmentReceipt
     };
   },
 });
