@@ -73,17 +73,17 @@ export const productStockColumns: BasicColumn[] = [
     {
         title: '单价',
         dataIndex: 'unitPrice',
-        width: 80,
+        width: 70,
     },
     {
         title: '初始库存',
         dataIndex: 'initialStock',
-        width: 90,
+        width: 70,
     },
     {
         title: '当前库存',
         dataIndex: 'currentStock',
-        width: 90,
+        width: 70,
     },
     {
         title: '库存金额',
@@ -184,6 +184,54 @@ export const searchStockFlowSchema: FormSchema[] = [
             format: 'YYYY/MM/DD',
             placeholder: ['开始日期', '结束日期'],
         },
+        colProps: { span: 10 },
+    },
+]
+
+export const accountStatisticsColumns: BasicColumn[] = [
+    {
+        title: '账户流水',
+        dataIndex: 'accountId',
+        width: 80,
+    },
+    {
+        title: '账户名称',
+        dataIndex: 'accountName',
+        width: 180,
+    },
+    {
+        title: '账户编号',
+        dataIndex: 'accountNumber',
+        width: 120,
+    },
+    {
+        title: '期初金额',
+        dataIndex: 'initialAmount',
+        width: 120,
+    },
+    {
+        title: '本月发生金额',
+        dataIndex: 'thisMonthChangeAmount',
+        width: 120,
+    },
+    {
+        title: '当前余额',
+        dataIndex: 'currentAmount',
+        width: 120,
+    },
+]
+
+export const searchAccountSchema: FormSchema[] = [
+    {
+        label: '账户名称',
+        field: 'accountName',
+        component: 'Input',
+        colProps: { span: 10 },
+    },
+    {
+        label: '账户编号',
+        field: 'accountNumber',
+        component: 'Input',
         colProps: { span: 10 },
     },
 ]
