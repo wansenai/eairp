@@ -20,7 +20,9 @@ import com.wansenai.dto.report.QueryStockFlowDTO;
 import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
 import com.wansenai.entities.basic.Supplier;
+import com.wansenai.entities.product.Product;
 import com.wansenai.entities.receipt.*;
+import com.wansenai.entities.warehouse.Warehouse;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.basic.MemberService;
@@ -46,8 +48,10 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReceiptServiceImpl implements ReceiptService {
@@ -92,6 +96,26 @@ public class ReceiptServiceImpl implements ReceiptService {
         this.productService = productService;
         this.productStockMapper = productStockMapper;
         this.warehouseService = warehouseService;
+    }
+
+    private String getProductName(Long id) {
+        var product = productService.lambdaQuery()
+                .eq(Product::getId, id)
+                .one();
+        if (product != null) {
+            return product.getProductName();
+        }
+        return "";
+    }
+
+    private String getWarehouseName(Long id) {
+        var warehouse = warehouseService.lambdaQuery()
+                .eq(Warehouse::getId, id)
+                .one();
+        if (warehouse != null) {
+            return warehouse.getWarehouseName();
+        }
+        return "";
     }
 
     @Override
@@ -566,7 +590,90 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public Response<Page<StockFlowVO>> getStockFlow(QueryStockFlowDTO queryStockFlowDTO) {
+        var retailData = receiptRetailSubService.lambdaQuery()
+                .eq(ReceiptRetailSub::getWarehouseId, queryStockFlowDTO.getWarehouseId())
+                .eq(ReceiptRetailSub::getProductBarcode, queryStockFlowDTO.getProductBarcode())
+                .eq(ReceiptRetailSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+        var salesData = receiptSaleSubService.lambdaQuery()
+                .eq(ReceiptSaleSub::getWarehouseId, queryStockFlowDTO.getWarehouseId())
+                .eq(ReceiptSaleSub::getProductBarcode, queryStockFlowDTO.getProductBarcode())
+                .eq(ReceiptSaleSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+        var purchaseData = receiptPurchaseSubService.lambdaQuery()
+                .eq(ReceiptPurchaseSub::getWarehouseId, queryStockFlowDTO.getWarehouseId())
+                .eq(ReceiptPurchaseSub::getProductBarcode, queryStockFlowDTO.getProductBarcode())
+                .eq(ReceiptPurchaseSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
 
-        return null;
+        List<StockFlowVO> stockFlowVos = new ArrayList<StockFlowVO>(retailData.size() + salesData.size() + purchaseData.size());
+        retailData.forEach(item -> {
+            var receiptRetailMain = receiptRetailService.lambdaQuery()
+                    .eq(ReceiptRetailMain::getId, item.getReceiptMainId())
+                    .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .one();
+            if(receiptRetailMain != null) {
+                var stockFlowVO = StockFlowVO.builder()
+                        .receiptNumber(receiptRetailMain.getReceiptNumber())
+                        .receiptDate(receiptRetailMain.getReceiptDate())
+                        .type(receiptRetailMain.getSubType())
+                        .productNumber(item.getProductNumber())
+                        .productBarcode(item.getProductBarcode())
+                        .productName(getProductName(item.getProductId()))
+                        .warehouseName(getWarehouseName(item.getWarehouseId()))
+                        .build();
+                stockFlowVos.add(stockFlowVO);
+            }
+        });
+        salesData.forEach(item -> {
+            var receiptSaleMain = receiptSaleService.lambdaQuery()
+                    .eq(ReceiptSaleMain::getId, item.getReceiptSaleMainId())
+                    .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .one();
+            if(receiptSaleMain != null) {
+                var stockFlowVO = StockFlowVO.builder()
+                        .receiptNumber(receiptSaleMain.getReceiptNumber())
+                        .receiptDate(receiptSaleMain.getReceiptDate())
+                        .type(receiptSaleMain.getSubType())
+                        .productNumber(item.getProductNumber())
+                        .productBarcode(item.getProductBarcode())
+                        .productName(getProductName(item.getProductId()))
+                        .warehouseName(getWarehouseName(item.getWarehouseId()))
+                        .build();
+                stockFlowVos.add(stockFlowVO);
+            }
+        });
+        purchaseData.forEach(item -> {
+            var receiptPurchaseMain = receiptPurchaseService.lambdaQuery()
+                    .eq(ReceiptPurchaseMain::getId, item.getReceiptPurchaseMainId())
+                    .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .one();
+            if(receiptPurchaseMain != null) {
+                var stockFlowVO = StockFlowVO.builder()
+                        .receiptNumber(receiptPurchaseMain.getReceiptNumber())
+                        .receiptDate(receiptPurchaseMain.getReceiptDate())
+                        .type(receiptPurchaseMain.getSubType())
+                        .productNumber(item.getProductNumber())
+                        .productBarcode(item.getProductBarcode())
+                        .productName(getProductName(item.getProductId()))
+                        .warehouseName(getWarehouseName(item.getWarehouseId()))
+                        .build();
+                stockFlowVos.add(stockFlowVO);
+            }
+        });
+        stockFlowVos.sort(Comparator.comparing(StockFlowVO::getReceiptDate).reversed());
+        var page = new Page<StockFlowVO>(queryStockFlowDTO.getPage(), queryStockFlowDTO.getPageSize());
+
+        int startIndex = (int) ((page.getCurrent() - 1) * page.getSize());
+        int endIndex = (int) Math.min(startIndex + page.getSize(), stockFlowVos.size());
+
+        startIndex = Math.min(startIndex, endIndex);
+        List<StockFlowVO> pagedStockFlowVos = new ArrayList<>(stockFlowVos.subList(startIndex, endIndex));
+
+        page.setRecords(pagedStockFlowVos);
+        page.setTotal(stockFlowVos.size());
+
+        return Response.responseData(page);
+
     }
 }
