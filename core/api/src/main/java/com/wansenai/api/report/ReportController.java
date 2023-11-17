@@ -43,7 +43,7 @@ public class ReportController {
         return receiptService.getProductStock(queryProductStockDTO);
     }
 
-    @PostMapping("stockFlow")
+    @PostMapping("productStockFlow")
     public Response<Page<StockFlowVO>> getStockFlow(@RequestBody QueryStockFlowDTO stockFlowDTO) {
         return receiptService.getStockFlow(stockFlowDTO);
     }

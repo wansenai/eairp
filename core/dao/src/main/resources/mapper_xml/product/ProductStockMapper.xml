@@ -18,10 +18,6 @@
         <result property="retailPrice" column="retail_price" />
     </resultMap>
 
-    <resultMap id="productStockMap" type="com.wansenai.vo.report.ProductStockVO">
-        <id property="id" column="id" />
-    </resultMap>
-
     <select id="getProductSkuList" resultMap="productResultMap" parameterType="com.baomidou.mybatisplus.core.metadata.IPage">
         SELECT ps.id, p.id AS productId, p.product_category_id, p.product_name, p.product_model, p.product_standard, p.product_color,
         sku.product_bar_code, sku.multi_attribute, sku.product_unit, sku.retail_price, p.product_manufacturer,pc.category_name,
@@ -72,10 +68,10 @@
         WHERE p.id= #{productId} AND ps.warehouse_id = #{warehouseId} AND sku.product_bar_code = #{barCode}
     </select>
 
-    <select id="getProductStock" resultMap="productStockMap" parameterType="com.baomidou.mybatisplus.extension.plugins.pagination.Page">
-        SELECT ps.id, p.product_name, p.product_model, p.product_standard, p.product_color,sku.product_bar_code, p.product_weight, p.warehouse_shelves,
+    <select id="getProductStock" resultType="com.wansenai.vo.report.ProductStockVO" parameterType="com.baomidou.mybatisplus.extension.plugins.pagination.Page">
+        SELECT ps.id, p.product_name, p.id AS productId, p.product_model, p.product_standard, p.product_color,sku.product_bar_code, p.product_weight, p.warehouse_shelves,
         sku.product_unit, sku.retail_price AS unit_price, p.product_manufacturer,pc.category_name AS product_category_name,
-        ps.current_stock_quantity AS current_stock, ps.init_stock_quantity AS initial_stock, w.warehouse_name,
+        ps.current_stock_quantity AS current_stock, ps.init_stock_quantity AS initial_stock, w.warehouse_name, w.id AS warehouseId,
         ROUND((ps.current_stock_quantity * sku.retail_price), 2) AS stock_amount
         FROM product_stock AS ps
         LEFT JOIN warehouse as w ON ps.warehouse_id = w.id

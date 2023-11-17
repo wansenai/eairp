@@ -36,7 +36,6 @@ public class ReceiptDetailVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long warehouseId;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productBarcode;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)

@@ -57,7 +57,7 @@ import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
 import {getSaleShipmentsPageList, updateSaleShipmentsStatus, deleteSaleShipments} from "@/api/sale/shipments";
 import AddEditModal from "@/views/sales/shipments/components/AddEditModal.vue";
-import ViewShipmentModal from "@/views/sales/shipments/components/ViewShipmentsModal.vue";
+import ViewShipmentModal from "@/views/sales/shipments/components/ViewSaleShipmentsModal.vue";
 import {useModal} from "@/components/Modal";
 export default defineComponent({
   name: 'SaleShipmentsModal',

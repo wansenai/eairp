@@ -17,9 +17,19 @@ import lombok.Data;
 @Data
 public class QueryStockFlowDTO {
 
+    private Long productId;
+
+    private Long warehouseId;
+
+    private Long productBarcode;
+
     private String receiptNumber;
 
     private String startDate;
 
     private String endDate;
+
+    private Integer page;
+
+    private Integer pageSize;
 }

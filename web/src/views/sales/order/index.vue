@@ -57,7 +57,7 @@ import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
 import {getSaleOrderPageList, updateSaleOrderStatus, deleteSaleOrder} from "@/api/sale/order";
 import AddEditModal from "@/views/sales/order/components/AddEditModal.vue";
-import ViewOrderModal from "@/views/sales/order/components/ViewOrderModal.vue";
+import ViewOrderModal from "@/views/sales/order/components/ViewSaleOrderModal.vue";
 import {useModal} from "@/components/Modal";
 export default defineComponent({
   name: 'SaleOrderModal',
