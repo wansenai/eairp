@@ -46,6 +46,7 @@ export default defineComponent({
       showTableSetting: true,
       striped: true,
       showIndexColumn: true,
+      canResize: false,
       showSummary: true,
       summaryFunc: handleSummary,
     });

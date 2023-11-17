@@ -615,7 +615,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .eq(ReceiptRetailMain::getId, item.getReceiptMainId())
                     .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .one();
-            if(receiptRetailMain != null) {
+            if (receiptRetailMain != null) {
                 var stockFlowVO = StockFlowVO.builder()
                         .receiptNumber(receiptRetailMain.getReceiptNumber())
                         .receiptDate(receiptRetailMain.getReceiptDate())
@@ -633,7 +633,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .eq(ReceiptSaleMain::getId, item.getReceiptSaleMainId())
                     .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .one();
-            if(receiptSaleMain != null) {
+            if (receiptSaleMain != null) {
                 var stockFlowVO = StockFlowVO.builder()
                         .receiptNumber(receiptSaleMain.getReceiptNumber())
                         .receiptDate(receiptSaleMain.getReceiptDate())
@@ -651,7 +651,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .eq(ReceiptPurchaseMain::getId, item.getReceiptPurchaseMainId())
                     .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .one();
-            if(receiptPurchaseMain != null) {
+            if (receiptPurchaseMain != null) {
                 var stockFlowVO = StockFlowVO.builder()
                         .receiptNumber(receiptPurchaseMain.getReceiptNumber())
                         .receiptDate(receiptPurchaseMain.getReceiptDate())
@@ -691,7 +691,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .eq(StringUtils.hasLength(accountStatisticsDTO.getAccountNumber()), FinancialAccount::getAccountNumber, accountStatisticsDTO.getAccountNumber())
                 .page(page);
 
-        if(accountPage.getRecords().isEmpty()) {
+        if (accountPage.getRecords().isEmpty()) {
             return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
         }
 
@@ -736,7 +736,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .eq(ReceiptPurchaseMain::getAccountId, item.getId())
                     .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .list();
-            if(!purchaseData.isEmpty()) {
+            if (!purchaseData.isEmpty()) {
                 purchaseChangeAmount = purchaseData.stream()
                         .filter(receiptPurchaseMain -> receiptPurchaseMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
                         .filter(receiptPurchaseMain -> receiptPurchaseMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
@@ -746,13 +746,38 @@ public class ReceiptServiceImpl implements ReceiptService {
                         .reduce(BigDecimal.ZERO, BigDecimal::add)
                         .setScale(2, RoundingMode.HALF_UP);
             }
-
+            // Calculate the amount of multiple accounts
             var saleAccountMultipleData = receiptSaleService.lambdaQuery()
                     .in(ReceiptSaleMain::getMultipleAccount, item.getId())
                     .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
-                    .list();
+                    .list()
+                    .stream()
+                    .filter(receiptSaleMain -> receiptSaleMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
+                    .filter(receiptSaleMain -> receiptSaleMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                    .toList();
 
-            System.err.println(saleAccountMultipleData);
+            if (!saleAccountMultipleData.isEmpty()) {
+                for (ReceiptSaleMain saleAccountMultiple : saleAccountMultipleData) {
+                    var saleAccountMultipleChangeAmount = saleAccountMultiple.getChangeAmount();
+                    purchaseChangeAmount = purchaseChangeAmount.add(Optional.ofNullable(saleAccountMultipleChangeAmount).orElse(BigDecimal.ZERO));
+                }
+            }
+
+            var purchaseAccountMultipleData = receiptPurchaseService.lambdaQuery()
+                    .in(ReceiptPurchaseMain::getMultipleAccount, item.getId())
+                    .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list()
+                    .stream()
+                    .filter(ReceiptPurchaseMain -> ReceiptPurchaseMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
+                    .filter(ReceiptPurchaseMain -> ReceiptPurchaseMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                    .toList();
+
+            if (!purchaseAccountMultipleData.isEmpty()) {
+                for (ReceiptPurchaseMain purchaseAccountMultiple : purchaseAccountMultipleData) {
+                    var purchaseAccountMultipleChangeAmount = purchaseAccountMultiple.getChangeAmount();
+                    purchaseChangeAmount = purchaseChangeAmount.add(Optional.ofNullable(purchaseAccountMultipleChangeAmount).orElse(BigDecimal.ZERO));
+                }
+            }
 
             var thisMonthChangeAmount = retailChangeAmount.add(saleChangeAmount).add(purchaseChangeAmount);
 

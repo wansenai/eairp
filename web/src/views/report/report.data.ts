@@ -68,7 +68,7 @@ export const productStockColumns: BasicColumn[] = [
     {
         title: '仓位货架',
         dataIndex: 'warehouseShelves',
-        width: 120,
+        width: 100,
     },
     {
         title: '单价',
