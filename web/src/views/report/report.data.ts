@@ -1,25 +1,24 @@
 import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
-import { h } from 'vue';
 import {getWarehouseList} from "@/api/basic/warehouse";
 import {getCategoryList} from "@/api/product/productCategory";
-
 export const productStockColumns: BasicColumn[] = [
+    {
+        title: '产品id',
+        dataIndex: 'productId',
+        width: 120,
+        ifShow: false
+    },
+    {
+        title: '仓库id',
+        dataIndex: 'warehouseId',
+        width: 60,
+        ifShow: false
+    },
     {
         title: '库存流水',
         dataIndex: 'id',
         width: 80,
-        customRender: ({ record }) => {
-            return h(
-            'a',
-                {
-                    onClick: () => {
-                        console.info(record)
-                    },
-                },
-                record.key !== '0' ? "流水" : undefined
-            )
-        }
     },
     {
         title: '商品条码',
@@ -136,11 +135,16 @@ export const stockFlowColumns: BasicColumn[] = [
     {
         title: '单据编号',
         dataIndex: 'receiptNumber',
-        width: 120,
+        width: 180,
     },
     {
         title: '类型',
-        dataIndex: 'subType',
+        dataIndex: 'type',
+        width: 80,
+    },
+    {
+        title: '商品条码',
+        dataIndex: 'productBarcode',
         width: 120,
     },
     {
@@ -149,14 +153,19 @@ export const stockFlowColumns: BasicColumn[] = [
         width: 120,
     },
     {
+        title: '仓库',
+        dataIndex: 'warehouseName',
+        width: 120,
+    },
+    {
         title: '数量',
         dataIndex: 'productNumber',
-        width: 120,
+        width: 60,
     },
     {
         title: '日期',
         dataIndex: 'receiptDate',
-        width: 120,
+        width: 150,
     }
 ]
 
@@ -165,7 +174,7 @@ export const searchStockFlowSchema: FormSchema[] = [
         label: '单据编号',
         field: 'receiptNumber',
         component: 'Input',
-        colProps: { span: 5 },
+        colProps: { span: 10 },
     },
     {
         field: '[startDate, endDate]',
@@ -175,6 +184,6 @@ export const searchStockFlowSchema: FormSchema[] = [
             format: 'YYYY/MM/DD',
             placeholder: ['开始日期', '结束日期'],
         },
-        colProps: { span: 5 },
+        colProps: { span: 10 },
     },
 ]

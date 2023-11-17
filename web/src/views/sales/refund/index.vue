@@ -57,7 +57,7 @@ import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
 import {getSaleRefundPageList, updateSaleRefundStatus, deleteSaleRefund} from "@/api/sale/refund";
 import AddEditModal from "@/views/sales/refund/components/AddEditModal.vue";
-import ViewShipmentModal from "@/views/sales/shipments/components/ViewShipmentsModal.vue";
+import ViewShipmentModal from "@/views/sales/shipments/components/ViewSaleShipmentsModal.vue";
 import {useModal} from "@/components/Modal";
 export default defineComponent({
   name: 'SaleRefundModal',

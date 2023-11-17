@@ -20,6 +20,13 @@ export interface QueryProductStockReq {
     warehouseShelves: string;
 }
 
+export interface QueryProductStockFlowReq {
+    productId: number;
+    warehouseId: number;
+    productBarcode: number;
+    receiptNumber: string;
+}
+
 export interface ProductStockResp {
     id: string;
     productBarcode: string;
@@ -35,4 +42,14 @@ export interface ProductStockResp {
     initialStock: number;
     currentStock: number;
     stockAmount: number;
+}
+
+export interface ProductStockFlowResp {
+    receiptNumber: string;
+    type: String;
+    productBarcode: number;
+    productName: string;
+    warehouseName: string;
+    productNumber: number;
+    receiptDate: string;
 }

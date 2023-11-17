@@ -4,7 +4,13 @@
       <template #toolbar>
         <a-button type="primary" @click=""> 导出</a-button>
       </template>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'id'">
+          <a @click="handleStockFlow(record)">流水</a>
+        </template>
+      </template>
     </BasicTable>
+    <StockFlowModal @register="registerModal"/>
   </div>
 </template>
 <div>
@@ -18,10 +24,10 @@ import {productStockColumns, searchProductStockSchema} from "@/views/report/repo
 import {Tag} from "ant-design-vue";
 import {getProductStock} from "@/api/report/report";
 import XEUtils from "xe-utils";
-
+import StockFlowModal from "@/views/report/modal/StockFlowModal.vue";
 export default defineComponent({
   name: 'productStock',
-  components: {Tag, TableAction, BasicTable },
+  components: {Tag, TableAction, BasicTable, StockFlowModal},
   setup() {
     const [registerModal, {openModal}] = useModal();
     const [registerTable, { reload }] = useTable({
@@ -57,10 +63,8 @@ export default defineComponent({
       ];
     }
 
-    async function handleCreate() {
-      openModal(true, {
-        isUpdate: false,
-      });
+    function handleStockFlow(record: Recordable) {
+      openModal(true, record);
     }
 
     async function handleSuccess() {
@@ -73,10 +77,10 @@ export default defineComponent({
 
     return {
       registerTable,
-      registerModal,
-      handleCreate,
       handleSuccess,
       handleCancel,
+      registerModal,
+      handleStockFlow
     }
   }
 })

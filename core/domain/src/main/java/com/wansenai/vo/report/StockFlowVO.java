@@ -13,18 +13,20 @@
 package com.wansenai.vo.report;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class StockFlowVO {
 
     private String receiptNumber;
 
     private String type;
 
-    private String productBarcode;
+    private Long productBarcode;
 
     private String productName;
 
@@ -33,5 +35,5 @@ public class StockFlowVO {
     private Integer productNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime receiptTime;
+    private LocalDateTime receiptDate;
 }
