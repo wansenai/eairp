@@ -26,7 +26,7 @@ import {getProductStock} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import StockFlowModal from "@/views/report/modal/StockFlowModal.vue";
 export default defineComponent({
-  name: 'productStock',
+  name: 'ProductStock',
   components: {Tag, TableAction, BasicTable, StockFlowModal},
   setup() {
     const [registerModal, {openModal}] = useModal();
