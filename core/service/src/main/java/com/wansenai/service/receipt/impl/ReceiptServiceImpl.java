@@ -15,11 +15,13 @@ package com.wansenai.service.receipt.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
+import com.wansenai.dto.report.QueryAccountStatisticsDTO;
 import com.wansenai.dto.report.QueryProductStockDTO;
 import com.wansenai.dto.report.QueryStockFlowDTO;
 import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
 import com.wansenai.entities.basic.Supplier;
+import com.wansenai.entities.financial.FinancialAccount;
 import com.wansenai.entities.product.Product;
 import com.wansenai.entities.receipt.*;
 import com.wansenai.entities.warehouse.Warehouse;
@@ -27,6 +29,7 @@ import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.basic.SupplierService;
+import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.service.receipt.*;
 import com.wansenai.service.user.ISysUserService;
@@ -38,6 +41,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
+import com.wansenai.vo.report.AccountStatisticsVO;
 import com.wansenai.vo.report.ProductStockVO;
 import com.wansenai.vo.report.StockFlowVO;
 import org.springframework.stereotype.Service;
@@ -47,11 +51,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class ReceiptServiceImpl implements ReceiptService {
@@ -82,7 +82,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     private final WarehouseService warehouseService;
 
-    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper, WarehouseService warehouseService) {
+    private final IFinancialAccountService accountService;
+
+    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper, WarehouseService warehouseService, IFinancialAccountService accountService) {
         this.receiptRetailService = receiptRetailService;
         this.receiptRetailSubService = receiptRetailSubService;
         this.receiptSaleService = receiptSaleService;
@@ -96,6 +98,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         this.productService = productService;
         this.productStockMapper = productStockMapper;
         this.warehouseService = warehouseService;
+        this.accountService = accountService;
     }
 
     private String getProductName(Long id) {
@@ -675,5 +678,100 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         return Response.responseData(page);
 
+    }
+
+    @Override
+    public Response<Page<AccountStatisticsVO>> getAccountStatistics(QueryAccountStatisticsDTO accountStatisticsDTO) {
+        var result = new Page<AccountStatisticsVO>();
+
+        var page = new Page<FinancialAccount>(accountStatisticsDTO.getPage(), accountStatisticsDTO.getPageSize());
+        var accountPage = accountService.lambdaQuery()
+                .eq(FinancialAccount::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(StringUtils.hasLength(accountStatisticsDTO.getAccountName()), FinancialAccount::getAccountName, accountStatisticsDTO.getAccountName())
+                .eq(StringUtils.hasLength(accountStatisticsDTO.getAccountNumber()), FinancialAccount::getAccountNumber, accountStatisticsDTO.getAccountNumber())
+                .page(page);
+
+        if(accountPage.getRecords().isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
+        }
+
+        var accountVos = new ArrayList<AccountStatisticsVO>();
+        accountPage.getRecords().forEach(item -> {
+            var retailData = receiptRetailService.lambdaQuery()
+                    .eq(ReceiptRetailMain::getAccountId, item.getId())
+                    .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+
+            var retailChangeAmount = BigDecimal.ZERO;
+            var saleChangeAmount = BigDecimal.ZERO;
+            var purchaseChangeAmount = BigDecimal.ZERO;
+
+            if (!retailData.isEmpty()) {
+                retailChangeAmount = retailData.stream()
+                        .filter(receiptRetailMain -> receiptRetailMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
+                        .filter(receiptRetailMain -> receiptRetailMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                        .toList()
+                        .stream()
+                        .map(receipt -> Optional.ofNullable(receipt.getChangeAmount()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .setScale(2, RoundingMode.HALF_UP);
+            }
+
+            var salesData = receiptSaleService.lambdaQuery()
+                    .eq(ReceiptSaleMain::getAccountId, item.getId())
+                    .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            if (!salesData.isEmpty()) {
+                saleChangeAmount = salesData.stream()
+                        .filter(receiptSaleMain -> receiptSaleMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
+                        .filter(receiptSaleMain -> receiptSaleMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                        .toList()
+                        .stream()
+                        .map(receipt -> Optional.ofNullable(receipt.getChangeAmount()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .setScale(2, RoundingMode.HALF_UP);
+            }
+
+            var purchaseData = receiptPurchaseService.lambdaQuery()
+                    .eq(ReceiptPurchaseMain::getAccountId, item.getId())
+                    .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            if(!purchaseData.isEmpty()) {
+                purchaseChangeAmount = purchaseData.stream()
+                        .filter(receiptPurchaseMain -> receiptPurchaseMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
+                        .filter(receiptPurchaseMain -> receiptPurchaseMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                        .toList()
+                        .stream()
+                        .map(receipt -> Optional.ofNullable(receipt.getChangeAmount()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .setScale(2, RoundingMode.HALF_UP);
+            }
+
+            var saleAccountMultipleData = receiptSaleService.lambdaQuery()
+                    .in(ReceiptSaleMain::getMultipleAccount, item.getId())
+                    .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+
+            System.err.println(saleAccountMultipleData);
+
+            var thisMonthChangeAmount = retailChangeAmount.add(saleChangeAmount).add(purchaseChangeAmount);
+
+            var accountVo = AccountStatisticsVO.builder()
+                    .accountId(item.getId())
+                    .accountName(item.getAccountName())
+                    .accountNumber(item.getAccountNumber())
+                    .initialAmount(item.getInitialAmount())
+                    .thisMonthChangeAmount(thisMonthChangeAmount)
+                    .currentAmount(item.getCurrentAmount())
+                    .build();
+
+            accountVos.add(accountVo);
+        });
+        result.setRecords(accountVos);
+        result.setPages(accountPage.getPages());
+        result.setSize(accountPage.getSize());
+        result.setTotal(accountPage.getTotal());
+
+        return Response.responseData(result);
     }
 }

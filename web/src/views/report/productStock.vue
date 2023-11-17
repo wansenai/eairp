@@ -3,6 +3,7 @@
     <BasicTable @register="registerTable">
       <template #toolbar>
         <a-button type="primary" @click=""> 导出</a-button>
+        <a-button @click=""> 打印</a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'id'">
@@ -26,7 +27,7 @@ import {getProductStock} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import StockFlowModal from "@/views/report/modal/StockFlowModal.vue";
 export default defineComponent({
-  name: 'productStock',
+  name: 'ProductStock',
   components: {Tag, TableAction, BasicTable, StockFlowModal},
   setup() {
     const [registerModal, {openModal}] = useModal();
@@ -44,7 +45,7 @@ export default defineComponent({
       bordered: true,
       showTableSetting: true,
       striped: true,
-      showIndexColumn: false,
+      showIndexColumn: true,
       showSummary: true,
       summaryFunc: handleSummary,
     });
