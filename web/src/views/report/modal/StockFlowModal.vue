@@ -40,7 +40,7 @@ import ViewRefundModal from "@/views/retail/refund/components/ViewRefundModal.vu
 import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundModal.vue";
 
 export default defineComponent({
-  name: 'productStock',
+  name: 'ProductStockModal',
   components: {
     ViewSaleRefundModal,
     ViewRefundModal,
