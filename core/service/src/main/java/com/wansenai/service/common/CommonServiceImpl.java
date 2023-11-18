@@ -19,6 +19,7 @@ import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.sms.v20190711.SmsClient;
 import com.tencentcloudapi.sms.v20190711.models.SendSmsRequest;
 import com.wansenai.bo.FileDataBO;
+import com.wansenai.entities.warehouse.Warehouse;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.BaseService;
 import com.wansenai.service.product.ProductStockKeepUnitService;
@@ -101,6 +102,8 @@ public class CommonServiceImpl implements CommonService{
     private final WarehouseService warehouseService;
 
     private final SysFileMapper fileMapper;
+
+    private final String NullString = "";
 
     public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService, ProductService productService, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, WarehouseService warehouseService, BaseService baseService, SysFileMapper fileMapper) {
         this.redisUtil = redisUtil;
@@ -720,7 +723,30 @@ public class CommonServiceImpl implements CommonService{
 
     @Override
     public String getWarehouseName(Long warehouseId) {
-        return warehouseService.getById(warehouseId).getWarehouseName();
+        return Optional.ofNullable(warehouseService.getById(warehouseId))
+                .map(Warehouse::getWarehouseName)
+                .orElse(NullString);
+    }
+
+    @Override
+    public String getMemberName(Long memberId) {
+        return Optional.ofNullable(memberService.getById(memberId))
+                .map(Member::getMemberName)
+                .orElse(NullString);
+    }
+
+    @Override
+    public String getSupplierName(Long supplierId) {
+        return Optional.ofNullable(supplierService.getById(supplierId))
+                .map(Supplier::getSupplierName)
+                .orElse(NullString);
+    }
+
+    @Override
+    public String getCustomerName(Long customerId) {
+        return Optional.ofNullable(customerService.getById(customerId))
+                .map(Customer::getCustomerName)
+                .orElse(NullString);
     }
 
     private String getCellValue(Cell cell, DataFormatter dataFormatter) {
