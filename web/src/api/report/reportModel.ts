@@ -67,3 +67,13 @@ export interface AccountStatisticsResp {
     thisMonthChangeAmount: number;
     currentAmount: number;
 }
+
+export interface AccountFlowResp {
+    receiptNumber: string;
+    subType: string;
+    useType: string;
+    name: string;
+    amount: number;
+    balance: number;
+    receiptDate: string;
+}

@@ -163,7 +163,7 @@ export const stockFlowColumns: BasicColumn[] = [
         width: 60,
     },
     {
-        title: '日期',
+        title: '单据日期',
         dataIndex: 'receiptDate',
         width: 150,
     }
@@ -234,4 +234,42 @@ export const searchAccountSchema: FormSchema[] = [
         component: 'Input',
         colProps: { span: 10 },
     },
+]
+
+export const accountFlowColumns: BasicColumn[] = [
+    {
+        title: '单据编号',
+        dataIndex: 'receiptNumber',
+        width: 180,
+    },
+    {
+        title: '单据类型',
+        dataIndex: 'subType',
+        width: 80,
+    },
+    {
+        title: '收付款放',
+        dataIndex: 'useType',
+        width: 90,
+    },
+    {
+        title: '名称',
+        dataIndex: 'name',
+        width: 120,
+    },
+    {
+        title: '金额',
+        dataIndex: 'amount',
+        width: 110,
+    },
+    {
+        title: '余额',
+        dataIndex: 'balance',
+        width: 110,
+    },
+    {
+        title: '单据日期',
+        dataIndex: 'receiptDate',
+        width: 150,
+    }
 ]
