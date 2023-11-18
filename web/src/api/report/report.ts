@@ -7,14 +7,15 @@ import {
     ProductStockFlowResp,
     QueryProductStockFlowReq,
     QueryAccountStatisticsReq,
-    AccountStatisticsResp
+    AccountStatisticsResp, AccountFlowResp
 } from "@/api/report/reportModel";
 
 enum API {
     getStatisticalData = '/report/homePage/statistics',
     getProductStockData = '/report/productStock',
     getProductStockFlowData = '/report/productStockFlow',
-    getAccountStatistics = '/report/accountStatistics'
+    getAccountStatistics = '/report/accountStatistics',
+    getAccountFlow = '/report/accountFlow'
 }
 
 
@@ -49,6 +50,15 @@ export function getAccountStatistics(params: QueryAccountStatisticsReq) {
         {
             url: API.getAccountStatistics,
             params
+        }
+    );
+}
+
+export function getAccountFlow(accountId: number) {
+    return defHttp.get<BaseDataResp<AccountFlowResp>>(
+        {
+            url: API.getAccountFlow,
+            params: accountId
         }
     );
 }

@@ -50,7 +50,7 @@ export default defineComponent({
       showIndexColumn: false,
       bordered: true,
       showTableSetting: true,
-      canResize: true,
+      canResize: false,
       tableSetting: { fullScreen: true },
       useSearchForm: true,
       clickToRowSelect: true,

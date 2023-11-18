@@ -29,6 +29,7 @@ import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.basic.SupplierService;
+import com.wansenai.service.common.CommonService;
 import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.service.receipt.*;
@@ -41,6 +42,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
+import com.wansenai.vo.report.AccountFlowVO;
 import com.wansenai.vo.report.AccountStatisticsVO;
 import com.wansenai.vo.report.ProductStockVO;
 import com.wansenai.vo.report.StockFlowVO;
@@ -52,6 +54,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class ReceiptServiceImpl implements ReceiptService {
@@ -84,7 +87,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     private final IFinancialAccountService accountService;
 
-    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper, WarehouseService warehouseService, IFinancialAccountService accountService) {
+    private final CommonService commonService;
+
+    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper, WarehouseService warehouseService, IFinancialAccountService accountService, CommonService commonService) {
         this.receiptRetailService = receiptRetailService;
         this.receiptRetailSubService = receiptRetailSubService;
         this.receiptSaleService = receiptSaleService;
@@ -99,6 +104,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         this.productStockMapper = productStockMapper;
         this.warehouseService = warehouseService;
         this.accountService = accountService;
+        this.commonService = commonService;
     }
 
     private String getProductName(Long id) {
@@ -669,13 +675,10 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         int startIndex = (int) ((page.getCurrent() - 1) * page.getSize());
         int endIndex = (int) Math.min(startIndex + page.getSize(), stockFlowVos.size());
-
         startIndex = Math.min(startIndex, endIndex);
         List<StockFlowVO> pagedStockFlowVos = new ArrayList<>(stockFlowVos.subList(startIndex, endIndex));
-
         page.setRecords(pagedStockFlowVos);
         page.setTotal(stockFlowVos.size());
-
         return Response.responseData(page);
 
     }
@@ -796,6 +799,86 @@ public class ReceiptServiceImpl implements ReceiptService {
         result.setPages(accountPage.getPages());
         result.setSize(accountPage.getSize());
         result.setTotal(accountPage.getTotal());
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<AccountFlowVO>> getAccountFlow(Long accountId, Long page, Long pageSize) {
+        if (accountId == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var account = accountService.getById(accountId);
+        var retailData = receiptRetailService.lambdaQuery()
+                .eq(ReceiptRetailMain::getAccountId, accountId)
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var accountAmount = new AtomicReference<>(account.getInitialAmount());
+        var accountFlowVos = new ArrayList<AccountFlowVO>();
+        if (!retailData.isEmpty()) {
+            retailData.forEach(retail -> {
+                accountAmount.accumulateAndGet(Optional.ofNullable(retail.getChangeAmount()).orElse(BigDecimal.ZERO), BigDecimal::add);
+                var accountFlowVO = AccountFlowVO.builder()
+                        .receiptNumber(retail.getReceiptNumber())
+                        .receiptDate(retail.getReceiptDate())
+                        .subType(retail.getSubType())
+                        .useType("会员")
+                        .name(commonService.getMemberName(retail.getMemberId()))
+                        .amount(retail.getChangeAmount() == null ? BigDecimal.ZERO : retail.getChangeAmount())
+                        .balance(accountAmount.get())
+                        .build();
+                accountFlowVos.add(accountFlowVO);
+            });
+        }
+        var salesData = receiptSaleService.lambdaQuery()
+                .eq(ReceiptSaleMain::getAccountId, accountId)
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+        if (!salesData.isEmpty()) {
+            salesData.forEach(sale -> {
+                accountAmount.accumulateAndGet(Optional.ofNullable(sale.getChangeAmount()).orElse(BigDecimal.ZERO), BigDecimal::add);
+                var accountFlowVO = AccountFlowVO.builder()
+                        .receiptNumber(sale.getReceiptNumber())
+                        .receiptDate(sale.getReceiptDate())
+                        .subType(sale.getSubType())
+                        .useType("客户")
+                        .name(commonService.getCustomerName(sale.getCustomerId()))
+                        .amount(sale.getChangeAmount() == null ? BigDecimal.ZERO : sale.getChangeAmount())
+                        .balance(accountAmount.get())
+                        .build();
+                accountFlowVos.add(accountFlowVO);
+            });
+        }
+
+        var purchaseData = receiptPurchaseService.lambdaQuery()
+                .eq(ReceiptPurchaseMain::getAccountId, accountId)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+        if (!purchaseData.isEmpty()) {
+            purchaseData.forEach(purchase -> {
+                accountAmount.accumulateAndGet(Optional.ofNullable(purchase.getChangeAmount()).orElse(BigDecimal.ZERO), BigDecimal::add);
+                var accountFlowVO = AccountFlowVO.builder()
+                        .receiptNumber(purchase.getReceiptNumber())
+                        .receiptDate(purchase.getReceiptDate())
+                        .subType(purchase.getSubType())
+                        .useType("供应商")
+                        .name(commonService.getSupplierName(purchase.getSupplierId()))
+                        .amount(purchase.getChangeAmount() == null ? BigDecimal.ZERO : purchase.getChangeAmount())
+                        .balance(accountAmount.get())
+                        .build();
+                accountFlowVos.add(accountFlowVO);
+            });
+        }
+        accountFlowVos.sort(Comparator.comparing(AccountFlowVO::getReceiptDate).reversed());
+
+        var result = new Page<AccountFlowVO>(page, pageSize);
+        int startIndex = (int) ((result.getCurrent() - 1) * result.getSize());
+        int endIndex = (int) Math.min(startIndex + result.getSize(), accountFlowVos.size());
+        startIndex = Math.min(startIndex, endIndex);
+        List<AccountFlowVO> pageAccountFlowVos = new ArrayList<>(accountFlowVos.subList(startIndex, endIndex));
+        result.setRecords(pageAccountFlowVos);
+        result.setTotal(accountFlowVos.size());
 
         return Response.responseData(result);
     }

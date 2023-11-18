@@ -7,10 +7,11 @@
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'accountId'">
-          <a @click="">流水</a>
+          <a @click="handleAccountFlow(record)">流水</a>
         </template>
       </template>
     </BasicTable>
+    <AccountFlowModal @register="registerModal"/>
   </div>
 </template>
 <div>
@@ -23,11 +24,15 @@ import {accountStatisticsColumns, searchAccountSchema} from "@/views/report/repo
 import {Tag} from "ant-design-vue";
 import {getAccountStatistics} from "@/api/report/report";
 import XEUtils from "xe-utils";
+import AccountFlowModal from "@/views/report/modal/AccountFlowModal.vue";
+import StockFlowModal from "@/views/report/modal/StockFlowModal.vue";
+import {useModal} from "@/components/Modal";
 
 export default defineComponent({
   name: 'AccountStatistics',
-  components: {Tag, TableAction, BasicTable},
+  components: {StockFlowModal, AccountFlowModal, Tag, TableAction, BasicTable},
   setup() {
+    const [registerModal, {openModal}] = useModal();
     const [registerTable, { reload }] = useTable({
       title: '账户统计报表',
       api: getAccountStatistics,
@@ -38,8 +43,8 @@ export default defineComponent({
         schemas: searchAccountSchema,
         autoSubmitOnEnter: true,
       },
-      useSearchForm: true,
       bordered: true,
+      useSearchForm: true,
       showTableSetting: true,
       striped: true,
       canResize: false,
@@ -62,6 +67,10 @@ export default defineComponent({
       ];
     }
 
+    function handleAccountFlow(record: Recordable) {
+      openModal(true, record);
+    }
+
     async function handleSuccess() {
       reload();
     }
@@ -71,9 +80,11 @@ export default defineComponent({
     }
 
     return {
+      registerModal,
       registerTable,
       handleSuccess,
-      handleCancel
+      handleCancel,
+      handleAccountFlow
     }
   }
 })

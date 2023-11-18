@@ -29,7 +29,7 @@ export default defineComponent({
       },
       bordered: true,
       showTableSetting: false,
-      canResize: true,
+      canResize: false,
       tableSetting: { fullScreen: true },
       useSearchForm: false,
       clickToRowSelect: true,

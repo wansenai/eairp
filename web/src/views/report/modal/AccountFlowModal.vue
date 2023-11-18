@@ -1,16 +1,13 @@
 <template>
-    <BasicModal v-bind="$attrs" @register="registerModal">
-      <BasicTable @register="registerTable">
-        <template #toolbar>
-          <a-button type="primary" @click=""> 导出</a-button>
+  <BasicModal v-bind="$attrs" @register="registerModal">
+    <BasicTable @register="registerTable">
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'receiptNumber'">
+          <a @click="openReceipt(record.receiptNumber)"> {{record.receiptNumber}} </a>
         </template>
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'receiptNumber'">
-            <a @click="openReceipt(record.receiptNumber)"> {{record.receiptNumber}} </a>
-          </template>
-        </template>
-      </BasicTable>
-    </BasicModal>
+      </template>
+    </BasicTable>
+  </BasicModal>
   <ViewShipmentModal @register="handleRetailShipmentModal" />
   <ViewRefundModal @register="handleRetailRefundModal" />
   <ViewSaleOrderModal @register="handleSaleOrderModal" />
@@ -27,9 +24,9 @@
 import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {BasicModal, useModal, useModalInner} from "@/components/Modal";
-import {searchStockFlowSchema, stockFlowColumns} from "@/views/report/report.data";
+import {accountFlowColumns, searchAccountSchema} from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getProductStockFlow} from "@/api/report/report";
+import {getAccountFlow} from "@/api/report/report";
 import ViewSaleOrderModal from "@/views/sales/order/components/ViewSaleOrderModal.vue";
 import ViewPurchaseOrderModal from "@/views/purchase/order/components/ViewOrderModal.vue";
 import ViewShipmentModal from "@/views/retail/shipments/components/ViewShipmentModal.vue";
@@ -40,7 +37,7 @@ import ViewRefundModal from "@/views/retail/refund/components/ViewRefundModal.vu
 import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundModal.vue";
 
 export default defineComponent({
-  name: 'ProductStockModal',
+  name: 'AccountFlowModal',
   components: {
     ViewSaleRefundModal,
     ViewRefundModal,
@@ -49,9 +46,7 @@ export default defineComponent({
     ViewSaleShipmentsModal,
     ViewShipmentModal, ViewPurchaseOrderModal, ViewSaleOrderModal, BasicModal, Tag, TableAction, BasicTable},
   setup() {
-    const productId = ref();
-    const warehouseId = ref();
-    const productBarcode = ref();
+    const accountId = ref();
     const [handleRetailShipmentModal, {openModal: openRetailShipmentModal}] = useModal();
     const [handleRetailRefundModal, {openModal: openRetailRefundModal}] = useModal();
     const [handleSaleOrderModal, {openModal: openSaleOrderModal}] = useModal();
@@ -61,30 +56,31 @@ export default defineComponent({
     const [handlePurchaseStorageModal, {openModal: openPurchaseStorageModal}] = useModal();
     const [handlePurchaseRefundModal, {openModal: openPurchaseRefundModal}] = useModal();
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
-      setModalProps({confirmLoading: false, destroyOnClose: true, width: 1000, title: '查看商品库存流水'});
-      productId.value = data.productId;
-      warehouseId.value = data.warehouseId;
-      productBarcode.value = data.productBarcode;
+      setModalProps({
+        confirmLoading: false,
+        destroyOnClose: true,
+        width: 1000,
+        title: '查看账户流水',
+        showOkBtn: false,
+      });
+      accountId.value = data.accountId;
     });
 
     const [registerTable, {reload}] = useTable({
-      api: getProductStockFlow,
+      api: getAccountFlow,
       rowKey: 'id',
-      columns: stockFlowColumns,
+      columns: accountFlowColumns,
+      useSearchForm: false,
+      bordered: true,
+      canResize: false,
       formConfig: {
-        labelWidth: 110,
-        schemas: searchStockFlowSchema,
         autoSubmitOnEnter: true,
       },
-      useSearchForm: true,
-      bordered: true,
-      showTableSetting: true,
       striped: true,
       showIndexColumn: false,
+
       beforeFetch: (data) => {
-        data.productId = productId.value;
-        data.warehouseId = warehouseId.value;
-        data.productBarcode = productBarcode.value;
+        data.accountId = accountId.value;
       },
     });
 
@@ -122,7 +118,6 @@ export default defineComponent({
           receiptNumber: openReceiptNumber,
         });
       }
-      closeModal();
     }
 
     async function handleSuccess() {
