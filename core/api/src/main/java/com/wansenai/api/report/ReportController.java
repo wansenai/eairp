@@ -20,6 +20,7 @@ import com.wansenai.dto.report.QueryStockFlowDTO;
 import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
+import com.wansenai.vo.report.AccountFlowVO;
 import com.wansenai.vo.report.AccountStatisticsVO;
 import com.wansenai.vo.report.ProductStockVO;
 import com.wansenai.vo.report.StockFlowVO;
@@ -53,5 +54,14 @@ public class ReportController {
     @PostMapping("accountStatistics")
     public Response<Page<AccountStatisticsVO>> getAccountStatistics(@RequestBody QueryAccountStatisticsDTO accountStatisticsDTO) {
         return receiptService.getAccountStatistics(accountStatisticsDTO);
+    }
+
+    @GetMapping("accountFlow")
+    public Response<Page<AccountFlowVO>> getAccountFlow(
+            @RequestParam("accountId") Long accountId,
+            @RequestParam(value = "page", defaultValue = "1") Long page,
+            @RequestParam(value = "size", defaultValue = "10") Long pageSize
+    ) {
+        return receiptService.getAccountFlow(accountId, page, pageSize);
     }
 }

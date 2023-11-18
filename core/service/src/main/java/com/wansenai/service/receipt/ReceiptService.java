@@ -22,6 +22,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
+import com.wansenai.vo.report.AccountFlowVO;
 import com.wansenai.vo.report.AccountStatisticsVO;
 import com.wansenai.vo.report.ProductStockVO;
 import com.wansenai.vo.report.StockFlowVO;
@@ -47,4 +48,6 @@ public interface ReceiptService {
     Response<Page<StockFlowVO>> getStockFlow(QueryStockFlowDTO queryStockFlowDTO);
 
     Response<Page<AccountStatisticsVO>> getAccountStatistics(QueryAccountStatisticsDTO accountStatisticsDTO);
+
+    Response<Page<AccountFlowVO>> getAccountFlow(Long accountId, Long page, Long pageSize);
 }
