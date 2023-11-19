@@ -876,7 +876,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             });
         }
         // 这里取消掉排序了，因为计算最终结果会跟排序结果不一致
-        // accountFlowVos.sort(Comparator.comparing(AccountFlowVO::getReceiptDate).reversed());
+        accountFlowVos.sort(Comparator.comparing(AccountFlowVO::getReceiptDate).reversed());
 
         var result = new Page<AccountFlowVO>(page, pageSize);
         int startIndex = (int) ((result.getCurrent() - 1) * result.getSize());
