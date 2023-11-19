@@ -16,14 +16,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.report.QueryAccountStatisticsDTO;
 import com.wansenai.dto.report.QueryProductStockDTO;
+import com.wansenai.dto.report.QueryRetailReportDTO;
 import com.wansenai.dto.report.QueryStockFlowDTO;
 import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
-import com.wansenai.vo.report.AccountFlowVO;
-import com.wansenai.vo.report.AccountStatisticsVO;
-import com.wansenai.vo.report.ProductStockVO;
-import com.wansenai.vo.report.StockFlowVO;
+import com.wansenai.vo.receipt.retail.StatisticalDataVO;
+import com.wansenai.vo.report.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,8 +35,8 @@ public class ReportController {
     }
 
     @GetMapping("homePage/statistics")
-    public Response<RetailStatisticalDataVO> getStatisticalData() {
-        return receiptService.getRetailStatistics();
+    public Response<StatisticalDataVO> getStatisticalData() {
+        return receiptService.getStatisticalData();
     }
 
     @PostMapping("productStock")
@@ -63,5 +61,10 @@ public class ReportController {
             @RequestParam(value = "size", defaultValue = "10") Long pageSize
     ) {
         return receiptService.getAccountFlow(accountId, page, pageSize);
+    }
+
+    @PostMapping("retailStatistics")
+    public Response<Page<RetailReportVO>> getRetailStatistics(@RequestBody QueryRetailReportDTO queryRetailReportDTO) {
+        return receiptService.getRetailStatistics(queryRetailReportDTO);
     }
 }

@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
 import com.wansenai.dto.report.QueryAccountStatisticsDTO;
 import com.wansenai.dto.report.QueryProductStockDTO;
+import com.wansenai.dto.report.QueryRetailReportDTO;
 import com.wansenai.dto.report.QueryStockFlowDTO;
 import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
@@ -41,11 +42,8 @@ import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
-import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
-import com.wansenai.vo.report.AccountFlowVO;
-import com.wansenai.vo.report.AccountStatisticsVO;
-import com.wansenai.vo.report.ProductStockVO;
-import com.wansenai.vo.report.StockFlowVO;
+import com.wansenai.vo.receipt.retail.StatisticalDataVO;
+import com.wansenai.vo.report.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -128,7 +126,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    public Response<RetailStatisticalDataVO> getRetailStatistics() {
+    public Response<StatisticalDataVO> getStatisticalData() {
         var now = LocalDateTime.now();
 
         var retailData = receiptRetailService.lambdaQuery()
@@ -179,7 +177,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         var monthPurchase = calculatePurchaseTotalPrice(purchaseData, purchaseRefundData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
         var yearPurchase = calculatePurchaseTotalPrice(purchaseData, purchaseRefundData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
 
-        var retailStatisticalDataVO = RetailStatisticalDataVO.builder()
+        var retailStatisticalDataVO = StatisticalDataVO.builder()
                 .todayRetailSales(todayRetailSales)
                 .yesterdayRetailSales(yesterdayRetailSales)
                 .monthRetailSales(monthRetailSales)
@@ -880,6 +878,67 @@ public class ReceiptServiceImpl implements ReceiptService {
         List<AccountFlowVO> pageAccountFlowVos = new ArrayList<>(accountFlowVos.subList(startIndex, endIndex));
         result.setRecords(pageAccountFlowVos);
         result.setTotal(accountFlowVos.size());
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<RetailReportVO>> getRetailStatistics(QueryRetailReportDTO queryRetailReportDTO) {
+        var result = new Page<RetailReportVO>();
+        var page = new Page<ReceiptRetailMain>(queryRetailReportDTO.getPage(), queryRetailReportDTO.getPageSize());
+        var retailPage = receiptRetailService.lambdaQuery()
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(queryRetailReportDTO.getMemberId() != null, ReceiptRetailMain::getMemberId, queryRetailReportDTO.getMemberId())
+                .le(queryRetailReportDTO.getStartDate() != null, ReceiptRetailMain::getReceiptDate, queryRetailReportDTO.getStartDate())
+                .ge(queryRetailReportDTO.getEndDate() != null, ReceiptRetailMain::getReceiptDate, queryRetailReportDTO.getEndDate())
+                .page(page);
+
+        var retailVos = new ArrayList<RetailReportVO>();
+        retailPage.getRecords().forEach(item -> {
+            var retailSub = receiptRetailSubService.lambdaQuery()
+                    .eq(ReceiptRetailSub::getReceiptMainId, item.getId())
+                    .eq(ReceiptRetailSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .one();
+
+            var retailVo = RetailReportVO.builder()
+                    .productBarcode(retailSub.getProductBarcode())
+                    .retailNumber(retailSub.getProductNumber())
+                    .build();
+
+            var product = productService.getById(retailSub.getProductId());
+            if (product != null) {
+                String productExtendInfo = product.getProductManufacturer() +
+                        "|" +
+                        product.getOtherFieldOne() +
+                        "|" +
+                        product.getOtherFieldTwo() +
+                        "|" +
+                        product.getOtherFieldThree();
+                retailVo.setProductName(product.getProductName());
+                retailVo.setProductStandard(product.getProductStandard());
+                retailVo.setProductModel(product.getProductModel());
+                retailVo.setProductUnit(product.getProductUnit());
+                retailVo.setProductExtendInfo(productExtendInfo);
+            }
+
+            var retailLastAmount = BigDecimal.ZERO;
+            if (item.getSubType().equals("零售出库")) {
+                retailVo.setRetailAmount(retailSub.getTotalAmount());
+                retailVo.setRetailNumber(retailSub.getProductNumber());
+                retailLastAmount = retailLastAmount.add(retailSub.getTotalAmount());
+            } else {
+                retailVo.setRetailRefundAmount(retailSub.getTotalAmount());
+                retailVo.setRetailRefundNumber(retailSub.getProductNumber());
+                retailLastAmount = retailLastAmount.subtract(retailSub.getTotalAmount());
+            }
+            retailVo.setRetailLastAmount(retailLastAmount);
+
+            retailVos.add(retailVo);
+        });
+        result.setRecords(retailVos);
+        result.setPages(retailPage.getPages());
+        result.setSize(retailPage.getSize());
+        result.setTotal(retailPage.getTotal());
 
         return Response.responseData(result);
     }
