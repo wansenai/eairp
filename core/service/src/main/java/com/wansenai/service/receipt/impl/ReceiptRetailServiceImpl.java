@@ -663,7 +663,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
             var account = accountService.getById(refundDTO.getAccountId());
             if (account != null) {
                 var accountBalance = account.getCurrentAmount();
-                var changeAmount = refundDTO.getPaymentAmount();
+                var changeAmount = refundDTO.getReceiptAmount();
                 var beforeChangeAmount = beforeReceipt.stream()
                         .map(item -> item.getTotalAmount())
                         .reduce(BigDecimal.ZERO, BigDecimal::add);

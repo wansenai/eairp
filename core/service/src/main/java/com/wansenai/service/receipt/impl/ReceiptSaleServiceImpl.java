@@ -713,6 +713,23 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 updateProductStock(receiptSaleList, 2);
             });
 
+            var account = accountService.getById(shipmentsDTO.getAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var thisCollectAmount = shipmentsDTO.getThisCollectAmount();
+                var beforeChangeAmount = beforeReceipt.stream()
+                        .map(item -> item.getTotalAmount())
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                if (beforeChangeAmount != null) {
+                    accountBalance = accountBalance.subtract(beforeChangeAmount);
+                }
+                if (thisCollectAmount != null) {
+                    accountBalance = accountBalance.add(thisCollectAmount);
+                }
+                account.setCurrentAmount(accountBalance);
+                accountService.updateById(account);
+            }
+
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_SHIPMENTS_SUCCESS);
             } else {
@@ -768,6 +785,18 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
 
             var saveSubResult = receiptSaleSubService.saveBatch(receiptList);
             updateProductStock(receiptList, 2);
+
+            var account = accountService.getById(shipmentsDTO.getAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var changeAmount = shipmentsDTO.getThisCollectAmount();
+                if (changeAmount != null) {
+                    accountBalance = accountBalance.add(changeAmount);
+                    account.setId(shipmentsDTO.getAccountId());
+                    account.setCurrentAmount(accountBalance);
+                    accountService.updateById(account);
+                }
+            }
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(SaleCodeEnum.ADD_SALE_SHIPMENTS_SUCCESS);
@@ -990,6 +1019,23 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 updateProductStock(receiptSaleList, 1);
             });
 
+            var account = accountService.getById(refundDTO.getAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var thisRefundAmount = refundDTO.getThisRefundAmount();
+                var beforeChangeAmount = beforeReceipt.stream()
+                        .map(item -> item.getTotalAmount())
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                if (beforeChangeAmount != null) {
+                    accountBalance = accountBalance.add(beforeChangeAmount);
+                }
+                if (thisRefundAmount != null) {
+                    accountBalance = accountBalance.subtract(thisRefundAmount);
+                }
+                account.setCurrentAmount(accountBalance);
+                accountService.updateById(account);
+            }
+
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS);
             } else {
@@ -1045,6 +1091,17 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
 
             var saveSubResult = receiptSaleSubService.saveBatch(receiptList);
             updateProductStock(receiptList,1);
+            var account = accountService.getById(refundDTO.getAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var thisRefundAmount = refundDTO.getThisRefundAmount();
+                if (thisRefundAmount != null) {
+                    accountBalance = accountBalance.subtract(thisRefundAmount);
+                    account.setId(refundDTO.getAccountId());
+                    account.setCurrentAmount(accountBalance);
+                    accountService.updateById(account);
+                }
+            }
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(SaleCodeEnum.ADD_SALE_REFUND_SUCCESS);
