@@ -17,11 +17,11 @@
             <a @click="viewShipmentReceipt">{{ otherReceipt }}</a>
           </a-descriptions-item>
           <a-descriptions-item label="优惠率">{{ refundOfferRate }}</a-descriptions-item>
-          <a-descriptions-item label="收款优惠">{{ refundOfferAmount }}</a-descriptions-item>
+          <a-descriptions-item label="退款优惠">{{ refundOfferAmount }}</a-descriptions-item>
           <a-descriptions-item label="优惠后金额">{{ refundLastAmount }}</a-descriptions-item>
           <a-descriptions-item label="其它费用">{{ otherAmount }}</a-descriptions-item>
           <a-descriptions-item label="结算账户">{{ accountName }}</a-descriptions-item>
-          <a-descriptions-item label="本次收款">{{ thisRefundAmount }}</a-descriptions-item>
+          <a-descriptions-item label="本次退款">{{ thisRefundAmount }}</a-descriptions-item>
           <a-descriptions-item label="本次欠款">{{ thisArrearsAmount }}</a-descriptions-item>
           <a-descriptions-item label="销售人员">{{  }}</a-descriptions-item>
           <a-descriptions-item label="备注">
@@ -49,7 +49,7 @@
             <a-statistic title="单据金额"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
-                         :value="refundLastAmount"/>
+                         :value="thisRefundAmount"/>
           </div>
         </div>
       </a-page-header>
