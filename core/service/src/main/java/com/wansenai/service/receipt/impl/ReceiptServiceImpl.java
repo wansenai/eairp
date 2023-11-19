@@ -15,11 +15,13 @@ package com.wansenai.service.receipt.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
+import com.wansenai.dto.report.QueryAccountStatisticsDTO;
 import com.wansenai.dto.report.QueryProductStockDTO;
 import com.wansenai.dto.report.QueryStockFlowDTO;
 import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
 import com.wansenai.entities.basic.Supplier;
+import com.wansenai.entities.financial.FinancialAccount;
 import com.wansenai.entities.product.Product;
 import com.wansenai.entities.receipt.*;
 import com.wansenai.entities.warehouse.Warehouse;
@@ -27,6 +29,8 @@ import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.basic.SupplierService;
+import com.wansenai.service.common.CommonService;
+import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.service.receipt.*;
 import com.wansenai.service.user.ISysUserService;
@@ -38,6 +42,8 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
+import com.wansenai.vo.report.AccountFlowVO;
+import com.wansenai.vo.report.AccountStatisticsVO;
 import com.wansenai.vo.report.ProductStockVO;
 import com.wansenai.vo.report.StockFlowVO;
 import org.springframework.stereotype.Service;
@@ -47,11 +53,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class ReceiptServiceImpl implements ReceiptService {
@@ -82,7 +85,11 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     private final WarehouseService warehouseService;
 
-    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper, WarehouseService warehouseService) {
+    private final IFinancialAccountService accountService;
+
+    private final CommonService commonService;
+
+    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper, WarehouseService warehouseService, IFinancialAccountService accountService, CommonService commonService) {
         this.receiptRetailService = receiptRetailService;
         this.receiptRetailSubService = receiptRetailSubService;
         this.receiptSaleService = receiptSaleService;
@@ -96,6 +103,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         this.productService = productService;
         this.productStockMapper = productStockMapper;
         this.warehouseService = warehouseService;
+        this.accountService = accountService;
+        this.commonService = commonService;
     }
 
     private String getProductName(Long id) {
@@ -612,7 +621,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .eq(ReceiptRetailMain::getId, item.getReceiptMainId())
                     .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .one();
-            if(receiptRetailMain != null) {
+            if (receiptRetailMain != null) {
                 var stockFlowVO = StockFlowVO.builder()
                         .receiptNumber(receiptRetailMain.getReceiptNumber())
                         .receiptDate(receiptRetailMain.getReceiptDate())
@@ -630,7 +639,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .eq(ReceiptSaleMain::getId, item.getReceiptSaleMainId())
                     .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .one();
-            if(receiptSaleMain != null) {
+            if (receiptSaleMain != null) {
                 var stockFlowVO = StockFlowVO.builder()
                         .receiptNumber(receiptSaleMain.getReceiptNumber())
                         .receiptDate(receiptSaleMain.getReceiptDate())
@@ -648,7 +657,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .eq(ReceiptPurchaseMain::getId, item.getReceiptPurchaseMainId())
                     .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .one();
-            if(receiptPurchaseMain != null) {
+            if (receiptPurchaseMain != null) {
                 var stockFlowVO = StockFlowVO.builder()
                         .receiptNumber(receiptPurchaseMain.getReceiptNumber())
                         .receiptDate(receiptPurchaseMain.getReceiptDate())
@@ -666,14 +675,211 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         int startIndex = (int) ((page.getCurrent() - 1) * page.getSize());
         int endIndex = (int) Math.min(startIndex + page.getSize(), stockFlowVos.size());
-
         startIndex = Math.min(startIndex, endIndex);
         List<StockFlowVO> pagedStockFlowVos = new ArrayList<>(stockFlowVos.subList(startIndex, endIndex));
-
         page.setRecords(pagedStockFlowVos);
         page.setTotal(stockFlowVos.size());
-
         return Response.responseData(page);
 
+    }
+
+    @Override
+    public Response<Page<AccountStatisticsVO>> getAccountStatistics(QueryAccountStatisticsDTO accountStatisticsDTO) {
+        var result = new Page<AccountStatisticsVO>();
+
+        var page = new Page<FinancialAccount>(accountStatisticsDTO.getPage(), accountStatisticsDTO.getPageSize());
+        var accountPage = accountService.lambdaQuery()
+                .eq(FinancialAccount::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(StringUtils.hasLength(accountStatisticsDTO.getAccountName()), FinancialAccount::getAccountName, accountStatisticsDTO.getAccountName())
+                .eq(StringUtils.hasLength(accountStatisticsDTO.getAccountNumber()), FinancialAccount::getAccountNumber, accountStatisticsDTO.getAccountNumber())
+                .page(page);
+
+        if (accountPage.getRecords().isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
+        }
+
+        var accountVos = new ArrayList<AccountStatisticsVO>();
+        accountPage.getRecords().forEach(item -> {
+            var retailData = receiptRetailService.lambdaQuery()
+                    .eq(ReceiptRetailMain::getAccountId, item.getId())
+                    .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+
+            var retailChangeAmount = BigDecimal.ZERO;
+            var saleChangeAmount = BigDecimal.ZERO;
+            var purchaseChangeAmount = BigDecimal.ZERO;
+
+            if (!retailData.isEmpty()) {
+                retailChangeAmount = retailData.stream()
+                        .filter(receiptRetailMain -> receiptRetailMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
+                        .filter(receiptRetailMain -> receiptRetailMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                        .toList()
+                        .stream()
+                        .map(receipt -> Optional.ofNullable(receipt.getChangeAmount()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .setScale(2, RoundingMode.HALF_UP);
+            }
+
+            var salesData = receiptSaleService.lambdaQuery()
+                    .eq(ReceiptSaleMain::getAccountId, item.getId())
+                    .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            if (!salesData.isEmpty()) {
+                saleChangeAmount = salesData.stream()
+                        .filter(receiptSaleMain -> receiptSaleMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
+                        .filter(receiptSaleMain -> receiptSaleMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                        .toList()
+                        .stream()
+                        .map(receipt -> Optional.ofNullable(receipt.getChangeAmount()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .setScale(2, RoundingMode.HALF_UP);
+            }
+
+            var purchaseData = receiptPurchaseService.lambdaQuery()
+                    .eq(ReceiptPurchaseMain::getAccountId, item.getId())
+                    .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            if (!purchaseData.isEmpty()) {
+                purchaseChangeAmount = purchaseData.stream()
+                        .filter(receiptPurchaseMain -> receiptPurchaseMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
+                        .filter(receiptPurchaseMain -> receiptPurchaseMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                        .toList()
+                        .stream()
+                        .map(receipt -> Optional.ofNullable(receipt.getChangeAmount()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .setScale(2, RoundingMode.HALF_UP);
+            }
+            // Calculate the amount of multiple accounts
+            var saleAccountMultipleData = receiptSaleService.lambdaQuery()
+                    .in(ReceiptSaleMain::getMultipleAccount, item.getId())
+                    .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list()
+                    .stream()
+                    .filter(receiptSaleMain -> receiptSaleMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
+                    .filter(receiptSaleMain -> receiptSaleMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                    .toList();
+
+            if (!saleAccountMultipleData.isEmpty()) {
+                for (ReceiptSaleMain saleAccountMultiple : saleAccountMultipleData) {
+                    var saleAccountMultipleChangeAmount = saleAccountMultiple.getChangeAmount();
+                    purchaseChangeAmount = purchaseChangeAmount.add(Optional.ofNullable(saleAccountMultipleChangeAmount).orElse(BigDecimal.ZERO));
+                }
+            }
+
+            var purchaseAccountMultipleData = receiptPurchaseService.lambdaQuery()
+                    .in(ReceiptPurchaseMain::getMultipleAccount, item.getId())
+                    .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list()
+                    .stream()
+                    .filter(ReceiptPurchaseMain -> ReceiptPurchaseMain.getReceiptDate().isAfter(LocalDateTime.now().withDayOfMonth(1).with(LocalTime.MIN)))
+                    .filter(ReceiptPurchaseMain -> ReceiptPurchaseMain.getReceiptDate().isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                    .toList();
+
+            if (!purchaseAccountMultipleData.isEmpty()) {
+                for (ReceiptPurchaseMain purchaseAccountMultiple : purchaseAccountMultipleData) {
+                    var purchaseAccountMultipleChangeAmount = purchaseAccountMultiple.getChangeAmount();
+                    purchaseChangeAmount = purchaseChangeAmount.add(Optional.ofNullable(purchaseAccountMultipleChangeAmount).orElse(BigDecimal.ZERO));
+                }
+            }
+
+            var thisMonthChangeAmount = retailChangeAmount.add(saleChangeAmount).add(purchaseChangeAmount);
+
+            var accountVo = AccountStatisticsVO.builder()
+                    .accountId(item.getId())
+                    .accountName(item.getAccountName())
+                    .accountNumber(item.getAccountNumber())
+                    .initialAmount(item.getInitialAmount())
+                    .thisMonthChangeAmount(thisMonthChangeAmount)
+                    .currentAmount(item.getCurrentAmount())
+                    .build();
+
+            accountVos.add(accountVo);
+        });
+        result.setRecords(accountVos);
+        result.setPages(accountPage.getPages());
+        result.setSize(accountPage.getSize());
+        result.setTotal(accountPage.getTotal());
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<AccountFlowVO>> getAccountFlow(Long accountId, Long page, Long pageSize) {
+        if (accountId == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var account = accountService.getById(accountId);
+        var retailData = receiptRetailService.lambdaQuery()
+                .eq(ReceiptRetailMain::getAccountId, accountId)
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var accountAmount = new AtomicReference<>(account.getInitialAmount());
+        var accountFlowVos = new ArrayList<AccountFlowVO>();
+        if (!retailData.isEmpty()) {
+            retailData.forEach(retail -> {
+                accountAmount.accumulateAndGet(Optional.ofNullable(retail.getChangeAmount()).orElse(BigDecimal.ZERO), BigDecimal::add);
+                var accountFlowVO = AccountFlowVO.builder()
+                        .receiptNumber(retail.getReceiptNumber())
+                        .receiptDate(retail.getReceiptDate())
+                        .subType(retail.getSubType())
+                        .useType("会员")
+                        .name(commonService.getMemberName(retail.getMemberId()))
+                        .amount(retail.getChangeAmount() == null ? BigDecimal.ZERO : retail.getChangeAmount())
+                        .balance(accountAmount.get())
+                        .build();
+                accountFlowVos.add(accountFlowVO);
+            });
+        }
+        var salesData = receiptSaleService.lambdaQuery()
+                .eq(ReceiptSaleMain::getAccountId, accountId)
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+        if (!salesData.isEmpty()) {
+            salesData.forEach(sale -> {
+                accountAmount.accumulateAndGet(Optional.ofNullable(sale.getChangeAmount()).orElse(BigDecimal.ZERO), BigDecimal::add);
+                var accountFlowVO = AccountFlowVO.builder()
+                        .receiptNumber(sale.getReceiptNumber())
+                        .receiptDate(sale.getReceiptDate())
+                        .subType(sale.getSubType())
+                        .useType("客户")
+                        .name(commonService.getCustomerName(sale.getCustomerId()))
+                        .amount(sale.getChangeAmount() == null ? BigDecimal.ZERO : sale.getChangeAmount())
+                        .balance(accountAmount.get())
+                        .build();
+                accountFlowVos.add(accountFlowVO);
+            });
+        }
+
+        var purchaseData = receiptPurchaseService.lambdaQuery()
+                .eq(ReceiptPurchaseMain::getAccountId, accountId)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+        if (!purchaseData.isEmpty()) {
+            purchaseData.forEach(purchase -> {
+                accountAmount.accumulateAndGet(Optional.ofNullable(purchase.getChangeAmount()).orElse(BigDecimal.ZERO), BigDecimal::add);
+                var accountFlowVO = AccountFlowVO.builder()
+                        .receiptNumber(purchase.getReceiptNumber())
+                        .receiptDate(purchase.getReceiptDate())
+                        .subType(purchase.getSubType())
+                        .useType("供应商")
+                        .name(commonService.getSupplierName(purchase.getSupplierId()))
+                        .amount(purchase.getChangeAmount() == null ? BigDecimal.ZERO : purchase.getChangeAmount())
+                        .balance(accountAmount.get())
+                        .build();
+                accountFlowVos.add(accountFlowVO);
+            });
+        }
+        accountFlowVos.sort(Comparator.comparing(AccountFlowVO::getReceiptDate).reversed());
+
+        var result = new Page<AccountFlowVO>(page, pageSize);
+        int startIndex = (int) ((result.getCurrent() - 1) * result.getSize());
+        int endIndex = (int) Math.min(startIndex + result.getSize(), accountFlowVos.size());
+        startIndex = Math.min(startIndex, endIndex);
+        List<AccountFlowVO> pageAccountFlowVos = new ArrayList<>(accountFlowVos.subList(startIndex, endIndex));
+        result.setRecords(pageAccountFlowVos);
+        result.setTotal(accountFlowVos.size());
+
+        return Response.responseData(result);
     }
 }

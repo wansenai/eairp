@@ -53,3 +53,27 @@ export interface ProductStockFlowResp {
     productNumber: number;
     receiptDate: string;
 }
+
+export interface QueryAccountStatisticsReq {
+    accountName: string;
+    accountNumber: string;
+}
+
+export interface AccountStatisticsResp {
+    accountId: string;
+    accountName: string;
+    accountNumber: string;
+    initialAmount: number;
+    thisMonthChangeAmount: number;
+    currentAmount: number;
+}
+
+export interface AccountFlowResp {
+    receiptNumber: string;
+    subType: string;
+    useType: string;
+    name: string;
+    amount: number;
+    balance: number;
+    receiptDate: string;
+}

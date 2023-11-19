@@ -35,4 +35,10 @@ public interface CommonService {
     List<FileDataBO> getFileList(String fileId);
 
     String getWarehouseName(Long warehouseId);
+
+    String getMemberName(Long memberId);
+
+    String getSupplierName(Long supplierId);
+
+    String getCustomerName(Long customerId);
 }

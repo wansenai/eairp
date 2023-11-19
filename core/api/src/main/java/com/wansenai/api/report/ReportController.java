@@ -14,11 +14,14 @@ package com.wansenai.api.report;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.report.QueryAccountStatisticsDTO;
 import com.wansenai.dto.report.QueryProductStockDTO;
 import com.wansenai.dto.report.QueryStockFlowDTO;
 import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.retail.RetailStatisticalDataVO;
+import com.wansenai.vo.report.AccountFlowVO;
+import com.wansenai.vo.report.AccountStatisticsVO;
 import com.wansenai.vo.report.ProductStockVO;
 import com.wansenai.vo.report.StockFlowVO;
 import org.springframework.web.bind.annotation.*;
@@ -48,4 +51,17 @@ public class ReportController {
         return receiptService.getStockFlow(stockFlowDTO);
     }
 
+    @PostMapping("accountStatistics")
+    public Response<Page<AccountStatisticsVO>> getAccountStatistics(@RequestBody QueryAccountStatisticsDTO accountStatisticsDTO) {
+        return receiptService.getAccountStatistics(accountStatisticsDTO);
+    }
+
+    @GetMapping("accountFlow")
+    public Response<Page<AccountFlowVO>> getAccountFlow(
+            @RequestParam("accountId") Long accountId,
+            @RequestParam(value = "page", defaultValue = "1") Long page,
+            @RequestParam(value = "size", defaultValue = "10") Long pageSize
+    ) {
+        return receiptService.getAccountFlow(accountId, page, pageSize);
+    }
 }

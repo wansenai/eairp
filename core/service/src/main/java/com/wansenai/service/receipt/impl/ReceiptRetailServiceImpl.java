@@ -22,6 +22,7 @@ import com.wansenai.dto.receipt.retail.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.retail.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.retail.RetailRefundDTO;
 import com.wansenai.dto.receipt.retail.RetailShipmentsDTO;
+import com.wansenai.entities.financial.FinancialAccount;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.wansenai.entities.receipt.ReceiptRetailMain;
