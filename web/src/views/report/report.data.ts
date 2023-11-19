@@ -2,6 +2,7 @@ import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
 import {getWarehouseList} from "@/api/basic/warehouse";
 import {getCategoryList} from "@/api/product/productCategory";
+import {getMemberList} from "@/api/basic/member";
 export const productStockColumns: BasicColumn[] = [
     {
         title: '产品id',
@@ -271,5 +272,94 @@ export const accountFlowColumns: BasicColumn[] = [
         title: '单据日期',
         dataIndex: 'receiptDate',
         width: 150,
+    }
+]
+
+export const searchRetailSchema: FormSchema[] = [
+    {
+        label: '商品信息',
+        field: 'productExtendInfo',
+        component: 'Input',
+        colProps: { span: 7 },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '单据日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: { span: 7 },
+    },
+    {
+        label: '会员卡号',
+        field: 'memberId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getMemberList,
+            resultField: 'data',
+            labelField: 'memberName',
+            valueField: 'id',
+        },
+        colProps: { span: 7 },
+    },
+]
+
+export const retailStatisticsColumns: BasicColumn[] = [
+    {
+        title: '商品条码',
+        dataIndex: 'productBarcode',
+        width: 120,
+    },
+    {
+        title: '商品名称',
+        dataIndex: 'productName',
+        width: 120,
+    },
+    {
+        title: '规格',
+        dataIndex: 'productStandard',
+        width: 120,
+    },
+    {
+        title: '型号',
+        dataIndex: 'productModel',
+        width: 90,
+    },
+    {
+        title: '扩展信息',
+        dataIndex: 'productExtendInfo',
+        width: 120,
+    },
+    {
+        title: '单位',
+        dataIndex: 'productUnit',
+        width: 80,
+    },
+    {
+        title: '零售数量',
+        dataIndex: 'retailNumber',
+        width: 70,
+    },
+    {
+        title: '零售金额',
+        dataIndex: 'retailAmount',
+        width: 70,
+    },
+    {
+        title: '退货数量',
+        dataIndex: 'retailRefundNumber',
+        width: 70,
+    },
+    {
+        title: '退货金额',
+        dataIndex: 'retailRefundAmount',
+        width: 70,
+    },
+    {
+        title: '实际零售金额',
+        dataIndex: 'retailLastAmount',
+        width: 70,
     }
 ]
