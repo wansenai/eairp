@@ -819,8 +819,6 @@ public class ReceiptServiceImpl implements ReceiptService {
         var accountFlowVos = new ArrayList<AccountFlowVO>();
         if (!retailData.isEmpty()) {
             retailData.forEach(retail -> {
-                BigDecimal changeAmount = Optional.ofNullable(retail.getChangeAmount()).orElse(BigDecimal.ZERO);
-                balance.updateAndGet(amount -> amount.add(changeAmount));
                 var accountFlowVO = AccountFlowVO.builder()
                         .receiptNumber(retail.getReceiptNumber())
                         .receiptDate(retail.getReceiptDate())
@@ -828,7 +826,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                         .useType("会员")
                         .name(commonService.getMemberName(retail.getMemberId()))
                         .amount(retail.getChangeAmount() == null ? BigDecimal.ZERO : retail.getChangeAmount())
-                        .balance(balance.get())
                         .build();
                 accountFlowVos.add(accountFlowVO);
             });
@@ -840,8 +837,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .list();
         if (!salesData.isEmpty()) {
             salesData.forEach(sale -> {
-                BigDecimal changeAmount = Optional.ofNullable(sale.getChangeAmount()).orElse(BigDecimal.ZERO);
-                balance.updateAndGet(amount -> amount.add(changeAmount));
                 var accountFlowVO = AccountFlowVO.builder()
                         .receiptNumber(sale.getReceiptNumber())
                         .receiptDate(sale.getReceiptDate())
@@ -849,7 +844,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                         .useType("客户")
                         .name(commonService.getCustomerName(sale.getCustomerId()))
                         .amount(sale.getChangeAmount() == null ? BigDecimal.ZERO : sale.getChangeAmount())
-                        .balance(balance.get())
                         .build();
                 accountFlowVos.add(accountFlowVO);
             });
@@ -861,8 +855,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .list();
         if (!purchaseData.isEmpty()) {
             purchaseData.forEach(purchase -> {
-                BigDecimal changeAmount = Optional.ofNullable(purchase.getChangeAmount()).orElse(BigDecimal.ZERO);
-                balance.updateAndGet(amount -> amount.add(changeAmount));
                 var accountFlowVO = AccountFlowVO.builder()
                         .receiptNumber(purchase.getReceiptNumber())
                         .receiptDate(purchase.getReceiptDate())
@@ -870,13 +862,16 @@ public class ReceiptServiceImpl implements ReceiptService {
                         .useType("供应商")
                         .name(commonService.getSupplierName(purchase.getSupplierId()))
                         .amount(purchase.getChangeAmount() == null ? BigDecimal.ZERO : purchase.getChangeAmount())
-                        .balance(balance.get())
                         .build();
                 accountFlowVos.add(accountFlowVO);
             });
         }
-        // 这里取消掉排序了，因为计算最终结果会跟排序结果不一致
         accountFlowVos.sort(Comparator.comparing(AccountFlowVO::getReceiptDate).reversed());
+        // 进行余额计算
+        accountFlowVos.forEach(item -> {
+            balance.updateAndGet(v -> v.add(item.getAmount()));
+            item.setBalance(balance.get());
+        });
 
         var result = new Page<AccountFlowVO>(page, pageSize);
         int startIndex = (int) ((result.getCurrent() - 1) * result.getSize());
