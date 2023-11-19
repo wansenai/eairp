@@ -722,6 +722,13 @@ public class CommonServiceImpl implements CommonService{
     }
 
     @Override
+    public String getProductName(Long productId) {
+        return Optional.ofNullable(productService.getById(productId))
+                .map(Product::getProductName)
+                .orElse(NullString);
+    }
+
+    @Override
     public String getWarehouseName(Long warehouseId) {
         return Optional.ofNullable(warehouseService.getById(warehouseId))
                 .map(Warehouse::getWarehouseName)

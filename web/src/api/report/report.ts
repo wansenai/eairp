@@ -7,7 +7,7 @@ import {
     ProductStockFlowResp,
     QueryProductStockFlowReq,
     QueryAccountStatisticsReq,
-    AccountStatisticsResp, AccountFlowResp
+    AccountStatisticsResp, AccountFlowResp, QueryRetailStatisticsReq, RetailStatisticsResp
 } from "@/api/report/reportModel";
 
 enum API {
@@ -15,7 +15,8 @@ enum API {
     getProductStockData = '/report/productStock',
     getProductStockFlowData = '/report/productStockFlow',
     getAccountStatistics = '/report/accountStatistics',
-    getAccountFlow = '/report/accountFlow'
+    getAccountFlow = '/report/accountFlow',
+    getRetailStatistics = '/report/retailStatistics',
 }
 
 
@@ -59,6 +60,15 @@ export function getAccountFlow(accountId: number) {
         {
             url: API.getAccountFlow,
             params: accountId
+        }
+    );
+}
+
+export function getRetailStatistics(params: QueryRetailStatisticsReq) {
+    return defHttp.post<BaseDataResp<RetailStatisticsResp>>(
+        {
+            url: API.getRetailStatistics,
+            params
         }
     );
 }
