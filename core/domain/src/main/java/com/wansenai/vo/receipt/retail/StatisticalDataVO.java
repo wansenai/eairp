@@ -25,7 +25,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RetailStatisticalDataVO {
+public class StatisticalDataVO {
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal todaySales;
