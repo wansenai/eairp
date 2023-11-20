@@ -15,7 +15,7 @@ package com.wansenai.dto.report;
 import lombok.Data;
 
 @Data
-public class StorageSummaryDTO {
+public class QueryShipmentsSummaryDTO {
 
     private Long relatedPersonId;
 
@@ -30,4 +30,5 @@ public class StorageSummaryDTO {
     private Integer page;
 
     private Integer pageSize;
+
 }
