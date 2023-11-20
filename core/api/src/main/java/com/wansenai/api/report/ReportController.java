@@ -14,10 +14,7 @@ package com.wansenai.api.report;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansenai.dto.report.QueryAccountStatisticsDTO;
-import com.wansenai.dto.report.QueryProductStockDTO;
-import com.wansenai.dto.report.QueryRetailReportDTO;
-import com.wansenai.dto.report.QueryStockFlowDTO;
+import com.wansenai.dto.report.*;
 import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.retail.StatisticalDataVO;
@@ -66,5 +63,15 @@ public class ReportController {
     @PostMapping("retailStatistics")
     public Response<Page<RetailReportVO>> getRetailStatistics(@RequestBody QueryRetailReportDTO queryRetailReportDTO) {
         return receiptService.getRetailStatistics(queryRetailReportDTO);
+    }
+
+    @PostMapping("purchaseStatistics")
+    public Response<Page<PurchaseReportVO>> getPurchaseStatistics(@RequestBody QueryPurchaseReportDTO queryPurchaseReportDTO) {
+        return receiptService.getPurchaseStatistics(queryPurchaseReportDTO);
+    }
+
+    @PostMapping("salesStatistics")
+    public Response<Page<SalesReportVO>> getSalesStatistics(@RequestBody QuerySalesReportDTO querySalesReportDTO) {
+        return receiptService.getSalesStatistics(querySalesReportDTO);
     }
 }

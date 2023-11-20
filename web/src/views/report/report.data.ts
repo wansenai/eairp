@@ -3,6 +3,8 @@ import {BasicColumn} from "@/components/Table";
 import {getWarehouseList} from "@/api/basic/warehouse";
 import {getCategoryList} from "@/api/product/productCategory";
 import {getMemberList} from "@/api/basic/member";
+import {getSupplierList} from "@/api/basic/supplier";
+import {getCustomerList} from "@/api/basic/customer";
 export const productStockColumns: BasicColumn[] = [
     {
         title: '产品id',
@@ -365,6 +367,195 @@ export const retailStatisticsColumns: BasicColumn[] = [
     {
         title: '实际零售金额',
         dataIndex: 'retailLastAmount',
+        width: 70,
+    }
+]
+
+
+export const searchPurchaseSchema: FormSchema[] = [
+    {
+        label: '商品信息',
+        field: 'productExtendInfo',
+        component: 'Input',
+        colProps: { span: 7 },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '单据日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: { span: 7 },
+    },
+    {
+        label: '供应商',
+        field: 'supplierId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getSupplierList,
+            resultField: 'data',
+            labelField: 'supplierName',
+            valueField: 'id',
+        },
+        colProps: { span: 7 },
+    },
+]
+
+export const purchaseStatisticsColumns: BasicColumn[] = [
+    {
+        title: '商品条码',
+        dataIndex: 'productBarcode',
+        width: 100,
+    },
+    {
+        title: '仓库',
+        dataIndex: 'warehouseName',
+        width: 100,
+    },
+    {
+        title: '商品名称',
+        dataIndex: 'productName',
+        width: 120,
+    },
+    {
+        title: '规格',
+        dataIndex: 'productStandard',
+        width: 120,
+    },
+    {
+        title: '型号',
+        dataIndex: 'productModel',
+        width: 90,
+    },
+    {
+        title: '扩展信息',
+        dataIndex: 'productExtendInfo',
+        width: 120,
+    },
+    {
+        title: '单位',
+        dataIndex: 'productUnit',
+        width: 80,
+    },
+    {
+        title: '采购数量',
+        dataIndex: 'purchaseNumber',
+        width: 70,
+    },
+    {
+        title: '采购金额',
+        dataIndex: 'purchaseAmount',
+        width: 70,
+    },
+    {
+        title: '退货数量',
+        dataIndex: 'purchaseRefundNumber',
+        width: 70,
+    },
+    {
+        title: '退货金额',
+        dataIndex: 'purchaseRefundAmount',
+        width: 70,
+    },
+    {
+        title: '实际采购金额',
+        dataIndex: 'purchaseLastAmount',
+        width: 70,
+    }
+]
+
+export const searchSalesSchema: FormSchema[] = [
+    {
+        label: '商品信息',
+        field: 'productExtendInfo',
+        component: 'Input',
+        colProps: { span: 7 },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '单据日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: { span: 7 },
+    },
+    {
+        label: '客户',
+        field: 'customerId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getCustomerList,
+            resultField: 'data',
+            labelField: 'customerName',
+            valueField: 'id',
+        },
+        colProps: { span: 7 },
+    },
+]
+
+export const salesStatisticsColumns: BasicColumn[] = [
+    {
+        title: '商品条码',
+        dataIndex: 'productBarcode',
+        width: 100,
+    },
+    {
+        title: '仓库',
+        dataIndex: 'warehouseName',
+        width: 100,
+    },
+    {
+        title: '商品名称',
+        dataIndex: 'productName',
+        width: 120,
+    },
+    {
+        title: '规格',
+        dataIndex: 'productStandard',
+        width: 120,
+    },
+    {
+        title: '型号',
+        dataIndex: 'productModel',
+        width: 90,
+    },
+    {
+        title: '扩展信息',
+        dataIndex: 'productExtendInfo',
+        width: 120,
+    },
+    {
+        title: '单位',
+        dataIndex: 'productUnit',
+        width: 80,
+    },
+    {
+        title: '销售数量',
+        dataIndex: 'salesNumber',
+        width: 70,
+    },
+    {
+        title: '销售金额',
+        dataIndex: 'salesAmount',
+        width: 70,
+    },
+    {
+        title: '退货数量',
+        dataIndex: 'salesRefundNumber',
+        width: 70,
+    },
+    {
+        title: '退货金额',
+        dataIndex: 'salesRefundAmount',
+        width: 70,
+    },
+    {
+        title: '实际销售金额',
+        dataIndex: 'salesLastAmount',
         width: 70,
     }
 ]

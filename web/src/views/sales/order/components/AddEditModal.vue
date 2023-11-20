@@ -74,7 +74,7 @@
                   <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="barCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
                   <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
-                  <a-button @click="productModal" style="margin-right: 10px">选择添加退货商品</a-button>
+                  <a-button @click="productModal" style="margin-right: 10px">选择添加销售商品</a-button>
                   <a-button @click="" style="margin-right: 10px">历史单据</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
                 </template>

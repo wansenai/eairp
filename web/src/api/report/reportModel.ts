@@ -97,3 +97,43 @@ export interface RetailStatisticsResp {
     retailRefundAmount: number;
     retailLastAmount: number;
 }
+
+export interface QueryPurchaseStatisticsReq {
+    productExtendInfo: string;
+    supplierId: number;
+    warehouseId: number;
+}
+
+export interface PurchaseStatisticsResp {
+    productBarcode: string;
+    productName: string;
+    productStandard: string;
+    productModel: string;
+    productExtendInfo: string;
+    productUnit: string;
+    purchaseNumber: number;
+    purchaseAmount: number;
+    purchaseRefundNumber: number;
+    purchaseRefundAmount: number;
+    purchaseLastAmount: number;
+}
+
+export interface QuerySalesStatisticsReq {
+    productExtendInfo: string;
+    customerId: number;
+    warehouseId: number;
+}
+
+export interface SalesStatisticsResp {
+    productBarcode: string;
+    productName: string;
+    productStandard: string;
+    productModel: string;
+    productExtendInfo: string;
+    productUnit: string;
+    salesNumber: number;
+    salesAmount: number;
+    salesRefundNumber: number;
+    salesRefundAmount: number;
+    salesLastAmount: number;
+}
