@@ -402,6 +402,25 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                     .set(ReceiptRetailMain::getUpdateTime, LocalDateTime.now())
                     .update();
 
+            // 更新余额 如果之前已经修改过那么就需要减去之前的金额 再加上现在的金额 如果之前没有修改过那么就直接加上现在的金额
+
+            var account = accountService.getById(shipmentsDTO.getAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var changeAmount = shipmentsDTO.getCollectAmount();
+                var beforeChangeAmount = beforeReceipt.stream()
+                        .map(item -> item.getTotalAmount())
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                if (beforeChangeAmount != null) {
+                    accountBalance = accountBalance.subtract(beforeChangeAmount);
+                }
+                if (changeAmount != null) {
+                    accountBalance = accountBalance.add(changeAmount);
+                }
+                account.setCurrentAmount(accountBalance);
+                accountService.updateById(account);
+            }
+
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS);
             } else {
@@ -449,8 +468,20 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                     .collect(Collectors.toList());
 
             var saveSubResult = receiptRetailSubService.saveBatch(receiptList);
-
             updateProductStock(receiptList, 2);
+
+            var account = accountService.getById(shipmentsDTO.getAccountId());
+            if (account != null) {
+                // 更新余额
+                var accountBalance = account.getCurrentAmount();
+                var changeAmount = shipmentsDTO.getReceiptAmount();
+                if (changeAmount != null) {
+                    accountBalance = accountBalance.add(changeAmount);
+                    account.setId(shipmentsDTO.getAccountId());
+                    account.setCurrentAmount(accountBalance);
+                    accountService.updateById(account);
+                }
+            }
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_SUCCESS);
@@ -628,6 +659,24 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 updateProductStock(receiptList, 1);
             });
 
+            // 更新余额 如果之前已经修改过那么就需要加上之前的金额 然后再减去现在的金额 如果之前没有修改过那么就直接加上现在的金额 因为这个是退货 所以是负数
+            var account = accountService.getById(refundDTO.getAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var changeAmount = refundDTO.getReceiptAmount();
+                var beforeChangeAmount = beforeReceipt.stream()
+                        .map(item -> item.getTotalAmount())
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                if (beforeChangeAmount != null) {
+                    accountBalance = accountBalance.add(beforeChangeAmount);
+                }
+                if (changeAmount != null) {
+                    accountBalance = accountBalance.subtract(changeAmount);
+                }
+                account.setCurrentAmount(accountBalance);
+                accountService.updateById(account);
+            }
+
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS);
             } else {
@@ -677,6 +726,19 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
             var saveSubResult = receiptRetailSubService.saveBatch(receiptList);
             updateProductStock(receiptList, 1);
+
+            var account = accountService.getById(refundDTO.getAccountId());
+            if (account != null) {
+                // 更新余额
+                var accountBalance = account.getCurrentAmount();
+                var changeAmount = refundDTO.getReceiptAmount();
+                if (changeAmount != null) {
+                    accountBalance = accountBalance.subtract(changeAmount);
+                    account.setId(refundDTO.getAccountId());
+                    account.setCurrentAmount(accountBalance);
+                    accountService.updateById(account);
+                }
+            }
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_REFUND_SUCCESS);

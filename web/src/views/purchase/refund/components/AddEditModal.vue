@@ -550,6 +550,19 @@ export default defineComponent({
         createMessage.error('请选择供应商');
         return;
       }
+      if (purchaseRefundFormState.accountId === 0) {
+        if(!multipleAccounts.value.accountOne && !multipleAccounts.value.accountTwo) {
+          createMessage.error('请至少选择两个退款账户');
+          return;
+        }
+        if(!multipleAccounts.value.accountPriceOne && !multipleAccounts.value.accountPriceTwo) {
+          createMessage.error('请输入退款金额');
+          return;
+        }
+      } else if (!purchaseRefundFormState.accountId) {
+        createMessage.error('请选择退款账户');
+        return;
+      }
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {

@@ -77,3 +77,23 @@ export interface AccountFlowResp {
     balance: number;
     receiptDate: string;
 }
+
+export interface QueryRetailStatisticsReq {
+    productExtendInfo: string;
+    memberId: number;
+    warehouseId: number;
+}
+
+export interface RetailStatisticsResp {
+    productBarcode: string;
+    productName: string;
+    productStandard: string;
+    productModel: string;
+    productExtendInfo: string;
+    productUnit: string;
+    retailNumber: number;
+    retailAmount: number;
+    retailRefundNumber: number;
+    retailRefundAmount: number;
+    retailLastAmount: number;
+}

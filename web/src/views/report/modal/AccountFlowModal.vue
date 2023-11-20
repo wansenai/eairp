@@ -62,6 +62,7 @@ export default defineComponent({
         width: 1000,
         title: '查看账户流水',
         showOkBtn: false,
+        helpMessage: '账户的流水统计是由前往后，最后面的余额是最终余额',
       });
       accountId.value = data.accountId;
     });

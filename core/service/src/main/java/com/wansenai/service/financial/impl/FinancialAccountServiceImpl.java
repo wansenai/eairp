@@ -101,6 +101,10 @@ public class FinancialAccountServiceImpl extends ServiceImpl<FinancialAccountMap
             account.setStatus(CommonConstants.STATUS_NORMAL);
             account.setCreateBy(userId);
             account.setCreateTime(LocalDateTime.now());
+            // 如果当前余额为空，则设置为初始化余额的值
+            if(account.getCurrentAmount() == null) {
+                account.setCurrentAmount(account.getInitialAmount());
+            }
             var saveResult = accountMapper.insert(account);
             if(saveResult == 0) {
                 return Response.responseMsg(FinancialCodeEnum.ADD_ACCOUNT_ERROR);

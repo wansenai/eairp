@@ -670,7 +670,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .set(purchaseStorageDTO.getPaymentAmount() != null, ReceiptPurchaseMain::getDiscountAmount, purchaseStorageDTO.getPaymentAmount())
                     .set(purchaseStorageDTO.getPaymentLastAmount() != null, ReceiptPurchaseMain::getDiscountLastAmount, purchaseStorageDTO.getPaymentLastAmount())
                     .set(purchaseStorageDTO.getOtherAmount() != null, ReceiptPurchaseMain::getOtherAmount, purchaseStorageDTO.getOtherAmount())
-                    .set(purchaseStorageDTO.getThisPaymentAmount() != null, ReceiptPurchaseMain::getChangeAmount, purchaseStorageDTO.getThisPaymentAmount())
+                    .set(purchaseStorageDTO.getThisPaymentAmount() != null, ReceiptPurchaseMain::getChangeAmount, purchaseStorageDTO.getThisPaymentAmount().negate())
                     .set(purchaseStorageDTO.getThisArrearsAmount() != null, ReceiptPurchaseMain::getArrearsAmount, purchaseStorageDTO.getThisArrearsAmount())
                     .set(purchaseStorageDTO.getStatus() != null, ReceiptPurchaseMain::getStatus, purchaseStorageDTO.getStatus())
                     .set(StringUtils.hasText(purchaseStorageDTO.getOtherReceipt()), ReceiptPurchaseMain::getOtherReceipt, purchaseStorageDTO.getOtherReceipt())
@@ -711,6 +711,21 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 updateProductStock(receiptPurchaseStorageList, 1);
             });
 
+            var account = accountService.getById(purchaseStorageDTO.getAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var thisPaymentAmount = purchaseStorageDTO.getThisPaymentAmount();
+                var beforeChangeAmount = beforeReceipt.stream()
+                        .map(ReceiptPurchaseSub::getTotalAmount)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                accountBalance = accountBalance.add(beforeChangeAmount);
+                if (thisPaymentAmount != null) {
+                    accountBalance = accountBalance.subtract(thisPaymentAmount);
+                }
+                account.setCurrentAmount(accountBalance);
+                accountService.updateById(account);
+            }
+
             if (updateMainResult && updateSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS);
             } else {
@@ -733,7 +748,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .discountLastAmount(purchaseStorageDTO.getPaymentLastAmount())
                     .otherAmount(purchaseStorageDTO.getOtherAmount())
                     .otherReceipt(purchaseStorageDTO.getOtherReceipt())
-                    .changeAmount(purchaseStorageDTO.getThisPaymentAmount())
+                    .changeAmount(purchaseStorageDTO.getThisPaymentAmount().negate())
                     .arrearsAmount(purchaseStorageDTO.getThisArrearsAmount())
                     .multipleAccount(multipleAccountIds)
                     .multipleAccountAmount(multipleAccountAmounts)
@@ -766,6 +781,17 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
 
             var saveSubResult = receiptPurchaseSubService.saveBatch(receiptList);
             updateProductStock(receiptList, 1);
+            var account = accountService.getById(purchaseStorageDTO.getAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var changeAmount = purchaseStorageDTO.getThisPaymentAmount();
+                if (changeAmount != null) {
+                    accountBalance = accountBalance.subtract(changeAmount);
+                    account.setId(purchaseStorageDTO.getAccountId());
+                    account.setCurrentAmount(accountBalance);
+                    accountService.updateById(account);
+                }
+            }
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_RECEIPT_SUCCESS);
@@ -987,6 +1013,20 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             purchaseRefundDTO.getTableData().forEach(item -> {
                 updateProductStock(receiptPurchaseRefundList, 2);
             });
+            var account = accountService.getById(purchaseRefundDTO.getAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var thisRefundAmount = purchaseRefundDTO.getThisRefundAmount();
+                var beforeChangeAmount = beforeReceipt.stream()
+                        .map(ReceiptPurchaseSub::getTotalAmount)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                accountBalance = accountBalance.subtract(thisRefundAmount);
+                if (thisRefundAmount != null) {
+                    accountBalance = accountBalance.add(beforeChangeAmount);
+                }
+                account.setCurrentAmount(accountBalance);
+                accountService.updateById(account);
+            }
 
 
             if (updateMainResult && updateSubResult) {
@@ -1044,6 +1084,18 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
 
             var saveSubResult = receiptPurchaseSubService.saveBatch(receiptList);
             updateProductStock(receiptList, 2);
+            var account = accountService.getById(purchaseRefundDTO.getAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var thisRefundAmount = purchaseRefundDTO.getThisRefundAmount();
+                if (thisRefundAmount != null) {
+                    accountBalance = accountBalance.add(thisRefundAmount);
+                    account.setId(purchaseRefundDTO.getAccountId());
+                    account.setCurrentAmount(accountBalance);
+                    accountService.updateById(account);
+                }
+            }
+
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_SUCCESS);
             } else {

@@ -241,7 +241,7 @@ import {AddOrUpdatePurchaseStorageReq, PurchaseData} from "@/api/purchase/model/
 import {FileData} from '/@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
 import {AccountResp} from "@/api/financial/model/accountModel";
-import XEUtils, {clear} from "xe-utils";
+import XEUtils from "xe-utils";
 import MultipleAccountsModal from "@/views/basic/settlement-account/components/MultipleAccountsModal.vue";
 import {SupplierResp} from "@/api/basic/model/supplierModel";
 import {addSupplier, getSupplierList} from "@/api/basic/supplier";
@@ -548,6 +548,19 @@ export default defineComponent({
       const table = xGrid.value
       if (!purchaseStorageFormState.supplierId) {
         createMessage.error('请选择供应商');
+        return;
+      }
+      if (purchaseStorageFormState.accountId === 0) {
+        if(!multipleAccounts.value.accountOne && !multipleAccounts.value.accountTwo) {
+          createMessage.error('请至少选择两个退款账户');
+          return;
+        }
+        if(!multipleAccounts.value.accountPriceOne && !multipleAccounts.value.accountPriceTwo) {
+          createMessage.error('请输入退款金额');
+          return;
+        }
+      } else if (!purchaseStorageFormState.accountId) {
+        createMessage.error('请选择退款账户');
         return;
       }
       if(table) {

@@ -50,7 +50,7 @@
             <a-statistic title="单据金额"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
-                         :value="collectOfferLastAmount"/>
+                         :value="thisCollectAmount"/>
           </div>
         </div>
       </a-page-header>
