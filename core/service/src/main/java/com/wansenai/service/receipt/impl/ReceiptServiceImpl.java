@@ -20,15 +20,14 @@ import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
 import com.wansenai.entities.basic.Supplier;
 import com.wansenai.entities.financial.FinancialAccount;
-import com.wansenai.entities.product.Product;
 import com.wansenai.entities.receipt.*;
-import com.wansenai.entities.warehouse.Warehouse;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.basic.SupplierService;
 import com.wansenai.service.common.CommonService;
 import com.wansenai.service.financial.IFinancialAccountService;
+import com.wansenai.service.product.ProductCategoryService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.service.receipt.*;
 import com.wansenai.service.user.ISysUserService;
@@ -76,6 +75,8 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     private final ProductService productService;
 
+    private final ProductCategoryService productCategoryService;
+
     private final ProductStockMapper productStockMapper;
 
     private final WarehouseService warehouseService;
@@ -84,7 +85,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     private final CommonService commonService;
 
-    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper, WarehouseService warehouseService, IFinancialAccountService accountService, CommonService commonService) {
+    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductCategoryService productCategoryService, ProductStockMapper productStockMapper, WarehouseService warehouseService, IFinancialAccountService accountService, CommonService commonService) {
         this.receiptRetailService = receiptRetailService;
         this.receiptRetailSubService = receiptRetailSubService;
         this.receiptSaleService = receiptSaleService;
@@ -96,30 +97,11 @@ public class ReceiptServiceImpl implements ReceiptService {
         this.supplierService = supplierService;
         this.userService = userService;
         this.productService = productService;
+        this.productCategoryService = productCategoryService;
         this.productStockMapper = productStockMapper;
         this.warehouseService = warehouseService;
         this.accountService = accountService;
         this.commonService = commonService;
-    }
-
-    private String getProductName(Long id) {
-        var product = productService.lambdaQuery()
-                .eq(Product::getId, id)
-                .one();
-        if (product != null) {
-            return product.getProductName();
-        }
-        return "";
-    }
-
-    private String getWarehouseName(Long id) {
-        var warehouse = warehouseService.lambdaQuery()
-                .eq(Warehouse::getId, id)
-                .one();
-        if (warehouse != null) {
-            return warehouse.getWarehouseName();
-        }
-        return "";
     }
 
     @Override
@@ -623,8 +605,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                         .type(receiptRetailMain.getSubType())
                         .productNumber(item.getProductNumber())
                         .productBarcode(item.getProductBarcode())
-                        .productName(getProductName(item.getProductId()))
-                        .warehouseName(getWarehouseName(item.getWarehouseId()))
+                        .productName(commonService.getProductName(item.getProductId()))
+                        .warehouseName(commonService.getWarehouseName(item.getWarehouseId()))
                         .build();
                 stockFlowVos.add(stockFlowVO);
             }
@@ -641,8 +623,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                         .type(receiptSaleMain.getSubType())
                         .productNumber(item.getProductNumber())
                         .productBarcode(item.getProductBarcode())
-                        .productName(getProductName(item.getProductId()))
-                        .warehouseName(getWarehouseName(item.getWarehouseId()))
+                        .productName(commonService.getProductName(item.getProductId()))
+                        .warehouseName(commonService.getWarehouseName(item.getWarehouseId()))
                         .build();
                 stockFlowVos.add(stockFlowVO);
             }
@@ -659,8 +641,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                         .type(receiptPurchaseMain.getSubType())
                         .productNumber(item.getProductNumber())
                         .productBarcode(item.getProductBarcode())
-                        .productName(getProductName(item.getProductId()))
-                        .warehouseName(getWarehouseName(item.getWarehouseId()))
+                        .productName(commonService.getProductName(item.getProductId()))
+                        .warehouseName(commonService.getWarehouseName(item.getWarehouseId()))
                         .build();
                 stockFlowVos.add(stockFlowVO);
             }
@@ -886,8 +868,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         var retailPage = receiptRetailService.lambdaQuery()
                 .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .eq(queryRetailReportDTO.getMemberId() != null, ReceiptRetailMain::getMemberId, queryRetailReportDTO.getMemberId())
-                .le(queryRetailReportDTO.getStartDate() != null, ReceiptRetailMain::getReceiptDate, queryRetailReportDTO.getStartDate())
-                .ge(queryRetailReportDTO.getEndDate() != null, ReceiptRetailMain::getReceiptDate, queryRetailReportDTO.getEndDate())
+                .ge(queryRetailReportDTO.getStartDate() != null, ReceiptRetailMain::getReceiptDate, queryRetailReportDTO.getStartDate())
+                .le(queryRetailReportDTO.getEndDate() != null, ReceiptRetailMain::getReceiptDate, queryRetailReportDTO.getEndDate())
                 .page(page);
 
         var retailVos = new ArrayList<RetailReportVO>();
@@ -900,7 +882,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             for (ReceiptRetailSub retailSub : retailSubs) {
                 var retailVo = RetailReportVO.builder()
                         .productBarcode(retailSub.getProductBarcode())
-                        .warehouseName(getWarehouseName(retailSub.getWarehouseId()))
+                        .warehouseName(commonService.getWarehouseName(retailSub.getWarehouseId()))
                         .build();
 
                 var product = productService.getById(retailSub.getProductId());
@@ -933,7 +915,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                                         .add(Optional.ofNullable(retailSub.getTotalAmount()).orElse(BigDecimal.ZERO)));
                                 matchRetailVo.setRetailNumber(Optional.ofNullable(matchRetailVo.getRetailNumber()).orElse(0)
                                         + Optional.ofNullable(retailSub.getProductNumber()).orElse(0));
-                            } else if (item.getSubType().equals("零售退货")){
+                            } else if (item.getSubType().equals("零售退货")) {
                                 matchRetailVo.setRetailRefundAmount(Optional.ofNullable(matchRetailVo.getRetailRefundAmount()).orElse(BigDecimal.ZERO)
                                         .add(Optional.ofNullable(retailSub.getTotalAmount()).orElse(BigDecimal.ZERO)));
                                 matchRetailVo.setRetailRefundNumber(Optional.ofNullable(matchRetailVo.getRetailRefundNumber()).orElse(0)
@@ -976,8 +958,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .eq(queryPurchaseReportDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, queryPurchaseReportDTO.getSupplierId())
                 .in(ReceiptPurchaseMain::getSubType, "采购入库", "采购退货")
-                .le(queryPurchaseReportDTO.getStartDate() != null, ReceiptPurchaseMain::getReceiptDate, queryPurchaseReportDTO.getStartDate())
-                .ge(queryPurchaseReportDTO.getEndDate() != null, ReceiptPurchaseMain::getReceiptDate, queryPurchaseReportDTO.getEndDate())
+                .ge(queryPurchaseReportDTO.getStartDate() != null, ReceiptPurchaseMain::getReceiptDate, queryPurchaseReportDTO.getStartDate())
+                .le(queryPurchaseReportDTO.getEndDate() != null, ReceiptPurchaseMain::getReceiptDate, queryPurchaseReportDTO.getEndDate())
                 .page(page);
 
         var purchaseVos = new ArrayList<PurchaseReportVO>();
@@ -990,7 +972,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             for (ReceiptPurchaseSub receiptPurchaseSub : purchaseSub) {
                 var purchaseVo = PurchaseReportVO.builder()
                         .productBarcode(receiptPurchaseSub.getProductBarcode())
-                        .warehouseName(getWarehouseName(receiptPurchaseSub.getWarehouseId()))
+                        .warehouseName(commonService.getWarehouseName(receiptPurchaseSub.getWarehouseId()))
                         .build();
 
                 var product = productService.getById(receiptPurchaseSub.getProductId());
@@ -1022,7 +1004,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                                         .add(Optional.ofNullable(receiptPurchaseSub.getTaxIncludedAmount()).orElse(BigDecimal.ZERO)));
                                 matchPurchaseVo.setPurchaseNumber(Optional.ofNullable(matchPurchaseVo.getPurchaseNumber()).orElse(0)
                                         + Optional.ofNullable(receiptPurchaseSub.getProductNumber()).orElse(0));
-                            } else if (item.getSubType().equals("采购退货")){
+                            } else if (item.getSubType().equals("采购退货")) {
                                 matchPurchaseVo.setPurchaseRefundAmount(Optional.ofNullable(matchPurchaseVo.getPurchaseRefundAmount()).orElse(BigDecimal.ZERO)
                                         .add(Optional.ofNullable(receiptPurchaseSub.getTaxIncludedAmount()).orElse(BigDecimal.ZERO)));
                                 matchPurchaseVo.setPurchaseRefundNumber(Optional.ofNullable(matchPurchaseVo.getPurchaseRefundNumber()).orElse(0)
@@ -1064,8 +1046,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .eq(querySalesReportDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, querySalesReportDTO.getCustomerId())
                 .in(ReceiptSaleMain::getSubType, "销售出库", "销售退货")
-                .le(querySalesReportDTO.getStartDate() != null, ReceiptSaleMain::getReceiptDate, querySalesReportDTO.getStartDate())
-                .ge(querySalesReportDTO.getEndDate() != null, ReceiptSaleMain::getReceiptDate, querySalesReportDTO.getEndDate())
+                .ge(querySalesReportDTO.getStartDate() != null, ReceiptSaleMain::getReceiptDate, querySalesReportDTO.getStartDate())
+                .le(querySalesReportDTO.getEndDate() != null, ReceiptSaleMain::getReceiptDate, querySalesReportDTO.getEndDate())
                 .page(page);
 
         var saleVos = new ArrayList<SalesReportVO>();
@@ -1078,7 +1060,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             for (ReceiptSaleSub saleSub : saleSubs) {
                 var saleVo = SalesReportVO.builder()
                         .productBarcode(saleSub.getProductBarcode())
-                        .warehouseName(getWarehouseName(saleSub.getWarehouseId()))
+                        .warehouseName(commonService.getWarehouseName(saleSub.getWarehouseId()))
                         .build();
 
                 var product = productService.getById(saleSub.getProductId());
@@ -1112,7 +1094,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                                         .add(Optional.ofNullable(saleSub.getTaxIncludedAmount()).orElse(BigDecimal.ZERO)));
                                 matchSaleVo.setSalesNumber(Optional.ofNullable(matchSaleVo.getSalesNumber()).orElse(0)
                                         + Optional.ofNullable(saleSub.getProductNumber()).orElse(0));
-                            } else if (item.getSubType().equals("销售退货")){
+                            } else if (item.getSubType().equals("销售退货")) {
                                 matchSaleVo.setSalesRefundAmount(Optional.ofNullable(matchSaleVo.getSalesRefundAmount()).orElse(BigDecimal.ZERO)
                                         .add(Optional.ofNullable(saleSub.getTaxIncludedAmount()).orElse(BigDecimal.ZERO)));
                                 matchSaleVo.setSalesRefundNumber(Optional.ofNullable(matchSaleVo.getSalesRefundNumber()).orElse(0)
@@ -1143,6 +1125,658 @@ public class ReceiptServiceImpl implements ReceiptService {
         result.setSize(salePage.getSize());
         result.setTotal(saleVos.size());
 
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<ShipmentsDetailVO>> getShipmentsDetail(QueryShipmentsDetailDTO queryShipmentsDetailDTO) {
+        var result = new Page<ShipmentsDetailVO>(queryShipmentsDetailDTO.getPage(), queryShipmentsDetailDTO.getPageSize());
+        var retailDetailVos = new ArrayList<ShipmentsDetailVO>();
+        var retailData = receiptRetailService.lambdaQuery()
+                .eq(StringUtils.hasLength(queryShipmentsDetailDTO.getReceiptNumber()), ReceiptRetailMain::getReceiptNumber, queryShipmentsDetailDTO.getReceiptNumber())
+                .eq(queryShipmentsDetailDTO.getOperatorId() != null, ReceiptRetailMain::getCreateBy, queryShipmentsDetailDTO.getOperatorId())
+                .eq(queryShipmentsDetailDTO.getRelatedPersonId() != null, ReceiptRetailMain::getMemberId, queryShipmentsDetailDTO.getRelatedPersonId())
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptRetailMain::getSubType, "零售出库")
+                .like(StringUtils.hasLength(queryShipmentsDetailDTO.getRemark()), ReceiptRetailMain::getRemark, queryShipmentsDetailDTO.getRemark())
+                .ge(queryShipmentsDetailDTO.getStartDate() != null, ReceiptRetailMain::getCreateTime, queryShipmentsDetailDTO.getStartDate())
+                .le(queryShipmentsDetailDTO.getEndDate() != null, ReceiptRetailMain::getCreateTime, queryShipmentsDetailDTO.getEndDate())
+                .list();
+
+        var salesData = receiptSaleService.lambdaQuery()
+                .eq(StringUtils.hasLength(queryShipmentsDetailDTO.getReceiptNumber()), ReceiptSaleMain::getReceiptNumber, queryShipmentsDetailDTO.getReceiptNumber())
+                .eq(queryShipmentsDetailDTO.getOperatorId() != null, ReceiptSaleMain::getCreateBy, queryShipmentsDetailDTO.getOperatorId())
+                .eq(queryShipmentsDetailDTO.getRelatedPersonId() != null, ReceiptSaleMain::getCustomerId, queryShipmentsDetailDTO.getRelatedPersonId())
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptSaleMain::getSubType, "销售出库")
+                .like(StringUtils.hasLength(queryShipmentsDetailDTO.getRemark()), ReceiptSaleMain::getRemark, queryShipmentsDetailDTO.getRemark())
+                .ge(queryShipmentsDetailDTO.getStartDate() != null, ReceiptSaleMain::getCreateTime, queryShipmentsDetailDTO.getStartDate())
+                .le(queryShipmentsDetailDTO.getEndDate() != null, ReceiptSaleMain::getCreateTime, queryShipmentsDetailDTO.getEndDate())
+                .list();
+
+        var purchaseData = receiptPurchaseService.lambdaQuery()
+                .eq(StringUtils.hasLength(queryShipmentsDetailDTO.getReceiptNumber()), ReceiptPurchaseMain::getReceiptNumber, queryShipmentsDetailDTO.getReceiptNumber())
+                .eq(queryShipmentsDetailDTO.getOperatorId() != null, ReceiptPurchaseMain::getCreateBy, queryShipmentsDetailDTO.getOperatorId())
+                .eq(queryShipmentsDetailDTO.getRelatedPersonId() != null, ReceiptPurchaseMain::getSupplierId, queryShipmentsDetailDTO.getRelatedPersonId())
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptPurchaseMain::getSubType, "采购退货")
+                .like(StringUtils.hasLength(queryShipmentsDetailDTO.getRemark()), ReceiptPurchaseMain::getRemark, queryShipmentsDetailDTO.getRemark())
+                .ge(queryShipmentsDetailDTO.getStartDate() != null, ReceiptPurchaseMain::getCreateTime, queryShipmentsDetailDTO.getStartDate())
+                .le(queryShipmentsDetailDTO.getEndDate() != null, ReceiptPurchaseMain::getCreateTime, queryShipmentsDetailDTO.getEndDate())
+                .list();
+
+        if (!retailData.isEmpty()) {
+            var retailSubs = receiptRetailSubService.lambdaQuery()
+                    .in(ReceiptRetailSub::getReceiptMainId, retailData.stream().map(ReceiptRetailMain::getId).toList())
+                    .eq(queryShipmentsDetailDTO.getWarehouseId() != null, ReceiptRetailSub::getWarehouseId, queryShipmentsDetailDTO.getWarehouseId())
+                    .eq(ReceiptRetailSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            for (ReceiptRetailSub retailSubData : retailSubs) {
+                var product = productService.getById(retailSubData.getProductId());
+                var retailDetailVo = ShipmentsDetailVO.builder()
+                        .productName(product.getProductName())
+                        .productStandard(product.getProductStandard())
+                        .productModel(product.getProductModel())
+                        .productUnit(product.getProductUnit())
+                        .productBarcode(retailSubData.getProductBarcode())
+                        .warehouseName(commonService.getWarehouseName(retailSubData.getWarehouseId()))
+                        .productNumber(retailSubData.getProductNumber())
+                        .unitPrice(retailSubData.getUnitPrice())
+                        .amount(retailSubData.getTotalAmount())
+                        .taxRate(BigDecimal.ZERO)
+                        .taxAmount(BigDecimal.ZERO)
+                        .build();
+
+                for (ReceiptRetailMain retail : retailData) {
+                    if (retail.getId().equals(retailSubData.getReceiptMainId())) {
+                        retailDetailVo.setReceiptNumber(retail.getReceiptNumber());
+                        retailDetailVo.setCreateTime(retail.getCreateTime());
+                        retailDetailVo.setType("会员");
+                        retailDetailVo.setName(commonService.getMemberName(retail.getMemberId()));
+                    }
+                }
+                retailDetailVos.add(retailDetailVo);
+            }
+        }
+
+        if (!salesData.isEmpty()) {
+            var salesSubs = receiptSaleSubService.lambdaQuery()
+                    .in(ReceiptSaleSub::getReceiptSaleMainId, salesData.stream().map(ReceiptSaleMain::getId).toList())
+                    .eq(ReceiptSaleSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            for (ReceiptSaleSub salesSubData : salesSubs) {
+                var product = productService.getById(salesSubData.getProductId());
+                var saleDetailVo = ShipmentsDetailVO.builder()
+                        .productName(product.getProductName())
+                        .productStandard(product.getProductStandard())
+                        .productModel(product.getProductModel())
+                        .productUnit(product.getProductUnit())
+                        .productBarcode(salesSubData.getProductBarcode())
+                        .warehouseName(commonService.getWarehouseName(salesSubData.getWarehouseId()))
+                        .productNumber(salesSubData.getProductNumber())
+                        .unitPrice(salesSubData.getUnitPrice())
+                        .amount(salesSubData.getTotalAmount())
+                        .taxRate(salesSubData.getTaxRate())
+                        .taxAmount(salesSubData.getTaxAmount())
+                        .build();
+
+                for (ReceiptSaleMain sale : salesData) {
+                    if (sale.getId().equals(salesSubData.getReceiptSaleMainId())) {
+                        saleDetailVo.setReceiptNumber(sale.getReceiptNumber());
+                        saleDetailVo.setCreateTime(sale.getCreateTime());
+                        saleDetailVo.setType("客户");
+                        saleDetailVo.setName(commonService.getCustomerName(sale.getCustomerId()));
+                    }
+                }
+                retailDetailVos.add(saleDetailVo);
+            }
+        }
+        if (!purchaseData.isEmpty()) {
+            var purchaseSubs = receiptPurchaseSubService.lambdaQuery()
+                    .in(ReceiptPurchaseSub::getReceiptPurchaseMainId, purchaseData.stream().map(ReceiptPurchaseMain::getId).toList())
+                    .eq(ReceiptPurchaseSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            for (ReceiptPurchaseSub purchaseSubData : purchaseSubs) {
+                var product = productService.getById(purchaseSubData.getProductId());
+                var purchaseDetailVo = ShipmentsDetailVO.builder()
+                        .productName(product.getProductName())
+                        .productStandard(product.getProductStandard())
+                        .productModel(product.getProductModel())
+                        .productUnit(product.getProductUnit())
+                        .productBarcode(purchaseSubData.getProductBarcode())
+                        .warehouseName(commonService.getWarehouseName(purchaseSubData.getWarehouseId()))
+                        .productNumber(purchaseSubData.getProductNumber())
+                        .unitPrice(purchaseSubData.getUnitPrice())
+                        .amount(purchaseSubData.getTotalAmount())
+                        .taxRate(purchaseSubData.getTaxRate())
+                        .taxAmount(purchaseSubData.getTaxAmount())
+                        .build();
+
+                for (ReceiptPurchaseMain purchase : purchaseData) {
+                    if (purchase.getId().equals(purchaseSubData.getReceiptPurchaseMainId())) {
+                        purchaseDetailVo.setReceiptNumber(purchase.getReceiptNumber());
+                        purchaseDetailVo.setCreateTime(purchase.getCreateTime());
+                        purchaseDetailVo.setType("供应商");
+                        purchaseDetailVo.setName(commonService.getSupplierName(purchase.getSupplierId()));
+                    }
+                }
+                retailDetailVos.add(purchaseDetailVo);
+            }
+        }
+        // 进行手动分页
+        int startIndex = (int) ((result.getCurrent() - 1) * result.getSize());
+        int endIndex = (int) Math.min(startIndex + result.getSize(), retailDetailVos.size());
+        startIndex = Math.min(startIndex, endIndex);
+
+        List<ShipmentsDetailVO> pageRetailDetailVos = new ArrayList<>(retailDetailVos.subList(startIndex, endIndex));
+        result.setRecords(pageRetailDetailVos);
+        result.setTotal(retailDetailVos.size());
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<StorageDetailVO>> getStorageDetail(QueryStorageDetailDTO queryStorageDetailDTO) {
+        var result = new Page<StorageDetailVO>(queryStorageDetailDTO.getPage(), queryStorageDetailDTO.getPageSize());
+        var storageDetailVos = new ArrayList<StorageDetailVO>();
+        var retailData = receiptRetailService.lambdaQuery()
+                .eq(StringUtils.hasLength(queryStorageDetailDTO.getReceiptNumber()), ReceiptRetailMain::getReceiptNumber, queryStorageDetailDTO.getReceiptNumber())
+                .eq(queryStorageDetailDTO.getOperatorId() != null, ReceiptRetailMain::getCreateBy, queryStorageDetailDTO.getOperatorId())
+                .eq(queryStorageDetailDTO.getRelatedPersonId() != null, ReceiptRetailMain::getMemberId, queryStorageDetailDTO.getRelatedPersonId())
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptRetailMain::getSubType, "零售退货")
+                .like(StringUtils.hasLength(queryStorageDetailDTO.getRemark()), ReceiptRetailMain::getRemark, queryStorageDetailDTO.getRemark())
+                .ge(queryStorageDetailDTO.getStartDate() != null, ReceiptRetailMain::getCreateTime, queryStorageDetailDTO.getStartDate())
+                .le(queryStorageDetailDTO.getEndDate() != null, ReceiptRetailMain::getCreateTime, queryStorageDetailDTO.getEndDate())
+                .list();
+
+        var salesData = receiptSaleService.lambdaQuery()
+                .eq(StringUtils.hasLength(queryStorageDetailDTO.getReceiptNumber()), ReceiptSaleMain::getReceiptNumber, queryStorageDetailDTO.getReceiptNumber())
+                .eq(queryStorageDetailDTO.getOperatorId() != null, ReceiptSaleMain::getCreateBy, queryStorageDetailDTO.getOperatorId())
+                .eq(queryStorageDetailDTO.getRelatedPersonId() != null, ReceiptSaleMain::getCustomerId, queryStorageDetailDTO.getRelatedPersonId())
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptSaleMain::getSubType, "销售退货")
+                .like(StringUtils.hasLength(queryStorageDetailDTO.getRemark()), ReceiptSaleMain::getRemark, queryStorageDetailDTO.getRemark())
+                .ge(queryStorageDetailDTO.getStartDate() != null, ReceiptSaleMain::getCreateTime, queryStorageDetailDTO.getStartDate())
+                .le(queryStorageDetailDTO.getEndDate() != null, ReceiptSaleMain::getCreateTime, queryStorageDetailDTO.getEndDate())
+                .list();
+
+        var purchaseData = receiptPurchaseService.lambdaQuery()
+                .eq(StringUtils.hasLength(queryStorageDetailDTO.getReceiptNumber()), ReceiptPurchaseMain::getReceiptNumber, queryStorageDetailDTO.getReceiptNumber())
+                .eq(queryStorageDetailDTO.getOperatorId() != null, ReceiptPurchaseMain::getCreateBy, queryStorageDetailDTO.getOperatorId())
+                .eq(queryStorageDetailDTO.getRelatedPersonId() != null, ReceiptPurchaseMain::getSupplierId, queryStorageDetailDTO.getRelatedPersonId())
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptPurchaseMain::getSubType, "采购入库")
+                .like(StringUtils.hasLength(queryStorageDetailDTO.getRemark()), ReceiptPurchaseMain::getRemark, queryStorageDetailDTO.getRemark())
+                .ge(queryStorageDetailDTO.getStartDate() != null, ReceiptPurchaseMain::getCreateTime, queryStorageDetailDTO.getStartDate())
+                .le(queryStorageDetailDTO.getEndDate() != null, ReceiptPurchaseMain::getCreateTime, queryStorageDetailDTO.getEndDate())
+                .list();
+
+        if (!retailData.isEmpty()) {
+            var retailSubs = receiptRetailSubService.lambdaQuery()
+                    .in(ReceiptRetailSub::getReceiptMainId, retailData.stream().map(ReceiptRetailMain::getId).toList())
+                    .eq(queryStorageDetailDTO.getWarehouseId() != null, ReceiptRetailSub::getWarehouseId, queryStorageDetailDTO.getWarehouseId())
+                    .eq(ReceiptRetailSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            for (ReceiptRetailSub retailSubData : retailSubs) {
+                var product = productService.getById(retailSubData.getProductId());
+                var retailDetailVo = StorageDetailVO.builder()
+                        .productName(product.getProductName())
+                        .productStandard(product.getProductStandard())
+                        .productModel(product.getProductModel())
+                        .productUnit(product.getProductUnit())
+                        .productBarcode(retailSubData.getProductBarcode())
+                        .warehouseName(commonService.getWarehouseName(retailSubData.getWarehouseId()))
+                        .productNumber(retailSubData.getProductNumber())
+                        .unitPrice(retailSubData.getUnitPrice())
+                        .amount(retailSubData.getTotalAmount())
+                        .taxRate(BigDecimal.ZERO)
+                        .taxAmount(BigDecimal.ZERO)
+                        .build();
+
+                for (ReceiptRetailMain retail : retailData) {
+                    if (retail.getId().equals(retailSubData.getReceiptMainId())) {
+                        retailDetailVo.setReceiptNumber(retail.getReceiptNumber());
+                        retailDetailVo.setCreateTime(retail.getCreateTime());
+                        retailDetailVo.setType("会员");
+                        retailDetailVo.setName(commonService.getMemberName(retail.getMemberId()));
+                    }
+                }
+                storageDetailVos.add(retailDetailVo);
+            }
+        }
+
+        if (!salesData.isEmpty()) {
+            var salesSubs = receiptSaleSubService.lambdaQuery()
+                    .in(ReceiptSaleSub::getReceiptSaleMainId, salesData.stream().map(ReceiptSaleMain::getId).toList())
+                    .eq(ReceiptSaleSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            for (ReceiptSaleSub salesSubData : salesSubs) {
+                var product = productService.getById(salesSubData.getProductId());
+                var saleDetailVo = StorageDetailVO.builder()
+                        .productName(product.getProductName())
+                        .productStandard(product.getProductStandard())
+                        .productModel(product.getProductModel())
+                        .productUnit(product.getProductUnit())
+                        .productBarcode(salesSubData.getProductBarcode())
+                        .warehouseName(commonService.getWarehouseName(salesSubData.getWarehouseId()))
+                        .productNumber(salesSubData.getProductNumber())
+                        .unitPrice(salesSubData.getUnitPrice())
+                        .amount(salesSubData.getTotalAmount())
+                        .taxRate(salesSubData.getTaxRate())
+                        .taxAmount(salesSubData.getTaxAmount())
+                        .build();
+
+                for (ReceiptSaleMain sale : salesData) {
+                    if (sale.getId().equals(salesSubData.getReceiptSaleMainId())) {
+                        saleDetailVo.setReceiptNumber(sale.getReceiptNumber());
+                        saleDetailVo.setCreateTime(sale.getCreateTime());
+                        saleDetailVo.setType("客户");
+                        saleDetailVo.setName(commonService.getCustomerName(sale.getCustomerId()));
+                    }
+                }
+                storageDetailVos.add(saleDetailVo);
+            }
+        }
+        if (!purchaseData.isEmpty()) {
+            var purchaseSubs = receiptPurchaseSubService.lambdaQuery()
+                    .in(ReceiptPurchaseSub::getReceiptPurchaseMainId, purchaseData.stream().map(ReceiptPurchaseMain::getId).toList())
+                    .eq(ReceiptPurchaseSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            for (ReceiptPurchaseSub purchaseSubData : purchaseSubs) {
+                var product = productService.getById(purchaseSubData.getProductId());
+                var purchaseDetailVo = StorageDetailVO.builder()
+                        .productName(product.getProductName())
+                        .productStandard(product.getProductStandard())
+                        .productModel(product.getProductModel())
+                        .productUnit(product.getProductUnit())
+                        .productBarcode(purchaseSubData.getProductBarcode())
+                        .warehouseName(commonService.getWarehouseName(purchaseSubData.getWarehouseId()))
+                        .productNumber(purchaseSubData.getProductNumber())
+                        .unitPrice(purchaseSubData.getUnitPrice())
+                        .amount(purchaseSubData.getTotalAmount())
+                        .taxRate(purchaseSubData.getTaxRate())
+                        .taxAmount(purchaseSubData.getTaxAmount())
+                        .build();
+
+                for (ReceiptPurchaseMain purchase : purchaseData) {
+                    if (purchase.getId().equals(purchaseSubData.getReceiptPurchaseMainId())) {
+                        purchaseDetailVo.setReceiptNumber(purchase.getReceiptNumber());
+                        purchaseDetailVo.setCreateTime(purchase.getCreateTime());
+                        purchaseDetailVo.setType("供应商");
+                        purchaseDetailVo.setName(commonService.getSupplierName(purchase.getSupplierId()));
+                    }
+                }
+                storageDetailVos.add(purchaseDetailVo);
+            }
+        }
+        // 进行手动分页
+        int startIndex = (int) ((result.getCurrent() - 1) * result.getSize());
+        int endIndex = (int) Math.min(startIndex + result.getSize(), storageDetailVos.size());
+        startIndex = Math.min(startIndex, endIndex);
+
+        List<StorageDetailVO> pageStorageDetailVos = new ArrayList<>(storageDetailVos.subList(startIndex, endIndex));
+        result.setRecords(pageStorageDetailVos);
+        result.setTotal(storageDetailVos.size());
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<ShipmentsSummaryVO>> getShipmentsSummary(QueryShipmentsSummaryDTO queryShipmentsSummaryDTO) {
+        var result = new Page<ShipmentsSummaryVO>(queryShipmentsSummaryDTO.getPage(), queryShipmentsSummaryDTO.getPageSize());
+        var shipmentsSummaryVos = new ArrayList<ShipmentsSummaryVO>();
+        var retailData = receiptRetailService.lambdaQuery()
+                .eq(queryShipmentsSummaryDTO.getRelatedPersonId() != null, ReceiptRetailMain::getMemberId, queryShipmentsSummaryDTO.getRelatedPersonId())
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptRetailMain::getSubType, "零售出库")
+                .ge(queryShipmentsSummaryDTO.getStartDate() != null, ReceiptRetailMain::getCreateTime, queryShipmentsSummaryDTO.getStartDate())
+                .le(queryShipmentsSummaryDTO.getEndDate() != null, ReceiptRetailMain::getCreateTime, queryShipmentsSummaryDTO.getEndDate())
+                .list();
+
+        var salesData = receiptSaleService.lambdaQuery()
+                .eq(queryShipmentsSummaryDTO.getRelatedPersonId() != null, ReceiptSaleMain::getCustomerId, queryShipmentsSummaryDTO.getRelatedPersonId())
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptSaleMain::getSubType, "销售出库")
+                .ge(queryShipmentsSummaryDTO.getStartDate() != null, ReceiptSaleMain::getCreateTime, queryShipmentsSummaryDTO.getStartDate())
+                .le(queryShipmentsSummaryDTO.getEndDate() != null, ReceiptSaleMain::getCreateTime, queryShipmentsSummaryDTO.getEndDate())
+                .list();
+
+        var purchaseData = receiptPurchaseService.lambdaQuery()
+                .eq(queryShipmentsSummaryDTO.getRelatedPersonId() != null, ReceiptPurchaseMain::getSupplierId, queryShipmentsSummaryDTO.getRelatedPersonId())
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptPurchaseMain::getSubType, "采购退货")
+                .ge(queryShipmentsSummaryDTO.getStartDate() != null, ReceiptPurchaseMain::getCreateTime, queryShipmentsSummaryDTO.getStartDate())
+                .le(queryShipmentsSummaryDTO.getEndDate() != null, ReceiptPurchaseMain::getCreateTime, queryShipmentsSummaryDTO.getEndDate())
+                .list();
+
+        if (!retailData.isEmpty()) {
+            var retailSubs = receiptRetailSubService.lambdaQuery()
+                    .in(ReceiptRetailSub::getReceiptMainId, retailData.stream().map(ReceiptRetailMain::getId).toList())
+                    .eq(queryShipmentsSummaryDTO.getWarehouseId() != null, ReceiptRetailSub::getWarehouseId, queryShipmentsSummaryDTO.getWarehouseId())
+                    .eq(ReceiptRetailSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            for (ReceiptRetailSub retailSubData : retailSubs) {
+                if (shipmentsSummaryVos.stream().noneMatch(matchShipmentsSummaryVo -> retailSubData.getProductBarcode().equals(matchShipmentsSummaryVo.getProductBarcode())
+                        && commonService.getWarehouseName(retailSubData.getWarehouseId())
+                        .equals(matchShipmentsSummaryVo.getWarehouseName()))) {
+                    var product = productService.getById(retailSubData.getProductId());
+
+                    var shipmentsSummaryVo = ShipmentsSummaryVO.builder()
+                            .productBarcode(retailSubData.getProductBarcode())
+                            .warehouseName(commonService.getWarehouseName(retailSubData.getWarehouseId()))
+                            .productName(product.getProductName())
+                            .productStandard(product.getProductStandard())
+                            .productModel(product.getProductModel())
+                            .productUnit(product.getProductUnit())
+                            .productCategoryName(commonService.getProductCategoryName(product.getProductCategoryId()))
+                            .shipmentsAmount(retailSubData.getTotalAmount())
+                            .shipmentsNumber(retailSubData.getProductNumber())
+                            .createTime(retailSubData.getCreateTime())
+                            .build();
+                    shipmentsSummaryVos.add(shipmentsSummaryVo);
+                } else {
+                    shipmentsSummaryVos.forEach(matchShipmentsSummaryVo -> {
+                        if (retailSubData.getProductBarcode().equals(matchShipmentsSummaryVo.getProductBarcode())
+                                && commonService.getWarehouseName(retailSubData.getWarehouseId())
+                                .equals(matchShipmentsSummaryVo.getWarehouseName())) {
+                            matchShipmentsSummaryVo.setShipmentsAmount(Optional.ofNullable(matchShipmentsSummaryVo.getShipmentsAmount()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(retailSubData.getTotalAmount()).orElse(BigDecimal.ZERO)));
+                            matchShipmentsSummaryVo.setShipmentsNumber(Optional.ofNullable(matchShipmentsSummaryVo.getShipmentsNumber()).orElse(0)
+                                    + Optional.ofNullable(retailSubData.getProductNumber()).orElse(0));
+                        }
+                    });
+                }
+            }
+        }
+
+        if (!salesData.isEmpty()) {
+            var salesSubs = receiptSaleSubService.lambdaQuery()
+                    .in(ReceiptSaleSub::getReceiptSaleMainId, salesData.stream().map(ReceiptSaleMain::getId).toList())
+                    .eq(queryShipmentsSummaryDTO.getWarehouseId() != null, ReceiptSaleSub::getWarehouseId, queryShipmentsSummaryDTO.getWarehouseId())
+                    .eq(ReceiptSaleSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+
+            for (ReceiptSaleSub salesSubData : salesSubs) {
+                if (shipmentsSummaryVos.stream().noneMatch(matchShipmentsSummaryVo -> salesSubData.getProductBarcode()
+                        .equals(matchShipmentsSummaryVo.getProductBarcode())
+                        && commonService.getWarehouseName(salesSubData.getWarehouseId())
+                        .equals(matchShipmentsSummaryVo.getWarehouseName()))) {
+
+                    var product = productService.getById(salesSubData.getProductId());
+                    var shipmentsSummaryVo = ShipmentsSummaryVO.builder()
+                            .productBarcode(salesSubData.getProductBarcode())
+                            .warehouseName(commonService.getWarehouseName(salesSubData.getWarehouseId()))
+                            .productName(product.getProductName())
+                            .productStandard(product.getProductStandard())
+                            .productModel(product.getProductModel())
+                            .productUnit(product.getProductUnit())
+                            .productCategoryName(commonService.getProductCategoryName(product.getProductCategoryId()))
+                            .shipmentsAmount(salesSubData.getTotalAmount())
+                            .shipmentsNumber(salesSubData.getProductNumber())
+                            .createTime(salesSubData.getCreateTime())
+                            .build();
+                    shipmentsSummaryVos.add(shipmentsSummaryVo);
+                } else {
+                    shipmentsSummaryVos.forEach(matchShipmentsSummaryVo -> {
+                        if (salesSubData.getProductBarcode().equals(matchShipmentsSummaryVo.getProductBarcode())
+                                && commonService.getWarehouseName(salesSubData.getWarehouseId())
+                                .equals(matchShipmentsSummaryVo.getWarehouseName())) {
+                            matchShipmentsSummaryVo.setShipmentsAmount(Optional.ofNullable(matchShipmentsSummaryVo.getShipmentsAmount()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(salesSubData.getTotalAmount()).orElse(BigDecimal.ZERO)));
+                            matchShipmentsSummaryVo.setShipmentsNumber(Optional.ofNullable(matchShipmentsSummaryVo.getShipmentsNumber()).orElse(0)
+                                    + Optional.ofNullable(salesSubData.getProductNumber()).orElse(0));
+                        }
+                    });
+                }
+            }
+        }
+        if (!purchaseData.isEmpty()) {
+            var purchaseSubs = receiptPurchaseSubService.lambdaQuery()
+                    .in(ReceiptPurchaseSub::getReceiptPurchaseMainId, purchaseData.stream().map(ReceiptPurchaseMain::getId).toList())
+                    .eq(queryShipmentsSummaryDTO.getWarehouseId() != null, ReceiptPurchaseSub::getWarehouseId, queryShipmentsSummaryDTO.getWarehouseId())
+                    .eq(ReceiptPurchaseSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            for (ReceiptPurchaseSub purchaseSubData : purchaseSubs) {
+                if (shipmentsSummaryVos.stream().noneMatch(matchShipmentsSummaryVo -> purchaseSubData.getProductBarcode()
+                        .equals(matchShipmentsSummaryVo.getProductBarcode())
+                        && commonService.getWarehouseName(purchaseSubData.getWarehouseId())
+                        .equals(matchShipmentsSummaryVo.getWarehouseName()))) {
+
+                    var product = productService.getById(purchaseSubData.getProductId());
+                    var shipmentsSummaryVo = ShipmentsSummaryVO.builder()
+                            .productBarcode(purchaseSubData.getProductBarcode())
+                            .warehouseName(commonService.getWarehouseName(purchaseSubData.getWarehouseId()))
+                            .productName(product.getProductName())
+                            .productStandard(product.getProductStandard())
+                            .productModel(product.getProductModel())
+                            .productUnit(product.getProductUnit())
+                            .productCategoryName(commonService.getProductCategoryName(product.getProductCategoryId()))
+                            .shipmentsAmount(purchaseSubData.getTotalAmount())
+                            .shipmentsNumber(purchaseSubData.getProductNumber())
+                            .createTime(purchaseSubData.getCreateTime())
+                            .build();
+                    shipmentsSummaryVos.add(shipmentsSummaryVo);
+                } else {
+                    shipmentsSummaryVos.forEach(matchShipmentsSummaryVo -> {
+                        if (purchaseSubData.getProductBarcode().equals(matchShipmentsSummaryVo.getProductBarcode())
+                                && commonService.getWarehouseName(purchaseSubData.getWarehouseId())
+                                .equals(matchShipmentsSummaryVo.getWarehouseName())) {
+                            matchShipmentsSummaryVo.setShipmentsAmount(Optional.ofNullable(matchShipmentsSummaryVo.getShipmentsAmount()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(purchaseSubData.getTotalAmount()).orElse(BigDecimal.ZERO)));
+                            matchShipmentsSummaryVo.setShipmentsNumber(Optional.ofNullable(matchShipmentsSummaryVo.getShipmentsNumber()).orElse(0)
+                                    + Optional.ofNullable(purchaseSubData.getProductNumber()).orElse(0));
+                        }
+                    });
+                }
+            }
+        }
+        // 进行手动分页
+        int startIndex = (int) ((result.getCurrent() - 1) * result.getSize());
+        int endIndex = (int) Math.min(startIndex + result.getSize(), shipmentsSummaryVos.size());
+        startIndex = Math.min(startIndex, endIndex);
+
+        List<ShipmentsSummaryVO> shipmentsSummaryVOS = new ArrayList<>(shipmentsSummaryVos.subList(startIndex, endIndex));
+        result.setRecords(shipmentsSummaryVOS);
+        result.setTotal(shipmentsSummaryVos.size());
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<StorageSummaryVO>> getStorageSummary(QueryStorageSummaryDTO queryStorageSummaryDTO) {
+        var result = new Page<StorageSummaryVO>(queryStorageSummaryDTO.getPage(), queryStorageSummaryDTO.getPageSize());
+        var storageSummaryVos = new ArrayList<StorageSummaryVO>();
+        var retailData = receiptRetailService.lambdaQuery()
+                .eq(queryStorageSummaryDTO.getRelatedPersonId() != null, ReceiptRetailMain::getMemberId, queryStorageSummaryDTO.getRelatedPersonId())
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptRetailMain::getSubType, "零售退货")
+                .ge(queryStorageSummaryDTO.getStartDate() != null, ReceiptRetailMain::getCreateTime, queryStorageSummaryDTO.getStartDate())
+                .le(queryStorageSummaryDTO.getEndDate() != null, ReceiptRetailMain::getCreateTime, queryStorageSummaryDTO.getEndDate())
+                .list();
+
+        var salesData = receiptSaleService.lambdaQuery()
+                .eq(queryStorageSummaryDTO.getRelatedPersonId() != null, ReceiptSaleMain::getCustomerId, queryStorageSummaryDTO.getRelatedPersonId())
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptSaleMain::getSubType, "销售退货")
+                .ge(queryStorageSummaryDTO.getStartDate() != null, ReceiptSaleMain::getCreateTime, queryStorageSummaryDTO.getStartDate())
+                .le(queryStorageSummaryDTO.getEndDate() != null, ReceiptSaleMain::getCreateTime, queryStorageSummaryDTO.getEndDate())
+                .list();
+
+        var purchaseData = receiptPurchaseService.lambdaQuery()
+                .eq(queryStorageSummaryDTO.getRelatedPersonId() != null, ReceiptPurchaseMain::getSupplierId, queryStorageSummaryDTO.getRelatedPersonId())
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptPurchaseMain::getSubType, "采购入库")
+                .ge(queryStorageSummaryDTO.getStartDate() != null, ReceiptPurchaseMain::getCreateTime, queryStorageSummaryDTO.getStartDate())
+                .le(queryStorageSummaryDTO.getEndDate() != null, ReceiptPurchaseMain::getCreateTime, queryStorageSummaryDTO.getEndDate())
+                .list();
+
+        if (!retailData.isEmpty()) {
+            var retailSubs = receiptRetailSubService.lambdaQuery()
+                    .in(ReceiptRetailSub::getReceiptMainId, retailData.stream().map(ReceiptRetailMain::getId).toList())
+                    .eq(queryStorageSummaryDTO.getWarehouseId() != null, ReceiptRetailSub::getWarehouseId, queryStorageSummaryDTO.getWarehouseId())
+                    .eq(ReceiptRetailSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            for (ReceiptRetailSub retailSubData : retailSubs) {
+                if (storageSummaryVos.stream().noneMatch(matchShipmentsSummaryVo -> retailSubData.getProductBarcode().equals(matchShipmentsSummaryVo.getProductBarcode())
+                        && commonService.getWarehouseName(retailSubData.getWarehouseId())
+                        .equals(matchShipmentsSummaryVo.getWarehouseName()))) {
+                    var product = productService.getById(retailSubData.getProductId());
+
+                    var storageSummaryVo = StorageSummaryVO.builder()
+                            .productBarcode(retailSubData.getProductBarcode())
+                            .warehouseName(commonService.getWarehouseName(retailSubData.getWarehouseId()))
+                            .productName(product.getProductName())
+                            .productStandard(product.getProductStandard())
+                            .productModel(product.getProductModel())
+                            .productUnit(product.getProductUnit())
+                            .productCategoryName(commonService.getProductCategoryName(product.getProductCategoryId()))
+                            .storageAmount(retailSubData.getTotalAmount())
+                            .storageNumber(retailSubData.getProductNumber())
+                            .createTime(retailSubData.getCreateTime())
+                            .build();
+                    storageSummaryVos.add(storageSummaryVo);
+                } else {
+                    storageSummaryVos.forEach(matchShipmentsSummaryVo -> {
+                        if (retailSubData.getProductBarcode().equals(matchShipmentsSummaryVo.getProductBarcode())
+                                && commonService.getWarehouseName(retailSubData.getWarehouseId())
+                                .equals(matchShipmentsSummaryVo.getWarehouseName())) {
+                            matchShipmentsSummaryVo.setStorageAmount(Optional.ofNullable(matchShipmentsSummaryVo.getStorageAmount()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(retailSubData.getTotalAmount()).orElse(BigDecimal.ZERO)));
+                            matchShipmentsSummaryVo.setStorageNumber(Optional.ofNullable(matchShipmentsSummaryVo.getStorageNumber()).orElse(0)
+                                    + Optional.ofNullable(retailSubData.getProductNumber()).orElse(0));
+                        }
+                    });
+                }
+            }
+        }
+
+        if (!salesData.isEmpty()) {
+            var salesSubs = receiptSaleSubService.lambdaQuery()
+                    .in(ReceiptSaleSub::getReceiptSaleMainId, salesData.stream().map(ReceiptSaleMain::getId).toList())
+                    .eq(queryStorageSummaryDTO.getWarehouseId() != null, ReceiptSaleSub::getWarehouseId, queryStorageSummaryDTO.getWarehouseId())
+                    .eq(ReceiptSaleSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+
+            for (ReceiptSaleSub salesSubData : salesSubs) {
+                if (storageSummaryVos.stream().noneMatch(matchShipmentsSummaryVo -> salesSubData.getProductBarcode()
+                        .equals(matchShipmentsSummaryVo.getProductBarcode())
+                        && commonService.getWarehouseName(salesSubData.getWarehouseId())
+                        .equals(matchShipmentsSummaryVo.getWarehouseName()))) {
+
+                    var product = productService.getById(salesSubData.getProductId());
+                    var storageSummaryVo = StorageSummaryVO.builder()
+                            .productBarcode(salesSubData.getProductBarcode())
+                            .warehouseName(commonService.getWarehouseName(salesSubData.getWarehouseId()))
+                            .productName(product.getProductName())
+                            .productStandard(product.getProductStandard())
+                            .productModel(product.getProductModel())
+                            .productUnit(product.getProductUnit())
+                            .productCategoryName(commonService.getProductCategoryName(product.getProductCategoryId()))
+                            .storageAmount(salesSubData.getTotalAmount())
+                            .storageNumber(salesSubData.getProductNumber())
+                            .createTime(salesSubData.getCreateTime())
+                            .build();
+                    storageSummaryVos.add(storageSummaryVo);
+                } else {
+                    storageSummaryVos.forEach(matchShipmentsSummaryVo -> {
+                        if (salesSubData.getProductBarcode().equals(matchShipmentsSummaryVo.getProductBarcode())
+                                && commonService.getWarehouseName(salesSubData.getWarehouseId())
+                                .equals(matchShipmentsSummaryVo.getWarehouseName())) {
+                            matchShipmentsSummaryVo.setStorageAmount(Optional.ofNullable(matchShipmentsSummaryVo.getStorageAmount()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(salesSubData.getTotalAmount()).orElse(BigDecimal.ZERO)));
+                            matchShipmentsSummaryVo.setStorageNumber(Optional.ofNullable(matchShipmentsSummaryVo.getStorageNumber()).orElse(0)
+                                    + Optional.ofNullable(salesSubData.getProductNumber()).orElse(0));
+                        }
+                    });
+                }
+            }
+        }
+        if (!purchaseData.isEmpty()) {
+            var purchaseSubs = receiptPurchaseSubService.lambdaQuery()
+                    .in(ReceiptPurchaseSub::getReceiptPurchaseMainId, purchaseData.stream().map(ReceiptPurchaseMain::getId).toList())
+                    .eq(queryStorageSummaryDTO.getWarehouseId() != null, ReceiptPurchaseSub::getWarehouseId, queryStorageSummaryDTO.getWarehouseId())
+                    .eq(ReceiptPurchaseSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            for (ReceiptPurchaseSub purchaseSubData : purchaseSubs) {
+                if (storageSummaryVos.stream().noneMatch(matchShipmentsSummaryVo -> purchaseSubData.getProductBarcode()
+                        .equals(matchShipmentsSummaryVo.getProductBarcode())
+                        && commonService.getWarehouseName(purchaseSubData.getWarehouseId())
+                        .equals(matchShipmentsSummaryVo.getWarehouseName()))) {
+
+                    var product = productService.getById(purchaseSubData.getProductId());
+                    var storageSummaryVo = StorageSummaryVO.builder()
+                            .productBarcode(purchaseSubData.getProductBarcode())
+                            .warehouseName(commonService.getWarehouseName(purchaseSubData.getWarehouseId()))
+                            .productName(product.getProductName())
+                            .productStandard(product.getProductStandard())
+                            .productModel(product.getProductModel())
+                            .productUnit(product.getProductUnit())
+                            .productCategoryName(commonService.getProductCategoryName(product.getProductCategoryId()))
+                            .storageAmount(purchaseSubData.getTotalAmount())
+                            .storageNumber(purchaseSubData.getProductNumber())
+                            .createTime(purchaseSubData.getCreateTime())
+                            .build();
+                    storageSummaryVos.add(storageSummaryVo);
+                } else {
+                    storageSummaryVos.forEach(matchShipmentsSummaryVo -> {
+                        if (purchaseSubData.getProductBarcode().equals(matchShipmentsSummaryVo.getProductBarcode())
+                                && commonService.getWarehouseName(purchaseSubData.getWarehouseId())
+                                .equals(matchShipmentsSummaryVo.getWarehouseName())) {
+                            matchShipmentsSummaryVo.setStorageAmount(Optional.ofNullable(matchShipmentsSummaryVo.getStorageAmount()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(purchaseSubData.getTotalAmount()).orElse(BigDecimal.ZERO)));
+                            matchShipmentsSummaryVo.setStorageNumber(Optional.ofNullable(matchShipmentsSummaryVo.getStorageNumber()).orElse(0)
+                                    + Optional.ofNullable(purchaseSubData.getProductNumber()).orElse(0));
+                        }
+                    });
+                }
+            }
+        }
+        // 进行手动分页
+        int startIndex = (int) ((result.getCurrent() - 1) * result.getSize());
+        int endIndex = (int) Math.min(startIndex + result.getSize(), storageSummaryVos.size());
+        startIndex = Math.min(startIndex, endIndex);
+
+        List<StorageSummaryVO> storageSummaryVOS = new ArrayList<>(storageSummaryVos.subList(startIndex, endIndex));
+        result.setRecords(storageSummaryVOS);
+        result.setTotal(storageSummaryVos.size());
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<List<RelatedPersonVO>> getRelatedPerson() {
+        var members = memberService.list();
+        var customers = customerService.list();
+        var suppliers = supplierService.list();
+
+        var result = new ArrayList<RelatedPersonVO>();
+        if (!members.isEmpty()) {
+            for (Member member : members) {
+                var personVO = RelatedPersonVO.builder()
+                        .id(member.getId())
+                        .type("会员")
+                        .name(member.getMemberName() + "[会员]")
+                        .build();
+                result.add(personVO);
+            }
+        }
+        if (!customers.isEmpty()) {
+            for (Customer customer : customers) {
+                var personVO = RelatedPersonVO.builder()
+                        .id(customer.getId())
+                        .type("客户")
+                        .name(customer.getCustomerName() + "[客户]")
+                        .build();
+                result.add(personVO);
+            }
+        }
+        if (!suppliers.isEmpty()) {
+            for (Supplier supplier : suppliers) {
+                var personVO = RelatedPersonVO.builder()
+                        .id(supplier.getId())
+                        .type("供应商")
+                        .name(supplier.getSupplierName() + "[供应商]")
+                        .build();
+                result.add(personVO);
+            }
+        }
         return Response.responseData(result);
     }
 }

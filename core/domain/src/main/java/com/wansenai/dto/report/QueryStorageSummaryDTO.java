@@ -10,31 +10,24 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.report;
+package com.wansenai.dto.report;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
-@Builder
-public class StockFlowVO {
+public class QueryStorageSummaryDTO {
 
-    private String receiptNumber;
+    private Long relatedPersonId;
 
-    private String type;
+    private String productInfo;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long productBarcode;
+    private Long warehouseId;
 
-    private String productName;
+    private String startDate;
 
-    private String warehouseName;
+    private String endDate;
 
-    private Integer productNumber;
+    private Integer page;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime receiptDate;
+    private Integer pageSize;
 }

@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -39,8 +40,11 @@ public class ShipmentsSummaryVO {
 
     private String productUnit;
 
-    private Integer ShipmentsNumber;
+    private Integer shipmentsNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal ShipmentsAmount;
+    private BigDecimal shipmentsAmount;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime createTime;
 }

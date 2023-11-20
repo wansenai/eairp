@@ -22,6 +22,8 @@ import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.StatisticalDataVO;
 import com.wansenai.vo.report.*;
 
+import java.util.List;
+
 public interface ReceiptService {
 
     /**
@@ -51,4 +53,14 @@ public interface ReceiptService {
     Response<Page<PurchaseReportVO>> getPurchaseStatistics(QueryPurchaseReportDTO queryPurchaseReportDTO);
 
     Response<Page<SalesReportVO>> getSalesStatistics(QuerySalesReportDTO querySalesReportDTO);
+
+    Response<Page<ShipmentsDetailVO>> getShipmentsDetail(QueryShipmentsDetailDTO queryShipmentsDetailDTO);
+
+    Response<Page<StorageDetailVO>> getStorageDetail(QueryStorageDetailDTO queryStorageDetailDTO);
+
+    Response<Page<ShipmentsSummaryVO>> getShipmentsSummary(QueryShipmentsSummaryDTO queryShipmentsSummaryDTO);
+
+    Response<Page<StorageSummaryVO>> getStorageSummary(QueryStorageSummaryDTO queryStorageSummaryDTO);
+
+    Response<List<RelatedPersonVO>> getRelatedPerson();
 }

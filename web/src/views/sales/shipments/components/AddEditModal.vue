@@ -688,6 +688,7 @@ export default defineComponent({
       saleShipmentsFormState.thisArrearsAmount = 0
       saleShipmentsFormState.accountId = undefined
       saleShipmentsFormState.operatorIds = []
+      saleShipmentsFormState.otherReceipt = ''
       barCode.value = ''
       saleShipmentsFormState.remark = ''
       fileList.value = []

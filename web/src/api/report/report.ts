@@ -12,7 +12,18 @@ import {
     QueryRetailStatisticsReq,
     RetailStatisticsResp,
     QueryPurchaseStatisticsReq,
-    PurchaseStatisticsResp, QuerySalesStatisticsReq, SalesStatisticsResp
+    PurchaseStatisticsResp,
+    QuerySalesStatisticsReq,
+    SalesStatisticsResp,
+    QueryShipmentsDetailStatisticsReq,
+    ShipmentsDetailStatisticsResp,
+    QueryStorageDetailStatisticsReq,
+    StorageDetailStatisticsResp,
+    RelatedPersonResp,
+    QueryShipmentsSummaryStatisticsReq,
+    ShipmentsSummaryStatisticsResp,
+    QueryStorageSummaryStatisticsReq,
+    StorageSummaryStatisticsResp
 } from "@/api/report/reportModel";
 
 enum API {
@@ -24,6 +35,11 @@ enum API {
     getRetailStatistics = '/report/retailStatistics',
     getPurchaseStatistics = '/report/purchaseStatistics',
     getSalesStatistics = '/report/salesStatistics',
+    getShipmentsDetail = '/report/shipmentsDetail',
+    getStorageDetail = '/report/storageDetail',
+    getRelatedPerson = '/report/relatedPerson',
+    getShipmentsSummary = '/report/shipmentsSummary',
+    getStorageSummary = '/report/storageSummary',
 }
 
 
@@ -93,6 +109,50 @@ export function getSalesStatistics(params: QuerySalesStatisticsReq) {
     return defHttp.post<BaseDataResp<SalesStatisticsResp>>(
         {
             url: API.getSalesStatistics,
+            params
+        }
+    );
+}
+
+export function getShipmentsDetail(params: QueryShipmentsDetailStatisticsReq) {
+    return defHttp.post<BaseDataResp<ShipmentsDetailStatisticsResp>>(
+        {
+            url: API.getShipmentsDetail,
+            params
+        }
+    );
+}
+
+export function getStorageDetail(params: QueryStorageDetailStatisticsReq) {
+    return defHttp.post<BaseDataResp<StorageDetailStatisticsResp>>(
+        {
+            url: API.getStorageDetail,
+            params
+        }
+    );
+}
+
+export function getRelatedPerson() {
+    return defHttp.get<BaseDataResp<RelatedPersonResp>>(
+        {
+            url: API.getRelatedPerson,
+        }
+    );
+}
+
+export function getShipmentsSummary(params: QueryShipmentsSummaryStatisticsReq) {
+    return defHttp.post<BaseDataResp<ShipmentsSummaryStatisticsResp>>(
+        {
+            url: API.getShipmentsSummary,
+            params
+        }
+    );
+}
+
+export function getStorageSummary(params: QueryStorageSummaryStatisticsReq) {
+    return defHttp.post<BaseDataResp<StorageSummaryStatisticsResp>>(
+        {
+            url: API.getStorageSummary,
             params
         }
     );

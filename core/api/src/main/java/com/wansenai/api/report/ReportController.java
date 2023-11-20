@@ -21,6 +21,8 @@ import com.wansenai.vo.receipt.retail.StatisticalDataVO;
 import com.wansenai.vo.report.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/report")
 public class ReportController {
@@ -73,5 +75,30 @@ public class ReportController {
     @PostMapping("salesStatistics")
     public Response<Page<SalesReportVO>> getSalesStatistics(@RequestBody QuerySalesReportDTO querySalesReportDTO) {
         return receiptService.getSalesStatistics(querySalesReportDTO);
+    }
+
+    @GetMapping("relatedPerson")
+    public Response<List<RelatedPersonVO>> getRelatedPerson() {
+        return receiptService.getRelatedPerson();
+    }
+
+    @PostMapping("shipmentsDetail")
+    public Response<Page<ShipmentsDetailVO>> getShipmentsDetail(@RequestBody QueryShipmentsDetailDTO queryShipmentsDetailDTO) {
+        return receiptService.getShipmentsDetail(queryShipmentsDetailDTO);
+    }
+
+    @PostMapping("storageDetail")
+    public Response<Page<StorageDetailVO>> getStorageDetail(@RequestBody QueryStorageDetailDTO queryStorageDetailDTO) {
+        return receiptService.getStorageDetail(queryStorageDetailDTO);
+    }
+
+    @PostMapping("shipmentsSummary")
+    public Response<Page<ShipmentsSummaryVO>> getShipmentsSummary(@RequestBody QueryShipmentsSummaryDTO queryShipmentsSummaryDTO) {
+        return receiptService.getShipmentsSummary(queryShipmentsSummaryDTO);
+    }
+
+    @PostMapping("storageSummary")
+    public Response<Page<StorageSummaryVO>> getStorageSummary(@RequestBody QueryStorageSummaryDTO queryStorageSummaryDTO) {
+        return receiptService.getStorageSummary(queryStorageSummaryDTO);
     }
 }

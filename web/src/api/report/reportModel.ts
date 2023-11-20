@@ -137,3 +137,97 @@ export interface SalesStatisticsResp {
     salesRefundAmount: number;
     salesLastAmount: number;
 }
+
+export interface QueryShipmentsDetailStatisticsReq {
+    receiptNumber: string;
+    productInfo: string;
+    relatedPersonId: number;
+    warehouseId: number;
+    operatorId: number;
+    remark: string;
+}
+
+export interface ShipmentsDetailStatisticsResp {
+    receiptNumber: string;
+    productBarcode: string;
+    productName: string;
+    productStandard: string;
+    productModel: string;
+    productUnit: string;
+    type: string;
+    name: string;
+    productNumber: number;
+    unitPrice: number;
+    amount: number;
+    taxRate: number;
+    taxAmount: number;
+    createTime: string;
+}
+
+export interface QueryStorageDetailStatisticsReq {
+    receiptNumber: string;
+    productInfo: string;
+    relatedPersonId: number;
+    warehouseId: number;
+    operatorId: number;
+    remark: string;
+}
+
+export interface RelatedPersonResp {
+    id: string;
+    type: string;
+    name: string;
+}
+
+export interface StorageDetailStatisticsResp {
+    receiptNumber: string;
+    productBarcode: string;
+    productName: string;
+    productStandard: string;
+    productModel: string;
+    productUnit: string;
+    type: string;
+    name: string;
+    productNumber: number;
+    unitPrice: number;
+    amount: number;
+    taxRate: number;
+    taxAmount: number;
+    createTime: string;
+}
+
+export interface QueryShipmentsSummaryStatisticsReq {
+    productInfo: string;
+    relatedPersonId: number;
+    warehouseId: number;
+}
+
+export interface ShipmentsSummaryStatisticsResp {
+    productBarcode: string;
+    productName: string;
+    warehouseName: string;
+    productStandard: string;
+    productCategoryName: string;
+    productModel: string;
+    productUnit: string;
+    shipmentsNumber: number;
+    shipmentsAmount: number;
+}
+
+export interface QueryStorageSummaryStatisticsReq {
+    productInfo: string;
+    relatedPersonId: number;
+    warehouseId: number;
+}
+
+export interface StorageSummaryStatisticsResp {
+    productBarcode: string;
+    productName: string;
+    warehouseName: string;
+    productStandard: string;
+    productCategoryName: string;
+    productModel: string;
+    productUnit: string;
+    storageNumber: number;
+    storageAmount: number;
+}

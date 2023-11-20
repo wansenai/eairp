@@ -19,6 +19,7 @@ import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.sms.v20190711.SmsClient;
 import com.tencentcloudapi.sms.v20190711.models.SendSmsRequest;
 import com.wansenai.bo.FileDataBO;
+import com.wansenai.entities.product.ProductCategory;
 import com.wansenai.entities.warehouse.Warehouse;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.BaseService;
@@ -725,6 +726,13 @@ public class CommonServiceImpl implements CommonService{
     public String getProductName(Long productId) {
         return Optional.ofNullable(productService.getById(productId))
                 .map(Product::getProductName)
+                .orElse(NullString);
+    }
+
+    @Override
+    public String getProductCategoryName(Long productCategoryId) {
+        return Optional.ofNullable(productCategoryService.getById(productCategoryId))
+                .map(ProductCategory::getCategoryName)
                 .orElse(NullString);
     }
 

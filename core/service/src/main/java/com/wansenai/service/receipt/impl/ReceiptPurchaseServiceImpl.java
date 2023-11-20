@@ -426,6 +426,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                             .taxIncludedAmount(item.getTaxTotalPrice())
                             .remark(item.getRemark())
                             .updateBy(userId)
+                            .createTime(LocalDateTime.now())
                             .updateTime(LocalDateTime.now())
                             .build())
                     .collect(Collectors.toList());
@@ -702,6 +703,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                             .taxAmount(item.getTaxAmount())
                             .taxIncludedAmount(item.getTaxTotalPrice())
                             .updateBy(userId)
+                            .createTime(LocalDateTime.now())
                             .updateTime(LocalDateTime.now())
                             .build())
                     .collect(Collectors.toList());
@@ -1005,6 +1007,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                             .taxAmount(item.getTaxAmount())
                             .taxIncludedAmount(item.getTaxTotalPrice())
                             .updateBy(userId)
+                            .createTime(LocalDateTime.now())
                             .updateTime(LocalDateTime.now())
                             .build())
                     .collect(Collectors.toList());
