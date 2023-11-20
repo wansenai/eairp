@@ -895,3 +895,209 @@ export const storageDetailStatisticsColumns: BasicColumn[] = [
         width: 140,
     },
 ]
+
+export const searchShipmentsSummarySchema: FormSchema[] = [
+    {
+        label: '商品信息',
+        field: 'productInfo',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '单据日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '往来单位',
+        field: 'relatedPersonId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getRelatedPerson,
+            resultField: 'data',
+            labelField: 'name',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '仓库',
+        field: 'warehouseId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getWarehouseList,
+            resultField: 'data',
+            labelField: 'warehouseName',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    }
+]
+
+export const shipmentsSummaryStatisticsColumns: BasicColumn[] = [
+    {
+        title: '商品条码',
+        dataIndex: 'productBarcode',
+        width: 100,
+    },
+    {
+        title: '仓库',
+        dataIndex: 'warehouseName',
+        width: 100,
+    },
+    {
+        title: '商品名称',
+        dataIndex: 'productName',
+        width: 120,
+    },
+    {
+        title: '规格',
+        dataIndex: 'productStandard',
+        width: 120,
+    },
+    {
+        title: '型号',
+        dataIndex: 'productModel',
+        width: 90,
+    },
+    {
+        title: '单位',
+        dataIndex: 'productUnit',
+        width: 60,
+    },
+    {
+        title: '出库数量',
+        dataIndex: 'shipmentsNumber',
+        width: 65,
+    },
+    {
+        title: '出库金额',
+        dataIndex: 'shipmentsAmount',
+        width: 65,
+    },
+    {
+        title: '出库日期',
+        dataIndex: 'createTime',
+        width: 140,
+    },
+]
+
+export const searchStorageSummarySchema: FormSchema[] = [
+    {
+        label: '商品信息',
+        field: 'productInfo',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '单据日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '往来单位',
+        field: 'relatedPersonId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getRelatedPerson,
+            resultField: 'data',
+            labelField: 'name',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '仓库',
+        field: 'warehouseId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getWarehouseList,
+            resultField: 'data',
+            labelField: 'warehouseName',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    }
+]
+
+export const storageSummaryStatisticsColumns: BasicColumn[] = [
+    {
+        title: '商品条码',
+        dataIndex: 'productBarcode',
+        width: 100,
+    },
+    {
+        title: '仓库',
+        dataIndex: 'warehouseName',
+        width: 100,
+    },
+    {
+        title: '商品名称',
+        dataIndex: 'productName',
+        width: 120,
+    },
+    {
+        title: '规格',
+        dataIndex: 'productStandard',
+        width: 120,
+    },
+    {
+        title: '型号',
+        dataIndex: 'productModel',
+        width: 90,
+    },
+    {
+        title: '单位',
+        dataIndex: 'productUnit',
+        width: 60,
+    },
+    {
+        title: '入库数量',
+        dataIndex: 'storageNumber',
+        width: 65,
+    },
+    {
+        title: '入库金额',
+        dataIndex: 'storageAmount',
+        width: 65,
+    },
+    {
+        title: '入库日期',
+        dataIndex: 'createTime',
+        width: 140,
+    },
+]
