@@ -147,20 +147,34 @@ public class OperatorServiceImpl extends ServiceImpl<OperatorMapper, Operator> i
         }
 
         var operatorVOS = new ArrayList<OperatorVO>();
-        var operator = lambdaQuery()
-                .eq(Operator::getType, type)
-                .eq(Operator::getStatus, CommonConstants.STATUS_NORMAL)
-                .eq(Operator::getDeleteFlag, CommonConstants.NOT_DELETED)
-                .list();
-
-        if (operator.isEmpty()) {
-            return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
+        if (type.equals("所有")) {
+            var operator = lambdaQuery()
+                    .eq(Operator::getStatus, CommonConstants.STATUS_NORMAL)
+                    .eq(Operator::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            if (operator.isEmpty()) {
+                return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
+            }
+            operator.forEach(item -> {
+                OperatorVO operatorVO = new OperatorVO();
+                BeanUtils.copyProperties(item, operatorVO);
+                operatorVOS.add(operatorVO);
+            });
+        } else {
+            var operator = lambdaQuery()
+                    .eq(Operator::getType, type)
+                    .eq(Operator::getStatus, CommonConstants.STATUS_NORMAL)
+                    .eq(Operator::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+            if (operator.isEmpty()) {
+                return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
+            }
+            operator.forEach(item -> {
+                OperatorVO operatorVO = new OperatorVO();
+                BeanUtils.copyProperties(item, operatorVO);
+                operatorVOS.add(operatorVO);
+            });
         }
-        operator.forEach(item -> {
-            OperatorVO operatorVO = new OperatorVO();
-            BeanUtils.copyProperties(item, operatorVO);
-            operatorVOS.add(operatorVO);
-        });
         return Response.responseData(operatorVOS);
     }
 }
