@@ -14,9 +14,13 @@ package com.wansenai.entities;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.io.Serial;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -27,12 +31,14 @@ import lombok.experimental.Accessors;
  * </p>
  */
 @Data
+@Builder
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("income_expense")
 public class IncomeExpense implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 799164139936218L;
 
     /**
      * 主键
@@ -63,12 +69,12 @@ public class IncomeExpense implements Serializable {
     /**
      * 启用
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 排序
      */
-    private String sort;
+    private Integer sort;
 
     /**
      * 创建时间
@@ -93,7 +99,7 @@ public class IncomeExpense implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }
