@@ -16,7 +16,14 @@ import {
     QuerySalesStatisticsReq,
     SalesStatisticsResp,
     QueryShipmentsDetailStatisticsReq,
-    ShipmentsDetailStatisticsResp, QueryStorageDetailStatisticsReq, StorageDetailStatisticsResp, RelatedPersonResp
+    ShipmentsDetailStatisticsResp,
+    QueryStorageDetailStatisticsReq,
+    StorageDetailStatisticsResp,
+    RelatedPersonResp,
+    QueryShipmentsSummaryStatisticsReq,
+    ShipmentsSummaryStatisticsResp,
+    QueryStorageSummaryStatisticsReq,
+    StorageSummaryStatisticsResp
 } from "@/api/report/reportModel";
 
 enum API {
@@ -30,7 +37,9 @@ enum API {
     getSalesStatistics = '/report/salesStatistics',
     getShipmentsDetail = '/report/shipmentsDetail',
     getStorageDetail = '/report/storageDetail',
-    getRelatedPerson = '/report/relatedPerson'
+    getRelatedPerson = '/report/relatedPerson',
+    getShipmentsSummary = '/report/shipmentsSummary',
+    getStorageSummary = '/report/storageSummary',
 }
 
 
@@ -127,6 +136,24 @@ export function getRelatedPerson() {
     return defHttp.get<BaseDataResp<RelatedPersonResp>>(
         {
             url: API.getRelatedPerson,
+        }
+    );
+}
+
+export function getShipmentsSummary(params: QueryShipmentsSummaryStatisticsReq) {
+    return defHttp.post<BaseDataResp<ShipmentsSummaryStatisticsResp>>(
+        {
+            url: API.getShipmentsSummary,
+            params
+        }
+    );
+}
+
+export function getStorageSummary(params: QueryStorageSummaryStatisticsReq) {
+    return defHttp.post<BaseDataResp<StorageSummaryStatisticsResp>>(
+        {
+            url: API.getStorageSummary,
+            params
         }
     );
 }

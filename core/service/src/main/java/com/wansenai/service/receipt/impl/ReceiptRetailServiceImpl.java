@@ -378,6 +378,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                             .productBarcode(item.getBarCode())
                             .warehouseId(item.getWarehouseId())
                             .updateBy(userId)
+                            .createTime(LocalDateTime.now())
                             .updateTime(LocalDateTime.now())
                             .build())
                     .collect(Collectors.toList());
@@ -650,6 +651,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                             .productBarcode(item.getBarCode())
                             .warehouseId(item.getWarehouseId())
                             .updateBy(userId)
+                            .createTime(LocalDateTime.now())
                             .updateTime(LocalDateTime.now())
                             .build())
                     .collect(Collectors.toList());

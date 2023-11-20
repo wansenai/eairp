@@ -704,6 +704,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                             .taxAmount(item.getTaxAmount())
                             .taxIncludedAmount(item.getTaxTotalPrice())
                             .updateBy(userId)
+                            .createTime(LocalDateTime.now())
                             .updateTime(LocalDateTime.now())
                             .build())
                     .collect(Collectors.toList());
@@ -718,11 +719,9 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 var accountBalance = account.getCurrentAmount();
                 var thisCollectAmount = shipmentsDTO.getThisCollectAmount();
                 var beforeChangeAmount = beforeReceipt.stream()
-                        .map(item -> item.getTotalAmount())
+                        .map(ReceiptSaleSub::getTotalAmount)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
-                if (beforeChangeAmount != null) {
-                    accountBalance = accountBalance.subtract(beforeChangeAmount);
-                }
+                accountBalance = accountBalance.subtract(beforeChangeAmount);
                 if (thisCollectAmount != null) {
                     accountBalance = accountBalance.add(thisCollectAmount);
                 }
@@ -1010,6 +1009,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                             .taxAmount(item.getTaxAmount())
                             .taxIncludedAmount(item.getTaxTotalPrice())
                             .updateBy(userId)
+                            .createTime(LocalDateTime.now())
                             .updateTime(LocalDateTime.now())
                             .build())
                     .collect(Collectors.toList());

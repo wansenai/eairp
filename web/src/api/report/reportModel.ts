@@ -140,7 +140,7 @@ export interface SalesStatisticsResp {
 
 export interface QueryShipmentsDetailStatisticsReq {
     receiptNumber: string;
-    productInfo: number;
+    productInfo: string;
     relatedPersonId: number;
     warehouseId: number;
     operatorId: number;
@@ -166,7 +166,7 @@ export interface ShipmentsDetailStatisticsResp {
 
 export interface QueryStorageDetailStatisticsReq {
     receiptNumber: string;
-    productInfo: number;
+    productInfo: string;
     relatedPersonId: number;
     warehouseId: number;
     operatorId: number;
@@ -194,4 +194,40 @@ export interface StorageDetailStatisticsResp {
     taxRate: number;
     taxAmount: number;
     createTime: string;
+}
+
+export interface QueryShipmentsSummaryStatisticsReq {
+    productInfo: string;
+    relatedPersonId: number;
+    warehouseId: number;
+}
+
+export interface ShipmentsSummaryStatisticsResp {
+    productBarcode: string;
+    productName: string;
+    warehouseName: string;
+    productStandard: string;
+    productCategoryName: string;
+    productModel: string;
+    productUnit: string;
+    shipmentsNumber: number;
+    shipmentsAmount: number;
+}
+
+export interface QueryStorageSummaryStatisticsReq {
+    productInfo: string;
+    relatedPersonId: number;
+    warehouseId: number;
+}
+
+export interface StorageSummaryStatisticsResp {
+    productBarcode: string;
+    productName: string;
+    warehouseName: string;
+    productStandard: string;
+    productCategoryName: string;
+    productModel: string;
+    productUnit: string;
+    storageNumber: number;
+    storageAmount: number;
 }
