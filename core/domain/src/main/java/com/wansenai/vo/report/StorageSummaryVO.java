@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class RetailReportVO {
+public class StorageSummaryVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productBarcode;
@@ -35,20 +35,12 @@ public class RetailReportVO {
 
     private String productStandard;
 
-    private String productExtendInfo;
+    private String productCategoryName;
 
     private String productUnit;
 
-    private Integer retailNumber;
+    private Integer storageNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal retailAmount;
-
-    private Integer retailRefundNumber;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal retailRefundAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal retailLastAmount;
+    private BigDecimal storageAmount;
 }

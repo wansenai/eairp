@@ -19,10 +19,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class RetailReportVO {
+public class StorageDetailVO {
+
+    private String receiptNumber;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productBarcode;
@@ -35,20 +38,25 @@ public class RetailReportVO {
 
     private String productStandard;
 
-    private String productExtendInfo;
-
     private String productUnit;
 
-    private Integer retailNumber;
+    private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal retailAmount;
-
-    private Integer retailRefundNumber;
+    private BigDecimal unitPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal retailRefundAmount;
+    private BigDecimal amount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal retailLastAmount;
+    private BigDecimal taxRate;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal taxAmount;
+
+    // supplier or customer or member
+    private String name;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime createTime;
 }
