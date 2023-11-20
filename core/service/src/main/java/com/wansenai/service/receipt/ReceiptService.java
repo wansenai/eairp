@@ -15,10 +15,7 @@ package com.wansenai.service.receipt;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
-import com.wansenai.dto.report.QueryAccountStatisticsDTO;
-import com.wansenai.dto.report.QueryProductStockDTO;
-import com.wansenai.dto.report.QueryRetailReportDTO;
-import com.wansenai.dto.report.QueryStockFlowDTO;
+import com.wansenai.dto.report.*;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
@@ -50,4 +47,8 @@ public interface ReceiptService {
     Response<Page<AccountFlowVO>> getAccountFlow(Long accountId, Long page, Long pageSize);
 
     Response<Page<RetailReportVO>> getRetailStatistics(QueryRetailReportDTO queryRetailReportDTO);
+
+    Response<Page<PurchaseReportVO>> getPurchaseStatistics(QueryPurchaseReportDTO queryPurchaseReportDTO);
+
+    Response<Page<SalesReportVO>> getSalesStatistics(QuerySalesReportDTO querySalesReportDTO);
 }

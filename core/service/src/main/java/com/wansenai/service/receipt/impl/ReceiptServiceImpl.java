@@ -15,10 +15,7 @@ package com.wansenai.service.receipt.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
-import com.wansenai.dto.report.QueryAccountStatisticsDTO;
-import com.wansenai.dto.report.QueryProductStockDTO;
-import com.wansenai.dto.report.QueryRetailReportDTO;
-import com.wansenai.dto.report.QueryStockFlowDTO;
+import com.wansenai.dto.report.*;
 import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
 import com.wansenai.entities.basic.Supplier;
@@ -895,76 +892,256 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         var retailVos = new ArrayList<RetailReportVO>();
         retailPage.getRecords().forEach(item -> {
-            var retailSub = receiptRetailSubService.lambdaQuery()
+            var retailSubs = receiptRetailSubService.lambdaQuery()
                     .eq(ReceiptRetailSub::getReceiptMainId, item.getId())
                     .eq(ReceiptRetailSub::getDeleteFlag, CommonConstants.NOT_DELETED)
-                    .one();
+                    .list();
 
-            var retailVo = RetailReportVO.builder()
-                    .productBarcode(retailSub.getProductBarcode())
-                    .warehouseName(getWarehouseName(retailSub.getWarehouseId()))
-                    .build();
+            for (ReceiptRetailSub retailSub : retailSubs) {
+                var retailVo = RetailReportVO.builder()
+                        .productBarcode(retailSub.getProductBarcode())
+                        .warehouseName(getWarehouseName(retailSub.getWarehouseId()))
+                        .build();
 
-            var product = productService.getById(retailSub.getProductId());
-            if (product != null) {
-                String productExtendInfo = product.getProductManufacturer() +
-                        "|" +
-                        product.getOtherFieldOne() +
-                        "|" +
-                        product.getOtherFieldTwo() +
-                        "|" +
-                        product.getOtherFieldThree();
-                retailVo.setProductName(product.getProductName());
-                retailVo.setProductStandard(product.getProductStandard());
-                retailVo.setProductModel(product.getProductModel());
-                retailVo.setProductUnit(product.getProductUnit());
-                retailVo.setProductExtendInfo(productExtendInfo);
-            }
-            // 如果是相同的商品条码和仓库名称 则不进行重复添加
-            if (retailVos.stream().noneMatch(matchRetailVo -> retailVo.getProductBarcode().equals(matchRetailVo.getProductBarcode())
-                    && retailVo.getWarehouseName().equals(matchRetailVo.getWarehouseName()))) {
-                retailVos.add(retailVo);
-            }
-            // 将数据进行组装 计算重复商品的出库和退货数量以及金额 匹配商品条码和仓库名称
-            if (retailVo.getProductBarcode() != null && retailVo.getWarehouseName() != null) {
-                retailVos.forEach(matchRetailVo -> {
-                    if (retailVo.getProductBarcode().equals(matchRetailVo.getProductBarcode())
-                            && retailVo.getWarehouseName().equals(matchRetailVo.getWarehouseName())) {
-                        if (item.getSubType().equals("零售出库")) {
-                            matchRetailVo.setRetailAmount(Optional.ofNullable(matchRetailVo.getRetailAmount()).orElse(BigDecimal.ZERO)
-                                    .add(Optional.ofNullable(retailSub.getTotalAmount()).orElse(BigDecimal.ZERO)));
-                            matchRetailVo.setRetailNumber(Optional.ofNullable(matchRetailVo.getRetailNumber()).orElse(0)
-                                    + Optional.ofNullable(retailSub.getProductNumber()).orElse(0));
-                        } else if (item.getSubType().equals("零售退货")){
-                            matchRetailVo.setRetailRefundAmount(Optional.ofNullable(matchRetailVo.getRetailRefundAmount()).orElse(BigDecimal.ZERO)
-                                    .add(Optional.ofNullable(retailSub.getTotalAmount()).orElse(BigDecimal.ZERO)));
-                            matchRetailVo.setRetailRefundNumber(Optional.ofNullable(matchRetailVo.getRetailRefundNumber()).orElse(0)
-                                    + Optional.ofNullable(retailSub.getProductNumber()).orElse(0));
-                        }
-                        // 如果没有值 则归0处理
-                        if (matchRetailVo.getRetailAmount() == null) {
-                            matchRetailVo.setRetailAmount(BigDecimal.ZERO);
-                        }
-                        if (matchRetailVo.getRetailRefundAmount() == null) {
-                            matchRetailVo.setRetailRefundAmount(BigDecimal.ZERO);
-                        }
-                        if (matchRetailVo.getRetailNumber() == null) {
-                            matchRetailVo.setRetailNumber(0);
-                        }
-                        if (matchRetailVo.getRetailRefundNumber() == null) {
-                            matchRetailVo.setRetailRefundNumber(0);
-                        }
+                var product = productService.getById(retailSub.getProductId());
+                if (product != null) {
+                    String productExtendInfo = product.getProductManufacturer() +
+                            "|" +
+                            product.getOtherFieldOne() +
+                            "|" +
+                            product.getOtherFieldTwo() +
+                            "|" +
+                            product.getOtherFieldThree();
+                    retailVo.setProductName(product.getProductName());
+                    retailVo.setProductStandard(product.getProductStandard());
+                    retailVo.setProductModel(product.getProductModel());
+                    retailVo.setProductUnit(product.getProductUnit());
+                    retailVo.setProductExtendInfo(productExtendInfo);
+                }
+                // 如果是相同的商品条码和仓库名称 则不进行重复添加
+                if (retailVos.stream().noneMatch(matchRetailVo -> retailVo.getProductBarcode().equals(matchRetailVo.getProductBarcode())
+                        && retailVo.getWarehouseName().equals(matchRetailVo.getWarehouseName()))) {
+                    retailVos.add(retailVo);
+                }
+                // 将数据进行组装 计算重复商品的出库和退货数量以及金额 匹配商品条码和仓库名称
+                if (retailVo.getProductBarcode() != null && retailVo.getWarehouseName() != null) {
+                    retailVos.forEach(matchRetailVo -> {
+                        if (retailVo.getProductBarcode().equals(matchRetailVo.getProductBarcode())
+                                && retailVo.getWarehouseName().equals(matchRetailVo.getWarehouseName())) {
+                            if (item.getSubType().equals("零售出库")) {
+                                matchRetailVo.setRetailAmount(Optional.ofNullable(matchRetailVo.getRetailAmount()).orElse(BigDecimal.ZERO)
+                                        .add(Optional.ofNullable(retailSub.getTotalAmount()).orElse(BigDecimal.ZERO)));
+                                matchRetailVo.setRetailNumber(Optional.ofNullable(matchRetailVo.getRetailNumber()).orElse(0)
+                                        + Optional.ofNullable(retailSub.getProductNumber()).orElse(0));
+                            } else if (item.getSubType().equals("零售退货")){
+                                matchRetailVo.setRetailRefundAmount(Optional.ofNullable(matchRetailVo.getRetailRefundAmount()).orElse(BigDecimal.ZERO)
+                                        .add(Optional.ofNullable(retailSub.getTotalAmount()).orElse(BigDecimal.ZERO)));
+                                matchRetailVo.setRetailRefundNumber(Optional.ofNullable(matchRetailVo.getRetailRefundNumber()).orElse(0)
+                                        + Optional.ofNullable(retailSub.getProductNumber()).orElse(0));
+                            }
+                            // 如果没有值 则归0处理
+                            if (matchRetailVo.getRetailAmount() == null) {
+                                matchRetailVo.setRetailAmount(BigDecimal.ZERO);
+                            }
+                            if (matchRetailVo.getRetailRefundAmount() == null) {
+                                matchRetailVo.setRetailRefundAmount(BigDecimal.ZERO);
+                            }
+                            if (matchRetailVo.getRetailNumber() == null) {
+                                matchRetailVo.setRetailNumber(0);
+                            }
+                            if (matchRetailVo.getRetailRefundNumber() == null) {
+                                matchRetailVo.setRetailRefundNumber(0);
+                            }
 
-                        matchRetailVo.setRetailLastAmount(Optional.ofNullable(matchRetailVo.getRetailAmount()).orElse(BigDecimal.ZERO)
-                                .subtract(Optional.ofNullable(matchRetailVo.getRetailRefundAmount()).orElse(BigDecimal.ZERO)));
-                    }
-                });
+                            matchRetailVo.setRetailLastAmount(Optional.ofNullable(matchRetailVo.getRetailAmount()).orElse(BigDecimal.ZERO)
+                                    .subtract(Optional.ofNullable(matchRetailVo.getRetailRefundAmount()).orElse(BigDecimal.ZERO)));
+                        }
+                    });
+                }
             }
         });
         result.setRecords(retailVos);
         result.setPages(retailPage.getPages());
         result.setSize(retailPage.getSize());
-        result.setTotal(retailPage.getTotal());
+        result.setTotal(retailVos.size());
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<PurchaseReportVO>> getPurchaseStatistics(QueryPurchaseReportDTO queryPurchaseReportDTO) {
+        var result = new Page<PurchaseReportVO>();
+        var page = new Page<ReceiptPurchaseMain>(queryPurchaseReportDTO.getPage(), queryPurchaseReportDTO.getPageSize());
+        var purchasePage = receiptPurchaseService.lambdaQuery()
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(queryPurchaseReportDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, queryPurchaseReportDTO.getSupplierId())
+                .in(ReceiptPurchaseMain::getSubType, "采购入库", "采购退货")
+                .le(queryPurchaseReportDTO.getStartDate() != null, ReceiptPurchaseMain::getReceiptDate, queryPurchaseReportDTO.getStartDate())
+                .ge(queryPurchaseReportDTO.getEndDate() != null, ReceiptPurchaseMain::getReceiptDate, queryPurchaseReportDTO.getEndDate())
+                .page(page);
+
+        var purchaseVos = new ArrayList<PurchaseReportVO>();
+        purchasePage.getRecords().forEach(item -> {
+            var purchaseSub = receiptPurchaseSubService.lambdaQuery()
+                    .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
+                    .eq(ReceiptPurchaseSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+
+            for (ReceiptPurchaseSub receiptPurchaseSub : purchaseSub) {
+                var purchaseVo = PurchaseReportVO.builder()
+                        .productBarcode(receiptPurchaseSub.getProductBarcode())
+                        .warehouseName(getWarehouseName(receiptPurchaseSub.getWarehouseId()))
+                        .build();
+
+                var product = productService.getById(receiptPurchaseSub.getProductId());
+                if (product != null) {
+                    String productExtendInfo = product.getProductManufacturer() +
+                            "|" +
+                            product.getOtherFieldOne() +
+                            "|" +
+                            product.getOtherFieldTwo() +
+                            "|" +
+                            product.getOtherFieldThree();
+                    purchaseVo.setProductName(product.getProductName());
+                    purchaseVo.setProductStandard(product.getProductStandard());
+                    purchaseVo.setProductModel(product.getProductModel());
+                    purchaseVo.setProductUnit(product.getProductUnit());
+                    purchaseVo.setProductExtendInfo(productExtendInfo);
+                }
+                if (purchaseVos.stream().noneMatch(matchPurchaseVo -> purchaseVo.getProductBarcode().equals(matchPurchaseVo.getProductBarcode())
+                        && purchaseVo.getWarehouseName().equals(matchPurchaseVo.getWarehouseName()))) {
+                    purchaseVos.add(purchaseVo);
+                }
+
+                if (purchaseVo.getProductBarcode() != null && purchaseVo.getWarehouseName() != null) {
+                    purchaseVos.forEach(matchPurchaseVo -> {
+                        if (purchaseVo.getProductBarcode().equals(matchPurchaseVo.getProductBarcode())
+                                && purchaseVo.getWarehouseName().equals(matchPurchaseVo.getWarehouseName())) {
+                            if (item.getSubType().equals("采购入库")) {
+                                matchPurchaseVo.setPurchaseAmount(Optional.ofNullable(matchPurchaseVo.getPurchaseAmount()).orElse(BigDecimal.ZERO)
+                                        .add(Optional.ofNullable(receiptPurchaseSub.getTaxIncludedAmount()).orElse(BigDecimal.ZERO)));
+                                matchPurchaseVo.setPurchaseNumber(Optional.ofNullable(matchPurchaseVo.getPurchaseNumber()).orElse(0)
+                                        + Optional.ofNullable(receiptPurchaseSub.getProductNumber()).orElse(0));
+                            } else if (item.getSubType().equals("采购退货")){
+                                matchPurchaseVo.setPurchaseRefundAmount(Optional.ofNullable(matchPurchaseVo.getPurchaseRefundAmount()).orElse(BigDecimal.ZERO)
+                                        .add(Optional.ofNullable(receiptPurchaseSub.getTaxIncludedAmount()).orElse(BigDecimal.ZERO)));
+                                matchPurchaseVo.setPurchaseRefundNumber(Optional.ofNullable(matchPurchaseVo.getPurchaseRefundNumber()).orElse(0)
+                                        + Optional.ofNullable(receiptPurchaseSub.getProductNumber()).orElse(0));
+                            }
+                            if (matchPurchaseVo.getPurchaseAmount() == null) {
+                                matchPurchaseVo.setPurchaseAmount(BigDecimal.ZERO);
+                            }
+                            if (matchPurchaseVo.getPurchaseRefundAmount() == null) {
+                                matchPurchaseVo.setPurchaseRefundAmount(BigDecimal.ZERO);
+                            }
+                            if (matchPurchaseVo.getPurchaseNumber() == null) {
+                                matchPurchaseVo.setPurchaseNumber(0);
+                            }
+                            if (matchPurchaseVo.getPurchaseRefundNumber() == null) {
+                                matchPurchaseVo.setPurchaseRefundNumber(0);
+                            }
+
+                            matchPurchaseVo.setPurchaseLastAmount(Optional.ofNullable(matchPurchaseVo.getPurchaseAmount()).orElse(BigDecimal.ZERO)
+                                    .subtract(Optional.ofNullable(matchPurchaseVo.getPurchaseRefundAmount()).orElse(BigDecimal.ZERO)));
+                        }
+                    });
+                }
+            }
+        });
+        result.setRecords(purchaseVos);
+        result.setPages(purchasePage.getPages());
+        result.setSize(purchasePage.getSize());
+        result.setTotal(purchaseVos.size());
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<SalesReportVO>> getSalesStatistics(QuerySalesReportDTO querySalesReportDTO) {
+        var result = new Page<SalesReportVO>();
+        var page = new Page<ReceiptSaleMain>(querySalesReportDTO.getPage(), querySalesReportDTO.getPageSize());
+        var salePage = receiptSaleService.lambdaQuery()
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(querySalesReportDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, querySalesReportDTO.getCustomerId())
+                .in(ReceiptSaleMain::getSubType, "销售出库", "销售退货")
+                .le(querySalesReportDTO.getStartDate() != null, ReceiptSaleMain::getReceiptDate, querySalesReportDTO.getStartDate())
+                .ge(querySalesReportDTO.getEndDate() != null, ReceiptSaleMain::getReceiptDate, querySalesReportDTO.getEndDate())
+                .page(page);
+
+        var saleVos = new ArrayList<SalesReportVO>();
+        salePage.getRecords().forEach(item -> {
+            var saleSubs = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .eq(ReceiptSaleSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+
+            for (ReceiptSaleSub saleSub : saleSubs) {
+                var saleVo = SalesReportVO.builder()
+                        .productBarcode(saleSub.getProductBarcode())
+                        .warehouseName(getWarehouseName(saleSub.getWarehouseId()))
+                        .build();
+
+                var product = productService.getById(saleSub.getProductId());
+                if (product != null) {
+                    String productExtendInfo = product.getProductManufacturer() +
+                            "|" +
+                            product.getOtherFieldOne() +
+                            "|" +
+                            product.getOtherFieldTwo() +
+                            "|" +
+                            product.getOtherFieldThree();
+                    saleVo.setProductName(product.getProductName());
+                    saleVo.setProductStandard(product.getProductStandard());
+                    saleVo.setProductModel(product.getProductModel());
+                    saleVo.setProductUnit(product.getProductUnit());
+                    saleVo.setProductExtendInfo(productExtendInfo);
+                }
+
+
+                if (saleVos.stream().noneMatch(matchSaleVo -> saleVo.getProductBarcode().equals(matchSaleVo.getProductBarcode())
+                        && saleVo.getWarehouseName().equals(matchSaleVo.getWarehouseName()))) {
+                    saleVos.add(saleVo);
+                }
+
+                if (saleVo.getProductBarcode() != null && saleVo.getWarehouseName() != null) {
+                    saleVos.forEach(matchSaleVo -> {
+                        if (saleVo.getProductBarcode().equals(matchSaleVo.getProductBarcode())
+                                && saleVo.getWarehouseName().equals(matchSaleVo.getWarehouseName())) {
+                            if (item.getSubType().equals("销售出库")) {
+                                matchSaleVo.setSalesAmount(Optional.ofNullable(matchSaleVo.getSalesAmount()).orElse(BigDecimal.ZERO)
+                                        .add(Optional.ofNullable(saleSub.getTaxIncludedAmount()).orElse(BigDecimal.ZERO)));
+                                matchSaleVo.setSalesNumber(Optional.ofNullable(matchSaleVo.getSalesNumber()).orElse(0)
+                                        + Optional.ofNullable(saleSub.getProductNumber()).orElse(0));
+                            } else if (item.getSubType().equals("销售退货")){
+                                matchSaleVo.setSalesRefundAmount(Optional.ofNullable(matchSaleVo.getSalesRefundAmount()).orElse(BigDecimal.ZERO)
+                                        .add(Optional.ofNullable(saleSub.getTaxIncludedAmount()).orElse(BigDecimal.ZERO)));
+                                matchSaleVo.setSalesRefundNumber(Optional.ofNullable(matchSaleVo.getSalesRefundNumber()).orElse(0)
+                                        + Optional.ofNullable(saleSub.getProductNumber()).orElse(0));
+                            }
+                            if (saleVo.getSalesAmount() == null) {
+                                saleVo.setSalesAmount(BigDecimal.ZERO);
+                            }
+                            if (saleVo.getSalesRefundAmount() == null) {
+                                saleVo.setSalesRefundAmount(BigDecimal.ZERO);
+                            }
+                            if (saleVo.getSalesNumber() == null) {
+                                saleVo.setSalesNumber(0);
+                            }
+                            if (saleVo.getSalesRefundNumber() == null) {
+                                saleVo.setSalesRefundNumber(0);
+                            }
+
+                            matchSaleVo.setSalesLastAmount(Optional.ofNullable(matchSaleVo.getSalesAmount()).orElse(BigDecimal.ZERO)
+                                    .subtract(Optional.ofNullable(matchSaleVo.getSalesRefundAmount()).orElse(BigDecimal.ZERO)));
+                        }
+                    });
+                }
+            }
+        });
+        result.setRecords(saleVos);
+        result.setPages(salePage.getPages());
+        result.setSize(salePage.getSize());
+        result.setTotal(saleVos.size());
 
         return Response.responseData(result);
     }
