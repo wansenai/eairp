@@ -36,6 +36,8 @@ public interface CommonService {
 
     String getProductName(Long productId);
 
+    String getProductCategoryName(Long productCategoryId);
+
     String getWarehouseName(Long warehouseId);
 
     String getMemberName(Long memberId);
