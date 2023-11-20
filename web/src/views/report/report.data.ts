@@ -968,6 +968,11 @@ export const shipmentsSummaryStatisticsColumns: BasicColumn[] = [
         width: 120,
     },
     {
+        title: '商品分类',
+        dataIndex: 'productCategoryName',
+        width: 100,
+    },
+    {
         title: '规格',
         dataIndex: 'productStandard',
         width: 120,
@@ -1069,6 +1074,11 @@ export const storageSummaryStatisticsColumns: BasicColumn[] = [
         title: '商品名称',
         dataIndex: 'productName',
         width: 120,
+    },
+    {
+        title: '商品分类',
+        dataIndex: 'productCategoryName',
+        width: 100,
     },
     {
         title: '规格',
