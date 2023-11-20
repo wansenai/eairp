@@ -310,7 +310,12 @@ export const retailStatisticsColumns: BasicColumn[] = [
     {
         title: '商品条码',
         dataIndex: 'productBarcode',
-        width: 120,
+        width: 100,
+    },
+    {
+        title: '仓库',
+        dataIndex: 'warehouseName',
+        width: 100,
     },
     {
         title: '商品名称',

@@ -29,6 +29,8 @@ public class RetailReportVO {
 
     private String productName;
 
+    private String warehouseName;
+
     private String productModel;
 
     private String productStandard;

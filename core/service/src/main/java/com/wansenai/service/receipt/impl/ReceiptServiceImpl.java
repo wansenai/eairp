@@ -902,7 +902,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             var retailVo = RetailReportVO.builder()
                     .productBarcode(retailSub.getProductBarcode())
-                    .retailNumber(retailSub.getProductNumber())
+                    .warehouseName(getWarehouseName(retailSub.getWarehouseId()))
                     .build();
 
             var product = productService.getById(retailSub.getProductId());
@@ -920,20 +920,46 @@ public class ReceiptServiceImpl implements ReceiptService {
                 retailVo.setProductUnit(product.getProductUnit());
                 retailVo.setProductExtendInfo(productExtendInfo);
             }
-
-            var retailLastAmount = BigDecimal.ZERO;
-            if (item.getSubType().equals("零售出库")) {
-                retailVo.setRetailAmount(retailSub.getTotalAmount());
-                retailVo.setRetailNumber(retailSub.getProductNumber());
-                retailLastAmount = retailLastAmount.add(retailSub.getTotalAmount());
-            } else {
-                retailVo.setRetailRefundAmount(retailSub.getTotalAmount());
-                retailVo.setRetailRefundNumber(retailSub.getProductNumber());
-                retailLastAmount = retailLastAmount.subtract(retailSub.getTotalAmount());
+            // 如果是相同的商品条码和仓库名称 则不进行重复添加
+            if (retailVos.stream().noneMatch(matchRetailVo -> retailVo.getProductBarcode().equals(matchRetailVo.getProductBarcode())
+                    && retailVo.getWarehouseName().equals(matchRetailVo.getWarehouseName()))) {
+                retailVos.add(retailVo);
             }
-            retailVo.setRetailLastAmount(retailLastAmount);
+            // 将数据进行组装 计算重复商品的出库和退货数量以及金额 匹配商品条码和仓库名称
+            if (retailVo.getProductBarcode() != null && retailVo.getWarehouseName() != null) {
+                retailVos.forEach(matchRetailVo -> {
+                    if (retailVo.getProductBarcode().equals(matchRetailVo.getProductBarcode())
+                            && retailVo.getWarehouseName().equals(matchRetailVo.getWarehouseName())) {
+                        if (item.getSubType().equals("零售出库")) {
+                            matchRetailVo.setRetailAmount(Optional.ofNullable(matchRetailVo.getRetailAmount()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(retailSub.getTotalAmount()).orElse(BigDecimal.ZERO)));
+                            matchRetailVo.setRetailNumber(Optional.ofNullable(matchRetailVo.getRetailNumber()).orElse(0)
+                                    + Optional.ofNullable(retailSub.getProductNumber()).orElse(0));
+                        } else if (item.getSubType().equals("零售退货")){
+                            matchRetailVo.setRetailRefundAmount(Optional.ofNullable(matchRetailVo.getRetailRefundAmount()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(retailSub.getTotalAmount()).orElse(BigDecimal.ZERO)));
+                            matchRetailVo.setRetailRefundNumber(Optional.ofNullable(matchRetailVo.getRetailRefundNumber()).orElse(0)
+                                    + Optional.ofNullable(retailSub.getProductNumber()).orElse(0));
+                        }
+                        // 如果没有值 则归0处理
+                        if (matchRetailVo.getRetailAmount() == null) {
+                            matchRetailVo.setRetailAmount(BigDecimal.ZERO);
+                        }
+                        if (matchRetailVo.getRetailRefundAmount() == null) {
+                            matchRetailVo.setRetailRefundAmount(BigDecimal.ZERO);
+                        }
+                        if (matchRetailVo.getRetailNumber() == null) {
+                            matchRetailVo.setRetailNumber(0);
+                        }
+                        if (matchRetailVo.getRetailRefundNumber() == null) {
+                            matchRetailVo.setRetailRefundNumber(0);
+                        }
 
-            retailVos.add(retailVo);
+                        matchRetailVo.setRetailLastAmount(Optional.ofNullable(matchRetailVo.getRetailAmount()).orElse(BigDecimal.ZERO)
+                                .subtract(Optional.ofNullable(matchRetailVo.getRetailRefundAmount()).orElse(BigDecimal.ZERO)));
+                    }
+                });
+            }
         });
         result.setRecords(retailVos);
         result.setPages(retailPage.getPages());
