@@ -54,6 +54,7 @@ public class ShipmentsDetailVO {
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal taxAmount;
 
+    private String type;
     // supplier or customer or member
     private String name;
 

@@ -5,6 +5,8 @@ import {getCategoryList} from "@/api/product/productCategory";
 import {getMemberList} from "@/api/basic/member";
 import {getSupplierList} from "@/api/basic/supplier";
 import {getCustomerList} from "@/api/basic/customer";
+import {getRelatedPerson} from "@/api/report/report";
+import {getOperatorList} from "@/api/basic/operator";
 export const productStockColumns: BasicColumn[] = [
     {
         title: '产品id',
@@ -558,4 +560,338 @@ export const salesStatisticsColumns: BasicColumn[] = [
         dataIndex: 'salesLastAmount',
         width: 70,
     }
+]
+
+export const searchShipmentsDetailSchema: FormSchema[] = [
+    {
+        label: '单据编号',
+        field: 'receiptNumber',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '单据日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '商品信息',
+        field: 'productInfo',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '往来单位',
+        field: 'relatedPersonId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getRelatedPerson,
+            resultField: 'data',
+            labelField: 'name',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '仓库',
+        field: 'warehouseId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getWarehouseList,
+            resultField: 'data',
+            labelField: 'warehouseName',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '操作人员',
+        field: 'operatorId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getOperatorList,
+            params: "所有",
+            resultField: 'data',
+            labelField: 'name',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '单据备注',
+        field: 'remark',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    }
+]
+
+export const shipmentsDetailStatisticsColumns: BasicColumn[] = [
+    {
+        title: '单据编号',
+        dataIndex: 'receiptNumber',
+        width: 170,
+    },
+    {
+        title: '类型',
+        dataIndex: 'type',
+        width: 70,
+    },
+    {
+        title: '往来人员',
+        dataIndex: 'name',
+        width: 70,
+    },
+    {
+        title: '商品条码',
+        dataIndex: 'productBarcode',
+        width: 100,
+    },
+    {
+        title: '仓库',
+        dataIndex: 'warehouseName',
+        width: 100,
+    },
+    {
+        title: '商品名称',
+        dataIndex: 'productName',
+        width: 120,
+    },
+    {
+        title: '规格',
+        dataIndex: 'productStandard',
+        width: 120,
+    },
+    {
+        title: '型号',
+        dataIndex: 'productModel',
+        width: 90,
+    },
+    {
+        title: '单位',
+        dataIndex: 'productUnit',
+        width: 60,
+    },
+    {
+        title: '数量',
+        dataIndex: 'productNumber',
+        width: 65,
+    },
+    {
+        title: '单价',
+        dataIndex: 'unitPrice',
+        width: 65,
+    },
+    {
+        title: '金额',
+        dataIndex: 'amount',
+        width: 65,
+    },
+    {
+        title: '税率(%)',
+        dataIndex: 'taxRate',
+        width: 65,
+    },
+    {
+        title: '税额',
+        dataIndex: 'taxAmount',
+        width: 65,
+    },
+    {
+        title: '出库日期',
+        dataIndex: 'createTime',
+        width: 140,
+    },
+]
+
+export const searchStorageDetailSchema: FormSchema[] = [
+    {
+        label: '单据编号',
+        field: 'receiptNumber',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '单据日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '商品信息',
+        field: 'productInfo',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '往来单位',
+        field: 'relatedPersonId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getRelatedPerson,
+            resultField: 'data',
+            labelField: 'name',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '仓库',
+        field: 'warehouseId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getWarehouseList,
+            resultField: 'data',
+            labelField: 'warehouseName',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '操作人员',
+        field: 'operatorId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getOperatorList,
+            params: "所有",
+            resultField: 'data',
+            labelField: 'name',
+            valueField: 'id',
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '单据备注',
+        field: 'remark',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    }
+]
+
+export const storageDetailStatisticsColumns: BasicColumn[] = [
+    {
+        title: '单据编号',
+        dataIndex: 'receiptNumber',
+        width: 170,
+    },
+    {
+        title: '类型',
+        dataIndex: 'type',
+        width: 70,
+    },
+    {
+        title: '往来人员',
+        dataIndex: 'name',
+        width: 70,
+    },
+    {
+        title: '商品条码',
+        dataIndex: 'productBarcode',
+        width: 100,
+    },
+    {
+        title: '仓库',
+        dataIndex: 'warehouseName',
+        width: 100,
+    },
+    {
+        title: '商品名称',
+        dataIndex: 'productName',
+        width: 120,
+    },
+    {
+        title: '规格',
+        dataIndex: 'productStandard',
+        width: 120,
+    },
+    {
+        title: '型号',
+        dataIndex: 'productModel',
+        width: 90,
+    },
+    {
+        title: '单位',
+        dataIndex: 'productUnit',
+        width: 80,
+    },
+    {
+        title: '数量',
+        dataIndex: 'productNumber',
+        width: 65,
+    },
+    {
+        title: '单价',
+        dataIndex: 'unitPrice',
+        width: 65,
+    },
+    {
+        title: '金额',
+        dataIndex: 'amount',
+        width: 65,
+    },
+    {
+        title: '税率(%)',
+        dataIndex: 'taxRate',
+        width: 65,
+    },
+    {
+        title: '税额',
+        dataIndex: 'taxAmount',
+        width: 65,
+    },
+    {
+        title: '出库日期',
+        dataIndex: 'createTime',
+        width: 140,
+    },
 ]

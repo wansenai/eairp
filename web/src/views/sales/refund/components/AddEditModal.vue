@@ -697,6 +697,8 @@ export default defineComponent({
       saleRefundFormState.thisArrearsAmount = 0
       saleRefundFormState.accountId = undefined
       saleRefundFormState.operatorIds = []
+      saleRefundFormState.receiptDate = undefined
+      saleRefundFormState.otherReceipt = ''
       barCode.value = ''
       saleRefundFormState.remark = ''
       fileList.value = []
@@ -705,7 +707,6 @@ export default defineComponent({
       if(table) {
         table.remove()
       }
-      saleRefundFormState.receiptDate = undefined
     }
 
     function beforeUpload(file: any) {

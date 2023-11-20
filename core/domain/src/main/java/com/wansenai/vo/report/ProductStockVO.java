@@ -31,7 +31,8 @@ public class ProductStockVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long warehouseId;
 
-    private String productBarcode;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long productBarcode;
 
     private String warehouseName;
 
