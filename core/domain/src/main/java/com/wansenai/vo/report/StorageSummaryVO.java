@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -43,4 +44,7 @@ public class StorageSummaryVO {
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal storageAmount;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime createTime;
 }
