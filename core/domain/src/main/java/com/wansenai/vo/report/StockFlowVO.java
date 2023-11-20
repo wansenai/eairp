@@ -26,6 +26,7 @@ public class StockFlowVO {
 
     private String type;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productBarcode;
 
     private String productName;
