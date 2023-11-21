@@ -41,4 +41,6 @@ public class AddOrUpdateIncomeDTO {
     private List<IncomeExpenseBO> tableData;
 
     private List<FileDataBO> files;
+
+    private Integer status;
 }
