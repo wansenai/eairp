@@ -21,8 +21,6 @@ public class QueryIncomeDTO {
 
     private Long relatedPersonId;
 
-    private Long operatorId;
-
     private Long financialPersonId;
 
     private Long accountId;

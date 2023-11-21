@@ -28,7 +28,9 @@ import java.math.BigDecimal;
 public class IncomeExpenseBO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long id;
+    private Long incomeExpenseId;
+
+    private String incomeExpenseName;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal incomeExpenseAmount;
