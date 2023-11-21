@@ -10,16 +10,30 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.service.financial;
+package com.wansenai.dto.financial;
 
-import com.wansenai.entities.financial.FinancialMain;
-import com.baomidou.mybatisplus.extension.service.IService;
+import lombok.Data;
 
-/**
- * <p>
- * 财务主表 服务类
- * </p>
- */
-public interface IFinancialMainService extends IService<FinancialMain> {
+@Data
+public class QueryIncomeDTO {
 
+    private String receiptNumber;
+
+    private Long relatedPersonId;
+
+    private Long financialPersonId;
+
+    private Long accountId;
+
+    private Integer status;
+
+    private String remark;
+
+    private String startDate;
+
+    private String endDate;
+
+    private Integer page;
+
+    private Integer pageSize;
 }

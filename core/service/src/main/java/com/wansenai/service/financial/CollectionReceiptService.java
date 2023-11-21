@@ -10,22 +10,10 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.api.financial;
+package com.wansenai.service.financial;
 
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.entities.financial.FinancialMain;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-/**
- * <p>
- * 财务主表 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
-@RestController
-@RequestMapping("/financialMain")
-public class FinancialMainController {
-
+public interface CollectionReceiptService extends IService<FinancialMain> {
 }

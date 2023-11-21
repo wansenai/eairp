@@ -18,6 +18,7 @@ import com.wansenai.vo.CaptchaVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface CommonService {
@@ -45,4 +46,10 @@ public interface CommonService {
     String getSupplierName(Long supplierId);
 
     String getCustomerName(Long customerId);
+
+    String getOperatorName(Long operatorId);
+
+    String getRelatedPersonName(Long relatedPersonId);
+
+    String getAccountName(Long accountId);
 }

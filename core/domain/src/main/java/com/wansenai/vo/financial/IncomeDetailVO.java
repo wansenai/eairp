@@ -13,8 +13,11 @@
 package com.wansenai.vo.financial;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.bo.FileDataBO;
+import com.wansenai.bo.IncomeExpenseBO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,58 +25,43 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountVO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class IncomeDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long id;
+    private Long relatedPersonId;
 
-    /**
-     * 名称
-     */
-    private String accountName;
+    private String relatedPersonName;
 
-    /**
-     * 账户编号
-     */
-    private String accountNumber;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime receiptDate;
 
-    /**
-     * 期初金额
-     */
+    private String receiptNumber;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long financialPersonId;
+
+    private String financialPersonName;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long incomeAccountId;
+
+    private String incomeAccountName;
+
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal initialAmount;
+    private BigDecimal incomeAmount;
 
-    /**
-     * 当前余额
-     */
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal currentAmount;
-
-    /**
-     * 备注
-     */
     private String remark;
 
-    /**
-     * 状态
-     */
+    private List<IncomeExpenseBO> tableData;
+
+    private List<FileDataBO> files;
+
     private Integer status;
-
-    /**
-     * 排序
-     */
-    private Integer sort;
-
-    /**
-     * 是否默认
-     */
-    private Integer isDefault;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
 }

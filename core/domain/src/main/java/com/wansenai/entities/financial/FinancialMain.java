@@ -52,22 +52,17 @@ public class FinancialMain implements Serializable {
     private Long tenantId;
 
     /**
-     * 机构id(收款/付款单位)
+     * 关联人id(会员/供应商/客户)
      */
-    private Long organizationId;
-
-    /**
-     * 会员id
-     */
-    private Long memberId;
+    private Long relatedPersonId;
 
     /**
      * 经手人id
      */
-    private Long handsPersonId;
+    private Long operatorId;
 
     /**
-     * 账户(收款/付款)
+     * 账户id
      */
     private Long accountId;
 
@@ -79,17 +74,17 @@ public class FinancialMain implements Serializable {
     /**
      * 变动金额(优惠/收款/付款/实付)
      */
-    private BigDecimal changePrice;
+    private BigDecimal changeAmount;
 
     /**
      * 优惠金额
      */
-    private BigDecimal discountPrice;
+    private BigDecimal discountAmount;
 
     /**
      * 合计金额
      */
-    private BigDecimal totalPrice;
+    private BigDecimal totalAmount;
 
     /**
      * 单据编号
@@ -104,7 +99,7 @@ public class FinancialMain implements Serializable {
     /**
      * 单据日期
      */
-    private LocalDateTime receiptTime;
+    private LocalDateTime receiptDate;
 
     /**
      * 备注

@@ -10,20 +10,10 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.service.financial.impl;
+package com.wansenai.service.financial;
 
-import com.wansenai.service.financial.IFinancialMainService;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansenai.entities.financial.FinancialMain;
-import com.wansenai.mappers.financial.FinancialMainMapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
 
-/**
- * <p>
- * 财务主表 服务实现类
- * </p>
- */
-@Service
-public class FinancialMainServiceImpl extends ServiceImpl<FinancialMainMapper, FinancialMain> implements IFinancialMainService {
-
+public interface ExpenseReceiptService extends IService<FinancialMain> {
 }
