@@ -10,22 +10,28 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.api.financial;
+package com.wansenai.bo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.math.BigDecimal;
 
-/**
- * <p>
- * 财务主表 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
-@RestController
-@RequestMapping("/financialMain")
-public class FinancialMainController {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class IncomeExpenseBO {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal incomeExpenseAmount;
+
+    private String remark;
 }

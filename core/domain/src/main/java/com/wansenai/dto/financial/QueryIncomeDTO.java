@@ -10,22 +10,32 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.api.financial;
+package com.wansenai.dto.financial;
 
+import lombok.Data;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+@Data
+public class QueryIncomeDTO {
 
-/**
- * <p>
- * 财务子表 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
-@RestController
-@RequestMapping("/financialSub")
-public class FinancialSubController {
+    private String receiptNumber;
 
+    private Long relatedPersonId;
+
+    private Long operatorId;
+
+    private Long financialPersonId;
+
+    private Long accountId;
+
+    private Integer status;
+
+    private String remark;
+
+    private String startDate;
+
+    private String endDate;
+
+    private Integer page;
+
+    private Integer pageSize;
 }
