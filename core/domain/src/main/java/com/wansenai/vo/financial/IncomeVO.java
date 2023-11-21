@@ -40,8 +40,6 @@ public class IncomeVO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime receiptDate;
 
-    private String operator;
-
     private String financialPerson;
 
     private String incomeAccountName;

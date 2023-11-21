@@ -410,11 +410,9 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 var accountBalance = account.getCurrentAmount();
                 var changeAmount = shipmentsDTO.getCollectAmount();
                 var beforeChangeAmount = beforeReceipt.stream()
-                        .map(item -> item.getTotalAmount())
+                        .map(ReceiptRetailSub::getTotalAmount)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
-                if (beforeChangeAmount != null) {
-                    accountBalance = accountBalance.subtract(beforeChangeAmount);
-                }
+                accountBalance = accountBalance.subtract(beforeChangeAmount);
                 if (changeAmount != null) {
                     accountBalance = accountBalance.add(changeAmount);
                 }

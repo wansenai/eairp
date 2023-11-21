@@ -177,7 +177,7 @@ import {AccountResp} from "@/api/financial/model/accountModel";
 import {useMessage} from "@/hooks/web/useMessage";
 import {addOrUpdateAdvance, getAdvanceDetail} from "@/api/financial/advance";
 import {AddOrUpdateAdvanceReq, AdvanceChargeData} from "@/api/financial/model/advanceModel";
-
+dayjs.locale('zh-cn');
 export default defineComponent({
   name: 'AdvanceChargeModal',
   emits: ['success', 'cancel', 'error'],

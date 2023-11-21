@@ -1,5 +1,6 @@
-interface FileData {
+export interface FileData {
     id: number | string;
+    uid: number | string;
     fileName: string;
     fileUrl: string;
     fileType: string;
@@ -13,7 +14,7 @@ interface AdvanceChargeData {
     remark: string;
 }
 
-interface AddOrUpdateAdvanceReq {
+export interface AddOrUpdateAdvanceReq {
     id: number | string | undefined;
     memberId: number | string;
     receiptDate: string;
@@ -27,7 +28,7 @@ interface AddOrUpdateAdvanceReq {
     review: number;
 }
 
-interface QueryAdvanceReq {
+export interface QueryAdvanceReq {
     receiptNumber: string;
     memberId: number | string;
     operatorId: number | string;
@@ -36,7 +37,7 @@ interface QueryAdvanceReq {
     remark: string;
 }
 
-interface AdvanceChargeResp {
+export interface AdvanceChargeResp {
     id: number | string;
     memberName: string;
     receiptNumber: string;
@@ -49,7 +50,7 @@ interface AdvanceChargeResp {
     remark: string;
 }
 
-interface AdvanceChargeDetailResp {
+export interface AdvanceChargeDetailResp {
     memberId: string;
     memberName: string;
     receiptNumber: string;
@@ -61,12 +62,4 @@ interface AdvanceChargeDetailResp {
     collectedAmount: number;
     tableData: AdvanceChargeData[];
     files: FileData[];
-}
-
-export {
-    AdvanceChargeData,
-    AddOrUpdateAdvanceReq,
-    QueryAdvanceReq,
-    AdvanceChargeResp,
-    AdvanceChargeDetailResp
 }

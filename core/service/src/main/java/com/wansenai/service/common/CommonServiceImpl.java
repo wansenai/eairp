@@ -19,10 +19,14 @@ import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.sms.v20190711.SmsClient;
 import com.tencentcloudapi.sms.v20190711.models.SendSmsRequest;
 import com.wansenai.bo.FileDataBO;
+import com.wansenai.entities.basic.Operator;
+import com.wansenai.entities.financial.FinancialAccount;
 import com.wansenai.entities.product.ProductCategory;
 import com.wansenai.entities.warehouse.Warehouse;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.BaseService;
+import com.wansenai.service.basic.IOperatorService;
+import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.product.ProductStockKeepUnitService;
 import com.wansenai.utils.ExcelUtil;
 import com.wansenai.utils.FileUtil;
@@ -92,6 +96,8 @@ public class CommonServiceImpl implements CommonService{
 
     private final ISysPlatformConfigService platformConfigService;
 
+    private final IFinancialAccountService accountService;
+
     private final ProductService productService;
 
     private final ProductStockKeepUnitService productStockKeepUnitService;
@@ -102,23 +108,27 @@ public class CommonServiceImpl implements CommonService{
 
     private final WarehouseService warehouseService;
 
+    private final IOperatorService operatorService;
+
     private final SysFileMapper fileMapper;
 
     private final String NullString = "";
 
-    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService, ProductService productService, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, WarehouseService warehouseService, BaseService baseService, SysFileMapper fileMapper) {
+    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService, IFinancialAccountService accountService, ProductService productService, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, WarehouseService warehouseService, BaseService baseService, IOperatorService operatorService, SysFileMapper fileMapper) {
         this.redisUtil = redisUtil;
         this.producer = producer;
         this.supplierService = supplierService;
         this.customerService = customerService;
         this.memberService = memberService;
         this.platformConfigService = platformConfigService;
+        this.accountService = accountService;
         this.productService = productService;
         this.productStockKeepUnitService = productStockKeepUnitService;
         this.productStockService = productStockService;
         this.productCategoryService = productCategoryService;
         this.warehouseService = warehouseService;
         this.baseService = baseService;
+        this.operatorService = operatorService;
         this.fileMapper = fileMapper;
     }
 
@@ -677,6 +687,7 @@ public class CommonServiceImpl implements CommonService{
             case "会员" -> "V";
             case "商品" -> "P";
             case "订单" -> "O";
+            case "收入单" -> "SRD";
             case "采购单" -> "CGD";
             case "销售单" -> "XSD";
             case "退货单" -> "THD";
@@ -761,6 +772,38 @@ public class CommonServiceImpl implements CommonService{
     public String getCustomerName(Long customerId) {
         return Optional.ofNullable(customerService.getById(customerId))
                 .map(Customer::getCustomerName)
+                .orElse(NullString);
+    }
+
+    @Override
+    public String getOperatorName(Long operatorId) {
+        return Optional.ofNullable(operatorService.getById(operatorId))
+                .map(Operator::getName)
+                .orElse(NullString);
+    }
+
+    @Override
+    public String getRelatedPersonName(Long relatedPersonId) {
+        // 查询供应商 客户 会员  哪一个不为空就返回哪一个
+        var member = memberService.getById(relatedPersonId);
+        if(member != null) {
+            return member.getMemberName();
+        }
+        var customer = customerService.getById(relatedPersonId);
+        if(customer != null) {
+            return customer.getCustomerName();
+        }
+        var supplier = supplierService.getById(relatedPersonId);
+        if(supplier != null) {
+            return supplier.getSupplierName();
+        }
+        return NullString;
+    }
+
+    @Override
+    public String getAccountName(Long accountId) {
+        return Optional.ofNullable(accountService.getById(accountId))
+                .map(FinancialAccount::getAccountName)
                 .orElse(NullString);
     }
 

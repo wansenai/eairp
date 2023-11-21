@@ -12,14 +12,8 @@
  */
 package com.wansenai.service.financial;
 
-import com.wansenai.entities.financial.FinancialMain;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.entities.financial.FinancialMain;
 
-/**
- * <p>
- * 财务主表 服务类
- * </p>
- */
-public interface IFinancialMainService extends IService<FinancialMain> {
-
+public interface CollectionReceiptService extends IService<FinancialMain> {
 }
