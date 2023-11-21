@@ -1,0 +1,24 @@
+[package]
+name = "eairp-desktop"
+version = "0.1.0"
+description = "This is the desktop version of the eairp project"
+authors = [
+    "James Zow <Jameszow@163.com>",
+    "WanSen AI Team <team@wansenai.com>"
+]
+license = "Apache-2.0 and MIT"
+repository = "https://github.com/wansenai/eairp"
+default-run = "eairp-desktop"
+edition = "2021"
+rust-version = "1.60"
+
+[build-dependencies]
+tauri-build = { version = "1.5.0", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "1.5.2", features = [] }
+
+[features]
+custom-protocol = [ "tauri/custom-protocol" ]
