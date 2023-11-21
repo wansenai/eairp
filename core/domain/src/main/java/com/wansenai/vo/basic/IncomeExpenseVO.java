@@ -10,21 +10,31 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.api;
+package com.wansenai.vo.basic;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
+import lombok.Data;
 
-/**
- * <p>
- * 收支项目 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
-@RestController
-@RequestMapping("/incomeExpense")
-public class IncomeExpenseController {
+import java.time.LocalDateTime;
 
+@Data
+@Builder
+public class IncomeExpenseVO {
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;
+
+    private String name;
+
+    private String type;
+
+    private Integer status;
+
+    private Integer sort;
+
+    private String remark;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
 }
