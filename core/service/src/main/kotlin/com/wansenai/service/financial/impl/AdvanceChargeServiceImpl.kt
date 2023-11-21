@@ -69,20 +69,6 @@ open class AdvanceChargeServiceImpl(
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
         }
         val userId = baseService.currentUserId
-        var deptId: Long? = null
-        val userDeptRelList = userDeptRelService.queryByUserId(userId)
-
-        deptId = userDeptRelList.takeIf { it.isNotEmpty() }
-            ?.map { it.deptId }
-            ?.let { deptIdList ->
-                departmentService.lambdaQuery()
-                    .`in`(deptIdList.isNotEmpty(), SysDepartment::getId, deptIdList)
-                    .list()
-                    .firstOrNull()
-                    ?.let { it.parentId ?: it.id }
-            }
-
-
         val fileIdList = ArrayList<Long>()
         if (advanceChargeDTO.id != null) {
             val financialSubList = financialSubService.lambdaQuery()
@@ -129,15 +115,14 @@ open class AdvanceChargeServiceImpl(
             val financialMainId = advanceChargeDTO.id ?: SnowflakeIdUtil.nextId()
             val financialMain = FinancialMain.builder()
                 .id(financialMainId)
-                .organizationId(deptId)
-                .handsPersonId(advanceChargeDTO.financialPersonnelId)
+                .relatedPersonId(advanceChargeDTO.memberId)
+                .operatorId(advanceChargeDTO.financialPersonnelId)
                 .type("收预付款")
-                .memberId(advanceChargeDTO.memberId)
-                .changePrice(advanceChargeDTO.totalAmount)
-                .totalPrice(advanceChargeDTO.totalAmount)
+                .changeAmount(advanceChargeDTO.totalAmount)
+                .totalAmount(advanceChargeDTO.totalAmount)
                 .receiptNumber(advanceChargeDTO.receiptNumber)
                 .receiptSource(0)
-                .receiptTime(TimeUtil.parse(advanceChargeDTO.receiptDate))
+                .receiptDate(TimeUtil.parse(advanceChargeDTO.receiptDate))
                 .fileId(fileIds)
                 .status(advanceChargeDTO.review ?: CommonConstants.UNAUDITED)
                 .createBy(userId)
@@ -180,7 +165,7 @@ open class AdvanceChargeServiceImpl(
     override fun getAdvanceChargePageList(advanceChargeDTO: QueryAdvanceChargeDTO?): Response<Page<AdvanceChargeVO>> {
         val page = advanceChargeDTO?.run { Page<FinancialMain>(page ?: 1, pageSize ?: 10) }
         val wrapper = LambdaQueryWrapper<FinancialMain>().apply {
-            advanceChargeDTO?.financialPersonnelId?.let { eq(FinancialMain::getHandsPersonId, it) }
+            advanceChargeDTO?.financialPersonnelId?.let { eq(FinancialMain::getOperatorId, it) }
             advanceChargeDTO?.receiptNumber?.let { eq(FinancialMain::getReceiptNumber, it) }
             advanceChargeDTO?.status?.let { eq(FinancialMain::getStatus, it) }
             advanceChargeDTO?.operatorId?.let { eq(FinancialMain::getCreateBy, it) }
@@ -193,9 +178,9 @@ open class AdvanceChargeServiceImpl(
         val result = page?.run {
             financialMainMapper.selectPage(this, wrapper)
             records.map { financialMain ->
-                val member = memberService.getMemberById(financialMain.memberId)
+                val member = memberService.getMemberById(financialMain.relatedPersonId)
                 val operator = userService.getById(financialMain.createBy)
-                val financialPerson = operatorService.getOperatorById(financialMain.handsPersonId)
+                val financialPerson = operatorService.getOperatorById(financialMain.operatorId)
 
                 financialMain.toAdvanceChargeVO(member, operator, financialPerson)
             }.toPage(this@run.total, this@run.pages, this@run.size)
@@ -208,12 +193,12 @@ open class AdvanceChargeServiceImpl(
         return AdvanceChargeVO(
             id = this.id,
             receiptNumber = this.receiptNumber,
-            receiptDate = this.receiptTime,
+            receiptDate = this.receiptDate,
             operator = operator.name,
             financialPersonnel = financialPerson?.name ?: "",
             memberName = member?.memberName,
-            totalAmount = this.totalPrice,
-            collectedAmount = this.changePrice,
+            totalAmount = this.totalAmount,
+            collectedAmount = this.changeAmount,
             status = this.status,
             remark = this.remark
         )
@@ -232,9 +217,9 @@ open class AdvanceChargeServiceImpl(
     override fun getAdvanceChargeDetailById(id: Long): Response<AdvanceChargeDetailVO> {
         val financialMain = getById(id)
         if(financialMain != null) {
-            val member = memberService.getMemberById(financialMain.memberId)
+            val member = memberService.getMemberById(financialMain.relatedPersonId)
 
-            val financialPerson = operatorService.getOperatorById(financialMain.handsPersonId)
+            val financialPerson = operatorService.getOperatorById(financialMain.operatorId)
             val subData = financialSubService.lambdaQuery()
                 .eq(FinancialSub::getFinancialMainId, id)
                 .list()
@@ -268,14 +253,14 @@ open class AdvanceChargeServiceImpl(
             }
 
             val resultVO = AdvanceChargeDetailVO(
-                memberId = financialMain.memberId,
+                memberId = financialMain.relatedPersonId,
                 memberName = member?.memberName,
                 receiptNumber = financialMain.receiptNumber,
-                receiptDate = financialMain.receiptTime,
+                receiptDate = financialMain.receiptDate,
                 financialPersonnel = financialPerson?.name ?: "",
                 financialPersonnelId = financialPerson?.id,
-                totalAmount = financialMain.totalPrice,
-                collectedAmount = financialMain.changePrice,
+                totalAmount = financialMain.totalAmount,
+                collectedAmount = financialMain.changeAmount,
                 tableData = tableData,
                 remark = financialMain.remark,
                 files = filesData
