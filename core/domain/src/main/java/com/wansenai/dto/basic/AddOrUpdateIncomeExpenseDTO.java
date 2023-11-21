@@ -10,16 +10,22 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.service;
+package com.wansenai.dto.basic;
 
-import com.wansenai.entities.IncomeExpense;
-import com.baomidou.mybatisplus.extension.service.IService;
+import lombok.Data;
 
-/**
- * <p>
- * 收支项目 服务类
- * </p>
- */
-public interface IIncomeExpenseService extends IService<IncomeExpense> {
+@Data
+public class AddOrUpdateIncomeExpenseDTO {
 
+    private Long id;
+
+    private String name;
+
+    private String type;
+
+    private String remark;
+
+    private Integer status;
+
+    private Integer sort;
 }

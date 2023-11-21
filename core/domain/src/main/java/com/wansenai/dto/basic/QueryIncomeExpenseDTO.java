@@ -10,19 +10,24 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.service;
+package com.wansenai.dto.basic;
 
-import com.wansenai.entities.IncomeExpense;
-import com.wansenai.mappers.IncomeExpenseMapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
+import lombok.Data;
 
-/**
- * <p>
- * 收支项目 服务实现类
- * </p>
- */
-@Service
-public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, IncomeExpense> implements IIncomeExpenseService {
+@Data
+public class QueryIncomeExpenseDTO {
 
+    private String name;
+
+    private String type;
+
+    private String remark;
+
+    private Long page;
+
+    private Long pageSize;
+
+    private String startDate;
+
+    private String endDate;
 }
