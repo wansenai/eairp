@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
 @RestController
-@RequestMapping("/incomeExpense")
+@RequestMapping("/basic/incomeExpense")
 public class IncomeExpenseController {
 
     private final IncomeExpenseService incomeExpenseService;
@@ -49,7 +49,7 @@ public class IncomeExpenseController {
         return incomeExpenseService.addOrUpdateIncomeExpense(addOrUpdateIncomeExpenseDTO);
     }
 
-    @DeleteMapping("delete")
+    @DeleteMapping("deleteBatch")
     public Response<String> deleteIncomeExpense(@RequestParam("ids") List<Long> ids) {
         return incomeExpenseService.deleteBatchIncomeExpense(ids);
     }

@@ -19,6 +19,8 @@ import com.wansenai.entities.IncomeExpense;
 import com.wansenai.mappers.IncomeExpenseMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.service.basic.IncomeExpenseService;
+import com.wansenai.service.common.CommonService;
+import com.wansenai.service.user.ISysUserService;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.IncomeExpenseCodeEnum;
 import com.wansenai.utils.response.Response;
@@ -26,6 +28,7 @@ import com.wansenai.vo.basic.IncomeExpenseVO;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +37,11 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
 
     private final IncomeExpenseMapper incomeExpenseMapper;
 
-    public IncomeExpenseServiceImpl(IncomeExpenseMapper incomeExpenseMapper) {
+    private final ISysUserService userService;
+
+    public IncomeExpenseServiceImpl(IncomeExpenseMapper incomeExpenseMapper, ISysUserService userService) {
         this.incomeExpenseMapper = incomeExpenseMapper;
+        this.userService = userService;
     }
 
     @Override
@@ -44,9 +50,9 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
 
         var page = new Page<IncomeExpense>(queryIncomeExpenseDTO.getPage(), queryIncomeExpenseDTO.getPageSize());
         var incomeExpensePage = lambdaQuery()
-                .eq(StringUtils.hasLength(queryIncomeExpenseDTO.getName()), IncomeExpense::getName, queryIncomeExpenseDTO.getName())
                 .eq(StringUtils.hasLength(queryIncomeExpenseDTO.getType()), IncomeExpense::getType, queryIncomeExpenseDTO.getType())
-                .eq(StringUtils.hasLength(queryIncomeExpenseDTO.getRemark()), IncomeExpense::getRemark, queryIncomeExpenseDTO.getRemark())
+                .like(StringUtils.hasLength(queryIncomeExpenseDTO.getName()), IncomeExpense::getName, queryIncomeExpenseDTO.getName())
+                .like(StringUtils.hasLength(queryIncomeExpenseDTO.getRemark()), IncomeExpense::getRemark, queryIncomeExpenseDTO.getRemark())
                 .ge(queryIncomeExpenseDTO.getStartDate() != null, IncomeExpense::getCreateTime, queryIncomeExpenseDTO.getStartDate())
                 .le(queryIncomeExpenseDTO.getEndDate() != null, IncomeExpense::getCreateTime, queryIncomeExpenseDTO.getEndDate())
                 .page(page);
@@ -64,6 +70,16 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
                     .build();
             incomeExpenses.add(incomeExpenseVO);
         });
+        incomeExpenses.sort((o1, o2) -> {
+            if (o1.getSort() == null) {
+                return 1;
+            }
+            if (o2.getSort() == null) {
+                return -1;
+            }
+            return o1.getSort().compareTo(o2.getSort());
+        });
+
         result.setRecords(incomeExpenses);
         result.setTotal(incomeExpensePage.getTotal());
         return Response.responseData(result);
@@ -71,6 +87,11 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
 
     @Override
     public Response<String> addOrUpdateIncomeExpense(AddOrUpdateIncomeExpenseDTO addOrUpdateIncomeExpenseDTO) {
+        if (addOrUpdateIncomeExpenseDTO == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var operator = userService.getCurrentUserId();
+
         if (addOrUpdateIncomeExpenseDTO.getId() == null) {
             var incomeExpense = IncomeExpense.builder()
                     .name(addOrUpdateIncomeExpenseDTO.getName())
@@ -78,6 +99,8 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
                     .status(addOrUpdateIncomeExpenseDTO.getStatus())
                     .sort(addOrUpdateIncomeExpenseDTO.getSort())
                     .remark(addOrUpdateIncomeExpenseDTO.getRemark())
+                    .createTime(LocalDateTime.now())
+                    .createBy(operator)
                     .build();
             var saveResult = save(incomeExpense);
             if (!saveResult) {
@@ -93,6 +116,8 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
                     .status(addOrUpdateIncomeExpenseDTO.getStatus())
                     .sort(addOrUpdateIncomeExpenseDTO.getSort())
                     .remark(addOrUpdateIncomeExpenseDTO.getRemark())
+                    .updateBy(operator)
+                    .updateTime(LocalDateTime.now())
                     .build();
             var updateResult = updateById(incomeExpense);
             if (!updateResult) {
