@@ -1,9 +1,9 @@
 {
   "build": {
-    "distDir": "../build",
-    "beforeBuildCommand": "cd web && pnpm install && pnpm serve",
-    "beforeDevCommand": "cd web && pnpm install && pnpm build",
-    "devPath": "http://localhost:3000"
+    "distDir": "../dist",
+    "beforeDevCommand": "cd web && pnpm install && pnpm serve",
+    "beforeBuildCommand": "cd web && pnpm install && pnpm build",
+    "devPath": "http://localhost:3000",
   },
   "package": {
     "productName": "eairp-desktop",
