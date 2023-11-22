@@ -39,7 +39,19 @@ public enum IncomeExpenseCodeEnum {
 
     DELETE_INCOME_RECEIPT_SUCCESS("I0006", "删除收入单成功"),
 
-    DELETE_INCOME_RECEIPT_ERROR("I0505", "删除收入单失败");
+    DELETE_INCOME_RECEIPT_ERROR("I0505", "删除收入单失败"),
+
+    ADD_EXPENSE_RECEIPT_SUCCESS("E0004", "新增支出单成功"),
+
+    ADD_EXPENSE_RECEIPT_ERROR("E0503", "新增支出单失败"),
+
+    UPDATE_EXPENSE_RECEIPT_SUCCESS("E0005", "更新支出单成功"),
+
+    UPDATE_EXPENSE_RECEIPT_ERROR("E0504", "更新支出单失败"),
+
+    DELETE_EXPENSE_RECEIPT_SUCCESS("E0006", "删除支出单成功"),
+
+    DELETE_EXPENSE_RECEIPT_ERROR("E0505", "删除支出单失败");
 
     private final String code;
 
