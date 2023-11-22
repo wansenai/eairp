@@ -12,8 +12,26 @@
  */
 package com.wansenai.service.financial;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.dto.financial.AddOrUpdateCollectionDTO;
+import com.wansenai.dto.financial.QueryCollectionDTO;
 import com.wansenai.entities.financial.FinancialMain;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.financial.CollectionDetailVO;
+import com.wansenai.vo.financial.CollectionVO;
+
+import java.util.List;
 
 public interface CollectionReceiptService extends IService<FinancialMain> {
+
+    Response<Page<CollectionVO>> getCollectionReceiptPageList(QueryCollectionDTO queryCollectionDTO);
+
+    Response<CollectionDetailVO> getCollectionReceiptDetail(Long id);
+
+    Response<String> addOrUpdateCollectionReceipt(AddOrUpdateCollectionDTO addOrUpdateCollectionDTO);
+
+    Response<String> deleteBatchCollectionReceipt(List<Long> ids);
+
+    Response<String> updateCollectionReceiptStatus(List<Long> ids, Integer status);
 }
