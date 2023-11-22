@@ -12,8 +12,26 @@
  */
 package com.wansenai.service.financial;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.dto.financial.AddOrUpdateTransferDTO;
+import com.wansenai.dto.financial.QueryTransferDTO;
 import com.wansenai.entities.financial.FinancialMain;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.financial.TransferDetailVO;
+import com.wansenai.vo.financial.TransferVO;
+
+import java.util.List;
 
 public interface TransferReceiptService extends IService<FinancialMain> {
+
+    Response<Page<TransferVO>> getTransferReceiptPageList(QueryTransferDTO queryTransferDTO);
+
+    Response<TransferDetailVO> getTransferReceiptDetail(Long id);
+
+    Response<String> addOrUpdateTransferReceipt(AddOrUpdateTransferDTO addOrUpdateTransferDTO);
+
+    Response<String> deleteBatchTransferReceipt(List<Long> ids);
+
+    Response<String> updateTransferReceiptStatus(List<Long> ids, Integer status);
 }
