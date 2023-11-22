@@ -23,11 +23,13 @@ import java.util.List;
 @Data
 public class AddOrUpdatePaymentDTO {
 
+    private Long id;
+
     private Long supplierId;
 
     private String receiptNumber;
 
-    private LocalDateTime receiptDate;
+    private String receiptDate;
 
     private Long financialPersonId;
 
