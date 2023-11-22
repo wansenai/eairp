@@ -12,10 +12,56 @@
  */
 package com.wansenai.api.financial;
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.financial.AddOrUpdateExpenseDTO;
+import com.wansenai.dto.financial.QueryExpenseDTO;
+import com.wansenai.service.financial.ExpenseReceiptService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.financial.ExpenseDetailVO;
+import com.wansenai.vo.financial.ExpenseVO;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/financial/expense")
 public class ExpenseReceiptController {
+
+    private final ExpenseReceiptService expenseReceiptService;
+
+    public ExpenseReceiptController(ExpenseReceiptService expenseReceiptService) {
+        this.expenseReceiptService = expenseReceiptService;
+    }
+
+    @PostMapping("addOrUpdate")
+    public Response<String> addOrUpdateExpenseReceipt(@RequestBody AddOrUpdateExpenseDTO addOrUpdateExpenseDTO) {
+        return expenseReceiptService.addOrUpdateExpenseReceipt(addOrUpdateExpenseDTO);
+    }
+
+    @PostMapping("pageList")
+    public Response<Page<ExpenseVO>> getExpenseReceiptPageList(@RequestBody QueryExpenseDTO queryExpenseDTO) {
+        return expenseReceiptService.getExpenseReceiptPageList(queryExpenseDTO);
+    }
+
+    @GetMapping("getDetailById/{id}")
+    public Response<ExpenseDetailVO> getExpenseReceiptDetailById(@PathVariable("id") Long id) {
+        return expenseReceiptService.getExpenseReceiptDetail(id);
+    }
+
+    @PutMapping("deleteByIds")
+    public Response<String> deleteExpenseReceiptByIds(@RequestParam("ids") List<Long> ids) {
+        return expenseReceiptService.deleteBatchExpenseReceipt(ids);
+    }
+
+    @PutMapping("updateStatusByIds")
+    public Response<String> updateExpenseReceiptStatusByIds(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
+        return expenseReceiptService.updateExpenseReceiptStatus(ids, status);
+    }
 }

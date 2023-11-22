@@ -26,13 +26,13 @@ export const columns: BasicColumn[] = [
         width: 70,
     },
     {
-        title: '收入账户',
-        dataIndex: 'incomeAccountName',
+        title: '支出账户',
+        dataIndex: 'expenseAccountName',
         width: 70,
     },
     {
-        title: '收入金额',
-        dataIndex: 'incomeAmount',
+        title: '支出金额',
+        dataIndex: 'expenseAmount',
         width: 70,
     },
     {
@@ -68,7 +68,7 @@ export const searchFormSchema: FormSchema[] = [
         colProps: { span: 7 },
     },
     {
-        label: '收入账户',
+        label: '支出账户',
         field: 'accountId',
         component: 'ApiSelect',
         componentProps: {
@@ -140,9 +140,9 @@ export const searchFormSchema: FormSchema[] = [
     }
 ]
 
-export const incomeReceiptTableColumns: BasicColumn[] = [
+export const expenseReceiptTableColumns: BasicColumn[] = [
     {
-        title: '收入项目',
+        title: '支出项目',
         dataIndex: 'incomeExpenseName',
         width: 200,
     },
