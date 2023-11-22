@@ -12,7 +12,10 @@
  */
 package com.wansenai.vo.financial;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.wansenai.bo.BigDecimalSerializerBO;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.TransferAccountBO;
 import lombok.AllArgsConstructor;
@@ -21,6 +24,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -30,18 +34,22 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransferDetailVO {
 
-    private String receiptDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime receiptDate;
 
     private String receiptNumber;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long financialPersonId;
 
     private String financialPersonName;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long paymentAccountId;
 
     private String paymentAccountName;
 
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal paymentAmount;
 
     private String remark;
