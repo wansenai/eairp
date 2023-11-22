@@ -12,10 +12,56 @@
  */
 package com.wansenai.api.financial;
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.financial.AddOrUpdateTransferDTO;
+import com.wansenai.dto.financial.QueryTransferDTO;
+import com.wansenai.service.financial.TransferReceiptService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.financial.TransferDetailVO;
+import com.wansenai.vo.financial.TransferVO;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/financial/transfer")
 public class TransferReceiptController {
+
+    private final TransferReceiptService transferReceiptService;
+
+    public TransferReceiptController(TransferReceiptService transferReceiptService) {
+        this.transferReceiptService = transferReceiptService;
+    }
+
+    @PostMapping("addOrUpdate")
+    public Response<String> addOrUpdateTransferReceipt(@RequestBody AddOrUpdateTransferDTO addOrUpdateTransferDTO) {
+        return transferReceiptService.addOrUpdateTransferReceipt(addOrUpdateTransferDTO);
+    }
+
+    @PostMapping("pageList")
+    public Response<Page<TransferVO>> getTransferReceiptPageList(@RequestBody QueryTransferDTO queryTransferDTO) {
+        return transferReceiptService.getTransferReceiptPageList(queryTransferDTO);
+    }
+
+    @GetMapping("getDetailById/{id}")
+    public Response<TransferDetailVO> getTransferReceiptDetailById(@PathVariable("id") Long id) {
+        return transferReceiptService.getTransferReceiptDetail(id);
+    }
+
+    @PutMapping("deleteByIds")
+    public Response<String> deleteTransferReceiptByIds(@RequestParam("ids") List<Long> ids) {
+        return transferReceiptService.deleteBatchTransferReceipt(ids);
+    }
+
+    @PutMapping("updateStatusByIds")
+    public Response<String> updateTransferReceiptStatusByIds(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
+        return transferReceiptService.updateTransferReceiptStatus(ids, status);
+    }
 }
