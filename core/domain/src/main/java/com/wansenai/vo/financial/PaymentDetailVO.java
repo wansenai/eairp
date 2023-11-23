@@ -33,6 +33,9 @@ import java.util.List;
 public class PaymentDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long supplierId;
 
     private String supplierName;
