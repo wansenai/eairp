@@ -5,7 +5,7 @@ import {
     AddOrUpdateCollectionReq,
     QueryCollectionReq,
     CollectionResp,
-    CollectionDetailResp,
+    CollectionDetailResp, QuerySaleArrearsReq, SaleArrearsResp,
 } from "@/api/financial/model/collectionModel";
 
 enum API {
@@ -14,6 +14,7 @@ enum API {
     DeleteBatch = '/financial/collection/deleteByIds',
     UpdateStatus = '/financial/collection/updateStatusByIds',
     GetDetail = '/financial/collection/getDetailById',
+    GetArrearsPage = '/sale/arrears/pageList',
 }
 
 export function getCollectionPageList(params: QueryCollectionReq, mode: ErrorMessageMode = 'notice') {
@@ -59,5 +60,14 @@ export function getCollectionDetailById(id: number) {
         {
             url: `${API.GetDetail}/${id}`
         },
+    );
+}
+
+export function getArrearsPageList(params: QuerySaleArrearsReq) {
+    return defHttp.post<BaseDataResp<SaleArrearsResp>>(
+        {
+            url: API.GetArrearsPage,
+            params,
+        }
     );
 }

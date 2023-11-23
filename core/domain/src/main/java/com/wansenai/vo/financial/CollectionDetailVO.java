@@ -33,6 +33,9 @@ import java.util.List;
 public class CollectionDetailVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long customerId;
 
     private String customerName;
