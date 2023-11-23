@@ -14,7 +14,7 @@
               :actions="[
               {
                 icon: 'clarity:info-standard-line',
-                tooltip: '查看支出单详情',
+                tooltip: '查看收款单详情',
                 onClick: handleView.bind(null, record),
               },
               {

@@ -226,4 +226,15 @@ public interface ReceiptPurchaseService extends IService<ReceiptPurchaseMain> {
      *         返回修改状态结果
      */
     Response<String> updatePurchaseRefundStatus(List<Long> ids, Integer status);
+
+    /**
+     * Query purchase arrears receipt based on general conditions
+     * 根据公共条件查询采购欠款单据
+     *
+     * @param arrearsDTO Query common conditions
+     *                   查询公共条件
+     * @return Returns paginated data
+     *      返回分页数据
+     */
+    Response<Page<PurchaseArrearsVO>> getPurchaseArrearsPage(QueryPurchaseArrearsDTO arrearsDTO);
 }
