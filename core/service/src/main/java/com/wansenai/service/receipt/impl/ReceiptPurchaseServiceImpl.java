@@ -19,17 +19,20 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.PurchaseDataBO;
 import com.wansenai.dto.receipt.purchase.*;
+import com.wansenai.entities.financial.FinancialMain;
+import com.wansenai.entities.financial.FinancialSub;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.receipt.ReceiptPurchaseMain;
 import com.wansenai.entities.receipt.ReceiptPurchaseSub;
 import com.wansenai.entities.system.SysFile;
-import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.mappers.receipt.ReceiptPurchaseMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.basic.SupplierService;
 import com.wansenai.service.common.CommonService;
+import com.wansenai.service.financial.FinancialSubService;
 import com.wansenai.service.financial.IFinancialAccountService;
+import com.wansenai.service.financial.PaymentReceiptService;
 import com.wansenai.service.receipt.ReceiptPurchaseService;
 import com.wansenai.service.receipt.ReceiptPurchaseSubService;
 import com.wansenai.service.user.ISysUserService;
@@ -56,7 +59,6 @@ import java.util.stream.Collectors;
 public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainMapper, ReceiptPurchaseMain> implements ReceiptPurchaseService {
 
     private final SysFileMapper fileMapper;
-    private final ProductStockKeepUnitMapper productStockKeepUnitMapper;
     private final CommonService commonService;
     private final ISysUserService userService;
     private final SupplierService supplierService;
@@ -64,10 +66,11 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     private final ReceiptPurchaseSubService receiptPurchaseSubService;
     private final ProductStockMapper productStockMapper;
     private final IFinancialAccountService accountService;
+    private final PaymentReceiptService paymentReceiptService;
+    private final FinancialSubService financialSubService;
 
-    public ReceiptPurchaseServiceImpl(SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, CommonService commonService, ISysUserService userService, SupplierService supplierService, ReceiptPurchaseMainMapper receiptPurchaseMainMapper, ReceiptPurchaseSubService receiptPurchaseSubService, ProductStockMapper productStockMapper, IFinancialAccountService accountService) {
+    public ReceiptPurchaseServiceImpl(SysFileMapper fileMapper , CommonService commonService, ISysUserService userService, SupplierService supplierService, ReceiptPurchaseMainMapper receiptPurchaseMainMapper, ReceiptPurchaseSubService receiptPurchaseSubService, ProductStockMapper productStockMapper, IFinancialAccountService accountService, PaymentReceiptService paymentReceiptService, FinancialSubService financialSubService) {
         this.fileMapper = fileMapper;
-        this.productStockKeepUnitMapper = productStockKeepUnitMapper;
         this.commonService = commonService;
         this.userService = userService;
         this.supplierService = supplierService;
@@ -75,6 +78,8 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         this.receiptPurchaseSubService = receiptPurchaseSubService;
         this.productStockMapper = productStockMapper;
         this.accountService = accountService;
+        this.paymentReceiptService = paymentReceiptService;
+        this.financialSubService = financialSubService;
     }
     private final Map<Long, List<ReceiptPurchaseSub>> receiptSubListCache = new ConcurrentHashMap<>();
 
@@ -203,6 +208,13 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         } else {
             return Response.responseMsg(errorEnum);
         }
+    }
+
+    private BigDecimal calculateArrearsAmount(List<FinancialSub> subList, Function<FinancialSub, BigDecimal> mapper) {
+        return subList.stream()
+                .map(mapper.andThen(bd -> bd != null ? bd : BigDecimal.ZERO)) // 在这里添加空值检查
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     private Response<String> updatePurchaseStatus(List<Long> ids, Integer status, PurchaseCodeEnum successEnum, PurchaseCodeEnum errorEnum) {
@@ -1115,5 +1127,58 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     @Override
     public Response<String> updatePurchaseRefundStatus(List<Long> ids, Integer status) {
         return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_ERROR);
+    }
+
+    @Override
+    public Response<Page<PurchaseArrearsVO>> getPurchaseArrearsPage(QueryPurchaseArrearsDTO arrearsDTO) {
+        var result = new Page<PurchaseArrearsVO>();
+        var purchaseArrearsVOList = new ArrayList<PurchaseArrearsVO>();
+        var page = new Page<ReceiptPurchaseMain>(arrearsDTO.getPage(), arrearsDTO.getPageSize());
+        var queryWrapper = new LambdaQueryWrapper<ReceiptPurchaseMain>()
+                .eq(StringUtils.hasText(arrearsDTO.getReceiptNumber()), ReceiptPurchaseMain::getReceiptNumber, arrearsDTO.getReceiptNumber())
+                .eq(arrearsDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, arrearsDTO.getSupplierId())
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .gt(ReceiptPurchaseMain::getArrearsAmount, BigDecimal.ZERO)
+                .ge(StringUtils.hasText(arrearsDTO.getStartDate()), ReceiptPurchaseMain::getCreateTime, arrearsDTO.getStartDate())
+                .le(StringUtils.hasText(arrearsDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, arrearsDTO.getEndDate());
+
+        var queryResult = receiptPurchaseMainMapper.selectPage(page, queryWrapper);
+
+        queryResult.getRecords().forEach(item -> {
+            var supplierName = getSupplierName(item.getSupplierId());
+            var operatorName = getUserName(item.getCreateBy());
+            var financeMainList = paymentReceiptService.lambdaQuery()
+                    .eq(FinancialMain::getRelatedPersonId, item.getSupplierId())
+                    .eq(FinancialMain::getStatus, CommonConstants.NOT_DELETED)
+                    .list();
+            var purchaseArrearsVO = PurchaseArrearsVO.builder()
+                    .id(item.getId())
+                    .supplierName(supplierName)
+                    .receiptDate(item.getReceiptDate())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(item.getRemark())
+                    .operatorName(operatorName)
+                    .thisReceiptArrears(item.getArrearsAmount())
+                    .build();
+            if(!financeMainList.isEmpty()) {
+                for (FinancialMain financialMain : financeMainList) {
+                    var financeSubList = financialSubService.lambdaQuery()
+                            .eq(FinancialSub::getFinancialMainId, financialMain.getId())
+                            .eq(FinancialSub::getOtherReceipt, item.getReceiptNumber())
+                            .eq(FinancialSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                            .list();
+                    var receivedArrears = calculateArrearsAmount(financeSubList, FinancialSub::getReceivedPrepaidArrears);
+                    purchaseArrearsVO.setPrepaidArrears(receivedArrears);
+                    purchaseArrearsVO.setPaymentArrears(item.getArrearsAmount().subtract(receivedArrears));
+                }
+            }
+            purchaseArrearsVOList.add(purchaseArrearsVO);
+        });
+        result.setRecords(purchaseArrearsVOList);
+        result.setTotal(queryResult.getTotal());
+        result.setCurrent(queryResult.getCurrent());
+        result.setSize(queryResult.getSize());
+
+        return Response.responseData(result);
     }
 }
