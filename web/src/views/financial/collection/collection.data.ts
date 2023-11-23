@@ -146,7 +146,6 @@ export const searchFormSchema: FormSchema[] = [
             xl: 8,
             xxl: 8,
         },
-
     }
 ]
 
@@ -175,5 +174,93 @@ export const collectionReceiptTableColumns: BasicColumn[] = [
         title: '备注',
         dataIndex: 'remark',
         width: 200,
+    },
+]
+
+export const searchSaleArrearsFormSchema: FormSchema[] = [
+    {
+        label: '单据编号',
+        field: 'receiptNumber',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '商品信息',
+        field: 'productInfo',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '单据日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+]
+
+export const saleArrearsReceiptTableColumns: BasicColumn[] = [
+    {
+        title: '销售单据id',
+        dataIndex: 'id',
+        ifShow: false,
+        width: 0,
+    },
+    {
+        title: '客户',
+        dataIndex: 'customerName',
+        width: 90,
+    },
+    {
+        title: '单据编号',
+        dataIndex: 'receiptNumber',
+        width: 200,
+    },
+    {
+        title: '单据日期',
+        dataIndex: 'receiptDate',
+        width: 150,
+    },
+    {
+        title: '商品信息',
+        dataIndex: 'productInfo',
+        width: 150,
+    },
+    {
+        title: '本单欠款',
+        dataIndex: 'thisReceiptArrears',
+        width: 80,
+    },
+    {
+        title: '已收欠款',
+        dataIndex: 'receivedArrears',
+        width: 80,
+    },
+    {
+        title: '待收欠款',
+        dataIndex: 'receivableArrears',
+        width: 80,
+    },
+    {
+        title: '操作员',
+        dataIndex: 'operatorName',
+        width: 80,
+    },
+    {
+        title: '备注',
+        dataIndex: 'remark',
+        width: 140,
     },
 ]

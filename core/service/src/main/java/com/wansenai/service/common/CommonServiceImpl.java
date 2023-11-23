@@ -690,6 +690,8 @@ public class CommonServiceImpl implements CommonService{
             case "收入单" -> "SRD";
             case "支出单" -> "ZCD";
             case "转账单" -> "ZZD";
+            case "收款单" -> "SKD";
+            case "付款单" -> "FKD";
             case "采购单" -> "CGD";
             case "销售单" -> "XSD";
             case "退货单" -> "THD";
