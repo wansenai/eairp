@@ -45,6 +45,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,6 +113,7 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
                 .ge(StringUtils.hasLength(queryCollectionDTO.getStartDate()), FinancialMain::getReceiptDate, queryCollectionDTO.getStartDate())
                 .le(StringUtils.hasLength(queryCollectionDTO.getEndDate()), FinancialMain::getReceiptDate, queryCollectionDTO.getEndDate())
                 .eq(FinancialMain::getType, "收款")
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .page(page);
 
         var collectionVOList = new ArrayList<CollectionVO>(financialMainPage.getRecords().size() + 1);
@@ -146,6 +148,9 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
         var financialMain = getById(id);
         if(financialMain != null) {
             var collectionDetailVO = CollectionDetailVO.builder()
+                    .id(financialMain.getId())
+                    .customerId(financialMain.getRelatedPersonId())
+                    .customerName(commonService.getCustomerName(financialMain.getRelatedPersonId()))
                     .receiptDate(financialMain.getReceiptDate())
                     .receiptNumber(financialMain.getReceiptNumber())
                     .financialPersonId(financialMain.getOperatorId())
@@ -209,7 +214,7 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
                             .accountId(addOrUpdateCollectionDTO.getCollectionAccountId())
                             .otherReceipt(item.getSaleReceiptNumber())
                             .ReceivablePaymentArrears(item.getReceivableArrears())
-                            .ReceivedPrepaidArrears(item.getReceivedArrears())
+                            .ReceivedPrepaidArrears(Optional.ofNullable(item.getReceivedArrears()).orElse(BigDecimal.ZERO).add(item.getThisCollectionAmount()))
                             .singleAmount(item.getThisCollectionAmount())
                             .remark(item.getRemark())
                             .createBy(userId)
@@ -283,7 +288,7 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
                             .accountId(addOrUpdateCollectionDTO.getCollectionAccountId())
                             .otherReceipt(item.getSaleReceiptNumber())
                             .ReceivablePaymentArrears(item.getReceivableArrears())
-                            .ReceivedPrepaidArrears(item.getReceivedArrears())
+                            .ReceivedPrepaidArrears(Optional.ofNullable(item.getReceivedArrears()).orElse(BigDecimal.ZERO).add(item.getThisCollectionAmount()))
                             .singleAmount(item.getThisCollectionAmount())
                             .remark(item.getRemark())
                             .createBy(userId)
@@ -321,6 +326,12 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
                 .set(FinancialMain::getDeleteFlag, CommonConstants.DELETED)
                 .in(FinancialMain::getId, ids)
                 .update();
+
+        financialSubService.lambdaUpdate()
+                .set(FinancialSub::getDeleteFlag, CommonConstants.DELETED)
+                .in(FinancialSub::getFinancialMainId, ids)
+                .update();
+
         if(!deleteResult) {
             return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_COLLECTION_RECEIPT_ERROR);
         }
