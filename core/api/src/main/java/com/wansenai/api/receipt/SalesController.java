@@ -121,4 +121,9 @@ public class SalesController {
     public Response<String> deleteRefund(@PathVariable("ids") List<Long> ids) {
         return receiptSaleService.deleteSaleRefund(ids);
     }
+
+    @PostMapping("/arrears/pageList")
+    public Response<Page<SaleArrearsVO>> arrearsPageList(@RequestBody QuerySaleArrearsDTO arrearsDTO) {
+        return receiptSaleService.getSaleArrearsPage(arrearsDTO);
+    }
 }
