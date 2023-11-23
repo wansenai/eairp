@@ -50,6 +50,7 @@ export interface CollectionResp {
 }
 
 export interface CollectionDetailResp {
+    id: string;
     customerId: number;
     customerName: string;
     receiptDate: string;
@@ -65,4 +66,21 @@ export interface CollectionDetailResp {
     status: number;
     files: FileData[];
     tableData: CollectionData[];
+}
+
+export interface QuerySaleArrearsReq {
+    customerId: number;
+    receiptNumber: string;
+    productInfo: string;
+}
+
+export interface SaleArrearsResp {
+    customerName: string;
+    receiptNumber: string;
+    receiptDate: string;
+    productInfo: string;
+    operatorName: string;
+    thisReceiptArrears: number;
+    receivedArrears: number;
+    receivableArrears: number;
 }

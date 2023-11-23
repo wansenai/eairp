@@ -10,13 +10,11 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.financial;
+package com.wansenai.vo.receipt.sale;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
-import com.wansenai.bo.CollectionBO;
-import com.wansenai.bo.FileDataBO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,19 +22,15 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CollectionDetailVO {
+public class SaleArrearsVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long customerId;
 
     private String customerName;
 
@@ -45,30 +39,16 @@ public class CollectionDetailVO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime receiptDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long financialPersonId;
+    private String productInfo;
 
-    private String financialPersonName;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long collectionAccountId;
-
-    private String collectionAccountName;
+    private String operatorName;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal totalCollectionAmount;
+    private BigDecimal thisReceiptArrears;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal discountAmount;
+    private BigDecimal receivedArrears;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal actualCollectionAmount;
-
-    private String remark;
-
-    private Integer status;
-
-    private List<CollectionBO> tableData;
-
-    private List<FileDataBO> files;
+    private BigDecimal receivableArrears;
 }

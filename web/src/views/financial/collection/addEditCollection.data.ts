@@ -5,10 +5,10 @@ import {Dayjs} from "dayjs";
 
 export interface RowVO {
     [key: string]: any,
-    collectionId: string,
-    saleReceiptNumber: string,
+    collectionId: number | string;
+    saleReceiptNumber: string | undefined,
     receivableArrears: number,
-    receivedArrears: number,
+    receivedArrears: number |string,
     thisCollectionAmount: number,
     remark: string,
 }
@@ -72,7 +72,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     columns: [
         { type: 'checkbox', field:'id', title: 'ID', width: 180},
         {   field: 'saleReceiptNumber',
-            width:180,
+            width:200,
             title: '销售单据编号',
         },
         {   field: 'receivableArrears',
@@ -101,6 +101,8 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
                 }
                 if (['thisCollectionAmount', 'rate'].includes(column.field)) {
                     collectionFormState.actualCollectionAmount = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    collectionFormState.totalCollectionAmount = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    getThisCollectionAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                     return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
                 return ''
@@ -119,6 +121,8 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         showStatus: true
     }
 })
+
+const getThisCollectionAmount = ref<string>('0')
 
 const sumNum = (list: RowVO[], field: string) => {
     let count = 0
@@ -146,4 +150,5 @@ export {
     tableData,
     gridOptions,
     collectionFormState,
+    getThisCollectionAmount
 }

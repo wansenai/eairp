@@ -225,4 +225,15 @@ public interface ReceiptSaleService extends IService<ReceiptSaleMain> {
      *        返回修改结果
      */
     Response<String> updateSaleRefundStatus(List<Long> ids, Integer status);
+
+    /**
+     * Query sales debt documents
+     * 查询销售欠款单据
+     *
+     * @param arrearsDTO Query common conditions
+     *                   查询公共条件
+     * @return Returns paginated data
+     *       返回分页数据
+     */
+    Response<Page<SaleArrearsVO>> getSaleArrearsPage(QuerySaleArrearsDTO arrearsDTO);
 }

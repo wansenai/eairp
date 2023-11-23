@@ -19,16 +19,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.SalesDataBO;
 import com.wansenai.dto.receipt.sale.*;
+import com.wansenai.entities.financial.FinancialMain;
+import com.wansenai.entities.financial.FinancialSub;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.receipt.ReceiptSaleMain;
 import com.wansenai.entities.receipt.ReceiptSaleSub;
 import com.wansenai.entities.system.SysFile;
-import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.mappers.receipt.ReceiptSaleMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.common.CommonService;
+import com.wansenai.service.financial.CollectionReceiptService;
+import com.wansenai.service.financial.FinancialSubService;
 import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.receipt.ReceiptSaleService;
 import com.wansenai.service.receipt.ReceiptSaleSubService;
@@ -61,21 +64,23 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
     private final ISysUserService userService;
     private final ReceiptSaleSubService receiptSaleSubService;
     private final SysFileMapper fileMapper;
-    private final ProductStockKeepUnitMapper productStockKeepUnitMapper;
     private final CommonService commonService;
     private final ProductStockMapper productStockMapper;
     private final IFinancialAccountService accountService;
+    private final CollectionReceiptService collectionReceiptService;
+    private final FinancialSubService financialSubService;
 
-    public ReceiptSaleServiceImpl(ReceiptSaleMainMapper receiptSaleMainMapper, CustomerService customerService, ISysUserService userService, ReceiptSaleSubService receiptSaleSubService, SysFileMapper fileMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, CommonService commonService, ProductStockMapper productStockMapper, IFinancialAccountService accountService) {
+    public ReceiptSaleServiceImpl(ReceiptSaleMainMapper receiptSaleMainMapper, CustomerService customerService, ISysUserService userService, ReceiptSaleSubService receiptSaleSubService, SysFileMapper fileMapper, CommonService commonService, ProductStockMapper productStockMapper, IFinancialAccountService accountService, CollectionReceiptService collectionReceiptService, FinancialSubService financialSubService) {
         this.receiptSaleMainMapper = receiptSaleMainMapper;
         this.customerService = customerService;
         this.userService = userService;
         this.receiptSaleSubService = receiptSaleSubService;
         this.fileMapper = fileMapper;
-        this.productStockKeepUnitMapper = productStockKeepUnitMapper;
         this.commonService = commonService;
         this.productStockMapper = productStockMapper;
         this.accountService = accountService;
+        this.collectionReceiptService = collectionReceiptService;
+        this.financialSubService = financialSubService;
     }
 
     private final Map<Long, List<ReceiptSaleSub>> receiptSubListCache = new ConcurrentHashMap<>();
@@ -91,6 +96,13 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
     private BigDecimal calculateTotalAmount(List<ReceiptSaleSub> subList, Function<ReceiptSaleSub, BigDecimal> mapper) {
         return subList.stream()
                 .map(mapper)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal calculateArrearsAmount(List<FinancialSub> subList, Function<FinancialSub, BigDecimal> mapper) {
+        return subList.stream()
+                .map(mapper.andThen(bd -> bd != null ? bd : BigDecimal.ZERO)) // 在这里添加空值检查
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
     }
@@ -1119,5 +1131,60 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
     @Override
     public Response<String> updateSaleRefundStatus(List<Long> ids, Integer status) {
         return updateSaleStatus(ids, status, SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS, SaleCodeEnum.UPDATE_SALE_REFUND_ERROR);
+    }
+
+    @Override
+    public Response<Page<SaleArrearsVO>> getSaleArrearsPage(QuerySaleArrearsDTO arrearsDTO) {
+        var result = new Page<SaleArrearsVO>();
+        var saleArrearsVOList = new ArrayList<SaleArrearsVO>();
+        var page = new Page<ReceiptSaleMain>(arrearsDTO.getPage(), arrearsDTO.getPageSize());
+        var queryWrapper = new LambdaQueryWrapper<ReceiptSaleMain>()
+                .eq(StringUtils.hasText(arrearsDTO.getReceiptNumber()), ReceiptSaleMain::getReceiptNumber, arrearsDTO.getReceiptNumber())
+                .eq(arrearsDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, arrearsDTO.getCustomerId())
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .gt(ReceiptSaleMain::getArrearsAmount, BigDecimal.ZERO)
+                .ge(StringUtils.hasText(arrearsDTO.getStartDate()), ReceiptSaleMain::getCreateTime, arrearsDTO.getStartDate())
+                .le(StringUtils.hasText(arrearsDTO.getEndDate()), ReceiptSaleMain::getCreateTime, arrearsDTO.getEndDate());
+
+        var queryResult = receiptSaleMainMapper.selectPage(page, queryWrapper);
+
+        queryResult.getRecords().forEach(item -> {
+            var customerName = getCustomerName(item.getCustomerId());
+            var operatorName = getUserName(item.getCreateBy());
+            var financeMainList = collectionReceiptService.lambdaQuery()
+                    .eq(FinancialMain::getRelatedPersonId, item.getCustomerId())
+                    .eq(FinancialMain::getStatus, CommonConstants.NOT_DELETED)
+                    .list();
+            var saleArrearsVO = SaleArrearsVO.builder()
+                    .id(item.getId())
+                    .customerName(customerName)
+                    .receiptDate(item.getReceiptDate())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(item.getRemark())
+                    .operatorName(operatorName)
+                    .thisReceiptArrears(item.getArrearsAmount())
+                    .build();
+            if(!financeMainList.isEmpty()) {
+
+                for (FinancialMain financialMain : financeMainList) {
+                    var financeSubList = financialSubService.lambdaQuery()
+                            .eq(FinancialSub::getFinancialMainId, financialMain.getId())
+                            .eq(FinancialSub::getOtherReceipt, item.getReceiptNumber())
+                            .eq(FinancialSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                            .list();
+                    var receivableArrears = calculateArrearsAmount(financeSubList, FinancialSub::getReceivablePaymentArrears);
+                    var receivedArrears = calculateArrearsAmount(financeSubList, FinancialSub::getReceivedPrepaidArrears);
+                    saleArrearsVO.setReceivedArrears(receivedArrears);
+                    saleArrearsVO.setReceivableArrears(item.getArrearsAmount().subtract(receivedArrears));
+                }
+            }
+            saleArrearsVOList.add(saleArrearsVO);
+        });
+        result.setRecords(saleArrearsVOList);
+        result.setTotal(queryResult.getTotal());
+        result.setCurrent(queryResult.getCurrent());
+        result.setSize(queryResult.getSize());
+
+        return Response.responseData(result);
     }
 }
