@@ -12,12 +12,68 @@
  */
 package com.wansenai.service.financial.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansenai.dto.financial.AddOrUpdatePaymentDTO;
+import com.wansenai.dto.financial.QueryPaymentDTO;
 import com.wansenai.entities.financial.FinancialMain;
 import com.wansenai.mappers.financial.FinancialMainMapper;
+import com.wansenai.mappers.system.SysFileMapper;
+import com.wansenai.service.common.CommonService;
+import com.wansenai.service.financial.FinancialSubService;
+import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.financial.PaymentReceiptService;
+import com.wansenai.service.user.ISysUserService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.financial.PaymentDetailVO;
+import com.wansenai.vo.financial.PaymentVO;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, FinancialMain> implements PaymentReceiptService {
+
+    private final FinancialSubService financialSubService;
+
+    private final CommonService commonService;
+
+    private final ISysUserService userService;
+
+    private final SysFileMapper fileMapper;
+
+    private final IFinancialAccountService accountService;
+
+    public PaymentReceiptServiceImpl(FinancialSubService financialSubService, CommonService commonService, ISysUserService userService, SysFileMapper fileMapper, IFinancialAccountService accountService) {
+        this.financialSubService = financialSubService;
+        this.commonService = commonService;
+        this.userService = userService;
+        this.fileMapper = fileMapper;
+        this.accountService = accountService;
+    }
+
+    @Override
+    public Response<Page<PaymentVO>> getPaymentReceiptPageList(QueryPaymentDTO queryPaymentDTO) {
+        return null;
+    }
+
+    @Override
+    public Response<PaymentDetailVO> getPaymentReceiptDetail(Long id) {
+        return null;
+    }
+
+    @Override
+    public Response<String> addOrUpdatePaymentReceipt(AddOrUpdatePaymentDTO addOrUpdatePaymentDTO) {
+        return null;
+    }
+
+    @Override
+    public Response<String> deleteBatchPaymentReceipt(List<Long> ids) {
+        return null;
+    }
+
+    @Override
+    public Response<String> updatePaymentReceiptStatus(List<Long> ids, Integer status) {
+        return null;
+    }
 }

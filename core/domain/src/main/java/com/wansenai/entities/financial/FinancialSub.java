@@ -67,19 +67,19 @@ public class FinancialSub implements Serializable {
     private Long incomeExpenseId;
 
     /**
-     * 单据id
+     * 其他单据
      */
-    private Long receiptId;
+    private String otherReceipt;
 
     /**
-     * 应收欠款
+     * 应收/付 欠款
      */
-    private BigDecimal accountsReceivable;
+    private BigDecimal ReceivablePaymentArrears;
 
     /**
-     * 已收欠款
+     * 已收/付 欠款
      */
-    private BigDecimal accountsReceived;
+    private BigDecimal ReceivedPrepaidArrears;
 
     /**
      * 单项金额
