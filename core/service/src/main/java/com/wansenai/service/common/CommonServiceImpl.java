@@ -702,11 +702,16 @@ public class CommonServiceImpl implements CommonService{
             case "报损单" -> "BSD";
             case "报溢单" -> "BZD";
             case "调价单" -> "DJD";
+            case "组装单" -> "ADD";
+            case "拆卸单" -> "CXD";
             case "零售出库" -> "LSCK";
             case "零售退货" -> "LSTH";
             case "销售出库" -> "XSCK";
             case "销售退货" -> "XSTH";
             case "采购入库" -> "CGRK";
+            case "其他入库" -> "QTRK";
+            case "其他出库" -> "QTCK";
+            case "调拨出库" -> "DBCK";
             case "采购退货" -> "CGTH";
             case "收预付款" -> "ACD";
             default -> "";

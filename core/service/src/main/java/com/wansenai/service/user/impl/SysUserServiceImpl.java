@@ -728,4 +728,24 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
         return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_SUCCESS);
     }
+
+    @Override
+    public Response<List<UserInfoVO>> operator() {
+        var user = lambdaQuery()
+                .eq(SysUser::getTenantId, getCurrentTenantId())
+                .eq(SysUser::getStatus, UserConstants.USER_STATUS_ENABLE)
+                .eq(SysUser::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+        var result = new ArrayList<UserInfoVO>(user.size() + 1);
+        for (SysUser sysUser : user) {
+            var userVO = UserInfoVO.builder()
+                    .id(sysUser.getId())
+                    .name(sysUser.getName())
+                    .userName(sysUser.getUserName())
+                    .avatar(sysUser.getAvatar())
+                    .build();
+            result.add(userVO);
+        }
+        return Response.responseData(result);
+    }
 }

@@ -29,6 +29,7 @@ enum Api {
   AddOrUpdateUser = '/user/addOrUpdate',
   DeleteUser = '/user/delete',
   ResetPassword = '/user/resetPassword',
+  GetUserOperatorList = '/user/operator',
 }
 
 /**
@@ -180,6 +181,10 @@ export function getPermCode() {
 
 export function doLogout() {
   return defHttp.get({url: Api.Logout});
+}
+
+export function getUserOperatorList() {
+    return defHttp.get<BaseDataResp<GetUserInfoModel>>({url: Api.GetUserOperatorList});
 }
 
 export function testRetry() {

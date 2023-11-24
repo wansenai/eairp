@@ -63,6 +63,11 @@ public class SysUserController {
         return userService.updatePassword(updatePasswordDto);
     }
 
+    @GetMapping(value = "operator")
+    public Response<List<UserInfoVO>> operator() {
+        return userService.operator();
+    }
+
     @GetMapping(value = "info")
     public Response<UserInfoVO> info() {
         return userService.userInfo();

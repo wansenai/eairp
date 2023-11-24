@@ -13,15 +13,17 @@
 package com.wansenai.service.warehouse;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansenai.dto.warehouse.DisassembleReceiptDTO;
 import com.wansenai.dto.warehouse.QueryDisassembleReceiptDTO;
+import com.wansenai.entities.warehouse.WarehouseReceiptMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.DisassembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.DisassembleReceiptVO;
 
 import java.util.List;
 
-public interface DisassembleReceiptService {
+public interface DisassembleReceiptService extends IService<WarehouseReceiptMain> {
 
     Response<Page<DisassembleReceiptVO>> getDisassembleReceiptPageList(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO);
 

@@ -39,11 +39,13 @@ public class StorageShipmentStockBO {
 
     private String productName;
 
-    private String productModel;
-
     private String productUnit;
 
     private String productStandard;
+
+    private String productModel;
+
+    private String productExtendInfo;
 
     private Integer stock;
 
