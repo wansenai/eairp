@@ -308,7 +308,7 @@ const stock: Stock = reactive({
     dataSource: ref([]),
     columns: [
         {
-            title: '仓库 (商品名称规格)',
+            title: '仓库 (商品条码/商品单位)',
             key: 'warehouseName',
             type: 'input',
         },
