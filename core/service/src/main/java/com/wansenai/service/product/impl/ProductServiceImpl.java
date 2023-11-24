@@ -108,6 +108,14 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                         .in(ProductStockKeepUnit::getProductBarCode, barCodeList)
                         .ne(productDTO.getProductId() != null, ProductStockKeepUnit::getProductId, productDTO.getProductId())
                         .exists();
+                // 比较是否有相同的条码 如果有就返回错误信息 如果没有就继续执行
+                boolean theSameBarCode = barCodeList.stream()
+                        .distinct()
+                        .count() != barCodeList.size();
+                if (theSameBarCode) {
+                    return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_EXIST.getCode(), "商品条码不能重复");
+                }
+
                 if (existBarCode) {
                     return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_EXIST);
                 }
