@@ -10,22 +10,30 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.api.warehouse;
+package com.wansenai.dto.warehouse;
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.wansenai.bo.FileDataBO;
+import com.wansenai.bo.StorageShipmentStockBO;
+import lombok.Data;
 
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
-/**
- * <p>
- * 单据子表 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
-@RestController
-@RequestMapping("/warehouseItem")
-public class WarehouseItemController {
+@Data
+public class OtherStorageDTO {
 
+    private Long id;
+
+    private Long supplierId;
+
+    private String receiptNumber;
+
+    private String receiptDate;
+
+    private String remark;
+
+    private Integer status;
+
+    private List<StorageShipmentStockBO> tableData;
+
+    private List<FileDataBO> files;
 }

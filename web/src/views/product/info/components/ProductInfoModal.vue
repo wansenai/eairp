@@ -284,7 +284,7 @@
                        :scroll="{ x: '100%', y: 300 }">
                 <template #bodyCell="{ column, text, record }">
                   <template v-if="column.key === 'warehouseName'">
-                    <a-input v-model:value="editStockData[record.key][column.key]" disabled/>
+                    <a-input v-model:value="editStockData[record.key][column.key]" readonly/>
                   </template>
                   <template v-else-if="editStockData[record.key]">
                     <a-input v-model:value="editStockData[record.key][column.key]"
@@ -785,7 +785,7 @@ export default defineComponent({
                     key: item.productStockId,
                     productStockId: item.productStockId,
                     warehouseId: item.warehouseId,
-                    warehouseName: item.warehouseName + '(' + data.productName + '/' + data.priceList[i].productUnit + ')',
+                    warehouseName: item.warehouseName + '(' + data.priceList[i].barCode + '/' + data.priceList[i].productUnit + ')',
                     initStockQuantity: item.initStockQuantity,
                     lowStockQuantity: item.lowStockQuantity,
                     highStockQuantity: item.highStockQuantity
