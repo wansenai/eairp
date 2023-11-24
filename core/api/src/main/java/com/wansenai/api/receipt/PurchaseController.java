@@ -128,4 +128,9 @@ public class PurchaseController {
     public Response<String> deletePurchaseRefund(@PathVariable("ids") List<Long> ids) {
         return purchaseService.deletePurchaseRefund(ids);
     }
+
+    @PostMapping("/arrears/pageList")
+    public Response<Page<PurchaseArrearsVO>> arrearsPageList(@RequestBody QueryPurchaseArrearsDTO arrearsDTO) {
+        return purchaseService.getPurchaseArrearsPage(arrearsDTO);
+    }
 }

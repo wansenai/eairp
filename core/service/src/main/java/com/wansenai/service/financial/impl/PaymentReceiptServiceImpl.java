@@ -14,9 +14,14 @@ package com.wansenai.service.financial.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansenai.bo.CollectionBO;
+import com.wansenai.bo.FileDataBO;
+import com.wansenai.bo.PaymentBO;
 import com.wansenai.dto.financial.AddOrUpdatePaymentDTO;
 import com.wansenai.dto.financial.QueryPaymentDTO;
 import com.wansenai.entities.financial.FinancialMain;
+import com.wansenai.entities.financial.FinancialSub;
+import com.wansenai.entities.system.SysFile;
 import com.wansenai.mappers.financial.FinancialMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.common.CommonService;
@@ -24,12 +29,26 @@ import com.wansenai.service.financial.FinancialSubService;
 import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.financial.PaymentReceiptService;
 import com.wansenai.service.user.ISysUserService;
+import com.wansenai.utils.SnowflakeIdUtil;
+import com.wansenai.utils.TimeUtil;
+import com.wansenai.utils.constants.CommonConstants;
+import com.wansenai.utils.enums.BaseCodeEnum;
+import com.wansenai.utils.enums.CollectionPaymentCodeEnum;
 import com.wansenai.utils.response.Response;
+import com.wansenai.vo.financial.CollectionDetailVO;
+import com.wansenai.vo.financial.CollectionVO;
 import com.wansenai.vo.financial.PaymentDetailVO;
 import com.wansenai.vo.financial.PaymentVO;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, FinancialMain> implements PaymentReceiptService {
@@ -52,28 +71,287 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
         this.accountService = accountService;
     }
 
+    private ArrayList<Long> processFiles(List<FileDataBO> files, Long retailId) {
+        var userId = userService.getCurrentUserId();
+        var fid = new ArrayList<Long>();
+        if (!files.isEmpty()) {
+            var receiptMain = getById(retailId);
+            if (receiptMain != null && StringUtils.hasLength(receiptMain.getFileId())) {
+                var ids = Arrays.stream(receiptMain.getFileId().split(","))
+                        .map(Long::parseLong)
+                        .collect(Collectors.toList());
+                fileMapper.deleteBatchIds(ids);
+            }
+            files.forEach(item -> {
+                var file = SysFile.builder()
+                        .id(SnowflakeIdUtil.nextId())
+                        .uid(item.getUid())
+                        .fileName(item.getFileName())
+                        .fileType(item.getFileType())
+                        .fileSize(item.getFileSize())
+                        .fileUrl(item.getFileUrl())
+                        .createBy(userId)
+                        .createTime(LocalDateTime.now())
+                        .build();
+                fileMapper.insert(file);
+                fid.add(file.getId());
+            });
+        }
+        return fid;
+    }
+
     @Override
     public Response<Page<PaymentVO>> getPaymentReceiptPageList(QueryPaymentDTO queryPaymentDTO) {
-        return null;
+        var result = new Page<PaymentVO>();
+        var page = new Page<FinancialMain>(queryPaymentDTO.getPage(), queryPaymentDTO.getPageSize());
+
+        var financialMainPage = lambdaQuery()
+                .eq(queryPaymentDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryPaymentDTO.getFinancialPersonId())
+                .eq(queryPaymentDTO.getAccountId() != null, FinancialMain::getAccountId, queryPaymentDTO.getAccountId())
+                .eq(queryPaymentDTO.getStatus() != null, FinancialMain::getStatus, queryPaymentDTO.getStatus())
+                .eq(queryPaymentDTO.getSupplierId() != null, FinancialMain::getRelatedPersonId, queryPaymentDTO.getSupplierId())
+                .eq(StringUtils.hasLength(queryPaymentDTO.getReceiptNumber()), FinancialMain::getReceiptNumber, queryPaymentDTO.getReceiptNumber())
+                .like(StringUtils.hasLength(queryPaymentDTO.getRemark()), FinancialMain::getRemark, queryPaymentDTO.getRemark())
+                .ge(StringUtils.hasLength(queryPaymentDTO.getStartDate()), FinancialMain::getReceiptDate, queryPaymentDTO.getStartDate())
+                .le(StringUtils.hasLength(queryPaymentDTO.getEndDate()), FinancialMain::getReceiptDate, queryPaymentDTO.getEndDate())
+                .eq(FinancialMain::getType, "付款")
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .page(page);
+
+        var paymentVOList = new ArrayList<PaymentVO>(financialMainPage.getRecords().size() + 1);
+        financialMainPage.getRecords().forEach(item -> {
+            var paymentVo = PaymentVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .supplierName(commonService.getSupplierName(item.getRelatedPersonId()))
+                    .receiptDate(item.getReceiptDate())
+                    .financialPerson(commonService.getOperatorName(item.getOperatorId()))
+                    .paymentAccountName(commonService.getAccountName(item.getAccountId()))
+                    .totalPaymentAmount(item.getTotalAmount())
+                    .discountAmount(item.getDiscountAmount())
+                    .actualPaymentAmount(item.getChangeAmount())
+                    .status(item.getStatus())
+                    .remark(item.getRemark())
+                    .build();
+
+            paymentVOList.add(paymentVo);
+        });
+        result.setRecords(paymentVOList);
+        result.setTotal(financialMainPage.getTotal());
+        return Response.responseData(result);
     }
 
     @Override
     public Response<PaymentDetailVO> getPaymentReceiptDetail(Long id) {
-        return null;
+        if (id == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        var financialMain = getById(id);
+        if(financialMain != null) {
+            var paymentDetailVO = PaymentDetailVO.builder()
+                    .id(financialMain.getId())
+                    .supplierId(financialMain.getRelatedPersonId())
+                    .supplierName(commonService.getSupplierName(financialMain.getRelatedPersonId()))
+                    .receiptDate(financialMain.getReceiptDate())
+                    .receiptNumber(financialMain.getReceiptNumber())
+                    .financialPersonId(financialMain.getOperatorId())
+                    .financialPersonName(commonService.getOperatorName(financialMain.getOperatorId()))
+                    .paymentAccountId(financialMain.getAccountId())
+                    .paymentAccountName(commonService.getAccountName(financialMain.getAccountId()))
+                    .totalPaymentAmount(financialMain.getTotalAmount())
+                    .discountAmount(financialMain.getDiscountAmount())
+                    .actualPaymentAmount(financialMain.getChangeAmount())
+                    .remark(financialMain.getRemark())
+                    .status(financialMain.getStatus())
+                    .build();
+
+            var financialSubs = financialSubService.lambdaQuery()
+                    .eq(FinancialSub::getFinancialMainId, id)
+                    .list();
+
+            if (financialSubs != null) {
+                var paymentBOList = new ArrayList<PaymentBO>(financialSubs.size() + 1);
+                financialSubs.forEach(sub -> {
+                    var paymentBO = PaymentBO.builder()
+                            .paymentId(sub.getId())
+                            .purchaseReceiptNumber(sub.getOtherReceipt())
+                            .paymentArrears(sub.getReceivablePaymentArrears())
+                            .prepaidArrears(sub.getReceivedPrepaidArrears())
+                            .thisPaymentAmount(sub.getSingleAmount())
+                            .remark(sub.getRemark())
+                            .build();
+                    paymentBOList.add(paymentBO);
+                });
+                paymentDetailVO.setTableData(paymentBOList);
+            }
+            var fileList = commonService.getFileList(financialMain.getFileId());
+            paymentDetailVO.setFiles(fileList);
+            return Response.responseData(paymentDetailVO);
+        }
+        return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
     }
 
     @Override
     public Response<String> addOrUpdatePaymentReceipt(AddOrUpdatePaymentDTO addOrUpdatePaymentDTO) {
-        return null;
+        var userId = userService.getCurrentUserId();
+        var fid = processFiles(addOrUpdatePaymentDTO.getFiles(), addOrUpdatePaymentDTO.getId());
+        var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
+        var isUpdate = addOrUpdatePaymentDTO.getId() != null;
+
+        if (isUpdate) {
+            var beforeReceipt = financialSubService.lambdaQuery()
+                    .eq(FinancialSub::getFinancialMainId, addOrUpdatePaymentDTO.getId())
+                    .list();
+
+            financialSubService.lambdaUpdate()
+                    .eq(FinancialSub::getFinancialMainId, addOrUpdatePaymentDTO.getId())
+                    .remove();
+
+            var financialSubList = addOrUpdatePaymentDTO.getTableData();
+            var financialSub = financialSubList.stream()
+                    .map(item -> FinancialSub.builder()
+                            .id(SnowflakeIdUtil.nextId())
+                            .financialMainId(addOrUpdatePaymentDTO.getId())
+                            .accountId(addOrUpdatePaymentDTO.getPaymentAccountId())
+                            .otherReceipt(item.getPurchaseReceiptNumber())
+                            .ReceivablePaymentArrears(item.getPaymentArrears())
+                            .ReceivedPrepaidArrears(Optional.ofNullable(item.getPrepaidArrears()).orElse(BigDecimal.ZERO).add(item.getPrepaidArrears()))
+                            .singleAmount(item.getThisPaymentAmount())
+                            .remark(item.getRemark())
+                            .createBy(userId)
+                            .createTime(LocalDateTime.now())
+                            .build())
+                    .collect(Collectors.toList());
+            var updateSubResult = financialSubService.saveBatch(financialSub);
+
+            var updateFinancialMain = lambdaUpdate()
+                    .eq(FinancialMain::getId, addOrUpdatePaymentDTO.getId())
+                    .set(addOrUpdatePaymentDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, addOrUpdatePaymentDTO.getFinancialPersonId())
+                    .set(addOrUpdatePaymentDTO.getPaymentAccountId() != null, FinancialMain::getAccountId, addOrUpdatePaymentDTO.getPaymentAccountId())
+                    .set(addOrUpdatePaymentDTO.getTotalPaymentAmount() != null, FinancialMain::getTotalAmount, addOrUpdatePaymentDTO.getTotalPaymentAmount())
+                    .set(addOrUpdatePaymentDTO.getDiscountAmount() != null, FinancialMain::getDiscountAmount, addOrUpdatePaymentDTO.getDiscountAmount())
+                    .set(addOrUpdatePaymentDTO.getActualPaymentAmount() != null, FinancialMain::getChangeAmount, addOrUpdatePaymentDTO.getActualPaymentAmount())
+                    .set(addOrUpdatePaymentDTO.getStatus() != null, FinancialMain::getStatus, addOrUpdatePaymentDTO.getStatus())
+                    .set(StringUtils.hasLength(addOrUpdatePaymentDTO.getRemark()), FinancialMain::getRemark, addOrUpdatePaymentDTO.getRemark())
+                    .set(StringUtils.hasLength(addOrUpdatePaymentDTO.getReceiptDate()), FinancialMain::getReceiptDate, addOrUpdatePaymentDTO.getReceiptDate())
+                    .set(StringUtils.hasLength(fileIds), FinancialMain::getFileId, fileIds)
+                    .set(FinancialMain::getUpdateBy, userId)
+                    .set(FinancialMain::getUpdateTime, LocalDateTime.now())
+                    .update();
+
+            var account = accountService.getById(addOrUpdatePaymentDTO.getPaymentAccountId());
+            if (account != null) {
+                var accountBalance = account.getCurrentAmount();
+                var changeAmount = addOrUpdatePaymentDTO.getActualPaymentAmount();
+                var beforeChangeAmount = beforeReceipt.stream()
+                        .map(FinancialSub::getSingleAmount)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                accountBalance = accountBalance.add(beforeChangeAmount);
+                if (changeAmount != null) {
+                    accountBalance = accountBalance.subtract(changeAmount);
+                }
+                account.setCurrentAmount(accountBalance);
+                accountService.updateById(account);
+            }
+
+            if (!updateSubResult || !updateFinancialMain) {
+                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_SUCCESS);
+
+        } else {
+            var id = SnowflakeIdUtil.nextId();
+            var financialMain = FinancialMain.builder()
+                    .id(id)
+                    .receiptDate(TimeUtil.parse(addOrUpdatePaymentDTO.getReceiptDate()))
+                    .receiptNumber(addOrUpdatePaymentDTO.getReceiptNumber())
+                    .operatorId(addOrUpdatePaymentDTO.getFinancialPersonId())
+                    .accountId(addOrUpdatePaymentDTO.getPaymentAccountId())
+                    .relatedPersonId(addOrUpdatePaymentDTO.getSupplierId())
+                    .totalAmount(addOrUpdatePaymentDTO.getTotalPaymentAmount())
+                    .discountAmount(addOrUpdatePaymentDTO.getDiscountAmount())
+                    .changeAmount(addOrUpdatePaymentDTO.getActualPaymentAmount())
+                    .remark(addOrUpdatePaymentDTO.getRemark())
+                    .status(addOrUpdatePaymentDTO.getStatus())
+                    .type("付款")
+                    .fileId(fileIds)
+                    .createBy(userId)
+                    .createTime(LocalDateTime.now())
+                    .status(addOrUpdatePaymentDTO.getStatus())
+                    .build();
+
+            var saveResult = save(financialMain);
+            var financialSubList = addOrUpdatePaymentDTO.getTableData();
+            var financialSub = financialSubList.stream()
+                    .map(item -> FinancialSub.builder()
+                            .id(SnowflakeIdUtil.nextId())
+                            .financialMainId(id)
+                            .accountId(addOrUpdatePaymentDTO.getPaymentAccountId())
+                            .otherReceipt(item.getPurchaseReceiptNumber())
+                            .ReceivablePaymentArrears(item.getPaymentArrears())
+                            .ReceivedPrepaidArrears(Optional.ofNullable(item.getPrepaidArrears()).orElse(BigDecimal.ZERO).add(item.getThisPaymentAmount()))
+                            .singleAmount(item.getThisPaymentAmount())
+                            .remark(item.getRemark())
+                            .createBy(userId)
+                            .createTime(LocalDateTime.now())
+                            .build())
+                    .collect(Collectors.toList());
+            var saveSubResult = financialSubService.saveBatch(financialSub);
+
+            var account = accountService.getById(addOrUpdatePaymentDTO.getPaymentAccountId());
+            if (account != null) {
+                // 更新余额 采购划扣金额
+                var accountBalance = account.getCurrentAmount();
+                var changeAmount = addOrUpdatePaymentDTO.getActualPaymentAmount();
+                if (changeAmount != null) {
+                    accountBalance = accountBalance.subtract(changeAmount);
+                    account.setId(addOrUpdatePaymentDTO.getPaymentAccountId());
+                    account.setCurrentAmount(accountBalance);
+                    accountService.updateById(account);
+                }
+            }
+
+            if (!saveResult || !saveSubResult) {
+                return Response.responseMsg(CollectionPaymentCodeEnum.ADD_PAYMENT_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(CollectionPaymentCodeEnum.ADD_PAYMENT_RECEIPT_SUCCESS);
+        }
     }
 
     @Override
     public Response<String> deleteBatchPaymentReceipt(List<Long> ids) {
-        return null;
+        if (ids == null || ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var deleteResult = lambdaUpdate()
+                .set(FinancialMain::getDeleteFlag, CommonConstants.DELETED)
+                .in(FinancialMain::getId, ids)
+                .update();
+
+        financialSubService.lambdaUpdate()
+                .set(FinancialSub::getDeleteFlag, CommonConstants.DELETED)
+                .in(FinancialSub::getFinancialMainId, ids)
+                .update();
+
+        if(!deleteResult) {
+            return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_PAYMENT_RECEIPT_ERROR);
+        }
+        return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_PAYMENT_RECEIPT_SUCCESS);
     }
 
     @Override
     public Response<String> updatePaymentReceiptStatus(List<Long> ids, Integer status) {
-        return null;
+        if (ids == null || ids.isEmpty() || status == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var updateResult = lambdaUpdate()
+                .set(FinancialMain::getStatus, status)
+                .in(FinancialMain::getId, ids)
+                .update();
+        if(!updateResult) {
+            return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_ERROR);
+        }
+        return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_SUCCESS);
     }
 }

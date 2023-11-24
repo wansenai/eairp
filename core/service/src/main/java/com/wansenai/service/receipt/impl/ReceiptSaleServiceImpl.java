@@ -1172,7 +1172,6 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                             .eq(FinancialSub::getOtherReceipt, item.getReceiptNumber())
                             .eq(FinancialSub::getDeleteFlag, CommonConstants.NOT_DELETED)
                             .list();
-                    var receivableArrears = calculateArrearsAmount(financeSubList, FinancialSub::getReceivablePaymentArrears);
                     var receivedArrears = calculateArrearsAmount(financeSubList, FinancialSub::getReceivedPrepaidArrears);
                     saleArrearsVO.setReceivedArrears(receivedArrears);
                     saleArrearsVO.setReceivableArrears(item.getArrearsAmount().subtract(receivedArrears));
