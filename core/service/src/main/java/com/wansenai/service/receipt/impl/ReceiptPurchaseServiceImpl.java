@@ -721,9 +721,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .collect(Collectors.toList());
 
             var updateSubResult = receiptPurchaseSubService.saveBatch(receiptPurchaseStorageList);
-            purchaseStorageDTO.getTableData().forEach(item -> {
-                updateProductStock(receiptPurchaseStorageList, 1);
-            });
+            updateProductStock(receiptPurchaseStorageList, 1);
 
             var account = accountService.getById(purchaseStorageDTO.getAccountId());
             if (account != null) {
@@ -1025,9 +1023,8 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .collect(Collectors.toList());
 
             var updateSubResult = receiptPurchaseSubService.saveBatch(receiptPurchaseRefundList);
-            purchaseRefundDTO.getTableData().forEach(item -> {
-                updateProductStock(receiptPurchaseRefundList, 2);
-            });
+            updateProductStock(receiptPurchaseRefundList, 2);
+
             var account = accountService.getById(purchaseRefundDTO.getAccountId());
             if (account != null) {
                 var accountBalance = account.getCurrentAmount();

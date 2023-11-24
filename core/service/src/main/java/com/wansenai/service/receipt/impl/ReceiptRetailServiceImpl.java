@@ -383,9 +383,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                             .build())
                     .collect(Collectors.toList());
             var updateSubResult = receiptRetailSubService.saveBatch(receiptList);
-            shipmentsDTO.getTableData().forEach(item -> {
-                updateProductStock(receiptList, 2);
-            });
+            updateProductStock(receiptList, 2);
 
             var updateMainResult = lambdaUpdate()
                     .eq(ReceiptRetailMain::getId, shipmentsDTO.getId())
@@ -655,9 +653,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                     .collect(Collectors.toList());
 
             var updateSubResult = receiptRetailSubService.saveBatch(receiptList);
-            refundDTO.getTableData().forEach(item -> {
-                updateProductStock(receiptList, 1);
-            });
+            updateProductStock(receiptList, 1);
 
             // 更新余额 如果之前已经修改过那么就需要加上之前的金额 然后再减去现在的金额 如果之前没有修改过那么就直接加上现在的金额 因为这个是退货 所以是负数
             var account = accountService.getById(refundDTO.getAccountId());
@@ -665,11 +661,9 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 var accountBalance = account.getCurrentAmount();
                 var changeAmount = refundDTO.getReceiptAmount();
                 var beforeChangeAmount = beforeReceipt.stream()
-                        .map(item -> item.getTotalAmount())
+                        .map(ReceiptRetailSub::getTotalAmount)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
-                if (beforeChangeAmount != null) {
-                    accountBalance = accountBalance.add(beforeChangeAmount);
-                }
+                accountBalance = accountBalance.add(beforeChangeAmount);
                 if (changeAmount != null) {
                     accountBalance = accountBalance.subtract(changeAmount);
                 }
