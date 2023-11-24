@@ -93,4 +93,6 @@ export interface GetUserInfoModel {
   status: number;
   // 用户角色名称
   roleName: string;
+  // 头像
+  avatar: string;
 }
