@@ -166,6 +166,41 @@ public class Response<T> implements Serializable {
         return baseResponse;
     }
 
+    public static <T> Response<T> responseMsg(AllotShipmentCodeEnum allotShipmentCodeEnum) {
+        Response<T> baseResponse = new Response<T>();
+        baseResponse.setCode(allotShipmentCodeEnum.getCode());
+        baseResponse.setMsg(allotShipmentCodeEnum.getMsg());
+        return baseResponse;
+    }
+
+    public static <T> Response<T> responseMsg(AssembleReceiptCodeEnum assembleReceiptCodeEnum) {
+        Response<T> baseResponse = new Response<T>();
+        baseResponse.setCode(assembleReceiptCodeEnum.getCode());
+        baseResponse.setMsg(assembleReceiptCodeEnum.getMsg());
+        return baseResponse;
+    }
+
+    public static <T> Response<T> responseMsg(DisassembleReceiptCodeEnum disassembleReceiptCodeEnum) {
+        Response<T> baseResponse = new Response<T>();
+        baseResponse.setCode(disassembleReceiptCodeEnum.getCode());
+        baseResponse.setMsg(disassembleReceiptCodeEnum.getMsg());
+        return baseResponse;
+    }
+
+    public static <T> Response<T> responseMsg(OtherShipmentCodeEnum otherShipmentCodeEnum) {
+        Response<T> baseResponse = new Response<T>();
+        baseResponse.setCode(otherShipmentCodeEnum.getCode());
+        baseResponse.setMsg(otherShipmentCodeEnum.getMsg());
+        return baseResponse;
+    }
+
+    public static <T> Response<T> responseMsg(OtherStorageCodeEnum otherStorageCodeEnum) {
+        Response<T> baseResponse = new Response<T>();
+        baseResponse.setCode(otherStorageCodeEnum.getCode());
+        baseResponse.setMsg(otherStorageCodeEnum.getMsg());
+        return baseResponse;
+    }
+
     public static <T> Response<T> responseMsg(String code, String msg) {
         Response<T> baseResponse = new Response<T>();
         baseResponse.setCode(code);
