@@ -13,15 +13,17 @@
 package com.wansenai.service.warehouse;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansenai.dto.warehouse.OtherStorageDTO;
 import com.wansenai.dto.warehouse.QueryOtherStorageDTO;
+import com.wansenai.entities.warehouse.WarehouseReceiptMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.OtherStorageDetailVO;
 import com.wansenai.vo.warehouse.OtherStorageVO;
 
 import java.util.List;
 
-public interface OtherStorageService {
+public interface OtherStorageService extends IService<WarehouseReceiptMain> {
 
     Response<Page<OtherStorageVO>> getOtherStoragePageList(QueryOtherStorageDTO queryOtherStorageDTO);
 
