@@ -57,7 +57,7 @@ public class WarehouseController {
     public Response<String> deleteWarehouse(@RequestParam("ids") List<Long> ids) {
         return warehouseService.deleteBatch(ids);
     }
-    //
+
     @PostMapping("updateStatus")
     public Response<String> updateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return warehouseService.updateBatchStatus(ids, status);
