@@ -6,8 +6,7 @@ import {useMessage} from "@/hooks/web/useMessage";
 import {useI18n} from "@/hooks/web/useI18n";
 import {updateProductStatus} from "@/api/product/product";
 import {getCategoryList} from "@/api/product/productCategory";
-import {MeTable, ProductInfo, Stock} from "@/views/product/info/model/productInfoModel";
-import {AddProductReq} from "@/api/product/model/productModel";
+import {MeTable, ProductInfo} from "@/views/product/info/model/productInfoModel";
 import {getWarehouseList} from "@/api/basic/warehouse";
 
 const { t } = useI18n();
@@ -303,7 +302,7 @@ const meTable: MeTable = reactive({
     ],
 });
 
-const stock: Stock = reactive({
+const stock: any = reactive({
     loading: false,
     dataSource: ref([]),
     columns: [
@@ -333,7 +332,7 @@ const stock: Stock = reactive({
     ],
 });
 
-const formState: AddProductReq = reactive({
+const formState: any = reactive({
     productId: '',
     productName: '',
     productStandard: '',
