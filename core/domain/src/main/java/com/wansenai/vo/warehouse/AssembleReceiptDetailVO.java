@@ -12,20 +12,26 @@
  */
 package com.wansenai.vo.warehouse;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.wansenai.bo.AssembleStockBO;
 import com.wansenai.bo.FileDataBO;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Builder
 public class AssembleReceiptDetailVO {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;
+
     private String receiptNumber;
 
-    private String receiptDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime receiptDate;
 
     private String remark;
 
