@@ -10,28 +10,14 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.dto.warehouse;
+package com.wansenai.service.warehouse.impl;
 
-import lombok.Data;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansenai.entities.warehouse.WarehouseReceiptSub;
+import com.wansenai.mappers.warehouse.WarehouseReceiptSubMapper;
+import com.wansenai.service.warehouse.WarehouseReceiptSubService;
+import org.springframework.stereotype.Service;
 
-@Data
-public class QueryAllotReceiptDTO {
-
-    private String receiptNumber;
-
-    private String productInfo;
-
-    private Long operatorId;
-
-    private Integer status;
-
-    private String remark;
-
-    private String startDate;
-
-    private String endDate;
-
-    private Long page;
-
-    private Long pageSize;
+@Service
+public class WarehouseReceiptSubServiceImpl extends ServiceImpl<WarehouseReceiptSubMapper, WarehouseReceiptSub> implements WarehouseReceiptSubService {
 }

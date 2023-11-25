@@ -16,6 +16,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
@@ -24,6 +27,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("warehouse_receipt_main")
@@ -47,6 +53,11 @@ public class WarehouseReceiptMain {
      * 关联人id(客户/供应商)
      */
     private Long relatedPersonId;
+
+    /**
+     * 商品id
+     */
+    private Long productId;
 
     /**
      * 类型(入库/出库/调拨/组装/拆卸)
@@ -78,10 +89,6 @@ public class WarehouseReceiptMain {
      */
     private Integer totalProductNumber;
 
-    /**
-     * 商品数量
-     */
-    private String productInfo;
 
     /**
      * 备注

@@ -13,10 +13,12 @@
 package com.wansenai.entities.warehouse;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.OrderBy;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
@@ -25,6 +27,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("warehouse_receipt_sub")
@@ -58,6 +63,11 @@ public class WarehouseReceiptSub {
      * 仓库id
      */
     private Long warehouseId;
+
+    /**
+     * 调拨对方仓库ID (这是调入方的仓库ID)
+     */
+    private Long otherWarehouseId;
 
     /**
      * 商品条码

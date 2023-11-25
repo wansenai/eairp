@@ -722,9 +722,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .collect(Collectors.toList());
 
             var updateSubResult = receiptSaleSubService.saveBatch(receiptSaleList);
-            shipmentsDTO.getTableData().forEach(item -> {
-                updateProductStock(receiptSaleList, 2);
-            });
+            updateProductStock(receiptSaleList, 2);
 
             var account = accountService.getById(shipmentsDTO.getAccountId());
             if (account != null) {
@@ -1027,20 +1025,16 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                     .collect(Collectors.toList());
 
             var updateSubResult = receiptSaleSubService.saveBatch(receiptSaleList);
-            refundDTO.getTableData().forEach(item -> {
-                updateProductStock(receiptSaleList, 1);
-            });
+            updateProductStock(receiptSaleList, 1);
 
             var account = accountService.getById(refundDTO.getAccountId());
             if (account != null) {
                 var accountBalance = account.getCurrentAmount();
                 var thisRefundAmount = refundDTO.getThisRefundAmount();
                 var beforeChangeAmount = beforeReceipt.stream()
-                        .map(item -> item.getTotalAmount())
+                        .map(ReceiptSaleSub::getTotalAmount)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
-                if (beforeChangeAmount != null) {
-                    accountBalance = accountBalance.add(beforeChangeAmount);
-                }
+                accountBalance = accountBalance.add(beforeChangeAmount);
                 if (thisRefundAmount != null) {
                     accountBalance = accountBalance.subtract(thisRefundAmount);
                 }
