@@ -147,6 +147,7 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
                 .like(StringUtils.hasLength(queryOtherStorageDTO.getRemark()), WarehouseReceiptMain::getRemark, queryOtherStorageDTO.getRemark())
                 .ge(StringUtils.hasLength(queryOtherStorageDTO.getStartDate()), WarehouseReceiptMain::getCreateTime, queryOtherStorageDTO.getStartDate())
                 .le(StringUtils.hasLength(queryOtherStorageDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryOtherStorageDTO.getEndDate())
+                .eq(WarehouseReceiptMain::getType, "其他入库")
                 .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .page(page);
 
@@ -183,7 +184,11 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
         if (id == null) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
-        var receiptMain = getById(id);
+        var receiptMain = lambdaQuery()
+                .eq(WarehouseReceiptMain::getId, id)
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+
         if (receiptMain != null) {
            var otherStorageDetailVO = OtherStorageDetailVO.builder()
                    .id(receiptMain.getId())
@@ -238,6 +243,16 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
         var isUpdate = otherStorageDTO.getId() != null;
 
+        var totalProductNumber = 0;
+        var totalAmount = BigDecimal.ZERO;
+
+        if(!otherStorageDTO.getTableData().isEmpty()) {
+            for (StorageShipmentStockBO stockBO : otherStorageDTO.getTableData()) {
+                totalProductNumber += stockBO.getProductNumber();
+                totalAmount = totalAmount.add(stockBO.getAmount());
+            }
+        }
+
         if (isUpdate) {
             var beforeReceipt = warehouseReceiptSubService.lambdaQuery()
                     .eq(WarehouseReceiptSub::getWarehouseReceiptMainId, otherStorageDTO.getId())
@@ -250,7 +265,8 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
                     .eq(WarehouseReceiptMain::getId, otherStorageDTO.getId())
                     .set(otherStorageDTO.getSupplierId() != null, WarehouseReceiptMain::getRelatedPersonId, otherStorageDTO.getSupplierId())
                     .set(otherStorageDTO.getStatus() != null, WarehouseReceiptMain::getStatus, otherStorageDTO.getStatus())
-                    .set(WarehouseReceiptMain::getReceiptNumber, otherStorageDTO.getReceiptNumber())
+                    .set(WarehouseReceiptMain::getTotalProductNumber, totalProductNumber)
+                    .set(WarehouseReceiptMain::getTotalAmount, totalAmount)
                     .set(StringUtils.hasLength(otherStorageDTO.getReceiptDate()), WarehouseReceiptMain::getReceiptDate, otherStorageDTO.getReceiptDate())
                     .set(StringUtils.hasLength(otherStorageDTO.getRemark()), WarehouseReceiptMain::getRemark, otherStorageDTO.getRemark())
                     .set(StringUtils.hasLength(fileIds), WarehouseReceiptMain::getFileId, fileIds)
@@ -307,20 +323,12 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
                     .collect(Collectors.toList());
             var saveSubResult = warehouseReceiptSubService.saveBatch(storageShipmentStock);
 
-            var totalProductNumber = 0;
-            var totalAmount = BigDecimal.ZERO;
-
-            for (WarehouseReceiptSub warehouseReceiptSub : storageShipmentStock) {
-                totalProductNumber += warehouseReceiptSub.getProductNumber();
-                totalAmount = totalAmount.add(warehouseReceiptSub.getTotalAmount());
-            }
-
             var warehouseReceiptMain = WarehouseReceiptMain.builder()
                     .id(receiptMainId)
                     .relatedPersonId(otherStorageDTO.getSupplierId())
                     .productId(otherStorageDTO.getTableData().get(0).getProductId())
                     .receiptNumber(otherStorageDTO.getReceiptNumber())
-                    .type("入库")
+                    .type("其他入库")
                     .initReceiptNumber(otherStorageDTO.getReceiptNumber())
                     .receiptDate(TimeUtil.parse(otherStorageDTO.getReceiptDate()))
                     .totalAmount(totalAmount)
