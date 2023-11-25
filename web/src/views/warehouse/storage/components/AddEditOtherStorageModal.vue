@@ -154,7 +154,7 @@ import {
   xGrid,
   tableData,
   gridOptions,
-} from '/src/views/warehouse/addEditStorageShipment.data';
+} from '/src/views/warehouse/addEditStorageShipments.data';
 import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
 import {VXETable, VxeGrid, VxeInput, VxeButton, VxeSelect, VxeOption} from 'vxe-table'
