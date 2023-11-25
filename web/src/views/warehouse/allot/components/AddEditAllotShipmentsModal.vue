@@ -18,38 +18,18 @@
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
     <a-spin :spinning="confirmLoading">
-      <a-form ref="formRef" :model="otherStorageFormState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
+      <a-form ref="formRef" :model="allotShipmentsFormState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
         <a-row class="form-row" :gutter="24">
-          <a-col :lg="6" :md="12" :sm="24">
-            <a-input v-model:value="otherStorageFormState.id" v-show="false"/>
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="供应商" data-step="1"
-                         data-title="供应商" :rules="[{ required: true}]">
-              <a-select v-model:value="otherStorageFormState.supplierId"
-                        :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
-                        placeholder="请选择供应商"
-                        :options="supplierList.map(item => ({ value: item.id, label: item.supplierName }))">
-                <template #dropdownRender="{ menuNode: menu }">
-                  <v-nodes :vnodes="menu"/>
-                  <a-divider style="margin: 4px 0"/>
-                  <div style="padding: 4px 8px; cursor: pointer;"
-                       @mousedown="e => e.preventDefault()" @click="addSupplier">
-                    <plus-outlined/>
-                    新增供应商
-                  </div>
-                </template>
-              </a-select>
-            </a-form-item>
-          </a-col>
-          <a-col :lg="6" :md="12" :sm="24">
+          <a-col :lg="8" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="otherStorageFormState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
+              <a-date-picker v-model:value="allotShipmentsFormState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
-          <a-col :lg="7" :md="12" :sm="24">
+          <a-col :lg="8" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="otherStorageFormState.receiptNumber" :readOnly="true"/>
+              <a-input placeholder="请输入单据编号" v-model:value="allotShipmentsFormState.receiptNumber" :readOnly="true"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -73,6 +53,14 @@
                     <vxe-option v-for="item in warehouseList" :key="item.id" :value="item.id" :label="item.warehouseName"></vxe-option>
                   </vxe-select>
                 </template>
+                <template #otherWarehouseId_default="{ row }">
+                  <span>{{ formatWarehouseId(row.otherWarehouseId) }}</span>
+                </template>
+                <template #otherWarehouseId_edit="{ row }">
+                  <vxe-select placeholder="请选择调入仓库" v-model="row.otherWarehouseId">
+                    <vxe-option v-for="item in warehouseList" :key="item.id" :value="item.id" :label="item.warehouseName"></vxe-option>
+                  </vxe-select>
+                </template>
                 <template #barCode_edit="{ row }">
                   <vxe-input type="search" clearable v-model="row.barCode"></vxe-input>
                 </template>
@@ -90,7 +78,7 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-textarea :rows="3" placeholder="请输入备注" v-model:value="otherStorageFormState.remark"
+                  <a-textarea :rows="3" placeholder="请输入备注" v-model:value="allotShipmentsFormState.remark"
                               style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
@@ -118,7 +106,6 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <SupplierModal @register="supplierModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
 </template>
 
@@ -150,22 +137,19 @@ import {
   Upload,
 } from "ant-design-vue";
 import {
-  otherStorageFormState,
+  allotShipmentsFormState,
   xGrid,
   tableData,
   gridOptions,
-} from '/src/views/warehouse/addEditStorageShipments.data';
+} from '/src/views/warehouse/allot/components/addEditAllotShipments.data';
 import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
 import {VXETable, VxeGrid, VxeInput, VxeButton, VxeSelect, VxeOption} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
-import { addOrUpdateOtherStorage, getOtherStorageDetailById} from "@/api/warehouse/storage"
-import {getSupplierList} from "@/api/basic/supplier";
-import SupplierModal from "@/views/basic/supplier/components/SupplierModal.vue";
+import { addOrUpdateAllotShipments, getAllotShipmentsDetailById} from "@/api/warehouse/allotShipments"
 import PurchaseArrearsModal from "@/views/financial/payment/components/PurchaseArrearsModal.vue"
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
-import {SupplierResp} from "@/api/basic/model/supplierModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {getDefaultWarehouse, getWarehouseList} from "@/api/basic/warehouse";
 import {getProductSkuByBarCode} from "@/api/product/product";
@@ -185,10 +169,9 @@ dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
 export default defineComponent({
-  name: 'AddEditPaymentModal',
+  name: 'AddEditAllotShipmentsModal',
   emits: ['success', 'cancel', 'error'],
   components: {
-    SupplierModal,
     SelectProductModal,
     'a-modal': Modal,
     'a-upload': Upload,
@@ -244,7 +227,6 @@ export default defineComponent({
       sm: {span: 16},
     });
     const barCode = ref('');
-    const supplierList = ref<SupplierResp[]>([]);
     const warehouseList = ref<WarehouseResp[]>([]);
 
     function handleCancelModal() {
@@ -256,16 +238,15 @@ export default defineComponent({
 
     function openAddEditModal(id: string | undefined) {
       open.value = true
-      loadSupplierList();
       loadWarehouseList();
       loadDefaultWarehouse();
       if (id) {
-        title.value = '编辑-其他入库'
-        loadOtherStorageDetail(id);
+        title.value = '编辑-调拨出库'
+        loadAllotShipmentsDetail(id);
       } else {
-        title.value = '新增-其他入库'
+        title.value = '新增-调拨出库'
         loadGenerateId();
-        otherStorageFormState.receiptDate = dayjs(new Date());
+        allotShipmentsFormState.receiptDate = dayjs(new Date());
       }
     }
 
@@ -273,14 +254,8 @@ export default defineComponent({
       getDefaultWarehouse().then(res => {
         const data = res.data
         if(data) {
-          otherStorageFormState.warehouseId = data.id
+          allotShipmentsFormState.warehouseId = data.id
         }
-      })
-    }
-
-    function loadSupplierList() {
-      getSupplierList().then(res => {
-        supplierList.value = res.data
       })
     }
 
@@ -291,21 +266,20 @@ export default defineComponent({
     }
 
     function loadGenerateId() {
-      generateId("其他入库").then(res => {
-        otherStorageFormState.receiptNumber = res.data
+      generateId("调拨出库").then(res => {
+        allotShipmentsFormState.receiptNumber = res.data
       })
     }
 
-    async function loadOtherStorageDetail(id) {
+    async function loadAllotShipmentsDetail(id) {
       clearData();
-      const result = await getOtherStorageDetailById(id)
+      const result = await getAllotShipmentsDetailById(id)
       if(result) {
         const data = result.data
-        otherStorageFormState.id = data.id
-        otherStorageFormState.supplierId = data.supplierId
-        otherStorageFormState.receiptDate = dayjs(data.receiptDate);
-        otherStorageFormState.receiptNumber = data.receiptNumber
-        otherStorageFormState.remark = data.remark
+        allotShipmentsFormState.id = data.id
+        allotShipmentsFormState.receiptDate = dayjs(data.receiptDate);
+        allotShipmentsFormState.receiptNumber = data.receiptNumber
+        allotShipmentsFormState.remark = data.remark
         // file
         fileList.value = data.files.map(item => ({
           id: item.id,
@@ -323,6 +297,7 @@ export default defineComponent({
           data.tableData.forEach(item => {
             const tableData : any = {
               warehouseId: item.warehouseId,
+              otherWarehouseId: item.otherWarehouseId,
               productId: item.productId,
               barCode: item.barCode,
               productName: item.productName,
@@ -341,11 +316,7 @@ export default defineComponent({
     }
 
     async function handleOk(type: number) {
-      if (!otherStorageFormState.supplierId) {
-        createMessage.error('请选择供应商');
-        return;
-      }
-      if (!otherStorageFormState.receiptDate) {
+      if (!allotShipmentsFormState.receiptDate) {
         createMessage.error('请选择单据日期');
         return;
       }
@@ -387,6 +358,7 @@ export default defineComponent({
       table?.getInsertRecords().forEach(item => {
         const data: any = {
           warehouseId: item.warehouseId,
+          otherWarehouseId: item.otherWarehouseId,
           productId: item.productId,
           barCode: item.barCode,
           productName: item.productName,
@@ -401,14 +373,14 @@ export default defineComponent({
         dataArray.push(data)
       })
       const params: any = {
-        ...otherStorageFormState,
+        ...allotShipmentsFormState,
         tableData: dataArray,
         files: files,
         status: type,
       }
       console.info(params)
-      const result = await addOrUpdateOtherStorage(params)
-      if (result.code === 'P0024' || 'P0025') {
+      const result = await addOrUpdateAllotShipments(params)
+      if (result.code === 'S0010' || 'S0011') {
         createMessage.success('操作成功');
         handleCancelModal();
         clearData();
@@ -420,11 +392,10 @@ export default defineComponent({
     }
 
     function clearData() {
-      otherStorageFormState.id = undefined
-      otherStorageFormState.receiptNumber = ''
-      otherStorageFormState.supplierId = undefined
-      otherStorageFormState.remark = ''
-      otherStorageFormState.receiptDate = undefined
+      allotShipmentsFormState.id = undefined
+      allotShipmentsFormState.receiptNumber = ''
+      allotShipmentsFormState.remark = ''
+      allotShipmentsFormState.receiptDate = undefined
       fileList.value = []
       const table = xGrid.value
       if(table) {
@@ -494,17 +465,17 @@ export default defineComponent({
     }
 
     function scanPressEnter() {
-      getProductSkuByBarCode(barCode.value, otherStorageFormState.warehouseId).then(res => {
+      getProductSkuByBarCode(barCode.value, allotShipmentsFormState.warehouseId).then(res => {
         const {columns} = gridOptions
         if (columns) {
           const {data} = res
           if (data) {
-            const storageData : any = data
+            const shipmentsData : any = data
             const table = xGrid.value
-            console.info(storageData)
+            console.info(shipmentsData)
             if (table) {
               const tableData = table.getTableData().tableData
-              const index = tableData.findIndex(item => item.barCode === storageData.barCode)
+              const index = tableData.findIndex(item => item.barCode === shipmentsData.barCode)
               if (index > -1) {
                 const row = tableData[index]
                 row.productNumber = Number(row.productNumber) + 1
@@ -513,16 +484,17 @@ export default defineComponent({
                 table.updateData()
               } else {
                 const tableData : any = {
-                  warehouseId: storageData.warehouseId,
-                  productId: storageData.productId,
-                  barCode: storageData.barCode,
-                  productName: storageData.productName,
-                  productStandard: storageData.productStandard,
-                  productUnit: storageData.productUnit,
-                  stock: storageData.stock,
+                  warehouseId: shipmentsData.warehouseId,
+                  otherWarehouseId: shipmentsData.otherWarehouseId,
+                  productId: shipmentsData.productId,
+                  barCode: shipmentsData.barCode,
+                  productName: shipmentsData.productName,
+                  productStandard: shipmentsData.productStandard,
+                  productUnit: shipmentsData.productUnit,
+                  stock: shipmentsData.stock,
                   productNumber: 1,
-                  amount: storageData.retailPrice,
-                  unitPrice: storageData.retailPrice,
+                  amount: shipmentsData.retailPrice,
+                  unitPrice: shipmentsData.retailPrice,
                 };
                 table.insert(tableData)
               }
@@ -592,7 +564,7 @@ export default defineComponent({
       confirmLoading,
       handleCancelModal,
       openAddEditModal,
-      otherStorageFormState,
+      allotShipmentsFormState,
       title,
       width,
       barCode,
@@ -607,7 +579,6 @@ export default defineComponent({
       model,
       labelCol,
       wrapperCol,
-      supplierList,
       handleOk,
       beforeUpload,
       uploadFiles,

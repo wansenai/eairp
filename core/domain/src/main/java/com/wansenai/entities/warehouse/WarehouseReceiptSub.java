@@ -65,6 +65,11 @@ public class WarehouseReceiptSub {
     private Long warehouseId;
 
     /**
+     * 调拨对方仓库ID (这是调入方的仓库ID)
+     */
+    private Long otherWarehouseId;
+
+    /**
      * 商品条码
      */
     private Long productBarcode;
