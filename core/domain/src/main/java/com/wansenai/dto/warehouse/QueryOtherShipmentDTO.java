@@ -23,8 +23,6 @@ public class QueryOtherShipmentDTO {
 
     private Long customerId;
 
-    private Long warehouseId;
-
     private Long operatorId;
 
     private String otherReceipt;

@@ -21,8 +21,6 @@ public class QueryAllotReceiptDTO {
 
     private String productInfo;
 
-    private Long warehouseId;
-
     private Long operatorId;
 
     private Integer status;
