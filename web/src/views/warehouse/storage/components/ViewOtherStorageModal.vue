@@ -2,7 +2,7 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="销售出库-详情"
+          title="其他入库-详情"
           :sub-title= "receiptNumber">
         <template #extra>
           <a-button key="1">导出</a-button>
