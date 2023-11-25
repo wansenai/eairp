@@ -2,7 +2,7 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="其他入库-详情"
+          title="其他出库-详情"
           :sub-title= "receiptNumber">
         <template #extra>
           <a-button key="1">导出</a-button>
@@ -11,7 +11,7 @@
           <a-button key="2" type="primary">发起流程审批</a-button>
         </template>
         <a-descriptions size="small" :column="3">
-          <a-descriptions-item label="供应商">{{ supplierName }}</a-descriptions-item>
+          <a-descriptions-item label="客户">{{ customerName }}</a-descriptions-item>
           <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
           <a-descriptions-item ></a-descriptions-item>
           <a-descriptions-item label="备注">
@@ -48,8 +48,8 @@
 import {defineComponent, ref} from 'vue';
 import {BasicTable, useTable} from '/src/components/Table';
 import {BasicModal, useModal, useModalInner} from "@/components/Modal";
-import {getOtherStorageDetailById} from "@/api/warehouse/storage";
-import {otherStorageTableColumns} from "@/views/warehouse/storage/otherStorage.data";
+import {getOtherShipmentsDetailById} from "@/api/warehouse/shipments";
+import {otherShipmentTableColumns} from "@/views/warehouse/shipments/otherShipments.data";
 import {
   Descriptions,
   DescriptionsItem,
@@ -71,14 +71,14 @@ export default defineComponent({
     const receiptNumber = ref('');
     const otherReceipt = ref('');
     const receiptDate = ref('');
-    const supplierName = ref('');
+    const customerName = ref('');
     const remark = ref('')
     const status = ref();
     const [viewOrderReceiptModal, {openModal: openViewOrderModal}] = useModal();
     const tableData = ref([]);
     const [registerTable] = useTable({
-      title: '其他入库表数据',
-      columns: otherStorageTableColumns,
+      title: '其他出库表数据',
+      columns: otherShipmentTableColumns,
       dataSource: tableData,
       pagination: false,
       showIndexColumn: false,
@@ -87,10 +87,10 @@ export default defineComponent({
     const getTitle = ref('单据详情');
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200, showOkBtn: false});
-      const res = await getOtherStorageDetailById(data.id);
+      const res = await getOtherShipmentsDetailById(data.id);
       tableData.value = res.data.tableData;
       receiptNumber.value = res.data.receiptNumber;
-      supplierName.value = res.data.supplierName;
+      customerName.value = res.data.customerName;
       receiptDate.value = res.data.receiptDate;
       remark.value = res.data.remark;
       status.value = res.data.status;
@@ -109,7 +109,7 @@ export default defineComponent({
 
     return {
       receiptNumber,
-      supplierName,
+      customerName,
       receiptDate,
       remark,
       status,
