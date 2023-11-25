@@ -29,6 +29,15 @@ interface OtherStorageFormState {
     remark: string;
 }
 
+interface OtherShipmentFormState {
+    id: number | string | undefined;
+    warehouseId: number | string;
+    customerId: number | string | undefined;
+    receiptDate: string | undefined | Dayjs;
+    receiptNumber: string |undefined;
+    remark: string;
+}
+
 const xGrid = ref<VxeGridInstance<RowVO>>()
 const tableData = ref<RowVO[]>([])
 const gridOptions = reactive<VxeGridProps<RowVO>>({
@@ -165,10 +174,20 @@ const otherStorageFormState = reactive<OtherStorageFormState>({
     remark: '',
 });
 
+const otherShipmentFormState = reactive<OtherShipmentFormState>({
+    id: undefined,
+    warehouseId: '',
+    customerId: '',
+    receiptDate: '',
+    receiptNumber: '',
+    remark: '',
+});
+
 export {
     xGrid,
     sumNum,
     tableData,
     gridOptions,
     otherStorageFormState,
+    otherShipmentFormState
 }
