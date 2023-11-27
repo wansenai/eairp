@@ -63,4 +63,12 @@ public interface ReceiptService {
     Response<Page<StorageSummaryVO>> getStorageSummary(QueryStorageSummaryDTO queryStorageSummaryDTO);
 
     Response<List<RelatedPersonVO>> getRelatedPerson();
+
+    Response<Page<CustomerBillVO>> getCustomerBill(QueryCustomerBillDTO queryCustomerBillDTO);
+
+    Response<Page<CustomerBillDetailVO>> getCustomerBillDetail(QueryCustomerBillDetailDTO queryCustomerBillDetailDTO);
+
+    Response<Page<SupplierBillVO>> getSupplierBill(QuerySupplierBillDTO querySupplierBillDTO);
+
+    Response<Page<SupplierBillDetailVO>> getSupplierBillDetail(QuerySupplierBillDetailDTO querySupplierBillDetailDTO);
 }

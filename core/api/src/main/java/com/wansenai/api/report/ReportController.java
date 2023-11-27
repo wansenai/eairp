@@ -101,4 +101,24 @@ public class ReportController {
     public Response<Page<StorageSummaryVO>> getStorageSummary(@RequestBody QueryStorageSummaryDTO queryStorageSummaryDTO) {
         return receiptService.getStorageSummary(queryStorageSummaryDTO);
     }
+
+    @PostMapping("customerBill")
+    public Response<Page<CustomerBillVO>> getCustomerBill(@RequestBody QueryCustomerBillDTO queryCustomerBillDTO) {
+        return receiptService.getCustomerBill(queryCustomerBillDTO);
+    }
+
+    @PostMapping("customerBillDetail")
+    public Response<Page<CustomerBillDetailVO>> getCustomerBillDetail(@RequestBody QueryCustomerBillDetailDTO queryCustomerBillDetailDTO) {
+        return receiptService.getCustomerBillDetail(queryCustomerBillDetailDTO);
+    }
+
+    @PostMapping("supplierBill")
+    public Response<Page<SupplierBillVO>> getSupplierBill(@RequestBody QuerySupplierBillDTO querySupplierBillDTO) {
+        return receiptService.getSupplierBill(querySupplierBillDTO);
+    }
+
+    @PostMapping("supplierBillDetail")
+    public Response<Page<SupplierBillDetailVO>> getSupplierBillDetail(@RequestBody QuerySupplierBillDetailDTO querySupplierBillDetailDTO) {
+        return receiptService.getSupplierBillDetail(querySupplierBillDetailDTO);
+    }
 }
