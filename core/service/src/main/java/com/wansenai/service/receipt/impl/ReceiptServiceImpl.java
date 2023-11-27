@@ -12,6 +12,7 @@
  */
 package com.wansenai.service.receipt.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
@@ -20,7 +21,12 @@ import com.wansenai.entities.basic.Customer;
 import com.wansenai.entities.basic.Member;
 import com.wansenai.entities.basic.Supplier;
 import com.wansenai.entities.financial.FinancialAccount;
+import com.wansenai.entities.financial.FinancialMain;
+import com.wansenai.entities.financial.FinancialSub;
+import com.wansenai.entities.product.Product;
 import com.wansenai.entities.receipt.*;
+import com.wansenai.mappers.financial.FinancialMainMapper;
+import com.wansenai.mappers.financial.FinancialSubMapper;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.service.basic.CustomerService;
 import com.wansenai.service.basic.MemberService;
@@ -49,6 +55,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 public class ReceiptServiceImpl implements ReceiptService {
@@ -75,17 +82,17 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     private final ProductService productService;
 
-    private final ProductCategoryService productCategoryService;
-
     private final ProductStockMapper productStockMapper;
-
-    private final WarehouseService warehouseService;
 
     private final IFinancialAccountService accountService;
 
     private final CommonService commonService;
 
-    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductCategoryService productCategoryService, ProductStockMapper productStockMapper, WarehouseService warehouseService, IFinancialAccountService accountService, CommonService commonService) {
+    private final FinancialMainMapper financialMainMapper;
+
+    private final FinancialSubMapper financialSubMapper;
+
+    public ReceiptServiceImpl(ReceiptRetailService receiptRetailService, ReceiptRetailSubService receiptRetailSubService, ReceiptSaleService receiptSaleService, ReceiptSaleSubService receiptSaleSubService, ReceiptPurchaseService receiptPurchaseService, ReceiptPurchaseSubService receiptPurchaseSubService, MemberService memberService, CustomerService customerService, SupplierService supplierService, ISysUserService userService, ProductService productService, ProductStockMapper productStockMapper, IFinancialAccountService accountService, CommonService commonService, FinancialMainMapper financialMainMapper, FinancialSubMapper financialSubMapper) {
         this.receiptRetailService = receiptRetailService;
         this.receiptRetailSubService = receiptRetailSubService;
         this.receiptSaleService = receiptSaleService;
@@ -97,11 +104,11 @@ public class ReceiptServiceImpl implements ReceiptService {
         this.supplierService = supplierService;
         this.userService = userService;
         this.productService = productService;
-        this.productCategoryService = productCategoryService;
         this.productStockMapper = productStockMapper;
-        this.warehouseService = warehouseService;
         this.accountService = accountService;
         this.commonService = commonService;
+        this.financialMainMapper = financialMainMapper;
+        this.financialSubMapper = financialSubMapper;
     }
 
     @Override
@@ -1776,6 +1783,319 @@ public class ReceiptServiceImpl implements ReceiptService {
                         .build();
                 result.add(personVO);
             }
+        }
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<CustomerBillVO>> getCustomerBill(QueryCustomerBillDTO queryCustomerBillDTO) {
+        var page = new Page<ReceiptSaleMain>(queryCustomerBillDTO.getPage(), queryCustomerBillDTO.getPageSize());
+        var queryData = receiptSaleService.lambdaQuery()
+                .eq(queryCustomerBillDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, queryCustomerBillDTO.getCustomerId())
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(queryCustomerBillDTO.getStartDate() != null, ReceiptSaleMain::getReceiptDate, queryCustomerBillDTO.getStartDate())
+                .le(queryCustomerBillDTO.getEndDate() != null, ReceiptSaleMain::getReceiptDate, queryCustomerBillDTO.getEndDate())
+                .page(page);
+
+        var result = new Page<CustomerBillVO>();
+        if (!queryData.getRecords().isEmpty()) {
+            var customerBillVos = new ArrayList<CustomerBillVO>();
+            for (ReceiptSaleMain record : queryData.getRecords()) {
+                var customer = customerService.getById(record.getCustomerId());
+                var customerBillVo = CustomerBillVO.builder()
+                        .customerId(record.getCustomerId())
+                        .customerName(customer.getCustomerName())
+                        .contactName(customer.getContact())
+                        .contactPhone(customer.getPhoneNumber())
+                        .email(customer.getEmail())
+                        .firstQuarterReceivable(customer.getFirstQuarterAccountReceivable())
+                        .secondQuarterReceivable(customer.getSecondQuarterAccountReceivable())
+                        .thirdQuarterReceivable(customer.getThirdQuarterAccountReceivable())
+                        .fourthQuarterReceivable(customer.getFourthQuarterAccountReceivable())
+                        .totalQuarterArrears(record.getArrearsAmount())
+                        .totalQuarterReceivable(record.getDiscountLastAmount())
+                        .build();
+
+                // 添加前判断是否已经存在 存在则进行累加 否则直接添加
+                if (customerBillVos.stream().anyMatch(matchCustomerBillVo -> matchCustomerBillVo.getCustomerId().equals(record.getCustomerId()))) {
+                    customerBillVos.forEach(matchCustomerBillVo -> {
+                        if (matchCustomerBillVo.getCustomerId().equals(record.getCustomerId())) {
+                            matchCustomerBillVo.setFirstQuarterReceivable(Optional.ofNullable(matchCustomerBillVo.getFirstQuarterReceivable()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(customerBillVo.getFirstQuarterReceivable()).orElse(BigDecimal.ZERO)));
+                            matchCustomerBillVo.setSecondQuarterReceivable(Optional.ofNullable(matchCustomerBillVo.getSecondQuarterReceivable()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(customerBillVo.getSecondQuarterReceivable()).orElse(BigDecimal.ZERO)));
+                            matchCustomerBillVo.setThirdQuarterReceivable(Optional.ofNullable(matchCustomerBillVo.getThirdQuarterReceivable()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(customerBillVo.getThirdQuarterReceivable()).orElse(BigDecimal.ZERO)));
+                            matchCustomerBillVo.setFourthQuarterReceivable(Optional.ofNullable(matchCustomerBillVo.getFourthQuarterReceivable()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(customerBillVo.getFourthQuarterReceivable()).orElse(BigDecimal.ZERO)));
+                            matchCustomerBillVo.setTotalQuarterArrears(Optional.ofNullable(matchCustomerBillVo.getTotalQuarterArrears()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(customerBillVo.getTotalQuarterArrears()).orElse(BigDecimal.ZERO)));
+                            matchCustomerBillVo.setTotalQuarterReceivable(Optional.ofNullable(matchCustomerBillVo.getTotalQuarterReceivable()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(customerBillVo.getTotalQuarterReceivable()).orElse(BigDecimal.ZERO)));
+                        }
+                    });
+                } else {
+                    customerBillVos.add(customerBillVo);
+                }
+            }
+            // 遍历customerBillVos 计算出remainingReceivableArrears金额 = 4个季度+totalQuarterArrears
+            for (CustomerBillVO customerBillVo : customerBillVos) {
+                customerBillVo.setRemainingReceivableArrears(Optional.ofNullable(customerBillVo.getFirstQuarterReceivable()).orElse(BigDecimal.ZERO)
+                        .add(Optional.ofNullable(customerBillVo.getSecondQuarterReceivable()).orElse(BigDecimal.ZERO))
+                        .add(Optional.ofNullable(customerBillVo.getThirdQuarterReceivable()).orElse(BigDecimal.ZERO))
+                        .add(Optional.ofNullable(customerBillVo.getFourthQuarterReceivable()).orElse(BigDecimal.ZERO))
+                        .add(Optional.ofNullable(customerBillVo.getTotalQuarterArrears()).orElse(BigDecimal.ZERO)));
+            }
+
+            // 进行手动分页
+            int startIndex = (int) ((result.getCurrent() - 1) * result.getSize());
+            int endIndex = (int) Math.min(startIndex + result.getSize(), customerBillVos.size());
+            startIndex = Math.min(startIndex, endIndex);
+
+            List<CustomerBillVO> customerBillVOS = new ArrayList<>(customerBillVos.subList(startIndex, endIndex));
+            result.setRecords(customerBillVOS);
+            result.setTotal(queryData.getTotal());
+            return Response.responseData(result);
+        }
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<CustomerBillDetailVO>> getCustomerBillDetail(QueryCustomerBillDetailDTO queryCustomerBillDetailDTO) {
+        var page = new Page<ReceiptSaleMain>(queryCustomerBillDetailDTO.getPage(), queryCustomerBillDetailDTO.getPageSize());
+
+        var queryDataPage = receiptSaleService.lambdaQuery()
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptSaleMain::getCustomerId, queryCustomerBillDetailDTO.getCustomerId())
+                .in(ReceiptSaleMain::getSubType, "销售出库", "销售退货")
+                .eq(StringUtils.hasLength(queryCustomerBillDetailDTO.getReceiptNumber()), ReceiptSaleMain::getReceiptNumber, queryCustomerBillDetailDTO.getReceiptNumber())
+                .ge(queryCustomerBillDetailDTO.getStartDate() != null, ReceiptSaleMain::getReceiptDate, queryCustomerBillDetailDTO.getStartDate())
+                .le(queryCustomerBillDetailDTO.getEndDate() != null, ReceiptSaleMain::getReceiptDate, queryCustomerBillDetailDTO.getEndDate())
+                .page(page);
+
+        var result = new Page<CustomerBillDetailVO>();
+        if (!queryDataPage.getRecords().isEmpty()) {
+            var customerBillDetailVos = new ArrayList<CustomerBillDetailVO>();
+            for (ReceiptSaleMain record : queryDataPage.getRecords()) {
+                var operatorName = "";
+                var operator = userService.getById(record.getCreateBy());
+                if (operator != null) {
+                    operatorName = operator.getName();
+                }
+                var customerBillVo = CustomerBillDetailVO.builder()
+                        .customerName(commonService.getCustomerName(record.getCustomerId()))
+                        .receiptNumber(record.getReceiptNumber())
+                        .receiptDate(record.getReceiptDate())
+                        .operator(operatorName)
+                        .thisReceiptArrears(record.getArrearsAmount())
+                        .build();
+
+                var receiptSaleSub = receiptSaleSubService.lambdaQuery()
+                        .eq(ReceiptSaleSub::getReceiptSaleMainId, record.getId())
+                        .eq(ReceiptSaleSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                        .list();
+                var productInfo = "";
+                if(!receiptSaleSub.isEmpty()) {
+                    var productIds = receiptSaleSub.stream().map(ReceiptSaleSub::getProductId).toList();
+                    var products = productService.lambdaQuery()
+                            .in(Product::getId, productIds)
+                            .eq(Product::getDeleteFlag, CommonConstants.NOT_DELETED)
+                            .like(StringUtils.hasLength(queryCustomerBillDetailDTO.getProductInfo()), Product::getProductName, queryCustomerBillDetailDTO.getProductInfo())
+                            .list();
+                    if (!products.isEmpty()) {
+                        productInfo = products.stream().map(Product::getProductName).collect(Collectors.joining("|"));
+                    }
+                }
+                customerBillVo.setProductInfo(productInfo);
+                var queryWrapper = new QueryWrapper<FinancialMain>();
+                queryWrapper.eq("related_person_id", record.getCustomerId());
+                queryWrapper.eq("type", "收款");
+                var financialMains = financialMainMapper.selectList(queryWrapper);
+                if (!financialMains.isEmpty()) {
+                    var financialSubs = financialSubMapper.selectList(new QueryWrapper<FinancialSub>()
+                            .in("financial_main_id",
+                                    financialMains.stream().map(FinancialMain::getId).toList()));
+                    if(!financialSubs.isEmpty()) {
+                        var totalAmount = BigDecimal.ZERO;
+                        for (FinancialSub customerPayment : financialSubs) {
+                            if(customerPayment.getOtherReceipt().equals(record.getReceiptNumber())) {
+                                totalAmount = customerPayment.getReceivedPrepaidArrears();
+                            }
+                            customerBillVo.setReceivedArrears(totalAmount);
+                            // 计算待收欠款 = 本次欠款 - 已收欠款
+                            customerBillVo.setReceivableArrears(record.getArrearsAmount().subtract(totalAmount));
+                        }
+                    } else {
+                        customerBillVo.setReceivedArrears(BigDecimal.ZERO);
+                        customerBillVo.setReceivableArrears(record.getArrearsAmount());
+                    }
+                } else {
+                    customerBillVo.setReceivedArrears(BigDecimal.ZERO);
+                    customerBillVo.setReceivableArrears(record.getArrearsAmount());
+                }
+
+                customerBillDetailVos.add(customerBillVo);
+            }
+
+            result.setRecords(customerBillDetailVos);
+            result.setTotal(queryDataPage.getTotal());
+        }
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<SupplierBillVO>> getSupplierBill(QuerySupplierBillDTO querySupplierBillDTO) {
+        var page = new Page<ReceiptPurchaseMain>(querySupplierBillDTO.getPage(), querySupplierBillDTO.getPageSize());
+        var queryData = receiptPurchaseService.lambdaQuery()
+                .eq(querySupplierBillDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, querySupplierBillDTO.getSupplierId())
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(querySupplierBillDTO.getStartDate() != null, ReceiptPurchaseMain::getReceiptDate, querySupplierBillDTO.getStartDate())
+                .le(querySupplierBillDTO.getEndDate() != null, ReceiptPurchaseMain::getReceiptDate, querySupplierBillDTO.getEndDate())
+                .page(page);
+
+        var result = new Page<SupplierBillVO>();
+        if (!queryData.getRecords().isEmpty()) {
+            var supplierBillVos = new ArrayList<SupplierBillVO>();
+            for (ReceiptPurchaseMain record : queryData.getRecords()) {
+                var supplier = supplierService.getById(record.getSupplierId());
+                var supplierBillVo = SupplierBillVO.builder()
+                        .supplierId(supplier.getId())
+                        .supplierName(supplier.getSupplierName())
+                        .contactName(supplier.getContact())
+                        .contactPhone(supplier.getPhoneNumber())
+                        .email(supplier.getEmail())
+                        .firstQuarterPayment(supplier.getFirstQuarterAccountPayment())
+                        .secondQuarterPayment(supplier.getSecondQuarterAccountPayment())
+                        .thirdQuarterPayment(supplier.getThirdQuarterAccountPayment())
+                        .fourthQuarterPayment(supplier.getFourthQuarterAccountPayment())
+                        .totalPayment(record.getDiscountLastAmount())
+                        .totalArrears(record.getArrearsAmount())
+                        .build();
+
+                // 添加前判断是否已经存在 存在则进行累加 否则直接添加
+                if (supplierBillVos.stream().anyMatch(matchSupplierBillVo -> matchSupplierBillVo.getSupplierId().equals(record.getSupplierId()))) {
+                    supplierBillVos.forEach(matchSupplierBillVo -> {
+                        if (matchSupplierBillVo.getSupplierId().equals(record.getSupplierId())) {
+                            matchSupplierBillVo.setFirstQuarterPayment(Optional.ofNullable(matchSupplierBillVo.getFirstQuarterPayment()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(supplierBillVo.getFirstQuarterPayment()).orElse(BigDecimal.ZERO)));
+                            matchSupplierBillVo.setSecondQuarterPayment(Optional.ofNullable(matchSupplierBillVo.getSecondQuarterPayment()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(supplierBillVo.getSecondQuarterPayment()).orElse(BigDecimal.ZERO)));
+                            matchSupplierBillVo.setThirdQuarterPayment(Optional.ofNullable(matchSupplierBillVo.getThirdQuarterPayment()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(supplierBillVo.getThirdQuarterPayment()).orElse(BigDecimal.ZERO)));
+                            matchSupplierBillVo.setFourthQuarterPayment(Optional.ofNullable(matchSupplierBillVo.getFourthQuarterPayment()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(supplierBillVo.getFourthQuarterPayment()).orElse(BigDecimal.ZERO)));
+                            matchSupplierBillVo.setTotalPayment(Optional.ofNullable(matchSupplierBillVo.getTotalPayment()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(supplierBillVo.getTotalPayment()).orElse(BigDecimal.ZERO)));
+                            matchSupplierBillVo.setTotalArrears(Optional.ofNullable(matchSupplierBillVo.getTotalArrears()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(supplierBillVo.getTotalArrears()).orElse(BigDecimal.ZERO)));
+                        }
+                    });
+                } else {
+                    supplierBillVos.add(supplierBillVo);
+                }
+            }
+            for (SupplierBillVO supplierBillVO : supplierBillVos) {
+                supplierBillVO.setRemainingPaymentArrears(Optional.ofNullable(supplierBillVO.getFirstQuarterPayment()).orElse(BigDecimal.ZERO)
+                        .add(Optional.ofNullable(supplierBillVO.getSecondQuarterPayment()).orElse(BigDecimal.ZERO))
+                        .add(Optional.ofNullable(supplierBillVO.getThirdQuarterPayment()).orElse(BigDecimal.ZERO))
+                        .add(Optional.ofNullable(supplierBillVO.getFourthQuarterPayment()).orElse(BigDecimal.ZERO))
+                        .add(Optional.ofNullable(supplierBillVO.getTotalArrears()).orElse(BigDecimal.ZERO)));
+            }
+
+            // 进行手动分页
+            int startIndex = (int) ((result.getCurrent() - 1) * result.getSize());
+            int endIndex = (int) Math.min(startIndex + result.getSize(), supplierBillVos.size());
+            startIndex = Math.min(startIndex, endIndex);
+
+            List<SupplierBillVO> supplierBillVOS = new ArrayList<>(supplierBillVos.subList(startIndex, endIndex));
+            result.setRecords(supplierBillVOS);
+            result.setTotal(queryData.getTotal());
+            return Response.responseData(result);
+        }
+
+        return Response.responseData(result);
+    }
+
+    @Override
+    public Response<Page<SupplierBillDetailVO>> getSupplierBillDetail(QuerySupplierBillDetailDTO querySupplierBillDetailDTO) {
+        var page = new Page<ReceiptPurchaseMain>(querySupplierBillDetailDTO.getPage(), querySupplierBillDetailDTO.getPageSize());
+
+        var queryDataPage = receiptPurchaseService.lambdaQuery()
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(ReceiptPurchaseMain::getSupplierId, querySupplierBillDetailDTO.getSupplierId())
+                .in(ReceiptPurchaseMain::getSubType, "采购入库", "采购退货")
+                .eq(StringUtils.hasLength(querySupplierBillDetailDTO.getReceiptNumber()), ReceiptPurchaseMain::getReceiptNumber, querySupplierBillDetailDTO.getReceiptNumber())
+                .ge(querySupplierBillDetailDTO.getStartDate() != null, ReceiptPurchaseMain::getReceiptDate, querySupplierBillDetailDTO.getStartDate())
+                .le(querySupplierBillDetailDTO.getEndDate() != null, ReceiptPurchaseMain::getReceiptDate, querySupplierBillDetailDTO.getEndDate())
+                .page(page);
+
+        var result = new Page<SupplierBillDetailVO>();
+        if (!queryDataPage.getRecords().isEmpty()) {
+            var supplierBillDetailVos = new ArrayList<SupplierBillDetailVO>();
+            for (ReceiptPurchaseMain record : queryDataPage.getRecords()) {
+                var operatorName = "";
+                var operator = userService.getById(record.getCreateBy());
+                if (operator != null) {
+                    operatorName = operator.getName();
+                }
+                var supplierBillVo = SupplierBillDetailVO.builder()
+                        .supplierName(commonService.getSupplierName(record.getSupplierId()))
+                        .receiptNumber(record.getReceiptNumber())
+                        .receiptDate(record.getReceiptDate())
+                        .operator(operatorName)
+                        .thisReceiptArrears(record.getArrearsAmount())
+                        .build();
+
+                var receiptPurchaseSub = receiptPurchaseSubService.lambdaQuery()
+                        .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, record.getId())
+                        .eq(ReceiptPurchaseSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                        .list();
+                var productInfo = "";
+                if(!receiptPurchaseSub.isEmpty()) {
+                    var productIds = receiptPurchaseSub.stream().map(ReceiptPurchaseSub::getProductId).toList();
+                    var products = productService.lambdaQuery()
+                            .in(Product::getId, productIds)
+                            .eq(Product::getDeleteFlag, CommonConstants.NOT_DELETED)
+                            .like(StringUtils.hasLength(querySupplierBillDetailDTO.getProductInfo()), Product::getProductName, querySupplierBillDetailDTO.getProductInfo())
+                            .list();
+                    if (!products.isEmpty()) {
+                        productInfo = products.stream().map(Product::getProductName).collect(Collectors.joining("|"));
+                    }
+                }
+                supplierBillVo.setProductInfo(productInfo);
+                var queryWrapper = new QueryWrapper<FinancialMain>();
+                queryWrapper.eq("related_person_id", record.getSupplierId());
+                queryWrapper.eq("type", "付款");
+                var financialMains = financialMainMapper.selectList(queryWrapper);
+                if (!financialMains.isEmpty()) {
+                    var financialSubs = financialSubMapper.selectList(new QueryWrapper<FinancialSub>()
+                            .in("financial_main_id",
+                                    financialMains.stream().map(FinancialMain::getId).toList()));
+                    if(!financialSubs.isEmpty()) {
+                        var totalAmount = BigDecimal.ZERO;
+                        for (FinancialSub purchasePayment : financialSubs) {
+                            if(purchasePayment.getOtherReceipt().equals(record.getReceiptNumber())) {
+                                totalAmount = purchasePayment.getReceivedPrepaidArrears();
+                            }
+                            supplierBillVo.setPrepaidArrears(totalAmount);
+                            // 计算待付欠款 = 本次付款 - 已付欠款
+                            supplierBillVo.setPaymentArrears(record.getArrearsAmount().subtract(totalAmount));
+                        }
+                    } else {
+                        supplierBillVo.setPrepaidArrears(BigDecimal.ZERO);
+                        supplierBillVo.setPaymentArrears(record.getArrearsAmount());
+                    }
+                } else {
+                    supplierBillVo.setPrepaidArrears(BigDecimal.ZERO);
+                    supplierBillVo.setPaymentArrears(record.getArrearsAmount());
+                }
+
+                supplierBillDetailVos.add(supplierBillVo);
+            }
+
+            result.setRecords(supplierBillDetailVos);
+            result.setTotal(queryDataPage.getTotal());
         }
         return Response.responseData(result);
     }
