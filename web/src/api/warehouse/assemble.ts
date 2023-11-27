@@ -1,0 +1,63 @@
+import {defHttp} from '/@/utils/http/axios';
+import { ErrorMessageMode } from '/#/axios';
+import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
+import {
+    AddOrUpdateAssembleReq,
+    QueryAssembleReq,
+    AssembleResp,
+    AssembleDetailResp,
+} from "@/api/warehouse/model/assembleModel";
+
+enum API {
+    PageList = '/warehouse/assemble/pageList',
+    AddOrUpdateAccount = '/warehouse/assemble/addOrUpdate',
+    DeleteBatch = '/warehouse/assemble/deleteByIds',
+    UpdateStatus = '/warehouse/assemble/updateStatusByIds',
+    GetDetail = '/warehouse/assemble/getDetailById',
+}
+
+export function getAssemblePageList(params: QueryAssembleReq, mode: ErrorMessageMode = 'notice') {
+    return defHttp.post<BaseDataResp<AssembleResp>>(
+        {
+            url: API.PageList,
+            params,
+        },
+        {
+            errorMessageMode: mode,
+            successMessageMode: mode,
+        },
+    );
+}
+
+export function addOrUpdateAssemble(params: AddOrUpdateAssembleReq) {
+    return defHttp.post<BaseResp>(
+        {
+            url: API.AddOrUpdateAccount,
+            params,
+        },
+    );
+}
+
+export function updateAssembleStatus(ids: number[], status: number) {
+    return defHttp.put<BaseResp>(
+        {
+            url: `${API.UpdateStatus}?ids=${ids}&status=${status}`
+        },
+    );
+}
+
+export function deleteBatchAssemble(ids: number[]) {
+    return defHttp.put<BaseResp>(
+        {
+            url: `${API.DeleteBatch}?ids=${ids}`
+        },
+    );
+}
+
+export function getAssembleDetailById(id: number) {
+    return defHttp.get<BaseDataResp<AssembleDetailResp>>(
+        {
+            url: `${API.GetDetail}/${id}`
+        },
+    );
+}
