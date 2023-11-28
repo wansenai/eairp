@@ -231,3 +231,75 @@ export interface StorageSummaryStatisticsResp {
     storageNumber: number;
     storageAmount: number;
 }
+
+export interface QueryCustomerBillReq {
+    customerId: number | string;
+}
+
+export interface CustomerBillStatisticsResp {
+    id: string;
+    customerId: string;
+    customerName: string;
+    contactName: string;
+    contactPhone: string;
+    email: string;
+    firstQuarterReceivable: number;
+    secondQuarterReceivable: number;
+    thirdQuarterReceivable: number;
+    fourthQuarterReceivable: number;
+    totalQuarterReceivable: number;
+    totalQuarterArrears: number;
+    remainingReceivableArrears: number;
+}
+
+export interface QueryCustomerBillDetailReq {
+    receiptNumber: number | string;
+    productInfo: string;
+}
+
+export interface CustomerBillDetailStatisticsResp {
+    receiptNumber: string;
+    customerName: string;
+    productInfo: string;
+    receiptDate: string;
+    operator: string;
+    thisReceiptArrears: number;
+    receivedArrears: number;
+    receivableArrears: number;
+}
+
+export interface QuerySupplierBillReq {
+    supplierId: number | string;
+}
+
+export interface SupplierBillStatisticsResp {
+    id: string;
+    supplierId: string;
+    supplierName: string;
+    contactName: string;
+    contactPhone: string;
+    email: string;
+    firstQuarterPayment: number;
+    secondQuarterPayment: number;
+    thirdQuarterPayment: number;
+    fourthQuarterPayment: number;
+    totalPayment: number;
+    totalArrears: number;
+    remainingPaymentArrears: number;
+}
+
+export interface QuerySupplierBillDetailReq {
+    receiptNumber: number | string;
+    productInfo: string;
+}
+
+export interface SupplierBillDetailStatisticsResp {
+    receiptNumber: string;
+    supplierName: string;
+    productInfo: string;
+    receiptDate: string;
+    operator: string;
+    thisReceiptArrears: number;
+    prepaidArrears: number;
+    paymentArrears: number;
+}

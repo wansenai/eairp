@@ -1111,3 +1111,342 @@ export const storageSummaryStatisticsColumns: BasicColumn[] = [
         width: 140,
     },
 ]
+
+export const searchCustomerBillSchema: FormSchema[] = [
+    {
+        label: '客户',
+        field: 'customerId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getCustomerList,
+            resultField: 'data',
+            labelField: 'customerName',
+            valueField: 'id',
+        },
+        colProps: { span: 7 },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '账单日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: {
+            xl: 9,
+            xxl: 9,
+        },
+    },
+]
+
+export const customerBillColumns: BasicColumn[] = [
+    {
+        title: '欠款详情',
+        dataIndex: 'customerId',
+        width: 60,
+    },
+    {
+        title: '客户',
+        dataIndex: 'customerName',
+        width: 100,
+    },
+    {
+        title: '联系人',
+        dataIndex: 'contactName',
+        width: 80,
+    },
+    {
+        title: '联系电话',
+        dataIndex: 'contactPhone',
+        width: 100,
+    },
+    {
+        title: '电子邮箱',
+        dataIndex: 'email',
+        width: 120,
+    },
+    {
+        title: '一季度应收账款',
+        dataIndex: 'firstQuarterReceivable',
+        width: 80,
+    },
+    {
+        title: '二季度应收账款',
+        dataIndex: 'secondQuarterReceivable',
+        width: 80,
+    },
+    {
+        title: '三季度应收账款',
+        dataIndex: 'thirdQuarterReceivable',
+        width: 80,
+    },
+    {
+        title: '四季度应收账款',
+        dataIndex: 'fourthQuarterReceivable',
+        width: 80,
+    },
+    {
+        title: '累计欠款',
+        dataIndex: 'totalQuarterArrears',
+        width: 100,
+    },
+    {
+        title: '累计收款',
+        dataIndex: 'totalQuarterReceivable',
+        width: 100,
+    },
+    {
+        title: '应收欠款',
+        dataIndex: 'remainingReceivableArrears',
+        width: 100,
+        helpMessage: '应收欠款=4个季度的应收账款+累计欠款'
+    },
+]
+
+
+export const searchCustomerBillDetailSchema: FormSchema[] = [
+    {
+        label: '单据编号',
+        field: 'receiptNumber',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '商品信息',
+        field: 'productInfo',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '账单日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+]
+
+export const customerBillDetailColumns: BasicColumn[] = [
+    {
+        title: '单据编号',
+        dataIndex: 'receiptNumber',
+        width: 180,
+    },
+    {
+        title: '客户',
+        dataIndex: 'customerName',
+        width: 90,
+    },
+    {
+        title: '商品信息',
+        dataIndex: 'productInfo',
+        width: 150,
+    },
+    {
+        title: '单据日期',
+        dataIndex: 'receiptDate',
+        width: 130,
+    },
+    {
+        title: '操作员',
+        dataIndex: 'operator',
+        width: 80,
+    },
+    {
+        title: '本单欠款',
+        dataIndex: 'thisReceiptArrears',
+        width: 80,
+    },
+    {
+        title: '已收欠款',
+        dataIndex: 'receivedArrears',
+        width: 80,
+    },
+    {
+        title: '待收欠款',
+        dataIndex: 'receivableArrears',
+        width: 80,
+    },
+]
+
+export const searchSupplierBillSchema: FormSchema[] = [
+    {
+        label: '供应商',
+        field: 'supplierId',
+        component: 'ApiSelect',
+        componentProps: {
+            api: getSupplierList,
+            resultField: 'data',
+            labelField: 'supplierName',
+            valueField: 'id',
+        },
+        colProps: { span: 7 },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '账单周期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: {
+            xl: 9,
+            xxl: 9,
+        },
+    },
+]
+
+export const supplierBillColumns: BasicColumn[] = [
+    {
+        title: '欠款详情',
+        dataIndex: 'supplierId',
+        width: 60,
+    },
+    {
+        title: '供应商',
+        dataIndex: 'supplierName',
+        width: 100,
+    },
+    {
+        title: '联系人',
+        dataIndex: 'contactName',
+        width: 80,
+    },
+    {
+        title: '联系电话',
+        dataIndex: 'contactPhone',
+        width: 100,
+    },
+    {
+        title: '电子邮箱',
+        dataIndex: 'email',
+        width: 120,
+    },
+    {
+        title: '一季度应付账款',
+        dataIndex: 'firstQuarterPayment',
+        width: 80,
+    },
+    {
+        title: '二季度应付账款',
+        dataIndex: 'secondQuarterPayment',
+        width: 80,
+    },
+    {
+        title: '三季度应付账款',
+        dataIndex: 'thirdQuarterPayment',
+        width: 80,
+    },
+    {
+        title: '四季度应付账款',
+        dataIndex: 'fourthQuarterPayment',
+        width: 80,
+    },
+    {
+        title: '累计欠款',
+        dataIndex: 'totalArrears',
+        width: 100,
+    },
+    {
+        title: '累计付款',
+        dataIndex: 'totalPayment',
+        width: 100,
+    },
+    {
+        title: '应付欠款',
+        dataIndex: 'remainingPaymentArrears',
+        width: 100,
+        helpMessage: '应付欠款=4个季度的应付账款+累计欠款'
+    },
+]
+
+export const searchSupplierBillDetailSchema: FormSchema[] = [
+    {
+        label: '单据编号',
+        field: 'receiptNumber',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        label: '商品信息',
+        field: 'productInfo',
+        component: 'Input',
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: '账单日期',
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: ['开始日期', '结束日期'],
+        },
+        colProps: {
+            xl: 8,
+            xxl: 8,
+        },
+    },
+]
+
+export const supplierBillDetailColumns: BasicColumn[] = [
+    {
+        title: '单据编号',
+        dataIndex: 'receiptNumber',
+        width: 180,
+    },
+    {
+        title: '供应商',
+        dataIndex: 'supplierName',
+        width: 90,
+    },
+    {
+        title: '商品信息',
+        dataIndex: 'productInfo',
+        width: 150,
+    },
+    {
+        title: '单据日期',
+        dataIndex: 'receiptDate',
+        width: 130,
+    },
+    {
+        title: '操作员',
+        dataIndex: 'operator',
+        width: 80,
+    },
+    {
+        title: '本单欠款',
+        dataIndex: 'thisReceiptArrears',
+        width: 80,
+    },
+    {
+        title: '已付欠款',
+        dataIndex: 'prepaidArrears',
+        width: 80,
+    },
+    {
+        title: '待付欠款',
+        dataIndex: 'paymentArrears',
+        width: 80,
+    },
+]

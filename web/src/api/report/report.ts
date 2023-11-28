@@ -23,7 +23,13 @@ import {
     QueryShipmentsSummaryStatisticsReq,
     ShipmentsSummaryStatisticsResp,
     QueryStorageSummaryStatisticsReq,
-    StorageSummaryStatisticsResp
+    StorageSummaryStatisticsResp,
+    CustomerBillStatisticsResp,
+    QueryCustomerBillReq,
+    QueryCustomerBillDetailReq,
+    CustomerBillDetailStatisticsResp,
+    SupplierBillStatisticsResp,
+    QuerySupplierBillReq, QuerySupplierBillDetailReq, SupplierBillDetailStatisticsResp
 } from "@/api/report/reportModel";
 
 enum API {
@@ -40,6 +46,10 @@ enum API {
     getRelatedPerson = '/report/relatedPerson',
     getShipmentsSummary = '/report/shipmentsSummary',
     getStorageSummary = '/report/storageSummary',
+    getCustomerBill = '/report/customerBill',
+    getCustomerBillDetail = '/report/customerBillDetail',
+    getSupplierBill = '/report/supplierBill',
+    getSupplierBillDetail = '/report/supplierBillDetail',
 }
 
 
@@ -153,6 +163,42 @@ export function getStorageSummary(params: QueryStorageSummaryStatisticsReq) {
     return defHttp.post<BaseDataResp<StorageSummaryStatisticsResp>>(
         {
             url: API.getStorageSummary,
+            params
+        }
+    );
+}
+
+export function getCustomerBill(params: QueryCustomerBillReq) {
+    return defHttp.post<BaseDataResp<CustomerBillStatisticsResp>>(
+        {
+            url: API.getCustomerBill,
+            params
+        }
+    );
+}
+
+export function getCustomerBillDetail(params: QueryCustomerBillDetailReq) {
+    return defHttp.post<BaseDataResp<CustomerBillDetailStatisticsResp>>(
+        {
+            url: API.getCustomerBillDetail,
+            params
+        }
+    );
+}
+
+export function getSupplierBill(params: QuerySupplierBillReq) {
+    return defHttp.post<BaseDataResp<SupplierBillStatisticsResp>>(
+        {
+            url: API.getSupplierBill,
+            params
+        }
+    );
+}
+
+export function getSupplierBillDetail(params: QuerySupplierBillDetailReq) {
+    return defHttp.post<BaseDataResp<SupplierBillDetailStatisticsResp>>(
+        {
+            url: API.getSupplierBillDetail,
             params
         }
     );
