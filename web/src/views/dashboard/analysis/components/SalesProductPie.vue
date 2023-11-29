@@ -7,6 +7,7 @@
   import { Ref, ref, watch } from 'vue';
   import { Card } from 'ant-design-vue';
   import { useECharts } from '/@/hooks/web/useECharts';
+  import {purchaseAxisStatisticalData} from '../data';
 
   const props = defineProps({
     loading: Boolean,
@@ -31,30 +32,28 @@
       }
       setOptions({
         tooltip: {
-          trigger: 'item',
+          trigger: 'axis',
+          axisPointer: {
+            lineStyle: {
+              width: 1,
+              color: '#019680',
+            },
+          },
         },
-
+        grid: { left: '1%', right: '1%', top: '2  %', bottom: 0, containLabel: true },
+        xAxis: {
+          type: 'category',
+          data: purchaseAxisStatisticalData.value.map((item) => item.xaxisData),
+        },
+        yAxis: {
+          type: 'value',
+          splitNumber: 4,
+        },
         series: [
           {
-            name: '访问来源',
-            type: 'pie',
-            radius: '80%',
-            center: ['50%', '50%'],
-            color: ['#5ab1ef', '#b6a2de', '#67e0e3', '#2ec7c9'],
-            data: [
-              { value: 500, name: '电子产品' },
-              { value: 310, name: '服装' },
-              { value: 274, name: '化妆品' },
-              { value: 400, name: '家居' },
-            ].sort(function (a, b) {
-              return a.value - b.value;
-            }),
-            roseType: 'radius',
-            animationType: 'scale',
-            animationEasing: 'exponentialInOut',
-            animationDelay: function () {
-              return Math.random() * 400;
-            },
+            data: purchaseAxisStatisticalData.value.map((item) => item.yAxisData),
+            type: 'bar',
+            barMaxWidth: 80,
           },
         ],
       });

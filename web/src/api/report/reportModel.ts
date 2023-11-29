@@ -11,6 +11,14 @@ export interface RetailStatisticalResp {
     yearSales: number;
     yearRetailSales: number;
     yearPurchase: number;
+    retailAxisStatisticalDataVO: XyAxisData[];
+    saleAxisStatisticalDataVO: XyAxisData[];
+    purchaseAxisStatisticalDataVO: XyAxisData[];
+}
+
+export interface XyAxisData {
+    xaxisData: string;
+    yaxisData: number;
 }
 
 export interface QueryProductStockReq {

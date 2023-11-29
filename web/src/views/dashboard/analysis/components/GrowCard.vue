@@ -30,10 +30,21 @@
   import Icon from '@/components/Icon/Icon.vue';
   import { Tag, Card } from 'ant-design-vue';
   import { growCardList } from '../data';
+  import { watch } from 'vue';
 
-  defineProps({
+  const props = defineProps({
     loading: {
       type: Boolean,
     },
   });
+
+  watch(
+      () => props.loading,
+      () => {
+        if (props.loading) {
+          return;
+        }
+      },
+      { immediate: true },
+  );
 </script>
