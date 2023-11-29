@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp} from "@/api/model/baseModel";
 import {AddOrUpdateProductCategoryReq, ProductCategoryResp} from "@/api/product/model/productCategoryModel";
 
@@ -17,25 +17,27 @@ export function getCategoryList() {
     );
 }
 
-export function addOrUpdateCategory(params: AddOrUpdateProductCategoryReq, mode: ErrorMessageMode = 'notice') {
+export function addOrUpdateCategory(params: AddOrUpdateProductCategoryReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseDataResp<AddOrUpdateProductCategoryReq>>(
         {
             url: Api.addOrUpdate,
             params,
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }
 
-export function deleteCategory(ids: number[], mode: ErrorMessageMode = 'notice') {
+export function deleteCategory(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseDataResp<string>>(
         {
             url: `${Api.deleteBatch}?ids=${ids}`,
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }
