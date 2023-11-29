@@ -5,7 +5,7 @@ import {
     QueryShipmentsReq,
     ShipmentsResp
 } from "@/api/retail/model/shipmentsModel"
-import {ErrorMessageMode} from "#/axios";
+import {ErrorMessageMode, SuccessMessageMode} from "#/axios";
 
 enum API {
     PageList = '/retail/shipments/pageList',
@@ -17,16 +17,12 @@ enum API {
     GetLinkShipmentDetail = '/retail/shipments/getLinkShipmentDetail',
 }
 
-export function getShipmentsPageList(params: QueryShipmentsReq, mode: ErrorMessageMode = 'notice') {
+export function getShipmentsPageList(params: QueryShipmentsReq) {
     return defHttp.post<BaseDataResp<ShipmentsResp>>(
         {
             url: API.PageList,
             params,
-        },
-        {
-            errorMessageMode: mode,
-            successMessageMode: mode,
-        },
+        }
     );
 }
 
@@ -39,43 +35,63 @@ export function getShipmentsList(params: QueryShipmentsReq) {
     );
 }
 
-export function addOrUpdateShipments(params: AddOrUpdateShipmentsReq) {
+export function addOrUpdateShipments(params: AddOrUpdateShipmentsReq,
+                                     successMode: SuccessMessageMode = 'message',
+                                     errorMode: ErrorMessageMode = 'message',) {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdate,
             params,
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }
 
-export function deleteShipments(ids: string[]) {
+export function deleteShipments(ids: string[], successMode: SuccessMessageMode = 'message', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`,
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }
 
-export function updateShipmentsStatus(ids: string[], status: number) {
+export function updateShipmentsStatus(ids: string[], status: number, successMode: SuccessMessageMode = 'message', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`,
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }
 
-export function getShipmentsDetail(id: string | number) {
+export function getShipmentsDetail(id: string | number, errorMode: ErrorMessageMode = 'message') {
     return defHttp.get<BaseDataResp<AddOrUpdateShipmentsReq>>(
         {
             url: `${API.GetDetail}/${id}`,
+        },
+        {
+            errorMessageMode: errorMode,
         }
     );
 }
 
-export function getLinkShipmentsDetail(otherReceipt: string) {
+export function getLinkShipmentsDetail(otherReceipt: string, errorMode: ErrorMessageMode = 'message') {
     return defHttp.get<BaseDataResp<AddOrUpdateShipmentsResp>>(
         {
             url: `${API.GetLinkShipmentDetail}/${otherReceipt}`,
+        },
+        {
+            errorMessageMode: errorMode,
         }
     );
 }
