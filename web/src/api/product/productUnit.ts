@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {AddOrUpdateProductUnitReq, ProductUnitResp, ProductUnitQueryReq} from "@/api/product/model/productUnitModel";
 
@@ -19,37 +19,40 @@ export function getUnitList(params: ProductUnitQueryReq) {
     );
 }
 
-export function addOrUpdateUnit(params: AddOrUpdateProductUnitReq, mode: ErrorMessageMode = 'notice') {
+export function addOrUpdateUnit(params: AddOrUpdateProductUnitReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: Api.AddOrUpdate,
             params,
         },
         {
-            errorMessageMode: mode,
-        },
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function deleteBatchUnits(ids: number[], mode: ErrorMessageMode = 'notice') {
+export function deleteBatchUnits(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.delete<BaseResp>(
         {
             url: `${Api.DeleteBatch}?ids=${ids}`
         },
         {
-            errorMessageMode: mode,
-        },
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function updateUnitStatus(params: {id: number, status: number}, mode: ErrorMessageMode = 'notice') {
+export function updateUnitStatus(params: {id: number, status: number}, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: Api.UpdateStatus,
             params,
         },
         {
-            errorMessageMode: mode,
-        },
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }

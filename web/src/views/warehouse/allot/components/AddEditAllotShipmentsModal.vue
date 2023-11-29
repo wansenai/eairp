@@ -378,17 +378,10 @@ export default defineComponent({
         files: files,
         status: type,
       }
-      console.info(params)
       const result = await addOrUpdateAllotShipments(params)
       if (result.code === 'S0010' || 'S0011') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-
-      } else {
-        createMessage.error('操作失败');
       }
-      clearData();
     }
 
     function clearData() {

@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {ContentTypeEnum} from "@/enums/httpEnum";
 
@@ -15,7 +15,7 @@ export interface UploadFileParams {
     file: File;
 }
 
-export function uploadXlsx(params: UploadFileParams, mode: ErrorMessageMode = 'notice') {
+export function uploadXlsx(params: UploadFileParams, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: Api.UploadXlsx,
@@ -25,26 +25,26 @@ export function uploadXlsx(params: UploadFileParams, mode: ErrorMessageMode = 'n
                 // @ts-ignore
                 ignoreCancelToken: true,
             },
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function exportXlsx(type: string, mode: ErrorMessageMode = 'notice') {
+export function exportXlsx(type: string, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.get<BaseDataResp<Blob>>(
         {
             url: `${Api.ExportXlsx}?type=${type}`,
             responseType: "blob"
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function uploadOss(params: UploadFileParams, mode: ErrorMessageMode = 'notice') {
+export function uploadOss(params: UploadFileParams, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: Api.UploadOss,
@@ -54,10 +54,10 @@ export function uploadOss(params: UploadFileParams, mode: ErrorMessageMode = 'no
                 // @ts-ignore
                 ignoreCancelToken: true,
             },
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 

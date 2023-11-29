@@ -8,7 +8,7 @@ import {
     ProductExtendPriceResp,
     QueryProductExtendPriceReq,
 } from "@/api/product/model/productModel";
-import {ErrorMessageMode} from "#/axios";
+import {ErrorMessageMode, SuccessMessageMode} from "#/axios";
 
 enum Api {
     getProductCode = '/product/getProductCode',
@@ -30,26 +30,24 @@ export function getProductCode() {
     );
 }
 
-export function addOrUpdateProduct(params: AddProductReq, mode: ErrorMessageMode = 'notice') {
+export function addOrUpdateProduct(params: AddProductReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: Api.addProduct,
             params
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }
 
-export function getProductInfo(params: QueryProductReq, mode: ErrorMessageMode = 'notice') {
+export function getProductInfo(params: QueryProductReq) {
     return defHttp.post<BaseResp>(
         {
             url: Api.getProductInfo,
             params
-        },
-        {
-            errorMessageMode: mode,
         },
     );
 }
@@ -62,34 +60,40 @@ export function getProductInfoDetail(productId: number) {
     );
 }
 
-export function deleteProduct(productIds: number[], mode: ErrorMessageMode = 'notice') {
+export function deleteProduct(productIds: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.delete<BaseResp>(
         {
             url: `${Api.deleteProduct}/${productIds}`,
-        },{
-            errorMessageMode: mode,
-        }
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        },
     );
 }
 
-export function updateProductStatus(productIds: number[], status: number, mode: ErrorMessageMode = 'notice') {
+export function updateProductStatus(productIds: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${Api.updateProductStatus}/${productIds}/${status}`,
-        },{
-            errorMessageMode: mode,
-        }
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        },
     );
 }
 
-export function updateBatchProductInfo(params: UpdateBatchProductInfoReq, mode: ErrorMessageMode = 'notice') {
+export function updateBatchProductInfo(params: UpdateBatchProductInfoReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: Api.updateBatchProductInfo,
             params
-        },{
-            errorMessageMode: mode,
-        }
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        },
     );
 }
 

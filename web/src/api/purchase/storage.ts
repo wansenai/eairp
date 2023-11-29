@@ -5,6 +5,7 @@ import {
     AddOrUpdatePurchaseStorageReq,
     PurchaseStorageDetailData
 } from "@/api/purchase/model/storageModel"
+import {ErrorMessageMode, SuccessMessageMode} from "#/axios";
 
 enum API {
     PageList = '/purchase/storage/pageList',
@@ -24,11 +25,14 @@ export function getPurchaseStoragePageList(params: QueryPurchaseStorageReq) {
     );
 }
 
-export function addOrUpdatePurchaseStorage(params: AddOrUpdatePurchaseStorageReq) {
+export function addOrUpdatePurchaseStorage(params: AddOrUpdatePurchaseStorageReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdate,
             params,
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }
@@ -41,18 +45,24 @@ export function getPurchaseStorageDetail(id: string) {
     );
 }
 
-export function updatePurchaseStorageStatus(ids: number[], status: number ) {
+export function updatePurchaseStorageStatus(ids: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}/${ids}/${status}`,
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }
 
-export function deletePurchaseStorage(ids: number[]) {
+export function deletePurchaseStorage(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.Delete}/${ids}`,
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }

@@ -590,11 +590,7 @@ export default defineComponent({
       }
       const result = await addOrUpdateRefund(params)
       if (result.code === 'R0004' || 'R0005') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-      } else {
-        createMessage.error('操作失败');
       }
     }
 

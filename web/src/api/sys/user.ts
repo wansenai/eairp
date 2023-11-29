@@ -10,7 +10,7 @@ import {
     updateUserInfoReq,
 } from './model/userModel';
 
-import {ErrorMessageMode} from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 
 enum Api {
@@ -35,66 +35,66 @@ enum Api {
 /**
  * @description: user login api
  */
-export function login(params: LoginReq, mode: ErrorMessageMode = 'notice') {
+export function login(params: LoginReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
   return defHttp.post<BaseDataResp<LoginResp>>(
     {
       url: Api.Login,
       params,
     },
     {
-      errorMessageMode: mode,
-      successMessageMode: mode,
+        successMessageMode: successMode,
+        errorMessageMode: errorMode,
     },
   );
 }
 
-export function mobileLogin(params: mobileLoginReq, mode: ErrorMessageMode = 'notice') {
+export function mobileLogin(params: mobileLoginReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
   return defHttp.post<BaseDataResp<LoginResp>>(
     {
       url: Api.MobileLogin,
       params,
     },
     {
-      errorMessageMode: mode,
-      successMessageMode: mode,
+        successMessageMode: successMode,
+        errorMessageMode: errorMode,
     },
   );
 }
 
-export function register(params: registerReq, mode: ErrorMessageMode = 'notice') {
+export function register(params: registerReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
   return defHttp.post<BaseResp>(
     {
       url: Api.Register,
       params,
     },
     {
-      errorMessageMode: mode,
-      successMessageMode: mode,
+        successMessageMode: successMode,
+        errorMessageMode: errorMode,
     }
   )
 }
 
-export function sendSmsRegister(type: number, phoneNumber: string, mode: ErrorMessageMode = 'notice') {
+export function sendSmsRegister(type: number, phoneNumber: string, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
   return defHttp.get<BaseResp>(
     {
       url: `${Api.SMS}/${type}/${phoneNumber}`
     },
     {
-      errorMessageMode: mode,
-      successMessageMode: mode,
+        successMessageMode: successMode,
+        errorMessageMode: errorMode,
     }
   )
 }
 
-export function updatePassword(params: updatePasswordReq, mode: ErrorMessageMode = 'notice') {
+export function updatePassword(params: updatePasswordReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
   return defHttp.post<BaseResp>(
     {
       url: Api.UpdatePassword,
       params,
     },
     {
-      errorMessageMode: mode,
-      successMessageMode: mode,
+        successMessageMode: successMode,
+        errorMessageMode: errorMode,
     }
   )
 }
@@ -109,13 +109,9 @@ export function getUserInfo() {
   );
 }
 
-export function getUserList(params: queryUserListReq, mode: ErrorMessageMode = 'notice') {
+export function getUserList(params: queryUserListReq) {
   return defHttp.post<BaseDataResp<GetUserInfoModel>>(
     {url: Api.List, params},
-    {
-      errorMessageMode: mode,
-      successMessageMode: mode,
-    },
   );
 }
 
@@ -129,48 +125,52 @@ export function getTenantUserList(mode: ErrorMessageMode = 'notice') {
     );
 }
 
-export function updateUser(params: updateUserInfoReq, mode: ErrorMessageMode = 'notice') {
+export function updateUser(params: updateUserInfoReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseResp>(
         {url: Api.UpdateUser, params},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     )
 }
 
-export function updateStatus(params: { id: any; status: number }, mode: ErrorMessageMode = 'notice') {
+export function updateStatus(params: { id: any; status: number }, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
   return defHttp.post<BaseResp>(
       {url: Api.UpdateUser, params},
       {
-        errorMessageMode: mode,
-        successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
       },
   )
 }
 
-export function addOrUpdateUser(params: addOrUpdateUserReq) {
+export function addOrUpdateUser(params: addOrUpdateUserReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseResp>(
         {url: Api.AddOrUpdateUser, params},
-    )
-}
-
-export function deleteUser(ids: string[] , mode: ErrorMessageMode = 'notice') {
-    return defHttp.post<BaseResp>(
-        { url: `${Api.DeleteUser}?ids=${ids}`},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     )
 }
 
-export function resetPassword(id: string, mode: ErrorMessageMode = 'notice') {
+export function deleteUser(ids: string[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
+    return defHttp.post<BaseResp>(
+        { url: `${Api.DeleteUser}?ids=${ids}`},
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
+    )
+}
+
+export function resetPassword(id: string, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseResp>(
         { url: `${Api.ResetPassword}?id=${id}`},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     )
 }

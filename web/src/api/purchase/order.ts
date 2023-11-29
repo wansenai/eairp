@@ -5,6 +5,7 @@ import {
     AddOrUpdateReceiptReq,
     PurchaseDetailData, LinkReceiptDetailResp
 } from "@/api/purchase/model/orderModel"
+import {ErrorMessageMode, SuccessMessageMode} from "#/axios";
 
 enum API {
     PageList = '/purchase/order/pageList',
@@ -24,11 +25,14 @@ export function getPurchaseOrderPageList(params: QueryPurchaseOrderReq) {
     );
 }
 
-export function addOrUpdatePurchaseOrder(params: AddOrUpdateReceiptReq) {
+export function addOrUpdatePurchaseOrder(params: AddOrUpdateReceiptReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdate,
             params,
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }
@@ -49,18 +53,24 @@ export function getLinkOrderDetail(receiptNumber: string) {
     );
 }
 
-export function updatePurchaseOrderStatus(ids: number[], status: number ) {
+export function updatePurchaseOrderStatus(ids: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}/${ids}/${status}`,
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }
 
-export function deletePurchaseOrder(ids: number[]) {
+export function deletePurchaseOrder(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.Delete}/${ids}`,
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }

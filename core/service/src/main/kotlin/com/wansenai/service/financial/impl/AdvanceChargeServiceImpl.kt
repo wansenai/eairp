@@ -46,6 +46,7 @@ import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Service
@@ -172,6 +173,7 @@ open class AdvanceChargeServiceImpl(
             advanceChargeDTO?.remark?.let { like(FinancialMain::getRemark, it) }
             advanceChargeDTO?.startDate?.let { ge(FinancialMain::getCreateTime, it) }
             advanceChargeDTO?.endDate?.let { le(FinancialMain::getCreateTime, it) }
+            eq(FinancialMain::getType, "收预付款")
             eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
         }
 
@@ -198,7 +200,7 @@ open class AdvanceChargeServiceImpl(
             financialPersonnel = financialPerson?.name ?: "",
             memberName = member?.memberName,
             totalAmount = this.totalAmount,
-            collectedAmount = this.changeAmount,
+            collectedAmount = this.changeAmount ?: BigDecimal.ZERO,
             status = this.status,
             remark = this.remark
         )

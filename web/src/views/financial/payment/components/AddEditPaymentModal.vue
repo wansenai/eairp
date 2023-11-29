@@ -447,14 +447,8 @@ export default defineComponent({
       console.info(params)
       const result = await addOrUpdatePayment(params)
       if (result.code === 'P0024' || 'P0025') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-
-      } else {
-        createMessage.error('操作失败');
       }
-      clearData();
     }
 
     function clearData() {

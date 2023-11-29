@@ -393,17 +393,10 @@ export default defineComponent({
         files: files,
         status: type,
       }
-      console.info(params)
       const result = await addOrUpdateAssemble(params)
       if (result.code === 'A0020' || 'A0021') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-
-      } else {
-        createMessage.error('操作失败');
       }
-      clearData();
     }
 
     function clearData() {

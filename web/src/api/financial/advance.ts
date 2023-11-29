@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     AdvanceChargeResp,
@@ -15,49 +15,50 @@ enum API {
     GetDetail = '/financial/advance-charge/getDetailById',
 }
 
-export function getAdvancePageList(params: QueryAdvanceReq, mode: ErrorMessageMode = 'notice') {
+export function getAdvancePageList(params: QueryAdvanceReq, errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseDataResp<AdvanceChargeResp>>(
         {
             url: API.PageList,
             params,
         },
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            errorMessageMode: errorMode,
         },
     );
 }
 
-export function addOrUpdateAdvance(params: AddOrUpdateAdvanceReq, mode: ErrorMessageMode = 'notice') {
+export function addOrUpdateAdvance(params: AddOrUpdateAdvanceReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdateAccount,
             params,
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function updateAdvanceStatus(ids: number[] | string[], status: number, mode: ErrorMessageMode = 'notice') {
+export function updateAdvanceStatus(ids: number[] | string[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }
 
-export function deleteBatchAdvance(ids: number[], mode: ErrorMessageMode = 'notice') {
+export function deleteBatchAdvance(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }

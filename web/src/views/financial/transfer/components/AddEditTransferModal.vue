@@ -399,14 +399,8 @@ export default defineComponent({
 
       const result = await addOrUpdateTransfer(params)
       if (result.code === 'T0001' || 'T0002') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-
-      } else {
-        createMessage.error('操作失败');
       }
-      clearData();
     }
 
     function clearData() {

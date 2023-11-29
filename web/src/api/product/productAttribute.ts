@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {AddOrUpdateProductAttributeReq, ProductAttributeResp, ProductAttributeListReq} from "@/api/product/model/productAttributeModel";
 
@@ -19,36 +19,34 @@ export function getAttributeList(params: ProductAttributeListReq) {
     );
 }
 
-export function addOrUpdateAttribute(params: AddOrUpdateProductAttributeReq, mode: ErrorMessageMode = 'notice') {
+export function addOrUpdateAttribute(params: AddOrUpdateProductAttributeReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: Api.addOrUpdate,
             params,
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function deleteBatchAttribute(ids: number[], mode: ErrorMessageMode = 'notice') {
+export function deleteBatchAttribute(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.delete<BaseResp>(
         {
             url: `${Api.deleteBatch}?ids=${ids}`
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }
 
-export function getAttributeById(id: number, mode: ErrorMessageMode = 'notice') {
+export function getAttributeById(id: number) {
     return defHttp.get<BaseDataResp<ProductAttributeResp>>(
         {
             url: `${Api.GetAttributeById}?id=${id}`
-        },
-        {
-            errorMessageMode: mode,
-        },
+        }
     );
 }
