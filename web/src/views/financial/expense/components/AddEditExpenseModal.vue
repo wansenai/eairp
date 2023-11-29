@@ -433,14 +433,8 @@ export default defineComponent({
 
       const result = await addOrUpdateExpense(params)
       if (result.code === 'E0004' || 'E0005') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-
-      } else {
-        createMessage.error('操作失败');
       }
-      clearData();
     }
 
     function clearData() {

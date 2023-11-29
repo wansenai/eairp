@@ -391,11 +391,7 @@ export default defineComponent({
       }
       const result = await addOrUpdateAdvance(params);
       if (result.code === 'F0005') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-      } else {
-        createMessage.error('操作失败');
       }
     }
 
