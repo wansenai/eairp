@@ -6,7 +6,7 @@ import {
 
 import { defHttp } from '/@/utils/http/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
-import {ErrorMessageMode} from "#/axios";
+import {ErrorMessageMode, SuccessMessageMode} from "#/axios";
 
 enum Api {
     DeptList = '/dept/list',
@@ -21,22 +21,22 @@ export function getUserBindDept() {
     return defHttp.get<BaseDataResp<GetDeptInfoModel>>({url: Api.UserBindDept})
 }
 
-export function addOrUpdateDept(params: addOrUpdateDeptReq, mode: ErrorMessageMode = 'notice') {
+export function addOrUpdateDept(params: addOrUpdateDeptReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseResp>({
             url: Api.AddOrUpdateDept, params},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     )
 }
 
-export function deleteDept(id: number | string, mode: ErrorMessageMode = 'notice') {
+export function deleteDept(id: number | string, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseResp>({
             url: `${Api.DeleteDept}?id=${id}`},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     )
 }
