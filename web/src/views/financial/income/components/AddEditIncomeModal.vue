@@ -439,14 +439,8 @@ export default defineComponent({
 
       const result = await addOrUpdateIncome(params)
       if (result.code === 'I0004' || 'I0005') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-
-      } else {
-        createMessage.error('操作失败');
       }
-      clearData();
     }
 
     function clearData() {

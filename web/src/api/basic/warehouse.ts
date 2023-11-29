@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     WarehouseResp,
@@ -18,50 +18,46 @@ enum API {
     GetDefaultWarehouse = '/basic/warehouse/getDefaultWarehouse',
 }
 
-export function getWarehousePageList(params: QueryWarehouseReq, mode: ErrorMessageMode = 'notice') {
+export function getWarehousePageList(params: QueryWarehouseReq) {
     return defHttp.post<BaseDataResp<WarehouseResp>>(
         {
             url: API.PageList,
             params,
-        },
-        {
-            errorMessageMode: mode,
-            successMessageMode: mode,
-        },
+        }
     );
 }
 
-export function addOrUpdateWarehouse(params: AddOrUpdateWarehouseReq, mode: ErrorMessageMode = 'notice') {
+export function addOrUpdateWarehouse(params: AddOrUpdateWarehouseReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdateWarehouse,
             params,
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function updateWarehouseStatus(ids: number[], status: number, mode: ErrorMessageMode = 'notice') {
+export function updateWarehouseStatus(ids: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function deleteBatchWarehouse(ids: number[], mode: ErrorMessageMode = 'notice') {
+export function deleteBatchWarehouse(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.delete<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 

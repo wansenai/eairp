@@ -1,7 +1,7 @@
 import {defHttp} from '/@/utils/http/axios';
 import {BaseDataResp} from "@/api/model/baseModel";
 import {MenuListResp, AddOrUpdateMenuReq} from "@/api/sys/model/menuModel";
-import {ErrorMessageMode} from "#/axios";
+import {ErrorMessageMode, SuccessMessageMode} from "#/axios";
 enum Api {
     GetMenuList = '/sysRole/menu',
     AddOrUpdateMenu = '/menu/addOrUpdate',
@@ -16,22 +16,22 @@ export const getMenuList = () => {
     return defHttp.get<BaseDataResp<MenuListResp>>({url: Api.GetMenuList});
 };
 
-export const addOrUpdateMenu = (params: AddOrUpdateMenuReq, mode: ErrorMessageMode = 'notice') => {
+export const addOrUpdateMenu = (params: AddOrUpdateMenuReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') => {
     return defHttp.post<BaseDataResp<any>>(
         {url: Api.AddOrUpdateMenu, params},
         {
-          errorMessageMode: mode,
-          successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     )
 }
 
-export const deleteMenu = (id: number, mode: ErrorMessageMode = 'notice') => {
+export const deleteMenu = (id: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') => {
     return defHttp.post<BaseDataResp<any>>(
         {url: `${Api.DeleteMenu}?id=${id}`},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     )
 }

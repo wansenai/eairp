@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     AccountResp,
@@ -16,50 +16,46 @@ enum API {
     List = '/financial/account/list',
 }
 
-export function getAccountPageList(params: QueryAccountReq, mode: ErrorMessageMode = 'notice') {
+export function getAccountPageList(params: QueryAccountReq) {
     return defHttp.post<BaseDataResp<AccountResp>>(
         {
             url: API.PageList,
             params,
-        },
-        {
-            errorMessageMode: mode,
-            successMessageMode: mode,
-        },
+        }
     );
 }
 
-export function addOrUpdateAccount(params: AddOrUpdateAccountReq, mode: ErrorMessageMode = 'notice') {
+export function addOrUpdateAccount(params: AddOrUpdateAccountReq, mode: ErrorMessageMode = 'notice', successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdateAccount,
             params,
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function updateAccountStatus(ids: number[], status: number, mode: ErrorMessageMode = 'notice') {
+export function updateAccountStatus(ids: number[], status: number, mode: ErrorMessageMode = 'notice', successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function deleteBatchAccount(ids: number[], mode: ErrorMessageMode = 'notice') {
+export function deleteBatchAccount(ids: number[], mode: ErrorMessageMode = 'notice', successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.delete<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`
-        },
-        {
-            errorMessageMode: mode,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 

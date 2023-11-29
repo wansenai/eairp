@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     QueryIncomeExpenseReq,
@@ -15,16 +15,12 @@ enum API {
     UpdateStatus = '/basic/incomeExpense/updateStatus',
 }
 
-export function getIncomeExpensePageList(params: QueryIncomeExpenseReq, mode: ErrorMessageMode = 'notice') {
+export function getIncomeExpensePageList(params: QueryIncomeExpenseReq) {
     return defHttp.post<BaseDataResp<IncomeExpenseResp>>(
         {
             url: API.PageList,
             params,
-        },
-        {
-            errorMessageMode: mode,
-            successMessageMode: mode,
-        },
+        }
     );
 }
 
@@ -36,33 +32,38 @@ export function getIncomeExpenseList(type: string) {
     );
 }
 
-export function addOrUpdateIncomeExpense(params: AddOrUpdateIncomeExpenseReq, mode: ErrorMessageMode = 'notice') {
+export function addOrUpdateIncomeExpense(params: AddOrUpdateIncomeExpenseReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdateIncomeExpense,
             params,
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }
 
-export function deleteIncomeExpense(ids: number[], mode: ErrorMessageMode = 'notice') {
+export function deleteIncomeExpense(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.delete<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }
 
-export function updateIncomeExpenseStatus(ids: number[], status: number, mode: ErrorMessageMode = 'notice') {
+export function updateIncomeExpenseStatus(ids: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }

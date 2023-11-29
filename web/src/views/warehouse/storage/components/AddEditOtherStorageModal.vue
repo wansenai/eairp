@@ -406,17 +406,10 @@ export default defineComponent({
         files: files,
         status: type,
       }
-      console.info(params)
       const result = await addOrUpdateOtherStorage(params)
-      if (result.code === 'P0024' || 'P0025') {
-        createMessage.success('操作成功');
+      if (result.code === 'S0016' || 'S0017') {
         handleCancelModal();
-        clearData();
-
-      } else {
-        createMessage.error('操作失败');
       }
-      clearData();
     }
 
     function clearData() {

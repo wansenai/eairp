@@ -666,14 +666,8 @@ export default defineComponent({
 
       const result = await addOrUpdateSaleShipments(params)
       if (result.code === 'S0004' || 'S0005') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-
-      } else {
-        createMessage.error('操作失败');
       }
-      clearData();
     }
 
     function clearData() {

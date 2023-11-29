@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     CustomerResp,
@@ -16,15 +16,11 @@ enum API {
     UpdateStatus = '/basic/customer/updateStatus',
 }
 
-export function getCustomerPageList(params: QueryCustomerReq, mode: ErrorMessageMode = 'notice') {
+export function getCustomerPageList(params: QueryCustomerReq) {
     return defHttp.post<BaseDataResp<CustomerResp>>(
         {
             url: API.PageList,
             params,
-        },
-        {
-            errorMessageMode: mode,
-            successMessageMode: mode,
         },
     );
 }
@@ -37,36 +33,39 @@ export function getCustomerList() {
     );
 }
 
-export function addOrUpdateCustomer(params: AddOrUpdateCustomerReq, mode: ErrorMessageMode = 'notice') {
+export function addOrUpdateCustomer(params: AddOrUpdateCustomerReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdateCustomer,
             params,
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }
 
-export function updateCustomerStatus(ids: number[], status: number, mode: ErrorMessageMode = 'notice') {
+export function updateCustomerStatus(ids: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }
 
-export function deleteBatchCustomer(ids: number[], mode: ErrorMessageMode = 'notice') {
+export function deleteBatchCustomer(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.delete<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`
         },
         {
-            errorMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     );
 }

@@ -1,4 +1,4 @@
-import {ErrorMessageMode} from "#/axios";
+import {ErrorMessageMode, SuccessMessageMode} from "#/axios";
 import {defHttp} from "@/utils/http/axios";
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
@@ -17,62 +17,57 @@ enum Api {
     RolePermission = '/sysRole/permission'
 }
 
-export function getRoleList(mode: ErrorMessageMode = 'notice') {
+export function getRoleList(errorMode: ErrorMessageMode = 'notice') {
     return defHttp.get<BaseResp>(
         {url: Api.List},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            errorMessageMode: errorMode,
         }
     )
 }
 
-export function getPageList(params: queryRoleListReq, mode: ErrorMessageMode = 'notice') {
+export function getPageList(params: queryRoleListReq) {
     return defHttp.post<BaseDataResp<GetRoleInfoModel>>(
         {url: Api.PageList, params},
-        {
-            errorMessageMode: mode,
-            successMessageMode: mode,
-        }
     )
 }
 
-export function setRoleStatus(id: string, status: number, mode: ErrorMessageMode = 'notice'){
+export function setRoleStatus(id: string, status: number, successMode: SuccessMessageMode ='notice', errorMode: ErrorMessageMode = 'notice'){
     return defHttp.post<BaseResp>(
         {url: `${Api.UpdateStatus}?id=${id}&status=${status}`},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         },
     )
 }
 
-export function addOrUpdateRole(params: addOrUpdateRoleInfoReq, mode: ErrorMessageMode = 'notice'){
+export function addOrUpdateRole(params: addOrUpdateRoleInfoReq, successMode: SuccessMessageMode ='notice',  errorMode: ErrorMessageMode = 'notice'){
     return defHttp.post<BaseResp>(
         {url: Api.AddOrUpdateRole, params: params},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     )
 }
 
-export function deleteRole(id: string, mode: ErrorMessageMode = 'notice') {
+export function deleteRole(id: string, successMode: SuccessMessageMode ='notice',  errorMode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseResp>(
         {url: `${Api.DeleteRole}?id=${id}`},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     )
 }
 
-export function rolePermission(params: addOrUpdateRolePermissionReq, mode: ErrorMessageMode = 'notice') {
+export function rolePermission(params: addOrUpdateRolePermissionReq, successMode: SuccessMessageMode ='notice',  errorMode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseResp>(
         {url: Api.RolePermission, params: params},
         {
-            errorMessageMode: mode,
-            successMessageMode: mode,
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     )
 }

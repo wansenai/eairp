@@ -5,6 +5,7 @@ import {
     AddOrUpdateRefundReq, AddOrUpdateRefundResp,
     RefundResp
 } from "@/api/retail/model/refundModel"
+import {ErrorMessageMode, SuccessMessageMode} from "#/axios";
 
 enum API {
     PageList = '/retail/refund/pageList',
@@ -24,11 +25,17 @@ export function getRefundPageList(params: QueryShipmentsReq) {
     );
 }
 
-export function addOrUpdateRefund(params: AddOrUpdateRefundReq) {
+export function addOrUpdateRefund(params: AddOrUpdateRefundReq,
+                                  successMode: SuccessMessageMode = 'message',
+                                  errorMode: ErrorMessageMode = 'message',) {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdate,
             params,
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }
@@ -49,18 +56,26 @@ export function getLinkRefundDetail(otherReceipt: string) {
     );
 }
 
-export function updateRefundStatus(ids: string[], status: number) {
+export function updateRefundStatus(ids: string[], status: number, successMode: SuccessMessageMode = 'message', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`,
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }
 
-export function deleteRefund(ids: string[]) {
+export function deleteRefund(ids: string[], successMode: SuccessMessageMode = 'message', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: `${API.Delete}?ids=${ids}`,
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }

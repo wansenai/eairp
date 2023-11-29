@@ -104,7 +104,6 @@ export default defineComponent({
       }
       const result = await deleteSaleOrder(data.map((item) => item.id));
       if (result.code === 'S0003') {
-        createMessage.success('删除成功');
         await reload();
       }
     }
@@ -120,7 +119,6 @@ export default defineComponent({
     async function handleDelete(record: Recordable) {
       const result = await deleteSaleOrder([record.id]);
       if (result.code === 'S0003') {
-        createMessage.success('删除成功');
         await reload();
       }
     }
@@ -164,7 +162,6 @@ export default defineComponent({
       const ids = data.map((item) => item.id);
       const {code} = await updateSaleOrderStatus(ids, newStatus);
       if (code === 'S0002') {
-        createMessage.success('修改状态成功');
         await reload();
       }
     }

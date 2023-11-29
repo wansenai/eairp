@@ -633,14 +633,8 @@ export default defineComponent({
       }
       const result = await addOrUpdateSaleOrder(params)
       if (result.code === 'S0001' || 'S0002') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-
-      } else {
-        createMessage.error('操作失败');
       }
-      clearData();
     }
 
     function clearData() {
