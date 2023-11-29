@@ -614,12 +614,7 @@ export default defineComponent({
       console.info(params)
       const result = await addOrUpdatePurchaseOrder(params)
       if (result.code === 'P0015' || 'P0016') {
-        createMessage.success('操作成功');
         handleCancelModal();
-        clearData();
-
-      } else {
-        createMessage.error('操作失败');
       }
       clearData();
     }
