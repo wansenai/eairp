@@ -29,9 +29,9 @@ public enum FinancialCodeEnum {
 
     DELETE_ACCOUNT_ERROR("F0502", "删除账户失败"),
 
-    UPDATE_ACCOUNT_STATUS_SUCCESS("F0004", "修改账号状态成功"),
+    UPDATE_ACCOUNT_STATUS_SUCCESS("F0004", "账户状态修改成功"),
 
-    UPDATE_ACCOUNT_STATUS_ERROR("F0503", "修改账号状态失败"),
+    UPDATE_ACCOUNT_STATUS_ERROR("F0503", "账户状态修改失败"),
 
     ADD_ADVANCE_SUCCESS("F0005", "新增预收款成功"),
 
