@@ -15,6 +15,7 @@ package com.wansenai.service.receipt.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.bo.XyAxisDataBO;
 import com.wansenai.dto.receipt.QueryReceiptDTO;
 import com.wansenai.dto.report.*;
 import com.wansenai.entities.basic.Customer;
@@ -33,11 +34,9 @@ import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.basic.SupplierService;
 import com.wansenai.service.common.CommonService;
 import com.wansenai.service.financial.IFinancialAccountService;
-import com.wansenai.service.product.ProductCategoryService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.service.receipt.*;
 import com.wansenai.service.user.ISysUserService;
-import com.wansenai.service.warehouse.WarehouseService;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
@@ -53,6 +52,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -163,6 +164,10 @@ public class ReceiptServiceImpl implements ReceiptService {
         var monthPurchase = calculatePurchaseTotalPrice(purchaseData, purchaseRefundData, now.withDayOfMonth(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
         var yearPurchase = calculatePurchaseTotalPrice(purchaseData, purchaseRefundData, now.withDayOfYear(1).with(LocalTime.MIN), now.with(LocalTime.MAX));
 
+        var assembleAxisRetailData = calculateRetailAxisData(retailData, retailRefundData);
+        var assembleAxisSaleData = calculateSaleAxisData(salesData, salesRefundData);
+        var assembleAxisPurchaseData = calculatePurchaseAxisData(purchaseData, purchaseRefundData);
+
         var retailStatisticalDataVO = StatisticalDataVO.builder()
                 .todayRetailSales(todayRetailSales)
                 .yesterdayRetailSales(yesterdayRetailSales)
@@ -176,6 +181,9 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .yesterdayPurchase(yesterdayPurchase)
                 .monthPurchase(monthPurchase)
                 .yearPurchase(yearPurchase)
+                .retailAxisStatisticalDataVO(assembleAxisRetailData)
+                .saleAxisStatisticalDataVO(assembleAxisSaleData)
+                .purchaseAxisStatisticalDataVO(assembleAxisPurchaseData)
                 .build();
 
         return Response.responseData(retailStatisticalDataVO);
@@ -210,6 +218,106 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     private BigDecimal calculatePurchaseTotalPrice(List<ReceiptPurchaseMain> data, List<ReceiptPurchaseMain> backData, LocalDateTime start, LocalDateTime end) {
+        var dataTotalPrice = data.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptPurchaseMain::getDiscountLastAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        var backDataTotalPrice = backData.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptPurchaseMain::getDiscountLastAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        return dataTotalPrice.add(backDataTotalPrice);
+    }
+
+    private List<XyAxisDataBO> calculateRetailAxisData(List<ReceiptRetailMain> data, List<ReceiptRetailMain> backData) {
+        LocalDateTime now = LocalDateTime.now();
+        var xyAxisDataBOList = new ArrayList<XyAxisDataBO>();
+        for (int i = 0; i < 6; i++) {
+            LocalDateTime previousMonth = now.minusMonths(i);
+            LocalDateTime start = now.minusMonths(i).with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN);
+            LocalDateTime end = now.minusMonths(i).with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
+            BigDecimal totalPrice = calculateRetailTotalPriceForRecentMonths(data, backData, start, end);
+            var xAxisData = previousMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            var xyAxisDataBO = XyAxisDataBO.builder()
+                    .xAxisData(xAxisData)
+                    .yAxisData(totalPrice)
+                    .build();
+            xyAxisDataBOList.add(xyAxisDataBO);
+        }
+        Collections.reverse(xyAxisDataBOList);
+        return xyAxisDataBOList;
+    }
+
+    private BigDecimal calculateRetailTotalPriceForRecentMonths(List<ReceiptRetailMain> data, List<ReceiptRetailMain> backData, LocalDateTime start, LocalDateTime end) {
+        var dataTotalPrice = data.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptRetailMain::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        var backDataTotalPrice = backData.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptRetailMain::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        return dataTotalPrice.add(backDataTotalPrice);
+    }
+
+
+    private List<XyAxisDataBO> calculateSaleAxisData(List<ReceiptSaleMain> data, List<ReceiptSaleMain> backData) {
+        LocalDateTime now = LocalDateTime.now();
+        var xyAxisDataBOList = new ArrayList<XyAxisDataBO>();
+        for (int i = 0; i < 6; i++) {
+            LocalDateTime previousMonth = now.minusMonths(i);
+            LocalDateTime start = now.minusMonths(i).with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN);
+            LocalDateTime end = now.minusMonths(i).with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
+            BigDecimal totalPrice = calculateSaleTotalPriceForRecentMonths(data, backData, start, end);
+            var xAxisData = previousMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            var xyAxisDataBO = XyAxisDataBO.builder()
+                    .xAxisData(xAxisData)
+                    .yAxisData(totalPrice)
+                    .build();
+            xyAxisDataBOList.add(xyAxisDataBO);
+        }
+        Collections.reverse(xyAxisDataBOList);
+        return xyAxisDataBOList;
+    }
+
+    private BigDecimal calculateSaleTotalPriceForRecentMonths(List<ReceiptSaleMain> data, List<ReceiptSaleMain> backData, LocalDateTime start, LocalDateTime end) {
+        var dataTotalPrice = data.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptSaleMain::getDiscountLastAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        var backDataTotalPrice = backData.stream()
+                .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                .map(ReceiptSaleMain::getDiscountLastAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        return dataTotalPrice.add(backDataTotalPrice);
+    }
+
+    private List<XyAxisDataBO> calculatePurchaseAxisData(List<ReceiptPurchaseMain> data, List<ReceiptPurchaseMain> backData) {
+        LocalDateTime now = LocalDateTime.now();
+        var xyAxisDataBOList = new ArrayList<XyAxisDataBO>();
+        for (int i = 0; i < 6; i++) {
+            LocalDateTime previousMonth = now.minusMonths(i);
+            LocalDateTime start = now.minusMonths(i).with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN);
+            LocalDateTime end = now.minusMonths(i).with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
+            BigDecimal totalPrice = calculatePurchaseTotalPriceForRecentMonths(data, backData, start, end);
+            var xAxisData = previousMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            var xyAxisDataBO = XyAxisDataBO.builder()
+                    .xAxisData(xAxisData)
+                    .yAxisData(totalPrice)
+                    .build();
+            xyAxisDataBOList.add(xyAxisDataBO);
+        }
+        Collections.reverse(xyAxisDataBOList);
+        return xyAxisDataBOList;
+    }
+
+    private BigDecimal calculatePurchaseTotalPriceForRecentMonths(List<ReceiptPurchaseMain> data, List<ReceiptPurchaseMain> backData, LocalDateTime start, LocalDateTime end) {
         var dataTotalPrice = data.stream()
                 .filter(item -> item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
                 .map(ReceiptPurchaseMain::getDiscountLastAmount)
