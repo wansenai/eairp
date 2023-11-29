@@ -3,7 +3,7 @@ import { BasicDrawer } from '/@/components/Drawer/index';
 import { Divider } from 'ant-design-vue';
 import {
   TypePicker,
-  // ThemeColorPicker,
+  ThemeColorPicker,
   SettingFooter,
   SwitchItem,
   SelectItem,
@@ -33,11 +33,11 @@ import {
   mixSidebarTriggerOptions,
 } from './enum';
 
-// import {
+import {
 //   HEADER_PRESET_BG_COLOR_LIST,
 //   SIDE_BAR_BG_COLOR_LIST,
-//   APP_PRESET_COLOR_LIST,
-// } from '/@/settings/designSetting';
+  APP_PRESET_COLOR_LIST,
+ } from '/@/settings/designSetting';
 
 const { t } = useI18n();
 
@@ -55,7 +55,7 @@ export default defineComponent({
       getGrayMode,
       getLockTime,
       getShowDarkModeToggle,
-      // getThemeColor,
+      getThemeColor,
     } = useRootSetting();
 
     const { getOpenPageLoading, getBasicTransition, getEnableTransition, getOpenNProgress } =
@@ -133,15 +133,15 @@ export default defineComponent({
     //   );
     // }
 
-    // function renderMainTheme() {
-    //   return (
-    //     <ThemeColorPicker
-    //       colorList={APP_PRESET_COLOR_LIST}
-    //       def={unref(getThemeColor)}
-    //       event={HandlerEnum.CHANGE_THEME_COLOR}
-    //     />
-    //   );
-    // }
+    function renderMainTheme() {
+      return (
+        <ThemeColorPicker
+          colorList={APP_PRESET_COLOR_LIST}
+          def={unref(getThemeColor)}
+          event={HandlerEnum.CHANGE_THEME_COLOR}
+        />
+      );
+    }
 
     /**
      * @description:
@@ -407,18 +407,18 @@ export default defineComponent({
         {unref(getShowDarkModeToggle) && <AppDarkModeToggle class="mx-auto" />}
         <Divider>{() => t('layout.setting.navMode')}</Divider>
         {renderSidebar()}
-        {/* <Divider>{() => t('layout.setting.sysTheme')}</Divider>
-        {renderMainTheme()}
-        <Divider>{() => t('layout.setting.headerTheme')}</Divider>
-        {renderHeaderTheme()}
-        <Divider>{() => t('layout.setting.sidebarTheme')}</Divider>
-        {renderSiderTheme()} */}
-        <Divider>{() => t('layout.setting.interfaceFunction')}</Divider>
-        {renderFeatures()}
+        {/*{ <Divider>{() => t('layout.setting.sysTheme')}</Divider> }*/}
+        {/*{renderMainTheme()}*/}
+        {/*<Divider>{() => t('layout.setting.headerTheme')}</Divider>*/}
+        {/*{renderHeaderTheme()}*/}
+        {/*<Divider>{() => t('layout.setting.sidebarTheme')}</Divider>*/}
+        {/*{renderSiderTheme()}*/}
+        {/*<Divider>{() => t('layout.setting.interfaceFunction')}</Divider>*/}
+        {/*{renderFeatures()}*/}
         <Divider>{() => t('layout.setting.interfaceDisplay')}</Divider>
         {renderContent()}
-        <Divider>{() => t('layout.setting.animation')}</Divider>
-        {renderTransition()}
+        {/*<Divider>{() => t('layout.setting.animation')}</Divider>*/}
+        {/*{renderTransition()}*/}
         <Divider />
         <SettingFooter />
       </BasicDrawer>

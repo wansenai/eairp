@@ -1,14 +1,14 @@
 <template>
   <div class="p-4">
-    <GrowCard  :loading="loading" class="md:w-4/3 w-full" />
-    <GrowCardTwo :loading="loading" class="md:w-4/3 w-full" />
-    <GrowCardThree :loading="loading" class="md:w-4/3 w-full" />
-    <GrowCardFour :loading="loading" class="md:w-4/3 w-full" />
-    <SiteAnalysis class="!my-4 enter-y" :loading="loading" />
-    <div class="md:flex enter-y">
-      <VisitRadar class="md:w-1/3 w-full" :loading="loading" />
-      <VisitSource class="md:w-1/3 !md:mx-4 !md:my-0 !my-4 w-full" :loading="loading" />
-      <SalesProductPie class="md:w-1/3 w-full" :loading="loading" />
+    <GrowCard  :loading="loading" class="md:w-4/3 !md:my-1 w-full" />
+    <GrowCardTwo :loading="loading" class="md:w-4/3 !md:my-1 w-full" />
+    <GrowCardThree :loading="loading" class="md:w-4/3 !md:my-1 w-full" />
+    <GrowCardFour :loading="loading" class="md:w-4/3 !md:my-1 w-full" />
+<!--    <SiteAnalysis class="!my-4 enter-y" :loading="loading" />-->
+    <div class="md:flex enter-y !my-4 enter-y">
+      <VisitSource class="md:w-1/3 !md:mx-1 !md:my-0 !my-4 !md:mx-1" :loading="loading" />
+      <VisitRadar class="md:w-1/3 !md:mx-1 !md:my-0 !my-4 !md:mx-1" :loading="loading" />
+      <SalesProductPie class="md:w-1/3 !md:mx-1 !md:my-0 !my-4 !md:mx-1" :loading="loading" />
     </div>
   </div>
 </template>
@@ -18,13 +18,20 @@
   import GrowCardTwo from './components/GrowCardTwo.vue';
   import GrowCardThree from './components/GrowCardThree.vue';
   import GrowCardFour from './components/GrowCardFour.vue';
-  import SiteAnalysis from './components/SiteAnalysis.vue';
   import VisitSource from './components/VisitSource.vue';
   import VisitRadar from './components/VisitRadar.vue';
   import SalesProductPie from './components/SalesProductPie.vue';
   import {getStatistical} from '/@/api/report/report';
   import {RetailStatisticalResp} from '/@/api/report/reportModel';
-  import {growCardList, growCardThreeList, growCardTwoList, growCardFourList} from "@/views/dashboard/analysis/data";
+  import {
+    growCardList,
+    growCardThreeList,
+    growCardTwoList,
+    growCardFourList,
+    retailAxisStatisticalData,
+    saleAxisStatisticalData,
+    purchaseAxisStatisticalData,
+  } from "@/views/dashboard/analysis/data";
   const loading = ref(true);
 
   onMounted(async () => {
@@ -58,6 +65,10 @@
         index === 1 && (item.value = data.yearSales) && (item.total = data.yearSales);
         index === 2 && (item.value = data.yearPurchase) && (item.total = data.yearPurchase);
       });
+
+      retailAxisStatisticalData.value = data.retailAxisStatisticalDataVO;
+      saleAxisStatisticalData.value = data.saleAxisStatisticalDataVO;
+      purchaseAxisStatisticalData.value = data.purchaseAxisStatisticalDataVO;
 
       clearTimeout(timer);
       loading.value = false;

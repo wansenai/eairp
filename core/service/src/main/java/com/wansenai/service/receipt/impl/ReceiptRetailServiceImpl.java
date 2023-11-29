@@ -99,10 +99,6 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         this.commonService = commonService;
     }
 
-    private String getMemberName(Long memberId) {
-        return (memberId != null) ? memberService.getById(memberId).getMemberName() : null;
-    }
-
     private String getAccountName(Long accountId) {
         return (accountId != null) ? accountService.getById(accountId).getAccountName() : null;
     }
@@ -277,7 +273,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                     .list();
             var productNumber = calculateProductNumber(receiptSubList);
 
-            var memberName = getMemberName(item.getMemberId());
+            var memberName = commonService.getMemberName(item.getMemberId());
             var crateBy = getUserName(item.getCreateBy());
 
             var retailShipmentsVO = RetailShipmentsVO.builder()
@@ -325,7 +321,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                     .eq(ReceiptRetailSub::getReceiptMainId, receiptRetailMain.getId())
                     .list();
             var productNumber = calculateProductNumber(receiptSubList);
-            var memberName = getMemberName(receiptRetailMain.getMemberId());
+            var memberName = commonService.getMemberName(receiptRetailMain.getMemberId());
             var crateBy = getUserName(receiptRetailMain.getCreateBy());
 
             var retailShipmentsVO = RetailShipmentsVO.builder()
@@ -507,7 +503,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .receiptNumber(shipment.getReceiptNumber())
                 .receiptDate(shipment.getReceiptDate())
                 .memberId(shipment.getMemberId())
-                .memberName(getMemberName(shipment.getMemberId()))
+                .memberName(commonService.getMemberName(shipment.getMemberId()))
                 .accountName(getAccountName(shipment.getAccountId()))
                 .accountId(shipment.getAccountId())
                 .paymentType(shipment.getPaymentType())
@@ -574,7 +570,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                     .eq(ReceiptRetailSub::getReceiptMainId, item.getId())
                     .list();
             var productNumber = calculateProductNumber(receiptSubList);
-            var memberName = getMemberName(item.getMemberId());
+            var memberName = commonService.getMemberName(item.getMemberId());
             var crateBy = getUserName(item.getCreateBy());
 
             var retailRefundVO = RetailRefundVO.builder()
@@ -797,7 +793,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .receiptNumber(refund.getReceiptNumber())
                 .receiptDate(refund.getReceiptDate())
                 .memberId(refund.getMemberId())
-                .memberName(getMemberName(refund.getMemberId()))
+                .memberName(commonService.getMemberName(refund.getMemberId()))
                 .accountId(refund.getAccountId())
                 .accountName(getAccountName(refund.getAccountId()))
                 .otherReceipt(refund.getOtherReceipt())

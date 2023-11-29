@@ -104,10 +104,6 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .sum();
     }
 
-    private String getSupplierName(Long supplierId) {
-        return (supplierId != null) ? supplierService.getById(supplierId).getSupplierName() : null;
-    }
-
     private String getUserName(Long userId) {
         return (userId != null) ? userService.getById(userId).getName() : null;
     }
@@ -288,7 +284,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
                     .list();
             var productNumber = calculateProductNumber(receiptSubList);
-            var supplierName = getSupplierName(item.getSupplierId());
+            var supplierName = commonService.getSupplierName(item.getSupplierId());
             var crateBy = getUserName(item.getCreateBy());
             var totalAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTotalAmount);
             var taxRateTotalPrice = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTaxIncludedAmount);
@@ -350,7 +346,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .receiptNumber(purchaseMain.getReceiptNumber())
                 .receiptDate(purchaseMain.getReceiptDate())
                 .supplierId(purchaseMain.getSupplierId())
-                .supplierName(getSupplierName(purchaseMain.getSupplierId()))
+                .supplierName(commonService.getSupplierName(purchaseMain.getSupplierId()))
                 .accountId(purchaseMain.getAccountId())
                 .accountName(accountName)
                 .discountRate(purchaseMain.getDiscountRate())
@@ -539,7 +535,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
                     .list();
             var productNumber = calculateProductNumber(receiptSubList);
-            var supplierName = getSupplierName(item.getSupplierId());
+            var supplierName = commonService.getSupplierName(item.getSupplierId());
             var crateBy = getUserName(item.getCreateBy());
             var totalAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTotalAmount);
             var taxIncludedAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTaxIncludedAmount);
@@ -601,7 +597,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .receiptNumber(purchaseMain.getReceiptNumber())
                 .receiptDate(purchaseMain.getReceiptDate())
                 .supplierId(purchaseMain.getSupplierId())
-                .supplierName(getSupplierName(purchaseMain.getSupplierId()))
+                .supplierName(commonService.getSupplierName(purchaseMain.getSupplierId()))
                 .accountId(purchaseMain.getAccountId())
                 .paymentRate(purchaseMain.getDiscountRate())
                 .paymentAmount(purchaseMain.getDiscountAmount())
@@ -847,7 +843,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
                     .list();
             var productNumber = calculateProductNumber(receiptSubList);
-            var supplierName = getSupplierName(item.getSupplierId());
+            var supplierName = commonService.getSupplierName(item.getSupplierId());
             var crateBy = getUserName(item.getCreateBy());
             var totalAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTotalAmount);
             var taxIncludedAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTaxIncludedAmount);
@@ -931,7 +927,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .receiptNumber(purchaseMain.getReceiptNumber())
                 .receiptDate(purchaseMain.getReceiptDate())
                 .supplierId(purchaseMain.getSupplierId())
-                .supplierName(getSupplierName(purchaseMain.getSupplierId()))
+                .supplierName(commonService.getSupplierName(purchaseMain.getSupplierId()))
                 .accountId(purchaseMain.getAccountId())
                 .refundOfferRate(purchaseMain.getDiscountRate())
                 .refundOfferAmount(purchaseMain.getDiscountAmount())
@@ -1142,7 +1138,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var queryResult = receiptPurchaseMainMapper.selectPage(page, queryWrapper);
 
         queryResult.getRecords().forEach(item -> {
-            var supplierName = getSupplierName(item.getSupplierId());
+            var supplierName = commonService.getSupplierName(item.getSupplierId());
             var operatorName = getUserName(item.getCreateBy());
             var financeMainList = paymentReceiptService.lambdaQuery()
                     .eq(FinancialMain::getRelatedPersonId, item.getSupplierId())

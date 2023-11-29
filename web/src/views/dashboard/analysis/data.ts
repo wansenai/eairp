@@ -1,3 +1,5 @@
+import {ref} from "vue";
+
 export interface GrowCardItem {
   icon: string;
   dataIndex: string;
@@ -127,3 +129,13 @@ export const growCardFourList: GrowCardItem[] = [
     action: '今年',
   },
 ];
+
+export interface XyAxisData {
+  xaxisData: string;
+  yaxisData: number;
+}
+// 定义图表数据类型 用于图表数据的展示
+export const retailAxisStatisticalData: XyAxisData[] = ref();
+export const saleAxisStatisticalData: XyAxisData[] = ref();
+export const purchaseAxisStatisticalData: XyAxisData[] = ref();
+
