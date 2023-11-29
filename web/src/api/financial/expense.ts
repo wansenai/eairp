@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     AddOrUpdateExpenseReq,
@@ -16,41 +16,46 @@ enum API {
     GetDetail = '/financial/expense/getDetailById',
 }
 
-export function getExpensePageList(params: QueryExpenseReq, mode: ErrorMessageMode = 'notice') {
+export function getExpensePageList(params: QueryExpenseReq) {
     return defHttp.post<BaseDataResp<ExpenseResp>>(
         {
             url: API.PageList,
             params,
-        },
-        {
-            errorMessageMode: mode,
-            successMessageMode: mode,
-        },
+        }
     );
 }
 
-export function addOrUpdateExpense(params: AddOrUpdateExpenseReq) {
+export function addOrUpdateExpense(params: AddOrUpdateExpenseReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdateAccount,
             params,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function updateExpenseStatus(ids: number[], status: number) {
+export function updateExpenseStatus(ids: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function deleteBatchExpense(ids: number[]) {
+export function deleteBatchExpense(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
