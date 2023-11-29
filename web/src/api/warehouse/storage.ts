@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     AddOrUpdateOtherStorageReq,
@@ -16,41 +16,46 @@ enum API {
     GetDetail = '/warehouse/otherStorage/getDetailById',
 }
 
-export function getOtherStoragePageList(params: QueryOtherStorageReq, mode: ErrorMessageMode = 'notice') {
+export function getOtherStoragePageList(params: QueryOtherStorageReq) {
     return defHttp.post<BaseDataResp<OtherStorageResp>>(
         {
             url: API.PageList,
             params,
-        },
-        {
-            errorMessageMode: mode,
-            successMessageMode: mode,
-        },
+        }
     );
 }
 
-export function addOrUpdateOtherStorage(params: AddOrUpdateOtherStorageReq) {
+export function addOrUpdateOtherStorage(params: AddOrUpdateOtherStorageReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdateAccount,
             params,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function updateOtherStorageStatus(ids: number[], status: number) {
+export function updateOtherStorageStatus(ids: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function deleteBatchOtherStorage(ids: number[]) {
+export function deleteBatchOtherStorage(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 

@@ -1,5 +1,5 @@
 import {defHttp} from '/@/utils/http/axios';
-import { ErrorMessageMode } from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     AddOrUpdateOtherShipmentsReq,
@@ -16,41 +16,46 @@ enum API {
     GetDetail = '/warehouse/otherShipments/getDetailById',
 }
 
-export function getOtherShipmentsPageList(params: QueryOtherShipmentsReq, mode: ErrorMessageMode = 'notice') {
+export function getOtherShipmentsPageList(params: QueryOtherShipmentsReq) {
     return defHttp.post<BaseDataResp<OtherShipmentsResp>>(
         {
             url: API.PageList,
             params,
-        },
-        {
-            errorMessageMode: mode,
-            successMessageMode: mode,
-        },
+        }
     );
 }
 
-export function addOrUpdateOtherShipments(params: AddOrUpdateOtherShipmentsReq) {
+export function addOrUpdateOtherShipments(params: AddOrUpdateOtherShipmentsReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdateAccount,
             params,
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function updateOtherShipmentsStatus(ids: number[], status: number) {
+export function updateOtherShipmentsStatus(ids: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
-export function deleteBatchOtherShipments(ids: number[]) {
+export function deleteBatchOtherShipments(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`
-        },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }
 
