@@ -622,7 +622,6 @@ export default defineComponent({
       let otherUnitTwo = '';
       let otherUnitThree = '';
 
-      console.info(unitArr)
       for (let i = 0; i < unitArr.length; i++) {
         if (unitArr[i].id === value) {
           basicUnit = unitArr[i].basicUnit;
@@ -893,7 +892,6 @@ export default defineComponent({
         skuThreeTitle.value = "";
         skuThreeList.value = [];
       }
-      console.info(skuOneList.value)
     }
 
     function batchSetPrice(type: string) {
@@ -935,7 +933,6 @@ export default defineComponent({
       meTable.dataSource.forEach(row => {
         edit(row.key);
       });
-      console.info(meTable.dataSource)
     }
 
     function batchSetStockModalFormOk(stockNumber: number, batchType: string) {
@@ -1195,19 +1192,13 @@ export default defineComponent({
 
       const addOrUpdateProductResult = await addOrUpdateProduct(product);
       if (addOrUpdateProductResult.code === 'P0010') {
-        createMessage.success('新增商品成功');
         context.emit('success');
         closeModal();
         clearData();
       } else if (addOrUpdateProductResult.code === 'P0011') {
-        createMessage.success('商品信息修改成功');
         context.emit('success');
         closeModal();
         clearData();
-      } else if (addOrUpdateProductResult.code === 'P0512') {
-        createMessage.error('新增商品失败');
-      } else if (addOrUpdateProductResult.code === 'P0513') {
-        createMessage.error('商品信息修改失败');
       }
     }
 

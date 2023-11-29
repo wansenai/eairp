@@ -171,11 +171,8 @@ export default {
       }
       updateBatchProductInfo(updateData).then((res) => {
         if (res.code === 'P0014') {
-          createMessage.success('批量编辑成功')
           close()
           context.emit('success')
-        } else {
-          createMessage.error('批量编辑失败')
         }
       })
     };
