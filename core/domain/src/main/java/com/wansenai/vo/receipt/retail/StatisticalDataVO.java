@@ -14,12 +14,14 @@ package com.wansenai.vo.receipt.retail;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.bo.XyAxisDataBO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -62,4 +64,11 @@ public class StatisticalDataVO {
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal yearPurchase;
+
+    private List<XyAxisDataBO> retailAxisStatisticalDataVO;
+
+    private List<XyAxisDataBO> saleAxisStatisticalDataVO;
+
+    private List<XyAxisDataBO> purchaseAxisStatisticalDataVO;
+
 }

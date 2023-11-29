@@ -21,14 +21,16 @@ import java.math.RoundingMode
 class BigDecimalSerializerBO : JsonSerializer<BigDecimal>() {
     override fun serialize(value: BigDecimal?, gen: JsonGenerator, serializers: SerializerProvider) {
         if (value != null) {
-            val scaledValue = value.setScale(2, RoundingMode.HALF_UP)
-            if (scaledValue.stripTrailingZeros().scale() <= 0) {
-                gen.writeNumber(scaledValue.toBigInteger())
-            } else {
-                gen.writeNumber(scaledValue)
-            }
+            val convertedValue = convertToPositiveFormatAndRound(value)
+            gen.writeNumber(convertedValue)
         } else {
             gen.writeNull()
         }
+    }
+
+    private fun convertToPositiveFormatAndRound(value: BigDecimal): BigDecimal {
+        val absoluteValue = value.abs()
+        val roundedValue = absoluteValue.setScale(2, RoundingMode.HALF_UP)
+        return roundedValue
     }
 }
