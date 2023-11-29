@@ -582,10 +582,7 @@ export default defineComponent({
       }
       const result = await addOrUpdateShipments(params)
       if (result.code === 'R0001' || 'R0002') {
-        createMessage.success('操作成功');
         handleCancelModal();
-      } else {
-        createMessage.error('操作失败');
       }
     }
 
