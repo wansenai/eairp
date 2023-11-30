@@ -5,10 +5,10 @@
           title="零售退货入库-详情"
           :sub-title= "receiptNumber">
         <template #extra>
-          <a-button key="1">导出</a-button>
-          <a-button key="1">普通打印</a-button>
-          <a-button key="1">三联打印</a-button>
-          <a-button key="2" type="primary">发起流程审批</a-button>
+          <a-button @click="exportTable">导出</a-button>
+          <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+          <!--          <a-button key="triplePrint">三联打印</a-button>-->
+          <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
         <a-descriptions size="small" :column="3">
           <a-descriptions-item label="会员">{{ memberName }}</a-descriptions-item>
@@ -68,6 +68,7 @@ import {
 } from 'ant-design-vue';
 import {retailShipmentsTableColumns} from "@/views/retail/shipments/shipments.data";
 import ViewShipmentModal from "@/views/retail/shipments/components/ViewShipmentModal.vue";
+import printJS from "print-js";
 
 export default defineComponent({
   name: 'ViewRefundModal',
@@ -134,6 +135,46 @@ export default defineComponent({
       });
     }
 
+    function exportTable() {
+
+    }
+
+    const flexContainer = 'display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 8px;';
+    const flexItem = 'display: flex; flex-direction: column; justify-content: space-between; font-size: 12px;';
+    function primaryPrint() {
+      const header = `
+  <div style="${flexContainer}">
+    <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
+    <div style="${flexItem}">单据金额：${receiptAmount.value}</div>
+    <div style="${flexItem}">单据日期：${receiptDate.value}</div>
+  </div>
+  <div style="${flexContainer}">
+    <div style="${flexItem}">付款账户：${accountName.value}</div>
+    <div style="${flexItem}">付款金额：${paymentType.value}</div>
+    <div style="${flexItem}">付款金额：${paymentAmount.value}</div>
+  </div>
+  <div style="${flexContainer}">
+    <div style="${flexItem}">找零：${backAmount.value}</div>
+    <div style="${flexItem}">会员：${memberName.value}</div>
+    <div style="${flexItem}">备注：${remark.value}</div>
+  </div>
+`;
+      printJS({
+        documentTitle: "EAIRP (零售退货单据-详情)",
+        header: header,
+        properties: retailShipmentsTableColumns.map((item) => {
+          return {
+            field: item.dataIndex,
+            displayName: item.title,
+          };
+        }),
+        printable: tableData.value,
+        gridHeaderStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
+        gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
+        type: 'json',
+      });
+    }
+
     return {
       receiptNumber,
       memberName,
@@ -152,7 +193,9 @@ export default defineComponent({
       handleSubmit,
       otherReceipt,
       viewShipmentReceipt,
-      viewShipmentReceiptModal
+      viewShipmentReceiptModal,
+      exportTable,
+      primaryPrint
     };
   },
 });
