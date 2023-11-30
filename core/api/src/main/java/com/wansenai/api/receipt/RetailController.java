@@ -18,11 +18,13 @@ import com.wansenai.dto.receipt.retail.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.retail.RetailRefundDTO;
 import com.wansenai.dto.receipt.retail.RetailShipmentsDTO;
 import com.wansenai.service.receipt.ReceiptRetailService;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.retail.RetailRefundDetailVO;
 import com.wansenai.vo.receipt.retail.RetailRefundVO;
 import com.wansenai.vo.receipt.retail.RetailShipmentsDetailVO;
 import com.wansenai.vo.receipt.retail.RetailShipmentsVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -100,5 +102,17 @@ public class RetailController {
     @PutMapping("/refund/updateStatus")
     public Response<String> refundUpdateStatus(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return receiptRetailService.updateRetailRefundStatus(ids, status);
+    }
+
+    @GetMapping("/shipments/export")
+    public void exportShipmentsExcel(@ModelAttribute QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) throws Exception {
+        var file = receiptRetailService.exportRetailShipmentsExcel(queryShipmentsDTO, response);
+        ExcelUtils.downloadExcel(file, "零售出库单", response);
+    }
+
+    @GetMapping("/refund/export")
+    public void exportRefundExcel(@ModelAttribute QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception {
+        var file = receiptRetailService.exportRetailRefundExcel(queryRetailRefundDTO, response);
+        ExcelUtils.downloadExcel(file, "零售退货单", response);
     }
 }

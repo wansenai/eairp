@@ -22,7 +22,6 @@ import com.wansenai.dto.receipt.retail.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.retail.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.retail.RetailRefundDTO;
 import com.wansenai.dto.receipt.retail.RetailShipmentsDTO;
-import com.wansenai.entities.financial.FinancialAccount;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.wansenai.entities.receipt.ReceiptRetailMain;
@@ -44,14 +43,18 @@ import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.RetailCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptRetailDetailVO;
 import com.wansenai.vo.receipt.retail.*;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -69,8 +72,6 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
     private final ReceiptRetailSubService receiptRetailSubService;
 
-    private final MemberService memberService;
-
     private final IFinancialAccountService accountService;
 
     private final ISysUserService userService;
@@ -86,10 +87,9 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
     private final CommonService commonService;
 
 
-    public ReceiptRetailServiceImpl(ReceiptRetailMainMapper receiptRetailMainMapper, ReceiptRetailSubService receiptRetailSubService, MemberService memberService, IFinancialAccountService accountService, ISysUserService userService, SysFileMapper fileMapper, ProductStockMapper productStockMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductService productService, CommonService commonService) {
+    public ReceiptRetailServiceImpl(ReceiptRetailMainMapper receiptRetailMainMapper, ReceiptRetailSubService receiptRetailSubService, IFinancialAccountService accountService, ISysUserService userService, SysFileMapper fileMapper, ProductStockMapper productStockMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductService productService, CommonService commonService) {
         this.receiptRetailMainMapper = receiptRetailMainMapper;
         this.receiptRetailSubService = receiptRetailSubService;
-        this.memberService = memberService;
         this.accountService = accountService;
         this.userService = userService;
         this.fileMapper = fileMapper;
@@ -596,6 +596,49 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         return Response.responseData(result);
     }
 
+    private Response<List<RetailRefundVO>> getRetailRefundList(QueryRetailRefundDTO refundDTO) {
+        List<RetailRefundVO> result = new ArrayList<>();
+        var retailRefundList = lambdaQuery()
+                .eq(ReceiptRetailMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .in(ReceiptRetailMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_RETAIL_REFUND)
+                .eq(StringUtils.hasText(refundDTO.getReceiptNumber()), ReceiptRetailMain::getReceiptNumber, refundDTO.getReceiptNumber())
+                .like(StringUtils.hasText(refundDTO.getRemark()), ReceiptRetailMain::getRemark, refundDTO.getRemark())
+                .eq(refundDTO.getMemberId() != null, ReceiptRetailMain::getMemberId, refundDTO.getMemberId())
+                .eq(refundDTO.getAccountId() != null, ReceiptRetailMain::getAccountId, refundDTO.getAccountId())
+                .eq(refundDTO.getOperatorId() != null, ReceiptRetailMain::getCreateBy, refundDTO.getOperatorId())
+                .eq(refundDTO.getStatus() != null, ReceiptRetailMain::getStatus, refundDTO.getStatus())
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(refundDTO.getStartDate()), ReceiptRetailMain::getCreateTime, refundDTO.getStartDate())
+                .le(StringUtils.hasText(refundDTO.getEndDate()), ReceiptRetailMain::getCreateTime, refundDTO.getEndDate())
+                .list();
+
+        retailRefundList.forEach(item -> {
+            var receiptSubList = receiptRetailSubService.lambdaQuery()
+                    .eq(ReceiptRetailSub::getReceiptMainId, item.getId())
+                    .list();
+            var productNumber = calculateProductNumber(receiptSubList);
+            var memberName = commonService.getMemberName(item.getMemberId());
+            var crateBy = getUserName(item.getCreateBy());
+
+            var retailRefundVO = RetailRefundVO.builder()
+                    .id(item.getId())
+                    .memberName(memberName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalPrice(item.getTotalAmount())
+                    .paymentAmount(item.getChangeAmount())
+                    .backAmount(item.getBackAmount())
+                    .status(item.getStatus())
+                    .build();
+            result.add(retailRefundVO);
+        });
+
+        return Response.responseData(result);
+    }
+
     @Override
     @Transactional
     public Response<String> addOrUpdateRetailRefund(RetailRefundDTO refundDTO) {
@@ -839,6 +882,18 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
     @Override
     public Response<String> updateRetailRefundStatus(List<Long> ids, Integer status) {
        return updateRetailStatus(ids, status, RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS, RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR);
+    }
+
+    @Override
+    public File exportRetailShipmentsExcel(QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) throws Exception {
+        var data = getRetailShipmentsList(queryShipmentsDTO).getData();
+        return ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "销售出库单", data);
+    }
+
+    @Override
+    public File exportRetailRefundExcel(QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception {
+        var data = getRetailRefundList(queryRetailRefundDTO).getData();
+        return ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "销售退货单", data);
     }
 
 }
