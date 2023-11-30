@@ -52,9 +52,8 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/retail/shipments/shipments.data";
-import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
-import {getShipmentsPageList, deleteShipments, updateShipmentsStatus} from "@/api/retail/shipments";
+import {getShipmentsPageList, deleteShipments, updateShipmentsStatus, exportShipments} from "@/api/retail/shipments";
 import AddEditModal from "@/views/retail/shipments/components/AddEditModal.vue"
 import ReceiptViewModal from "@/views/retail/shipments/components/ViewShipmentModal.vue";
 import {Tag} from "ant-design-vue";
@@ -67,7 +66,7 @@ export default defineComponent({
     const { createMessage } = useMessage();
     const addEditModalRef = ref(null);
     const [receiptViewModal, {openModal: openReceiptViewModal}] = useModal();
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm }] = useTable({
       title: '零售出库列表',
       rowKey: 'id',
       api: getShipmentsPageList,
@@ -154,6 +153,7 @@ export default defineComponent({
       ).toString();
     };
 
+
     async function handleOnStatus(newStatus: number) {
       const data = getSelectRows();
       if (data.length === 0) {
@@ -169,7 +169,9 @@ export default defineComponent({
     }
 
     async function handleExport() {
-      const file = await exportXlsx("零售出库列表")
+      // 获取getForm().getFieldsValue()的数据传给后端打印接口
+      const data = getForm().getFieldsValue();
+      const file = await exportShipments(data);
       const blob = new Blob([file]);
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
