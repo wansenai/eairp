@@ -52,13 +52,13 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/retail/refund/refund.data";
-import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 import AddEditModal from "@/views/retail/refund/components/AddEditModal.vue"
 import {Tag} from "ant-design-vue";
 import {getRefundPageList, updateRefundStatus, deleteRefund} from "@/api/retail/refund";
 import {useModal} from "@/components/Modal";
 import ViewModal from "@/views/retail/refund/components/ViewRefundModal.vue";
+import {exportRefund} from "@/api/retail/refund";
 export default defineComponent({
   name: 'Shipments',
   components: {Tag, TableAction, BasicTable, AddEditModal, ViewModal},
@@ -67,7 +67,7 @@ export default defineComponent({
     const { createMessage } = useMessage();
     const addEditModalRef = ref(null);
     const [receiptViewModal, {openModal: openReceiptViewModal}] = useModal();
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm }] = useTable({
       title: '零售退货列表',
       rowKey: 'id',
       api: getRefundPageList,
@@ -168,7 +168,8 @@ export default defineComponent({
     }
 
     async function handleExport() {
-      const file = await exportXlsx("零售退货列表")
+      const data = getForm().getFieldsValue();
+      const file = await exportRefund(data);
       const blob = new Blob([file]);
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);

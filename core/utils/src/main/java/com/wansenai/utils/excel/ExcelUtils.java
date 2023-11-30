@@ -2,6 +2,9 @@ package com.wansenai.utils.excel;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -14,13 +17,16 @@ import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -34,6 +40,8 @@ public class ExcelUtils {
     private static final String XLS = ".xls";
     public static final String ROW_MERGE = "row_merge";
     public static final String COLUMN_MERGE = "column_merge";
+
+    public static final String DEFAULT_FILE_PATH = "D:/excel/eairp/";
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final String ROW_NUM = "rowNum";
     private static final String ROW_DATA = "rowData";
@@ -45,6 +53,7 @@ public class ExcelUtils {
     private static final int IMG_WIDTH = 30;
     private static final char LEAN_LINE = '/';
     private static final int BYTES_DEFAULT_LENGTH = 10240;
+
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance();
 
 
@@ -551,6 +560,31 @@ public class ExcelUtils {
     }
 
     /**
+     * 下载文件
+     *
+     * @param excelFile 文件对象
+     * @param fileName 文件名称
+     * @param response 响应对象
+     * @throws Exception 异常
+     */
+    public static void downloadExcel(File excelFile, String fileName, HttpServletResponse response) throws Exception{
+        response.setContentType("application/octet-stream");
+        fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + ".xls" + "\"");
+        FileInputStream fis = new FileInputStream(excelFile);
+        OutputStream out = response.getOutputStream();
+
+        int SIZE = 1024 * 1024;
+        byte[] bytes = new byte[SIZE];
+        int LENGTH = -1;
+        while((LENGTH = fis.read(bytes)) != -1){
+            out.write(bytes,0,LENGTH);
+        }
+        out.flush();
+        fis.close();
+    }
+
+    /**
      * 获取文件
      *
      * @param filePath filePath 文件父路径（如：D:/doc/excel/）
@@ -630,6 +664,14 @@ public class ExcelUtils {
                     rowList.add(Double.valueOf(val));
                 } else {
                     rowList.add(val);
+                }
+            }
+            for (Object o : rowList) {
+                var number = o.toString();
+                // 判断是否为数字 如果是数字则将负数转为正数 如果不是数字则不做处理
+                if (number.startsWith("-")) {
+                    number = number.replace("-", "");
+                    rowList.set(rowList.indexOf(o), number);
                 }
             }
             sheetDataList.add(rowList);
@@ -873,7 +915,7 @@ public class ExcelUtils {
             // 当数字类型长度超过8位时，改为字符串类型显示（Excel数字超过一定长度会显示为科学计数法）
             if (isNumeric(s) && s.length() < 8) {
                 cell.setCellType(CellType.NUMERIC);
-                cell.setCellValue(Double.parseDouble(s));
+                cell.setCellValue(Optional.ofNullable(s).orElse("0"));
                 return CELL_OTHER;
             } else {
                 cell.setCellType(CellType.STRING);
