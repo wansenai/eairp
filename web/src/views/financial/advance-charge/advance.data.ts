@@ -163,3 +163,21 @@ export const formState: UnwrapRef<FormState> = reactive<FormState>({
     totalAmount: 0,
     collectedAmount: 0,
 });
+
+export const advanceChargeTableColumns: BasicColumn[] = [
+    {
+        title: '账户名称',
+        dataIndex: 'accountName',
+        width: 200,
+    },
+    {
+        title: '金额',
+        dataIndex: 'amount',
+        width: 180,
+    },
+    {
+        title: '备注',
+        dataIndex: 'remark',
+        width: 200,
+    },
+]

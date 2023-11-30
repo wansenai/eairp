@@ -710,7 +710,7 @@ export const shipmentsDetailStatisticsColumns: BasicColumn[] = [
     {
         title: '金额',
         dataIndex: 'amount',
-        width: 65,
+        width: 75,
     },
     {
         title: '税率(%)',
@@ -720,7 +720,7 @@ export const shipmentsDetailStatisticsColumns: BasicColumn[] = [
     {
         title: '税额',
         dataIndex: 'taxAmount',
-        width: 65,
+        width: 70,
     },
     {
         title: '出库日期',
