@@ -12,8 +12,9 @@
           <TableAction
               :actions="[
               {
-                icon: 'clarity:view-line',
-                onClick: handleEdit.bind(null, record),
+                icon: 'clarity:info-standard-line',
+                tooltip: '查看收预付款单详情',
+                onClick: handleView.bind(null, record),
               },
               {
                 icon: 'clarity:note-edit-line',
@@ -39,6 +40,7 @@
       </template>
     </BasicTable>
     <AdvanceChargeModal ref="advanceChargeModalRef" @cancel="handleCancel"></AdvanceChargeModal>
+    <ViewAdvanceChargeModal @register="viewAdvanceChargeModalRef"/>
   </div>
 </template>
 <div>
@@ -52,13 +54,14 @@ import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/financial/advance-charge/advance.data";
 import {getAdvancePageList, deleteBatchAdvance, updateAdvanceStatus} from "@/api/financial/advance";
 import AdvanceChargeModal from "@/views/financial/advance-charge/components/AdvanceChargeModal.vue";
+import ViewAdvanceChargeModal from "@/views/financial/advance-charge/components/ViewAdvanceChargeModal.vue";
 import {Tag} from "ant-design-vue";
 
 export default defineComponent({
   name: 'advanceCharge',
-  components: {Tag, TableAction, BasicTable, AdvanceChargeModal },
+  components: {Tag, TableAction, BasicTable, AdvanceChargeModal, ViewAdvanceChargeModal},
   setup() {
-    const [registerModal, {openModal}] = useModal();
+    const [viewAdvanceChargeModalRef, {openModal: openAdvanceChargeModal}] = useModal();
     const { createMessage } = useMessage();
     const advanceChargeModalRef = ref(null);
     const [registerTable, { reload, getSelectRows }] = useTable({
@@ -142,17 +145,24 @@ export default defineComponent({
       reload();
     }
 
+    function handleView(record: Recordable){
+      openAdvanceChargeModal(true, {
+        id: record.id,
+      });
+    }
+
     return {
       registerTable,
-      registerModal,
       handleCreate,
       handleDelete,
       handleBatchDelete,
       handleEdit,
+      handleView,
       handleSuccess,
       handleOnStatus,
       handleCancel,
-      advanceChargeModalRef
+      advanceChargeModalRef,
+      viewAdvanceChargeModalRef
     }
   }
 })

@@ -2,7 +2,7 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="销售退货-详情"
+          title="收预付款单-详情"
           :sub-title= "receiptNumber">
         <template #extra>
           <a-button @click="exportTable">导出</a-button>
@@ -10,20 +10,12 @@
           <!--          <a-button key="triplePrint">三联打印</a-button>-->
           <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
-        <a-descriptions size="small" :column="4">
-          <a-descriptions-item label="客户">{{ customerName }}</a-descriptions-item>
+        <a-descriptions size="small" :column="3">
+          <a-descriptions-item label="付款会员">{{ memberName }}</a-descriptions-item>
           <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item label="出库单据">
-            <a @click="viewShipmentReceipt">{{ otherReceipt }}</a>
-          </a-descriptions-item>
-          <a-descriptions-item label="优惠率">{{ refundOfferRate }}</a-descriptions-item>
-          <a-descriptions-item label="退款优惠">{{ refundOfferAmount }}</a-descriptions-item>
-          <a-descriptions-item label="优惠后金额">{{ refundLastAmount }}</a-descriptions-item>
-          <a-descriptions-item label="其它费用">{{ otherAmount }}</a-descriptions-item>
-          <a-descriptions-item label="结算账户">{{ accountName }}</a-descriptions-item>
-          <a-descriptions-item label="本次退款">{{ thisRefundAmount }}</a-descriptions-item>
-          <a-descriptions-item label="本次欠款">{{ thisArrearsAmount }}</a-descriptions-item>
-          <a-descriptions-item label="销售人员">{{  }}</a-descriptions-item>
+          <a-descriptions-item label="财务人员">{{ financialPersonnel }}</a-descriptions-item>
+          <a-descriptions-item label="合计金额">{{ totalAmount }}</a-descriptions-item>
+          <a-descriptions-item label="收款金额">{{ collectedAmount }}</a-descriptions-item>
           <a-descriptions-item label="备注">
             {{ remark }}
           </a-descriptions-item>
@@ -49,7 +41,7 @@
             <a-statistic title="单据金额"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
-                         :value="thisRefundAmount"/>
+                         :value="collectedAmount"/>
           </div>
         </div>
       </a-page-header>
@@ -57,29 +49,26 @@
       </BasicTable>
     </div>
   </BasicModal>
-  <ViewShipmentsModal @register="viewShipmentsReceiptModal"/>
 </template>
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
 import {BasicTable, useTable} from '/src/components/Table';
-import {BasicModal, useModal, useModalInner} from "@/components/Modal";
-import {getLinkRefundDetail} from "@/api/sale/refund";
-import {TableColumns} from "@/views/sales/order/sales.data";
-import ViewShipmentsModal from "@/views/sales/shipments/components/ViewSaleShipmentsModal.vue";
+import {BasicModal, useModalInner} from "@/components/Modal";
+import {getAdvanceDetail} from "@/api/financial/advance";
 import {
   Descriptions,
   DescriptionsItem,
   PageHeader,
   Statistic,
 } from 'ant-design-vue';
+import {advanceChargeTableColumns} from "@/views/financial/advance-charge/advance.data";
 import printJS from "print-js";
 
 export default defineComponent({
-  name: 'ViewSaleRefundModal',
+  name: 'ViewIncomeModal',
   components: {
     BasicModal,
     BasicTable,
-    ViewShipmentsModal,
     'a-page-header': PageHeader,
     'a-descriptions': Descriptions,
     'a-descriptions-item': DescriptionsItem,
@@ -87,54 +76,37 @@ export default defineComponent({
   },
   setup() {
     const receiptNumber = ref('');
-    const otherReceipt = ref('');
-    const customerName = ref(0);
-    const refundOfferRate = ref('');
+    const memberName = ref('');
     const receiptDate = ref('');
-    const refundOfferAmount = ref('');
-    const refundLastAmount = ref('');
-    const otherAmount = ref('');
-    const thisRefundAmount = ref('');
-    const thisArrearsAmount = ref('');
-    const accountName = ref('');
+    const financialPersonnel = ref('');
+    const totalAmount = ref('');
+    const collectedAmount = ref('');
     const remark = ref('')
-    const status = ref();
-    const [viewShipmentsReceiptModal, {openModal: openViewShipmentsReceiptModal}] = useModal();
     const tableData = ref([]);
+    const status = ref(-1);
     const [registerTable] = useTable({
-      title: '销售退货表数据',
-      columns: TableColumns,
+      title: '收预付款单据详情数据',
+      columns: advanceChargeTableColumns,
       dataSource: tableData,
       pagination: false,
       showIndexColumn: false,
       bordered: true,
+      canResize: false,
     });
     const getTitle = ref('单据详情');
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
-      setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200, showOkBtn: false});
-      const res = await getLinkRefundDetail(data.receiptNumber);
+      setModalProps({confirmLoading: false, destroyOnClose: true, width: 1000, showOkBtn: false});
+      const res = await getAdvanceDetail(data.id);
       tableData.value = res.data.tableData;
       receiptNumber.value = res.data.receiptNumber;
-      customerName.value = res.data.customerName;
+      memberName.value = res.data.memberName;
+      financialPersonnel.value = res.data.financialPersonnel;
       receiptDate.value = res.data.receiptDate;
-      refundOfferRate.value = res.data.refundOfferRate;
-      refundOfferAmount.value = res.data.refundOfferAmount;
-      refundLastAmount.value = res.data.refundLastAmount;
-      otherAmount.value = res.data.otherAmount;
-      thisRefundAmount.value = res.data.thisRefundAmount;
-      thisArrearsAmount.value = res.data.thisArrearsAmount;
-      accountName.value = res.data.accountName;
-      otherReceipt.value = res.data.otherReceipt;
+      totalAmount.value = res.data.totalAmount;
+      collectedAmount.value = res.data.collectedAmount;
       remark.value = res.data.remark;
       status.value = res.data.status;
     });
-
-    function viewShipmentReceipt() {
-      closeModal();
-      openViewShipmentsReceiptModal(true, {
-        receiptNumber: otherReceipt.value
-      });
-    }
 
     function handleSubmit() {
       closeModal();
@@ -150,26 +122,19 @@ export default defineComponent({
       const header = `
   <div style="${flexContainer}">
     <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
-    <div style="${flexItem}">单据金额：${refundLastAmount.value}</div>
     <div style="${flexItem}">单据日期：${receiptDate.value}</div>
+    <div style="${flexItem}">单据金额：${totalAmount.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">结算账户：${accountName.value}</div>
-    <div style="${flexItem}">优惠率：${refundOfferRate.value}</div>
-    <div style="${flexItem}">退款优惠：${refundOfferAmount.value}</div>
-    <div style="${flexItem}">其它费用：${otherAmount.value}</div>
-  </div>
-  <div style="${flexContainer}">
-    <div style="${flexItem}">本次退款：${thisRefundAmount.value}</div>
-    <div style="${flexItem}">本次欠款：${thisArrearsAmount.value}</div>
-    <div style="${flexItem}">客户：${customerName.value}</div>
+    <div style="${flexItem}">付款会员：${memberName.value}</div>
+    <div style="${flexItem}">财务人员：${financialPersonnel.value}</div>
     <div style="${flexItem}">备注：${remark.value}</div>
   </div>
 `;
       printJS({
-        documentTitle: "EAIRP (销售退货单单据-详情)",
+        documentTitle: "EAIRP (收预付款单单据-详情)",
         header: header,
-        properties: TableColumns.map((item) => {
+        properties: advanceChargeTableColumns.map((item) => {
           return {
             field: item.dataIndex,
             displayName: item.title,
@@ -184,24 +149,17 @@ export default defineComponent({
 
     return {
       receiptNumber,
-      otherReceipt,
-      customerName,
-      refundOfferRate,
+      memberName,
       receiptDate,
-      refundOfferAmount,
-      refundLastAmount,
-      otherAmount,
-      thisRefundAmount,
-      thisArrearsAmount,
-      accountName,
+      financialPersonnel,
+      collectedAmount,
+      totalAmount,
       remark,
       status,
       registerTable,
       registerModal,
       getTitle,
       handleSubmit,
-      viewShipmentsReceiptModal,
-      viewShipmentReceipt,
       exportTable,
       primaryPrint
     };

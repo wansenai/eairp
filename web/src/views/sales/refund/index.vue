@@ -41,7 +41,7 @@
       </template>
     </BasicTable>
     <AddEditModal ref="addEditModalRef" @cancel="handleCancel"/>
-    <ViewShipmentModal @register="viewShipmentReceiptModal"/>
+    <ViewSaleRefundModal @register="viewRefundReceiptModal"/>
   </div>
 </template>
 <div>
@@ -57,16 +57,16 @@ import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
 import {getSaleRefundPageList, updateSaleRefundStatus, deleteSaleRefund} from "@/api/sale/refund";
 import AddEditModal from "@/views/sales/refund/components/AddEditModal.vue";
-import ViewShipmentModal from "@/views/sales/shipments/components/ViewSaleShipmentsModal.vue";
+import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundModal.vue";
 import {useModal} from "@/components/Modal";
 export default defineComponent({
   name: 'SaleRefundModal',
-  components: {ViewShipmentModal, Tag, TableAction, BasicTable, AddEditModal},
+  components: {ViewSaleRefundModal, Tag, TableAction, BasicTable, AddEditModal},
   setup() {
     const { t } = useI18n();
     const addEditModalRef = ref(null);
     const { createMessage } = useMessage();
-    const [viewShipmentReceiptModal, {openModal: openViewShipmentReceiptModal}] = useModal()
+    const [viewRefundReceiptModal, {openModal: openViewRefundReceiptModal}] = useModal()
     const [registerTable, { reload, getSelectRows }] = useTable({
       title: '销售退货列表',
       rowKey: 'id',
@@ -136,7 +136,7 @@ export default defineComponent({
     }
 
     function handleView(record: Recordable){
-      openViewShipmentReceiptModal(true, {
+      openViewRefundReceiptModal(true, {
         receiptNumber: record.receiptNumber
       });
     }
@@ -192,7 +192,7 @@ export default defineComponent({
       handleView,
       handleOk,
       handleExport,
-      viewShipmentReceiptModal
+      viewRefundReceiptModal
     }
   }
 })

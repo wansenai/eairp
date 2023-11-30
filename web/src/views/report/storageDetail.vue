@@ -2,8 +2,8 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click=""> 导出</a-button>
-        <a-button @click=""> 打印</a-button>
+        <a-button @click="exportTable">导出</a-button>
+        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'receiptNumber'">
@@ -20,9 +20,12 @@
 </div>
 
 <script lang="ts">
-import {defineComponent} from "vue";
+import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
-import {searchStorageDetailSchema, storageDetailStatisticsColumns} from "@/views/report/report.data";
+import {
+  searchStorageDetailSchema,
+  storageDetailStatisticsColumns
+} from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
 import {getStorageDetail} from "@/api/report/report";
 import XEUtils from "xe-utils";
@@ -30,6 +33,7 @@ import {useModal} from "@/components/Modal";
 import ViewRefundModal from "@/views/retail/refund/components/ViewRefundModal.vue";
 import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundModal.vue";
 import ViewPurchaseStorageModal from "@/views/purchase/storage/components/ViewStorageModal.vue";
+import printJS from "print-js";
 
 export default defineComponent({
   name: 'StorageDetailStatistics',
@@ -42,6 +46,7 @@ export default defineComponent({
     const [handleRetailRefundModal, {openModal: openRetailRefundModal}] = useModal();
     const [handleSaleRefundModal, {openModal: openSaleRefundModal}] = useModal();
     const [handlePurchaseStorageModal, {openModal: openPurchaseStorageModal}] = useModal();
+    const printTableData = ref<any[]>([]);
     const [registerTable, { reload }] = useTable({
       title: '入库明细报表',
       api: getStorageDetail,
@@ -65,6 +70,24 @@ export default defineComponent({
       const productNumber = tableData.reduce((prev, next) => prev + next.productNumber, 0);
       const amount = tableData.reduce((prev, next) => prev + next.amount, 0);
       const taxAmount = tableData.reduce((prev, next) => prev + next.taxAmount, 0);
+      printTableData.value = tableData;
+      printTableData.value.push({
+        productNumber: productNumber,
+        amount: `￥${XEUtils.commafy(XEUtils.toNumber(amount), { digits: 2 })}`,
+        taxAmount: `￥${XEUtils.commafy(XEUtils.toNumber(taxAmount), { digits: 2 })}`,
+        receiptNumber: '合计',
+        type: '',
+        name: '',
+        productBarcode: '',
+        warehouseName: '',
+        productName: '',
+        productStandard: '',
+        productModel: '',
+        productUnit: '',
+        unitPrice: '',
+        taxRate: '',
+        createTime: ''
+      });
       return [
         {
           _index: '合计',
@@ -98,6 +121,22 @@ export default defineComponent({
       }
     }
 
+    function exportTable() {
+    }
+
+    function primaryPrint() {
+      printJS({
+        documentTitle: "EAIRP (入库明细)",
+        properties: storageDetailStatisticsColumns.map(item => {
+          return { field: item.dataIndex, displayName: item.title }
+        }),
+        printable: printTableData.value,
+        gridHeaderStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
+        gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
+        type: 'json',
+      });
+    }
+
     return {
       openReceipt,
       registerTable,
@@ -106,6 +145,8 @@ export default defineComponent({
       handleRetailRefundModal,
       handleSaleRefundModal,
       handlePurchaseStorageModal,
+      exportTable,
+      primaryPrint
     }
   }
 })

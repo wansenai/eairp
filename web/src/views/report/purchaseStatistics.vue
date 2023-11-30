@@ -2,8 +2,8 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click=""> 导出</a-button>
-        <a-button @click=""> 打印</a-button>
+        <a-button @click="exportTable">导出</a-button>
+        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
       </template>
     </BasicTable>
   </div>
@@ -12,17 +12,19 @@
 </div>
 
 <script lang="ts">
-import {defineComponent} from "vue";
+import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {searchPurchaseSchema, purchaseStatisticsColumns} from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
 import {getPurchaseStatistics} from "@/api/report/report";
 import XEUtils from "xe-utils";
+import printJS from "print-js";
 
 export default defineComponent({
   name: 'PurchaseStatistics',
   components: {Tag, TableAction, BasicTable},
   setup() {
+    const printTableData = ref<any[]>([]);
     const [registerTable, { reload }] = useTable({
       title: '采购统计报表',
       api: getPurchaseStatistics,
@@ -48,6 +50,21 @@ export default defineComponent({
       const purchaseRefundNumber = tableData.reduce((prev, next) => prev + next.purchaseRefundNumber, 0);
       const purchaseRefundAmount = tableData.reduce((prev, next) => prev + next.purchaseRefundAmount, 0);
       const purchaseLastAmount = tableData.reduce((prev, next) => prev + next.purchaseLastAmount, 0);
+      printTableData.value = tableData;
+      printTableData.value.push({
+        purchaseNumber: purchaseNumber,
+        purchaseAmount: `￥${XEUtils.commafy(XEUtils.toNumber(purchaseAmount), { digits: 2 })}`,
+        purchaseRefundNumber: purchaseRefundNumber,
+        purchaseRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(purchaseRefundAmount), { digits: 2 })}`,
+        purchaseLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(purchaseLastAmount), { digits: 2 })}`,
+        productBarcode: '合计',
+        warehouseName: '',
+        productName: '',
+        productStandard: '',
+        productModel: '',
+        productExtendInfo: '',
+        productUnit: '',
+      });
       return [
         {
           _index: '合计',
@@ -67,10 +84,29 @@ export default defineComponent({
       reload();
     }
 
+    function exportTable() {
+
+    }
+
+    function primaryPrint() {
+      printJS({
+        documentTitle: "EAIRP (采购统计-详情)",
+        properties: purchaseStatisticsColumns.map(item => {
+          return { field: item.dataIndex, displayName: item.title }
+        }),
+        printable: printTableData.value,
+        gridHeaderStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
+        gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
+        type: 'json',
+      });
+    }
+
     return {
       registerTable,
       handleSuccess,
       handleCancel,
+      exportTable,
+      primaryPrint
     }
   }
 })

@@ -2,8 +2,8 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click=""> 导出</a-button>
-        <a-button @click=""> 打印</a-button>
+        <a-button @click="exportTable">导出</a-button>
+        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'customerId'">
@@ -18,20 +18,25 @@
 </div>
 
 <script lang="ts">
-import {defineComponent} from "vue";
+import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
-import {customerBillColumns, searchCustomerBillSchema} from "@/views/report/report.data";
+import {
+  customerBillColumns,
+  searchCustomerBillSchema,
+} from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
 import {getCustomerBill} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import {useModal} from "@/components/Modal";
 import CustomerBillDetailModal from "@/views/report/modal/CustomerBillDetailModal.vue";
+import printJS from "print-js";
 
 export default defineComponent({
   name: 'CustomerBill',
   components: {
     CustomerBillDetailModal, Tag, TableAction, BasicTable},
   setup() {
+    const printTableData = ref<any[]>([]);
     const [handleRegister, {openModal}] = useModal();
     const [registerTable, { reload }] = useTable({
       title: '客户对账报表',
@@ -60,6 +65,20 @@ export default defineComponent({
       const totalQuarterArrears = tableData.reduce((prev, next) => prev + next.totalQuarterArrears, 0);
       const totalQuarterReceivable = tableData.reduce((prev, next) => prev + next.totalQuarterReceivable, 0);
       const remainingReceivableArrears = tableData.reduce((prev, next) => prev + next.remainingReceivableArrears, 0);
+      printTableData.value = tableData;
+      printTableData.value.push({
+        firstQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterReceivable), { digits: 2 })}`,
+        secondQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterReceivable), { digits: 2 })}`,
+        thirdQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterReceivable), { digits: 2 })}`,
+        fourthQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(fourthQuarterReceivable), { digits: 2 })}`,
+        totalQuarterArrears:`￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterArrears), { digits: 2 })}`,
+        totalQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterReceivable), { digits: 2 })}`,
+        remainingReceivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(remainingReceivableArrears), { digits: 2 })}`,
+        customerName: '合计',
+        contactName: '',
+        contactPhone: '',
+        email: '',
+      });
       return [
         {
           _index: '合计',
@@ -87,12 +106,31 @@ export default defineComponent({
       });
     }
 
+    function exportTable() {
+    }
+
+    function primaryPrint() {
+      const printColumns = customerBillColumns.filter(item => item.dataIndex !== 'customerId');
+      printJS({
+        documentTitle: "EAIRP (客户对账)",
+        properties: printColumns.map(item => {
+          return { field: item.dataIndex, displayName: item.title }
+        }),
+        printable: printTableData.value,
+        gridHeaderStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
+        gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
+        type: 'json',
+      });
+    }
+
     return {
       openReceipt,
       registerTable,
       handleSuccess,
       handleCancel,
       handleRegister,
+      exportTable,
+      primaryPrint
     }
   }
 })
