@@ -52,10 +52,9 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/purchase/storage/purchaseStorage.data";
-import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
-import {getPurchaseStoragePageList, updatePurchaseStorageStatus, deletePurchaseStorage} from "@/api/purchase/storage";
+import {getPurchaseStoragePageList, updatePurchaseStorageStatus, deletePurchaseStorage, exportStorage} from "@/api/purchase/storage";
 import AddEditModal from "@/views/purchase/storage/components/AddEditModal.vue";
 import ViewStorageModal from "@/views/purchase/storage/components/ViewStorageModal.vue";
 import {useModal} from "@/components/Modal";
@@ -67,7 +66,7 @@ export default defineComponent({
     const addEditModalRef = ref(null);
     const { createMessage } = useMessage();
     const [viewStorageReceiptModal, {openModal: openViewStorageReceiptModal}] = useModal();
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm }] = useTable({
       title: '采购入库列表',
       rowKey: 'id',
       api: getPurchaseStoragePageList,
@@ -173,14 +172,17 @@ export default defineComponent({
     }
 
     async function handleExport() {
-      const file = await exportXlsx("采购入库列表")
-      const blob = new Blob([file]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = "采购入库单数据" + timestamp + ".xlsx";
-      link.target = "_blank";
-      link.click();
+      const data = getForm().getFieldsValue();
+      const file: any = await exportStorage(data)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = "采购入库单数据" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
 
