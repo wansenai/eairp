@@ -14,6 +14,7 @@ enum API {
     UpdateStatus = '/retail/refund/updateStatus',
     Delete = '/retail/refund/deleteByIds',
     GetLinkRefundDetail = '/retail/refund/getLinkRefundDetail',
+    Export = '/retail/refund/export',
 }
 
 export function getRefundPageList(params: QueryShipmentsReq) {
@@ -76,6 +77,16 @@ export function deleteRefund(ids: string[], successMode: SuccessMessageMode = 'm
         {
             successMessageMode: successMode,
             errorMessageMode: errorMode,
+        }
+    );
+}
+
+export function exportRefund(params: QueryShipmentsReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
         }
     );
 }

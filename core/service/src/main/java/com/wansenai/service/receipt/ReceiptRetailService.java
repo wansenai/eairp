@@ -22,7 +22,10 @@ import com.wansenai.utils.response.Response;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.vo.receipt.ReceiptRetailDetailVO;
 import com.wansenai.vo.receipt.retail.*;
+import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public interface ReceiptRetailService extends IService<ReceiptRetailMain> {
@@ -185,4 +188,36 @@ public interface ReceiptRetailService extends IService<ReceiptRetailMain> {
      *       返回修改结果
      */
     Response<String> updateRetailRefundStatus(List<Long> ids, Integer status);
+
+    /**
+     * Query data through public query criteria and export retail shipments data files
+     * 根据公共查询条件查询数据并导出零售出库数据文件
+     *
+     * @param queryShipmentsDTO Query common conditions
+     *                          查询公共条件
+     * @param response         HttpServletResponse
+     *
+     * @return Returns the exported file
+     *        返回导出的文件
+     *
+     * @throws Exception Exception
+     *                  异常
+     */
+    File exportRetailShipmentsExcel(QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) throws Exception;
+
+    /**
+     * Query data through public query criteria and export retail refund data files
+     * 根据公共查询条件查询数据并导出零售退货数据文件
+     *
+     * @param queryRetailRefundDTO Query common conditions
+     *                          查询公共条件
+     * @param response         HttpServletResponse
+     *
+     * @return Returns the exported file
+     *        返回导出的文件
+     *
+     * @throws Exception Exception
+     *                  异常
+     */
+    File exportRetailRefundExcel(QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception;
 }
