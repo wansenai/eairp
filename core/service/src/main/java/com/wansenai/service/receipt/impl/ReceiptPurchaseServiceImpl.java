@@ -42,10 +42,13 @@ import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.PurchaseCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.purchase.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -312,6 +315,50 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         return Response.responseData(result);
     }
 
+    private List<PurchaseOrderVO> getPurchaseOrderList(QueryPurchaseOrderDTO queryPurchaseOrderDTO) {
+        var purchaseOrderVOList = new ArrayList<PurchaseOrderVO>();
+        var queryWrapper = new LambdaQueryWrapper<ReceiptPurchaseMain>()
+                .eq(ReceiptPurchaseMain::getType, ReceiptConstants.RECEIPT_TYPE_ORDER)
+                .in(ReceiptPurchaseMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_PURCHASE_ORDER)
+                .eq(StringUtils.hasText(queryPurchaseOrderDTO.getReceiptNumber()), ReceiptPurchaseMain::getReceiptNumber, queryPurchaseOrderDTO.getReceiptNumber())
+                .like(StringUtils.hasText(queryPurchaseOrderDTO.getRemark()), ReceiptPurchaseMain::getRemark, queryPurchaseOrderDTO.getRemark())
+                .eq(queryPurchaseOrderDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, queryPurchaseOrderDTO.getSupplierId())
+                .eq(queryPurchaseOrderDTO.getOperatorId() != null, ReceiptPurchaseMain::getCreateBy, queryPurchaseOrderDTO.getOperatorId())
+                .eq(queryPurchaseOrderDTO.getStatus() != null, ReceiptPurchaseMain::getStatus, queryPurchaseOrderDTO.getStatus())
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(queryPurchaseOrderDTO.getStartDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseOrderDTO.getStartDate())
+                .le(StringUtils.hasText(queryPurchaseOrderDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseOrderDTO.getEndDate());
+
+        var queryResult = receiptPurchaseMainMapper.selectList(queryWrapper);
+
+        queryResult.forEach(item -> {
+            var receiptSubList = receiptPurchaseSubService.lambdaQuery()
+                    .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
+                    .list();
+            var productNumber = calculateProductNumber(receiptSubList);
+            var supplierName = commonService.getSupplierName(item.getSupplierId());
+            var crateBy = getUserName(item.getCreateBy());
+            var totalAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTotalAmount);
+            var taxRateTotalPrice = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTaxIncludedAmount);
+
+            var purchaseOrderVO = PurchaseOrderVO.builder()
+                    .id(item.getId())
+                    .supplierName(supplierName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalAmount(totalAmount)
+                    .taxRateTotalAmount(taxRateTotalPrice)
+                    .deposit(item.getDeposit())
+                    .status(item.getStatus())
+                    .build();
+            purchaseOrderVOList.add(purchaseOrderVO);
+        });
+        return purchaseOrderVOList;
+    }
+
     private PurchaseOrderDetailVO createPurchaseOrderDetail(ReceiptPurchaseMain purchaseMain) {
         List<FileDataBO> fileList = commonService.getFileList(purchaseMain.getFileId());
 
@@ -566,6 +613,52 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         result.setSize(queryResult.getSize());
 
         return Response.responseData(result);
+    }
+
+    private List<PurchaseStorageVO> getPurchaseStorageList(QueryPurchaseStorageDTO queryPurchaseStorageDTO) {
+        var purchaseStorageVOList = new ArrayList<PurchaseStorageVO>();
+        var queryWrapper = new LambdaQueryWrapper<ReceiptPurchaseMain>()
+                .eq(ReceiptPurchaseMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .in(ReceiptPurchaseMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_PURCHASE_STORAGE)
+                .eq(StringUtils.hasText(queryPurchaseStorageDTO.getReceiptNumber()), ReceiptPurchaseMain::getReceiptNumber, queryPurchaseStorageDTO.getReceiptNumber())
+                .like(StringUtils.hasText(queryPurchaseStorageDTO.getRemark()), ReceiptPurchaseMain::getRemark, queryPurchaseStorageDTO.getRemark())
+                .eq(queryPurchaseStorageDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, queryPurchaseStorageDTO.getSupplierId())
+                .eq(queryPurchaseStorageDTO.getOperatorId() != null, ReceiptPurchaseMain::getCreateBy, queryPurchaseStorageDTO.getOperatorId())
+                .eq(queryPurchaseStorageDTO.getStatus() != null, ReceiptPurchaseMain::getStatus, queryPurchaseStorageDTO.getStatus())
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(queryPurchaseStorageDTO.getStartDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseStorageDTO.getStartDate())
+                .le(StringUtils.hasText(queryPurchaseStorageDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseStorageDTO.getEndDate());
+
+        var queryResult = receiptPurchaseMainMapper.selectList(queryWrapper);
+
+        queryResult.forEach(item -> {
+            var receiptSubList = receiptPurchaseSubService.lambdaQuery()
+                    .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
+                    .list();
+            var productNumber = calculateProductNumber(receiptSubList);
+            var supplierName = commonService.getSupplierName(item.getSupplierId());
+            var crateBy = getUserName(item.getCreateBy());
+            var totalAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTotalAmount);
+            var taxIncludedAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTaxIncludedAmount);
+            var totalPaymentAmount = Optional.ofNullable(item.getArrearsAmount()).orElse(BigDecimal.ZERO).add(item.getChangeAmount());
+            var purchaseStorageVO = PurchaseStorageVO.builder()
+                    .id(item.getId())
+                    .supplierName(supplierName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalAmount(totalAmount)
+                    .taxIncludedAmount(taxIncludedAmount)
+                    .totalPaymentAmount(totalPaymentAmount)
+                    .thisPaymentAmount(item.getChangeAmount())
+                    .thisArrearsAmount(item.getArrearsAmount())
+                    .status(item.getStatus())
+                    .build();
+            purchaseStorageVOList.add(purchaseStorageVO);
+        });
+        return purchaseStorageVOList;
     }
 
     private PurchaseStorageDetailVO createPurchaseStorageDetail(ReceiptPurchaseMain purchaseMain) {
@@ -875,6 +968,54 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         return Response.responseData(result);
     }
 
+    private List<PurchaseRefundVO> getPurchaseRefundList(QueryPurchaseRefundDTO queryPurchaseRefundDTO) {
+        var purchaseRefundVOList = new ArrayList<PurchaseRefundVO>();
+        var queryWrapper = new LambdaQueryWrapper<ReceiptPurchaseMain>()
+                .eq(ReceiptPurchaseMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .in(ReceiptPurchaseMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_PURCHASE_REFUND)
+                .eq(StringUtils.hasText(queryPurchaseRefundDTO.getReceiptNumber()), ReceiptPurchaseMain::getReceiptNumber, queryPurchaseRefundDTO.getReceiptNumber())
+                .like(StringUtils.hasText(queryPurchaseRefundDTO.getRemark()), ReceiptPurchaseMain::getRemark, queryPurchaseRefundDTO.getRemark())
+                .eq(queryPurchaseRefundDTO.getSupplierId() != null, ReceiptPurchaseMain::getSupplierId, queryPurchaseRefundDTO.getSupplierId())
+                .eq(queryPurchaseRefundDTO.getOperatorId() != null, ReceiptPurchaseMain::getCreateBy, queryPurchaseRefundDTO.getOperatorId())
+                .eq(queryPurchaseRefundDTO.getStatus() != null, ReceiptPurchaseMain::getStatus, queryPurchaseRefundDTO.getStatus())
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(queryPurchaseRefundDTO.getStartDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseRefundDTO.getStartDate())
+                .le(StringUtils.hasText(queryPurchaseRefundDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseRefundDTO.getEndDate());
+
+        var queryResult = receiptPurchaseMainMapper.selectList(queryWrapper);
+
+        queryResult.forEach(item -> {
+            var receiptSubList = receiptPurchaseSubService.lambdaQuery()
+                    .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
+                    .list();
+            var productNumber = calculateProductNumber(receiptSubList);
+            var supplierName = commonService.getSupplierName(item.getSupplierId());
+            var crateBy = getUserName(item.getCreateBy());
+            var totalAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTotalAmount);
+            var taxIncludedAmount = calculateTotalAmount(receiptSubList, ReceiptPurchaseSub::getTaxIncludedAmount);
+
+            var totalPaymentAmount = Optional.ofNullable(item.getArrearsAmount()).orElse(BigDecimal.ZERO).add(item.getChangeAmount());
+
+            var purchaseRefundVO = PurchaseRefundVO.builder()
+                    .id(item.getId())
+                    .supplierName(supplierName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalAmount(totalAmount)
+                    .taxIncludedAmount(taxIncludedAmount)
+                    .refundTotalAmount(totalPaymentAmount)
+                    .thisRefundAmount(item.getChangeAmount())
+                    .thisArrearsAmount(item.getArrearsAmount())
+                    .status(item.getStatus())
+                    .build();
+            purchaseRefundVOList.add(purchaseRefundVO);
+        });
+        return purchaseRefundVOList;
+    }
+
     @Override
     public Response<PurchaseRefundDetailVO> getPurchaseRefundDetail(Long id) {
         if (id == null) {
@@ -1173,5 +1314,32 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         result.setSize(queryResult.getSize());
 
         return Response.responseData(result);
+    }
+
+    @Override
+    public void exportPurchaseOrderExcel(QueryPurchaseOrderDTO queryPurchaseOrderDTO, HttpServletResponse response) throws Exception {
+        var data = getPurchaseOrderList(queryPurchaseOrderDTO);
+        if (!data.isEmpty()) {
+            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "采购订单", data);
+            ExcelUtils.downloadExcel(file, "采购订单", response);
+        }
+    }
+
+    @Override
+    public void exportPurchaseStorageExcel(QueryPurchaseStorageDTO queryPurchaseStorageDTO, HttpServletResponse response) throws Exception {
+        var data = getPurchaseStorageList(queryPurchaseStorageDTO);
+        if (!data.isEmpty()) {
+            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "采购入库", data);
+            ExcelUtils.downloadExcel(file, "采购入库", response);
+        }
+    }
+
+    @Override
+    public void exportPurchaseRefundExcel(QueryPurchaseRefundDTO queryPurchaseRefundDTO, HttpServletResponse response) throws Exception {
+        var data = getPurchaseRefundList(queryPurchaseRefundDTO);
+        if (!data.isEmpty()) {
+            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "采购退货", data);
+            ExcelUtils.downloadExcel(file, "采购退货", response);
+        }
     }
 }

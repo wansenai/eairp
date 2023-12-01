@@ -18,6 +18,7 @@ import com.wansenai.dto.receipt.purchase.*;
 import com.wansenai.entities.receipt.ReceiptPurchaseMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.purchase.*;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -237,4 +238,10 @@ public interface ReceiptPurchaseService extends IService<ReceiptPurchaseMain> {
      *      返回分页数据
      */
     Response<Page<PurchaseArrearsVO>> getPurchaseArrearsPage(QueryPurchaseArrearsDTO arrearsDTO);
+
+    void exportPurchaseOrderExcel(QueryPurchaseOrderDTO queryPurchaseOrderDTO, HttpServletResponse response) throws Exception;
+
+    void exportPurchaseStorageExcel(QueryPurchaseStorageDTO queryPurchaseStorageDTO, HttpServletResponse response) throws Exception;
+
+    void exportPurchaseRefundExcel(QueryPurchaseRefundDTO queryPurchaseRefundDTO, HttpServletResponse response) throws Exception;
 }
