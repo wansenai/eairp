@@ -15,6 +15,7 @@ package com.wansenai.vo.receipt.sale;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,33 +33,45 @@ public class SaleRefundVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
+    @ExcelExport(value = "客户")
     private String customerName;
 
+    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ExcelExport(value = "单据日期")
     private LocalDateTime receiptDate;
 
+    @ExcelExport(value = "商品信息")
     private String productInfo;
 
+    @ExcelExport(value = "操作员")
     private String operator;
 
+    @ExcelExport(value = "商品数量")
     private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "金额合计")
     private BigDecimal totalAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "含税合计")
     private BigDecimal taxIncludedAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "待退金额")
     private BigDecimal refundTotalAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "本次退款")
     private BigDecimal thisRefundAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "本次欠款")
     private BigDecimal thisArrearsAmount;
 
+    @ExcelExport(value = "状态", kv = "0-未审核;1-已审核")
     private Integer status;
 }
