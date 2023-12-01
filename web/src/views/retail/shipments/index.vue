@@ -171,14 +171,16 @@ export default defineComponent({
     async function handleExport() {
       // 获取getForm().getFieldsValue()的数据传给后端打印接口
       const data = getForm().getFieldsValue();
-      const file = await exportShipments(data);
-      const blob = new Blob([file]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = "零售出库数据" + timestamp + ".xlsx";
-      link.target = "_blank";
-      link.click();
+      const file: any = await exportShipments(data);
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = "零售出库数据" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
 

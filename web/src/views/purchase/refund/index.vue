@@ -52,10 +52,9 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/purchase/refund/purchaseRefund.data";
-import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
-import {getPurchaseRefundPageList, updatePurchaseRefundStatus, deletePurchaseRefund} from "@/api/purchase/refund";
+import {getPurchaseRefundPageList, updatePurchaseRefundStatus, deletePurchaseRefund, exportRefund} from "@/api/purchase/refund";
 import AddEditModal from "@/views/purchase/refund/components/AddEditModal.vue";
 import ViewRefundModal from "@/views/purchase/refund/components/ViewRefundModal.vue"
 import {useModal} from "@/components/Modal";
@@ -68,7 +67,7 @@ export default defineComponent({
     const [viewRefundReceiptModal, {openModal: openViewRefundModal}] = useModal();
 
     const { createMessage } = useMessage();
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm }] = useTable({
       title: '采购退货列表',
       rowKey: 'id',
       api: getPurchaseRefundPageList,
@@ -171,14 +170,17 @@ export default defineComponent({
     }
 
     async function handleExport() {
-      const file = await exportXlsx("采购退货列表")
-      const blob = new Blob([file]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = "采购退货单数据" + timestamp + ".xlsx";
-      link.target = "_blank";
-      link.click();
+      const data = getForm().getFieldsValue();
+      const file: any = await exportRefund(data)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = "采购退货单数据" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
 

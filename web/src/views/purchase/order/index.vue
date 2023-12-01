@@ -52,10 +52,9 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/purchase/order/purchaseOrder.data";
-import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
-import {getPurchaseOrderPageList, updatePurchaseOrderStatus, deletePurchaseOrder} from "@/api/purchase/order";
+import {getPurchaseOrderPageList, updatePurchaseOrderStatus, deletePurchaseOrder, exportOrder} from "@/api/purchase/order";
 import AddEditModal from "@/views/purchase/order/components/AddEditModal.vue";
 import ViewOrderModal from "@/views/purchase/order/components/ViewOrderModal.vue";
 import {useModal} from "@/components/Modal";
@@ -67,7 +66,7 @@ export default defineComponent({
     const addEditModalRef = ref(null);
     const [receiptViewOrderModal, {openModal: openViewOrderModal}] = useModal();
     const { createMessage } = useMessage();
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm }] = useTable({
       title: '采购订单列表',
       rowKey: 'id',
       api: getPurchaseOrderPageList,
@@ -168,14 +167,17 @@ export default defineComponent({
     }
 
     async function handleExport() {
-      const file = await exportXlsx("采购订单列表")
-      const blob = new Blob([file]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = "采购订单数据" + timestamp + ".xlsx";
-      link.target = "_blank";
-      link.click();
+      const data = getForm().getFieldsValue();
+      const file: any = await exportOrder(data)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = "采购订单数据" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
 

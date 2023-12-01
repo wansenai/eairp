@@ -18,6 +18,7 @@ import com.wansenai.dto.receipt.sale.*;
 import com.wansenai.entities.receipt.ReceiptSaleMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.sale.*;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -236,4 +237,10 @@ public interface ReceiptSaleService extends IService<ReceiptSaleMain> {
      *       返回分页数据
      */
     Response<Page<SaleArrearsVO>> getSaleArrearsPage(QuerySaleArrearsDTO arrearsDTO);
+
+    void exportSaleOrderExcel(QuerySaleOrderDTO querySaleOrderDTO, HttpServletResponse response) throws Exception;
+
+    void exportSaleShipmentsExcel(QuerySaleShipmentsDTO querySaleShipmentsDTO, HttpServletResponse response) throws Exception;
+
+    void exportSaleRefundExcel(QuerySaleRefundDTO querySaleRefundDTO, HttpServletResponse response) throws Exception;
 }

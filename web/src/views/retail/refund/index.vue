@@ -169,14 +169,16 @@ export default defineComponent({
 
     async function handleExport() {
       const data = getForm().getFieldsValue();
-      const file = await exportRefund(data);
-      const blob = new Blob([file]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = "零售退货数据" + timestamp + ".xlsx";
-      link.target = "_blank";
-      link.click();
+      const file: any = await exportRefund(data);
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = "零售退货数据" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
 

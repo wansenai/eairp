@@ -14,10 +14,10 @@ package com.wansenai.api.receipt;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.dto.receipt.sale.*;
-import com.wansenai.service.receipt.ReceiptRetailService;
 import com.wansenai.service.receipt.ReceiptSaleService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.sale.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -125,5 +125,20 @@ public class SalesController {
     @PostMapping("/arrears/pageList")
     public Response<Page<SaleArrearsVO>> arrearsPageList(@RequestBody QuerySaleArrearsDTO arrearsDTO) {
         return receiptSaleService.getSaleArrearsPage(arrearsDTO);
+    }
+
+    @GetMapping("/order/export")
+    public void exportOrderExcel(@ModelAttribute QuerySaleOrderDTO querySaleOrderDTO, HttpServletResponse response) throws Exception {
+        receiptSaleService.exportSaleOrderExcel(querySaleOrderDTO, response);
+    }
+
+    @GetMapping("/shipments/export")
+    public void exportStorageExcel(@ModelAttribute QuerySaleShipmentsDTO querySaleShipmentsDTO, HttpServletResponse response) throws Exception {
+        receiptSaleService.exportSaleShipmentsExcel(querySaleShipmentsDTO, response);
+    }
+
+    @GetMapping("/refund/export")
+    public void exportRefundExcel(@ModelAttribute QuerySaleRefundDTO querySaleRefundDTO, HttpServletResponse response) throws Exception {
+        receiptSaleService.exportSaleRefundExcel(querySaleRefundDTO, response);
     }
 }

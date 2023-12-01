@@ -106,13 +106,11 @@ public class RetailController {
 
     @GetMapping("/shipments/export")
     public void exportShipmentsExcel(@ModelAttribute QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) throws Exception {
-        var file = receiptRetailService.exportRetailShipmentsExcel(queryShipmentsDTO, response);
-        ExcelUtils.downloadExcel(file, "零售出库单", response);
+        receiptRetailService.exportRetailShipmentsExcel(queryShipmentsDTO, response);
     }
 
     @GetMapping("/refund/export")
     public void exportRefundExcel(@ModelAttribute QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception {
-        var file = receiptRetailService.exportRetailRefundExcel(queryRetailRefundDTO, response);
-        ExcelUtils.downloadExcel(file, "零售退货单", response);
+        receiptRetailService.exportRetailRefundExcel(queryRetailRefundDTO, response);
     }
 }

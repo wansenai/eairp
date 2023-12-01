@@ -14,6 +14,7 @@ enum API {
     UpdateStatus = '/purchase/order/updateStatus',
     Delete = '/purchase/order/delete',
     GetLinkOrderDetail = '/purchase/order/getLinkOrderDetail',
+    Export = '/purchase/order/export',
 }
 
 export function getPurchaseOrderPageList(params: QueryPurchaseOrderReq) {
@@ -71,6 +72,16 @@ export function deletePurchaseOrder(ids: number[], successMode: SuccessMessageMo
         },{
             successMessageMode: successMode,
             errorMessageMode: errorMode,
+        }
+    );
+}
+
+export function exportOrder(params: QueryPurchaseOrderReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
         }
     );
 }
