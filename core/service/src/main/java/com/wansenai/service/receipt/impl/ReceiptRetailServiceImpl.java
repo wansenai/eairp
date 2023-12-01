@@ -885,15 +885,21 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
     }
 
     @Override
-    public File exportRetailShipmentsExcel(QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) throws Exception {
+    public void exportRetailShipmentsExcel(QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) throws Exception {
         var data = getRetailShipmentsList(queryShipmentsDTO).getData();
-        return ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "销售出库单", data);
+        if (!data.isEmpty()) {
+            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "销售出库单", data);
+            ExcelUtils.downloadExcel(file, "零售出库单", response);
+        }
     }
 
     @Override
-    public File exportRetailRefundExcel(QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception {
+    public void exportRetailRefundExcel(QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception {
         var data = getRetailRefundList(queryRetailRefundDTO).getData();
-        return ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "销售退货单", data);
+        if (!data.isEmpty()){
+            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "销售退货单", data);
+            ExcelUtils.downloadExcel(file, "零售退货单", response);
+        }
     }
 
 }

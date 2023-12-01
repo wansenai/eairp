@@ -203,7 +203,7 @@ public interface ReceiptRetailService extends IService<ReceiptRetailMain> {
      * @throws Exception Exception
      *                  异常
      */
-    File exportRetailShipmentsExcel(QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) throws Exception;
+    void exportRetailShipmentsExcel(QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) throws Exception;
 
     /**
      * Query data through public query criteria and export retail refund data files
@@ -219,5 +219,5 @@ public interface ReceiptRetailService extends IService<ReceiptRetailMain> {
      * @throws Exception Exception
      *                  异常
      */
-    File exportRetailRefundExcel(QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception;
+    void exportRetailRefundExcel(QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception;
 }
