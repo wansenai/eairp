@@ -52,10 +52,9 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/sales/refund/saleRefund.data";
-import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
-import {getSaleRefundPageList, updateSaleRefundStatus, deleteSaleRefund} from "@/api/sale/refund";
+import {getSaleRefundPageList, updateSaleRefundStatus, deleteSaleRefund, exportRefund} from "@/api/sale/refund";
 import AddEditModal from "@/views/sales/refund/components/AddEditModal.vue";
 import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundModal.vue";
 import {useModal} from "@/components/Modal";
@@ -67,7 +66,7 @@ export default defineComponent({
     const addEditModalRef = ref(null);
     const { createMessage } = useMessage();
     const [viewRefundReceiptModal, {openModal: openViewRefundReceiptModal}] = useModal()
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm }] = useTable({
       title: '销售退货列表',
       rowKey: 'id',
       api: getSaleRefundPageList,
@@ -167,14 +166,17 @@ export default defineComponent({
     }
 
     async function handleExport() {
-      const file = await exportXlsx("销售退货列表")
-      const blob = new Blob([file]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = "销售退货数据" + timestamp + ".xlsx";
-      link.target = "_blank";
-      link.click();
+      const data = getForm().getFieldsValue();
+      const file: any = await exportRefund(data)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = "销售退货数据" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
 

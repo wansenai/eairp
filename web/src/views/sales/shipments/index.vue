@@ -52,10 +52,9 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/sales/shipments/saleShipments.data";
-import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 import {Tag} from "ant-design-vue";
-import {getSaleShipmentsPageList, updateSaleShipmentsStatus, deleteSaleShipments} from "@/api/sale/shipments";
+import {getSaleShipmentsPageList, updateSaleShipmentsStatus, deleteSaleShipments, exportShipments} from "@/api/sale/shipments";
 import AddEditModal from "@/views/sales/shipments/components/AddEditModal.vue";
 import ViewShipmentModal from "@/views/sales/shipments/components/ViewSaleShipmentsModal.vue";
 import {useModal} from "@/components/Modal";
@@ -67,7 +66,7 @@ export default defineComponent({
     const addEditModalRef = ref(null);
     const { createMessage } = useMessage();
     const [viewShipmentReceiptModal, {openModal: openViewShipmentReceiptModal}] = useModal()
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm }] = useTable({
       title: '销售出库列表',
       rowKey: 'id',
       api: getSaleShipmentsPageList,
@@ -167,14 +166,17 @@ export default defineComponent({
     }
 
     async function handleExport() {
-      const file = await exportXlsx("销售出库列表")
-      const blob = new Blob([file]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = "销售出库数据" + timestamp + ".xlsx";
-      link.target = "_blank";
-      link.click();
+      const data = getForm().getFieldsValue();
+      const file: any = await exportShipments(data)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = "销售出库数据" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
 
