@@ -428,11 +428,38 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
     }
 
     @Override
-    public void exportOtherShipments(QueryOtherShipmentDTO queryOtherShipmentDTO, HttpServletResponse response) throws Exception {
-        var data = getOtherShipmentsList(queryOtherShipmentDTO);
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "其他出库", data);
-            ExcelUtils.downloadExcel(file, "其他出库", response);
+    public void exportOtherShipments(QueryOtherShipmentDTO queryOtherShipmentDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getOtherShipmentsList(queryOtherShipmentDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("其他出库", ExcelUtils.getSheetData(mainData));
+            if (queryOtherShipmentDTO.getIsExportDetail()) {
+                var subData = new ArrayList<StorageShipmentStockBO>();
+                for (OtherShipmentVO otherShipmentVO : mainData) {
+                    var detail = getOtherShipmentsDetail(otherShipmentVO.getId()).getData().getTableData();
+                    if(!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var storageShipmentStockBO = StorageShipmentStockBO.builder()
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productExtendInfo(item.getProductExtendInfo())
+                                    .stock(item.getStock())
+                                    .productUnit(item.getProductUnit())
+                                    .productNumber(item.getProductNumber())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(storageShipmentStockBO);
+                        });
+                    }
+                }
+                exportMap.put("其他出库明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "其他出库", exportMap);
         }
     }
 }

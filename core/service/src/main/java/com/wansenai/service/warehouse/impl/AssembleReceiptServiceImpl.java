@@ -471,11 +471,39 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
     }
 
     @Override
-    public void exportAssembleReceipt(QueryAssembleReceiptDTO queryAssembleReceiptDTO, HttpServletResponse response) throws Exception {
-        var data = getAssembleReceiptList(queryAssembleReceiptDTO);
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "组装单", data);
-            ExcelUtils.downloadExcel(file, "组装单", response);
+    public void exportAssembleReceipt(QueryAssembleReceiptDTO queryAssembleReceiptDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getAssembleReceiptList(queryAssembleReceiptDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("组装单", ExcelUtils.getSheetData(mainData));
+            if (queryAssembleReceiptDTO.getIsExportDetail()) {
+                var subData = new ArrayList<AssembleStockBO>();
+                for (AssembleReceiptVO assembleReceiptVO : mainData) {
+                    var detail = getAssembleReceiptDetail(assembleReceiptVO.getId()).getData().getTableData();
+                    if(!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var assembleStockBO = AssembleStockBO.builder()
+                                    .type(item.getType())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productUnit(item.getProductUnit())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .stock(item.getStock())
+                                    .type(item.getType())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .productNumber(item.getProductNumber())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(assembleStockBO);
+                        });
+                    }
+                }
+                exportMap.put("组装单明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "组装单", exportMap);
         }
     }
 }

@@ -40,6 +40,7 @@ import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.OtherStorageCodeEnum;
 import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
+import com.wansenai.vo.warehouse.OtherShipmentVO;
 import com.wansenai.vo.warehouse.OtherStorageDetailVO;
 import com.wansenai.vo.warehouse.OtherStorageVO;
 import jakarta.servlet.http.HttpServletResponse;
@@ -430,11 +431,38 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
     }
 
     @Override
-    public void exportOtherStorage(QueryOtherStorageDTO queryOtherStorageDTO, HttpServletResponse response) throws Exception {
-        var data = getOtherStorageList(queryOtherStorageDTO);
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "其他入库", data);
-            ExcelUtils.downloadExcel(file, "其他入库", response);
+    public void exportOtherStorage(QueryOtherStorageDTO queryOtherStorageDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getOtherStorageList(queryOtherStorageDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("其他入库", ExcelUtils.getSheetData(mainData));
+            if (queryOtherStorageDTO.getIsExportDetail()) {
+                var subData = new ArrayList<StorageShipmentStockBO>();
+                for (OtherStorageVO otherStorageVO : mainData) {
+                    var detail = getOtherStorageDetail(otherStorageVO.getId()).getData().getTableData();
+                    if(!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var storageShipmentStockBO = StorageShipmentStockBO.builder()
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productExtendInfo(item.getProductExtendInfo())
+                                    .stock(item.getStock())
+                                    .productUnit(item.getProductUnit())
+                                    .productNumber(item.getProductNumber())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(storageShipmentStockBO);
+                        });
+                    }
+                }
+                exportMap.put("其他入库明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "其他入库", exportMap);
         }
     }
 }

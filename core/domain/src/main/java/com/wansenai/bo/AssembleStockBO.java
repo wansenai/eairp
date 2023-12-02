@@ -45,14 +45,14 @@ public class AssembleStockBO {
     @ExcelExport("商品名称")
     private String productName;
 
-    @ExcelExport("商品型号")
+    @ExcelExport("规格")
+    private String productStandard;
+
+    @ExcelExport("型号")
     private String productModel;
 
     @ExcelExport("单位")
     private String productUnit;
-
-    @ExcelExport("商品规格")
-    private String productStandard;
 
     @ExcelExport("库存")
     private Integer stock;
