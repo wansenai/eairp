@@ -29,8 +29,7 @@ public class ExportProductVO {
 
     private String productUnit;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long productBarcode;
+    private String productBarcode;
 
     private String multiAttribute;
 
