@@ -474,13 +474,12 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
     }
 
     @Override
-    public void exportDisAssembleReceipt(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO, HttpServletResponse response) throws Exception {
+    public void exportDisAssembleReceipt(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
         var mainData = getDisassembleReceiptList(queryDisassembleReceiptDTO);
-        System.err.println(queryDisassembleReceiptDTO);
         if (!mainData.isEmpty()) {
             if (queryDisassembleReceiptDTO.getIsExportDetail()) {
-                var subDate = new ArrayList<AssembleStockBO>();
+                var subData = new ArrayList<AssembleStockBO>();
                 for (DisassembleReceiptVO item : mainData) {
                     var detail = getDisassembleReceiptDetail(item.getId());
                     detail.getData().getTableData().forEach(item2 -> {
@@ -501,10 +500,10 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                                 .amount(item2.getAmount())
                                 .remark(item2.getRemark())
                                 .build();
-                        subDate.add(assembleStockBO);
+                        subData.add(assembleStockBO);
                     });
                 }
-                exportMap.put("拆卸单明细", ExcelUtils.getSheetData(subDate));
+                exportMap.put("拆卸单明细", ExcelUtils.getSheetData(subData));
             }
             exportMap.put("拆卸单", ExcelUtils.getSheetData(mainData));
             ExcelUtils.exportManySheet(response, "拆卸单", exportMap);
