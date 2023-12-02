@@ -1317,29 +1317,119 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     }
 
     @Override
-    public void exportPurchaseOrderExcel(QueryPurchaseOrderDTO queryPurchaseOrderDTO, HttpServletResponse response) throws Exception {
-        var data = getPurchaseOrderList(queryPurchaseOrderDTO);
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "采购订单", data);
-            ExcelUtils.downloadExcel(file, "采购订单", response);
+    public void exportPurchaseOrderExcel(QueryPurchaseOrderDTO queryPurchaseOrderDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getPurchaseOrderList(queryPurchaseOrderDTO);
+        if (!mainData.isEmpty()) {
+            if (queryPurchaseOrderDTO.getIsExportDetail()) {
+                var subData = new ArrayList<PurchaseDataBO>();
+                for (PurchaseOrderVO purchaseOrderVO : mainData) {
+                    var detail = getPurchaseOrderDetail(purchaseOrderVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var purchaseDataBo = PurchaseDataBO.builder()
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productUnit(item.getProductUnit())
+                                    .productNumber(item.getProductNumber())
+                                    .stock(item.getStock())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .taxRate(item.getTaxRate())
+                                    .taxAmount(item.getTaxAmount())
+                                    .taxTotalPrice(item.getTaxTotalPrice())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(purchaseDataBo);
+                        });
+                    }
+                    exportMap.put("采购订单明细", ExcelUtils.getSheetData(subData));
+                }
+            }
+            exportMap.put("采购订单", ExcelUtils.getSheetData(mainData));
+            ExcelUtils.exportManySheet(response, "采购订单", exportMap);
         }
     }
 
     @Override
-    public void exportPurchaseStorageExcel(QueryPurchaseStorageDTO queryPurchaseStorageDTO, HttpServletResponse response) throws Exception {
-        var data = getPurchaseStorageList(queryPurchaseStorageDTO);
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "采购入库", data);
-            ExcelUtils.downloadExcel(file, "采购入库", response);
+    public void exportPurchaseStorageExcel(QueryPurchaseStorageDTO queryPurchaseStorageDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getPurchaseStorageList(queryPurchaseStorageDTO);
+        if (!mainData.isEmpty()) {
+            if (queryPurchaseStorageDTO.getIsExportDetail()) {
+                var subData = new ArrayList<PurchaseDataBO>();
+                for (PurchaseStorageVO purchaseStorageVO : mainData) {
+                    var detail = getPurchaseStorageDetail(purchaseStorageVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var purchaseDataBo = PurchaseDataBO.builder()
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productUnit(item.getProductUnit())
+                                    .productNumber(item.getProductNumber())
+                                    .stock(item.getStock())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .taxRate(item.getTaxRate())
+                                    .taxAmount(item.getTaxAmount())
+                                    .taxTotalPrice(item.getTaxTotalPrice())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(purchaseDataBo);
+                        });
+                    }
+                    exportMap.put("采购入库明细", ExcelUtils.getSheetData(subData));
+                }
+            }
+            exportMap.put("采购入库", ExcelUtils.getSheetData(mainData));
+            ExcelUtils.exportManySheet(response, "采购入库", exportMap);
         }
     }
 
     @Override
-    public void exportPurchaseRefundExcel(QueryPurchaseRefundDTO queryPurchaseRefundDTO, HttpServletResponse response) throws Exception {
-        var data = getPurchaseRefundList(queryPurchaseRefundDTO);
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "采购退货", data);
-            ExcelUtils.downloadExcel(file, "采购退货", response);
+    public void exportPurchaseRefundExcel(QueryPurchaseRefundDTO queryPurchaseRefundDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getPurchaseRefundList(queryPurchaseRefundDTO);
+        if (!mainData.isEmpty()) {
+            if (queryPurchaseRefundDTO.getIsExportDetail()) {
+                var subData = new ArrayList<PurchaseDataBO>();
+                for (PurchaseRefundVO purchaseRefundVO : mainData) {
+                    var detail = getPurchaseRefundDetail(purchaseRefundVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var purchaseDataBo = PurchaseDataBO.builder()
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productUnit(item.getProductUnit())
+                                    .productNumber(item.getProductNumber())
+                                    .stock(item.getStock())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .taxRate(item.getTaxRate())
+                                    .taxAmount(item.getTaxAmount())
+                                    .taxTotalPrice(item.getTaxTotalPrice())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(purchaseDataBo);
+                        });
+                    }
+                    exportMap.put("采购退货明细", ExcelUtils.getSheetData(subData));
+                }
+            }
+            exportMap.put("采购退货", ExcelUtils.getSheetData(mainData));
+            ExcelUtils.exportManySheet(response, "采购退货", exportMap);
         }
     }
 }

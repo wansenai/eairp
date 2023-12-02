@@ -190,6 +190,8 @@ export default defineComponent({
     }
 
     const handleExportCancel = () => {
+      confirmLoading.value = false;
+      openExportData.value = false;
       exportDetailData.value = false;
     };
 
@@ -209,6 +211,7 @@ export default defineComponent({
       }
       confirmLoading.value = false;
       openExportData.value = false;
+      exportDetailData.value = false;
     };
 
 

@@ -1322,28 +1322,121 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
 
     @Override
     public void exportSaleOrderExcel(QuerySaleOrderDTO querySaleOrderDTO, HttpServletResponse response) throws Exception {
-        var data = getSaleOrderList(querySaleOrderDTO);
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "销售订单", data);
-            ExcelUtils.downloadExcel(file, "销售订单", response);
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getSaleOrderList(querySaleOrderDTO);
+        if (!mainData.isEmpty()) {
+            if (querySaleOrderDTO.getIsExportDetail()) {
+                var subData = new ArrayList<SalesDataBO>();
+                for (SaleOrderVO saleOrderVO : mainData) {
+                    var detail = getSaleOrderDetail(saleOrderVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var saleDataBo = SalesDataBO.builder()
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productNumber(item.getProductNumber())
+                                    .stock(item.getStock())
+                                    .productUnit(item.getProductUnit())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .taxRate(item.getTaxRate())
+                                    .taxAmount(item.getTaxAmount())
+                                    .taxTotalPrice(item.getTaxTotalPrice())
+                                    .remark(item.getRemark())
+                                    .build();
+
+                            subData.add(saleDataBo);
+                        });
+                    }
+                    exportMap.put("销售订单明细", ExcelUtils.getSheetData(subData));
+                }
+            }
+            exportMap.put("销售订单", ExcelUtils.getSheetData(mainData));
+            ExcelUtils.exportManySheet(response, "销售订单", exportMap);
         }
     }
 
     @Override
     public void exportSaleShipmentsExcel(QuerySaleShipmentsDTO querySaleShipmentsDTO, HttpServletResponse response) throws Exception {
-        var data = getSaleShipmentsList(querySaleShipmentsDTO);
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "销售出库", data);
-            ExcelUtils.downloadExcel(file, "销售出库", response);
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getSaleShipmentsList(querySaleShipmentsDTO);
+        if (!mainData.isEmpty()) {
+            if (querySaleShipmentsDTO.getIsExportDetail()) {
+                var subData = new ArrayList<SalesDataBO>();
+                for (SaleShipmentsVO saleShipmentsVO : mainData) {
+                    var detail = getSaleShipmentsDetail(saleShipmentsVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var saleDataBo = SalesDataBO.builder()
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productNumber(item.getProductNumber())
+                                    .stock(item.getStock())
+                                    .productUnit(item.getProductUnit())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .taxRate(item.getTaxRate())
+                                    .taxAmount(item.getTaxAmount())
+                                    .taxTotalPrice(item.getTaxTotalPrice())
+                                    .remark(item.getRemark())
+                                    .build();
+
+                            subData.add(saleDataBo);
+                        });
+                    }
+                    exportMap.put("销售出库明细", ExcelUtils.getSheetData(subData));
+                }
+            }
+            exportMap.put("销售出库", ExcelUtils.getSheetData(mainData));
+            ExcelUtils.exportManySheet(response, "销售出库", exportMap);
         }
     }
 
     @Override
     public void exportSaleRefundExcel(QuerySaleRefundDTO querySaleRefundDTO, HttpServletResponse response) throws Exception {
-        var data = getSaleRefundList(querySaleRefundDTO);
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "销售退货", data);
-            ExcelUtils.downloadExcel(file, "销售退货", response);
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getSaleRefundList(querySaleRefundDTO);
+        if (!mainData.isEmpty()) {
+            if (querySaleRefundDTO.getIsExportDetail()) {
+                var subData = new ArrayList<SalesDataBO>();
+                for (SaleRefundVO saleRefundVO : mainData) {
+                    var detail = getSaleShipmentsDetail(saleRefundVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var saleDataBo = SalesDataBO.builder()
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productNumber(item.getProductNumber())
+                                    .stock(item.getStock())
+                                    .productUnit(item.getProductUnit())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .taxRate(item.getTaxRate())
+                                    .taxAmount(item.getTaxAmount())
+                                    .taxTotalPrice(item.getTaxTotalPrice())
+                                    .remark(item.getRemark())
+                                    .build();
+
+                            subData.add(saleDataBo);
+                        });
+                    }
+                    exportMap.put("销售退货明细", ExcelUtils.getSheetData(subData));
+                }
+            }
+            exportMap.put("销售退货", ExcelUtils.getSheetData(mainData));
+            ExcelUtils.exportManySheet(response, "销售退货", exportMap);
         }
     }
 }

@@ -475,11 +475,38 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
     }
 
     @Override
-    public void exportAllotReceipt(QueryAllotReceiptDTO queryAllotReceiptDTO, HttpServletResponse response) throws Exception {
-        var data = getAllotReceiptList(queryAllotReceiptDTO);
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "调拨出库", data);
-            ExcelUtils.downloadExcel(file, "调拨出库", response);
+    public void exportAllotReceipt(QueryAllotReceiptDTO queryAllotReceiptDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getAllotReceiptList(queryAllotReceiptDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("调拨出库", ExcelUtils.getSheetData(mainData));
+            if (queryAllotReceiptDTO.getIsExportDetail()) {
+                var subData = new ArrayList<AllotStockBO>();
+                for (AllotReceiptVO allotReceiptVO : mainData) {
+                    var detail = getAllotReceiptDetail(allotReceiptVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var allotStockBo = AllotStockBO.builder()
+                                    .warehouseName(item.getWarehouseName())
+                                    .otherWarehouseName(item.getOtherWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productUnit(item.getProductUnit())
+                                    .stock(item.getStock())
+                                    .productNumber(item.getProductNumber())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(allotStockBo);
+                        });
+                    }
+                }
+                exportMap.put("调拨出库明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "调拨出库", exportMap);
         }
     }
 }

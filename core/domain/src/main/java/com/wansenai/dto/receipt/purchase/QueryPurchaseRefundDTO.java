@@ -42,4 +42,6 @@ public class QueryPurchaseRefundDTO {
     private Long page;
 
     private Long pageSize;
+
+    private Boolean isExportDetail;
 }

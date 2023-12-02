@@ -40,6 +40,14 @@
         </template>
       </template>
     </BasicTable>
+    <a-modal v-model:open="openExportData" title="确认导出" :confirm-loading="confirmLoading"
+             @ok="handleExportOk" @cancel="handleExportCancel" okText="导出">
+      <div style="text-align: center">
+        <p>即将导出{{dataSum}}条数据，请耐心等待。</p>
+        <p>如需导出明细数据（可能耗时较长），请勾选下方复选框。</p>
+        <a-checkbox v-model:checked="exportDetailData">需要导出明细数据</a-checkbox>
+      </div>
+    </a-modal>
     <AddEditOtherStorageModal ref="addEditModalRef" @cancel="handleCancel" />
     <ViewOtherStorageModal @register="receiptViewModal" @ok="handleOk"/>
   </div>
@@ -56,17 +64,21 @@ import {useI18n} from "vue-i18n";
 import {getOtherStoragePageList, deleteBatchOtherStorage, updateOtherStorageStatus, exportOtherStorage} from "@/api/warehouse/storage";
 import AddEditOtherStorageModal from "@/views/warehouse/storage/components/AddEditOtherStorageModal.vue"
 import ViewOtherStorageModal from "@/views/warehouse/storage/components/ViewOtherStorageModal.vue";
-import {Tag} from "ant-design-vue";
+import {Checkbox, Modal, Tag} from "ant-design-vue";
 import {useModal} from "@/components/Modal";
 export default defineComponent({
   name: 'OtherStorage',
-  components: {Tag, TableAction, BasicTable, AddEditOtherStorageModal, ViewOtherStorageModal},
+  components: {'a-modal': Modal, 'a-checkbox': Checkbox, Tag, TableAction, BasicTable, AddEditOtherStorageModal, ViewOtherStorageModal},
   setup() {
     const { t } = useI18n();
     const { createMessage } = useMessage();
     const addEditModalRef = ref(null);
+    const exportDetailData = ref<boolean>(false);
+    const openExportData = ref<boolean>(false);
+    const confirmLoading = ref<boolean>(false);
+    const dataSum = ref<number>(0);
     const [receiptViewModal, {openModal: openReceiptViewModal}] = useModal();
-    const [registerTable, { reload, getSelectRows, getForm }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm, getDataSource }] = useTable({
       title: '其他入库列表',
       rowKey: 'id',
       api: getOtherStoragePageList,
@@ -168,7 +180,24 @@ export default defineComponent({
     }
 
     async function handleExport() {
-      const data = getForm().getFieldsValue();
+      dataSum.value = getDataSource().length;
+      if (dataSum.value === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      openExportData.value = true;
+    }
+
+    const handleExportCancel = () => {
+      confirmLoading.value = false;
+      openExportData.value = false;
+      exportDetailData.value = false;
+    };
+
+    const handleExportOk = async () => {
+      confirmLoading.value = true;
+      const data: any = getForm().getFieldsValue();
+      data.isExportDetail = exportDetailData.value;
       const file: any = await exportOtherStorage(data)
       if (file.size > 0) {
         const blob = new Blob([file]);
@@ -179,8 +208,10 @@ export default defineComponent({
         link.target = "_blank";
         link.click();
       }
+      confirmLoading.value = false;
+      openExportData.value = false;
+      exportDetailData.value = false;
     }
-
 
     return {
       t,
@@ -197,6 +228,12 @@ export default defineComponent({
       handleView,
       handleOk,
       handleExport,
+      openExportData,
+      confirmLoading,
+      exportDetailData,
+      dataSum,
+      handleExportOk,
+      handleExportCancel
     }
   }
 })

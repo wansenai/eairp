@@ -474,39 +474,40 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
     }
 
     @Override
-    public void exportDisAssembleReceipt(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO, HttpServletResponse response) throws Exception {
+    public void exportDisAssembleReceipt(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
         var mainData = getDisassembleReceiptList(queryDisassembleReceiptDTO);
-        System.err.println(queryDisassembleReceiptDTO);
         if (!mainData.isEmpty()) {
-            if (queryDisassembleReceiptDTO.getIsExportDetail()) {
-                var subDate = new ArrayList<AssembleStockBO>();
-                for (DisassembleReceiptVO item : mainData) {
-                    var detail = getDisassembleReceiptDetail(item.getId());
-                    detail.getData().getTableData().forEach(item2 -> {
-                        var assembleStockBO = AssembleStockBO.builder()
-                                .id(item2.getId())
-                                .warehouseId(item2.getWarehouseId())
-                                .type(item2.getType())
-                                .warehouseName(item2.getWarehouseName())
-                                .barCode(item2.getBarCode())
-                                .productId(item2.getProductId())
-                                .productName(item2.getProductName())
-                                .productModel(item2.getProductModel())
-                                .productUnit(item2.getProductUnit())
-                                .productStandard(item2.getProductStandard())
-                                .stock(item2.getStock())
-                                .productNumber(item2.getProductNumber())
-                                .unitPrice(item2.getUnitPrice())
-                                .amount(item2.getAmount())
-                                .remark(item2.getRemark())
-                                .build();
-                        subDate.add(assembleStockBO);
-                    });
-                }
-                exportMap.put("拆卸单明细", ExcelUtils.getSheetData(subDate));
-            }
             exportMap.put("拆卸单", ExcelUtils.getSheetData(mainData));
+            if (queryDisassembleReceiptDTO.getIsExportDetail()) {
+                var subData = new ArrayList<AssembleStockBO>();
+                for (DisassembleReceiptVO disassembleReceiptVO : mainData) {
+                    var detail = getDisassembleReceiptDetail(disassembleReceiptVO.getId()).getData().getTableData();
+                    if(!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var assembleStockBO = AssembleStockBO.builder()
+                                    .id(item.getId())
+                                    .warehouseId(item.getWarehouseId())
+                                    .type(item.getType())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productId(item.getProductId())
+                                    .productName(item.getProductName())
+                                    .productModel(item.getProductModel())
+                                    .productUnit(item.getProductUnit())
+                                    .productStandard(item.getProductStandard())
+                                    .stock(item.getStock())
+                                    .productNumber(item.getProductNumber())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(assembleStockBO);
+                        });
+                    }
+                }
+                exportMap.put("拆卸单明细", ExcelUtils.getSheetData(subData));
+            }
             ExcelUtils.exportManySheet(response, "拆卸单", exportMap);
         }
     }
