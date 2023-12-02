@@ -126,19 +126,14 @@ export const allotShipmentTableColumns: BasicColumn[] = [
         width: 150,
     },
     {
-        title: '单位',
-        dataIndex: 'productUnit',
-        width: 70,
-    },
-    {
-        title: '商品规格',
+        title: '规格',
         dataIndex: 'productStandard',
-        width: 130,
+        width: 100,
     },
     {
-        title: '商品型号',
+        title: '型号',
         dataIndex: 'productModel',
-        width: 130,
+        width: 100,
     },
     {
         title: '扩展信息',
@@ -148,6 +143,11 @@ export const allotShipmentTableColumns: BasicColumn[] = [
     {
         title: '库存',
         dataIndex: 'stock',
+        width: 70,
+    },
+    {
+        title: '单位',
+        dataIndex: 'productUnit',
         width: 70,
     },
     {
