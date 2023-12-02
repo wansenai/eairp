@@ -25,8 +25,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ShipmentsSummaryVO {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long productBarcode;
+    private String productBarcode;
 
     private String productName;
 

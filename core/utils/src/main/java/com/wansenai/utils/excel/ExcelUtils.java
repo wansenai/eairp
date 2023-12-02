@@ -160,7 +160,7 @@ public class ExcelUtils {
         return t;
     }
 
-    private static <T> void setFieldValue(T t, Field field, JSONObject obj, StringBuilder uniqueBuilder, List<String> errMsgList) {
+    public static <T> void setFieldValue(T t, Field field, JSONObject obj, StringBuilder uniqueBuilder, List<String> errMsgList) {
         // 获取 ExcelImport 注解属性
         ExcelImport annotation = field.getAnnotation(ExcelImport.class);
         if (annotation == null) {
@@ -261,7 +261,7 @@ public class ExcelUtils {
         return map;
     }
 
-    private static JSONArray readExcel(MultipartFile mFile, File file) throws IOException {
+    public static JSONArray readExcel(MultipartFile mFile, File file) throws IOException {
         Workbook book = getWorkbook(mFile, file);
         if (book == null) {
             return new JSONArray();
@@ -271,7 +271,7 @@ public class ExcelUtils {
         return array;
     }
 
-    private static Workbook getWorkbook(MultipartFile mFile, File file) throws IOException {
+    public static Workbook getWorkbook(MultipartFile mFile, File file) throws IOException {
         boolean fileNotExist = (file == null || !file.exists());
         if (mFile == null && fileNotExist) {
             return null;
@@ -301,7 +301,7 @@ public class ExcelUtils {
         return book;
     }
 
-    private static JSONArray readSheet(Sheet sheet) {
+    public static JSONArray readSheet(Sheet sheet) {
         // 首行下标
         int rowStart = sheet.getFirstRowNum();
         // 尾行下标
@@ -359,7 +359,7 @@ public class ExcelUtils {
         return array;
     }
 
-    private static String getCellValue(Cell cell) {
+    public static String getCellValue(Cell cell) {
         // 空白或空
         if (cell == null || cell.getCellTypeEnum() == CellType.BLANK) {
             return "";
@@ -430,7 +430,7 @@ public class ExcelUtils {
         export(response, fileName, sheetName, sheetDataList, selectMap);
     }
 
-    private static <T> List<ExcelClassField> getExcelClassFieldList(Class<T> clazz) {
+    public static <T> List<ExcelClassField> getExcelClassFieldList(Class<T> clazz) {
         // 解析所有字段
         Field[] fields = clazz.getDeclaredFields();
         boolean hasExportAnnotation = false;
@@ -468,7 +468,7 @@ public class ExcelUtils {
         return headFieldList;
     }
 
-    private static ExcelClassField getExcelClassField(Field field) {
+    public static ExcelClassField getExcelClassField(Field field) {
         ExcelClassField cf = new ExcelClassField();
         String fieldName = field.getName();
         cf.setFieldName(fieldName);
@@ -500,7 +500,7 @@ public class ExcelUtils {
         return cf;
     }
 
-    private static LinkedHashMap<String, String> getKvMap(String kv) {
+    public static LinkedHashMap<String, String> getKvMap(String kv) {
         LinkedHashMap<String, String> kvMap = new LinkedHashMap<>();
         if (kv.isEmpty()) {
             return kvMap;
@@ -583,7 +583,6 @@ public class ExcelUtils {
         out.flush();
         fis.close();
     }
-
     /**
      * 获取文件
      *
@@ -591,7 +590,7 @@ public class ExcelUtils {
      * @param fileName 文件名称（不带尾缀，如：用户表）
      * @return 本地File文件对象
      */
-    private static File getFile(String filePath, String fileName) throws IOException {
+    public static File getFile(String filePath, String fileName) throws IOException {
         String dirPath = getString(filePath);
         String fileFullPath;
         if (dirPath.isEmpty()) {
@@ -623,7 +622,7 @@ public class ExcelUtils {
         return file;
     }
 
-    private static <T> List<List<Object>> getSheetData(List<T> list) {
+    public static <T> List<List<Object>> getSheetData(List<T> list) {
         // 获取表头字段
         List<ExcelClassField> excelClassFieldList = getExcelClassFieldList(list.get(0).getClass());
         List<String> headFieldList = new ArrayList<>();
@@ -679,7 +678,7 @@ public class ExcelUtils {
         return sheetDataList;
     }
 
-    private static <T> Map<String, Object> getFieldDataMap(T t) {
+    public static <T> Map<String, Object> getFieldDataMap(T t) {
         Map<String, Object> map = new HashMap<>();
         Field[] fields = t.getClass().getDeclaredFields();
         try {
@@ -707,8 +706,8 @@ public class ExcelUtils {
         export(response, fileName, fileName, sheetDataList, null);
     }
 
-    public static void exportManySheet(HttpServletResponse response, String fileName, Map<String, List<List<Object>>> sheetMap) {
-        export(response, null, fileName, sheetMap, null);
+    public static File exportManySheet(HttpServletResponse response, String fileName, Map<String, List<List<Object>>> sheetMap) {
+        return export(response, null, fileName, sheetMap, null);
     }
 
 
@@ -747,7 +746,7 @@ public class ExcelUtils {
         export(response, fileName, fileName, sheetDataList, selectMap);
     }
 
-    private static void export(HttpServletResponse response, File file, String fileName,
+    public static File export(HttpServletResponse response, File file, String fileName,
                                Map<String, List<List<Object>>> sheetMap, Map<Integer, List<String>> selectMap) {
         // 整个 Excel 表格 book 对象
         SXSSFWorkbook book = new SXSSFWorkbook();
@@ -807,8 +806,10 @@ public class ExcelUtils {
             // 前端导出
             try {
                 write(response, book, fileName);
+                return null;
             } catch (IOException e) {
                 e.printStackTrace();
+                return null;
             }
         } else {
             // 本地导出
@@ -819,8 +820,10 @@ public class ExcelUtils {
                 book.write(ops);
                 fos.write(ops.toByteArray());
                 fos.close();
+                return file;
             } catch (Exception e) {
                 e.printStackTrace();
+                return null;
             }
         }
     }
@@ -831,7 +834,7 @@ public class ExcelUtils {
      * @param sheet      当前 sheet 页
      * @param mergeArray 合并单元格算法
      */
-    private static void mergeCells(Sheet sheet, int[][] mergeArray) {
+    public static void mergeCells(Sheet sheet, int[][] mergeArray) {
         // 横向合并
         for (int x = 0; x < mergeArray.length; x++) {
             int[] arr = mergeArray[x];
@@ -929,7 +932,7 @@ public class ExcelUtils {
                 return CELL_OTHER;
             }
         }
-        // 是否为字符串
+        // 是否为数字
         if (o instanceof Integer || o instanceof Long || o instanceof Double || o instanceof Float) {
             cell.setCellType(CellType.NUMERIC);
             cell.setCellValue(Double.parseDouble(o.toString()));

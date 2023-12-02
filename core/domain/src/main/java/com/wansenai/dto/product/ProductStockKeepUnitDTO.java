@@ -21,7 +21,7 @@ public class ProductStockKeepUnitDTO {
 
     private Integer productCode;
 
-    private Long barCode;
+    private String barCode;
 
     private String productUnit;
 

@@ -72,7 +72,7 @@ public class WarehouseReceiptSub {
     /**
      * 商品条码
      */
-    private Long productBarcode;
+    private String productBarcode;
 
     /**
      * 商品数量

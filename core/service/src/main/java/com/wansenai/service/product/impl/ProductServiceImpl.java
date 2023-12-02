@@ -182,7 +182,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             ProductStockKeepUnit price = ProductStockKeepUnit.builder()
                     .id(productSkuId)
                     .productId(productId)
-                    .productBarCode(getNumberValue(priceDTO.getBarCode()))
+                    .productBarCode(priceDTO.getBarCode())
                     .productUnit(getStringValue(priceDTO.getProductUnit()))
                     .multiAttribute(getStringValue(priceDTO.getMultiAttribute()))
                     .purchasePrice(getBigDecimalValue(priceDTO.getPurchasePrice()))

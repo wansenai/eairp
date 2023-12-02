@@ -28,7 +28,7 @@ import java.util.List;
  */
 public interface ProductStockKeepUnitService extends IService<ProductStockKeepUnit> {
 
-    Response<Long> getProductCode();
+    Response<String> getProductCode();
 
     Boolean checkProductCode(List<String> barCodes);
 }

@@ -49,7 +49,7 @@ public class ProductStockKeepUnitController {
     }
 
     @GetMapping("getProduct/{barCode}/{warehouseId}")
-    public Response<ProductStockKeepUnitVO> getProductByBarCode(@PathVariable("barCode") Long barCode, @PathVariable("warehouseId")Long warehouseId) {
+    public Response<ProductStockKeepUnitVO> getProductByBarCode(@PathVariable("barCode") String barCode, @PathVariable("warehouseId")Long warehouseId) {
         return productStockService.getProductByBarCode(barCode, warehouseId);
     }
 }

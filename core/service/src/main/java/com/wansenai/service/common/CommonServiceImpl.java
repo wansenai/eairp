@@ -410,7 +410,7 @@ public class CommonServiceImpl implements CommonService{
             var productPrice = ProductStockKeepUnit.builder()
                     .id(SnowflakeIdUtil.nextId())
                     .productId(productId)
-                    .productBarCode(Long.valueOf(productCode))
+                    .productBarCode(productCode)
                     .multiAttribute(getCellValue(row.getCell(11), dataFormatter))
                     .purchasePrice(getNumericCellValue(row.getCell(12)))
                     .retailPrice(getNumericCellValue(row.getCell(13)))

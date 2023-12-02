@@ -30,9 +30,8 @@ public class StorageShipmentStockBO {
     private Long warehouseId;
 
     private String warehouseName;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long barCode;
+    
+    private String barCode;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productId;

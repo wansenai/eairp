@@ -5,7 +5,7 @@ import {
     AddOrUpdateDisAssembleReq,
     QueryDisAssembleReq,
     DisAssembleResp,
-    DisAssembleDetailResp,
+    DisAssembleDetailResp, ExportDisAssembleReq,
 } from "@/api/warehouse/model/disassembleModel";
 
 enum API {
@@ -68,7 +68,7 @@ export function getDisAssembleDetailById(id: number) {
     );
 }
 
-export function exportDisAssemble(params: QueryDisAssembleReq) {
+export function exportDisAssemble(params: ExportDisAssembleReq) {
     return defHttp.get<BaseDataResp<Blob>>(
         {
             url: `${API.Export}`,

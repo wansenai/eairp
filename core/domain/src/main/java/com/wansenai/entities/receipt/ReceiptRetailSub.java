@@ -47,7 +47,7 @@ public class ReceiptRetailSub implements Serializable {
 
     private Long warehouseId;
 
-    private Long productBarcode;
+    private String productBarcode;
 
     private Integer productNumber;
 
