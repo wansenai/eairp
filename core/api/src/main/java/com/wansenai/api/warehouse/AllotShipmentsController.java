@@ -19,14 +19,8 @@ import com.wansenai.service.warehouse.AllotShipmentsService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.AllotReceiptDetailVO;
 import com.wansenai.vo.warehouse.AllotReceiptVO;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -64,4 +58,10 @@ public class AllotShipmentsController {
     public Response<String> updateAllotShipmentsStatusByIds(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return allotShipmentsService.updateAllotReceiptStatus(ids, status);
     }
+
+    @GetMapping("export")
+    public void exportAllotShipments(@ModelAttribute QueryAllotReceiptDTO queryAllotReceiptDTO, HttpServletResponse response) throws Exception {
+        allotShipmentsService.exportAllotReceipt(queryAllotReceiptDTO, response);
+    }
+
 }
