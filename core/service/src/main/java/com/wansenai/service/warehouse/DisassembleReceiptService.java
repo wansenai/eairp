@@ -20,6 +20,7 @@ import com.wansenai.entities.warehouse.WarehouseReceiptMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.DisassembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.DisassembleReceiptVO;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -34,4 +35,6 @@ public interface DisassembleReceiptService extends IService<WarehouseReceiptMain
     Response<String> deleteBatchDisassembleReceipt(List<Long> ids);
 
     Response<String> updateDisassembleReceiptStatus(List<Long> ids, Integer status);
+
+    void exportDisAssembleReceipt(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO, HttpServletResponse response) throws Exception;
 }

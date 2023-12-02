@@ -37,9 +37,11 @@ import com.wansenai.utils.TimeUtil;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.OtherShipmentCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.OtherShipmentDetailVO;
 import com.wansenai.vo.warehouse.OtherShipmentVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -177,6 +179,47 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         result.setRecords(otherShipmentVOList);
         result.setTotal(wrapperMainMapper.getTotal());
         return Response.responseData(result);
+    }
+
+    private List<OtherShipmentVO> getOtherShipmentsList(QueryOtherShipmentDTO queryOtherShipmentDTO) {
+        var wrapperMainMapper = lambdaQuery()
+                .eq(queryOtherShipmentDTO.getCustomerId() != null, WarehouseReceiptMain::getRelatedPersonId, queryOtherShipmentDTO.getCustomerId())
+                .eq(queryOtherShipmentDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryOtherShipmentDTO.getOperatorId())
+                .eq(queryOtherShipmentDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryOtherShipmentDTO.getStatus())
+                .eq(StringUtils.hasLength(queryOtherShipmentDTO.getReceiptNumber()), WarehouseReceiptMain::getReceiptNumber, queryOtherShipmentDTO.getReceiptNumber())
+                .eq(StringUtils.hasLength(queryOtherShipmentDTO.getOtherReceipt()), WarehouseReceiptMain::getReceiptNumber, queryOtherShipmentDTO.getOtherReceipt())
+                .like(StringUtils.hasLength(queryOtherShipmentDTO.getRemark()), WarehouseReceiptMain::getRemark, queryOtherShipmentDTO.getRemark())
+                .ge(StringUtils.hasLength(queryOtherShipmentDTO.getStartDate()), WarehouseReceiptMain::getCreateTime, queryOtherShipmentDTO.getStartDate())
+                .le(StringUtils.hasLength(queryOtherShipmentDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryOtherShipmentDTO.getEndDate())
+                .eq(WarehouseReceiptMain::getType, "其他出库")
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var otherShipmentVOList = new ArrayList<OtherShipmentVO>(wrapperMainMapper.size() + 1);
+        wrapperMainMapper.forEach(item -> {
+
+            var product = productService.getById(item.getProductId());
+            var productInfo = "";
+            if(product != null) {
+                productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
+            }
+
+            var operator = userService.getById(item.getCreateBy());
+            var otherShipmentVO = OtherShipmentVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(productInfo)
+                    .customerName(commonService.getCustomerName(item.getRelatedPersonId()))
+                    .receiptDate(item.getReceiptDate())
+                    .operator(Optional.ofNullable(operator).map(SysUser::getName).orElse(""))
+                    .productNumber(item.getTotalProductNumber())
+                    .totalAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .build();
+
+            otherShipmentVOList.add(otherShipmentVO);
+        });
+        return otherShipmentVOList;
     }
 
     @Override
@@ -382,5 +425,14 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
             return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_ERROR);
         }
         return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_SUCCESS);
+    }
+
+    @Override
+    public void exportOtherShipments(QueryOtherShipmentDTO queryOtherShipmentDTO, HttpServletResponse response) throws Exception {
+        var data = getOtherShipmentsList(queryOtherShipmentDTO);
+        if (!data.isEmpty()) {
+            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "其他出库", data);
+            ExcelUtils.downloadExcel(file, "其他出库", response);
+        }
     }
 }

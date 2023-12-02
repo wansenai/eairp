@@ -39,9 +39,11 @@ import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.AllotShipmentCodeEnum;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.OtherShipmentCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.AllotReceiptDetailVO;
 import com.wansenai.vo.warehouse.AllotReceiptVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -178,6 +180,44 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         result.setRecords(allotReceiptVOList);
         result.setTotal(wrapperMainMapper.getTotal());
         return Response.responseData(result);
+    }
+
+    private List<AllotReceiptVO> getAllotReceiptList(QueryAllotReceiptDTO queryAllotReceiptDTO) {
+        var wrapperMainMapper = lambdaQuery()
+                .eq(queryAllotReceiptDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryAllotReceiptDTO.getOperatorId())
+                .eq(queryAllotReceiptDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryAllotReceiptDTO.getStatus())
+                .eq(StringUtils.hasLength(queryAllotReceiptDTO.getReceiptNumber()), WarehouseReceiptMain::getReceiptNumber, queryAllotReceiptDTO.getReceiptNumber())
+                .like(StringUtils.hasLength(queryAllotReceiptDTO.getRemark()), WarehouseReceiptMain::getRemark, queryAllotReceiptDTO.getRemark())
+                .ge(StringUtils.hasLength(queryAllotReceiptDTO.getStartDate()), WarehouseReceiptMain::getCreateTime, queryAllotReceiptDTO.getStartDate())
+                .le(StringUtils.hasLength(queryAllotReceiptDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryAllotReceiptDTO.getEndDate())
+                .eq(WarehouseReceiptMain::getType, "调拨出库")
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var allotReceiptVOList = new ArrayList<AllotReceiptVO>(wrapperMainMapper.size() + 1);
+        wrapperMainMapper.forEach(item -> {
+
+            var product = productService.getById(item.getProductId());
+            var productInfo = "";
+            if(product != null) {
+                productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
+            }
+
+            var operator = userService.getById(item.getCreateBy());
+            var allotReceiptVO = AllotReceiptVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(productInfo)
+                    .receiptDate(item.getReceiptDate())
+                    .operator(Optional.ofNullable(operator).map(SysUser::getName).orElse(""))
+                    .productNumber(item.getTotalProductNumber())
+                    .totalAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .build();
+
+            allotReceiptVOList.add(allotReceiptVO);
+        });
+        return allotReceiptVOList;
     }
 
     @Override
@@ -432,5 +472,14 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
             return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
         }
         return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS);
+    }
+
+    @Override
+    public void exportAllotReceipt(QueryAllotReceiptDTO queryAllotReceiptDTO, HttpServletResponse response) throws Exception {
+        var data = getAllotReceiptList(queryAllotReceiptDTO);
+        if (!data.isEmpty()) {
+            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "调拨出库", data);
+            ExcelUtils.downloadExcel(file, "调拨出库", response);
+        }
     }
 }

@@ -19,14 +19,8 @@ import com.wansenai.service.warehouse.OtherStorageService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.OtherStorageDetailVO;
 import com.wansenai.vo.warehouse.OtherStorageVO;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -64,4 +58,10 @@ public class OtherStorageController {
     public Response<String> updateOtherStorageStatusByIds(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return otherStorageService.updateOtherStorageStatus(ids, status);
     }
+
+    @GetMapping("export")
+    public void exportOtherStorage(@ModelAttribute QueryOtherStorageDTO queryOtherStorageDTO, HttpServletResponse response) throws Exception {
+        otherStorageService.exportOtherStorage(queryOtherStorageDTO, response);
+    }
+
 }

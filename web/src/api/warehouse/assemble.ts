@@ -14,6 +14,7 @@ enum API {
     DeleteBatch = '/warehouse/assemble/deleteByIds',
     UpdateStatus = '/warehouse/assemble/updateStatusByIds',
     GetDetail = '/warehouse/assemble/getDetailById',
+    Export = '/warehouse/assemble/export',
 }
 
 export function getAssemblePageList(params: QueryAssembleReq) {
@@ -64,5 +65,15 @@ export function getAssembleDetailById(id: number) {
         {
             url: `${API.GetDetail}/${id}`
         },
+    );
+}
+
+export function exportAssemble(params: QueryAssembleReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
+        }
     );
 }

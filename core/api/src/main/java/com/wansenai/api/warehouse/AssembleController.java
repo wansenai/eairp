@@ -19,14 +19,8 @@ import com.wansenai.service.warehouse.AssembleReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.AssembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.AssembleReceiptVO;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -63,5 +57,10 @@ public class AssembleController {
     @PutMapping("updateStatusByIds")
     public Response<String> updateAssembleReceiptStatusByIds(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return assembleService.updateAssembleReceiptStatus(ids, status);
+    }
+
+    @GetMapping("export")
+    public void exportAssembleReceipt(@ModelAttribute QueryAssembleReceiptDTO queryAssembleReceiptDTO, HttpServletResponse response) throws Exception {
+        assembleService.exportAssembleReceipt(queryAssembleReceiptDTO, response);
     }
 }

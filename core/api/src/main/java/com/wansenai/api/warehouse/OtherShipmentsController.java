@@ -19,14 +19,8 @@ import com.wansenai.service.warehouse.OtherShipmentsService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.OtherShipmentDetailVO;
 import com.wansenai.vo.warehouse.OtherShipmentVO;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -63,5 +57,10 @@ public class OtherShipmentsController {
     @PutMapping("updateStatusByIds")
     public Response<String> updateOtherShipmentsStatusByIds(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return otherShipmentsService.updateOtherShipmentsStatus(ids, status);
+    }
+
+    @GetMapping("export")
+    public void exportOtherShipments(@ModelAttribute QueryOtherShipmentDTO queryOtherShipmentDTO, HttpServletResponse response) throws Exception {
+        otherShipmentsService.exportOtherShipments(queryOtherShipmentDTO, response);
     }
 }
