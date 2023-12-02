@@ -15,6 +15,7 @@ package com.wansenai.vo.warehouse;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.Builder;
 import lombok.Data;
 
@@ -28,19 +29,26 @@ public class AssembleReceiptVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
+    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
+    @ExcelExport(value = "商品信息")
     private String productInfo;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ExcelExport(value = "单据日期")
     private LocalDateTime receiptDate;
 
-    private String operator;
-
+    @ExcelExport(value = "商品数量")
     private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "金额合计")
     private BigDecimal totalAmount;
 
+    @ExcelExport(value = "操作员")
+    private String operator;
+
+    @ExcelExport(value = "状态", kv = "0-未审核;1-已审核")
     private Integer status;
 }
