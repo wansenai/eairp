@@ -40,6 +40,14 @@
         </template>
       </template>
     </BasicTable>
+    <a-modal v-model:open="openExportData" title="确认导出" :confirm-loading="confirmLoading"
+             @ok="handleExportOk" @cancel="handleExportCancel" okText="导出">
+      <div style="text-align: center">
+        <p>即将导出{{dataSum}}条数据，请耐心等待。</p>
+        <p>如需导出明细数据（可能耗时较长），请勾选下方复选框。</p>
+        <a-checkbox v-model:checked="exportDetailData">需要导出明细数据</a-checkbox>
+      </div>
+    </a-modal>
     <AddEditModal ref="addEditModalRef" @cancel="handleCancel"></AddEditModal>
     <ReceiptViewModal @register="receiptViewModal" @ok="handleOk"/>
   </div>
@@ -56,17 +64,22 @@ import {useI18n} from "vue-i18n";
 import {getShipmentsPageList, deleteShipments, updateShipmentsStatus, exportShipments} from "@/api/retail/shipments";
 import AddEditModal from "@/views/retail/shipments/components/AddEditModal.vue"
 import ReceiptViewModal from "@/views/retail/shipments/components/ViewShipmentModal.vue";
-import {Tag} from "ant-design-vue";
+import {Checkbox, Modal, Tag} from "ant-design-vue";
 import {useModal} from "@/components/Modal";
+
 export default defineComponent({
   name: 'Shipments',
-  components: {Tag, TableAction, BasicTable, AddEditModal, ReceiptViewModal},
+  components: {'a-modal': Modal, 'a-checkbox': Checkbox, Tag, TableAction, BasicTable, AddEditModal, ReceiptViewModal},
   setup() {
     const { t } = useI18n();
     const { createMessage } = useMessage();
     const addEditModalRef = ref(null);
+    const exportDetailData = ref<boolean>(false);
+    const openExportData = ref<boolean>(false);
+    const confirmLoading = ref<boolean>(false);
+    const dataSum = ref<number>(0);
     const [receiptViewModal, {openModal: openReceiptViewModal}] = useModal();
-    const [registerTable, { reload, getSelectRows, getForm }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm, getDataSource }] = useTable({
       title: '零售出库列表',
       rowKey: 'id',
       api: getShipmentsPageList,
@@ -169,19 +182,38 @@ export default defineComponent({
     }
 
     async function handleExport() {
-      // 获取getForm().getFieldsValue()的数据传给后端打印接口
-      const data = getForm().getFieldsValue();
-      const file: any = await exportShipments(data);
+      dataSum.value = getDataSource().length;
+      if (dataSum.value === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      openExportData.value = true;
+    }
+
+    const handleExportCancel = () => {
+      confirmLoading.value = false;
+      openExportData.value = false;
+      exportDetailData.value = false;
+    };
+
+    const handleExportOk = async () => {
+      confirmLoading.value = true;
+      const data: any = getForm().getFieldsValue();
+      data.isExportDetail = exportDetailData.value;
+      const file: any = await exportShipments(data)
       if (file.size > 0) {
         const blob = new Blob([file]);
         const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
         const timestamp = getTimestamp(new Date());
+        link.href = URL.createObjectURL(blob);
         link.download = "零售出库数据" + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
-    }
+      confirmLoading.value = false;
+      openExportData.value = false;
+      exportDetailData.value = false;
+    };
 
 
     return {
@@ -199,6 +231,12 @@ export default defineComponent({
       handleView,
       handleOk,
       handleExport,
+      openExportData,
+      confirmLoading,
+      exportDetailData,
+      dataSum,
+      handleExportOk,
+      handleExportCancel
     }
   }
 })

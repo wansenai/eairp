@@ -885,11 +885,36 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
     }
 
     @Override
-    public void exportRetailShipmentsExcel(QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) throws Exception {
-        var data = getRetailShipmentsList(queryShipmentsDTO).getData();
-        if (!data.isEmpty()) {
-            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "销售出库单", data);
-            ExcelUtils.downloadExcel(file, "零售出库单", response);
+    public void exportRetailShipmentsExcel(QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getRetailShipmentsList(queryShipmentsDTO).getData();
+        if (!mainData.isEmpty()) {
+            if (queryShipmentsDTO.getIsExportDetail()) {
+                var subData = new ArrayList<ShipmentsDataBO>();
+                for (RetailShipmentsVO retailShipmentsVO : mainData) {
+                   var detail = getRetailShipmentsDetail(retailShipmentsVO.getId()).getData().getTableData();
+                    detail.forEach(item -> {
+                        var shipmentBo = ShipmentsDataBO.builder()
+                                .warehouseName(item.getWarehouseName())
+                                .barCode(item.getBarCode())
+                                .productName(item.getProductName())
+                                .productStandard(item.getProductStandard())
+                                .productModel(item.getProductModel())
+                                .productColor(item.getProductColor())
+                                .productUnit(item.getProductUnit())
+                                .productNumber(item.getProductNumber())
+                                .unitPrice(item.getUnitPrice())
+                                .amount(item.getAmount())
+                                .stock(item.getStock())
+                                .remark(item.getRemark())
+                                .build();
+                        subData.add(shipmentBo);
+                    });
+                }
+                exportMap.put("销售出库单明细", ExcelUtils.getSheetData(subData));
+            }
+            exportMap.put("销售出库单", ExcelUtils.getSheetData(mainData));
+            ExcelUtils.exportManySheet(response, "销售出库单", exportMap);
         }
     }
 
