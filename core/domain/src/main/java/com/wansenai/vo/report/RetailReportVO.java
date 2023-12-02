@@ -24,8 +24,7 @@ import java.math.BigDecimal;
 @Builder
 public class RetailReportVO {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long productBarcode;
+    private String productBarcode;
 
     private String productName;
 

@@ -59,7 +59,7 @@ public class ProductStockKeepUnit implements Serializable {
     /**
      * 商品条码
      */
-    private Long productBarCode;
+    private String productBarCode;
 
     /**
      * 商品单位
