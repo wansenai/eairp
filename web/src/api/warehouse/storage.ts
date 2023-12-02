@@ -14,6 +14,7 @@ enum API {
     DeleteBatch = '/warehouse/otherStorage/deleteByIds',
     UpdateStatus = '/warehouse/otherStorage/updateStatusByIds',
     GetDetail = '/warehouse/otherStorage/getDetailById',
+    Export = '/warehouse/otherStorage/export',
 }
 
 export function getOtherStoragePageList(params: QueryOtherStorageReq) {
@@ -64,5 +65,15 @@ export function getOtherStorageDetailById(id: number) {
         {
             url: `${API.GetDetail}/${id}`
         },
+    );
+}
+
+export function exportOtherStorage(params: QueryOtherStorageReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
+        }
     );
 }
