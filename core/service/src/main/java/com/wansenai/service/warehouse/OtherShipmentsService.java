@@ -20,6 +20,7 @@ import com.wansenai.entities.warehouse.WarehouseReceiptMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.OtherShipmentDetailVO;
 import com.wansenai.vo.warehouse.OtherShipmentVO;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -34,4 +35,6 @@ public interface OtherShipmentsService extends IService<WarehouseReceiptMain> {
     Response<String> deleteBatchOtherShipments(List<Long> ids);
 
     Response<String> updateOtherShipmentsStatus(List<Long> ids, Integer status);
+
+    void exportOtherShipments(QueryOtherShipmentDTO queryOtherShipmentDTO, HttpServletResponse response) throws Exception;
 }
