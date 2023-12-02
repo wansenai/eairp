@@ -52,9 +52,8 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views//warehouse/disassemble/disassemble.data";
-import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
-import {getDisAssemblePageList, deleteBatchDisAssemble, updateDisAssembleStatus} from "@/api/warehouse/disassemble";
+import {getDisAssemblePageList, deleteBatchDisAssemble, updateDisAssembleStatus, exportDisAssemble} from "@/api/warehouse/disassemble";
 import AddEditDisassembleModal from "@/views/warehouse/disassemble/components/AddEditDisassembleModal.vue"
 import ViewDisassembleModal from "@/views/warehouse/disassemble/components/ViewDisassembleModal.vue";
 import {Tag} from "ant-design-vue";
@@ -67,7 +66,7 @@ export default defineComponent({
     const { createMessage } = useMessage();
     const addEditModalRef = ref(null);
     const [receiptViewModal, {openModal: openReceiptViewModal}] = useModal();
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm }] = useTable({
       title: '拆卸单列表',
       rowKey: 'id',
       api: getDisAssemblePageList,
@@ -170,14 +169,17 @@ export default defineComponent({
     }
 
     async function handleExport() {
-      const file = await exportXlsx("拆卸单列表")
-      const blob = new Blob([file]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = "拆卸单数据" + timestamp + ".xlsx";
-      link.target = "_blank";
-      link.click();
+      const data = getForm().getFieldsValue();
+      const file: any = await exportDisAssemble(data)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = "拆卸单数据" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
 

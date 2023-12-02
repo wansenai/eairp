@@ -38,11 +38,13 @@ import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.AssembleReceiptCodeEnum;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.DisassembleReceiptCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.AssembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.AssembleReceiptVO;
 import com.wansenai.vo.warehouse.DisassembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.DisassembleReceiptVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -179,6 +181,44 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
         result.setRecords(disAssembleReceiptVOList);
         result.setTotal(wrapperMainMapper.getTotal());
         return Response.responseData(result);
+    }
+
+    public List<DisassembleReceiptVO> getDisassembleReceiptList(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO) {
+        var wrapperMainMapper = lambdaQuery()
+                .eq(queryDisassembleReceiptDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryDisassembleReceiptDTO.getOperatorId())
+                .eq(queryDisassembleReceiptDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryDisassembleReceiptDTO.getStatus())
+                .eq(StringUtils.hasLength(queryDisassembleReceiptDTO.getReceiptNumber()), WarehouseReceiptMain::getReceiptNumber, queryDisassembleReceiptDTO.getReceiptNumber())
+                .like(StringUtils.hasLength(queryDisassembleReceiptDTO.getRemark()), WarehouseReceiptMain::getRemark, queryDisassembleReceiptDTO.getRemark())
+                .ge(StringUtils.hasLength(queryDisassembleReceiptDTO.getStartDate()), WarehouseReceiptMain::getCreateTime, queryDisassembleReceiptDTO.getStartDate())
+                .le(StringUtils.hasLength(queryDisassembleReceiptDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryDisassembleReceiptDTO.getEndDate())
+                .eq(WarehouseReceiptMain::getType, "拆卸单")
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var disAssembleReceiptVOList = new ArrayList<DisassembleReceiptVO>(wrapperMainMapper.size() + 1);
+        wrapperMainMapper.forEach(item -> {
+
+            var product = productService.getById(item.getProductId());
+            var productInfo = "";
+            if(product != null) {
+                productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
+            }
+
+            var operator = userService.getById(item.getCreateBy());
+            var disAssembleReceiptVO = DisassembleReceiptVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(productInfo)
+                    .receiptDate(item.getReceiptDate())
+                    .operator(Optional.ofNullable(operator).map(SysUser::getName).orElse(""))
+                    .productNumber(item.getTotalProductNumber())
+                    .totalAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .build();
+
+            disAssembleReceiptVOList.add(disAssembleReceiptVO);
+        });
+        return disAssembleReceiptVOList;
     }
 
     @Override
@@ -431,5 +471,14 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
             return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_ERROR);
         }
         return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_SUCCESS);
+    }
+
+    @Override
+    public void exportDisAssembleReceipt(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO, HttpServletResponse response) throws Exception {
+        var data = getDisassembleReceiptList(queryDisassembleReceiptDTO);
+        if (!data.isEmpty()) {
+            var file = ExcelUtils.exportFile(ExcelUtils.DEFAULT_FILE_PATH, "拆卸单", data);
+            ExcelUtils.downloadExcel(file, "拆卸单", response);
+        }
     }
 }
