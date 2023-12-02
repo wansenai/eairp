@@ -40,4 +40,6 @@ public class QuerySaleRefundDTO {
     private Long page;
 
     private Long pageSize;
+
+    private Boolean isExportDetail;
 }
