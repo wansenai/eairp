@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.PurchaseDataBO;
+import com.wansenai.bo.PurchaseDataExportBO;
 import com.wansenai.dto.receipt.purchase.*;
 import com.wansenai.entities.financial.FinancialMain;
 import com.wansenai.entities.financial.FinancialSub;
@@ -1322,12 +1323,14 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var mainData = getPurchaseOrderList(queryPurchaseOrderDTO);
         if (!mainData.isEmpty()) {
             if (queryPurchaseOrderDTO.getIsExportDetail()) {
-                var subData = new ArrayList<PurchaseDataBO>();
+                var subData = new ArrayList<PurchaseDataExportBO>();
                 for (PurchaseOrderVO purchaseOrderVO : mainData) {
                     var detail = getPurchaseOrderDetail(purchaseOrderVO.getId()).getData().getTableData();
                     if (!detail.isEmpty()) {
                         detail.forEach(item -> {
-                            var purchaseDataBo = PurchaseDataBO.builder()
+                            var purchaseDataBo = PurchaseDataExportBO.builder()
+                                    .supplierName(purchaseOrderVO.getSupplierName())
+                                    .receiptNumber(purchaseOrderVO.getReceiptNumber())
                                     .warehouseName(item.getWarehouseName())
                                     .barCode(item.getBarCode())
                                     .productName(item.getProductName())
@@ -1361,12 +1364,14 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var mainData = getPurchaseStorageList(queryPurchaseStorageDTO);
         if (!mainData.isEmpty()) {
             if (queryPurchaseStorageDTO.getIsExportDetail()) {
-                var subData = new ArrayList<PurchaseDataBO>();
+                var subData = new ArrayList<PurchaseDataExportBO>();
                 for (PurchaseStorageVO purchaseStorageVO : mainData) {
                     var detail = getPurchaseStorageDetail(purchaseStorageVO.getId()).getData().getTableData();
                     if (!detail.isEmpty()) {
                         detail.forEach(item -> {
-                            var purchaseDataBo = PurchaseDataBO.builder()
+                            var purchaseDataBo = PurchaseDataExportBO.builder()
+                                    .supplierName(purchaseStorageVO.getSupplierName())
+                                    .receiptNumber(purchaseStorageVO.getReceiptNumber())
                                     .warehouseName(item.getWarehouseName())
                                     .barCode(item.getBarCode())
                                     .productName(item.getProductName())
@@ -1400,12 +1405,14 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var mainData = getPurchaseRefundList(queryPurchaseRefundDTO);
         if (!mainData.isEmpty()) {
             if (queryPurchaseRefundDTO.getIsExportDetail()) {
-                var subData = new ArrayList<PurchaseDataBO>();
+                var subData = new ArrayList<PurchaseDataExportBO>();
                 for (PurchaseRefundVO purchaseRefundVO : mainData) {
                     var detail = getPurchaseRefundDetail(purchaseRefundVO.getId()).getData().getTableData();
                     if (!detail.isEmpty()) {
                         detail.forEach(item -> {
-                            var purchaseDataBo = PurchaseDataBO.builder()
+                            var purchaseDataBo = PurchaseDataExportBO.builder()
+                                    .supplierName(purchaseRefundVO.getSupplierName())
+                                    .receiptNumber(purchaseRefundVO.getReceiptNumber())
                                     .warehouseName(item.getWarehouseName())
                                     .barCode(item.getBarCode())
                                     .productName(item.getProductName())
