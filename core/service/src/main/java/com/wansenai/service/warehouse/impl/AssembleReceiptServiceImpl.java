@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.AssembleStockBO;
+import com.wansenai.bo.AssembleStockDataExportBO;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.dto.warehouse.AssembleReceiptDTO;
 import com.wansenai.dto.warehouse.QueryAssembleReceiptDTO;
@@ -477,12 +478,13 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
         if (!mainData.isEmpty()) {
             exportMap.put("组装单", ExcelUtils.getSheetData(mainData));
             if (queryAssembleReceiptDTO.getIsExportDetail()) {
-                var subData = new ArrayList<AssembleStockBO>();
+                var subData = new ArrayList<AssembleStockDataExportBO>();
                 for (AssembleReceiptVO assembleReceiptVO : mainData) {
                     var detail = getAssembleReceiptDetail(assembleReceiptVO.getId()).getData().getTableData();
                     if(!detail.isEmpty()) {
                         detail.forEach(item -> {
-                            var assembleStockBO = AssembleStockBO.builder()
+                            var assembleStockBO = AssembleStockDataExportBO.builder()
+                                    .receiptNumber(assembleReceiptVO.getReceiptNumber())
                                     .type(item.getType())
                                     .warehouseName(item.getWarehouseName())
                                     .barCode(item.getBarCode())
