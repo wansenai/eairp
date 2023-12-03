@@ -13,6 +13,7 @@ enum API {
     DeleteBatch = '/financial/income/deleteByIds',
     UpdateStatus = '/financial/income/updateStatusByIds',
     GetDetail = '/financial/income/getDetailById',
+    Export = '/financial/income/export',
 }
 
 export function getIncomePageList(params: QueryIncomeReq, mode: ErrorMessageMode = 'notice') {
@@ -63,5 +64,15 @@ export function getIncomeDetailById(id: number) {
         {
             url: `${API.GetDetail}/${id}`
         },
+    );
+}
+
+export function exportIncome(params: QueryIncomeReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
+        }
     );
 }

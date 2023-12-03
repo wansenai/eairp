@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.IncomeExpenseBO;
+import com.wansenai.bo.IncomeExpenseDataExportBO;
 import com.wansenai.dto.financial.AddOrUpdateIncomeDTO;
 import com.wansenai.dto.financial.QueryIncomeDTO;
 import com.wansenai.entities.financial.FinancialMain;
@@ -34,9 +35,11 @@ import com.wansenai.utils.TimeUtil;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.IncomeExpenseCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.IncomeDetailVO;
 import com.wansenai.vo.financial.IncomeVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -45,6 +48,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -137,6 +141,39 @@ public class IncomeReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, F
         result.setRecords(incomeVOList);
         result.setTotal(financialMainPage.getTotal());
         return Response.responseData(result);
+    }
+
+    private List<IncomeVO> getIncomeReceiptList(QueryIncomeDTO queryIncomeDTO) {
+        var financialMainList = lambdaQuery()
+                .eq(queryIncomeDTO.getRelatedPersonId() != null, FinancialMain::getRelatedPersonId, queryIncomeDTO.getRelatedPersonId())
+                .eq(queryIncomeDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryIncomeDTO.getFinancialPersonId())
+                .eq(queryIncomeDTO.getAccountId() != null, FinancialMain::getAccountId, queryIncomeDTO.getAccountId())
+                .eq(StringUtils.hasLength(queryIncomeDTO.getReceiptNumber()), FinancialMain::getReceiptNumber, queryIncomeDTO.getReceiptNumber())
+                .eq(queryIncomeDTO.getStatus() != null, FinancialMain::getStatus, queryIncomeDTO.getStatus())
+                .like(StringUtils.hasLength(queryIncomeDTO.getRemark()), FinancialMain::getRemark, queryIncomeDTO.getRemark())
+                .ge(StringUtils.hasLength(queryIncomeDTO.getStartDate()), FinancialMain::getReceiptDate, queryIncomeDTO.getStartDate())
+                .le(StringUtils.hasLength(queryIncomeDTO.getEndDate()), FinancialMain::getReceiptDate, queryIncomeDTO.getEndDate())
+                .eq(FinancialMain::getType, "收入")
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var incomeVOList = new ArrayList<IncomeVO>(financialMainList.size() + 1);
+        financialMainList.forEach(item -> {
+            var incomeVO = IncomeVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .name(commonService.getRelatedPersonName(item.getRelatedPersonId()))
+                    .receiptDate(item.getReceiptDate())
+                    .financialPerson(commonService.getOperatorName(item.getOperatorId()))
+                    .incomeAccountName(commonService.getAccountName(item.getAccountId()))
+                    .incomeAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .remark(item.getRemark())
+                    .build();
+
+            incomeVOList.add(incomeVO);
+        });
+        return incomeVOList;
     }
 
     @Override
@@ -333,5 +370,34 @@ public class IncomeReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, F
             return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_RECEIPT_ERROR);
         }
         return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_RECEIPT_SUCCESS);
+    }
+
+    @Override
+    public void exportIncomeReceipt(QueryIncomeDTO queryIncomeDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getIncomeReceiptList(queryIncomeDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("收入单", ExcelUtils.getSheetData(mainData));
+            if (queryIncomeDTO.getIsExportDetail()) {
+                var subData = new ArrayList<IncomeExpenseDataExportBO>();
+                for (IncomeVO incomeVO : mainData) {
+                    var detail = getIncomeReceiptDetail(incomeVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var data = IncomeExpenseDataExportBO.builder()
+                                    .receiptNumber(incomeVO.getReceiptNumber())
+                                    .relatedPerson(incomeVO.getName())
+                                    .incomeExpenseName(item.getIncomeExpenseName())
+                                    .incomeExpenseAmount(item.getIncomeExpenseAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(data);
+                        });
+                    }
+                }
+                exportMap.put("收入单明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "收入单", exportMap);
+        }
     }
 }

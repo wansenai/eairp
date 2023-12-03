@@ -10,32 +10,36 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.dto.financial;
+package com.wansenai.bo;
 
+import com.wansenai.utils.excel.ExcelExport;
+import lombok.Builder;
 import lombok.Data;
 
-@Data
-public class QueryExpenseDTO {
+import java.math.BigDecimal;
 
+@Data
+@Builder
+public class PaymentDataExportBO {
+
+    @ExcelExport(value = "供应商")
+    private String supplierName;
+
+    @ExcelExport(value = "付款单号")
     private String receiptNumber;
 
-    private Long relatedPersonId;
+    @ExcelExport(value = "采购单据编号")
+    private String purchaseReceiptNumber;
 
-    private Long financialPersonId;
+    @ExcelExport(value = "应付欠款")
+    private BigDecimal paymentArrears;
 
-    private Long accountId;
+    @ExcelExport(value = "已付欠款")
+    private BigDecimal  prepaidArrears;
 
-    private Integer status;
+    @ExcelExport(value = "本次付款")
+    private BigDecimal thisPaymentAmount;
 
+    @ExcelExport(value = "备注")
     private String remark;
-
-    private String startDate;
-
-    private String endDate;
-
-    private Integer page;
-
-    private Integer pageSize;
-
-    private Boolean isExportDetail;
 }

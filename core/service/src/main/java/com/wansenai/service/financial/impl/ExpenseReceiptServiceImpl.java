@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.IncomeExpenseBO;
+import com.wansenai.bo.IncomeExpenseDataExportBO;
 import com.wansenai.dto.financial.AddOrUpdateExpenseDTO;
 import com.wansenai.dto.financial.QueryExpenseDTO;
 import com.wansenai.entities.financial.FinancialMain;
@@ -34,11 +35,11 @@ import com.wansenai.utils.TimeUtil;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.IncomeExpenseCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.ExpenseDetailVO;
 import com.wansenai.vo.financial.ExpenseVO;
-import com.wansenai.vo.financial.IncomeDetailVO;
-import com.wansenai.vo.financial.IncomeVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -47,6 +48,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -138,6 +140,38 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
         result.setRecords(expenseVOList);
         result.setTotal(financialMainPage.getTotal());
         return Response.responseData(result);
+    }
+
+    public List<ExpenseVO> getExpenseReceiptList(QueryExpenseDTO queryExpenseDTO) {
+        var financialMainList = lambdaQuery()
+                .eq(queryExpenseDTO.getRelatedPersonId() != null, FinancialMain::getRelatedPersonId, queryExpenseDTO.getRelatedPersonId())
+                .eq(queryExpenseDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryExpenseDTO.getFinancialPersonId())
+                .eq(queryExpenseDTO.getAccountId() != null, FinancialMain::getAccountId, queryExpenseDTO.getAccountId())
+                .eq(StringUtils.hasLength(queryExpenseDTO.getReceiptNumber()), FinancialMain::getReceiptNumber, queryExpenseDTO.getReceiptNumber())
+                .eq(queryExpenseDTO.getStatus() != null, FinancialMain::getStatus, queryExpenseDTO.getStatus())
+                .like(StringUtils.hasLength(queryExpenseDTO.getRemark()), FinancialMain::getRemark, queryExpenseDTO.getRemark())
+                .ge(StringUtils.hasLength(queryExpenseDTO.getStartDate()), FinancialMain::getReceiptDate, queryExpenseDTO.getStartDate())
+                .le(StringUtils.hasLength(queryExpenseDTO.getEndDate()), FinancialMain::getReceiptDate, queryExpenseDTO.getEndDate())
+                .eq(FinancialMain::getType, "支出")
+                .list();
+
+        var expenseVOList = new ArrayList<ExpenseVO>(financialMainList.size() + 1);
+        financialMainList.forEach(item -> {
+            var expenseVO = ExpenseVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .name(commonService.getRelatedPersonName(item.getRelatedPersonId()))
+                    .receiptDate(item.getReceiptDate())
+                    .financialPerson(commonService.getOperatorName(item.getOperatorId()))
+                    .expenseAccountName(commonService.getAccountName(item.getAccountId()))
+                    .expenseAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .remark(item.getRemark())
+                    .build();
+
+            expenseVOList.add(expenseVO);
+        });
+        return expenseVOList;
     }
 
     @Override
@@ -334,5 +368,34 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
             return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_ERROR);
         }
         return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_SUCCESS);
+    }
+
+    @Override
+    public void exportExpenseReceipt(QueryExpenseDTO queryExpenseDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getExpenseReceiptList(queryExpenseDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("支出单", ExcelUtils.getSheetData(mainData));
+            if (queryExpenseDTO.getIsExportDetail()) {
+                var subData = new ArrayList<IncomeExpenseDataExportBO>();
+                for (ExpenseVO expenseVO : mainData) {
+                    var detail = getExpenseReceiptDetail(expenseVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var data = IncomeExpenseDataExportBO.builder()
+                                    .receiptNumber(expenseVO.getReceiptNumber())
+                                    .relatedPerson(expenseVO.getName())
+                                    .incomeExpenseName(item.getIncomeExpenseName())
+                                    .incomeExpenseAmount(item.getIncomeExpenseAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(data);
+                        });
+                    }
+                }
+                exportMap.put("支出单明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "支出单", exportMap);
+        }
     }
 }

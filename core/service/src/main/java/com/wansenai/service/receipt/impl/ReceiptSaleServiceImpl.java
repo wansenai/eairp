@@ -1355,8 +1355,8 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                             subData.add(saleDataBo);
                         });
                     }
-                    exportMap.put("销售订单明细", ExcelUtils.getSheetData(subData));
                 }
+                exportMap.put("销售订单明细", ExcelUtils.getSheetData(subData));
             }
             exportMap.put("销售订单", ExcelUtils.getSheetData(mainData));
             ExcelUtils.exportManySheet(response, "销售订单", exportMap);
@@ -1397,8 +1397,8 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                             subData.add(saleDataBo);
                         });
                     }
-                    exportMap.put("销售出库明细", ExcelUtils.getSheetData(subData));
                 }
+                exportMap.put("销售出库明细", ExcelUtils.getSheetData(subData));
             }
             exportMap.put("销售出库", ExcelUtils.getSheetData(mainData));
             ExcelUtils.exportManySheet(response, "销售出库", exportMap);
@@ -1439,8 +1439,8 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                             subData.add(saleDataBo);
                         });
                     }
-                    exportMap.put("销售退货明细", ExcelUtils.getSheetData(subData));
                 }
+                exportMap.put("销售退货明细", ExcelUtils.getSheetData(subData));
             }
             exportMap.put("销售退货", ExcelUtils.getSheetData(mainData));
             ExcelUtils.exportManySheet(response, "销售退货", exportMap);

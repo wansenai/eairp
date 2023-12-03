@@ -10,30 +10,29 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.dto.financial;
+package com.wansenai.bo
 
-import lombok.Data;
+import com.wansenai.NoArg
+import com.wansenai.utils.excel.ExcelExport
+import lombok.Data
+import java.math.BigDecimal
 
+@NoArg
 @Data
-public class QueryTransferDTO {
+data class AdvanceChargeDataExportBO(
 
-    private String receiptNumber;
+    @ExcelExport(value = "会员")
+    val memberName: String,
 
-    private Long accountId;
+    @ExcelExport(value = "预付款单据编号")
+    val receiptNumber: String,
 
-    private Long financialPersonId;
+    @ExcelExport(value = "账户名称")
+    val accountName: String,
 
-    private Integer status;
+    @ExcelExport(value = "金额")
+    val amount : BigDecimal,
 
-    private String remark;
-
-    private String startDate;
-
-    private String endDate;
-
-    private Integer page;
-
-    private Integer pageSize;
-
-    private Boolean isExportDetail;
-}
+    @ExcelExport(value = "备注")
+    val remark : String? = null,
+)

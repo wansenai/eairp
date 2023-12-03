@@ -15,10 +15,10 @@ package com.wansenai.service.financial.impl
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
-import com.wansenai.entities.SysDepartment
 import com.wansenai.entities.financial.FinancialMain
 import com.wansenai.entities.financial.FinancialSub
 import com.wansenai.bo.AdvanceChargeDataBO
+import com.wansenai.bo.AdvanceChargeDataExportBO
 import com.wansenai.bo.FileDataBO
 import com.wansenai.dto.financial.AddOrUpdateAdvanceChargeDTO
 import com.wansenai.dto.financial.QueryAdvanceChargeDTO
@@ -32,29 +32,29 @@ import com.wansenai.service.basic.IOperatorService
 import com.wansenai.service.basic.MemberService
 import com.wansenai.service.financial.AdvanceChargeService
 import com.wansenai.service.financial.IFinancialAccountService
-import com.wansenai.service.system.SysDepartmentService
 import com.wansenai.service.user.ISysUserService
 import com.wansenai.utils.SnowflakeIdUtil
 import com.wansenai.utils.TimeUtil
 import com.wansenai.utils.constants.CommonConstants
 import com.wansenai.utils.enums.BaseCodeEnum
 import com.wansenai.utils.enums.FinancialCodeEnum
+import com.wansenai.utils.excel.ExcelUtils
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.financial.AdvanceChargeDetailVO
 import com.wansenai.vo.financial.AdvanceChargeVO
+import jakarta.servlet.http.HttpServletResponse
 import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDateTime
+import java.util.concurrent.ConcurrentHashMap
 
 @Service
 @Slf4j
 open class AdvanceChargeServiceImpl(
     private val baseService: com.wansenai.service.BaseService,
-    private val userDeptRelService: com.wansenai.service.user.ISysUserDeptRelService,
-    private val departmentService: SysDepartmentService,
     private val financialSubService: com.wansenai.service.financial.FinancialSubService,
     private val financialMainMapper: FinancialMainMapper,
     private val memberService: MemberService,
@@ -198,12 +198,35 @@ open class AdvanceChargeServiceImpl(
             receiptDate = this.receiptDate,
             operator = operator.name,
             financialPersonnel = financialPerson?.name ?: "",
-            memberName = member?.memberName,
+            memberName = member?.memberName ?: "",
             totalAmount = this.totalAmount,
             collectedAmount = this.changeAmount ?: BigDecimal.ZERO,
             status = this.status,
             remark = this.remark
         )
+    }
+
+    private fun getAdvanceChargeList(advanceChargeDTO: QueryAdvanceChargeDTO?): List<AdvanceChargeVO> {
+        val wrapper = LambdaQueryWrapper<FinancialMain>().apply {
+            advanceChargeDTO?.financialPersonnelId?.let { eq(FinancialMain::getOperatorId, it) }
+            advanceChargeDTO?.receiptNumber?.let { eq(FinancialMain::getReceiptNumber, it) }
+            advanceChargeDTO?.status?.let { eq(FinancialMain::getStatus, it) }
+            advanceChargeDTO?.operatorId?.let { eq(FinancialMain::getCreateBy, it) }
+            advanceChargeDTO?.remark?.let { like(FinancialMain::getRemark, it) }
+            advanceChargeDTO?.startDate?.let { ge(FinancialMain::getCreateTime, it) }
+            advanceChargeDTO?.endDate?.let { le(FinancialMain::getCreateTime, it) }
+            eq(FinancialMain::getType, "收预付款")
+            eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+        }
+
+        val result = financialMainMapper.selectList(wrapper)
+        return result.map { financialMain ->
+            val member = memberService.getMemberById(financialMain.relatedPersonId)
+            val operator = userService.getById(financialMain.createBy)
+            val financialPerson = operatorService.getOperatorById(financialMain.operatorId)
+
+            financialMain.toAdvanceChargeVO(member, operator, financialPerson)
+        }
     }
 
     // Extension function, converting List to Page
@@ -313,5 +336,28 @@ open class AdvanceChargeServiceImpl(
             return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_SUCCESS)
         }
         return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_ERROR)
+    }
+
+    override fun exportAdvanceCharge(advanceChargeDTO: QueryAdvanceChargeDTO, response: HttpServletResponse) {
+        val exportMap = ConcurrentHashMap<String, List<List<Any>>>()
+        val mainData = getAdvanceChargeList(advanceChargeDTO)
+        if (mainData.isNotEmpty()) {
+            exportMap["收预付款"] = ExcelUtils.getSheetData(mainData)
+            if (advanceChargeDTO.isExportDetail == true) {
+                val subData = mainData.flatMap { advanceChargeVO ->
+                    advanceChargeVO.id?.let { getAdvanceChargeDetailById(it) }?.data?.tableData?.map { item ->
+                        AdvanceChargeDataExportBO(
+                            memberName = advanceChargeVO.memberName,
+                            receiptNumber = advanceChargeVO.receiptNumber,
+                            accountName = item.accountName,
+                            amount = item.amount,
+                            remark = item.remark
+                        )
+                    } ?: emptyList()
+                }
+                exportMap["收预付款单据明细"] = ExcelUtils.getSheetData(subData)
+            }
+            ExcelUtils.exportManySheet(response, "收预付款", exportMap)
+        }
     }
 }

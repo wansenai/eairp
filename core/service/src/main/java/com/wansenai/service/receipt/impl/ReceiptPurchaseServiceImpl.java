@@ -1350,8 +1350,8 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                             subData.add(purchaseDataBo);
                         });
                     }
-                    exportMap.put("采购订单明细", ExcelUtils.getSheetData(subData));
                 }
+                exportMap.put("采购订单明细", ExcelUtils.getSheetData(subData));
             }
             exportMap.put("采购订单", ExcelUtils.getSheetData(mainData));
             ExcelUtils.exportManySheet(response, "采购订单", exportMap);
@@ -1391,8 +1391,8 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                             subData.add(purchaseDataBo);
                         });
                     }
-                    exportMap.put("采购入库明细", ExcelUtils.getSheetData(subData));
                 }
+                exportMap.put("采购入库明细", ExcelUtils.getSheetData(subData));
             }
             exportMap.put("采购入库", ExcelUtils.getSheetData(mainData));
             ExcelUtils.exportManySheet(response, "采购入库", exportMap);
@@ -1432,8 +1432,8 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                             subData.add(purchaseDataBo);
                         });
                     }
-                    exportMap.put("采购退货明细", ExcelUtils.getSheetData(subData));
                 }
+                exportMap.put("采购退货明细", ExcelUtils.getSheetData(subData));
             }
             exportMap.put("采购退货", ExcelUtils.getSheetData(mainData));
             ExcelUtils.exportManySheet(response, "采购退货", exportMap);

@@ -6,7 +6,7 @@ import {getOperatorList} from "@/api/basic/operator";
 
 export const columns: BasicColumn[] = [
     {
-        title: '客户',
+        title: '供应商',
         dataIndex: 'supplierName',
         width: 120,
     },
