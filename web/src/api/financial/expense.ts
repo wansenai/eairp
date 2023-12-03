@@ -14,6 +14,7 @@ enum API {
     DeleteBatch = '/financial/expense/deleteByIds',
     UpdateStatus = '/financial/expense/updateStatusByIds',
     GetDetail = '/financial/expense/getDetailById',
+    Export = '/financial/expense/export',
 }
 
 export function getExpensePageList(params: QueryExpenseReq) {
@@ -64,5 +65,15 @@ export function getExpenseDetailById(id: number) {
         {
             url: `${API.GetDetail}/${id}`
         },
+    );
+}
+
+export function exportExpense(params: QueryExpenseReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
+        }
     );
 }

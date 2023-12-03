@@ -36,4 +36,6 @@ public class QueryExpenseDTO {
     private Integer page;
 
     private Integer pageSize;
+
+    private Boolean isExportDetail;
 }

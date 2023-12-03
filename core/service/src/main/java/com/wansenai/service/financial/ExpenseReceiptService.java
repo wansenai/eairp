@@ -20,6 +20,7 @@ import com.wansenai.entities.financial.FinancialMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.ExpenseDetailVO;
 import com.wansenai.vo.financial.ExpenseVO;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -34,4 +35,6 @@ public interface ExpenseReceiptService extends IService<FinancialMain> {
     Response<String> deleteBatchExpenseReceipt(List<Long> ids);
 
     Response<String> updateExpenseReceiptStatus(List<Long> ids, Integer status);
+
+    void exportExpenseReceipt(QueryExpenseDTO queryExpenseDTO, HttpServletResponse response);
 }
