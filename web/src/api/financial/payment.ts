@@ -17,6 +17,7 @@ enum API {
     UpdateStatus = '/financial/payment/updateStatusByIds',
     GetDetail = '/financial/payment/getDetailById',
     GetArrearsPage = '/purchase/arrears/pageList',
+    Export = '/financial/payment/export',
 }
 
 export function getPaymentPageList(params: QueryPaymentReq) {
@@ -75,6 +76,16 @@ export function getArrearsPageList(params: QueryPaymentArrearsReq) {
         {
             url: API.GetArrearsPage,
             params,
+        }
+    );
+}
+
+export function exportPayment(params: QueryPaymentReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
         }
     );
 }
