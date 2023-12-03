@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.ShipmentsDataBO;
+import com.wansenai.bo.ShipmentsDataExportBO;
 import com.wansenai.dto.receipt.retail.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.retail.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.retail.RetailRefundDTO;
@@ -890,11 +891,13 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         var mainData = getRetailShipmentsList(queryShipmentsDTO).getData();
         if (!mainData.isEmpty()) {
             if (queryShipmentsDTO.getIsExportDetail()) {
-                var subData = new ArrayList<ShipmentsDataBO>();
+                var subData = new ArrayList<ShipmentsDataExportBO>();
                 for (RetailShipmentsVO retailShipmentsVO : mainData) {
                    var detail = getRetailShipmentsDetail(retailShipmentsVO.getId()).getData().getTableData();
                     detail.forEach(item -> {
-                        var shipmentBo = ShipmentsDataBO.builder()
+                        var shipmentBo = ShipmentsDataExportBO.builder()
+                                .memberName(retailShipmentsVO.getMemberName())
+                                .receiptNumber(retailShipmentsVO.getReceiptNumber())
                                 .warehouseName(item.getWarehouseName())
                                 .barCode(item.getBarCode())
                                 .productName(item.getProductName())
@@ -924,11 +927,13 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         var mainData = getRetailRefundList(queryRetailRefundDTO).getData();
         if (!mainData.isEmpty()) {
             if (queryRetailRefundDTO.getIsExportDetail()) {
-                var subData = new ArrayList<>();
+                var subData = new ArrayList<ShipmentsDataExportBO>();
                 for (RetailRefundVO refundVO : mainData) {
                     var detail = getRetailRefundDetail(refundVO.getId()).getData().getTableData();
                     detail.forEach(item -> {
-                        var shipmentBo = ShipmentsDataBO.builder()
+                        var shipmentBo = ShipmentsDataExportBO.builder()
+                                .memberName(refundVO.getMemberName())
+                                .receiptNumber(refundVO.getReceiptNumber())
                                 .warehouseName(item.getWarehouseName())
                                 .barCode(item.getBarCode())
                                 .productName(item.getProductName())

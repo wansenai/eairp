@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.AssembleStockBO;
+import com.wansenai.bo.AssembleStockDataExportBO;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.dto.warehouse.DisassembleReceiptDTO;
 import com.wansenai.dto.warehouse.QueryDisassembleReceiptDTO;
@@ -480,18 +481,16 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
         if (!mainData.isEmpty()) {
             exportMap.put("拆卸单", ExcelUtils.getSheetData(mainData));
             if (queryDisassembleReceiptDTO.getIsExportDetail()) {
-                var subData = new ArrayList<AssembleStockBO>();
+                var subData = new ArrayList<AssembleStockDataExportBO>();
                 for (DisassembleReceiptVO disassembleReceiptVO : mainData) {
                     var detail = getDisassembleReceiptDetail(disassembleReceiptVO.getId()).getData().getTableData();
                     if(!detail.isEmpty()) {
                         detail.forEach(item -> {
-                            var assembleStockBO = AssembleStockBO.builder()
-                                    .id(item.getId())
-                                    .warehouseId(item.getWarehouseId())
+                            var assembleStockBO = AssembleStockDataExportBO.builder()
+                                    .receiptNumber(disassembleReceiptVO.getReceiptNumber())
                                     .type(item.getType())
                                     .warehouseName(item.getWarehouseName())
                                     .barCode(item.getBarCode())
-                                    .productId(item.getProductId())
                                     .productName(item.getProductName())
                                     .productModel(item.getProductModel())
                                     .productUnit(item.getProductUnit())

@@ -14,7 +14,6 @@ package com.wansenai.bo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.wansenai.utils.excel.ExcelExport;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,56 +30,41 @@ public class SalesDataBO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long warehouseId;
 
-    @ExcelExport("仓库名称")
     private String warehouseName;
 
-    @ExcelExport("条码")
     private String barCode;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productId;
 
-    @ExcelExport("商品名称")
     private String productName;
 
-    @ExcelExport("规格")
     private String productStandard;
 
-    @ExcelExport("型号")
     private String productModel;
 
-    @ExcelExport("颜色")
     private String productColor;
 
-    @ExcelExport("库存")
     private Integer stock;
 
-    @ExcelExport("单位")
     private String productUnit;
 
-    @ExcelExport("数量")
     private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport("单价")
     private BigDecimal unitPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport("金额")
     private BigDecimal amount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport("税率(%)")
     private BigDecimal taxRate;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport("税额")
     private BigDecimal taxAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport("价税合计")
     private BigDecimal taxTotalPrice;
 
-    @ExcelExport("备注")
     private String remark;
 }

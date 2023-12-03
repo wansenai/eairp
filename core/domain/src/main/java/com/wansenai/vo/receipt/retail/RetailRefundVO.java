@@ -33,7 +33,7 @@ public class RetailRefundVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
-    @ExcelExport(value = "会员名称")
+    @ExcelExport(value = "会员")
     private String memberName;
 
     @ExcelExport(value = "单据编号")

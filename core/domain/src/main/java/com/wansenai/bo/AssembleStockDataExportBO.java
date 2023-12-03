@@ -12,59 +12,55 @@
  */
 package com.wansenai.bo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.AllArgsConstructor;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * 组装单和拆卸单导出数据BO (AssembleStockDataExportBO) 共存在这一个类中
+ */
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PurchaseDataBO {
+public class AssembleStockDataExportBO {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long warehouseId;
+    @ExcelExport("单据编号")
+    private String receiptNumber;
 
+    @ExcelExport("商品类型")
+    private String type;
+
+    @ExcelExport("仓库")
     private String warehouseName;
 
+    @ExcelExport("条码")
     private String barCode;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long productId;
-
+    @ExcelExport("商品名称")
     private String productName;
 
+    @ExcelExport("规格")
     private String productStandard;
 
+    @ExcelExport("型号")
     private String productModel;
 
-    private String productColor;
-
-    private Integer stock;
-
+    @ExcelExport("单位")
     private String productUnit;
 
+    @ExcelExport("库存")
+    private Integer stock;
+
+    @ExcelExport("商品数量")
     private Integer productNumber;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport("单价")
     private BigDecimal unitPrice;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport("金额")
     private BigDecimal amount;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal taxRate;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal taxAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal taxTotalPrice;
-
+    @ExcelExport("备注")
     private String remark;
 }

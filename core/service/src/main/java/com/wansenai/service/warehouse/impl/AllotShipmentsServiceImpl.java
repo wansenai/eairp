@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.AllotStockBO;
+import com.wansenai.bo.AllotStockDataExportBO;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.StorageShipmentStockBO;
 import com.wansenai.dto.warehouse.AllotReceiptDTO;
@@ -481,12 +482,13 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         if (!mainData.isEmpty()) {
             exportMap.put("调拨出库", ExcelUtils.getSheetData(mainData));
             if (queryAllotReceiptDTO.getIsExportDetail()) {
-                var subData = new ArrayList<AllotStockBO>();
+                var subData = new ArrayList<AllotStockDataExportBO>();
                 for (AllotReceiptVO allotReceiptVO : mainData) {
                     var detail = getAllotReceiptDetail(allotReceiptVO.getId()).getData().getTableData();
                     if (!detail.isEmpty()) {
                         detail.forEach(item -> {
-                            var allotStockBo = AllotStockBO.builder()
+                            var allotStockBo = AllotStockDataExportBO.builder()
+                                    .receiptNumber(allotReceiptVO.getReceiptNumber())
                                     .warehouseName(item.getWarehouseName())
                                     .otherWarehouseName(item.getOtherWarehouseName())
                                     .barCode(item.getBarCode())

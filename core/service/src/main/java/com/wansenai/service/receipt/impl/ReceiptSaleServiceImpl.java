@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.SalesDataBO;
+import com.wansenai.bo.SalesDataExportBO;
 import com.wansenai.dto.receipt.sale.*;
 import com.wansenai.entities.financial.FinancialMain;
 import com.wansenai.entities.financial.FinancialSub;
@@ -1326,12 +1327,14 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         var mainData = getSaleOrderList(querySaleOrderDTO);
         if (!mainData.isEmpty()) {
             if (querySaleOrderDTO.getIsExportDetail()) {
-                var subData = new ArrayList<SalesDataBO>();
+                var subData = new ArrayList<SalesDataExportBO>();
                 for (SaleOrderVO saleOrderVO : mainData) {
                     var detail = getSaleOrderDetail(saleOrderVO.getId()).getData().getTableData();
                     if (!detail.isEmpty()) {
                         detail.forEach(item -> {
-                            var saleDataBo = SalesDataBO.builder()
+                            var saleDataBo = SalesDataExportBO.builder()
+                                    .customerName(saleOrderVO.getCustomerName())
+                                    .receiptNumber(saleOrderVO.getReceiptNumber())
                                     .warehouseName(item.getWarehouseName())
                                     .barCode(item.getBarCode())
                                     .productName(item.getProductName())
@@ -1366,12 +1369,14 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         var mainData = getSaleShipmentsList(querySaleShipmentsDTO);
         if (!mainData.isEmpty()) {
             if (querySaleShipmentsDTO.getIsExportDetail()) {
-                var subData = new ArrayList<SalesDataBO>();
+                var subData = new ArrayList<SalesDataExportBO>();
                 for (SaleShipmentsVO saleShipmentsVO : mainData) {
                     var detail = getSaleShipmentsDetail(saleShipmentsVO.getId()).getData().getTableData();
                     if (!detail.isEmpty()) {
                         detail.forEach(item -> {
-                            var saleDataBo = SalesDataBO.builder()
+                            var saleDataBo = SalesDataExportBO.builder()
+                                    .customerName(saleShipmentsVO.getCustomerName())
+                                    .receiptNumber(saleShipmentsVO.getReceiptNumber())
                                     .warehouseName(item.getWarehouseName())
                                     .barCode(item.getBarCode())
                                     .productName(item.getProductName())
@@ -1406,12 +1411,14 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         var mainData = getSaleRefundList(querySaleRefundDTO);
         if (!mainData.isEmpty()) {
             if (querySaleRefundDTO.getIsExportDetail()) {
-                var subData = new ArrayList<SalesDataBO>();
+                var subData = new ArrayList<SalesDataExportBO>();
                 for (SaleRefundVO saleRefundVO : mainData) {
                     var detail = getSaleShipmentsDetail(saleRefundVO.getId()).getData().getTableData();
                     if (!detail.isEmpty()) {
                         detail.forEach(item -> {
-                            var saleDataBo = SalesDataBO.builder()
+                            var saleDataBo = SalesDataExportBO.builder()
+                                    .customerName(saleRefundVO.getCustomerName())
+                                    .receiptNumber(saleRefundVO.getReceiptNumber())
                                     .warehouseName(item.getWarehouseName())
                                     .barCode(item.getBarCode())
                                     .productName(item.getProductName())
