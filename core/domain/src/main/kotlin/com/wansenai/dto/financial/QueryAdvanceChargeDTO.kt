@@ -36,4 +36,6 @@ data class QueryAdvanceChargeDTO (
     val startDate: String?,
 
     val endDate: String?,
+
+    val isExportDetail: Boolean?,
 )
