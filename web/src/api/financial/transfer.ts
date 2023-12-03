@@ -14,6 +14,7 @@ enum API {
     DeleteBatch = '/financial/transfer/deleteByIds',
     UpdateStatus = '/financial/transfer/updateStatusByIds',
     GetDetail = '/financial/transfer/getDetailById',
+    Export = '/financial/transfer/export',
 }
 
 export function getTransferPageList(params: QueryTransferReq, mode: ErrorMessageMode = 'notice') {
@@ -64,5 +65,15 @@ export function getTransferDetailById(id: number) {
         {
             url: `${API.GetDetail}/${id}`
         },
+    );
+}
+
+export function exportTransfer(params: QueryTransferReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
+        }
     );
 }

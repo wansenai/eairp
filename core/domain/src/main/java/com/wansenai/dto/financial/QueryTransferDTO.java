@@ -34,4 +34,6 @@ public class QueryTransferDTO {
     private Integer page;
 
     private Integer pageSize;
+
+    private Boolean isExportDetail;
 }

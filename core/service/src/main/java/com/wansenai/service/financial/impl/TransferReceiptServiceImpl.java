@@ -15,7 +15,9 @@ package com.wansenai.service.financial.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
+import com.wansenai.bo.IncomeExpenseDataExportBO;
 import com.wansenai.bo.TransferAccountBO;
+import com.wansenai.bo.TransferAccountDataExportBO;
 import com.wansenai.dto.financial.AddOrUpdateTransferDTO;
 import com.wansenai.dto.financial.QueryTransferDTO;
 import com.wansenai.entities.financial.FinancialMain;
@@ -32,11 +34,12 @@ import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.utils.TimeUtil;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
-import com.wansenai.utils.enums.IncomeExpenseCodeEnum;
 import com.wansenai.utils.enums.TransferAccountCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.TransferDetailVO;
 import com.wansenai.vo.financial.TransferVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -45,6 +48,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,6 +135,36 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
         result.setRecords(transferVOList);
         result.setTotal(financialMainPage.getTotal());
         return Response.responseData(result);
+    }
+
+    private List<TransferVO> getTransferReceiptList(QueryTransferDTO queryTransferDTO) {
+        var financialMainList = lambdaQuery()
+                .eq(queryTransferDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryTransferDTO.getFinancialPersonId())
+                .eq(queryTransferDTO.getAccountId() != null, FinancialMain::getAccountId, queryTransferDTO.getAccountId())
+                .eq(StringUtils.hasLength(queryTransferDTO.getReceiptNumber()), FinancialMain::getReceiptNumber, queryTransferDTO.getReceiptNumber())
+                .eq(queryTransferDTO.getStatus() != null, FinancialMain::getStatus, queryTransferDTO.getStatus())
+                .like(StringUtils.hasLength(queryTransferDTO.getRemark()), FinancialMain::getRemark, queryTransferDTO.getRemark())
+                .ge(StringUtils.hasLength(queryTransferDTO.getStartDate()), FinancialMain::getReceiptDate, queryTransferDTO.getStartDate())
+                .le(StringUtils.hasLength(queryTransferDTO.getEndDate()), FinancialMain::getReceiptDate, queryTransferDTO.getEndDate())
+                .eq(FinancialMain::getType, "转账")
+                .list();
+
+        var transferVOList = new ArrayList<TransferVO>(financialMainList.size() + 1);
+        financialMainList.forEach(item -> {
+            var transferVO = TransferVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .financialPerson(commonService.getOperatorName(item.getOperatorId()))
+                    .paymentAmount(item.getTotalAmount())
+                    .paymentAccountName(commonService.getAccountName(item.getAccountId()))
+                    .status(item.getStatus())
+                    .remark(item.getRemark())
+                    .build();
+
+            transferVOList.add(transferVO);
+        });
+        return transferVOList;
     }
 
     @Override
@@ -351,5 +385,33 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
             return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_ERROR);
         }
         return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_SUCCESS);
+    }
+
+    @Override
+    public void exportTransferReceipt(QueryTransferDTO queryTransferDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getTransferReceiptList(queryTransferDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("转账单", ExcelUtils.getSheetData(mainData));
+            if (queryTransferDTO.getIsExportDetail()) {
+                var subData = new ArrayList<TransferAccountDataExportBO>();
+                for (TransferVO transferVO : mainData) {
+                    var detail = getTransferReceiptDetail(transferVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var data = TransferAccountDataExportBO.builder()
+                                    .receiptNumber(transferVO.getReceiptNumber())
+                                    .accountName(item.getAccountName())
+                                    .transferAmount(item.getTransferAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(data);
+                        });
+                    }
+                }
+                exportMap.put("转账单明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "转账单", exportMap);
+        }
     }
 }
