@@ -40,14 +40,17 @@ import com.wansenai.service.user.ISysUserService;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.StatisticalDataVO;
 import com.wansenai.vo.report.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -2206,5 +2209,13 @@ public class ReceiptServiceImpl implements ReceiptService {
             result.setTotal(queryDataPage.getTotal());
         }
         return Response.responseData(result);
+    }
+
+    @Override
+    public void exportProductStockExcel(QueryProductStockDTO queryProductStockDTO, HttpServletResponse response) {
+        var queryData = productStockMapper.getProductStockList(queryProductStockDTO);
+        if (!queryData.isEmpty()) {
+            ExcelUtils.export(response, "商品库存报表", ExcelUtils.getSheetData(queryData));
+        }
     }
 }

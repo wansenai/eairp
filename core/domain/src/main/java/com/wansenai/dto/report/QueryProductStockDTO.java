@@ -13,6 +13,7 @@
 package com.wansenai.dto.report;
 
 import lombok.Data;
+import lombok.Getter;
 
 @Data
 public class QueryProductStockDTO {
@@ -28,4 +29,6 @@ public class QueryProductStockDTO {
     private Long page;
 
     private Long pageSize;
+
+    private Boolean isExportDetail;
 }

@@ -19,8 +19,10 @@ import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.retail.StatisticalDataVO;
 import com.wansenai.vo.report.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -120,5 +122,10 @@ public class ReportController {
     @PostMapping("supplierBillDetail")
     public Response<Page<SupplierBillDetailVO>> getSupplierBillDetail(@RequestBody QuerySupplierBillDetailDTO querySupplierBillDetailDTO) {
         return receiptService.getSupplierBillDetail(querySupplierBillDetailDTO);
+    }
+
+    @GetMapping("/productStockExport")
+    public void exportProductStockExcel(@ModelAttribute QueryProductStockDTO queryProductStockDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportProductStockExcel(queryProductStockDTO, response);
     }
 }

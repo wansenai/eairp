@@ -21,7 +21,9 @@ import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.StatisticalDataVO;
 import com.wansenai.vo.report.*;
+import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ReceiptService {
@@ -71,4 +73,6 @@ public interface ReceiptService {
     Response<Page<SupplierBillVO>> getSupplierBill(QuerySupplierBillDTO querySupplierBillDTO);
 
     Response<Page<SupplierBillDetailVO>> getSupplierBillDetail(QuerySupplierBillDetailDTO querySupplierBillDetailDTO);
+
+    void exportProductStockExcel(QueryProductStockDTO queryProductStockDTO, HttpServletResponse response) throws IOException;
 }
