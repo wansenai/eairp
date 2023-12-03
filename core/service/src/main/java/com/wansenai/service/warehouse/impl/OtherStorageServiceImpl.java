@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.StorageShipmentStockBO;
+import com.wansenai.bo.StorageShipmentStockExportBO;
 import com.wansenai.dto.warehouse.OtherStorageDTO;
 import com.wansenai.dto.warehouse.QueryOtherStorageDTO;
 import com.wansenai.entities.product.ProductStock;
@@ -437,12 +438,15 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
         if (!mainData.isEmpty()) {
             exportMap.put("其他入库", ExcelUtils.getSheetData(mainData));
             if (queryOtherStorageDTO.getIsExportDetail()) {
-                var subData = new ArrayList<StorageShipmentStockBO>();
+                var subData = new ArrayList<StorageShipmentStockExportBO>();
                 for (OtherStorageVO otherStorageVO : mainData) {
                     var detail = getOtherStorageDetail(otherStorageVO.getId()).getData().getTableData();
                     if(!detail.isEmpty()) {
                         detail.forEach(item -> {
-                            var storageShipmentStockBO = StorageShipmentStockBO.builder()
+                            var storageShipmentStockBO = StorageShipmentStockExportBO.builder()
+                                    .receiptNumber(otherStorageVO.getReceiptNumber())
+                                    .relatedPersonType("供应商")
+                                    .relatedPerson(otherStorageVO.getSupplierName())
                                     .warehouseName(item.getWarehouseName())
                                     .barCode(item.getBarCode())
                                     .productName(item.getProductName())
