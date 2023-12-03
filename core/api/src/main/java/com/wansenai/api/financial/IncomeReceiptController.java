@@ -19,6 +19,7 @@ import com.wansenai.service.financial.IncomeReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.IncomeDetailVO;
 import com.wansenai.vo.financial.IncomeVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.List;
 
@@ -63,5 +65,10 @@ public class IncomeReceiptController {
     @PutMapping("updateStatusByIds")
     public Response<String> updateIncomeReceiptStatusByIds(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return incomeReceiptService.updateIncomeReceiptStatus(ids, status);
+    }
+
+    @GetMapping("export")
+    public void exportIncomeReceipt(@ModelAttribute QueryIncomeDTO queryIncomeDTO, HttpServletResponse response) {
+        incomeReceiptService.exportIncomeReceipt(queryIncomeDTO, response);
     }
 }
