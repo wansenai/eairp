@@ -13,6 +13,7 @@ enum API {
     DeleteBatch = '/financial/advance-charge/deleteByIds',
     UpdateStatus = '/financial/advance-charge/updateStatusByIds',
     GetDetail = '/financial/advance-charge/getDetailById',
+    Export = '/financial/advance-charge/export',
 }
 
 export function getAdvancePageList(params: QueryAdvanceReq, errorMode: ErrorMessageMode = 'message') {
@@ -71,5 +72,15 @@ export function getAdvanceDetail(id: number | string, mode: ErrorMessageMode = '
         {
             errorMessageMode: mode,
         },
+    );
+}
+
+export function exportAdvance(params: QueryAdvanceReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
+        }
     );
 }
