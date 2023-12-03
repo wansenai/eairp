@@ -23,17 +23,20 @@ import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useModal} from "@/components/Modal";
 import {productStockColumns, searchProductStockSchema} from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getProductStock} from "@/api/report/report";
+import {getProductStock, exportProductStock} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import StockFlowModal from "@/views/report/modal/StockFlowModal.vue";
 import printJS from "print-js";
+import {useMessage} from "@/hooks/web/useMessage";
+import {getTimestamp} from "@/utils/dateUtil";
 export default defineComponent({
   name: 'ProductStock',
   components: {Tag, TableAction, BasicTable, StockFlowModal},
   setup() {
     const [registerModal, {openModal}] = useModal();
     const printTableData = ref<any[]>([]);
-    const [registerTable, { reload }] = useTable({
+    const { createMessage } = useMessage();
+    const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '商品库存报表',
       api: getProductStock,
       rowKey: 'id',
@@ -99,7 +102,24 @@ export default defineComponent({
     }
 
     function exportTable() {
-
+      const dataSum = getDataSource().length;
+      if (dataSum === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      exportProductStock(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "商品库存数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
     }
 
     function primaryPrint() {

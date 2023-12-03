@@ -33,30 +33,31 @@ import {
 } from "@/api/report/reportModel";
 
 enum API {
-    getStatisticalData = '/report/homePage/statistics',
-    getProductStockData = '/report/productStock',
-    getProductStockFlowData = '/report/productStockFlow',
-    getAccountStatistics = '/report/accountStatistics',
-    getAccountFlow = '/report/accountFlow',
-    getRetailStatistics = '/report/retailStatistics',
-    getPurchaseStatistics = '/report/purchaseStatistics',
-    getSalesStatistics = '/report/salesStatistics',
-    getShipmentsDetail = '/report/shipmentsDetail',
-    getStorageDetail = '/report/storageDetail',
-    getRelatedPerson = '/report/relatedPerson',
-    getShipmentsSummary = '/report/shipmentsSummary',
-    getStorageSummary = '/report/storageSummary',
-    getCustomerBill = '/report/customerBill',
-    getCustomerBillDetail = '/report/customerBillDetail',
-    getSupplierBill = '/report/supplierBill',
-    getSupplierBillDetail = '/report/supplierBillDetail',
+    GetStatisticalData = '/report/homePage/statistics',
+    GetProductStockData = '/report/productStock',
+    GetProductStockFlowData = '/report/productStockFlow',
+    GetAccountStatistics = '/report/accountStatistics',
+    GetAccountFlow = '/report/accountFlow',
+    GetRetailStatistics = '/report/retailStatistics',
+    GetPurchaseStatistics = '/report/purchaseStatistics',
+    GetSalesStatistics = '/report/salesStatistics',
+    GetShipmentsDetail = '/report/shipmentsDetail',
+    GetStorageDetail = '/report/storageDetail',
+    GetRelatedPerson = '/report/relatedPerson',
+    GetShipmentsSummary = '/report/shipmentsSummary',
+    GetStorageSummary = '/report/storageSummary',
+    GetCustomerBill = '/report/customerBill',
+    GetCustomerBillDetail = '/report/customerBillDetail',
+    GetSupplierBill = '/report/supplierBill',
+    GetSupplierBillDetail = '/report/supplierBillDetail',
+    ExportProductStockData = '/report/productStockExport',
 }
 
 
 export function getStatistical() {
     return defHttp.get<BaseDataResp<RetailStatisticalResp>>(
         {
-            url: API.getStatisticalData,
+            url: API.GetStatisticalData,
         },
     );
 }
@@ -64,7 +65,7 @@ export function getStatistical() {
 export function getProductStock(params: QueryProductStockReq) {
     return defHttp.post<BaseDataResp<ProductStockResp>>(
         {
-            url: API.getProductStockData,
+            url: API.GetProductStockData,
             params
         }
     );
@@ -73,7 +74,7 @@ export function getProductStock(params: QueryProductStockReq) {
 export function getProductStockFlow(params: QueryProductStockFlowReq, productId: number) {
     return defHttp.post<BaseDataResp<ProductStockFlowResp>>(
         {
-            url: API.getProductStockFlowData,
+            url: API.GetProductStockFlowData,
             params
         }
     );
@@ -82,7 +83,7 @@ export function getProductStockFlow(params: QueryProductStockFlowReq, productId:
 export function getAccountStatistics(params: QueryAccountStatisticsReq) {
     return defHttp.post<BaseDataResp<AccountStatisticsResp>>(
         {
-            url: API.getAccountStatistics,
+            url: API.GetAccountStatistics,
             params
         }
     );
@@ -91,7 +92,7 @@ export function getAccountStatistics(params: QueryAccountStatisticsReq) {
 export function getAccountFlow(accountId: number) {
     return defHttp.get<BaseDataResp<AccountFlowResp>>(
         {
-            url: API.getAccountFlow,
+            url: API.GetAccountFlow,
             params: accountId
         }
     );
@@ -100,7 +101,7 @@ export function getAccountFlow(accountId: number) {
 export function getRetailStatistics(params: QueryRetailStatisticsReq) {
     return defHttp.post<BaseDataResp<RetailStatisticsResp>>(
         {
-            url: API.getRetailStatistics,
+            url: API.GetRetailStatistics,
             params
         }
     );
@@ -109,7 +110,7 @@ export function getRetailStatistics(params: QueryRetailStatisticsReq) {
 export function getPurchaseStatistics(params: QueryPurchaseStatisticsReq) {
     return defHttp.post<BaseDataResp<PurchaseStatisticsResp>>(
         {
-            url: API.getPurchaseStatistics,
+            url: API.GetPurchaseStatistics,
             params
         }
     );
@@ -118,7 +119,7 @@ export function getPurchaseStatistics(params: QueryPurchaseStatisticsReq) {
 export function getSalesStatistics(params: QuerySalesStatisticsReq) {
     return defHttp.post<BaseDataResp<SalesStatisticsResp>>(
         {
-            url: API.getSalesStatistics,
+            url: API.GetSalesStatistics,
             params
         }
     );
@@ -127,7 +128,7 @@ export function getSalesStatistics(params: QuerySalesStatisticsReq) {
 export function getShipmentsDetail(params: QueryShipmentsDetailStatisticsReq) {
     return defHttp.post<BaseDataResp<ShipmentsDetailStatisticsResp>>(
         {
-            url: API.getShipmentsDetail,
+            url: API.GetShipmentsDetail,
             params
         }
     );
@@ -136,7 +137,7 @@ export function getShipmentsDetail(params: QueryShipmentsDetailStatisticsReq) {
 export function getStorageDetail(params: QueryStorageDetailStatisticsReq) {
     return defHttp.post<BaseDataResp<StorageDetailStatisticsResp>>(
         {
-            url: API.getStorageDetail,
+            url: API.GetStorageDetail,
             params
         }
     );
@@ -145,7 +146,7 @@ export function getStorageDetail(params: QueryStorageDetailStatisticsReq) {
 export function getRelatedPerson() {
     return defHttp.get<BaseDataResp<RelatedPersonResp>>(
         {
-            url: API.getRelatedPerson,
+            url: API.GetRelatedPerson,
         }
     );
 }
@@ -153,7 +154,7 @@ export function getRelatedPerson() {
 export function getShipmentsSummary(params: QueryShipmentsSummaryStatisticsReq) {
     return defHttp.post<BaseDataResp<ShipmentsSummaryStatisticsResp>>(
         {
-            url: API.getShipmentsSummary,
+            url: API.GetShipmentsSummary,
             params
         }
     );
@@ -162,7 +163,7 @@ export function getShipmentsSummary(params: QueryShipmentsSummaryStatisticsReq) 
 export function getStorageSummary(params: QueryStorageSummaryStatisticsReq) {
     return defHttp.post<BaseDataResp<StorageSummaryStatisticsResp>>(
         {
-            url: API.getStorageSummary,
+            url: API.GetStorageSummary,
             params
         }
     );
@@ -171,7 +172,7 @@ export function getStorageSummary(params: QueryStorageSummaryStatisticsReq) {
 export function getCustomerBill(params: QueryCustomerBillReq) {
     return defHttp.post<BaseDataResp<CustomerBillStatisticsResp>>(
         {
-            url: API.getCustomerBill,
+            url: API.GetCustomerBill,
             params
         }
     );
@@ -180,7 +181,7 @@ export function getCustomerBill(params: QueryCustomerBillReq) {
 export function getCustomerBillDetail(params: QueryCustomerBillDetailReq) {
     return defHttp.post<BaseDataResp<CustomerBillDetailStatisticsResp>>(
         {
-            url: API.getCustomerBillDetail,
+            url: API.GetCustomerBillDetail,
             params
         }
     );
@@ -189,7 +190,7 @@ export function getCustomerBillDetail(params: QueryCustomerBillDetailReq) {
 export function getSupplierBill(params: QuerySupplierBillReq) {
     return defHttp.post<BaseDataResp<SupplierBillStatisticsResp>>(
         {
-            url: API.getSupplierBill,
+            url: API.GetSupplierBill,
             params
         }
     );
@@ -198,8 +199,18 @@ export function getSupplierBill(params: QuerySupplierBillReq) {
 export function getSupplierBillDetail(params: QuerySupplierBillDetailReq) {
     return defHttp.post<BaseDataResp<SupplierBillDetailStatisticsResp>>(
         {
-            url: API.getSupplierBillDetail,
+            url: API.GetSupplierBillDetail,
             params
+        }
+    );
+}
+
+export function exportProductStock(params: QueryProductStockReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportProductStockData}`,
+            params,
+            responseType: "blob"
         }
     );
 }
