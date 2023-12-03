@@ -20,6 +20,7 @@ import com.wansenai.entities.financial.FinancialMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.CollectionDetailVO;
 import com.wansenai.vo.financial.CollectionVO;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -34,4 +35,6 @@ public interface CollectionReceiptService extends IService<FinancialMain> {
     Response<String> deleteBatchCollectionReceipt(List<Long> ids);
 
     Response<String> updateCollectionReceiptStatus(List<Long> ids, Integer status);
+
+    void exportCollectionReceipt(QueryCollectionDTO queryCollectionDTO, HttpServletResponse response);
 }
