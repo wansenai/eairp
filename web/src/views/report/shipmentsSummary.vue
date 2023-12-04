@@ -19,16 +19,19 @@ import {
   shipmentsSummaryStatisticsColumns
 } from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getShipmentsSummary} from "@/api/report/report";
+import {getShipmentsSummary, exportShipmentsSummary} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import printJS from "print-js";
+import {getTimestamp} from "@/utils/dateUtil";
+import {useMessage} from "@/hooks/web/useMessage";
 
 export default defineComponent({
   name: 'ShipmentsSummaryStatistics',
   components: {Tag, TableAction, BasicTable},
   setup() {
     const printTableData = ref<any[]>([]);
-    const [registerTable, { reload }] = useTable({
+    const { createMessage } = useMessage();
+    const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '出库汇总报表',
       api: getShipmentsSummary,
       columns: shipmentsSummaryStatisticsColumns,
@@ -80,6 +83,23 @@ export default defineComponent({
     }
 
     function exportTable() {
+      if (getDataSource() === undefined || getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      exportShipmentsSummary(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "出库汇总数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
     }
 
     function primaryPrint() {
