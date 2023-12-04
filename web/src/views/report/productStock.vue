@@ -102,8 +102,7 @@ export default defineComponent({
     }
 
     function exportTable() {
-      const dataSum = getDataSource().length;
-      if (dataSum === 0) {
+      if (getDataSource() === undefined || getDataSource().length === 0) {
         createMessage.warn('当前查询条件下无数据可导出');
         return;
       }
