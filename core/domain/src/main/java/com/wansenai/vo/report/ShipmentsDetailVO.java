@@ -15,6 +15,7 @@ package com.wansenai.vo.report;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.Builder;
 import lombok.Data;
 
@@ -25,38 +26,54 @@ import java.time.LocalDateTime;
 @Builder
 public class ShipmentsDetailVO {
 
+    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
+    @ExcelExport(value = "类型")
+    private String type;
+
+    // supplier or customer or member
+    @ExcelExport(value = "往来人员")
+    private String name;
+
+    @ExcelExport(value = "商品条码")
     private String productBarcode;
 
-    private String productName;
-
+    @ExcelExport(value = "仓库")
     private String warehouseName;
 
-    private String productModel;
+    @ExcelExport(value = "商品名称")
+    private String productName;
 
+    @ExcelExport(value = "规格")
     private String productStandard;
 
+    @ExcelExport(value = "型号")
+    private String productModel;
+
+    @ExcelExport(value = "单位")
     private String productUnit;
 
+    @ExcelExport(value = "数量")
     private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "单价")
     private BigDecimal unitPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "金额")
     private BigDecimal amount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "税率(%)")
     private BigDecimal taxRate;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "税额")
     private BigDecimal taxAmount;
 
-    private String type;
-    // supplier or customer or member
-    private String name;
-
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ExcelExport(value = "出库时间")
     private LocalDateTime createTime;
 }

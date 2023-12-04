@@ -27,13 +27,15 @@ import {
   shipmentsDetailStatisticsColumns
 } from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getShipmentsDetail} from "@/api/report/report";
+import {getShipmentsDetail, exportShipmentsDetail} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import {useModal} from "@/components/Modal";
 import ViewShipmentModal from "@/views/retail/shipments/components/ViewShipmentModal.vue";
 import ViewSaleShipmentsModal from "@/views/sales/shipments/components/ViewSaleShipmentsModal.vue";
 import ViewPurchaseRefundModal from "@/views/purchase/refund/components/ViewRefundModal.vue";
 import printJS from "print-js";
+import {useMessage} from "@/hooks/web/useMessage";
+import {getTimestamp} from "@/utils/dateUtil";
 
 export default defineComponent({
   name: 'ShipmentsDetailStatistics',
@@ -43,7 +45,8 @@ export default defineComponent({
     const [handlePurchaseRefundModal, {openModal: openPurchaseRefundModal}] = useModal();
     const [handleRetailShipmentModal, {openModal: openRetailShipmentModal}] = useModal();
     const printTableData = ref<any[]>([]);
-    const [registerTable, { reload }] = useTable({
+    const { createMessage } = useMessage();
+    const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '出库明细报表',
       api: getShipmentsDetail,
       columns: shipmentsDetailStatisticsColumns,
@@ -118,6 +121,23 @@ export default defineComponent({
     }
 
     function exportTable() {
+      if (getDataSource() === undefined || getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      exportShipmentsDetail(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "出库明细数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
     }
 
     function primaryPrint() {
