@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.StorageShipmentStockBO;
+import com.wansenai.bo.StorageShipmentStockExportBO;
 import com.wansenai.dto.warehouse.OtherStorageDTO;
 import com.wansenai.dto.warehouse.QueryOtherStorageDTO;
 import com.wansenai.entities.product.ProductStock;
@@ -38,9 +39,12 @@ import com.wansenai.utils.TimeUtil;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.OtherStorageCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
+import com.wansenai.vo.warehouse.OtherShipmentVO;
 import com.wansenai.vo.warehouse.OtherStorageDetailVO;
 import com.wansenai.vo.warehouse.OtherStorageVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -179,6 +183,49 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
         result.setTotal(wrapperMainMapper.getTotal());
         return Response.responseData(result);
     }
+
+    private List<OtherStorageVO> getOtherStorageList(QueryOtherStorageDTO queryOtherStorageDTO) {
+        var wrapperMainMapper = lambdaQuery()
+                .eq(queryOtherStorageDTO.getSupplierId() != null, WarehouseReceiptMain::getRelatedPersonId, queryOtherStorageDTO.getSupplierId())
+                .eq(queryOtherStorageDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryOtherStorageDTO.getOperatorId())
+                .eq(queryOtherStorageDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryOtherStorageDTO.getStatus())
+                .eq(StringUtils.hasLength(queryOtherStorageDTO.getReceiptNumber()), WarehouseReceiptMain::getReceiptNumber, queryOtherStorageDTO.getReceiptNumber())
+                .eq(StringUtils.hasLength(queryOtherStorageDTO.getOtherReceipt()), WarehouseReceiptMain::getReceiptNumber, queryOtherStorageDTO.getOtherReceipt())
+                .like(StringUtils.hasLength(queryOtherStorageDTO.getRemark()), WarehouseReceiptMain::getRemark, queryOtherStorageDTO.getRemark())
+                .ge(StringUtils.hasLength(queryOtherStorageDTO.getStartDate()), WarehouseReceiptMain::getCreateTime, queryOtherStorageDTO.getStartDate())
+                .le(StringUtils.hasLength(queryOtherStorageDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryOtherStorageDTO.getEndDate())
+                .eq(WarehouseReceiptMain::getType, "其他入库")
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var otherStorageVOList = new ArrayList<OtherStorageVO>(wrapperMainMapper.size() + 1);
+        wrapperMainMapper.forEach(item -> {
+
+            var product = productService.getById(item.getProductId());
+            var productInfo = "";
+            if(product != null) {
+                productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
+            }
+
+            var operator = userService.getById(item.getCreateBy());
+            var otherStorageVO = OtherStorageVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(productInfo)
+                    .supplierName(commonService.getSupplierName(item.getRelatedPersonId()))
+                    .receiptDate(item.getReceiptDate())
+                    .operator(Optional.ofNullable(operator).map(SysUser::getName).orElse(""))
+                    .productNumber(item.getTotalProductNumber())
+                    .totalAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .build();
+
+            otherStorageVOList.add(otherStorageVO);
+        });
+        return otherStorageVOList;
+    }
+
+
     @Override
     public Response<OtherStorageDetailVO> getOtherStorageDetail(Long id) {
         if (id == null) {
@@ -382,5 +429,44 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
             return Response.responseMsg(OtherStorageCodeEnum.UPDATE_OTHER_STORAGE_STOCK_ERROR);
         }
         return Response.responseMsg(OtherStorageCodeEnum.UPDATE_OTHER_STORAGE_STOCK_SUCCESS);
+    }
+
+    @Override
+    public void exportOtherStorage(QueryOtherStorageDTO queryOtherStorageDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getOtherStorageList(queryOtherStorageDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("其他入库", ExcelUtils.getSheetData(mainData));
+            if (queryOtherStorageDTO.getIsExportDetail()) {
+                var subData = new ArrayList<StorageShipmentStockExportBO>();
+                for (OtherStorageVO otherStorageVO : mainData) {
+                    var detail = getOtherStorageDetail(otherStorageVO.getId()).getData().getTableData();
+                    if(!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var storageShipmentStockBO = StorageShipmentStockExportBO.builder()
+                                    .receiptNumber(otherStorageVO.getReceiptNumber())
+                                    .relatedPersonType("供应商")
+                                    .relatedPerson(otherStorageVO.getSupplierName())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productExtendInfo(item.getProductExtendInfo())
+                                    .stock(item.getStock())
+                                    .productUnit(item.getProductUnit())
+                                    .productNumber(item.getProductNumber())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(storageShipmentStockBO);
+                        });
+                    }
+                }
+                exportMap.put("其他入库明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "其他入库", exportMap);
+        }
     }
 }

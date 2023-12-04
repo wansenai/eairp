@@ -36,4 +36,6 @@ public class QueryIncomeDTO {
     private Integer page;
 
     private Integer pageSize;
+
+    private Boolean isExportDetail;
 }

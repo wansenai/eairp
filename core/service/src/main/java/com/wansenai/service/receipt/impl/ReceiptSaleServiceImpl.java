@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.SalesDataBO;
+import com.wansenai.bo.SalesDataExportBO;
 import com.wansenai.dto.receipt.sale.*;
 import com.wansenai.entities.financial.FinancialMain;
 import com.wansenai.entities.financial.FinancialSub;
@@ -42,8 +43,10 @@ import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.SaleCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.sale.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -319,6 +322,50 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         return Response.responseData(result);
     }
 
+    private List<SaleOrderVO> getSaleOrderList(QuerySaleOrderDTO querySaleOrderDTO) {
+        var saleOrderVOList = new ArrayList<SaleOrderVO>();
+        var saleMains = lambdaQuery()
+                .eq(ReceiptSaleMain::getType, ReceiptConstants.RECEIPT_TYPE_ORDER)
+                .in(ReceiptSaleMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_SALES_ORDER)
+                .eq(StringUtils.hasText(querySaleOrderDTO.getReceiptNumber()), ReceiptSaleMain::getReceiptNumber, querySaleOrderDTO.getReceiptNumber())
+                .like(StringUtils.hasText(querySaleOrderDTO.getRemark()), ReceiptSaleMain::getRemark, querySaleOrderDTO.getRemark())
+                .eq(querySaleOrderDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, querySaleOrderDTO.getCustomerId())
+                .eq(querySaleOrderDTO.getOperatorId() != null, ReceiptSaleMain::getCreateBy, querySaleOrderDTO.getOperatorId())
+                .eq(querySaleOrderDTO.getStatus() != null, ReceiptSaleMain::getStatus, querySaleOrderDTO.getStatus())
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(querySaleOrderDTO.getStartDate()), ReceiptSaleMain::getCreateTime, querySaleOrderDTO.getStartDate())
+                .le(StringUtils.hasText(querySaleOrderDTO.getEndDate()), ReceiptSaleMain::getCreateTime, querySaleOrderDTO.getEndDate())
+                .list();
+
+        saleMains.forEach(item -> {
+            var receiptSubList = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .list();
+            var productNumber = calculateProductNumber(receiptSubList);
+
+            var customerName = getCustomerName(item.getCustomerId());
+            var crateBy = getUserName(item.getCreateBy());
+            var totalAmount = calculateTotalAmount(receiptSubList, ReceiptSaleSub::getTotalAmount);
+            var taxRateTotalPrice = calculateTotalAmount(receiptSubList, ReceiptSaleSub::getTaxIncludedAmount);
+
+            var saleOrderVO = SaleOrderVO.builder()
+                    .id(item.getId())
+                    .customerName(customerName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalPrice(totalAmount)
+                    .taxRateTotalPrice(taxRateTotalPrice)
+                    .deposit(item.getDeposit())
+                    .status(item.getStatus())
+                    .build();
+            saleOrderVOList.add(saleOrderVO);
+        });
+        return saleOrderVOList;
+    }
+
     @Override
     public Response<SaleOrderDetailVO> getSaleOrderDetail(Long id) {
         if (id == null) {
@@ -576,6 +623,52 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         result.setSize(queryResult.getSize());
 
         return Response.responseData(result);
+    }
+
+    private List<SaleShipmentsVO> getSaleShipmentsList(QuerySaleShipmentsDTO shipmentsDTO) {
+        var saleShipmentsVOList = new ArrayList<SaleShipmentsVO>();
+        var saleMains = lambdaQuery()
+                .eq(ReceiptSaleMain::getType, ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
+                .in(ReceiptSaleMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_SALES_SHIPMENTS)
+                .eq(StringUtils.hasText(shipmentsDTO.getReceiptNumber()), ReceiptSaleMain::getReceiptNumber, shipmentsDTO.getReceiptNumber())
+                .like(StringUtils.hasText(shipmentsDTO.getRemark()), ReceiptSaleMain::getRemark, shipmentsDTO.getRemark())
+                .eq(shipmentsDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, shipmentsDTO.getCustomerId())
+                .eq(shipmentsDTO.getOperatorId() != null, ReceiptSaleMain::getCreateBy, shipmentsDTO.getOperatorId())
+                .eq(shipmentsDTO.getStatus() != null, ReceiptSaleMain::getStatus, shipmentsDTO.getStatus())
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(shipmentsDTO.getStartDate()), ReceiptSaleMain::getCreateTime, shipmentsDTO.getStartDate())
+                .le(StringUtils.hasText(shipmentsDTO.getEndDate()), ReceiptSaleMain::getCreateTime, shipmentsDTO.getEndDate())
+                .list();
+
+        saleMains.forEach(item -> {
+            var receiptSubList = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .list();
+            var productNumber = calculateProductNumber(receiptSubList);
+            var customerName = getCustomerName(item.getCustomerId());
+            var crateBy = getUserName(item.getCreateBy());
+            var totalAmount = calculateTotalAmount(receiptSubList, ReceiptSaleSub::getTotalAmount);
+            var taxRateTotalPrice = calculateTotalAmount(receiptSubList, ReceiptSaleSub::getTaxIncludedAmount);
+            var totalCollectAmount = item.getArrearsAmount().add(item.getChangeAmount());
+
+            var saleShipmentVO = SaleShipmentsVO.builder()
+                    .id(item.getId())
+                    .customerName(customerName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalAmount(totalAmount)
+                    .taxIncludedAmount(taxRateTotalPrice)
+                    .totalCollectAmount(totalCollectAmount)
+                    .thisCollectAmount(item.getChangeAmount())
+                    .thisArrearsAmount(item.getArrearsAmount())
+                    .status(item.getStatus())
+                    .build();
+            saleShipmentsVOList.add(saleShipmentVO);
+        });
+        return saleShipmentsVOList;
     }
 
     @Override
@@ -882,6 +975,53 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         return Response.responseData(result);
     }
 
+    private List<SaleRefundVO> getSaleRefundList(QuerySaleRefundDTO refundDTO) {
+        var saleRefundVOList = new ArrayList<SaleRefundVO>();
+        var saleMains = lambdaQuery()
+                .eq(ReceiptSaleMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .in(ReceiptSaleMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_SALES_REFUND)
+                .eq(StringUtils.hasText(refundDTO.getReceiptNumber()), ReceiptSaleMain::getReceiptNumber, refundDTO.getReceiptNumber())
+                .like(StringUtils.hasText(refundDTO.getRemark()), ReceiptSaleMain::getRemark, refundDTO.getRemark())
+                .eq(refundDTO.getCustomerId() != null, ReceiptSaleMain::getCustomerId, refundDTO.getCustomerId())
+                .eq(refundDTO.getOperatorId() != null, ReceiptSaleMain::getCreateBy, refundDTO.getOperatorId())
+                .eq(refundDTO.getStatus() != null, ReceiptSaleMain::getStatus, refundDTO.getStatus())
+                .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(refundDTO.getStartDate()), ReceiptSaleMain::getCreateTime, refundDTO.getStartDate())
+                .le(StringUtils.hasText(refundDTO.getEndDate()), ReceiptSaleMain::getCreateTime, refundDTO.getEndDate())
+                .list();
+
+        saleMains.forEach(item -> {
+            var receiptSubList = receiptSaleSubService.lambdaQuery()
+                    .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .list();
+            var productNumber = calculateProductNumber(receiptSubList);
+            var customerName = getCustomerName(item.getCustomerId());
+            var crateBy = getUserName(item.getCreateBy());
+            var totalAmount = calculateTotalAmount(receiptSubList, ReceiptSaleSub::getTotalAmount);
+            var taxRateTotalPrice = calculateTotalAmount(receiptSubList, ReceiptSaleSub::getTaxIncludedAmount);
+
+            var totalRefundAmount = item.getArrearsAmount().add(item.getChangeAmount());
+
+            var saleRefundVO = SaleRefundVO.builder()
+                    .id(item.getId())
+                    .customerName(customerName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalAmount(totalAmount)
+                    .taxIncludedAmount(taxRateTotalPrice)
+                    .refundTotalAmount(totalRefundAmount)
+                    .thisRefundAmount(item.getChangeAmount())
+                    .thisArrearsAmount(item.getArrearsAmount())
+                    .status(item.getStatus())
+                    .build();
+            saleRefundVOList.add(saleRefundVO);
+        });
+        return saleRefundVOList;
+    }
+
     @Override
     public Response<SaleRefundDetailVO> getSaleRefundDetail(Long id) {
         if (id == null) {
@@ -1179,5 +1319,131 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
         result.setSize(queryResult.getSize());
 
         return Response.responseData(result);
+    }
+
+    @Override
+    public void exportSaleOrderExcel(QuerySaleOrderDTO querySaleOrderDTO, HttpServletResponse response) throws Exception {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getSaleOrderList(querySaleOrderDTO);
+        if (!mainData.isEmpty()) {
+            if (querySaleOrderDTO.getIsExportDetail()) {
+                var subData = new ArrayList<SalesDataExportBO>();
+                for (SaleOrderVO saleOrderVO : mainData) {
+                    var detail = getSaleOrderDetail(saleOrderVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var saleDataBo = SalesDataExportBO.builder()
+                                    .customerName(saleOrderVO.getCustomerName())
+                                    .receiptNumber(saleOrderVO.getReceiptNumber())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productNumber(item.getProductNumber())
+                                    .stock(item.getStock())
+                                    .productUnit(item.getProductUnit())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .taxRate(item.getTaxRate())
+                                    .taxAmount(item.getTaxAmount())
+                                    .taxTotalPrice(item.getTaxTotalPrice())
+                                    .remark(item.getRemark())
+                                    .build();
+
+                            subData.add(saleDataBo);
+                        });
+                    }
+                }
+                exportMap.put("销售订单明细", ExcelUtils.getSheetData(subData));
+            }
+            exportMap.put("销售订单", ExcelUtils.getSheetData(mainData));
+            ExcelUtils.exportManySheet(response, "销售订单", exportMap);
+        }
+    }
+
+    @Override
+    public void exportSaleShipmentsExcel(QuerySaleShipmentsDTO querySaleShipmentsDTO, HttpServletResponse response) throws Exception {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getSaleShipmentsList(querySaleShipmentsDTO);
+        if (!mainData.isEmpty()) {
+            if (querySaleShipmentsDTO.getIsExportDetail()) {
+                var subData = new ArrayList<SalesDataExportBO>();
+                for (SaleShipmentsVO saleShipmentsVO : mainData) {
+                    var detail = getSaleShipmentsDetail(saleShipmentsVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var saleDataBo = SalesDataExportBO.builder()
+                                    .customerName(saleShipmentsVO.getCustomerName())
+                                    .receiptNumber(saleShipmentsVO.getReceiptNumber())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productNumber(item.getProductNumber())
+                                    .stock(item.getStock())
+                                    .productUnit(item.getProductUnit())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .taxRate(item.getTaxRate())
+                                    .taxAmount(item.getTaxAmount())
+                                    .taxTotalPrice(item.getTaxTotalPrice())
+                                    .remark(item.getRemark())
+                                    .build();
+
+                            subData.add(saleDataBo);
+                        });
+                    }
+                }
+                exportMap.put("销售出库明细", ExcelUtils.getSheetData(subData));
+            }
+            exportMap.put("销售出库", ExcelUtils.getSheetData(mainData));
+            ExcelUtils.exportManySheet(response, "销售出库", exportMap);
+        }
+    }
+
+    @Override
+    public void exportSaleRefundExcel(QuerySaleRefundDTO querySaleRefundDTO, HttpServletResponse response) throws Exception {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getSaleRefundList(querySaleRefundDTO);
+        if (!mainData.isEmpty()) {
+            if (querySaleRefundDTO.getIsExportDetail()) {
+                var subData = new ArrayList<SalesDataExportBO>();
+                for (SaleRefundVO saleRefundVO : mainData) {
+                    var detail = getSaleShipmentsDetail(saleRefundVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var saleDataBo = SalesDataExportBO.builder()
+                                    .customerName(saleRefundVO.getCustomerName())
+                                    .receiptNumber(saleRefundVO.getReceiptNumber())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productNumber(item.getProductNumber())
+                                    .stock(item.getStock())
+                                    .productUnit(item.getProductUnit())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .taxRate(item.getTaxRate())
+                                    .taxAmount(item.getTaxAmount())
+                                    .taxTotalPrice(item.getTaxTotalPrice())
+                                    .remark(item.getRemark())
+                                    .build();
+
+                            subData.add(saleDataBo);
+                        });
+                    }
+                }
+                exportMap.put("销售退货明细", ExcelUtils.getSheetData(subData));
+            }
+            exportMap.put("销售退货", ExcelUtils.getSheetData(mainData));
+            ExcelUtils.exportManySheet(response, "销售退货", exportMap);
+        }
     }
 }

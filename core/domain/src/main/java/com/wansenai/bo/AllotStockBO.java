@@ -36,19 +36,18 @@ public class AllotStockBO {
 
     private String otherWarehouseName;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long barCode;
+    private String barCode;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productId;
 
     private String productName;
 
+    private String productStandard;
+
     private String productModel;
 
     private String productUnit;
-
-    private String productStandard;
 
     private Integer stock;
 

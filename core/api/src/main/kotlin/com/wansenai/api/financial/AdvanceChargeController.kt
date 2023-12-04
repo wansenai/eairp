@@ -12,6 +12,15 @@
  */
 package com.wansenai.api.financial
 
+import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ModelAttribute
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.wansenai.dto.financial.AddOrUpdateAdvanceChargeDTO
 import com.wansenai.dto.financial.QueryAdvanceChargeDTO
@@ -19,14 +28,7 @@ import com.wansenai.service.financial.AdvanceChargeService
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.financial.AdvanceChargeDetailVO
 import com.wansenai.vo.financial.AdvanceChargeVO
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import jakarta.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/financial/advance-charge")
@@ -55,5 +57,10 @@ class AdvanceChargeController(private val advanceChargeService: AdvanceChargeSer
     @PutMapping("updateStatusByIds")
     fun updateStatus(@RequestParam("ids") ids: List<Long>, @RequestParam("status") status: Int) : Response<String> {
         return advanceChargeService.updateAdvanceChargeStatusById(ids, status)
+    }
+
+    @GetMapping("export")
+    fun export(@ModelAttribute advanceChargeDTO: QueryAdvanceChargeDTO, response: HttpServletResponse) {
+        advanceChargeService.exportAdvanceCharge(advanceChargeDTO, response)
     }
 }

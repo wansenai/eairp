@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.AssembleStockBO;
+import com.wansenai.bo.AssembleStockDataExportBO;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.dto.warehouse.AssembleReceiptDTO;
 import com.wansenai.dto.warehouse.QueryAssembleReceiptDTO;
@@ -37,9 +38,11 @@ import com.wansenai.utils.TimeUtil;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.AssembleReceiptCodeEnum;
 import com.wansenai.utils.enums.BaseCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.AssembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.AssembleReceiptVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -178,7 +181,46 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
         return Response.responseData(result);
     }
 
-    @Override
+    private List<AssembleReceiptVO> getAssembleReceiptList(QueryAssembleReceiptDTO queryAssembleReceiptDTO) {
+        var wrapperMainMapper = lambdaQuery()
+                .eq(queryAssembleReceiptDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryAssembleReceiptDTO.getOperatorId())
+                .eq(queryAssembleReceiptDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryAssembleReceiptDTO.getStatus())
+                .eq(StringUtils.hasLength(queryAssembleReceiptDTO.getReceiptNumber()), WarehouseReceiptMain::getReceiptNumber, queryAssembleReceiptDTO.getReceiptNumber())
+                .like(StringUtils.hasLength(queryAssembleReceiptDTO.getRemark()), WarehouseReceiptMain::getRemark, queryAssembleReceiptDTO.getRemark())
+                .ge(StringUtils.hasLength(queryAssembleReceiptDTO.getStartDate()), WarehouseReceiptMain::getCreateTime, queryAssembleReceiptDTO.getStartDate())
+                .le(StringUtils.hasLength(queryAssembleReceiptDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryAssembleReceiptDTO.getEndDate())
+                .eq(WarehouseReceiptMain::getType, "组装单")
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var assembleReceiptVOList = new ArrayList<AssembleReceiptVO>(wrapperMainMapper.size() + 1);
+        wrapperMainMapper.forEach(item -> {
+
+            var product = productService.getById(item.getProductId());
+            var productInfo = "";
+            if(product != null) {
+                productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
+            }
+
+            var operator = userService.getById(item.getCreateBy());
+            var assembleReceiptVO = AssembleReceiptVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(productInfo)
+                    .receiptDate(item.getReceiptDate())
+                    .operator(Optional.ofNullable(operator).map(SysUser::getName).orElse(""))
+                    .productNumber(item.getTotalProductNumber())
+                    .totalAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .build();
+
+            assembleReceiptVOList.add(assembleReceiptVO);
+        });
+        return assembleReceiptVOList;
+    }
+
+
+        @Override
     public Response<AssembleReceiptDetailVO> getAssembleReceiptDetail(Long id) {
         if (id == null) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
@@ -427,5 +469,43 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
             return Response.responseMsg(AssembleReceiptCodeEnum.UPDATE_ASSEMBLE_RECEIPT_ERROR);
         }
         return Response.responseMsg(AssembleReceiptCodeEnum.UPDATE_ASSEMBLE_RECEIPT_SUCCESS);
+    }
+
+    @Override
+    public void exportAssembleReceipt(QueryAssembleReceiptDTO queryAssembleReceiptDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getAssembleReceiptList(queryAssembleReceiptDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("组装单", ExcelUtils.getSheetData(mainData));
+            if (queryAssembleReceiptDTO.getIsExportDetail()) {
+                var subData = new ArrayList<AssembleStockDataExportBO>();
+                for (AssembleReceiptVO assembleReceiptVO : mainData) {
+                    var detail = getAssembleReceiptDetail(assembleReceiptVO.getId()).getData().getTableData();
+                    if(!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var assembleStockBO = AssembleStockDataExportBO.builder()
+                                    .receiptNumber(assembleReceiptVO.getReceiptNumber())
+                                    .type(item.getType())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productUnit(item.getProductUnit())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .stock(item.getStock())
+                                    .type(item.getType())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .productNumber(item.getProductNumber())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(assembleStockBO);
+                        });
+                    }
+                }
+                exportMap.put("组装单明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "组装单", exportMap);
+        }
     }
 }

@@ -38,4 +38,6 @@ public class QueryPaymentDTO {
     private Integer page;
 
     private Integer pageSize;
+
+    private Boolean isExportDetail;
 }

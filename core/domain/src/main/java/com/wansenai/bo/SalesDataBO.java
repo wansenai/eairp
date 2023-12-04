@@ -32,23 +32,22 @@ public class SalesDataBO {
 
     private String warehouseName;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long barCode;
+    private String barCode;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productId;
 
     private String productName;
 
-    private String productModel;
+    private String productStandard;
 
-    private String productUnit;
+    private String productModel;
 
     private String productColor;
 
-    private String productStandard;
-
     private Integer stock;
+
+    private String productUnit;
 
     private Integer productNumber;
 

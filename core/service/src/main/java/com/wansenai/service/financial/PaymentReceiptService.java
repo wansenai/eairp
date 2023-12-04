@@ -20,6 +20,7 @@ import com.wansenai.entities.financial.FinancialMain;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.PaymentDetailVO;
 import com.wansenai.vo.financial.PaymentVO;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -34,4 +35,6 @@ public interface PaymentReceiptService extends IService<FinancialMain> {
     Response<String> deleteBatchPaymentReceipt(List<Long> ids);
 
     Response<String> updatePaymentReceiptStatus(List<Long> ids, Integer status);
+
+    void exportPaymentReceipt(QueryPaymentDTO queryPaymentDTO, HttpServletResponse response);
 }

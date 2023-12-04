@@ -52,14 +52,14 @@ public class ProductStockKeepUnitServiceImpl extends ServiceImpl<ProductStockKee
     }
 
     @Override
-    public Response<Long> getProductCode() {
+    public Response<String> getProductCode() {
         var data = lambdaQuery()
                 .orderByDesc(ProductStockKeepUnit::getProductBarCode)
                 .last("LIMIT 1").one();
         if(data == null){
-            return Response.responseData(1000L);
+            return Response.responseData("1000");
         }
-        return Response.responseData(data.getProductBarCode() + 1);
+        return Response.responseData(String.valueOf(Integer.parseInt(data.getProductBarCode()) + 1));
     }
 
     @Override

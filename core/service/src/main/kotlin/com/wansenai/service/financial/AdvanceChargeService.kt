@@ -20,6 +20,7 @@ import com.wansenai.entities.financial.FinancialMain
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.financial.AdvanceChargeDetailVO
 import com.wansenai.vo.financial.AdvanceChargeVO
+import jakarta.servlet.http.HttpServletResponse
 
 interface AdvanceChargeService : IService<FinancialMain>{
 
@@ -32,4 +33,6 @@ interface AdvanceChargeService : IService<FinancialMain>{
     fun deleteAdvanceChargeById(ids: List<Long>): Response<String>
 
     fun updateAdvanceChargeStatusById(ids: List<Long>, status: Int): Response<String>
+
+    fun exportAdvanceCharge(advanceChargeDTO: QueryAdvanceChargeDTO, response: HttpServletResponse)
 }

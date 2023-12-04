@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.AssembleStockBO;
+import com.wansenai.bo.AssembleStockDataExportBO;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.dto.warehouse.DisassembleReceiptDTO;
 import com.wansenai.dto.warehouse.QueryDisassembleReceiptDTO;
@@ -38,11 +39,13 @@ import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.AssembleReceiptCodeEnum;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.DisassembleReceiptCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.AssembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.AssembleReceiptVO;
 import com.wansenai.vo.warehouse.DisassembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.DisassembleReceiptVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -158,7 +161,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
 
             var product = productService.getById(item.getProductId());
             var productInfo = "";
-            if(product != null) {
+            if (product != null) {
                 productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
             }
 
@@ -179,6 +182,44 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
         result.setRecords(disAssembleReceiptVOList);
         result.setTotal(wrapperMainMapper.getTotal());
         return Response.responseData(result);
+    }
+
+    public List<DisassembleReceiptVO> getDisassembleReceiptList(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO) {
+        var wrapperMainMapper = lambdaQuery()
+                .eq(queryDisassembleReceiptDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryDisassembleReceiptDTO.getOperatorId())
+                .eq(queryDisassembleReceiptDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryDisassembleReceiptDTO.getStatus())
+                .eq(StringUtils.hasLength(queryDisassembleReceiptDTO.getReceiptNumber()), WarehouseReceiptMain::getReceiptNumber, queryDisassembleReceiptDTO.getReceiptNumber())
+                .like(StringUtils.hasLength(queryDisassembleReceiptDTO.getRemark()), WarehouseReceiptMain::getRemark, queryDisassembleReceiptDTO.getRemark())
+                .ge(StringUtils.hasLength(queryDisassembleReceiptDTO.getStartDate()), WarehouseReceiptMain::getCreateTime, queryDisassembleReceiptDTO.getStartDate())
+                .le(StringUtils.hasLength(queryDisassembleReceiptDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryDisassembleReceiptDTO.getEndDate())
+                .eq(WarehouseReceiptMain::getType, "拆卸单")
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var disAssembleReceiptVOList = new ArrayList<DisassembleReceiptVO>(wrapperMainMapper.size() + 1);
+        wrapperMainMapper.forEach(item -> {
+
+            var product = productService.getById(item.getProductId());
+            var productInfo = "";
+            if (product != null) {
+                productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
+            }
+
+            var operator = userService.getById(item.getCreateBy());
+            var disAssembleReceiptVO = DisassembleReceiptVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(productInfo)
+                    .receiptDate(item.getReceiptDate())
+                    .operator(Optional.ofNullable(operator).map(SysUser::getName).orElse(""))
+                    .productNumber(item.getTotalProductNumber())
+                    .totalAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .build();
+
+            disAssembleReceiptVOList.add(disAssembleReceiptVO);
+        });
+        return disAssembleReceiptVOList;
     }
 
     @Override
@@ -247,7 +288,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
         var totalProductNumber = 0;
         var totalAmount = BigDecimal.ZERO;
 
-        if(!disassembleReceiptDTO.getTableData().isEmpty()) {
+        if (!disassembleReceiptDTO.getTableData().isEmpty()) {
             for (AssembleStockBO stockBO : disassembleReceiptDTO.getTableData()) {
                 totalProductNumber += stockBO.getProductNumber();
                 totalAmount = totalAmount.add(stockBO.getAmount());
@@ -264,7 +305,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
 
                 var otherWarehouseReceipts = new ArrayList<WarehouseReceiptSub>();
                 for (WarehouseReceiptSub warehouseReceiptSub : beforeReceipt) {
-                    if("普通子件".equals(warehouseReceiptSub.getType())) {
+                    if ("普通子件".equals(warehouseReceiptSub.getType())) {
                         var otherWarehouseStock = WarehouseReceiptSub.builder()
                                 .warehouseId(warehouseReceiptSub.getOtherWarehouseId())
                                 .productBarcode(warehouseReceiptSub.getProductBarcode())
@@ -274,7 +315,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                     }
                 }
                 // 普通子件subtract操作
-                if(!otherWarehouseReceipts.isEmpty()) {
+                if (!otherWarehouseReceipts.isEmpty()) {
                     updateProductStock(otherWarehouseReceipts, 2);
                 }
             }
@@ -320,7 +361,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
             // 重新普通子件subtract操作
             var subStockList = new ArrayList<WarehouseReceiptSub>();
             for (AssembleStockBO warehouseStock : mainStockList) {
-                if("普通子件".equals(warehouseStock.getType())) {
+                if ("普通子件".equals(warehouseStock.getType())) {
                     var subStock = WarehouseReceiptSub.builder()
                             .warehouseId(warehouseStock.getWarehouseId())
                             .productBarcode(warehouseStock.getBarCode())
@@ -329,7 +370,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                     subStockList.add(subStock);
                 }
             }
-            if(!subStockList.isEmpty()) {
+            if (!subStockList.isEmpty()) {
                 updateProductStock(subStockList, 1);
             }
 
@@ -378,7 +419,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
             updateProductStock(mainStock, 2);
             var subStocks = new ArrayList<WarehouseReceiptSub>();
             for (AssembleStockBO warehouseStock : mainStockList) {
-                if("普通子件".equals(warehouseStock.getType())) {
+                if ("普通子件".equals(warehouseStock.getType())) {
                     var subStock = WarehouseReceiptSub.builder()
                             .warehouseId(warehouseStock.getWarehouseId())
                             .productBarcode(warehouseStock.getBarCode())
@@ -387,7 +428,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                     subStocks.add(subStock);
                 }
             }
-            if(!subStocks.isEmpty()) {
+            if (!subStocks.isEmpty()) {
                 updateProductStock(subStocks, 1);
             }
             if (saveSubResult && saveMainResult) {
@@ -412,7 +453,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                 .in(WarehouseReceiptSub::getWarehouseReceiptMainId, ids)
                 .update();
 
-        if(!deleteResult) {
+        if (!deleteResult) {
             return Response.responseMsg(DisassembleReceiptCodeEnum.DELETE_DISASSEMBLE_RECEIPT_ERROR);
         }
         return Response.responseMsg(DisassembleReceiptCodeEnum.DELETE_DISASSEMBLE_RECEIPT_SUCCESS);
@@ -427,9 +468,46 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                 .set(WarehouseReceiptMain::getStatus, status)
                 .in(WarehouseReceiptMain::getId, ids)
                 .update();
-        if(!updateResult) {
+        if (!updateResult) {
             return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_ERROR);
         }
         return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_SUCCESS);
+    }
+
+    @Override
+    public void exportDisAssembleReceipt(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getDisassembleReceiptList(queryDisassembleReceiptDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("拆卸单", ExcelUtils.getSheetData(mainData));
+            if (queryDisassembleReceiptDTO.getIsExportDetail()) {
+                var subData = new ArrayList<AssembleStockDataExportBO>();
+                for (DisassembleReceiptVO disassembleReceiptVO : mainData) {
+                    var detail = getDisassembleReceiptDetail(disassembleReceiptVO.getId()).getData().getTableData();
+                    if(!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var assembleStockBO = AssembleStockDataExportBO.builder()
+                                    .receiptNumber(disassembleReceiptVO.getReceiptNumber())
+                                    .type(item.getType())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productModel(item.getProductModel())
+                                    .productUnit(item.getProductUnit())
+                                    .productStandard(item.getProductStandard())
+                                    .stock(item.getStock())
+                                    .productNumber(item.getProductNumber())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(assembleStockBO);
+                        });
+                    }
+                }
+                exportMap.put("拆卸单明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "拆卸单", exportMap);
+        }
     }
 }

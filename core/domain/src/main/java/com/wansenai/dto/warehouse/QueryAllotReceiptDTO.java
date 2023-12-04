@@ -34,4 +34,6 @@ public class QueryAllotReceiptDTO {
     private Long page;
 
     private Long pageSize;
+
+    private Boolean isExportDetail;
 }

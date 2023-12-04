@@ -15,6 +15,7 @@ enum API {
     UpdateStatus = '/sale/order/updateStatus',
     Delete = '/sale/order/delete',
     GetLinkOrderDetail = '/sale/order/getLinkOrderDetail',
+    Export = '/sale/order/export',
 }
 
 export function getSaleOrderPageList(params: QuerySaleOrderReq) {
@@ -72,6 +73,16 @@ export function getLinkOrderDetail(receiptNumber: string) {
     return defHttp.get<BaseDataResp<LinkReceiptSaleOrderDetailResp>>(
         {
             url: `${API.GetLinkOrderDetail}/${receiptNumber}`,
+        }
+    );
+}
+
+export function exportOrder(params: QuerySaleOrderReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
         }
     );
 }

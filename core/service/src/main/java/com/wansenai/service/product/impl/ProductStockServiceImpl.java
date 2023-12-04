@@ -48,7 +48,7 @@ public class ProductStockServiceImpl extends ServiceImpl<ProductStockMapper, Pro
     }
 
     @Override
-    public Response<ProductStockKeepUnitVO> getProductByBarCode(Long barCode, Long warehouseId) {
+    public Response<ProductStockKeepUnitVO> getProductByBarCode(String barCode, Long warehouseId) {
         var data = productStockMapper.getProductSkuByBarCode(barCode, warehouseId);
         if (data == null) {
             return Response.responseData(null);

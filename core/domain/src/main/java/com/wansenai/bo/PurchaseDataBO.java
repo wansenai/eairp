@@ -32,23 +32,22 @@ public class PurchaseDataBO {
 
     private String warehouseName;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long barCode;
+    private String barCode;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productId;
 
     private String productName;
 
-    private String productUnit;
+    private String productStandard;
 
     private String productModel;
-
-    private String productStandard;
 
     private String productColor;
 
     private Integer stock;
+
+    private String productUnit;
 
     private Integer productNumber;
 
@@ -68,5 +67,4 @@ public class PurchaseDataBO {
     private BigDecimal taxTotalPrice;
 
     private String remark;
-
 }

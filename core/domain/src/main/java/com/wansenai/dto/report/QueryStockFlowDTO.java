@@ -21,7 +21,7 @@ public class QueryStockFlowDTO {
 
     private Long warehouseId;
 
-    private Long productBarcode;
+    private String productBarcode;
 
     private String receiptNumber;
 

@@ -69,7 +69,6 @@ export default defineComponent({
   },
   setup() {
     const receiptNumber = ref('');
-    const otherReceipt = ref('');
     const receiptDate = ref('');
     const customerName = ref('');
     const remark = ref('')

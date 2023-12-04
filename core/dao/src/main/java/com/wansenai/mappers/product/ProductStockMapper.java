@@ -30,9 +30,9 @@ public interface ProductStockMapper extends BaseMapper<ProductStock> {
 
     IPage<ProductStockKeepUnitVO> getProductSkuList(IPage<QueryProductStockKeepUnitDTO> pageObject, QueryProductStockKeepUnitDTO queryProductStockKeepUnitDTO);
 
-    ProductStockKeepUnitVO getProductSkuByBarCode(Long barCode, Long warehouseId);
+    ProductStockKeepUnitVO getProductSkuByBarCode(String barCode, Long warehouseId);
 
-    ProductStockKeepUnitVO getProductSkuDetail(Long productId, Long warehouseId, Long barCode);
+    ProductStockKeepUnitVO getProductSkuDetail(Long productId, Long warehouseId, String barCode);
 
     Page<ProductStockVO> getProductStock(IPage<QueryProductStockDTO> pageObject, QueryProductStockDTO queryProductStockDTO);
 

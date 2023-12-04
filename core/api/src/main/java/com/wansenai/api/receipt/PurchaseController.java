@@ -18,6 +18,7 @@ import com.wansenai.dto.receipt.purchase.*;
 import com.wansenai.service.receipt.ReceiptPurchaseService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.purchase.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -132,5 +133,20 @@ public class PurchaseController {
     @PostMapping("/arrears/pageList")
     public Response<Page<PurchaseArrearsVO>> arrearsPageList(@RequestBody QueryPurchaseArrearsDTO arrearsDTO) {
         return purchaseService.getPurchaseArrearsPage(arrearsDTO);
+    }
+
+    @GetMapping("/order/export")
+    public void exportOrderExcel(@ModelAttribute QueryPurchaseOrderDTO queryPurchaseOrderDTO, HttpServletResponse response) throws Exception {
+        purchaseService.exportPurchaseOrderExcel(queryPurchaseOrderDTO, response);
+    }
+
+    @GetMapping("/storage/export")
+    public void exportStorageExcel(@ModelAttribute QueryPurchaseStorageDTO queryPurchaseStorageDTO, HttpServletResponse response) throws Exception {
+        purchaseService.exportPurchaseStorageExcel(queryPurchaseStorageDTO, response);
+    }
+
+    @GetMapping("/refund/export")
+    public void exportRefundExcel(@ModelAttribute QueryPurchaseRefundDTO queryPurchaseRefundDTO, HttpServletResponse response) throws Exception {
+        purchaseService.exportPurchaseRefundExcel(queryPurchaseRefundDTO, response);
     }
 }

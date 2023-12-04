@@ -43,7 +43,7 @@ public class ProductController {
     }
 
     @GetMapping("getProductCode")
-    public Response<Long> getProductCode() {
+    public Response<String> getProductCode() {
         return extendPriceService.getProductCode();
     }
 

@@ -5,7 +5,7 @@ import {
     AddOrUpdateDisAssembleReq,
     QueryDisAssembleReq,
     DisAssembleResp,
-    DisAssembleDetailResp,
+    DisAssembleDetailResp, ExportDisAssembleReq,
 } from "@/api/warehouse/model/disassembleModel";
 
 enum API {
@@ -14,6 +14,7 @@ enum API {
     DeleteBatch = '/warehouse/disassemble/deleteByIds',
     UpdateStatus = '/warehouse/disassemble/updateStatusByIds',
     GetDetail = '/warehouse/disassemble/getDetailById',
+    Export = '/warehouse/disassemble/export',
 }
 
 export function getDisAssemblePageList(params: QueryDisAssembleReq) {
@@ -64,5 +65,15 @@ export function getDisAssembleDetailById(id: number) {
         {
             url: `${API.GetDetail}/${id}`
         },
+    );
+}
+
+export function exportDisAssemble(params: ExportDisAssembleReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
+        }
     );
 }

@@ -38,6 +38,17 @@ export interface QueryDisAssembleReq {
     remark: string;
 }
 
+export interface ExportDisAssembleReq {
+    receiptNumber: string;
+    productInfo: string;
+    operatorId: number;
+    warehouseId: number;
+    otherReceipt: string;
+    status: number;
+    remark: string;
+    isExportDetail: boolean;
+}
+
 export interface DisAssembleResp {
     id: string | undefined;
     receiptNumber: string;

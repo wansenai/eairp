@@ -45,9 +45,9 @@ Some functional modules are being developed and improved, please refer to our [t
 
 ## Quick Start
 ```shell
-docker pull wansenai/eairp:2.0.6
+docker pull wansenai/eairp:2.0.7
 
-docker pull wansenai/eairp-web:2.0.6
+docker pull wansenai/eairp-web:2.0.7
 ```
 ## Run Server
 You can customize and modify port 8080, please ensure that the service ports monitored by your front-end are consistent.
@@ -56,9 +56,9 @@ If you want to deploy to your domain name, the local host needs to be modified t
 We will use the Docker Compose method for integration and deployment next it is coming soon :)
 
 ```shell
-docker run --name eairp -d -p 8080:8088 wansenai/eairp:2.0.6
+docker run --name eairp -d -p 8080:8088 wansenai/eairp:2.0.7
 
-docker run --name eairp-web -d -p 3000:80 -e API_BASE_URL=http://localhost:8080/erp-api wansenai/eairp-web:2.0.6
+docker run --name eairp-web -d -p 3000:80 -e API_BASE_URL=http://localhost:8080/erp-api wansenai/eairp-web:2.0.7
 ```
 
 ## System screenshot (only part)

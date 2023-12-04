@@ -201,7 +201,7 @@ export const TableColumns: BasicColumn[] = [
         width: 60,
     },
     {
-        title: '税额',
+        title: '价税合计',
         dataIndex: 'taxTotalPrice',
         width: 60,
     },

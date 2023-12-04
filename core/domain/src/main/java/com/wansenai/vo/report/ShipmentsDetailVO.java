@@ -27,8 +27,7 @@ public class ShipmentsDetailVO {
 
     private String receiptNumber;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long productBarcode;
+    private String productBarcode;
 
     private String productName;
 

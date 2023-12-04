@@ -19,6 +19,7 @@ import com.wansenai.service.financial.CollectionReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.CollectionDetailVO;
 import com.wansenai.vo.financial.CollectionVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.List;
 
@@ -63,5 +65,10 @@ public class CollectionReceiptController {
     @PutMapping("updateStatusByIds")
     public Response<String> updateCollectionReceiptStatusByIds(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return collectionReceiptService.updateCollectionReceiptStatus(ids, status);
+    }
+
+    @GetMapping("export")
+    public void exportCollectionReceipt(@ModelAttribute QueryCollectionDTO queryCollectionDTO, HttpServletResponse response) {
+        collectionReceiptService.exportCollectionReceipt(queryCollectionDTO, response);
     }
 }

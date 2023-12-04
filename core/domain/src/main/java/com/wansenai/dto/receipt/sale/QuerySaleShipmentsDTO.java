@@ -43,4 +43,6 @@ public class QuerySaleShipmentsDTO {
     private Long page;
 
     private Long pageSize;
+
+    private Boolean isExportDetail;
 }

@@ -19,14 +19,16 @@ import com.wansenai.service.financial.ExpenseReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.ExpenseDetailVO;
 import com.wansenai.vo.financial.ExpenseVO;
-import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.List;
 
@@ -63,5 +65,10 @@ public class ExpenseReceiptController {
     @PutMapping("updateStatusByIds")
     public Response<String> updateExpenseReceiptStatusByIds(@RequestParam("ids") List<Long> ids, @RequestParam("status") Integer status) {
         return expenseReceiptService.updateExpenseReceiptStatus(ids, status);
+    }
+
+    @GetMapping("export")
+    public void exportExpenseReceipt(@ModelAttribute QueryExpenseDTO queryExpenseDTO, HttpServletResponse response) {
+        expenseReceiptService.exportExpenseReceipt(queryExpenseDTO, response);
     }
 }

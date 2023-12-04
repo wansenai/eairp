@@ -14,9 +14,9 @@ package com.wansenai.service.financial.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.wansenai.bo.CollectionBO;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.PaymentBO;
+import com.wansenai.bo.PaymentDataExportBO;
 import com.wansenai.dto.financial.AddOrUpdatePaymentDTO;
 import com.wansenai.dto.financial.QueryPaymentDTO;
 import com.wansenai.entities.financial.FinancialMain;
@@ -34,11 +34,11 @@ import com.wansenai.utils.TimeUtil;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.CollectionPaymentCodeEnum;
+import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.financial.CollectionDetailVO;
-import com.wansenai.vo.financial.CollectionVO;
 import com.wansenai.vo.financial.PaymentDetailVO;
 import com.wansenai.vo.financial.PaymentVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -139,6 +140,41 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
         result.setRecords(paymentVOList);
         result.setTotal(financialMainPage.getTotal());
         return Response.responseData(result);
+    }
+
+    private List<PaymentVO> getPaymentReceiptList(QueryPaymentDTO queryPaymentDTO) {
+        var financialMainList = lambdaQuery()
+                .eq(queryPaymentDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryPaymentDTO.getFinancialPersonId())
+                .eq(queryPaymentDTO.getAccountId() != null, FinancialMain::getAccountId, queryPaymentDTO.getAccountId())
+                .eq(queryPaymentDTO.getStatus() != null, FinancialMain::getStatus, queryPaymentDTO.getStatus())
+                .eq(queryPaymentDTO.getSupplierId() != null, FinancialMain::getRelatedPersonId, queryPaymentDTO.getSupplierId())
+                .eq(StringUtils.hasLength(queryPaymentDTO.getReceiptNumber()), FinancialMain::getReceiptNumber, queryPaymentDTO.getReceiptNumber())
+                .like(StringUtils.hasLength(queryPaymentDTO.getRemark()), FinancialMain::getRemark, queryPaymentDTO.getRemark())
+                .ge(StringUtils.hasLength(queryPaymentDTO.getStartDate()), FinancialMain::getReceiptDate, queryPaymentDTO.getStartDate())
+                .le(StringUtils.hasLength(queryPaymentDTO.getEndDate()), FinancialMain::getReceiptDate, queryPaymentDTO.getEndDate())
+                .eq(FinancialMain::getType, "付款")
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var paymentVOList = new ArrayList<PaymentVO>(financialMainList.size() + 1);
+        financialMainList.forEach(item -> {
+            var paymentVo = PaymentVO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .supplierName(commonService.getSupplierName(item.getRelatedPersonId()))
+                    .receiptDate(item.getReceiptDate())
+                    .financialPerson(commonService.getOperatorName(item.getOperatorId()))
+                    .paymentAccountName(commonService.getAccountName(item.getAccountId()))
+                    .totalPaymentAmount(item.getTotalAmount())
+                    .discountAmount(item.getDiscountAmount())
+                    .actualPaymentAmount(item.getChangeAmount())
+                    .status(item.getStatus())
+                    .remark(item.getRemark())
+                    .build();
+
+            paymentVOList.add(paymentVo);
+        });
+        return paymentVOList;
     }
 
     @Override
@@ -353,5 +389,36 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
             return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_ERROR);
         }
         return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_SUCCESS);
+    }
+
+    @Override
+    public void exportPaymentReceipt(QueryPaymentDTO queryPaymentDTO, HttpServletResponse response) {
+        var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
+        var mainData = getPaymentReceiptList(queryPaymentDTO);
+        if (!mainData.isEmpty()) {
+            exportMap.put("付款单", ExcelUtils.getSheetData(mainData));
+            if (queryPaymentDTO.getIsExportDetail()) {
+                var subData = new ArrayList<PaymentDataExportBO>();
+                for (PaymentVO paymentVO : mainData) {
+                    var detail = getPaymentReceiptDetail(paymentVO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var data = PaymentDataExportBO.builder()
+                                    .supplierName(paymentVO.getSupplierName())
+                                    .receiptNumber(paymentVO.getReceiptNumber())
+                                    .purchaseReceiptNumber(item.getPurchaseReceiptNumber())
+                                    .paymentArrears(item.getPaymentArrears())
+                                    .prepaidArrears(item.getPrepaidArrears())
+                                    .thisPaymentAmount(item.getThisPaymentAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(data);
+                        });
+                    }
+                }
+                exportMap.put("付款单明细", ExcelUtils.getSheetData(subData));
+            }
+            ExcelUtils.exportManySheet(response, "付款单", exportMap);
+        }
     }
 }
