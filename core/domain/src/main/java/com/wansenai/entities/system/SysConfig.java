@@ -85,27 +85,27 @@ public class SysConfig implements Serializable {
     /**
      * 仓库启用标记，0未启用，1启用
      */
-    private Boolean warehouseStatus;
+    private Integer warehouseStatus;
 
     /**
      * 客户启用标记，0未启用，1启用
      */
-    private Boolean customerStatus;
+    private Integer customerStatus;
 
     /**
      * 负库存启用标记，0未启用，1启用
      */
-    private Boolean minusStockStatus;
+    private Integer minusStockStatus;
 
     /**
      * 以销定购启用标记，0未启用，1启用
      */
-    private Boolean purchaseBySaleStatus;
+    private Integer purchaseBySaleStatus;
 
     /**
      * 多级审核启用标记，0未启用，1启用
      */
-    private Boolean multiLevelApprovalStatus;
+    private Integer multiLevelApprovalStatus;
 
     /**
      * 流程类型，可多选
@@ -115,22 +115,22 @@ public class SysConfig implements Serializable {
     /**
      * 强审核启用标记，0未启用，1启用
      */
-    private Boolean forceApprovalStatus;
+    private Integer forceApprovalStatus;
 
     /**
      * 更新单价启用标记，0未启用，1启用
      */
-    private Boolean updateUnitPriceStatus;
+    private Integer updateUnitPriceStatus;
 
     /**
      * 超出关联单据启用标记，0未启用，1启用
      */
-    private Boolean overLinkBillStatus;
+    private Integer overLinkBillStatus;
 
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }
