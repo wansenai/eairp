@@ -2,18 +2,20 @@
   <div class="anticon" :class="getAppLogoClass" @click="goHome">
     <img src="../../../assets/images/logo.png" />
     <div class="ml-2 truncate md:opacity-100" :class="getTitleClass" v-show="showTitle">
-      {{ title }}
+      {{ companyTitle == undefined ? title : companyTitle}}
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-  import { computed, unref } from 'vue';
+import {computed, onMounted, ref, unref} from 'vue';
   import { useGlobSetting } from '/@/hooks/setting';
   import { useGo } from '/@/hooks/web/usePage';
   import { useMenuSetting } from '/@/hooks/setting/useMenuSetting';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { PageEnum } from '/@/enums/pageEnum';
   import { useUserStore } from '/@/store/modules/user';
+  import { getConfigInfo} from "@/api/sys/config";
+  const companyTitle = ref<string>('');
 
   const props = defineProps({
     /**
@@ -35,6 +37,11 @@
   const userStore = useUserStore();
   const { title } = useGlobSetting();
   const go = useGo();
+
+  onMounted(async () => {
+    const res = await getConfigInfo();
+    companyTitle.value = res.data.companyName;
+  });
 
   const getAppLogoClass = computed(() => [
     prefixCls,

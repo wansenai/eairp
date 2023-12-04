@@ -1,5 +1,3 @@
-import {BasicFetchResult} from "@/api/model/baseModel";
-
 export interface DeptListItem {
     deptName: string;
 }
