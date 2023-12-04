@@ -50,7 +50,17 @@ enum API {
     GetCustomerBillDetail = '/report/customerBillDetail',
     GetSupplierBill = '/report/supplierBill',
     GetSupplierBillDetail = '/report/supplierBillDetail',
-    ExportProductStockData = '/report/productStockExport',
+    ExportProductStockData = '/report/productStock/export',
+    ExportAccountStatistics = '/report/accountStatistics/export',
+    ExportRetailStatistics = '/report/retailStatistics/export',
+    ExportPurchaseStatistics = '/report/purchaseStatistics/export',
+    ExportSalesStatistics = '/report/salesStatistics/export',
+    ExportShipmentsDetail = '/report/shipmentsDetail/export',
+    ExportStorageDetail = '/report/storageDetail/export',
+    ExportShipmentsSummary = '/report/shipmentsSummary/export',
+    ExportStorageSummary = '/report/storageSummary/export',
+    ExportCustomerBill = '/report/customerBill/export',
+    ExportSupplierBill = '/report/supplierBill/export',
 }
 
 
@@ -209,6 +219,106 @@ export function exportProductStock(params: QueryProductStockReq) {
     return defHttp.get<BaseDataResp<Blob>>(
         {
             url: `${API.ExportProductStockData}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportAccountStatistics(params: QueryAccountStatisticsReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportAccountStatistics}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportRetailStatistics(params: QueryRetailStatisticsReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportRetailStatistics}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportPurchaseStatistics(params: QueryPurchaseStatisticsReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportPurchaseStatistics}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportSalesStatistics(params: QuerySalesStatisticsReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportSalesStatistics}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportShipmentsDetail(params: QueryShipmentsDetailStatisticsReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportShipmentsDetail}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportStorageDetail(params: QueryStorageDetailStatisticsReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportStorageDetail}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportShipmentsSummary(params: QueryShipmentsSummaryStatisticsReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportShipmentsSummary}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportStorageSummary(params: QueryStorageSummaryStatisticsReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportStorageSummary}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportCustomerBill(params: QueryCustomerBillReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportCustomerBill}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportSupplierBill(params: QuerySupplierBillReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportSupplierBill}`,
             params,
             responseType: "blob"
         }
