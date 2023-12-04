@@ -15,6 +15,7 @@ package com.wansenai.vo.report;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.Builder;
 import lombok.Data;
 
@@ -24,30 +25,42 @@ import java.math.BigDecimal;
 @Builder
 public class RetailReportVO {
 
+    @ExcelExport(value = "商品条码")
     private String productBarcode;
 
-    private String productName;
-
+    @ExcelExport(value = "仓库")
     private String warehouseName;
 
-    private String productModel;
+    @ExcelExport(value = "商品名称")
+    private String productName;
 
+    @ExcelExport(value = "规格")
     private String productStandard;
 
+    @ExcelExport(value = "型号")
+    private String productModel;
+
+    @ExcelExport(value = "扩展信息")
     private String productExtendInfo;
 
+    @ExcelExport(value = "单位")
     private String productUnit;
 
+    @ExcelExport(value = "零售数量")
     private Integer retailNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "零售金额")
     private BigDecimal retailAmount;
 
+    @ExcelExport(value = "零售退货数量")
     private Integer retailRefundNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "零售退货金额")
     private BigDecimal retailRefundAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "实际零售金额")
     private BigDecimal retailLastAmount;
 }
