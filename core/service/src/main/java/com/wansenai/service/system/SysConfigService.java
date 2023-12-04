@@ -12,14 +12,21 @@
  */
 package com.wansenai.service.system;
 
+import com.wansenai.dto.system.SystemConfigDTO;
 import com.wansenai.entities.system.SysConfig;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.SystemConfigVO;
 
 /**
  * <p>
  * 系统参数 服务类
  * </p>
  */
-public interface ISysConfigService extends IService<SysConfig> {
+public interface SysConfigService extends IService<SysConfig> {
+
+    Response<SystemConfigVO> getSystemConfigInfo();
+
+    Response<String> addOrUpdateCompanyInfo(SystemConfigDTO systemConfigDTO);
 
 }
