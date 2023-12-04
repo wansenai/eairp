@@ -27,13 +27,15 @@ import {
   storageDetailStatisticsColumns
 } from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getStorageDetail} from "@/api/report/report";
+import {getStorageDetail, exportStorageDetail} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import {useModal} from "@/components/Modal";
 import ViewRefundModal from "@/views/retail/refund/components/ViewRefundModal.vue";
 import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundModal.vue";
 import ViewPurchaseStorageModal from "@/views/purchase/storage/components/ViewStorageModal.vue";
 import printJS from "print-js";
+import {useMessage} from "@/hooks/web/useMessage";
+import {getTimestamp} from "@/utils/dateUtil";
 
 export default defineComponent({
   name: 'StorageDetailStatistics',
@@ -47,7 +49,8 @@ export default defineComponent({
     const [handleSaleRefundModal, {openModal: openSaleRefundModal}] = useModal();
     const [handlePurchaseStorageModal, {openModal: openPurchaseStorageModal}] = useModal();
     const printTableData = ref<any[]>([]);
-    const [registerTable, { reload }] = useTable({
+    const { createMessage } = useMessage();
+    const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '入库明细报表',
       api: getStorageDetail,
       columns: storageDetailStatisticsColumns,
@@ -122,6 +125,23 @@ export default defineComponent({
     }
 
     function exportTable() {
+      if (getDataSource() === undefined || getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      exportStorageDetail(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "入库明细数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
     }
 
     function primaryPrint() {

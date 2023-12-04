@@ -11,7 +11,7 @@
         </template>
       </template>
     </BasicTable>
-    <CustomerBillDetailModal @register="handleRegister" />
+    <CustomerBillDetailModal @register="handleRegister"/>
   </div>
 </template>
 <div>
@@ -25,20 +25,24 @@ import {
   searchCustomerBillSchema,
 } from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getCustomerBill} from "@/api/report/report";
+import {getCustomerBill, exportCustomerBill} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import {useModal} from "@/components/Modal";
 import CustomerBillDetailModal from "@/views/report/modal/CustomerBillDetailModal.vue";
 import printJS from "print-js";
+import {useMessage} from "@/hooks/web/useMessage";
+import {getTimestamp} from "@/utils/dateUtil";
 
 export default defineComponent({
   name: 'CustomerBill',
   components: {
-    CustomerBillDetailModal, Tag, TableAction, BasicTable},
+    CustomerBillDetailModal, Tag, TableAction, BasicTable
+  },
   setup() {
     const printTableData = ref<any[]>([]);
+    const { createMessage } = useMessage();
     const [handleRegister, {openModal}] = useModal();
-    const [registerTable, { reload }] = useTable({
+    const [registerTable, {reload, getForm, getDataSource}] = useTable({
       title: '客户对账报表',
       api: getCustomerBill,
       columns: customerBillColumns,
@@ -67,13 +71,13 @@ export default defineComponent({
       const remainingReceivableArrears = tableData.reduce((prev, next) => prev + next.remainingReceivableArrears, 0);
       printTableData.value = tableData;
       printTableData.value.push({
-        firstQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterReceivable), { digits: 2 })}`,
-        secondQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterReceivable), { digits: 2 })}`,
-        thirdQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterReceivable), { digits: 2 })}`,
-        fourthQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(fourthQuarterReceivable), { digits: 2 })}`,
-        totalQuarterArrears:`￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterArrears), { digits: 2 })}`,
-        totalQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterReceivable), { digits: 2 })}`,
-        remainingReceivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(remainingReceivableArrears), { digits: 2 })}`,
+        firstQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterReceivable), {digits: 2})}`,
+        secondQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterReceivable), {digits: 2})}`,
+        thirdQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterReceivable), {digits: 2})}`,
+        fourthQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(fourthQuarterReceivable), {digits: 2})}`,
+        totalQuarterArrears: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterArrears), {digits: 2})}`,
+        totalQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterReceivable), {digits: 2})}`,
+        remainingReceivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(remainingReceivableArrears), {digits: 2})}`,
         customerName: '合计',
         contactName: '',
         contactPhone: '',
@@ -82,16 +86,17 @@ export default defineComponent({
       return [
         {
           _index: '合计',
-          firstQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterReceivable), { digits: 2 })}`,
-          secondQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterReceivable), { digits: 2 })}`,
-          thirdQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterReceivable), { digits: 2 })}`,
-          fourthQuarterReceivable:`￥${XEUtils.commafy(XEUtils.toNumber(fourthQuarterReceivable), { digits: 2 })}`,
-          totalQuarterArrears:`￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterArrears), { digits: 2 })}`,
-          totalQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterReceivable), { digits: 2 })}`,
-          remainingReceivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(remainingReceivableArrears), { digits: 2 })}`
+          firstQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterReceivable), {digits: 2})}`,
+          secondQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterReceivable), {digits: 2})}`,
+          thirdQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterReceivable), {digits: 2})}`,
+          fourthQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(fourthQuarterReceivable), {digits: 2})}`,
+          totalQuarterArrears: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterArrears), {digits: 2})}`,
+          totalQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterReceivable), {digits: 2})}`,
+          remainingReceivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(remainingReceivableArrears), {digits: 2})}`
         },
       ];
     }
+
     async function handleSuccess() {
       reload();
     }
@@ -107,6 +112,23 @@ export default defineComponent({
     }
 
     function exportTable() {
+      if (getDataSource() === undefined || getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      exportCustomerBill(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "客户对账数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
     }
 
     function primaryPrint() {
@@ -114,7 +136,7 @@ export default defineComponent({
       printJS({
         documentTitle: "EAIRP (客户对账)",
         properties: printColumns.map(item => {
-          return { field: item.dataIndex, displayName: item.title }
+          return {field: item.dataIndex, displayName: item.title}
         }),
         printable: printTableData.value,
         gridHeaderStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',

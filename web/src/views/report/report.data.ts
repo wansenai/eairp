@@ -357,12 +357,12 @@ export const retailStatisticsColumns: BasicColumn[] = [
         width: 70,
     },
     {
-        title: '退货数量',
+        title: '零售退货数量',
         dataIndex: 'retailRefundNumber',
         width: 70,
     },
     {
-        title: '退货金额',
+        title: '零售退货金额',
         dataIndex: 'retailRefundAmount',
         width: 70,
     },
@@ -452,12 +452,12 @@ export const purchaseStatisticsColumns: BasicColumn[] = [
         width: 70,
     },
     {
-        title: '退货数量',
+        title: '采购退货数量',
         dataIndex: 'purchaseRefundNumber',
         width: 70,
     },
     {
-        title: '退货金额',
+        title: '采购退货金额',
         dataIndex: 'purchaseRefundAmount',
         width: 70,
     },
@@ -546,12 +546,12 @@ export const salesStatisticsColumns: BasicColumn[] = [
         width: 70,
     },
     {
-        title: '退货数量',
+        title: '销售退货数量',
         dataIndex: 'salesRefundNumber',
         width: 70,
     },
     {
-        title: '退货金额',
+        title: '销售退货金额',
         dataIndex: 'salesRefundAmount',
         width: 70,
     },
@@ -723,7 +723,7 @@ export const shipmentsDetailStatisticsColumns: BasicColumn[] = [
         width: 70,
     },
     {
-        title: '出库日期',
+        title: '出库时间',
         dataIndex: 'createTime',
         width: 140,
     },
@@ -890,7 +890,7 @@ export const storageDetailStatisticsColumns: BasicColumn[] = [
         width: 65,
     },
     {
-        title: '出库日期',
+        title: '入库时间',
         dataIndex: 'createTime',
         width: 140,
     },
@@ -998,7 +998,7 @@ export const shipmentsSummaryStatisticsColumns: BasicColumn[] = [
         width: 65,
     },
     {
-        title: '出库日期',
+        title: '出库时间',
         dataIndex: 'createTime',
         width: 140,
     },
@@ -1106,7 +1106,7 @@ export const storageSummaryStatisticsColumns: BasicColumn[] = [
         width: 65,
     },
     {
-        title: '入库日期',
+        title: '入库时间',
         dataIndex: 'createTime',
         width: 140,
     },

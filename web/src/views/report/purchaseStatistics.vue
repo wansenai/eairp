@@ -16,16 +16,19 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {searchPurchaseSchema, purchaseStatisticsColumns} from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getPurchaseStatistics} from "@/api/report/report";
+import {getPurchaseStatistics, exportPurchaseStatistics} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import printJS from "print-js";
+import {getTimestamp} from "@/utils/dateUtil";
+import {useMessage} from "@/hooks/web/useMessage";
 
 export default defineComponent({
   name: 'PurchaseStatistics',
   components: {Tag, TableAction, BasicTable},
   setup() {
     const printTableData = ref<any[]>([]);
-    const [registerTable, { reload }] = useTable({
+    const { createMessage } = useMessage();
+    const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '采购统计报表',
       api: getPurchaseStatistics,
       columns: purchaseStatisticsColumns,
@@ -85,7 +88,23 @@ export default defineComponent({
     }
 
     function exportTable() {
-
+      if (getDataSource() === undefined || getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      exportPurchaseStatistics(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "采购统计数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
     }
 
     function primaryPrint() {

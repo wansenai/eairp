@@ -22,20 +22,23 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {accountStatisticsColumns, searchAccountSchema} from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getAccountStatistics} from "@/api/report/report";
+import {getAccountStatistics, exportAccountStatistics} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import AccountFlowModal from "@/views/report/modal/AccountFlowModal.vue";
 import StockFlowModal from "@/views/report/modal/StockFlowModal.vue";
 import {useModal} from "@/components/Modal";
 import printJS from "print-js";
+import {getTimestamp} from "@/utils/dateUtil";
+import {useMessage} from "@/hooks/web/useMessage";
 
 export default defineComponent({
   name: 'AccountStatistics',
   components: {StockFlowModal, AccountFlowModal, Tag, TableAction, BasicTable},
   setup() {
     const printTableData = ref<any[]>([]);
+    const { createMessage } = useMessage();
     const [registerModal, {openModal}] = useModal();
-    const [registerTable, { reload }] = useTable({
+    const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '账户统计报表',
       api: getAccountStatistics,
       rowKey: 'id',
@@ -90,7 +93,23 @@ export default defineComponent({
     }
 
     function exportTable() {
-
+      if (getDataSource() === undefined || getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      exportAccountStatistics(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "账户统计数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
     }
 
     function primaryPrint() {

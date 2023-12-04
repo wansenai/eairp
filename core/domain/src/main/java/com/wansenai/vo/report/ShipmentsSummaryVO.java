@@ -15,6 +15,7 @@ package com.wansenai.vo.report;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.Builder;
 import lombok.Data;
 
@@ -25,25 +26,35 @@ import java.time.LocalDateTime;
 @Builder
 public class ShipmentsSummaryVO {
 
+    @ExcelExport(value = "商品条码")
     private String productBarcode;
 
-    private String productName;
-
+    @ExcelExport(value = "仓库")
     private String warehouseName;
 
-    private String productModel;
+    @ExcelExport(value = "商品名称")
+    private String productName;
 
-    private String productStandard;
-
+    @ExcelExport(value = "商品分类")
     private String productCategoryName;
 
+    @ExcelExport(value = "规格")
+    private String productStandard;
+
+    @ExcelExport(value = "型号")
+    private String productModel;
+
+    @ExcelExport(value = "单位")
     private String productUnit;
 
+    @ExcelExport(value = "出库数量")
     private Integer shipmentsNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "出库金额")
     private BigDecimal shipmentsAmount;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ExcelExport(value = "出库时间")
     private LocalDateTime createTime;
 }

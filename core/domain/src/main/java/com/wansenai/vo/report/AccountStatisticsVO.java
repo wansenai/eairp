@@ -15,6 +15,7 @@ package com.wansenai.vo.report;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.Builder;
 import lombok.Data;
 
@@ -27,16 +28,21 @@ public class AccountStatisticsVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long accountId;
 
+    @ExcelExport(value = "账户名称")
     private String accountName;
 
+    @ExcelExport(value = "账户编号")
     private String accountNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "期初金额")
     private BigDecimal initialAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "本月发生金额")
     private BigDecimal thisMonthChangeAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "当前余额")
     private BigDecimal currentAmount;
 }
