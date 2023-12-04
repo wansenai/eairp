@@ -15,6 +15,7 @@ package com.wansenai.vo.report;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.Builder;
 import lombok.Data;
 
@@ -25,39 +26,54 @@ import java.time.LocalDateTime;
 @Builder
 public class StorageDetailVO {
 
+    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
-    private String productBarcode;
-
-    private String productName;
-
-    private String warehouseName;
-
-    private String productModel;
-
-    private String productStandard;
-
-    private String productUnit;
-
-    private Integer productNumber;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal unitPrice;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal amount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal taxRate;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal taxAmount;
-
+    @ExcelExport(value = "类型")
     private String type;
 
     // supplier or customer or member
+    @ExcelExport(value = "往来人员")
     private String name;
 
+    @ExcelExport(value = "商品条码")
+    private String productBarcode;
+
+    @ExcelExport(value = "仓库")
+    private String warehouseName;
+
+    @ExcelExport(value = "商品名称")
+    private String productName;
+
+    @ExcelExport(value = "规格")
+    private String productStandard;
+
+    @ExcelExport(value = "型号")
+    private String productModel;
+
+    @ExcelExport(value = "单位")
+    private String productUnit;
+
+    @ExcelExport(value = "数量")
+    private Integer productNumber;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "单价")
+    private BigDecimal unitPrice;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "金额")
+    private BigDecimal amount;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "税率(%)")
+    private BigDecimal taxRate;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "税额")
+    private BigDecimal taxAmount;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ExcelExport(value = "入库时间")
     private LocalDateTime createTime;
 }
