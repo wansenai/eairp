@@ -75,4 +75,24 @@ public interface ReceiptService {
     Response<Page<SupplierBillDetailVO>> getSupplierBillDetail(QuerySupplierBillDetailDTO querySupplierBillDetailDTO);
 
     void exportProductStockExcel(QueryProductStockDTO queryProductStockDTO, HttpServletResponse response) throws IOException;
+
+    void exportAccountStatisticsExcel (QueryAccountStatisticsDTO queryAccountStatisticsDTO, HttpServletResponse response) throws IOException;
+
+    void exportRetailStatisticsExcel (QueryRetailReportDTO queryRetailReportDTO, HttpServletResponse response) throws IOException;
+
+    void exportPurchaseStatisticsExcel (QueryPurchaseReportDTO queryPurchaseReportDTO, HttpServletResponse response) throws IOException;
+
+    void exportSalesStatisticsExcel (QuerySalesReportDTO querySalesReportDTO, HttpServletResponse response) throws IOException;
+
+    void exportShipmentsDetailExcel (QueryShipmentsDetailDTO queryShipmentsDetailDTO, HttpServletResponse response) throws IOException;
+
+    void exportStorageDetailExcel (QueryStorageDetailDTO queryStorageDetailDTO, HttpServletResponse response) throws IOException;
+
+    void exportShipmentsSummaryExcel (QueryShipmentsSummaryDTO queryShipmentsSummaryDTO, HttpServletResponse response) throws IOException;
+
+    void exportStorageSummaryExcel (QueryStorageSummaryDTO queryStorageSummaryDTO, HttpServletResponse response) throws IOException;
+
+    void exportCustomerBillExcel (QueryCustomerBillDTO queryCustomerBillDTO, HttpServletResponse response) throws IOException;
+
+    void exportSupplierBillExcel (QuerySupplierBillDTO querySupplierBillDTO, HttpServletResponse response) throws IOException;
 }

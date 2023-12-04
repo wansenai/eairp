@@ -2218,4 +2218,106 @@ public class ReceiptServiceImpl implements ReceiptService {
             ExcelUtils.export(response, "商品库存报表", ExcelUtils.getSheetData(queryData));
         }
     }
+
+    @Override
+    public void exportAccountStatisticsExcel(QueryAccountStatisticsDTO queryAccountStatisticsDTO, HttpServletResponse response) {
+        // 最大传递分页参数为1 - 100
+        queryAccountStatisticsDTO.setPage(1L);
+        queryAccountStatisticsDTO.setPageSize(100L);
+        var queryData = getAccountStatistics(queryAccountStatisticsDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "账户统计报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportRetailStatisticsExcel(QueryRetailReportDTO queryRetailReportDTO, HttpServletResponse response) {
+        // 最大传递分页参数为1 - 9999
+        queryRetailReportDTO.setPage(1);
+        queryRetailReportDTO.setPageSize(9999);
+        var queryData = getRetailStatistics(queryRetailReportDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "零售统计报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportPurchaseStatisticsExcel(QueryPurchaseReportDTO queryPurchaseReportDTO, HttpServletResponse response) throws IOException {
+        queryPurchaseReportDTO.setPage(1);
+        queryPurchaseReportDTO.setPageSize(9999);
+        var queryData = getPurchaseStatistics(queryPurchaseReportDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "采购统计报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportSalesStatisticsExcel(QuerySalesReportDTO querySalesReportDTO, HttpServletResponse response) {
+        querySalesReportDTO.setPage(1);
+        querySalesReportDTO.setPageSize(9999);
+        var queryData = getSalesStatistics(querySalesReportDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "销售统计报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportShipmentsDetailExcel(QueryShipmentsDetailDTO queryShipmentsDetailDTO, HttpServletResponse response) {
+        queryShipmentsDetailDTO.setPage(1);
+        queryShipmentsDetailDTO.setPageSize(10000);
+        var queryData = getShipmentsDetail(queryShipmentsDetailDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "出库明细报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportStorageDetailExcel(QueryStorageDetailDTO queryStorageDetailDTO, HttpServletResponse response) {
+        queryStorageDetailDTO.setPage(1);
+        queryStorageDetailDTO.setPageSize(10000);
+        var queryData = getStorageDetail(queryStorageDetailDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "入库明细报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportShipmentsSummaryExcel(QueryShipmentsSummaryDTO queryShipmentsSummaryDTO, HttpServletResponse response) {
+        queryShipmentsSummaryDTO.setPage(1);
+        queryShipmentsSummaryDTO.setPageSize(10000);
+        var queryData = getShipmentsSummary(queryShipmentsSummaryDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "出库汇总报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportStorageSummaryExcel(QueryStorageSummaryDTO queryStorageSummaryDTO, HttpServletResponse response) {
+        queryStorageSummaryDTO.setPage(1);
+        queryStorageSummaryDTO.setPageSize(10000);
+        var queryData = getStorageSummary(queryStorageSummaryDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "入库汇总报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportCustomerBillExcel(QueryCustomerBillDTO queryCustomerBillDTO, HttpServletResponse response) {
+        queryCustomerBillDTO.setPage(1);
+        queryCustomerBillDTO.setPageSize(10000);
+        var queryData = getCustomerBill(queryCustomerBillDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "客户对账报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportSupplierBillExcel(QuerySupplierBillDTO querySupplierBillDTO, HttpServletResponse response) {
+        querySupplierBillDTO.setPage(1);
+        querySupplierBillDTO.setPageSize(10000);
+        var queryData = getSupplierBill(querySupplierBillDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "供应商对账报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
 }
