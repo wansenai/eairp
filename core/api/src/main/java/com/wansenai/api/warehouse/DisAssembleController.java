@@ -63,4 +63,9 @@ public class DisAssembleController {
     public void exportDisAssembleReceipt(@ModelAttribute QueryDisassembleReceiptDTO queryDisassembleReceiptDTO, HttpServletResponse response) throws Exception {
         disassembleService.exportDisAssembleReceipt(queryDisassembleReceiptDTO, response);
     }
+
+    @GetMapping("exportDetail/{receiptNumber}")
+    public void exportDisAssembleReceiptDetail(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        disassembleService.exportDisAssembleReceiptDetail(receiptNumber, response);
+    }
 }
