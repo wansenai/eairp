@@ -206,6 +206,15 @@ public interface ReceiptRetailService extends IService<ReceiptRetailMain> {
     void exportRetailShipmentsExcel(QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) throws Exception;
 
     /**
+     *
+     * @param receiptNumber
+     * @param response
+     * @throws IOException
+     */
+    void exportShipmentsDetailExcel(String receiptNumber, HttpServletResponse response) throws IOException;
+
+
+    /**
      * Query data through public query criteria and export retail refund data files
      * 根据公共查询条件查询数据并导出零售退货数据文件
      *
@@ -220,4 +229,6 @@ public interface ReceiptRetailService extends IService<ReceiptRetailMain> {
      *                  异常
      */
     void exportRetailRefundExcel(QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception;
+
+    void exportRefundDetailExcel(String receiptNumber, HttpServletResponse response) throws IOException;
 }

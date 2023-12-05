@@ -59,7 +59,7 @@
 import {defineComponent, ref} from 'vue';
 import {BasicTable, useTable} from '/src/components/Table';
 import {BasicModal, useModalInner} from "@/components/Modal";
-import {getLinkShipmentsDetail} from "@/api/retail/shipments";
+import {getLinkShipmentsDetail, exportShipmentsDetail} from "@/api/retail/shipments";
 import printJS from 'print-js';
 import {
   Descriptions,
@@ -68,6 +68,7 @@ import {
   Statistic,
 } from 'ant-design-vue';
 import {retailShipmentsTableColumns} from "@/views/retail/shipments/shipments.data";
+import {getTimestamp} from "@/utils/dateUtil";
 
 export default defineComponent({
   name: 'ViewShipmentModal',
@@ -82,18 +83,18 @@ export default defineComponent({
   setup() {
     const receiptNumber = ref('');
     const otherReceipt = ref('');
-    const memberName = ref(0);
+    const memberName = ref<any>('');
     const paymentType = ref('');
     const receiptDate = ref('');
     const receiptType = ref('');
-    const receiptAmount = ref('');
+    const receiptAmount = ref<any>('');
     const collectAmount = ref('');
-    const backAmount = ref('');
+    const backAmount = ref<any>('');
     const accountName = ref('');
     const remark = ref('')
     const status = ref();
 
-    const tableData = ref([]);
+    const tableData = ref<any>([]);
     const [registerTable] = useTable({
       title: '出库商品表数据',
       columns: retailShipmentsTableColumns,
@@ -106,7 +107,6 @@ export default defineComponent({
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200, showOkBtn: false});
       const res = await getLinkShipmentsDetail(data.receiptNumber);
-      console.info(res.data);
       tableData.value = res.data.tableData;
       receiptNumber.value = res.data.receiptNumber;
       memberName.value = res.data.memberName;
@@ -129,8 +129,17 @@ export default defineComponent({
       closeModal();
     }
 
-    function exportTable() {
-
+    async function exportTable() {
+      const file: any = await exportShipmentsDetail(receiptNumber.value)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        const timestamp = getTimestamp(new Date());
+        link.href = URL.createObjectURL(blob);
+        link.download = "零售出库单据详情" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
     const flexContainer = 'display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 8px;';
