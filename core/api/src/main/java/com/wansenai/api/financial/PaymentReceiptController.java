@@ -71,4 +71,9 @@ public class PaymentReceiptController {
     public void exportPaymentReceipt(@ModelAttribute QueryPaymentDTO queryPaymentDTO, HttpServletResponse response) {
         paymentReceiptService.exportPaymentReceipt(queryPaymentDTO, response);
     }
+
+    @GetMapping("exportDetail/{receiptNumber}")
+    public void exportPaymentReceiptDetail(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) {
+        paymentReceiptService.exportPaymentReceiptDetail(receiptNumber, response);
+    }
 }
