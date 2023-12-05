@@ -166,9 +166,6 @@ public class FinancialAccountServiceImpl extends ServiceImpl<FinancialAccountMap
         var accountList = lambdaQuery()
                 .eq(FinancialAccount::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list();
-        if(accountList.isEmpty()) {
-            return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY);
-        }
         var accountVos = new ArrayList<AccountVO>();
         accountList.forEach(item -> {
             AccountVO accountVO = new AccountVO();
