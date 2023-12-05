@@ -14,6 +14,8 @@ package com.wansenai.service.user.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.entities.warehouse.Warehouse;
+import com.wansenai.mappers.warehouse.WarehouseMapper;
 import com.wansenai.utils.CommonTools;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.dto.user.*;
@@ -84,8 +86,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private final SysRoleMenuRelService roleMenuRelService;
 
+    private final WarehouseMapper warehouseMapper;
+
     public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService,
-                              ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper, SysMenuMapper menuMapper, SysRoleMenuRelService roleMenuRelService) {
+                              ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper, SysMenuMapper menuMapper, SysRoleMenuRelService roleMenuRelService, WarehouseMapper warehouseMapper) {
         this.userMapper = userMapper;
         this.redisUtil = redisUtil;
         this.jwtUtil = jwtUtil;
@@ -95,6 +99,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         this.departmentMapper = departmentMapper;
         this.menuMapper = menuMapper;
         this.roleMenuRelService = roleMenuRelService;
+        this.warehouseMapper = warehouseMapper;
     }
 
 
@@ -189,6 +194,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .createTime(LocalDateTime.now())
                 .createBy(userId)
                 .build();
+        // 2023-12-05 默认分配仓库
+        var warehouse = Warehouse.builder()
+                .id(SnowflakeIdUtil.nextId())
+                .tenantId(userId)
+                .warehouseManager(userId)
+                .warehouseName("默认仓库")
+                .remark("默认仓库")
+                .createTime(LocalDateTime.now())
+                .createBy(userId)
+                .build();
+        warehouseMapper.insert(warehouse);
 
         var userResult = save(user);
         var roleResult = roleMapper.insert(role);
