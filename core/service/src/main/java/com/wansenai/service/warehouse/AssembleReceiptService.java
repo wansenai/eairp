@@ -37,4 +37,6 @@ public interface AssembleReceiptService extends IService<WarehouseReceiptMain> {
     Response<String> updateAssembleReceiptStatus(List<Long> ids, Integer status);
 
     void exportAssembleReceipt(QueryAssembleReceiptDTO queryAssembleReceiptDTO, HttpServletResponse response) throws Exception;
+
+    void exportAssembleReceiptDetail(String receiptNumber, HttpServletResponse response) throws Exception;
 }

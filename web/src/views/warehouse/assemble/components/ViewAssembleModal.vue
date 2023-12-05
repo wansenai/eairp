@@ -47,7 +47,7 @@
 import {defineComponent, ref} from 'vue';
 import {BasicTable, useTable} from '/src/components/Table';
 import {BasicModal, useModalInner} from "@/components/Modal";
-import {getAssembleDetailById} from "@/api/warehouse/assemble";
+import {getAssembleDetailById, exportAssembleDetail} from "@/api/warehouse/assemble";
 import {assembleTableColumns} from "@/views/warehouse/assemble/assemble.data";
 import {
   Descriptions,
@@ -56,6 +56,7 @@ import {
   Statistic,
 } from 'ant-design-vue';
 import printJS from "print-js";
+import {getTimestamp} from "@/utils/dateUtil";
 
 export default defineComponent({
   name: 'ViewAssembleModal',
@@ -96,8 +97,17 @@ export default defineComponent({
       closeModal();
     }
 
-    function exportTable() {
-
+    async function exportTable() {
+      const file: any = await exportAssembleDetail(receiptNumber.value)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        const timestamp = getTimestamp(new Date());
+        link.href = URL.createObjectURL(blob);
+        link.download = "组装单单据详情" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
     const flexContainer = 'display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 8px;';
