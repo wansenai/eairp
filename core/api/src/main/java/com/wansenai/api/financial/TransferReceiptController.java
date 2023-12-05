@@ -71,4 +71,9 @@ public class TransferReceiptController {
     public void exportTransferReceipt(@ModelAttribute QueryTransferDTO queryTransferDTO, HttpServletResponse response) {
         transferReceiptService.exportTransferReceipt(queryTransferDTO, response);
     }
+
+    @GetMapping("exportDetail/{receiptNumber}")
+    public void exportTransferReceiptDetail(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) {
+        transferReceiptService.exportTransferReceiptDetail(receiptNumber, response);
+    }
 }

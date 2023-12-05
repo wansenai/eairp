@@ -15,6 +15,7 @@ enum API {
     UpdateStatus = '/financial/transfer/updateStatusByIds',
     GetDetail = '/financial/transfer/getDetailById',
     Export = '/financial/transfer/export',
+    ExportDetail = '/financial/transfer/exportDetail',
 }
 
 export function getTransferPageList(params: QueryTransferReq, mode: ErrorMessageMode = 'notice') {
@@ -73,6 +74,15 @@ export function exportTransfer(params: QueryTransferReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportTransferDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );
