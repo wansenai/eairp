@@ -15,6 +15,7 @@ enum API {
     Delete = '/purchase/refund/delete',
     GetLinkRefundDetail = '/purchase/refund/getLinkRefundDetail',
     Export = '/purchase/refund/export',
+    ExportDetail = '/purchase/order/exportDetail',
 }
 
 export function getPurchaseRefundPageList(params: QueryPurchaseRefundReq) {
@@ -81,6 +82,15 @@ export function exportRefund(params: QueryPurchaseRefundReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportRefundDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );

@@ -15,6 +15,7 @@ enum API {
     Delete = '/purchase/order/delete',
     GetLinkOrderDetail = '/purchase/order/getLinkOrderDetail',
     Export = '/purchase/order/export',
+    ExportDetail = '/purchase/order/exportDetail',
 }
 
 export function getPurchaseOrderPageList(params: QueryPurchaseOrderReq) {
@@ -81,6 +82,15 @@ export function exportOrder(params: QueryPurchaseOrderReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportOrderDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );

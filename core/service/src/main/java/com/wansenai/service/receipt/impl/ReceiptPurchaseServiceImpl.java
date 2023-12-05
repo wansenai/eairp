@@ -47,6 +47,7 @@ import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.purchase.*;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.stylesheets.LinkStyle;
@@ -1359,6 +1360,30 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     }
 
     @Override
+    public void exportPurchaseOrderDetailExcel(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(ReceiptPurchaseMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one()
+                .getId();
+        var detail = getPurchaseOrderDetail(id);
+        if (detail != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<PurchaseDataExportBO>();
+            tableData.forEach(item -> {
+                var purchaseBo = new PurchaseDataExportBO();
+                purchaseBo.setSupplierName(data.getSupplierName());
+                purchaseBo.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, purchaseBo);
+                exportData.add(purchaseBo);
+            });
+            var fileName = data.getReceiptNumber() + "-采购订单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+        }
+    }
+
+    @Override
     public void exportPurchaseStorageExcel(QueryPurchaseStorageDTO queryPurchaseStorageDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
         var mainData = getPurchaseStorageList(queryPurchaseStorageDTO);
@@ -1400,6 +1425,30 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     }
 
     @Override
+    public void exportPurchaseStorageDetailExcel(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(ReceiptPurchaseMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one()
+                .getId();
+        var detail = getPurchaseStorageDetail(id);
+        if (detail != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<PurchaseDataExportBO>();
+            tableData.forEach(item -> {
+                var purchaseBo = new PurchaseDataExportBO();
+                purchaseBo.setSupplierName(data.getSupplierName());
+                purchaseBo.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, purchaseBo);
+                exportData.add(purchaseBo);
+            });
+            var fileName = data.getReceiptNumber() + "-采购入库单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+        }
+    }
+
+    @Override
     public void exportPurchaseRefundExcel(QueryPurchaseRefundDTO queryPurchaseRefundDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
         var mainData = getPurchaseRefundList(queryPurchaseRefundDTO);
@@ -1437,6 +1486,30 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             }
             exportMap.put("采购退货", ExcelUtils.getSheetData(mainData));
             ExcelUtils.exportManySheet(response, "采购退货", exportMap);
+        }
+    }
+
+    @Override
+    public void exportPurchaseRefundDetailExcel(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(ReceiptPurchaseMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one()
+                .getId();
+        var detail = getPurchaseRefundDetail(id);
+        if (detail != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<PurchaseDataExportBO>();
+            tableData.forEach(item -> {
+                var purchaseBo = new PurchaseDataExportBO();
+                purchaseBo.setSupplierName(data.getSupplierName());
+                purchaseBo.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, purchaseBo);
+                exportData.add(purchaseBo);
+            });
+            var fileName = data.getReceiptNumber() + "-采购退货单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 }
