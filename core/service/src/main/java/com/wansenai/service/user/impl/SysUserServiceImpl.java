@@ -180,7 +180,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .map(SysMenu::getId)
                 .filter(id -> id != 15)
                 .toList();
-        var menuIdStr = menuIds.toString().replace(",", "][");
+        var menuIdStr = menuIds.toString().replaceAll(",\\s*", "][");
         var roleMenuRel = SysRoleMenuRel.builder()
                 .id(SnowflakeIdUtil.nextId())
                 .tenantId(userId)
