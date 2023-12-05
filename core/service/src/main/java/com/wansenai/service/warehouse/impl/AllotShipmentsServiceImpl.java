@@ -45,6 +45,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.AllotReceiptDetailVO;
 import com.wansenai.vo.warehouse.AllotReceiptVO;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -509,6 +510,30 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 exportMap.put("调拨出库明细", ExcelUtils.getSheetData(subData));
             }
             ExcelUtils.exportManySheet(response, "调拨出库", exportMap);
+        }
+    }
+
+    @Override
+    public void exportAllotReceiptDetail(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(WarehouseReceiptMain::getReceiptNumber, receiptNumber)
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(WarehouseReceiptMain::getType, "调拨出库")
+                .one()
+                .getId();
+        var detail = getAllotReceiptDetail(id);
+        if (detail != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<AllotStockDataExportBO>();
+            tableData.forEach(item -> {
+               var allotStockBo = new AllotStockDataExportBO();
+                allotStockBo.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, allotStockBo);
+                exportData.add(allotStockBo);
+            });
+            var fileName = data.getReceiptNumber() + "-调拨出库明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 }

@@ -15,6 +15,7 @@ enum API {
     UpdateStatus = '/warehouse/otherShipments/updateStatusByIds',
     GetDetail = '/warehouse/otherShipments/getDetailById',
     Export = '/warehouse/otherShipments/export',
+    ExportDetail = '/warehouse/otherShipments/exportDetail',
 }
 
 export function getOtherShipmentsPageList(params: QueryOtherShipmentsReq) {
@@ -73,6 +74,15 @@ export function exportOtherShipments(params: QueryOtherShipmentsReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportOtherShipmentsDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );
