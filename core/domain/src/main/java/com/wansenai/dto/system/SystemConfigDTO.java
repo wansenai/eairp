@@ -10,16 +10,26 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.service.system;
+package com.wansenai.dto.system;
 
-import com.wansenai.entities.system.SysConfig;
-import com.baomidou.mybatisplus.extension.service.IService;
+import lombok.Data;
 
-/**
- * <p>
- * 系统参数 服务类
- * </p>
- */
-public interface ISysConfigService extends IService<SysConfig> {
+@Data
+public class SystemConfigDTO {
 
+    private Long id;
+
+    private String companyName;
+
+    private String companyContact;
+
+    private String companyAddress;
+
+    private String companyPhone;
+
+    private String companyFax;
+
+    private String companyPostCode;
+
+    private String saleAgreement;
 }

@@ -22,11 +22,13 @@ import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {searchSupplierBillSchema, supplierBillColumns} from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getSupplierBill} from "@/api/report/report";
+import {getSupplierBill, exportSupplierBill} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import {useModal} from "@/components/Modal";
 import SupplierBillDetailModal from "@/views/report/modal/SupplierBillDetailModal.vue";
 import printJS from "print-js";
+import {useMessage} from "@/hooks/web/useMessage";
+import {getTimestamp} from "@/utils/dateUtil";
 
 export default defineComponent({
   name: 'SupplierBill',
@@ -34,8 +36,9 @@ export default defineComponent({
     SupplierBillDetailModal, Tag, TableAction, BasicTable},
   setup() {
     const printTableData = ref<any[]>([]);
+    const { createMessage } = useMessage();
     const [handleRegister, {openModal}] = useModal();
-    const [registerTable, { reload }] = useTable({
+    const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '供应商对账报表',
       api: getSupplierBill,
       columns: supplierBillColumns,
@@ -104,6 +107,23 @@ export default defineComponent({
     }
 
     function exportTable() {
+      if (getDataSource() === undefined || getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      exportSupplierBill(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "供应商对账数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
     }
 
     function primaryPrint() {

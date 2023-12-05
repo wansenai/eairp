@@ -10,25 +10,28 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.dto.report;
+package com.wansenai.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import lombok.Getter;
 
 @Data
-public class QueryProductStockDTO {
+public class SystemConfigVO {
 
-    private Long warehouseId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;
 
-    private String productInfo;
+    private String companyName;
 
-    private Long productCategoryId;
+    private String companyContact;
 
-    private String warehouseShelves;
+    private String companyAddress;
 
-    private Long page;
+    private String companyPhone;
 
-    private Long pageSize;
+    private String companyFax;
 
-    private Boolean isExportDetail;
+    private String companyPostCode;
+
+    private String saleAgreement;
 }

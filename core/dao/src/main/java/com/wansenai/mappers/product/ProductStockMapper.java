@@ -21,6 +21,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wansenai.vo.product.ProductStockKeepUnitVO;
 import com.wansenai.vo.report.ProductStockVO;
 
+import java.util.List;
+
 /**
  * <p>
  * 产品初始库存 Mapper 接口
@@ -36,4 +38,5 @@ public interface ProductStockMapper extends BaseMapper<ProductStock> {
 
     Page<ProductStockVO> getProductStock(IPage<QueryProductStockDTO> pageObject, QueryProductStockDTO queryProductStockDTO);
 
+    List<ProductStockVO> getProductStockList(QueryProductStockDTO queryProductStockDTO);
 }

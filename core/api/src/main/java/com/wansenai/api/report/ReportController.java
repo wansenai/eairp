@@ -19,8 +19,10 @@ import com.wansenai.service.receipt.ReceiptService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.retail.StatisticalDataVO;
 import com.wansenai.vo.report.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -120,5 +122,60 @@ public class ReportController {
     @PostMapping("supplierBillDetail")
     public Response<Page<SupplierBillDetailVO>> getSupplierBillDetail(@RequestBody QuerySupplierBillDetailDTO querySupplierBillDetailDTO) {
         return receiptService.getSupplierBillDetail(querySupplierBillDetailDTO);
+    }
+
+    @GetMapping("/productStock/export")
+    public void exportProductStockExcel(@ModelAttribute QueryProductStockDTO queryProductStockDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportProductStockExcel(queryProductStockDTO, response);
+    }
+
+    @GetMapping("/accountStatistics/export")
+    public void exportAccountStatisticsExcel(@ModelAttribute QueryAccountStatisticsDTO queryAccountStatisticsDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportAccountStatisticsExcel(queryAccountStatisticsDTO, response);
+    }
+
+    @GetMapping("/retailStatistics/export")
+    public void exportRetailStatisticsExcel(@ModelAttribute QueryRetailReportDTO queryRetailReportDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportRetailStatisticsExcel(queryRetailReportDTO, response);
+    }
+
+    @GetMapping("/purchaseStatistics/export")
+    public void exportPurchaseStatisticsExcel(@ModelAttribute QueryPurchaseReportDTO queryPurchaseReportDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportPurchaseStatisticsExcel(queryPurchaseReportDTO, response);
+    }
+
+    @GetMapping("/salesStatistics/export")
+    public void exportSalesStatisticsExcel(@ModelAttribute QuerySalesReportDTO querySalesReportDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportSalesStatisticsExcel(querySalesReportDTO, response);
+    }
+
+    @GetMapping("/shipmentsDetail/export")
+    public void exportShipmentsDetailExcel(@ModelAttribute QueryShipmentsDetailDTO queryShipmentsDetailDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportShipmentsDetailExcel(queryShipmentsDetailDTO, response);
+    }
+
+    @GetMapping("/storageDetail/export")
+    public void exportStorageDetailExcel(@ModelAttribute QueryStorageDetailDTO queryStorageDetailDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportStorageDetailExcel(queryStorageDetailDTO, response);
+    }
+
+    @GetMapping("/shipmentsSummary/export")
+    public void exportShipmentsSummaryExcel(@ModelAttribute QueryShipmentsSummaryDTO queryShipmentsSummaryDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportShipmentsSummaryExcel(queryShipmentsSummaryDTO, response);
+    }
+
+    @GetMapping("/storageSummary/export")
+    public void exportStorageSummaryExcel(@ModelAttribute QueryStorageSummaryDTO queryStorageSummaryDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportStorageSummaryExcel(queryStorageSummaryDTO, response);
+    }
+
+    @GetMapping("/customerBill/export")
+    public void exportCustomerBillExcel(@ModelAttribute QueryCustomerBillDTO queryCustomerBillDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportCustomerBillExcel(queryCustomerBillDTO, response);
+    }
+
+    @GetMapping("/supplierBill/export")
+    public void exportSupplierBillExcel(@ModelAttribute QuerySupplierBillDTO querySupplierBillDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportSupplierBillExcel(querySupplierBillDTO, response);
     }
 }

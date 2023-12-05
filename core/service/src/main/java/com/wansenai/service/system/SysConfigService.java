@@ -10,25 +10,23 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.dto.report;
+package com.wansenai.service.system;
 
-import lombok.Data;
-import lombok.Getter;
+import com.wansenai.dto.system.SystemConfigDTO;
+import com.wansenai.entities.system.SysConfig;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.SystemConfigVO;
 
-@Data
-public class QueryProductStockDTO {
+/**
+ * <p>
+ * 系统参数 服务类
+ * </p>
+ */
+public interface SysConfigService extends IService<SysConfig> {
 
-    private Long warehouseId;
+    Response<SystemConfigVO> getSystemConfigInfo();
 
-    private String productInfo;
+    Response<String> addOrUpdateCompanyInfo(SystemConfigDTO systemConfigDTO);
 
-    private Long productCategoryId;
-
-    private String warehouseShelves;
-
-    private Long page;
-
-    private Long pageSize;
-
-    private Boolean isExportDetail;
 }

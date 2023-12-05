@@ -19,16 +19,19 @@ import {
   storageSummaryStatisticsColumns
 } from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getStorageSummary} from "@/api/report/report";
+import {getStorageSummary, exportStorageSummary} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import printJS from "print-js";
+import {useMessage} from "@/hooks/web/useMessage";
+import {getTimestamp} from "@/utils/dateUtil";
 
 export default defineComponent({
   name: 'StorageSummaryStatistics',
   components: {Tag, TableAction, BasicTable},
   setup() {
     const printTableData = ref<any[]>([]);
-    const [registerTable, { reload }] = useTable({
+    const {createMessage} = useMessage();
+    const [registerTable, {reload, getForm, getDataSource}] = useTable({
       title: '入库汇总报表',
       api: getStorageSummary,
       columns: storageSummaryStatisticsColumns,
@@ -53,7 +56,7 @@ export default defineComponent({
       printTableData.value = tableData;
       printTableData.value.push({
         storageNumber: storageNumber,
-        storageAmount: `￥${XEUtils.commafy(XEUtils.toNumber(storageAmount), { digits: 2 })}`,
+        storageAmount: `￥${XEUtils.commafy(XEUtils.toNumber(storageAmount), {digits: 2})}`,
         productBarcode: '合计',
         warehouseName: '',
         productName: '',
@@ -67,10 +70,11 @@ export default defineComponent({
         {
           _index: '合计',
           storageNumber: storageNumber,
-          storageAmount: `￥${XEUtils.commafy(XEUtils.toNumber(storageAmount), { digits: 2 })}`,
+          storageAmount: `￥${XEUtils.commafy(XEUtils.toNumber(storageAmount), {digits: 2})}`,
         },
       ];
     }
+
     async function handleSuccess() {
       reload();
     }
@@ -80,13 +84,30 @@ export default defineComponent({
     }
 
     function exportTable() {
+      if (getDataSource() === undefined || getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      exportStorageSummary(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "入库汇总数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
     }
 
     function primaryPrint() {
       printJS({
         documentTitle: "EAIRP (入库汇总)",
         properties: storageSummaryStatisticsColumns.map(item => {
-          return { field: item.dataIndex, displayName: item.title }
+          return {field: item.dataIndex, displayName: item.title}
         }),
         printable: printTableData.value,
         gridHeaderStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',

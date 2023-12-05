@@ -12,20 +12,33 @@
  */
 package com.wansenai.api.system;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
+import com.wansenai.dto.system.SystemConfigDTO;
+import com.wansenai.service.system.SysConfigService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.SystemConfigVO;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-/**
- * <p>
- * 系统参数 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
- */
 @RestController
-@RequestMapping("/sys-config")
+@RequestMapping("/sys/config")
 public class SysConfigController {
 
+    private final SysConfigService sysConfigService;
+
+    public SysConfigController(SysConfigService sysConfigService) {
+        this.sysConfigService = sysConfigService;
+    }
+
+    @GetMapping("getCompanyInfo")
+    public Response<SystemConfigVO> getSystemConfigInfo() {
+        return sysConfigService.getSystemConfigInfo();
+    }
+
+    @PostMapping("addOrUpdate")
+    public Response<String> addOrUpdateCompanyInfo(@RequestBody SystemConfigDTO systemConfigDTO) {
+        return sysConfigService.addOrUpdateCompanyInfo(systemConfigDTO);
+    }
 }

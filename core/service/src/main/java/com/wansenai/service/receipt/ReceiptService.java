@@ -21,7 +21,9 @@ import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.StatisticalDataVO;
 import com.wansenai.vo.report.*;
+import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ReceiptService {
@@ -71,4 +73,26 @@ public interface ReceiptService {
     Response<Page<SupplierBillVO>> getSupplierBill(QuerySupplierBillDTO querySupplierBillDTO);
 
     Response<Page<SupplierBillDetailVO>> getSupplierBillDetail(QuerySupplierBillDetailDTO querySupplierBillDetailDTO);
+
+    void exportProductStockExcel(QueryProductStockDTO queryProductStockDTO, HttpServletResponse response) throws IOException;
+
+    void exportAccountStatisticsExcel (QueryAccountStatisticsDTO queryAccountStatisticsDTO, HttpServletResponse response) throws IOException;
+
+    void exportRetailStatisticsExcel (QueryRetailReportDTO queryRetailReportDTO, HttpServletResponse response) throws IOException;
+
+    void exportPurchaseStatisticsExcel (QueryPurchaseReportDTO queryPurchaseReportDTO, HttpServletResponse response) throws IOException;
+
+    void exportSalesStatisticsExcel (QuerySalesReportDTO querySalesReportDTO, HttpServletResponse response) throws IOException;
+
+    void exportShipmentsDetailExcel (QueryShipmentsDetailDTO queryShipmentsDetailDTO, HttpServletResponse response) throws IOException;
+
+    void exportStorageDetailExcel (QueryStorageDetailDTO queryStorageDetailDTO, HttpServletResponse response) throws IOException;
+
+    void exportShipmentsSummaryExcel (QueryShipmentsSummaryDTO queryShipmentsSummaryDTO, HttpServletResponse response) throws IOException;
+
+    void exportStorageSummaryExcel (QueryStorageSummaryDTO queryStorageSummaryDTO, HttpServletResponse response) throws IOException;
+
+    void exportCustomerBillExcel (QueryCustomerBillDTO queryCustomerBillDTO, HttpServletResponse response) throws IOException;
+
+    void exportSupplierBillExcel (QuerySupplierBillDTO querySupplierBillDTO, HttpServletResponse response) throws IOException;
 }

@@ -67,6 +67,8 @@ const transform: AxiosTransform = {
     'U0002', 'U0003', 'U0004', 'M0001', 'M0002', 'M0003', 'M0004', 'W0001', 'W0002', 'W0003', 'W0004', 'O0001', 'O0002', 'O0003',
     'O0004']; // 定义包含可能值的数组
 
+    const warningCodes = ['A0404'];
+
     if (validCodes.includes(res.data.code) || res.data.code === undefined) {
       if (options.successMessageMode === 'message') {
         createMessage.success(res.data.msg);
@@ -79,8 +81,21 @@ const transform: AxiosTransform = {
           duration: 3,
         });
       }
-
       return res.data;
+      // add info here to handle warning codes
+    } else if (warningCodes.includes(res.data.code)) {
+        if (options.errorMessageMode === 'message') {
+            createMessage.info(res.data.msg);
+        } else if (options.errorMessageMode === 'modal') {
+            createSuccessModal({ title: res.data.msg, content: res.data.msg });
+        } else if (options.errorMessageMode === 'notice') {
+            notification.info({
+            message: t('common.warning'),
+            description: t(res.data.msg),
+            duration: 3,
+            });
+        }
+        return res.data;
     } else {
       if (options.errorMessageMode === 'message') {
         createMessage.error(res.data.msg);
