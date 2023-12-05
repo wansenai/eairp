@@ -71,4 +71,9 @@ public class IncomeReceiptController {
     public void exportIncomeReceipt(@ModelAttribute QueryIncomeDTO queryIncomeDTO, HttpServletResponse response) {
         incomeReceiptService.exportIncomeReceipt(queryIncomeDTO, response);
     }
+
+    @GetMapping("exportDetail/{receiptNumber}")
+    public void exportIncomeReceiptDetail(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) {
+        incomeReceiptService.exportIncomeReceiptDetail(receiptNumber, response);
+    }
 }

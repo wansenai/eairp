@@ -37,4 +37,6 @@ public interface IncomeReceiptService extends IService<FinancialMain> {
     Response<String> updateIncomeReceiptStatus(List<Long> ids, Integer status);
 
     void exportIncomeReceipt(QueryIncomeDTO queryIncomeDTO, HttpServletResponse response);
+
+    void exportIncomeReceiptDetail(String receiptNumber, HttpServletResponse response);
 }
