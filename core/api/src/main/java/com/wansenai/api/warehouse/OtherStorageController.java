@@ -64,4 +64,9 @@ public class OtherStorageController {
         otherStorageService.exportOtherStorage(queryOtherStorageDTO, response);
     }
 
+    @GetMapping("exportDetail/{receiptNumber}")
+    public void exportOtherStorageDetail(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        otherStorageService.exportOtherStorageDetail(receiptNumber, response);
+    }
+
 }
