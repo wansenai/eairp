@@ -16,6 +16,7 @@ enum API {
     GetDetail = '/financial/collection/getDetailById',
     GetArrearsPage = '/sale/arrears/pageList',
     Export = '/financial/collection/export',
+    ExportDetail = '/financial/collection/exportDetail',
 }
 
 export function getCollectionPageList(params: QueryCollectionReq) {
@@ -83,6 +84,15 @@ export function exportCollection(params: QueryCollectionReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportCollectionDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );

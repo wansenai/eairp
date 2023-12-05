@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.CollectionBO;
 import com.wansenai.bo.CollectionDataExportBO;
 import com.wansenai.bo.FileDataBO;
+import com.wansenai.bo.IncomeExpenseDataExportBO;
 import com.wansenai.dto.financial.AddOrUpdateCollectionDTO;
 import com.wansenai.dto.financial.QueryCollectionDTO;
 import com.wansenai.entities.financial.FinancialMain;
@@ -39,6 +40,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.CollectionDetailVO;
 import com.wansenai.vo.financial.CollectionVO;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -419,6 +421,32 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
                 exportMap.put("收款单明细", ExcelUtils.getSheetData(subData));
             }
             ExcelUtils.exportManySheet(response, "收款单", exportMap);
+        }
+    }
+
+    @Override
+    public void exportCollectionReceiptDetail(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(FinancialMain::getReceiptNumber, receiptNumber)
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(FinancialMain::getType, "收款")
+                .one()
+                .getId();
+
+        var detail = getCollectionReceiptDetail(id);
+        if (detail.getData() != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<CollectionDataExportBO>();
+            tableData.forEach(item -> {
+                var collectionDataBO = new CollectionDataExportBO();
+                collectionDataBO.setCustomerName(data.getCustomerName());
+                collectionDataBO.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, collectionDataBO);
+                exportData.add(collectionDataBO);
+            });
+            var fileName = data.getReceiptNumber() + "-收款单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 }
