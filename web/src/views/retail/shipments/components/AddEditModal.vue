@@ -156,7 +156,8 @@
                 </a-col>
                 <a-col :lg="24" :md="6" :sm="6">
                   <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" data-step="8" data-title="收款账户"
-                               data-intro="收款账户的信息来自基本资料菜单下的【结算账户】">
+                               data-intro="收款账户的信息来自基本资料菜单下的【结算账户】"
+                               :rules="[{ required: true}]">
                     <template #label>
                       <span style="font-size: 20px;line-height:20px">收款账户</span>
                     </template>
@@ -519,6 +520,10 @@ export default defineComponent({
       const table = xGrid.value
       if (!formState.receiptDate) {
         createMessage.error('请选择单据日期');
+        return;
+      }
+      if (!formState.accountId) {
+        createMessage.error('请选择收款账户');
         return;
       }
       if(table) {

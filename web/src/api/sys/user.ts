@@ -179,8 +179,11 @@ export function getPermCode() {
   return defHttp.get<string[]>({url: Api.GetPermCode});
 }
 
-export function doLogout() {
-  return defHttp.get({url: Api.Logout});
+export function doLogout(successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
+  return defHttp.get({url: Api.Logout}, {
+        successMessageMode: successMode,
+        errorMessageMode: errorMode,
+  });
 }
 
 export function getUserOperatorList() {
