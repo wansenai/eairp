@@ -140,13 +140,28 @@ public class PurchaseController {
         purchaseService.exportPurchaseOrderExcel(queryPurchaseOrderDTO, response);
     }
 
+    @GetMapping("/order/exportDetail/{receiptNumber}")
+    public void exportOrderDetailExcel(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        purchaseService.exportPurchaseOrderDetailExcel(receiptNumber, response);
+    }
+
     @GetMapping("/storage/export")
     public void exportStorageExcel(@ModelAttribute QueryPurchaseStorageDTO queryPurchaseStorageDTO, HttpServletResponse response) throws Exception {
         purchaseService.exportPurchaseStorageExcel(queryPurchaseStorageDTO, response);
     }
 
+    @GetMapping("/storage/exportDetail/{receiptNumber}")
+    public void exportStorageDetailExcel(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        purchaseService.exportPurchaseStorageDetailExcel(receiptNumber, response);
+    }
+
     @GetMapping("/refund/export")
     public void exportRefundExcel(@ModelAttribute QueryPurchaseRefundDTO queryPurchaseRefundDTO, HttpServletResponse response) throws Exception {
         purchaseService.exportPurchaseRefundExcel(queryPurchaseRefundDTO, response);
+    }
+
+    @GetMapping("/refund/exportDetail/{receiptNumber}")
+    public void exportRefundDetailExcel(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        purchaseService.exportPurchaseRefundDetailExcel(receiptNumber, response);
     }
 }

@@ -37,4 +37,6 @@ public interface TransferReceiptService extends IService<FinancialMain> {
     Response<String> updateTransferReceiptStatus(List<Long> ids, Integer status);
 
     void exportTransferReceipt(QueryTransferDTO queryTransferDTO, HttpServletResponse response);
+
+    void exportTransferReceiptDetail(String receiptNumber, HttpServletResponse response);
 }

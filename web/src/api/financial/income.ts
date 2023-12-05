@@ -14,6 +14,7 @@ enum API {
     UpdateStatus = '/financial/income/updateStatusByIds',
     GetDetail = '/financial/income/getDetailById',
     Export = '/financial/income/export',
+    ExportDetail = '/financial/income/exportDetail',
 }
 
 export function getIncomePageList(params: QueryIncomeReq, mode: ErrorMessageMode = 'notice') {
@@ -72,6 +73,15 @@ export function exportIncome(params: QueryIncomeReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportIncomeDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );

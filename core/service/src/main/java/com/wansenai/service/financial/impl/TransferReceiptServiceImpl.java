@@ -40,6 +40,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.TransferDetailVO;
 import com.wansenai.vo.financial.TransferVO;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -412,6 +413,31 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
                 exportMap.put("转账单明细", ExcelUtils.getSheetData(subData));
             }
             ExcelUtils.exportManySheet(response, "转账单", exportMap);
+        }
+    }
+
+    @Override
+    public void exportTransferReceiptDetail(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(FinancialMain::getReceiptNumber, receiptNumber)
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(FinancialMain::getType, "转账")
+                .one()
+                .getId();
+
+        var detail = getTransferReceiptDetail(id);
+        if(detail.getData() != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<TransferAccountDataExportBO>();
+            tableData.forEach(item -> {
+                var transferAccountBO = new TransferAccountDataExportBO();
+                transferAccountBO.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, transferAccountBO);
+                exportData.add(transferAccountBO);
+            });
+            var fileName = data.getReceiptNumber() + "-转账单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 }

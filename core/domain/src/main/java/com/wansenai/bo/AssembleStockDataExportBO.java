@@ -13,8 +13,10 @@
 package com.wansenai.bo;
 
 import com.wansenai.utils.excel.ExcelExport;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
@@ -23,6 +25,8 @@ import java.math.BigDecimal;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AssembleStockDataExportBO {
 
     @ExcelExport("单据编号")

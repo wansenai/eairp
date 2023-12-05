@@ -37,4 +37,6 @@ public interface OtherStorageService extends IService<WarehouseReceiptMain> {
     Response<String> updateOtherStorageStatus(List<Long> ids, Integer status);
 
     void exportOtherStorage(QueryOtherStorageDTO queryOtherStorageDTO, HttpServletResponse response) throws Exception;
+
+    void exportOtherStorageDetail(String receiptNumer, HttpServletResponse response) throws Exception;
 }

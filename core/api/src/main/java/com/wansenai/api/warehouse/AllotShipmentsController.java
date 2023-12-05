@@ -64,4 +64,8 @@ public class AllotShipmentsController {
         allotShipmentsService.exportAllotReceipt(queryAllotReceiptDTO, response);
     }
 
+    @GetMapping("exportDetail/{receiptNumber}")
+    public void exportAllotShipmentsDetail(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        allotShipmentsService.exportAllotReceiptDetail(receiptNumber, response);
+    }
 }

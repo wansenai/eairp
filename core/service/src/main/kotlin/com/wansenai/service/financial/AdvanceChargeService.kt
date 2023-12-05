@@ -35,4 +35,6 @@ interface AdvanceChargeService : IService<FinancialMain>{
     fun updateAdvanceChargeStatusById(ids: List<Long>, status: Int): Response<String>
 
     fun exportAdvanceCharge(advanceChargeDTO: QueryAdvanceChargeDTO, response: HttpServletResponse)
+
+    fun exportAdvanceChargeDetail(receiptNumber: String, response: HttpServletResponse)
 }

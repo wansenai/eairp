@@ -46,6 +46,7 @@ import com.wansenai.vo.warehouse.AssembleReceiptVO;
 import com.wansenai.vo.warehouse.DisassembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.DisassembleReceiptVO;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -508,6 +509,30 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                 exportMap.put("拆卸单明细", ExcelUtils.getSheetData(subData));
             }
             ExcelUtils.exportManySheet(response, "拆卸单", exportMap);
+        }
+    }
+
+    @Override
+    public void exportDisAssembleReceiptDetail(String receiptNumber, HttpServletResponse response) throws Exception {
+        var id = lambdaQuery()
+                .eq(WarehouseReceiptMain::getReceiptNumber, receiptNumber)
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(WarehouseReceiptMain::getType, "拆卸单")
+                .one()
+                .getId();
+        var detail = getDisassembleReceiptDetail(id);
+        if (detail != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<AssembleStockDataExportBO>();
+            tableData.forEach(item -> {
+                var assembleStockBO = new AssembleStockDataExportBO();
+                assembleStockBO.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, assembleStockBO);
+                exportData.add(assembleStockBO);
+            });
+            var fileName = data.getReceiptNumber() + "-拆卸单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 }

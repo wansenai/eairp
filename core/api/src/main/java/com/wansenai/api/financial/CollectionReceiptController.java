@@ -71,4 +71,9 @@ public class CollectionReceiptController {
     public void exportCollectionReceipt(@ModelAttribute QueryCollectionDTO queryCollectionDTO, HttpServletResponse response) {
         collectionReceiptService.exportCollectionReceipt(queryCollectionDTO, response);
     }
+
+    @GetMapping("exportDetail/{receiptNumber}")
+    public void exportCollectionReceiptDetail(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) {
+        collectionReceiptService.exportCollectionReceiptDetail(receiptNumber, response);
+    }
 }

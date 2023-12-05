@@ -240,7 +240,13 @@ public interface ReceiptSaleService extends IService<ReceiptSaleMain> {
 
     void exportSaleOrderExcel(QuerySaleOrderDTO querySaleOrderDTO, HttpServletResponse response) throws Exception;
 
+    void exportSaleOrderDetailExcel(String receiptNumber, HttpServletResponse response) throws Exception;
+
     void exportSaleShipmentsExcel(QuerySaleShipmentsDTO querySaleShipmentsDTO, HttpServletResponse response) throws Exception;
 
+    void exportSaleShipmentsDetailExcel(String receiptNumber, HttpServletResponse response) throws Exception;
+
     void exportSaleRefundExcel(QuerySaleRefundDTO querySaleRefundDTO, HttpServletResponse response) throws Exception;
+
+    void exportSaleRefundDetailExcel(String receiptNumber, HttpServletResponse response) throws Exception;
 }

@@ -37,4 +37,6 @@ public interface ExpenseReceiptService extends IService<FinancialMain> {
     Response<String> updateExpenseReceiptStatus(List<Long> ids, Integer status);
 
     void exportExpenseReceipt(QueryExpenseDTO queryExpenseDTO, HttpServletResponse response);
+
+    void exportExpenseReceiptDetail(String receiptNumber, HttpServletResponse response);
 }

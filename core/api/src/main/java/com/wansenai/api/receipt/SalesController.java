@@ -132,13 +132,30 @@ public class SalesController {
         receiptSaleService.exportSaleOrderExcel(querySaleOrderDTO, response);
     }
 
+    @GetMapping("/order/exportDetail/{receiptNumber}")
+    public void exportSaleOrderDetailExcel(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        receiptSaleService.exportSaleOrderDetailExcel(receiptNumber, response);
+    }
+
     @GetMapping("/shipments/export")
-    public void exportStorageExcel(@ModelAttribute QuerySaleShipmentsDTO querySaleShipmentsDTO, HttpServletResponse response) throws Exception {
+    public void exportSaleShipmentsExcel(@ModelAttribute QuerySaleShipmentsDTO querySaleShipmentsDTO, HttpServletResponse response) throws Exception {
         receiptSaleService.exportSaleShipmentsExcel(querySaleShipmentsDTO, response);
     }
+
+    @GetMapping("/shipments/exportDetail/{receiptNumber}")
+    public void exportSaleShipmentsDetailExcel(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        receiptSaleService.exportSaleShipmentsDetailExcel(receiptNumber, response);
+    }
+
 
     @GetMapping("/refund/export")
     public void exportRefundExcel(@ModelAttribute QuerySaleRefundDTO querySaleRefundDTO, HttpServletResponse response) throws Exception {
         receiptSaleService.exportSaleRefundExcel(querySaleRefundDTO, response);
     }
+
+    @GetMapping("/refund/exportDetail/{receiptNumber}")
+    public void exportSaleRefundDetailExcel(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        receiptSaleService.exportSaleRefundDetailExcel(receiptNumber, response);
+    }
+
 }

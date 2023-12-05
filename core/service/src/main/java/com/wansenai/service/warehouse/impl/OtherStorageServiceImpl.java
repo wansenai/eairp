@@ -45,6 +45,7 @@ import com.wansenai.vo.warehouse.OtherShipmentVO;
 import com.wansenai.vo.warehouse.OtherStorageDetailVO;
 import com.wansenai.vo.warehouse.OtherStorageVO;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -467,6 +468,32 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
                 exportMap.put("其他入库明细", ExcelUtils.getSheetData(subData));
             }
             ExcelUtils.exportManySheet(response, "其他入库", exportMap);
+        }
+    }
+
+    @Override
+    public void exportOtherStorageDetail(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(WarehouseReceiptMain::getReceiptNumber, receiptNumber)
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(WarehouseReceiptMain::getType, "其他入库")
+                .one()
+                .getId();
+        var detail = getOtherStorageDetail(id);
+        if (detail != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<StorageShipmentStockExportBO>();
+            tableData.forEach(item -> {
+                var storageShipmentStockBO = new StorageShipmentStockExportBO();
+                storageShipmentStockBO.setReceiptNumber(data.getReceiptNumber());
+                storageShipmentStockBO.setRelatedPersonType("供应商");
+                storageShipmentStockBO.setRelatedPerson(data.getSupplierName());
+                BeanUtils.copyProperties(item, storageShipmentStockBO);
+                exportData.add(storageShipmentStockBO);
+            });
+            var fileName = data.getReceiptNumber() + "-其他入库单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 }

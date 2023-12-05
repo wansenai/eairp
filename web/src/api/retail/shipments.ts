@@ -16,6 +16,7 @@ enum API {
     GetDetail = '/retail/shipments/detail',
     GetLinkShipmentDetail = '/retail/shipments/getLinkShipmentDetail',
     Export = '/retail/shipments/export',
+    ExportDetail = '/retail/shipments/exportDetail',
 }
 
 export function getShipmentsPageList(params: QueryShipmentsReq) {
@@ -102,6 +103,15 @@ export function exportShipments(params: QueryShipmentsReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportShipmentsDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );

@@ -15,6 +15,7 @@ enum API {
     UpdateStatus = '/financial/expense/updateStatusByIds',
     GetDetail = '/financial/expense/getDetailById',
     Export = '/financial/expense/export',
+    ExportDetail = '/financial/expense/exportDetail',
 }
 
 export function getExpensePageList(params: QueryExpenseReq) {
@@ -73,6 +74,15 @@ export function exportExpense(params: QueryExpenseReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportExpenseDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );

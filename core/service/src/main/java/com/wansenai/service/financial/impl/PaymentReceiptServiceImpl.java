@@ -14,6 +14,7 @@ package com.wansenai.service.financial.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansenai.bo.CollectionDataExportBO;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.PaymentBO;
 import com.wansenai.bo.PaymentDataExportBO;
@@ -39,6 +40,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.PaymentDetailVO;
 import com.wansenai.vo.financial.PaymentVO;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -419,6 +421,32 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 exportMap.put("付款单明细", ExcelUtils.getSheetData(subData));
             }
             ExcelUtils.exportManySheet(response, "付款单", exportMap);
+        }
+    }
+
+    @Override
+    public void exportPaymentReceiptDetail(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(FinancialMain::getReceiptNumber, receiptNumber)
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(FinancialMain::getType, "付款")
+                .one()
+                .getId();
+
+        var detail = getPaymentReceiptDetail(id);
+        if (detail.getData() != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<PaymentDataExportBO>();
+            tableData.forEach(item -> {
+                var paymentDataBO = new PaymentDataExportBO();
+                paymentDataBO.setSupplierName(data.getSupplierName());
+                paymentDataBO.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, paymentDataBO);
+                exportData.add(paymentDataBO);
+            });
+            var fileName = data.getReceiptNumber() + "-付款单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 }

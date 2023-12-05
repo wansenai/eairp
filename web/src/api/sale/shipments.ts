@@ -16,6 +16,7 @@ enum API {
     Delete = '/sale/shipments/delete',
     GetLinkShipmentsDetail = '/sale/shipments/getLinkShipmentDetail',
     Export = '/sale/shipments/export',
+    ExportDetail = '/sale/shipments/exportDetail',
 }
 
 export function getSaleShipmentsPageList(params: QuerySaleShipmentsReq) {
@@ -82,6 +83,15 @@ export function exportShipments(params: QuerySaleShipmentsReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportShipmentsDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );

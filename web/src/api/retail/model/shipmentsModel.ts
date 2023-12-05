@@ -41,6 +41,7 @@ export interface AddOrUpdateShipmentsResp {
     id: number | string | undefined;
     memberId: number | string;
     memberName: string;
+    paymentType: string;
     accountId: number | string;
     accountName: string;
     receiptDate: string;

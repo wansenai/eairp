@@ -241,7 +241,13 @@ public interface ReceiptPurchaseService extends IService<ReceiptPurchaseMain> {
 
     void exportPurchaseOrderExcel(QueryPurchaseOrderDTO queryPurchaseOrderDTO, HttpServletResponse response) throws Exception;
 
+    void exportPurchaseOrderDetailExcel(String receiptNumber, HttpServletResponse response) throws Exception;
+
     void exportPurchaseStorageExcel(QueryPurchaseStorageDTO queryPurchaseStorageDTO, HttpServletResponse response) throws Exception;
 
+    void exportPurchaseStorageDetailExcel(String receiptNumber, HttpServletResponse response) throws Exception;
+
     void exportPurchaseRefundExcel(QueryPurchaseRefundDTO queryPurchaseRefundDTO, HttpServletResponse response) throws Exception;
+
+    void exportPurchaseRefundDetailExcel(String receiptNumber, HttpServletResponse response) throws Exception;
 }

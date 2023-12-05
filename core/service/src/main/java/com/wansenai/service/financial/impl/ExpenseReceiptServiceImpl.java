@@ -40,6 +40,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.ExpenseDetailVO;
 import com.wansenai.vo.financial.ExpenseVO;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -396,6 +397,32 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 exportMap.put("支出单明细", ExcelUtils.getSheetData(subData));
             }
             ExcelUtils.exportManySheet(response, "支出单", exportMap);
+        }
+    }
+
+    @Override
+    public void exportExpenseReceiptDetail(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(FinancialMain::getReceiptNumber, receiptNumber)
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(FinancialMain::getType, "支出")
+                .one()
+                .getId();
+
+        var detail = getExpenseReceiptDetail(id);
+        if (detail.getData() != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<IncomeExpenseDataExportBO>();
+            tableData.forEach(item -> {
+                var expenseDataBO = new IncomeExpenseDataExportBO();
+                expenseDataBO.setReceiptNumber(data.getReceiptNumber());
+                expenseDataBO.setRelatedPerson(data.getRelatedPersonName());
+                BeanUtils.copyProperties(item, expenseDataBO);
+                exportData.add(expenseDataBO);
+            });
+            var fileName = data.getReceiptNumber() + "-支出单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 }

@@ -27,6 +27,7 @@ import com.wansenai.vo.receipt.retail.RetailShipmentsVO;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -109,8 +110,18 @@ public class RetailController {
         receiptRetailService.exportRetailShipmentsExcel(queryShipmentsDTO, response);
     }
 
+    @GetMapping("/shipments/exportDetail/{receiptNumber}")
+    public void exportShipmentsDetailExcel(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws IOException {
+        receiptRetailService.exportShipmentsDetailExcel(receiptNumber, response);
+    }
+
     @GetMapping("/refund/export")
     public void exportRefundExcel(@ModelAttribute QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception {
         receiptRetailService.exportRetailRefundExcel(queryRetailRefundDTO, response);
+    }
+
+    @GetMapping("/refund/exportDetail/{receiptNumber}")
+    public void exportRefundDetailExcel(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws IOException {
+        receiptRetailService.exportRefundDetailExcel(receiptNumber, response);
     }
 }

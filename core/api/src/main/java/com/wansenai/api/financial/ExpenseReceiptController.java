@@ -71,4 +71,9 @@ public class ExpenseReceiptController {
     public void exportExpenseReceipt(@ModelAttribute QueryExpenseDTO queryExpenseDTO, HttpServletResponse response) {
         expenseReceiptService.exportExpenseReceipt(queryExpenseDTO, response);
     }
+
+    @GetMapping("exportDetail/{receiptNumber}")
+    public void exportExpenseReceiptDetail(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) {
+        expenseReceiptService.exportExpenseReceiptDetail(receiptNumber, response);
+    }
 }

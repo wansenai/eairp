@@ -15,6 +15,7 @@ enum API {
     Delete = '/purchase/storage/delete',
     GetLinkStorageDetail = '/purchase/storage/getLinkStorageDetail',
     Export = '/purchase/storage/export',
+    ExportDetail = '/purchase/order/exportDetail',
 }
 
 export function getPurchaseStoragePageList(params: QueryPurchaseStorageReq) {
@@ -81,6 +82,15 @@ export function exportStorage(params: QueryPurchaseStorageReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportStorageDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );

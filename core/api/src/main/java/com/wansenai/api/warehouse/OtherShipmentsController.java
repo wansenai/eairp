@@ -63,4 +63,9 @@ public class OtherShipmentsController {
     public void exportOtherShipments(@ModelAttribute QueryOtherShipmentDTO queryOtherShipmentDTO, HttpServletResponse response) throws Exception {
         otherShipmentsService.exportOtherShipments(queryOtherShipmentDTO, response);
     }
+
+    @GetMapping("exportDetail/{receiptNumber}")
+    public void exportOtherShipmentsDetail(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        otherShipmentsService.exportOtherShipmentsDetail(receiptNumber, response);
+    }
 }

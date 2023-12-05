@@ -37,4 +37,6 @@ public interface CollectionReceiptService extends IService<FinancialMain> {
     Response<String> updateCollectionReceiptStatus(List<Long> ids, Integer status);
 
     void exportCollectionReceipt(QueryCollectionDTO queryCollectionDTO, HttpServletResponse response);
+
+    void exportCollectionReceiptDetail(String receiptNumber, HttpServletResponse response);
 }
