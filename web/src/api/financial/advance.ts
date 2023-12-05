@@ -14,6 +14,7 @@ enum API {
     UpdateStatus = '/financial/advance-charge/updateStatusByIds',
     GetDetail = '/financial/advance-charge/getDetailById',
     Export = '/financial/advance-charge/export',
+    ExportDetail = '/financial/advance-charge/exportDetail',
 }
 
 export function getAdvancePageList(params: QueryAdvanceReq, errorMode: ErrorMessageMode = 'message') {
@@ -80,6 +81,15 @@ export function exportAdvance(params: QueryAdvanceReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportAdvanceDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );

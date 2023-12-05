@@ -63,4 +63,9 @@ class AdvanceChargeController(private val advanceChargeService: AdvanceChargeSer
     fun export(@ModelAttribute advanceChargeDTO: QueryAdvanceChargeDTO, response: HttpServletResponse) {
         advanceChargeService.exportAdvanceCharge(advanceChargeDTO, response)
     }
+
+    @GetMapping("exportDetail/{receiptNumber}")
+    fun exportDetail(@PathVariable receiptNumber: String, response: HttpServletResponse) {
+        advanceChargeService.exportAdvanceChargeDetail(receiptNumber, response)
+    }
 }
