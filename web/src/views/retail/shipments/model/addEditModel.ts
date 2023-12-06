@@ -115,8 +115,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             width:160,
             title: '条码',
             slots: { edit: 'barCode_edit' },
-            sortable: true,
-            titlePrefix: { content: '输入条码商品信息自动带出！' },
+            titlePrefix: { content: '需要在商品管理添加商品' },
             editRender: { name: 'input', attrs: { placeholder: '请输入条码并回车' } }
         },
         {

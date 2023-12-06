@@ -59,10 +59,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -422,8 +419,13 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR);
             }
         } else {
-            var id = SnowflakeIdUtil.nextId();
 
+            for (ShipmentsDataBO check : shipmentsDTO.getTableData()) {
+                if (check.getProductId() == null) {
+                    return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY.getCode(), "条码没有找到对应的商品,请检查条码是否正确");
+                }
+            }
+            var id = SnowflakeIdUtil.nextId();
             var receiptMain = ReceiptRetailMain.builder()
                     .id(id)
                     .type(ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
@@ -468,7 +470,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
             var account = accountService.getById(shipmentsDTO.getAccountId());
             if (account != null) {
                 // 更新余额
-                var accountBalance = account.getCurrentAmount();
+                var accountBalance = Optional.ofNullable(account.getCurrentAmount()).orElse(BigDecimal.ZERO);
                 var changeAmount = shipmentsDTO.getReceiptAmount();
                 if (changeAmount != null) {
                     accountBalance = accountBalance.add(changeAmount);
@@ -718,8 +720,12 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR);
             }
         } else {
+            for (ShipmentsDataBO check : refundDTO.getTableData()) {
+                if (check.getProductId() == null) {
+                    return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY.getCode(), "条码没有找到对应的商品,请检查条码是否正确");
+                }
+            }
             var id = SnowflakeIdUtil.nextId();
-
             var receiptMain = ReceiptRetailMain.builder()
                     .id(id)
                     .type(ReceiptConstants.RECEIPT_TYPE_STORAGE)
