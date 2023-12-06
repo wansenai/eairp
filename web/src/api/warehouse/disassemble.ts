@@ -15,6 +15,7 @@ enum API {
     UpdateStatus = '/warehouse/disassemble/updateStatusByIds',
     GetDetail = '/warehouse/disassemble/getDetailById',
     Export = '/warehouse/disassemble/export',
+    ExportDetail = '/warehouse/disassemble/exportDetail',
 }
 
 export function getDisAssemblePageList(params: QueryDisAssembleReq) {
@@ -73,6 +74,15 @@ export function exportDisAssemble(params: ExportDisAssembleReq) {
         {
             url: `${API.Export}`,
             params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportDisAssembleDetail(receiptNumber: string) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportDetail}/${receiptNumber}`,
             responseType: "blob"
         }
     );

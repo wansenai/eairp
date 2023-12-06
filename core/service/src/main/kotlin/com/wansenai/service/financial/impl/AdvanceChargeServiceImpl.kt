@@ -279,7 +279,7 @@ open class AdvanceChargeServiceImpl(
 
             val resultVO = AdvanceChargeDetailVO(
                 memberId = financialMain.relatedPersonId,
-                memberName = member?.memberName,
+                memberName = member?.memberName ?: "",
                 receiptNumber = financialMain.receiptNumber,
                 receiptDate = financialMain.receiptDate,
                 financialPersonnel = financialPerson?.name ?: "",
@@ -358,6 +358,32 @@ open class AdvanceChargeServiceImpl(
                 exportMap["收预付款单据明细"] = ExcelUtils.getSheetData(subData)
             }
             ExcelUtils.exportManySheet(response, "收预付款", exportMap)
+        }
+    }
+
+    override fun exportAdvanceChargeDetail(receiptNumber: String, response: HttpServletResponse) {
+        val id = lambdaQuery()
+            .eq(FinancialMain::getReceiptNumber, receiptNumber)
+            .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+            .eq(FinancialMain::getType, "收预付款")
+            .one()
+            .id
+        val detail = getAdvanceChargeDetailById(id)
+        if (detail.data != null) {
+            val exportData = ArrayList<AdvanceChargeDataExportBO>()
+            detail.data.tableData.map { item ->
+                detail.data?.let {
+                    val data = AdvanceChargeDataExportBO(
+                        memberName = detail.data.memberName,
+                        receiptNumber = detail.data.receiptNumber,
+                        accountName = item.accountName,
+                        amount = item.amount,
+                        remark = item.remark
+                    )
+                    exportData.add(data)
+                }
+            }
+            ExcelUtils.export(response, "收预付款单据明细", ExcelUtils.getSheetData(exportData))
         }
     }
 }

@@ -40,6 +40,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.financial.IncomeDetailVO;
 import com.wansenai.vo.financial.IncomeVO;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -398,6 +399,32 @@ public class IncomeReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, F
                 exportMap.put("收入单明细", ExcelUtils.getSheetData(subData));
             }
             ExcelUtils.exportManySheet(response, "收入单", exportMap);
+        }
+    }
+
+    @Override
+    public void exportIncomeReceiptDetail(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(FinancialMain::getReceiptNumber, receiptNumber)
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(FinancialMain::getType, "收入")
+                .one()
+                .getId();
+
+        var detail = getIncomeReceiptDetail(id);
+        if(detail.getData() != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<IncomeExpenseDataExportBO>();
+            tableData.forEach(item -> {
+                var incomeDataBO = new IncomeExpenseDataExportBO();
+                incomeDataBO.setReceiptNumber(data.getReceiptNumber());
+                incomeDataBO.setRelatedPerson(data.getRelatedPersonName());
+                BeanUtils.copyProperties(item, incomeDataBO);
+                exportData.add(incomeDataBO);
+            });
+            var fileName = data.getReceiptNumber() + "-收入单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 }

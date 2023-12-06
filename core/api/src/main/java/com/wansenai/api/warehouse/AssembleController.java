@@ -63,4 +63,9 @@ public class AssembleController {
     public void exportAssembleReceipt(@ModelAttribute QueryAssembleReceiptDTO queryAssembleReceiptDTO, HttpServletResponse response) throws Exception {
         assembleService.exportAssembleReceipt(queryAssembleReceiptDTO, response);
     }
+
+    @GetMapping("exportDetail/{receiptNumber}")
+    public void exportAssembleReceiptDetail(@PathVariable("receiptNumber") String receiptNumber, HttpServletResponse response) throws Exception {
+        assembleService.exportAssembleReceiptDetail(receiptNumber, response);
+    }
 }

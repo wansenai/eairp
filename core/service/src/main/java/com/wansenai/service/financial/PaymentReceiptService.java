@@ -37,4 +37,6 @@ public interface PaymentReceiptService extends IService<FinancialMain> {
     Response<String> updatePaymentReceiptStatus(List<Long> ids, Integer status);
 
     void exportPaymentReceipt(QueryPaymentDTO queryPaymentDTO, HttpServletResponse response);
+
+    void exportPaymentReceiptDetail(String receiptNumber, HttpServletResponse response);
 }

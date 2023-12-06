@@ -50,6 +50,7 @@ import com.wansenai.vo.receipt.ReceiptRetailDetailVO;
 import com.wansenai.vo.receipt.retail.*;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -922,6 +923,30 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
     }
 
     @Override
+    public void exportShipmentsDetailExcel(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(ReceiptRetailMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one()
+                .getId();
+        var detail = getRetailShipmentsDetail(id);
+        if (detail != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<ShipmentsDataExportBO>();
+            tableData.forEach(item -> {
+                var shipmentBo = new ShipmentsDataExportBO();
+                shipmentBo.setMemberName(data.getMemberName());
+                shipmentBo.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, shipmentBo);
+                exportData.add(shipmentBo);
+            });
+            var fileName = data.getReceiptNumber() + "-零售出库单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+        }
+    }
+
+    @Override
     public void exportRetailRefundExcel(QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
         var mainData = getRetailRefundList(queryRetailRefundDTO).getData();
@@ -954,6 +979,30 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
             }
             exportMap.put("零售退货单", ExcelUtils.getSheetData(mainData));
             ExcelUtils.exportManySheet(response, "零售退货单", exportMap);
+        }
+    }
+
+    @Override
+    public void exportRefundDetailExcel(String receiptNumber, HttpServletResponse response) throws IOException {
+        var id = lambdaQuery()
+                .eq(ReceiptRetailMain::getReceiptNumber, receiptNumber)
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one()
+                .getId();
+        var detail = getRetailRefundDetail(id);
+        if (detail != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<ShipmentsDataExportBO>();
+            tableData.forEach(item -> {
+                var shipmentBo = new ShipmentsDataExportBO();
+                shipmentBo.setMemberName(data.getMemberName());
+                shipmentBo.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, shipmentBo);
+                exportData.add(shipmentBo);
+            });
+            var fileName = data.getReceiptNumber() + "-零售退货单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 

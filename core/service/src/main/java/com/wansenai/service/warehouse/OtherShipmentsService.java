@@ -37,4 +37,6 @@ public interface OtherShipmentsService extends IService<WarehouseReceiptMain> {
     Response<String> updateOtherShipmentsStatus(List<Long> ids, Integer status);
 
     void exportOtherShipments(QueryOtherShipmentDTO queryOtherShipmentDTO, HttpServletResponse response) throws Exception;
+
+    void exportOtherShipmentsDetail(String receiptNumber, HttpServletResponse response) throws Exception;
 }

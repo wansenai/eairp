@@ -37,4 +37,6 @@ public interface AllotShipmentsService extends IService<WarehouseReceiptMain> {
     Response<String> updateAllotReceiptStatus(List<Long> ids, Integer status);
 
     void exportAllotReceipt(QueryAllotReceiptDTO queryAllotReceiptDTO, HttpServletResponse response) throws Exception;
+
+    void exportAllotReceiptDetail(String receiptNumber, HttpServletResponse response) throws Exception;
 }

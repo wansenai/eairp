@@ -54,7 +54,7 @@
 import {defineComponent, ref} from 'vue';
 import {BasicTable, useTable} from '/src/components/Table';
 import {BasicModal, useModalInner} from "@/components/Modal";
-import {getAdvanceDetail} from "@/api/financial/advance";
+import {getAdvanceDetail, exportAdvanceDetail} from "@/api/financial/advance";
 import {
   Descriptions,
   DescriptionsItem,
@@ -63,6 +63,7 @@ import {
 } from 'ant-design-vue';
 import {advanceChargeTableColumns} from "@/views/financial/advance-charge/advance.data";
 import printJS from "print-js";
+import {getTimestamp} from "@/utils/dateUtil";
 
 export default defineComponent({
   name: 'ViewIncomeModal',
@@ -112,8 +113,17 @@ export default defineComponent({
       closeModal();
     }
 
-    function exportTable() {
-
+    async function exportTable() {
+      const file: any = await exportAdvanceDetail(receiptNumber.value)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        const timestamp = getTimestamp(new Date());
+        link.href = URL.createObjectURL(blob);
+        link.download = "收预付款单据详情" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
     const flexContainer = 'display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 8px;';

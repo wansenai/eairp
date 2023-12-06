@@ -37,4 +37,6 @@ public interface DisassembleReceiptService extends IService<WarehouseReceiptMain
     Response<String> updateDisassembleReceiptStatus(List<Long> ids, Integer status);
 
     void exportDisAssembleReceipt(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO, HttpServletResponse response) throws Exception;
+
+    void exportDisAssembleReceiptDetail(String receiptNumber, HttpServletResponse response) throws Exception;
 }

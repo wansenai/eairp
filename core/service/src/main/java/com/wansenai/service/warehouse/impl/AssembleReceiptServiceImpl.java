@@ -43,6 +43,7 @@ import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.AssembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.AssembleReceiptVO;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -58,7 +59,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMainMapper, WarehouseReceiptMain> implements AssembleReceiptService {
-
     private final WarehouseReceiptSubService warehouseReceiptSubService;
     private final ProductService productService;
     private final CommonService commonService;
@@ -506,6 +506,30 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                 exportMap.put("组装单明细", ExcelUtils.getSheetData(subData));
             }
             ExcelUtils.exportManySheet(response, "组装单", exportMap);
+        }
+    }
+
+    @Override
+    public void exportAssembleReceiptDetail(String receiptNumber, HttpServletResponse response) {
+        var id = lambdaQuery()
+                .eq(WarehouseReceiptMain::getReceiptNumber, receiptNumber)
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .eq(WarehouseReceiptMain::getType, "组装单")
+                .one()
+                .getId();
+        var detail = getAssembleReceiptDetail(id);
+        if (detail != null) {
+            var data = detail.getData();
+            var tableData = data.getTableData();
+            var exportData = new ArrayList<AssembleStockDataExportBO>();
+            tableData.forEach(item -> {
+                var assembleStockBO = new AssembleStockDataExportBO();
+                assembleStockBO.setReceiptNumber(data.getReceiptNumber());
+                BeanUtils.copyProperties(item, assembleStockBO);
+                exportData.add(assembleStockBO);
+            });
+            var fileName = data.getReceiptNumber() + "-组装单明细";
+            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
         }
     }
 }

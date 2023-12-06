@@ -56,7 +56,7 @@
 import {defineComponent, ref} from 'vue';
 import {BasicTable, useTable} from '/src/components/Table';
 import {BasicModal, useModalInner} from "@/components/Modal";
-import {getCollectionDetailById} from "@/api/financial/collection";
+import {getCollectionDetailById, exportCollectionDetail} from "@/api/financial/collection";
 import {
   Descriptions,
   DescriptionsItem,
@@ -65,6 +65,7 @@ import {
 } from 'ant-design-vue';
 import {collectionReceiptTableColumns} from "@/views/financial/collection/collection.data";
 import printJS from "print-js";
+import {getTimestamp} from "@/utils/dateUtil";
 export default defineComponent({
   name: 'ViewExpenseModal',
   components: {
@@ -117,8 +118,17 @@ export default defineComponent({
       closeModal();
     }
 
-    function exportTable() {
-
+    async function exportTable() {
+      const file: any = await exportCollectionDetail(receiptNumber.value)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        const timestamp = getTimestamp(new Date());
+        link.href = URL.createObjectURL(blob);
+        link.download = "收款单单据详情" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
     const flexContainer = 'display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 8px;';

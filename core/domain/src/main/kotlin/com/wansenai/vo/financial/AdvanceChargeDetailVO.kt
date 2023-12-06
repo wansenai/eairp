@@ -29,7 +29,7 @@ data class AdvanceChargeDetailVO (
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     var memberId: Long? = null,
 
-    var memberName: String? = null,
+    var memberName: String,
 
     var receiptNumber: String,
 
