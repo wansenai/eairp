@@ -64,6 +64,14 @@ export interface QueryProductReq {
     enableBatchNumber: number
 }
 
+export interface ProductStockSkuReq {
+    warehouseId: number | string;
+    productInfo: string;
+    productCategoryId: number | string;
+    warehouseShelves: string;
+    isExportDetail: boolean;
+}
+
 export interface ProductInfoDetailResp {
     productId: string;
     productCategoryId: string;
@@ -104,6 +112,26 @@ export interface ProductPriceResp {
     salesPrice: number;
     lowSalesPrice: number;
     stockList: ProductStockResp[];
+}
+
+export interface ProductStockSkuResp {
+    id: string;
+    productId: string;
+    warehouseId: string;
+    productBarcode: string;
+    warehouseName: string;
+    productName: string;
+    productCategoryName: string;
+    productStandard: string;
+    productModel: string;
+    productColor: string;
+    productUnit: string;
+    warehouseShelves: string;
+    productWeight: number;
+    unitPrice: number;
+    initialStock: number;
+    currentStock: number;
+    stockAmount: number;
 }
 
 export interface ProductStockResp {

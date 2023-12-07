@@ -6,7 +6,7 @@ import {
     QueryProductReq,
     UpdateBatchProductInfoReq,
     ProductExtendPriceResp,
-    QueryProductExtendPriceReq,
+    QueryProductExtendPriceReq, ProductStockSkuReq, ProductStockSkuResp,
 } from "@/api/product/model/productModel";
 import {ErrorMessageMode, SuccessMessageMode} from "#/axios";
 
@@ -20,6 +20,7 @@ enum Api {
     updateBatchProductInfo = '/product/updateBatchProductInfo',
     getProductSku = '/product/sku/pageList',
     getProductSkuByBarCode = '/product/sku/getProduct',
+    getProductListInfo = '/product/sku/productStockSku'
 }
 
 export function getProductCode() {
@@ -110,6 +111,15 @@ export function getProductSkuByBarCode(barCode: number | string, warehouseId: nu
     return defHttp.get<BaseDataResp<ProductExtendPriceResp>>(
         {
             url: `${Api.getProductSkuByBarCode}/${barCode}/${warehouseId}`,
+        }
+    );
+}
+
+export function getProductStockSku(params: ProductStockSkuReq) {
+    return defHttp.post<BaseDataResp<ProductStockSkuResp[]>>(
+        {
+            url: Api.getProductListInfo,
+            params
         }
     );
 }
