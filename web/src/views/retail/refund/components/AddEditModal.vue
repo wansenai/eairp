@@ -415,8 +415,8 @@ export default defineComponent({
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
-              selectRow.row.retailPrice = product.unitPrice
-              selectRow.row.amount = product.unitPrice
+              selectRow.row.retailPrice = product.retailPrice
+              selectRow.row.amount = product.retailPrice
               selectRow.row.productNumber = 1
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
