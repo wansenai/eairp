@@ -519,17 +519,22 @@ export default defineComponent({
     async function handleOk(type: number) {
       const table = xGrid.value
       if (!formState.receiptDate) {
-        createMessage.error('请选择单据日期');
+        createMessage.warn('请选择单据日期');
         return;
       }
       if (!formState.accountId) {
-        createMessage.error('请选择收款账户');
+        createMessage.warn('请选择收款账户');
         return;
       }
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.error("请添加一行数据")
+          createMessage.warn("请添加一行数据")
+          return;
+        }
+        const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
+        if(isBarCodeEmpty) {
+          createMessage.warn("请录入条码或者选择产品")
           return;
         }
       }
@@ -586,7 +591,7 @@ export default defineComponent({
         status: type,
       }
       const result = await addOrUpdateShipments(params)
-      if (result.code === 'R0001' || 'R0002') {
+      if (result.code === 'R0001' || result.code === 'R0002') {
         handleCancelModal();
       }
     }

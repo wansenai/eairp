@@ -73,6 +73,7 @@
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
                   <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
                   <a-button @click="productModal" style="margin-right: 10px">选择添加退货商品</a-button>
+                  <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
                 </template>
                 <template #product_number_edit="{ row }">
@@ -521,17 +522,22 @@ export default defineComponent({
     async function handleOk(type: number) {
       const table = xGrid.value
       if (!formState.receiptDate) {
-        createMessage.error('请选择单据日期');
+        createMessage.warn('请选择单据日期');
         return;
       }
       if (!formState.accountId) {
-        createMessage.error('请选择付款账户');
+        createMessage.warn('请选择付款账户');
         return;
       }
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.error("请添加一行数据")
+          createMessage.warn("请添加一行数据")
+          return;
+        }
+        const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
+        if(isBarCodeEmpty) {
+          createMessage.warn("请录入条码或者选择产品")
           return;
         }
       }
@@ -589,7 +595,7 @@ export default defineComponent({
         status: type,
       }
       const result = await addOrUpdateRefund(params)
-      if (result.code === 'R0004' || 'R0005') {
+      if (result.code === 'R0004' || result.code === 'R0005') {
         handleCancelModal();
       }
     }
