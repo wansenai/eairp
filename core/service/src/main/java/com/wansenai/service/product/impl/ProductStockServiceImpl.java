@@ -14,15 +14,17 @@ package com.wansenai.service.product.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
-import com.wansenai.service.product.ProductStockService;
+import com.wansenai.dto.report.QueryProductStockDTO;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.mappers.product.ProductStockMapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wansenai.service.product.ProductStockService;
 import com.wansenai.service.warehouse.WarehouseService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.product.ProductStockKeepUnitVO;
 import com.wansenai.vo.product.ProductStockVO;
+import com.wansenai.vo.report.ProductStockSkuVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -75,5 +77,11 @@ public class ProductStockServiceImpl extends ServiceImpl<ProductStockMapper, Pro
         });
 
         return productStockVos;
+    }
+
+    @Override
+    public Response<List<ProductStockSkuVO>> getProductStockSkuList(QueryProductStockDTO queryProductStockDTO) {
+        var data = productStockMapper.getProductStockList(queryProductStockDTO);
+        return Response.responseData(data);
     }
 }

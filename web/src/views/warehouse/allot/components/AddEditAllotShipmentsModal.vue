@@ -43,6 +43,7 @@
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
                   <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
                   <a-button @click="productModal" style="margin-right: 10px">选择添加入库商品</a-button>
+                  <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
                 </template>
                 <template #warehouseId_default="{ row }">
@@ -62,7 +63,7 @@
                   </vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-input type="search" clearable v-model="row.barCode"></vxe-input>
+                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
@@ -151,9 +152,10 @@ import PurchaseArrearsModal from "@/views/financial/payment/components/PurchaseA
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-import {getDefaultWarehouse, getWarehouseList} from "@/api/basic/warehouse";
-import {getProductSkuByBarCode} from "@/api/product/product";
+import {getWarehouseList} from "@/api/basic/warehouse";
+import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue";
+import {ProductStockSkuResp} from "@/api/product/model/productModel";
 const VNodes = {
   props: {
     vnodes: {
@@ -228,6 +230,8 @@ export default defineComponent({
     });
     const barCode = ref('');
     const warehouseList = ref<WarehouseResp[]>([]);
+    const productList = ref<ProductStockSkuResp[]>([]);
+    const productLabelList = ref<any[]>([]);
 
     function handleCancelModal() {
       close();
@@ -239,7 +243,7 @@ export default defineComponent({
     function openAddEditModal(id: string | undefined) {
       open.value = true
       loadWarehouseList();
-      loadDefaultWarehouse();
+      loadProductSku();
       if (id) {
         title.value = '编辑-调拨出库'
         loadAllotShipmentsDetail(id);
@@ -250,19 +254,64 @@ export default defineComponent({
       }
     }
 
-    function loadDefaultWarehouse() {
-      getDefaultWarehouse().then(res => {
-        const data = res.data
-        if(data) {
-          allotShipmentsFormState.warehouseId = data.id
+    function loadWarehouseList() {
+      getWarehouseList().then(res => {
+        const {columns} = gridOptions
+        if (columns) {
+          const warehouseColumn = columns[1]
+          warehouseColumn.editRender.options = [];
+          if (warehouseColumn && warehouseColumn.editRender) {
+            warehouseColumn.editRender.options?.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
+          }
+          warehouseList.value = res.data
+        }
+        const defaultWarehouse = res.data.find(item => item.isDefault === 1)
+        if(defaultWarehouse) {
+          allotShipmentsFormState.warehouseId = defaultWarehouse.id
+        } else {
+          allotShipmentsFormState.warehouseId = res.data[0].id
         }
       })
     }
 
-    function loadWarehouseList() {
-      getWarehouseList().then(res => {
-        warehouseList.value = res.data
+    function loadProductSku() {
+      getProductStockSku().then(res => {
+        productList.value = res.data
+        productLabelList.value.push(...res.data.map(item => ({value: item.productBarcode, label: item.productBarcode})))
+        productLabelList.value = productLabelList.value.filter((item, index, arr) => {
+          return arr.findIndex(item1 => item1.value === item.value) === index
+        })
       })
+    }
+
+    function selectBarCode() {
+      const table = xGrid.value
+      const selectRow = table?.getActiveRecord()
+      if(selectRow) {
+        const {columns} = gridOptions
+        if (columns) {
+          const barCodeColumn = selectRow.row.barCode
+          const warehouseColumn = selectRow.row.warehouseId
+          if(barCodeColumn && warehouseColumn) {
+            const product = productList.value.find(item => {
+              return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
+            });
+            if (product) {
+              selectRow.row.productId = product.productId
+              selectRow.row.productName = product.productName
+              selectRow.row.productStandard = product.productStandard
+              selectRow.row.productUnit = product.productUnit
+              selectRow.row.stock = product.currentStock
+              selectRow.row.unitPrice = product.unitPrice
+              selectRow.row.amount = product.unitPrice
+              selectRow.row.productNumber = 1
+              table.updateData(selectRow.rowIndex, selectRow.row)
+            } else {
+              createMessage.warn("该条码查询不到商品信息")
+            }
+          }
+        }
+      }
     }
 
     function loadGenerateId() {
@@ -317,14 +366,24 @@ export default defineComponent({
 
     async function handleOk(type: number) {
       if (!allotShipmentsFormState.receiptDate) {
-        createMessage.error('请选择单据日期');
+        createMessage.warn('请选择单据日期');
         return;
       }
       const table = xGrid.value
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.error("请添加一行数据")
+          createMessage.warn("请添加一行数据")
+          return;
+        }
+        const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
+        if(isBarCodeEmpty) {
+          createMessage.warn("请录入条码或者选择产品")
+          return;
+        }
+        const isOtherWarehouseEmpty = insertRecords.some(item => !item.otherWarehouseId)
+        if(isOtherWarehouseEmpty) {
+          createMessage.warn("调入方仓库不能为空")
           return;
         }
       }
@@ -379,7 +438,7 @@ export default defineComponent({
         status: type,
       }
       const result = await addOrUpdateAllotShipments(params)
-      if (result.code === 'S0010' || 'S0011') {
+      if (result.code === 'S0010' || result.code === 'S0011') {
         handleCancelModal();
       }
     }
@@ -539,6 +598,15 @@ export default defineComponent({
       }
     }
 
+    function addRowData() {
+      const table = xGrid.value
+      const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
+      const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
+      if(table) {
+        table.insert({warehouseId: warehouseId})
+      }
+    }
+
     function amountChange() {
       const table = xGrid.value
       if(table) {
@@ -589,7 +657,11 @@ export default defineComponent({
       handleCheckSuccess,
       productNumberChange,
       unitPriceChange,
-      amountChange
+      amountChange,
+      addRowData,
+      productList,
+      productLabelList,
+      selectBarCode
     };
   },
 });

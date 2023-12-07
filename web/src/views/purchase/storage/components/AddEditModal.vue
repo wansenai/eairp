@@ -23,7 +23,7 @@
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="purchaseStorageFormState.id" v-show="false"/>
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="供应商" data-step="1"
-                         data-title="供应商">
+                         data-title="供应商" :rules="[{ required: true}]">
               <a-select v-model:value="purchaseStorageFormState.supplierId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
                         placeholder="请选择供应商"
@@ -71,10 +71,11 @@
                   <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
                   <a-button @click="productModal" style="margin-right: 10px">选择添加采购商品</a-button>
                   <a-button @click="" style="margin-right: 10px">历史单据</a-button>
+                  <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-input type="search" clearable v-model="row.barCode" @search-click="productModal"></vxe-input>
+                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
@@ -235,8 +236,8 @@ import {useMessage} from "@/hooks/web/useMessage";
 import { addOrUpdatePurchaseStorage, getPurchaseStorageDetail} from "@/api/purchase/storage"
 import SupplierModal from "@/views/basic/supplier/components/SupplierModal.vue"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
-import {getProductSkuByBarCode} from "@/api/product/product";
-import {getDefaultWarehouse} from "@/api/basic/warehouse";
+import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
+import {getWarehouseList} from "@/api/basic/warehouse";
 import {AddOrUpdatePurchaseStorageReq, PurchaseData} from "@/api/purchase/model/storageModel";
 import {FileData} from '/@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
@@ -246,6 +247,8 @@ import MultipleAccountsModal from "@/views/basic/settlement-account/components/M
 import {SupplierResp} from "@/api/basic/model/supplierModel";
 import {addSupplier, getSupplierList} from "@/api/basic/supplier";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
+import {ProductStockSkuResp} from "@/api/product/model/productModel";
+import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 const VNodes = {
   props: {
     vnodes: {
@@ -331,12 +334,15 @@ export default defineComponent({
     const activeKey = ref('productDataTable');
     const supplierList = ref<SupplierResp[]>([])
     const accountList = ref<AccountResp[]>([]);
+    const warehouseList = ref<WarehouseResp[]>([]);
     const multipleAccounts = ref();
     const [supplierModal, {openModal}] = useModal();
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
     const [multipleAccountModal, {openModal: openManyAccountModal}] = useModal();
     const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
+    const productList = ref<ProductStockSkuResp[]>([]);
+    const productLabelList = ref<any[]>([]);
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -347,8 +353,9 @@ export default defineComponent({
     function openAddEditModal(id: string | undefined) {
       open.value = true
       loadSupplierList();
-      loadDefaultWarehouse();
+      loadWarehouseList();
       loadAccountList();
+      loadProductSku();
       if (id) {
         title.value = '编辑-采购入库'
         loadStorageDetail(id);
@@ -359,13 +366,65 @@ export default defineComponent({
       }
     }
 
-    function loadDefaultWarehouse() {
-      getDefaultWarehouse().then(res => {
-        const data = res.data
-        if(data) {
-          purchaseStorageFormState.warehouseId = data.id
+    function loadWarehouseList() {
+      getWarehouseList().then(res => {
+        const {columns} = gridOptions
+        if (columns) {
+          const warehouseColumn = columns[1]
+          warehouseColumn.editRender.options = [];
+          if (warehouseColumn && warehouseColumn.editRender) {
+            warehouseColumn.editRender.options?.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
+          }
+          warehouseList.value = res.data
+        }
+        const defaultWarehouse = res.data.find(item => item.isDefault === 1)
+        if(defaultWarehouse) {
+          purchaseStorageFormState.warehouseId = defaultWarehouse.id
+        } else {
+          purchaseStorageFormState.warehouseId = res.data[0].id
         }
       })
+    }
+
+    function loadProductSku() {
+      getProductStockSku().then(res => {
+        productList.value = res.data
+        productLabelList.value.push(...res.data.map(item => ({value: item.productBarcode, label: item.productBarcode})))
+        productLabelList.value = productLabelList.value.filter((item, index, arr) => {
+          return arr.findIndex(item1 => item1.value === item.value) === index
+        })
+      })
+    }
+
+    function selectBarCode() {
+      const table = xGrid.value
+      const selectRow = table?.getActiveRecord()
+      if(selectRow) {
+        const {columns} = gridOptions
+        if (columns) {
+          const barCodeColumn = selectRow.row.barCode
+          const warehouseColumn = selectRow.row.warehouseId
+          if(barCodeColumn && warehouseColumn) {
+            const product = productList.value.find(item => {
+              return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
+            });
+            if (product) {
+              selectRow.row.productId = product.productId
+              selectRow.row.productName = product.productName
+              selectRow.row.productStandard = product.productStandard
+              selectRow.row.productUnit = product.productUnit
+              selectRow.row.stock = product.currentStock
+              selectRow.row.unitPrice = product.unitPrice
+              selectRow.row.taxTotalPrice = product.unitPrice
+              selectRow.row.amount = product.unitPrice
+              selectRow.row.productNumber = 1
+              table.updateData(selectRow.rowIndex, selectRow.row)
+            } else {
+              createMessage.warn("该条码查询不到商品信息")
+            }
+          }
+        }
+      }
     }
 
     function loadAccountList() {
@@ -547,26 +606,31 @@ export default defineComponent({
     async function handleOk(type: number) {
       const table = xGrid.value
       if (!purchaseStorageFormState.supplierId) {
-        createMessage.error('请选择供应商');
+        createMessage.warn('请选择供应商');
         return;
       }
       if (purchaseStorageFormState.accountId === 0) {
         if(!multipleAccounts.value.accountOne && !multipleAccounts.value.accountTwo) {
-          createMessage.error('请至少选择两个退款账户');
+          createMessage.warn('请至少选择两个退款账户');
           return;
         }
         if(!multipleAccounts.value.accountPriceOne && !multipleAccounts.value.accountPriceTwo) {
-          createMessage.error('请输入退款金额');
+          createMessage.warn('请输入退款金额');
           return;
         }
       } else if (!purchaseStorageFormState.accountId) {
-        createMessage.error('请选择退款账户');
+        createMessage.warn('请选择结算账户');
         return;
       }
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.error("请添加一行数据")
+          createMessage.warn("请添加一行数据")
+          return;
+        }
+        const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
+        if(isBarCodeEmpty) {
+          createMessage.warn("请录入条码或者选择产品")
           return;
         }
       }
@@ -652,7 +716,7 @@ export default defineComponent({
       }
 
       const result = await addOrUpdatePurchaseStorage(params)
-      if (result.code === 'P0018' || 'P0019') {
+      if (result.code === 'P0018' || result.code === 'P0019') {
         createMessage.success('操作成功');
         handleCancelModal();
         clearData();
@@ -748,8 +812,10 @@ export default defineComponent({
 
     function addRowData() {
       const table = xGrid.value
+      const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
+      const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
       if(table) {
-        table.insert({productNumber: 1})
+        table.insert({warehouseId: warehouseId})
       }
     }
 
@@ -1033,7 +1099,10 @@ export default defineComponent({
       onSearch,
       linkReceiptModal,
       openLinkReceiptModal,
-      handleReceiptSuccess
+      handleReceiptSuccess,
+      productList,
+      productLabelList,
+      selectBarCode
     };
   },
 });

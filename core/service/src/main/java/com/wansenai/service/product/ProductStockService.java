@@ -14,11 +14,13 @@ package com.wansenai.service.product;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
+import com.wansenai.dto.report.QueryProductStockDTO;
 import com.wansenai.entities.product.ProductStock;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.product.ProductStockKeepUnitVO;
 import com.wansenai.vo.product.ProductStockVO;
+import com.wansenai.vo.report.ProductStockSkuVO;
 
 import java.util.List;
 
@@ -35,4 +37,5 @@ public interface ProductStockService extends IService<ProductStock> {
 
    List<ProductStockVO> getProductStockList(Long productSukId);
 
+   Response<List<ProductStockSkuVO>> getProductStockSkuList(QueryProductStockDTO queryProductStockDTO);
 }

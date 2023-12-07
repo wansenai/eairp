@@ -681,7 +681,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    public Response<IPage<ProductStockVO>> getProductStock(QueryProductStockDTO queryProductStockDTO) {
+    public Response<IPage<ProductStockSkuVO>> getProductStock(QueryProductStockDTO queryProductStockDTO) {
         var page = new Page<QueryProductStockDTO>(queryProductStockDTO.getPage(), queryProductStockDTO.getPageSize());
         // 获取默认仓库
 //        var warehouse = warehouseService.getDefaultWarehouse();
