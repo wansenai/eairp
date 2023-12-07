@@ -19,6 +19,7 @@ export interface PurchaseData {
     stock: number;
     productNumber: number;
     unitPrice: number;
+    purchasePrice: number;
     amount: number;
     taxRate: number;
     taxAmount: number;
