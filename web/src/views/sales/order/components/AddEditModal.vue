@@ -25,7 +25,7 @@
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="formState.id" v-show="false"/>
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="客户" data-step="1"
-                         data-title="客户卡号">
+                         data-title="客户" :rules="[{ required: true}]">
               <a-select v-model:value="formState.customerId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
                         placeholder="请选择客户"
@@ -68,7 +68,7 @@
         <a-row class="form-row" :gutter="24">
           <a-col :lg="24" :md="12" :sm="24" style="margin-bottom: 150px;">
             <div class="table-operations">
-              <vxe-grid ref='xGrid' v-bind="gridOptions">
+              <vxe-grid ref='xGrid' v-bind="orderGridOptions">
                 <template #toolbar_buttons="{ row }">
                   <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
                   <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="barCode"
@@ -76,10 +76,11 @@
                   <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
                   <a-button @click="productModal" style="margin-right: 10px">选择添加销售商品</a-button>
                   <a-button @click="" style="margin-right: 10px">历史单据</a-button>
+                  <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-input type="search" clearable v-model="row.barCode" @search-click="productModal"></vxe-input>
+                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
@@ -214,7 +215,7 @@ import {
   RowVO,
   xGrid,
   tableData,
-  gridOptions,
+  orderGridOptions,
   getTaxTotalPrice,
 } from '/src/views/sales/model/addEditModel';
 import {getCustomerList} from "@/api/basic/customer";
@@ -229,14 +230,15 @@ import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
 import { addOrUpdateSaleOrder, getSaleOrderDetail} from "@/api/sale/order"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
-import {getProductSkuByBarCode} from "@/api/product/product";
-import {getDefaultWarehouse} from "@/api/basic/warehouse";
+import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
 import {AddOrUpdateReceiptReq, SalesData} from "@/api/sale/model/orderModel";
 import {FileData} from '/@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
 import MultipleAccountsModal from "@/views/basic/settlement-account/components/MultipleAccountsModal.vue";
+import {ProductStockSkuResp} from "@/api/product/model/productModel";
+import {getDefaultWarehouse} from "@/api/basic/warehouse";
 const VNodes = {
   props: {
     vnodes: {
@@ -324,6 +326,8 @@ export default defineComponent({
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
     const [multipleAccountModal, {openModal: openManyAccountModal}] = useModal();
+    const productList = ref<ProductStockSkuResp[]>([]);
+    const productLabelList = ref<any[]>([]);
     function handleCancelModal() {
       close();
       clearData();
@@ -334,9 +338,10 @@ export default defineComponent({
     function openAddEditModal(id: string | undefined) {
       open.value = true
      loadCustomerList();
+      loadDefaultWarehouse();
      loadSalePersonalList();
-     loadDefaultWarehouse();
      loadAccountList();
+     loadProductSku();
       if (id) {
         title.value = '编辑-销售订单'
         loadRefundDetail(id);
@@ -345,15 +350,6 @@ export default defineComponent({
         loadGenerateId();
         formState.receiptDate = dayjs(new Date());
       }
-    }
-
-    function loadDefaultWarehouse() {
-      getDefaultWarehouse().then(res => {
-        const data = res.data
-        if(data) {
-          formState.warehouseId = data.id
-        }
-      })
     }
 
     function loadAccountList() {
@@ -394,6 +390,57 @@ export default defineComponent({
       generateId("销售单").then(res => {
         formState.receiptNumber = res.data
       })
+    }
+
+    function loadDefaultWarehouse() {
+      getDefaultWarehouse().then(res => {
+        const data = res.data
+        if(data) {
+          formState.warehouseId = data.id
+        }
+      })
+    }
+
+    function loadProductSku() {
+      getProductStockSku().then(res => {
+        productList.value = res.data
+        productLabelList.value.push(...res.data.map(item => ({value: item.productBarcode, label: item.productBarcode})))
+        productLabelList.value = productLabelList.value.filter((item, index, arr) => {
+          return arr.findIndex(item1 => item1.value === item.value) === index
+        })
+      })
+    }
+
+    function selectBarCode() {
+      const table = xGrid.value
+      const selectRow = table?.getActiveRecord()
+      if(selectRow) {
+        const {columns} = orderGridOptions
+        if (columns) {
+          const barCodeColumn = selectRow.row.barCode
+          if(barCodeColumn) {
+            const product = productList.value.find(item => {
+              return item.productBarcode === barCodeColumn;
+            });
+            if (product) {
+              selectRow.row.productId = product.productId
+              // 这里默认加载默认仓库
+              selectRow.row.warehouseId = formState.warehouseId
+              selectRow.row.productName = product.productName
+              selectRow.row.productStandard = product.productStandard
+              selectRow.row.productUnit = product.productUnit
+              selectRow.row.stock = product.currentStock
+              selectRow.row.unitPrice = product.unitPrice
+              selectRow.row.taxTotalPrice = product.unitPrice
+              selectRow.row.amount = product.unitPrice
+              selectRow.row.productNumber = 1
+              table.updateData(selectRow.rowIndex, selectRow.row)
+            } else {
+              createMessage.warn("该条码查询不到商品信息")
+            }
+          }
+        }
+      }
     }
 
     async function loadRefundDetail(id) {
@@ -466,7 +513,7 @@ export default defineComponent({
 
     function scanPressEnter() {
       getProductSkuByBarCode(barCode.value, formState.warehouseId).then(res => {
-        const {columns} = gridOptions
+        const {columns} = orderGridOptions
         if (columns) {
           const {data} = res
           if (data) {
@@ -543,13 +590,18 @@ export default defineComponent({
     async function handleOk(type: number) {
       const table = xGrid.value
       if (!formState.customerId) {
-        createMessage.error('请选择客户');
+        createMessage.warn('请选择客户');
         return;
       }
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.error("请添加一行数据")
+          createMessage.warn("请添加一行数据")
+          return;
+        }
+        const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
+        if(isBarCodeEmpty) {
+          createMessage.warn("请录入条码或者选择产品")
           return;
         }
       }
@@ -632,7 +684,7 @@ export default defineComponent({
         status: type,
       }
       const result = await addOrUpdateSaleOrder(params)
-      if (result.code === 'S0001' || 'S0002') {
+      if (result.code === 'S0001' || result.code === 'S0002') {
         handleCancelModal();
       }
     }
@@ -717,7 +769,7 @@ export default defineComponent({
     function addRowData() {
       const table = xGrid.value
       if(table) {
-        table.insert({productNumber: 1})
+        table.insert({productNumber: 0})
       }
     }
 
@@ -900,7 +952,7 @@ export default defineComponent({
       handleOk,
       beforeUpload,
       uploadFiles,
-      gridOptions,
+      orderGridOptions,
       xGrid,
       tableData,
       getTaxTotalPrice,
@@ -922,7 +974,10 @@ export default defineComponent({
       manyAccountBtnStatus,
       handleManyAccount,
       multipleAccountModal,
-      handleAccountSuccess
+      handleAccountSuccess,
+      productList,
+      productLabelList,
+      selectBarCode
     };
   },
 });
