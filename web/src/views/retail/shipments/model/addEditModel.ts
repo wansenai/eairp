@@ -116,7 +116,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             title: '条码',
             slots: { edit: 'barCode_edit' },
             titlePrefix: { content: '需要在商品管理添加商品' },
-            editRender: { name: 'input', attrs: { placeholder: '请输入条码并回车' } }
+            editRender: { name: '$select', options: []}
         },
         {
             field: 'productName',
