@@ -75,17 +75,15 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     columns: [
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
         {   field: 'warehouseId',
-            width:120,
-            title: '仓库名称',
+            width:150,
+            title: '仓库',
             slots: { edit: 'warehouseId_edit',default: 'warehouseId_default' },
-            sortable: true,
             editRender: {}
         },
         {   field: 'barCode',
             width:160,
             title: '条码',
             slots: { edit: 'barCode_edit' },
-            sortable: true,
             titlePrefix: { content: '输入条码商品信息自动带出！' },
             editRender: { name: 'input', attrs: { placeholder: '请输入条码并回车' } }
         },
@@ -97,7 +95,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         { field: 'productStandard', title: '规格', width: 110,  },
         { field: 'stock', title: '库存',  width: 70},
         {   field: 'otherWarehouseId',
-            width:120,
+            width:150,
             title: '调入仓库',
             slots: { edit: 'otherWarehouseId_edit',default: 'otherWarehouseId_default' },
             editRender: {}
@@ -106,24 +104,6 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         { field: 'productNumber', title: '数量', width:80,
             slots: { edit: 'product_number_edit' },
             editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } }, },
-        {
-            field: 'unitPrice',
-            title: '单价', width:90,
-            formatter ({ cellValue }) {
-                return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
-            },
-            slots: { edit: 'price_edit' },
-            editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入单价' } }
-        },
-        {
-            field: 'amount',
-            title: '金额', width:90,
-            formatter ({ cellValue }) {
-                return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
-            },
-            slots: { edit: 'amount_edit' },
-            editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
-        },
         { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } }, width: 150},
     ],
     footerMethod ({ columns, data }) {
@@ -152,7 +132,18 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         trigger: 'click',
         mode: 'row',
         showStatus: true
-    }
+    },
+    editRules: {
+        warehouseId: [
+            { required: true, message: '仓库不能为空' }
+        ],
+        barCode: [
+            { required: true, message: '商品条码不能为空' }
+        ],
+        otherWarehouseId: [
+            { required: true, message: '调入方仓库不能为空' }
+        ]
+    },
 })
 
 const sumNum = (list: RowVO[], field: string) => {
