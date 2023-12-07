@@ -19,7 +19,7 @@ import com.wansenai.dto.report.QueryProductStockDTO;
 import com.wansenai.entities.product.ProductStock;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wansenai.vo.product.ProductStockKeepUnitVO;
-import com.wansenai.vo.report.ProductStockVO;
+import com.wansenai.vo.report.ProductStockSkuVO;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public interface ProductStockMapper extends BaseMapper<ProductStock> {
 
     ProductStockKeepUnitVO getProductSkuDetail(Long productId, Long warehouseId, String barCode);
 
-    Page<ProductStockVO> getProductStock(IPage<QueryProductStockDTO> pageObject, QueryProductStockDTO queryProductStockDTO);
+    Page<ProductStockSkuVO> getProductStock(IPage<QueryProductStockDTO> pageObject, QueryProductStockDTO queryProductStockDTO);
 
-    List<ProductStockVO> getProductStockList(QueryProductStockDTO queryProductStockDTO);
+    List<ProductStockSkuVO> getProductStockList(QueryProductStockDTO queryProductStockDTO);
 }
