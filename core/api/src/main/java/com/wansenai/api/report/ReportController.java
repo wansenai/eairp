@@ -41,7 +41,7 @@ public class ReportController {
     }
 
     @PostMapping("productStock")
-    public Response<IPage<ProductStockVO>> getProductStock(@RequestBody QueryProductStockDTO queryProductStockDTO) {
+    public Response<IPage<ProductStockSkuVO>> getProductStock(@RequestBody QueryProductStockDTO queryProductStockDTO) {
         return receiptService.getProductStock(queryProductStockDTO);
     }
 

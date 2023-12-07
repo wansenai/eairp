@@ -83,7 +83,7 @@
                   <vxe-input v-model="row.amount"></vxe-input>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-input type="search" clearable v-model="row.barCode" @search-click="productModal"></vxe-input>
+                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #return_number_edit="{ row }">
                   <vxe-input v-model="row.returnNumber"></vxe-input>
@@ -233,9 +233,9 @@ import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
 import { addOrUpdateRefund, getRefundDetail} from "@/api/retail/refund"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
-import {getProductSkuByBarCode} from "@/api/product/product";
+import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
 import XEUtils from "xe-utils";
-import {ProductExtendPriceResp} from "@/api/product/model/productModel";
+import {ProductExtendPriceResp, ProductStockSkuResp} from "@/api/product/model/productModel";
 import {AddOrUpdateRefundReq} from "@/api/retail/model/refundModel";
 import {FileData, ShipmentsData} from "@/api/retail/model/shipmentsModel";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
@@ -327,6 +327,8 @@ export default defineComponent({
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
     const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
+    const productList = ref<ProductStockSkuResp[]>([]);
+    const productLabelList = ref<any[]>([]);
 
     function handleCancelModal() {
       close();
@@ -340,6 +342,7 @@ export default defineComponent({
       loadMemberList();
       loadAccountList();
       loadWarehouseList();
+      loadProductSku();
       if (id) {
         title.value = '编辑-零售退货'
         loadRefundDetail(id);
@@ -382,6 +385,46 @@ export default defineComponent({
           warehouseList.value = res.data
         }
       })
+    }
+
+    function loadProductSku() {
+      getProductStockSku().then(res => {
+        productList.value = res.data
+        productLabelList.value.push(...res.data.map(item => ({value: item.productBarcode, label: item.productBarcode})))
+        productLabelList.value = productLabelList.value.filter((item, index, arr) => {
+          return arr.findIndex(item1 => item1.value === item.value) === index
+        })
+      })
+    }
+
+    function selectBarCode() {
+      const table = xGrid.value
+      const selectRow = table?.getActiveRecord()
+      if(selectRow) {
+        const {columns} = gridOptions
+        if (columns) {
+          const barCodeColumn = selectRow.row.barCode
+          const warehouseColumn = selectRow.row.warehouseId
+          if(barCodeColumn && warehouseColumn) {
+            const product = productList.value.find(item => {
+              return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
+            });
+            if (product) {
+              selectRow.row.productId = product.productId
+              selectRow.row.productName = product.productName
+              selectRow.row.productStandard = product.productStandard
+              selectRow.row.productUnit = product.productUnit
+              selectRow.row.stock = product.currentStock
+              selectRow.row.retailPrice = product.unitPrice
+              selectRow.row.amount = product.unitPrice
+              selectRow.row.productNumber = 1
+              table.updateData(selectRow.rowIndex, selectRow.row)
+            } else {
+              createMessage.warn("该条码查询不到商品信息")
+            }
+          }
+        }
+      }
     }
 
     async function loadRefundDetail(id) {
@@ -772,7 +815,10 @@ export default defineComponent({
       onSearch,
       handleReceiptSuccess,
       disabledStatus,
-      linkReceiptModal
+      linkReceiptModal,
+      productList,
+      productLabelList,
+      selectBarCode,
     };
   },
 });

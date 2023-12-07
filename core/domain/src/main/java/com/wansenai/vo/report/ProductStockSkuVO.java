@@ -21,7 +21,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class ProductStockVO {
+public class ProductStockSkuVO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;

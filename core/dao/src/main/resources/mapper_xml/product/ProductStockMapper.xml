@@ -68,7 +68,7 @@
         WHERE p.id= #{productId} AND ps.warehouse_id = #{warehouseId} AND sku.product_bar_code = #{barCode}
     </select>
 
-    <select id="getProductStock" resultType="com.wansenai.vo.report.ProductStockVO" parameterType="com.baomidou.mybatisplus.extension.plugins.pagination.Page">
+    <select id="getProductStock" resultType="com.wansenai.vo.report.ProductStockSkuVO" parameterType="com.baomidou.mybatisplus.extension.plugins.pagination.Page">
         SELECT ps.id, p.product_name, p.id AS productId, p.product_model, p.product_standard, p.product_color,sku.product_bar_code, p.product_weight, p.warehouse_shelves,
         sku.product_unit, sku.retail_price AS unit_price, p.product_manufacturer,pc.category_name AS product_category_name,
         ps.current_stock_quantity AS current_stock, ps.init_stock_quantity AS initial_stock, w.warehouse_name, w.id AS warehouseId,
@@ -94,7 +94,7 @@
         </where>
     </select>
 
-    <select id="getProductStockList" resultType="com.wansenai.vo.report.ProductStockVO" parameterType="com.wansenai.dto.report.QueryProductStockDTO">
+    <select id="getProductStockList" resultType="com.wansenai.vo.report.ProductStockSkuVO" parameterType="com.wansenai.dto.report.QueryProductStockDTO">
         SELECT ps.id, p.product_name, p.id AS productId, p.product_model, p.product_standard, p.product_color,sku.product_bar_code, p.product_weight, p.warehouse_shelves,
         sku.product_unit, sku.retail_price AS unit_price, p.product_manufacturer,pc.category_name AS product_category_name,
         ps.current_stock_quantity AS current_stock, ps.init_stock_quantity AS initial_stock, w.warehouse_name, w.id AS warehouseId,

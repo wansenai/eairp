@@ -88,7 +88,7 @@
                   <vxe-input v-model="row.amount"></vxe-input>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-input type="search" clearable v-model="row.barCode" @search-click="productModal"></vxe-input>
+                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
               </vxe-grid>
             </div>
@@ -190,6 +190,7 @@
 
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
+import {getProductStockSku} from "@/api/product/product";
 import {PlusOutlined, UploadOutlined} from '@ant-design/icons-vue';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
@@ -242,8 +243,8 @@ import { addOrUpdateShipments, getShipmentsDetail} from "@/api/retail/shipments"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
 import {getProductSkuByBarCode} from "@/api/product/product";
 import XEUtils from "xe-utils";
-import {ProductExtendPriceResp} from "@/api/product/model/productModel";
-import {AddOrUpdateShipmentsReq} from "@/api/retail/model/shipmentsModel";
+import {ProductExtendPriceResp, ProductStockSkuResp} from "@/api/product/model/productModel";
+import {AddOrUpdateShipmentsReq, ShipmentsData} from "@/api/retail/model/shipmentsModel";
 const VNodes = {
   props: {
     vnodes: {
@@ -327,6 +328,8 @@ export default defineComponent({
     const [memberModal, {openModal}] = useModal();
     const [accountModal, {openModal: openAccountModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
+    const productList = ref<ProductStockSkuResp[]>([]);
+    const productLabelList = ref<any[]>([]);
 
     function handleCancelModal() {
       open.value = false;
@@ -339,6 +342,7 @@ export default defineComponent({
       loadMemberList();
       loadAccountList();
       loadWarehouseList();
+      loadProductSku();
       if (id) {
         title.value = '编辑-零售出库'
         loadShipmentsDetail(id);
@@ -380,6 +384,46 @@ export default defineComponent({
           warehouseList.value = res.data
         }
       })
+    }
+
+    function loadProductSku() {
+      getProductStockSku().then(res => {
+        productList.value = res.data
+        productLabelList.value.push(...res.data.map(item => ({value: item.productBarcode, label: item.productBarcode})))
+        productLabelList.value = productLabelList.value.filter((item, index, arr) => {
+          return arr.findIndex(item1 => item1.value === item.value) === index
+        })
+      })
+    }
+
+    function selectBarCode() {
+      const table = xGrid.value
+      const selectRow = table?.getActiveRecord()
+      if(selectRow) {
+        const {columns} = gridOptions
+        if (columns) {
+          const barCodeColumn = selectRow.row.barCode
+          const warehouseColumn = selectRow.row.warehouseId
+          if(barCodeColumn && warehouseColumn) {
+            const product = productList.value.find(item => {
+              return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
+            });
+            if (product) {
+              selectRow.row.productId = product.productId
+              selectRow.row.productName = product.productName
+              selectRow.row.productStandard = product.productStandard
+              selectRow.row.productUnit = product.productUnit
+              selectRow.row.stock = product.currentStock
+              selectRow.row.retailPrice = product.unitPrice
+              selectRow.row.amount = product.unitPrice
+              selectRow.row.productNumber = 1
+              table.updateData(selectRow.rowIndex, selectRow.row)
+            } else {
+              createMessage.warn("该条码查询不到商品信息")
+            }
+          }
+        }
+      }
     }
 
     async function loadShipmentsDetail(id) {
@@ -664,7 +708,7 @@ export default defineComponent({
       const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
       const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
       if(table) {
-        table.insert({productNumber: 1, warehouseId: warehouseId})
+        table.insert({warehouseId: warehouseId})
       }
     }
 
@@ -733,6 +777,9 @@ export default defineComponent({
       handleCheckSuccess,
       addRowData,
       deleteRowData,
+      productList,
+      productLabelList,
+      selectBarCode,
     };
   },
 });
