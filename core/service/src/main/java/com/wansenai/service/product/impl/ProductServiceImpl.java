@@ -14,6 +14,7 @@ package com.wansenai.service.product.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.service.BaseService;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.dto.product.*;
@@ -61,7 +62,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     private final BaseService baseService;
 
-    public ProductServiceImpl(ProductMapper productMapper, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, ProductImageService productImageService, ProductUnitService productUnitService, BaseService baseService) {
+    private final ProductStockMapper productStockMapper;
+
+    public ProductServiceImpl(ProductMapper productMapper, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, ProductImageService productImageService, ProductUnitService productUnitService, BaseService baseService, ProductStockMapper productStockMapper) {
         this.productMapper = productMapper;
         this.productStockKeepUnitService = productStockKeepUnitService;
         this.productStockService = productStockService;
@@ -69,6 +72,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         this.productImageService = productImageService;
         this.productUnitService = productUnitService;
         this.baseService = baseService;
+        this.productStockMapper = productStockMapper;
     }
 
     public String getStringValue(String str) {

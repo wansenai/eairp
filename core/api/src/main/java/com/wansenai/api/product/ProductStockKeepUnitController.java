@@ -14,12 +14,15 @@ package com.wansenai.api.product;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
-import com.wansenai.service.product.ProductStockKeepUnitService;
+import com.wansenai.dto.report.QueryProductStockDTO;
 import com.wansenai.service.product.ProductStockService;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.product.ProductStockKeepUnitVO;
+import com.wansenai.vo.report.ProductStockSkuVO;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -51,5 +54,10 @@ public class ProductStockKeepUnitController {
     @GetMapping("getProduct/{barCode}/{warehouseId}")
     public Response<ProductStockKeepUnitVO> getProductByBarCode(@PathVariable("barCode") String barCode, @PathVariable("warehouseId")Long warehouseId) {
         return productStockService.getProductByBarCode(barCode, warehouseId);
+    }
+
+    @PostMapping("productStockSku")
+    public Response<List<ProductStockSkuVO>> getProductStockInfo(@RequestBody QueryProductStockDTO queryProductStockDTO) {
+        return productStockService.getProductStockSkuList(queryProductStockDTO);
     }
 }
