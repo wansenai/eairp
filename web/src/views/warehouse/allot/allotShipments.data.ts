@@ -24,11 +24,6 @@ export const columns: BasicColumn[] = [
         width: 100,
     },
     {
-        title: '金额合计',
-        dataIndex: 'totalAmount',
-        width: 70,
-    },
-    {
         title: '操作员',
         dataIndex: 'operator',
         width: 70,
@@ -153,16 +148,6 @@ export const allotShipmentTableColumns: BasicColumn[] = [
     {
         title: '数量',
         dataIndex: 'productNumber',
-        width: 70,
-    },
-    {
-        title: '单价',
-        dataIndex: 'unitPrice',
-        width: 70,
-    },
-    {
-        title: '金额',
-        dataIndex: 'amount',
         width: 70,
     },
     {
