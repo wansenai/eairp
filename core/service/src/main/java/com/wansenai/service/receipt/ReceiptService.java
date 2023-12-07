@@ -42,7 +42,7 @@ public interface ReceiptService {
 
     Response<Page<ReceiptDetailVO>> getOtherDetail(QueryReceiptDTO receiptDTO);
 
-    Response<IPage<ProductStockVO>> getProductStock(QueryProductStockDTO queryProductStockDTO);
+    Response<IPage<ProductStockSkuVO>> getProductStock(QueryProductStockDTO queryProductStockDTO);
 
     Response<Page<StockFlowVO>> getStockFlow(QueryStockFlowDTO queryStockFlowDTO);
 
