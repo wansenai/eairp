@@ -390,11 +390,11 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         var receiptVos = new ArrayList<ReceiptVO>(receiptRetailVOList.getRecords().size() + 2);
         receiptRetailVOList.getRecords().forEach(item -> {
-            var member = memberService.lambdaQuery()
+            Optional<Member> memberOptional = Optional.ofNullable(memberService.lambdaQuery()
                     .eq(Member::getId, item.getMemberId())
                     .eq(Member::getDeleteFlag, CommonConstants.NOT_DELETED)
-                    .one();
-
+                    .one());
+            var memberName = memberOptional.map(Member::getMemberName).orElse("");
             var operator = userService.getById(item.getCreateBy());
 
             var productNumber = receiptRetailSubService.lambdaQuery()
@@ -406,7 +406,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             ReceiptVO receiptVO = ReceiptVO.builder()
                     .id(item.getId())
-                    .name(Optional.ofNullable(member.getMemberName()).orElse(""))
+                    .name(memberName)
                     .receiptNumber(item.getReceiptNumber())
                     .receiptDate(item.getReceiptDate())
                     .operator(Optional.ofNullable(operator.getName()).orElse(""))
