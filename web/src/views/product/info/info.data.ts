@@ -169,6 +169,16 @@ const extendPriceColumn: BasicColumn[] = [
         width: 60,
     },
     {
+        title: '销售价',
+        dataIndex: 'salePrice',
+        width: 60,
+    },
+    {
+        title: '采购价',
+        dataIndex: 'purchasePrice',
+        width: 60,
+    },
+    {
         title: '扩展信息',
         dataIndex: 'extendInfo',
         width: 60,

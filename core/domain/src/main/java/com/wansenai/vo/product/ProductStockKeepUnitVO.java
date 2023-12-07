@@ -58,4 +58,10 @@ public class ProductStockKeepUnitVO {
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     private BigDecimal retailPrice;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal salePrice;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal purchasePrice;
 }

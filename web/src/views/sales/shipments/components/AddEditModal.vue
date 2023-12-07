@@ -428,9 +428,10 @@ export default defineComponent({
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
-              selectRow.row.unitPrice = product.unitPrice
-              selectRow.row.taxTotalPrice = product.unitPrice
-              selectRow.row.amount = product.unitPrice
+              selectRow.row.unitPrice = product.salePrice
+              selectRow.row.taxTotalPrice = product.salePrice
+              selectRow.row.amount = product.salePrice
+              selectRow.row.taxRate = 0
               selectRow.row.productNumber = 1
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
@@ -558,7 +559,7 @@ export default defineComponent({
         if (columns) {
           const {data} = res
           if (data) {
-            const sale : SalesData = data
+            const sale: SalesData = data
             const table = xGrid.value
             if (table) {
               //根据productExtendPrice.id判断表格中如果是同一个商品，数量加1 否则新增一行
@@ -585,9 +586,9 @@ export default defineComponent({
                   productUnit: sale.productUnit,
                   stock: sale.stock,
                   productNumber: 1,
-                  amount: sale.retailPrice,
-                  unitPrice: sale.retailPrice,
-                  taxTotalPrice: sale.retailPrice,
+                  amount: sale.salePrice,
+                  unitPrice: sale.salePrice,
+                  taxTotalPrice: sale.salePrice,
                   taxRate: 0,
                   taxAmount: 0,
                 };
@@ -659,6 +660,16 @@ export default defineComponent({
           createMessage.warn("请录入条码或者选择产品")
           return;
         }
+      }
+      // 库存校验
+      const tableData = table.getTableData().tableData
+      const isStockNotEnough = tableData.some(item => item.productNumber > item.stock)
+      if(isStockNotEnough) {
+        const tableDataNotEnough = tableData.filter(item => item.productNumber > item.stock)
+        const tableDataNotEnoughBarCode = tableDataNotEnough.map(item => item.barCode)
+        const tableDataNotEnoughBarCodeStr = tableDataNotEnoughBarCode.join(",")
+        createMessage.info("条码: "+tableDataNotEnoughBarCodeStr +"商品库存不足，请检查库存数量")
+        return;
       }
 
       const files = [];
@@ -807,11 +818,10 @@ export default defineComponent({
     function handleCheckSuccess(data) {
       const table = xGrid.value
       if(table) {
-        // 给表格的unitPrice赋值item的retailPrice
         data = data.map(item => {
-          item.unitPrice = item.retailPrice
+          item.unitPrice = item.salePrice
           item.productNumber = 1
-          item.amount = item.retailPrice * item.productNumber
+          item.amount = item.salePrice * item.productNumber
           item.taxRate = 0
           item.taxAmount = 0
           item.taxTotalPrice = item.amount + item.taxRate
@@ -929,12 +939,9 @@ export default defineComponent({
     }
 
     watch(getTaxTotalPrice, (newValue, oldValue) => {
-      // 判断如果是查询详情的方法就不调用 重新计算本次收款 和 本次欠款 的两个方法 因为查询详情的时候已经计算过了
-      if(oldValue !== '￥0.00') {
         saleShipmentsFormState.collectOfferLastAmount = newValue
         saleShipmentsFormState.thisCollectAmount = newValue
         discountAmountChange()
-      }
     });
 
     function discountRateChange() {

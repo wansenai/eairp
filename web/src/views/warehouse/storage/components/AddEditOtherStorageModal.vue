@@ -568,8 +568,6 @@ export default defineComponent({
                   productUnit: storageData.productUnit,
                   stock: storageData.stock,
                   productNumber: 1,
-                  amount: storageData.retailPrice,
-                  unitPrice: storageData.retailPrice,
                 };
                 table.insert(tableData)
               }
@@ -585,9 +583,8 @@ export default defineComponent({
       const table = xGrid.value
       if(table) {
         data = data.map(item => {
-          item.unitPrice = item.retailPrice
+          item.warehouseId = otherStorageFormState.warehouseId
           item.productNumber = 1
-          item.amount = item.retailPrice * item.productNumber
           return item
         })
         table.insert(data)

@@ -414,8 +414,8 @@ export default defineComponent({
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
-              selectRow.row.retailPrice = product.unitPrice
-              selectRow.row.amount = product.unitPrice
+              selectRow.row.retailPrice = product.retailPrice
+              selectRow.row.amount = product.retailPrice
               selectRow.row.productNumber = 1
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
@@ -561,7 +561,7 @@ export default defineComponent({
     }
 
     async function handleOk(type: number) {
-      const table = xGrid.value
+      const table:any = xGrid.value
       if (!formState.receiptDate) {
         createMessage.warn('请选择单据日期');
         return;
@@ -582,6 +582,17 @@ export default defineComponent({
           return;
         }
       }
+      // 库存校验
+      const tableData = table.getTableData().tableData
+      const isStockNotEnough = tableData.some(item => item.productNumber > item.stock)
+      if(isStockNotEnough) {
+        const tableDataNotEnough = tableData.filter(item => item.productNumber > item.stock)
+        const tableDataNotEnoughBarCode = tableDataNotEnough.map(item => item.barCode)
+        const tableDataNotEnoughBarCodeStr = tableDataNotEnoughBarCode.join(",")
+        createMessage.info("条码: "+tableDataNotEnoughBarCodeStr +"商品库存不足，请检查库存数量")
+        return;
+      }
+
       const files = [];
       if (fileList && fileList.value) {
         for (let i = 0; i < fileList.value.length; i++) {

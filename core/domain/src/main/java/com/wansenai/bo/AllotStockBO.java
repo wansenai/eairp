@@ -53,11 +53,5 @@ public class AllotStockBO {
 
     private Integer productNumber;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal unitPrice;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal amount;
-
     private String remark;
 }

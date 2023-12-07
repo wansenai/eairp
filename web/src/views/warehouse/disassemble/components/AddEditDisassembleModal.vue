@@ -42,7 +42,7 @@
                   <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="barCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
                   <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
-                  <a-button @click="addRowSubData" style="margin-right: 10px">插入一行</a-button>
+                  <a-button @click="addRowSubData" style="margin-right: 10px">添加一行</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
                 </template>
                 <template #warehouseId_default="{ row }">
@@ -54,7 +54,7 @@
                   </vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-input type="search" clearable @search-click="productModal" v-model="row.barCode"></vxe-input>
+                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
@@ -132,7 +132,7 @@ import {
   disAssembleFormState,
   xGrid,
   tableData,
-  gridOptions, assembleFormState,
+  gridOptions,
 } from '/src/views/warehouse/addEditAssembleOrDisassemble.data';
 import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
@@ -142,9 +142,10 @@ import { addOrUpdateDisAssemble, getDisAssembleDetailById} from "@/api/warehouse
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-import {getDefaultWarehouse, getWarehouseList} from "@/api/basic/warehouse";
-import {getProductSkuByBarCode} from "@/api/product/product";
+import {getWarehouseList} from "@/api/basic/warehouse";
+import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue";
+import {ProductStockSkuResp} from "@/api/product/model/productModel";
 const VNodes = {
   props: {
     vnodes: {
@@ -219,6 +220,8 @@ export default defineComponent({
     });
     const barCode = ref('');
     const warehouseList = ref<WarehouseResp[]>([]);
+    const productList = ref<ProductStockSkuResp[]>([]);
+    const productLabelList = ref<any[]>([]);
 
     function handleCancelModal() {
       close();
@@ -230,7 +233,7 @@ export default defineComponent({
     function openAddEditModal(id: string | undefined) {
       open.value = true
       loadWarehouseList();
-      loadDefaultWarehouse();
+      loadProductSku();
       if (id) {
         title.value = '编辑-拆卸单'
         loadDisAssembleReceipt(id);
@@ -242,19 +245,65 @@ export default defineComponent({
       }
     }
 
-    function loadDefaultWarehouse() {
-      getDefaultWarehouse().then(res => {
-        const data = res.data
-        if(data) {
-          disAssembleFormState.warehouseId = data.id
+
+    function loadWarehouseList() {
+      getWarehouseList().then(res => {
+        const {columns} = gridOptions
+        if (columns) {
+          const warehouseColumn = columns[2]
+          warehouseColumn.editRender.options = [];
+          if (warehouseColumn && warehouseColumn.editRender) {
+            warehouseColumn.editRender.options?.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
+          }
+          warehouseList.value = res.data
+        }
+        const defaultWarehouse = res.data.find(item => item.isDefault === 1)
+        if(defaultWarehouse) {
+          disAssembleFormState.warehouseId = defaultWarehouse.id
+        } else {
+          disAssembleFormState.warehouseId = res.data[0].id
         }
       })
     }
 
-    function loadWarehouseList() {
-      getWarehouseList().then(res => {
-        warehouseList.value = res.data
+    function loadProductSku() {
+      getProductStockSku().then(res => {
+        productList.value = res.data
+        productLabelList.value.push(...res.data.map(item => ({value: item.productBarcode, label: item.productBarcode})))
+        productLabelList.value = productLabelList.value.filter((item, index, arr) => {
+          return arr.findIndex(item1 => item1.value === item.value) === index
+        })
       })
+    }
+
+    function selectBarCode() {
+      const table = xGrid.value
+      const selectRow = table?.getActiveRecord()
+      if(selectRow) {
+        const {columns} = gridOptions
+        if (columns) {
+          const barCodeColumn = selectRow.row.barCode
+          const warehouseColumn = selectRow.row.warehouseId
+          if(barCodeColumn && warehouseColumn) {
+            const product = productList.value.find(item => {
+              return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
+            });
+            if (product) {
+              selectRow.row.productId = product.productId
+              selectRow.row.productName = product.productName
+              selectRow.row.productStandard = product.productStandard
+              selectRow.row.productUnit = product.productUnit
+              selectRow.row.stock = product.currentStock
+              selectRow.row.unitPrice = product.purchasePrice
+              selectRow.row.amount = product.purchasePrice
+              selectRow.row.productNumber = 1
+              table.updateData(selectRow.rowIndex, selectRow.row)
+            } else {
+              createMessage.warn("该条码查询不到商品信息")
+            }
+          }
+        }
+      }
     }
 
     function loadGenerateId() {
@@ -269,7 +318,7 @@ export default defineComponent({
       if(table) {
         const tableData : any = {
           type: "组合件",
-          warehouseId: assembleFormState.warehouseId,
+          warehouseId: disAssembleFormState.warehouseId,
           productId: '',
           barCode: '',
           productName: '',
@@ -341,6 +390,21 @@ export default defineComponent({
           createMessage.error("请添加一行数据")
           return;
         }
+        const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
+        if(isBarCodeEmpty) {
+          createMessage.warn("请录入条码或者选择产品")
+          return;
+        }
+      }
+
+      const tableData = table.getTableData().tableData
+      const isStockNotEnough = tableData.some(item => item.productNumber > item.stock)
+      if(isStockNotEnough) {
+        const tableDataNotEnough = tableData.filter(item => item.productNumber > item.stock)
+        const tableDataNotEnoughBarCode = tableDataNotEnough.map(item => item.barCode)
+        const tableDataNotEnoughBarCodeStr = tableDataNotEnoughBarCode.join(",")
+        createMessage.info("条码: "+tableDataNotEnoughBarCodeStr +"商品库存不足，请检查库存数量")
+        return;
       }
 
       const files :any = [];
@@ -500,8 +564,8 @@ export default defineComponent({
                   productUnit: shipmentsData.productUnit,
                   stock: shipmentsData.stock,
                   productNumber: 1,
-                  amount: shipmentsData.retailPrice,
-                  unitPrice: shipmentsData.retailPrice,
+                  amount: shipmentsData.purchasePrice,
+                  unitPrice: shipmentsData.purchasePrice,
                 };
                 table.insert(tableData)
               }
@@ -527,8 +591,8 @@ export default defineComponent({
           tableData.productStandard = data[0].productStandard
           tableData.productUnit = data[0].productUnit
           tableData.stock = data[0].stock
-          tableData.unitPrice = data[0].retailPrice
-          tableData.amount = data[0].retailPrice
+          tableData.unitPrice = data[0].purchasePrice
+          tableData.amount = data[0].purchasePrice
           tableData.productNumber = 1
           table.updateData()
         } else {
@@ -543,8 +607,8 @@ export default defineComponent({
               productUnit: item.productUnit,
               stock: item.stock,
               productNumber: 1,
-              amount: item.retailPrice,
-              unitPrice: item.retailPrice,
+              amount: item.purchasePrice,
+              unitPrice: item.purchasePrice,
             };
             // 如果获取data的下标
             if (data.indexOf(item) === 0) {
@@ -556,8 +620,8 @@ export default defineComponent({
               tableData.productStandard = item.productStandard
               tableData.productUnit = item.productUnit
               tableData.stock = item.stock
-              tableData.unitPrice = item.retailPrice
-              tableData.amount = item.retailPrice
+              tableData.unitPrice = item.purchasePrice
+              tableData.amount = item.purchasePrice
               tableData.productNumber = 1
               table.updateData()
             } else {
@@ -609,7 +673,7 @@ export default defineComponent({
     function addRowSubData() {
       const table = xGrid.value
       if(table) {
-        table.insertAt({type: "普通子件", warehouseId: assembleFormState.warehouseId}, -1)
+        table.insertAt({type: "普通子件", warehouseId: disAssembleFormState.warehouseId}, -1)
       }
     }
 
@@ -653,7 +717,10 @@ export default defineComponent({
       productNumberChange,
       unitPriceChange,
       amountChange,
-      addRowSubData
+      addRowSubData,
+      loadProductSku,
+      selectBarCode,
+      productLabelList
     };
   },
 });

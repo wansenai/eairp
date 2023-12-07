@@ -215,7 +215,7 @@ import { addOrUpdatePurchaseOrder, getPurchaseOrderDetail} from "@/api/purchase/
 import SupplierModal from "@/views/basic/supplier/components/SupplierModal.vue"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
 import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
-import {getDefaultWarehouse} from "@/api/basic/warehouse";
+import {getWarehouseList} from "@/api/basic/warehouse";
 import {AddOrUpdateReceiptReq, PurchaseData} from "@/api/purchase/model/orderModel";
 import {FileData} from '/@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
@@ -325,7 +325,7 @@ export default defineComponent({
     function openAddEditModal(id: string | undefined) {
       open.value = true
       loadSupplierList();
-      loadDefaultWarehouse();
+      loadWarehouseList();
       loadAccountList();
       loadProductSku();
       if (id) {
@@ -338,11 +338,16 @@ export default defineComponent({
       }
     }
 
-    function loadDefaultWarehouse() {
-      getDefaultWarehouse().then(res => {
+    function loadWarehouseList() {
+      getWarehouseList().then(res => {
         const data = res.data
         if(data) {
-          purchaseOrderFormState.warehouseId = data.id
+          const defaultWarehouse = res.data.find(item => item.isDefault === 1)
+          if(defaultWarehouse) {
+            purchaseOrderFormState.warehouseId = defaultWarehouse.id
+          } else {
+            purchaseOrderFormState.warehouseId = res.data[0].id
+          }
         }
       })
     }
@@ -410,9 +415,10 @@ export default defineComponent({
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
-              selectRow.row.unitPrice = product.unitPrice
-              selectRow.row.taxTotalPrice = product.unitPrice
-              selectRow.row.amount = product.unitPrice
+              selectRow.row.unitPrice = product.purchasePrice
+              selectRow.row.taxTotalPrice = product.purchasePrice
+              selectRow.row.amount = product.purchasePrice
+              selectRow.row.taxRate = 0
               selectRow.row.productNumber = 1
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
@@ -496,12 +502,12 @@ export default defineComponent({
         if (columns) {
           const {data} = res
           if (data) {
-            const sale : PurchaseData = data
+            const purchase : PurchaseData = data
             const table = xGrid.value
             if (table) {
               //根据productExtendPrice.id判断表格中如果是同一个商品，数量加1 否则新增一行
               const tableData = table.getTableData().tableData
-              const index = tableData.findIndex(item => item.barCode === sale.barCode)
+              const index = tableData.findIndex(item => item.barCode === purchase.barCode)
               if (index > -1) {
                 const row = tableData[index]
                 row.productNumber = Number(row.productNumber) + 1
@@ -516,25 +522,22 @@ export default defineComponent({
                 table.updateData()
               } else {
                 const tableData : RowVO = {
-                  warehouseId: sale.warehouseId,
-                  productId: sale.productId,
-                  barCode: sale.barCode,
-                  productName: sale.productName,
-                  productStandard: sale.productStandard,
-                  productUnit: sale.productUnit,
-                  stock: sale.stock,
+                  warehouseId: purchase.warehouseId,
+                  productId: purchase.productId,
+                  barCode: purchase.barCode,
+                  productName: purchase.productName,
+                  productStandard: purchase.productStandard,
+                  productUnit: purchase.productUnit,
+                  stock: purchase.stock,
                   productNumber: 1,
-                  amount: sale.retailPrice,
-                  unitPrice: sale.retailPrice,
-                  taxTotalPrice: sale.retailPrice,
+                  amount: purchase.purchasePrice,
+                  unitPrice: purchase.purchasePrice,
+                  taxTotalPrice: purchase.purchasePrice,
                   taxRate: 0,
                   taxAmount: 0,
                 };
                 table.insert(tableData)
               }
-              // 调用单价改变方法进行一次计算
-              // unitPriceChange(table)
-              // 更新数据
               purchaseOrderFormState.discountLastAmount = getTaxTotalPrice.value
             }
           }
@@ -727,11 +730,10 @@ export default defineComponent({
     function handleCheckSuccess(data) {
       const table = xGrid.value
       if(table) {
-        // 给表格的unitPrice赋值item的retailPrice
         data = data.map(item => {
-          item.unitPrice = item.retailPrice
+          item.unitPrice = item.purchasePrice
           item.productNumber = 1
-          item.amount = item.retailPrice * item.productNumber
+          item.amount = item.purchasePrice * item.productNumber
           item.taxRate = 0
           item.taxAmount = 0
           item.taxTotalPrice = item.amount + item.taxRate
@@ -847,7 +849,7 @@ export default defineComponent({
       }
     }
 
-    watch(getTaxTotalPrice, (newValue, oldValue) => {
+    watch(getTaxTotalPrice, (newValue) => {
       purchaseOrderFormState.discountLastAmount = newValue
       // 重新调用本次收款
       discountAmountChange()

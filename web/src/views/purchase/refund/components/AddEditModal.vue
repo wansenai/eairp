@@ -226,7 +226,7 @@ import {
   xGrid,
   tableData,
   gridOptions,
-  getTaxTotalPrice, purchaseOrderFormState,
+  getTaxTotalPrice,
 } from '/src/views/purchase/model/addEditModel';
 import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
@@ -237,7 +237,7 @@ import { addOrUpdatePurchaseRefund, getPurchaseRefundDetail} from "@/api/purchas
 import SupplierModal from "@/views/basic/supplier/components/SupplierModal.vue"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
 import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
-import {getDefaultWarehouse, getWarehouseList} from "@/api/basic/warehouse";
+import {getWarehouseList} from "@/api/basic/warehouse";
 import {AddOrUpdatePurchaseRefundReq, PurchaseRefundData} from "@/api/purchase/model/refundModel";
 import {FileData} from '/@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
@@ -452,10 +452,11 @@ export default defineComponent({
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
-              selectRow.row.unitPrice = product.unitPrice
-              selectRow.row.taxTotalPrice = product.unitPrice
-              selectRow.row.amount = product.unitPrice
+              selectRow.row.unitPrice = product.purchasePrice
+              selectRow.row.taxTotalPrice = product.purchasePrice
+              selectRow.row.amount = product.purchasePrice
               selectRow.row.productNumber = 1
+              selectRow.row.taxRate = 0
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
               createMessage.warn("该条码查询不到商品信息")
@@ -574,9 +575,9 @@ export default defineComponent({
                   productUnit: purchase.productUnit,
                   stock: purchase.stock,
                   productNumber: 1,
-                  amount: purchase.retailPrice,
-                  unitPrice: purchase.retailPrice,
-                  taxTotalPrice: purchase.retailPrice,
+                  amount: purchase.purchasePrice,
+                  unitPrice: purchase.purchasePrice,
+                  taxTotalPrice: purchase.purchasePrice,
                   taxRate: 0,
                   taxAmount: 0,
                 };
@@ -643,6 +644,16 @@ export default defineComponent({
           createMessage.warn("请录入条码或者选择产品")
           return;
         }
+      }
+      // 库存校验
+      const tableData = table.getTableData().tableData
+      const isStockNotEnough = tableData.some(item => item.productNumber > item.stock)
+      if(isStockNotEnough) {
+        const tableDataNotEnough = tableData.filter(item => item.productNumber > item.stock)
+        const tableDataNotEnoughBarCode = tableDataNotEnough.map(item => item.barCode)
+        const tableDataNotEnoughBarCodeStr = tableDataNotEnoughBarCode.join(",")
+        createMessage.info("条码: "+tableDataNotEnoughBarCodeStr +"商品库存不足，请检查库存数量")
+        return;
       }
 
       const files = [];
@@ -800,11 +811,10 @@ export default defineComponent({
     function handleCheckSuccess(data) {
       const table = xGrid.value
       if(table) {
-        // 给表格的unitPrice赋值item的retailPrice
         data = data.map(item => {
-          item.unitPrice = item.retailPrice
+          item.unitPrice = item.purchasePrice
           item.productNumber = 1
-          item.amount = item.retailPrice * item.productNumber
+          item.amount = item.purchasePrice * item.productNumber
           item.taxRate = 0
           item.taxAmount = 0
           item.taxTotalPrice = item.amount + item.taxRate
@@ -922,12 +932,10 @@ export default defineComponent({
       }
     }
 
-    watch(getTaxTotalPrice, (newValue, oldValue) => {
-      if(oldValue !== '￥0.00') {
-        discountAmountChange()
+    watch(getTaxTotalPrice, (newValue) => {
         purchaseRefundFormState.refundLastAmount = newValue
         purchaseRefundFormState.thisRefundAmount = newValue
-      }
+      discountAmountChange()
     });
 
     function onSearch() {

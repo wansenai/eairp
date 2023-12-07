@@ -2,6 +2,7 @@ import {FileData} from "@/api/financial/model/advanceModel";
 
 export interface OtherShipmentsData {
     id: number | string;
+    warehouseId: number | string;
     customerId: number | string;
     warehouseName: string;
     barCode: string;

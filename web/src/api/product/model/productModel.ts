@@ -129,6 +129,9 @@ export interface ProductStockSkuResp {
     warehouseShelves: string;
     productWeight: number;
     unitPrice: number;
+    retailPrice: number;
+    salePrice: number;
+    purchasePrice: number;
     initialStock: number;
     currentStock: number;
     stockAmount: number;

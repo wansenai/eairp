@@ -414,10 +414,11 @@ export default defineComponent({
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
-              selectRow.row.unitPrice = product.unitPrice
-              selectRow.row.taxTotalPrice = product.unitPrice
-              selectRow.row.amount = product.unitPrice
+              selectRow.row.unitPrice = product.purchasePrice
+              selectRow.row.taxTotalPrice = product.purchasePrice
+              selectRow.row.amount = product.purchasePrice
               selectRow.row.productNumber = 1
+              selectRow.row.taxRate = 0
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
               createMessage.warn("该条码查询不到商品信息")
@@ -564,9 +565,9 @@ export default defineComponent({
                   productUnit: purchase.productUnit,
                   stock: purchase.stock,
                   productNumber: 1,
-                  amount: purchase.retailPrice,
-                  unitPrice: purchase.retailPrice,
-                  taxTotalPrice: purchase.retailPrice,
+                  amount: purchase.purchasePrice,
+                  unitPrice: purchase.purchasePrice,
+                  taxTotalPrice: purchase.purchasePrice,
                   taxRate: 0,
                   taxAmount: 0,
                 };
@@ -790,11 +791,10 @@ export default defineComponent({
     function handleCheckSuccess(data) {
       const table = xGrid.value
       if(table) {
-        // 给表格的unitPrice赋值item的retailPrice
         data = data.map(item => {
-          item.unitPrice = item.retailPrice
+          item.unitPrice = item.purchasePrice
           item.productNumber = 1
-          item.amount = item.retailPrice * item.productNumber
+          item.amount = item.purchasePrice * item.productNumber
           item.taxRate = 0
           item.taxAmount = 0
           item.taxTotalPrice = item.amount + item.taxRate
@@ -912,12 +912,10 @@ export default defineComponent({
       }
     }
 
-    watch(getTaxTotalPrice, (newValue, oldValue) => {
-      if(oldValue !== '￥0.00') {
-        discountAmountChange()
+    watch(getTaxTotalPrice, (newValue) => {
         purchaseStorageFormState.paymentLastAmount = newValue
         purchaseStorageFormState.thisPaymentAmount = newValue
-      }
+      discountAmountChange()
     });
 
     function onSearch() {
