@@ -964,7 +964,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         accountFlowVos.sort(Comparator.comparing(AccountFlowVO::getReceiptDate).reversed());
         // 进行余额计算
         accountFlowVos.forEach(item -> {
-            balance.updateAndGet(v -> v.add(item.getAmount()));
+            balance.updateAndGet(v -> (v != null) ? v.add(item.getAmount()) : item.getAmount());
             item.setBalance(balance.get());
         });
 
