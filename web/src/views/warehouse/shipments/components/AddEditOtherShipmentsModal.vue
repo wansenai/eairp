@@ -167,7 +167,7 @@ import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import {CustomerResp} from "@/api/basic/model/customerModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-import {getDefaultWarehouse, getWarehouseList} from "@/api/basic/warehouse";
+import {getWarehouseList} from "@/api/basic/warehouse";
 import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue";
 import CustomerModal from "@/views/basic/customer/components/CustomerModal.vue";
@@ -411,6 +411,16 @@ export default defineComponent({
           return;
         }
       }
+      // 库存校验
+      const tableData = table.getTableData().tableData
+      const isStockNotEnough = tableData.some(item => item.productNumber > item.stock)
+      if(isStockNotEnough) {
+        const tableDataNotEnough = tableData.filter(item => item.productNumber > item.stock)
+        const tableDataNotEnoughBarCode = tableDataNotEnough.map(item => item.barCode)
+        const tableDataNotEnoughBarCodeStr = tableDataNotEnoughBarCode.join(",")
+        createMessage.info("条码: "+tableDataNotEnoughBarCodeStr +"商品库存不足，请检查库存数量")
+        return;
+      }
 
       const files :any = [];
       if (fileList && fileList.value) {
@@ -577,8 +587,6 @@ export default defineComponent({
                   productUnit: shipmentsData.productUnit,
                   stock: shipmentsData.stock,
                   productNumber: 1,
-                  amount: shipmentsData.retailPrice,
-                  unitPrice: shipmentsData.retailPrice,
                 };
                 table.insert(tableData)
               }
@@ -594,9 +602,8 @@ export default defineComponent({
       const table = xGrid.value
       if(table) {
         data = data.map(item => {
-          item.unitPrice = item.retailPrice
+          item.warehouseId = otherShipmentFormState.warehouseId
           item.productNumber = 1
-          item.amount = item.retailPrice * item.productNumber
           return item
         })
         table.insert(data)

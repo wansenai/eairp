@@ -112,7 +112,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } }, },
         {
             field: 'unitPrice',
-            title: '单价', width:90,
+            title: '采购价', width:90,
             formatter ({ cellValue }) {
                 return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },

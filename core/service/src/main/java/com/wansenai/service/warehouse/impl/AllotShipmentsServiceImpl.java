@@ -262,8 +262,6 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                             .productStandard(product.getProductStandard())
                             .productModel(product.getProductModel())
                             .stock(product.getStock())
-                            .unitPrice(warehouseReceiptSub.getUnitPrice())
-                            .amount(warehouseReceiptSub.getTotalAmount())
                             .productNumber(warehouseReceiptSub.getProductNumber())
                             .remark(warehouseReceiptSub.getRemark())
                             .build();
@@ -287,12 +285,9 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         var isUpdate = allotReceiptDTO.getId() != null;
 
         var totalProductNumber = 0;
-        var totalAmount = BigDecimal.ZERO;
-
         if(!allotReceiptDTO.getTableData().isEmpty()) {
             for (AllotStockBO stockBO : allotReceiptDTO.getTableData()) {
                 totalProductNumber += stockBO.getProductNumber();
-                totalAmount = totalAmount.add(stockBO.getAmount());
             }
         }
 
@@ -326,7 +321,6 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                     .eq(WarehouseReceiptMain::getId, allotReceiptDTO.getId())
                     .set(allotReceiptDTO.getStatus() != null, WarehouseReceiptMain::getStatus, allotReceiptDTO.getStatus())
                     .set(WarehouseReceiptMain::getTotalProductNumber, totalProductNumber)
-                    .set(WarehouseReceiptMain::getTotalAmount, totalAmount)
                     .set(StringUtils.hasLength(allotReceiptDTO.getReceiptDate()), WarehouseReceiptMain::getReceiptDate, allotReceiptDTO.getReceiptDate())
                     .set(StringUtils.hasLength(allotReceiptDTO.getRemark()), WarehouseReceiptMain::getRemark, allotReceiptDTO.getRemark())
                     .set(StringUtils.hasLength(fileIds), WarehouseReceiptMain::getFileId, fileIds)
@@ -348,8 +342,6 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                             .otherWarehouseId(item.getOtherWarehouseId())
                             .productBarcode(item.getBarCode())
                             .productNumber(item.getProductNumber())
-                            .unitPrice(item.getUnitPrice())
-                            .totalAmount(item.getAmount())
                             .remark(item.getRemark())
                             .createBy(userId)
                             .createTime(LocalDateTime.now())
@@ -392,8 +384,6 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                             .otherWarehouseId(item.getOtherWarehouseId())
                             .productBarcode(item.getBarCode())
                             .productNumber(item.getProductNumber())
-                            .unitPrice(item.getUnitPrice())
-                            .totalAmount(item.getAmount())
                             .remark(item.getRemark())
                             .createBy(userId)
                             .createTime(LocalDateTime.now())
@@ -408,7 +398,6 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                     .type("调拨出库")
                     .initReceiptNumber(allotReceiptDTO.getReceiptNumber())
                     .receiptDate(TimeUtil.parse(allotReceiptDTO.getReceiptDate()))
-                    .totalAmount(totalAmount)
                     .totalProductNumber(totalProductNumber)
                     .remark(allotReceiptDTO.getRemark())
                     .fileId(fileIds)
@@ -499,8 +488,6 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                                     .productUnit(item.getProductUnit())
                                     .stock(item.getStock())
                                     .productNumber(item.getProductNumber())
-                                    .unitPrice(item.getUnitPrice())
-                                    .amount(item.getAmount())
                                     .remark(item.getRemark())
                                     .build();
                             subData.add(allotStockBo);

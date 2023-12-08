@@ -240,7 +240,7 @@ import {
   RowVO,
   xGrid,
   tableData,
-  gridOptions, getTaxTotalPrice, formState,
+  gridOptions, getTaxTotalPrice,
 } from '/src/views/sales/model/addEditModel';
 import {getCustomerList} from "@/api/basic/customer";
 import {CustomerResp} from "@/api/basic/model/customerModel";
@@ -255,9 +255,8 @@ import {useMessage} from "@/hooks/web/useMessage";
 import { addOrUpdateSaleRefund, getSaleRefundDetail} from "@/api/sale/refund"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
 import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
-import {getDefaultWarehouse, getWarehouseList} from "@/api/basic/warehouse";
+import {getWarehouseList} from "@/api/basic/warehouse";
 import {AddOrUpdateReceiptSaleRefundReq, SaleRefundTableData} from "@/api/sale/model/refundModel";
-import {FileData} from '/@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
@@ -418,9 +417,10 @@ export default defineComponent({
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
-              selectRow.row.unitPrice = product.unitPrice
-              selectRow.row.taxTotalPrice = product.unitPrice
-              selectRow.row.amount = product.unitPrice
+              selectRow.row.unitPrice = product.salePrice
+              selectRow.row.taxTotalPrice = product.salePrice
+              selectRow.row.amount = product.salePrice
+              selectRow.row.taxRate = 0
               selectRow.row.productNumber = 1
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
@@ -586,9 +586,9 @@ export default defineComponent({
                   productUnit: sale.productUnit,
                   stock: sale.stock,
                   productNumber: 1,
-                  amount: sale.retailPrice,
-                  unitPrice: sale.retailPrice,
-                  taxTotalPrice: sale.retailPrice,
+                  amount: sale.salePrice,
+                  unitPrice: sale.salePrice,
+                  taxTotalPrice: sale.salePrice,
                   taxRate: 0,
                   taxAmount: 0,
                 };
@@ -804,11 +804,10 @@ export default defineComponent({
     function handleCheckSuccess(data) {
       const table = xGrid.value
       if(table) {
-        // 给表格的unitPrice赋值item的retailPrice
         data = data.map(item => {
-          item.unitPrice = item.retailPrice
+          item.unitPrice = item.salePrice
           item.productNumber = 1
-          item.amount = item.retailPrice * item.productNumber
+          item.amount = item.salePrice * item.productNumber
           item.taxRate = 0
           item.taxAmount = 0
           item.taxTotalPrice = item.amount + item.taxRate
@@ -926,11 +925,10 @@ export default defineComponent({
     }
 
     watch(getTaxTotalPrice, (newValue, oldValue) => {
-      if(oldValue !== '￥0.00') {
         saleRefundFormState.refundLastAmount = newValue
         saleRefundFormState.thisRefundAmount = newValue
         discountAmountChange()
-      }
+
     });
 
     function discountRateChange() {

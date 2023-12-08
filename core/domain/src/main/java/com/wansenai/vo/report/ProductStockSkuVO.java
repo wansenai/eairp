@@ -68,6 +68,15 @@ public class ProductStockSkuVO {
     private BigDecimal unitPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal retailPrice;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal salePrice;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal purchasePrice;
+
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
     @ExcelExport(value = "初始库存")
     private BigDecimal initialStock;
 

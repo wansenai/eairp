@@ -238,7 +238,7 @@ import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
 import MultipleAccountsModal from "@/views/basic/settlement-account/components/MultipleAccountsModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
-import {getDefaultWarehouse} from "@/api/basic/warehouse";
+import {getWarehouseList} from "@/api/basic/warehouse";
 const VNodes = {
   props: {
     vnodes: {
@@ -337,14 +337,14 @@ export default defineComponent({
 
     function openAddEditModal(id: string | undefined) {
       open.value = true
-     loadCustomerList();
-      loadDefaultWarehouse();
-     loadSalePersonalList();
-     loadAccountList();
-     loadProductSku();
+      loadCustomerList();
+      loadWarehouseList();
+      loadSalePersonalList();
+      loadAccountList();
+      loadProductSku();
       if (id) {
         title.value = '编辑-销售订单'
-        loadRefundDetail(id);
+        loadOrderDetail(id);
       } else {
         title.value = '新增-销售订单'
         loadGenerateId();
@@ -392,11 +392,16 @@ export default defineComponent({
       })
     }
 
-    function loadDefaultWarehouse() {
-      getDefaultWarehouse().then(res => {
+    function loadWarehouseList() {
+      getWarehouseList().then(res => {
         const data = res.data
         if(data) {
-          formState.warehouseId = data.id
+          const defaultWarehouse = res.data.find(item => item.isDefault === 1)
+          if(defaultWarehouse) {
+            formState.warehouseId = defaultWarehouse.id
+          } else {
+            formState.warehouseId = res.data[0].id
+          }
         }
       })
     }
@@ -430,10 +435,11 @@ export default defineComponent({
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
-              selectRow.row.unitPrice = product.unitPrice
-              selectRow.row.taxTotalPrice = product.unitPrice
-              selectRow.row.amount = product.unitPrice
+              selectRow.row.unitPrice = product.salePrice
+              selectRow.row.taxTotalPrice = product.salePrice
+              selectRow.row.amount = product.salePrice
               selectRow.row.productNumber = 1
+              selectRow.row.taxRate = 0
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
               createMessage.warn("该条码查询不到商品信息")
@@ -443,7 +449,7 @@ export default defineComponent({
       }
     }
 
-    async function loadRefundDetail(id) {
+    async function loadOrderDetail(id) {
       clearData();
       const result = await getSaleOrderDetail(id)
       if(result) {
@@ -553,8 +559,6 @@ export default defineComponent({
                 };
                 table.insert(tableData)
               }
-              // 调用单价改变方法进行一次计算
-              // unitPriceChange(table)
               // 更新数据
               formState.discountLastAmount = getTaxTotalPrice.value
             }
@@ -748,9 +752,9 @@ export default defineComponent({
       if(table) {
         // 给表格的unitPrice赋值item的retailPrice
         data = data.map(item => {
-          item.unitPrice = item.retailPrice
+          item.unitPrice = item.salePrice
           item.productNumber = 1
-          item.amount = item.retailPrice * item.productNumber
+          item.amount = item.salePrice * item.productNumber
           item.taxRate = 0
           item.taxAmount = 0
           item.taxTotalPrice = item.amount + item.taxRate

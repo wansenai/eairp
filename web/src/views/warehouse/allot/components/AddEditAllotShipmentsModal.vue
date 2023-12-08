@@ -66,13 +66,7 @@
                   <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
-                  <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
-                </template>
-                <template #price_edit="{ row }">
-                  <vxe-input v-model="row.unitPrice" @change="unitPriceChange"></vxe-input>
-                </template>
-                <template #amount_edit="{ row }">
-                  <vxe-input v-model="row.amount"  @change="amountChange"></vxe-input>
+                  <vxe-input v-model="row.productNumber" ></vxe-input>
                 </template>
               </vxe-grid>
             </div>
@@ -302,8 +296,6 @@ export default defineComponent({
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
-              selectRow.row.unitPrice = product.unitPrice
-              selectRow.row.amount = product.unitPrice
               selectRow.row.productNumber = 1
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
@@ -354,8 +346,6 @@ export default defineComponent({
               stock: item.stock,
               productUnit: item.productUnit,
               productNumber: item.productNumber,
-              unitPrice: item.unitPrice,
-              amount: item.amount,
               remark: item.remark,
             };
             table.insert(tableData)
@@ -386,6 +376,16 @@ export default defineComponent({
           createMessage.warn("调入方仓库不能为空")
           return;
         }
+      }
+
+      const tableData = table.getTableData().tableData
+      const isStockNotEnough = tableData.some(item => item.productNumber > item.stock)
+      if(isStockNotEnough) {
+        const tableDataNotEnough = tableData.filter(item => item.productNumber > item.stock)
+        const tableDataNotEnoughBarCode = tableDataNotEnough.map(item => item.barCode)
+        const tableDataNotEnoughBarCodeStr = tableDataNotEnoughBarCode.join(",")
+        createMessage.info("条码: "+tableDataNotEnoughBarCodeStr +"商品库存不足，请检查库存数量")
+        return;
       }
 
       const files :any = [];
@@ -425,8 +425,6 @@ export default defineComponent({
           stock: item.stock,
           productUnit: item.productUnit,
           productNumber: item.productNumber,
-          unitPrice: item.unitPrice,
-          amount: item.amount,
           remark: item.remark,
         }
         dataArray.push(data)
@@ -531,8 +529,6 @@ export default defineComponent({
               if (index > -1) {
                 const row = tableData[index]
                 row.productNumber = Number(row.productNumber) + 1
-                row.amount = row.productNumber * row.unitPrice
-                row.amount = Number(row.amount.toFixed(2))
                 table.updateData()
               } else {
                 const tableData : any = {
@@ -545,8 +541,6 @@ export default defineComponent({
                   productUnit: shipmentsData.productUnit,
                   stock: shipmentsData.stock,
                   productNumber: 1,
-                  amount: shipmentsData.retailPrice,
-                  unitPrice: shipmentsData.retailPrice,
                 };
                 table.insert(tableData)
               }
@@ -562,40 +556,18 @@ export default defineComponent({
       const table = xGrid.value
       if(table) {
         data = data.map(item => {
-          item.unitPrice = item.retailPrice
+          item.warehouseId = allotShipmentsFormState.warehouseId
           item.productNumber = 1
-          item.amount = item.retailPrice * item.productNumber
           return item
         })
         table.insert(data)
       }
     }
 
-
     function productModal() {
       openProductModal(true, {
         isUpdate: false,
       });
-    }
-
-    function productNumberChange() {
-      const table = xGrid.value
-      if(table) {
-        const data = table.getEditRecord().row;
-        data.amount = data.productNumber * data.unitPrice
-        data.amount = Number(data.amount.toFixed(2))
-        table.updateData()
-      }
-    }
-
-    function unitPriceChange() {
-      const table = xGrid.value
-      if(table) {
-        const data = table.getEditRecord().row;
-        data.amount = data.unitPrice * data.productNumber
-        data.amount = Number(data.amount.toFixed(2))
-        table.updateData()
-      }
     }
 
     function addRowData() {
@@ -604,16 +576,6 @@ export default defineComponent({
       const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
       if(table) {
         table.insert({warehouseId: warehouseId})
-      }
-    }
-
-    function amountChange() {
-      const table = xGrid.value
-      if(table) {
-        const data = table.getEditRecord().row;
-        data.unitPrice = data.amount / data.productNumber
-        data.unitPrice = Number(data.unitPrice.toFixed(2))
-        table.updateData()
       }
     }
 
@@ -655,9 +617,6 @@ export default defineComponent({
       selectProductModal,
       productModal,
       handleCheckSuccess,
-      productNumberChange,
-      unitPriceChange,
-      amountChange,
       addRowData,
       productList,
       productLabelList,

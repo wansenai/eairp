@@ -110,6 +110,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         {
             field: 'unitPrice',
             title: '单价', width:90,
+            titlePrefix: { content: '其他入/出库没有单价信息，若需要可自行修改' },
             formatter ({ cellValue }) {
                 return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
@@ -119,6 +120,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         {
             field: 'amount',
             title: '金额', width:90,
+            titlePrefix: { content: '其他入/出库没有金额信息，若需要可自行修改' },
             formatter ({ cellValue }) {
                 return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
