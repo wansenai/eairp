@@ -177,8 +177,8 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <MemberModal @register="memberModal"/>
-  <FinancialAccountModal @register="accountModal"/>
+  <MemberModal @register="memberModal" @success="handleMemberModalSuccess"/>
+  <FinancialAccountModal @register="accountModal" @success="handleAccountModalSuccess"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <LinkReceiptModal @register="linkReceiptModal" @handleReceiptSuccess="handleReceiptSuccess"/>
 </template>
@@ -542,6 +542,10 @@ export default defineComponent({
       });
     }
 
+    function handleMemberModalSuccess() {
+      loadMemberList();
+    }
+
     function onMemberChange(value) {
       payTypeList.value = []
       const member = memberList.value.find(item => item.id === value)
@@ -561,6 +565,10 @@ export default defineComponent({
       openAccountModal(true, {
         isUpdate: false,
       });
+    }
+
+    function handleAccountModalSuccess() {
+      loadAccountList();
     }
 
     async function handleOk(type: number) {
@@ -820,6 +828,8 @@ export default defineComponent({
       productList,
       productLabelList,
       selectBarCode,
+      handleMemberModalSuccess,
+      handleAccountModalSuccess
     };
   },
 });

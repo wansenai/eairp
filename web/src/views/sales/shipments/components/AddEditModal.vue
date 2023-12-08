@@ -142,7 +142,17 @@
                   <a-select v-model:value="saleShipmentsFormState.accountId"
                             placeholder="请选择结算账户"
                             :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
-                            @change="selectAccountChange"/>
+                            @change="selectAccountChange">
+                    <template #dropdownRender="{ menuNode: menu }">
+                      <v-nodes :vnodes="menu"/>
+                      <a-divider style="margin: 4px 0"/>
+                      <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
+                           @mousedown="e => e.preventDefault()" @click="addAccount">
+                        <plus-outlined/>
+                        新增结算账户
+                      </div>
+                    </template>
+                  </a-select>
                 </a-form-item>
               </a-col>
               <a-col style="margin-left: -25px">
@@ -199,8 +209,8 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <CustomerModal @register="customerModal"/>
-  <FinancialAccountModal @register="accountModal"/>
+  <CustomerModal @register="customerModal" @success="handleCustomerModalSuccess"/>
+  <FinancialAccountModal @register="accountModal" @success="handleAccountModalSuccess"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
   <LinkReceiptModal @register="linkReceiptModal" @handleReceiptSuccess="handleReceiptSuccess"/>
@@ -467,10 +477,18 @@ export default defineComponent({
       })
     }
 
+    function handleAccountModalSuccess() {
+      loadAccountList();
+    }
+
     function loadCustomerList() {
       getCustomerList().then(res => {
         customerList.value = res.data
       })
+    }
+
+    function handleCustomerModalSuccess() {
+      loadCustomerList();
     }
 
     function loadSalePersonalList() {
@@ -1129,7 +1147,9 @@ export default defineComponent({
       handleReceiptSuccess,
       productList,
       productLabelList,
-      selectBarCode
+      selectBarCode,
+      handleCustomerModalSuccess,
+      handleAccountModalSuccess
     };
   },
 });

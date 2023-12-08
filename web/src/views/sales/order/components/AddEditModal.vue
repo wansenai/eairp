@@ -175,7 +175,7 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <CustomerModal @register="customerModal"/>
+  <CustomerModal @register="customerModal" @success="handleCustomerModalSuccess"/>
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
@@ -381,6 +381,10 @@ export default defineComponent({
       getCustomerList().then(res => {
         customerList.value = res.data
       })
+    }
+
+    function handleCustomerModalSuccess() {
+      loadCustomerList();
     }
 
     function loadSalePersonalList() {
@@ -984,7 +988,8 @@ export default defineComponent({
       handleAccountSuccess,
       productList,
       productLabelList,
-      selectBarCode
+      selectBarCode,
+      handleCustomerModalSuccess
     };
   },
 });

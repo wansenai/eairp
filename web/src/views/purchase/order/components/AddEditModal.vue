@@ -163,7 +163,7 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <SupplierModal @register="supplierModal"/>
+  <SupplierModal @register="supplierModal" @success="handleSupplierModalSuccess"/>
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
@@ -379,6 +379,10 @@ export default defineComponent({
       getSupplierList().then(res => {
         supplierList.value = res.data
       })
+    }
+
+    function handleSupplierModalSuccess() {
+      loadSupplierList();
     }
 
     function loadGenerateId() {
@@ -960,6 +964,7 @@ export default defineComponent({
       productList,
       productLabelList,
       selectBarCode,
+      handleSupplierModalSuccess
     };
   },
 });
