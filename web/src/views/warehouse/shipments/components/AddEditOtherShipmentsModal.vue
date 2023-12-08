@@ -31,7 +31,7 @@
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
-                  <div style="padding: 4px 8px; cursor: pointer;"
+                  <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addSupplier">
                     <plus-outlined/>
                     新增客户
@@ -148,7 +148,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   otherShipmentFormState,
@@ -172,7 +172,7 @@ import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue";
 import CustomerModal from "@/views/basic/customer/components/CustomerModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -182,7 +182,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -221,6 +221,7 @@ export default defineComponent({
     'vxe-button': VxeButton,
     'plus-outlined': PlusOutlined,
     'upload-outlined': UploadOutlined,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const [supplierModal, {openModal}] = useModal();

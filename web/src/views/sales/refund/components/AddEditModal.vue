@@ -34,7 +34,7 @@
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
-                  <div style="padding: 4px 8px; cursor: pointer;"
+                  <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addCustomer">
                     <plus-outlined/>
                     新增客户
@@ -143,7 +143,17 @@
                   <a-select v-model:value="saleRefundFormState.accountId"
                             placeholder="请选择退款账户"
                             :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
-                            @change="selectAccountChange"/>
+                            @change="selectAccountChange">
+                    <template #dropdownRender="{ menuNode: menu }">
+                      <v-nodes :vnodes="menu"/>
+                      <a-divider style="margin: 4px 0"/>
+                      <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
+                           @mousedown="e => e.preventDefault()" @click="addAccount">
+                        <plus-outlined/>
+                        新增结算账户
+                      </div>
+                    </template>
+                  </a-select>
                 </a-form-item>
               </a-col>
               <a-col style="margin-left: -25px">
@@ -199,8 +209,8 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <CustomerModal @register="customerModal"/>
-  <FinancialAccountModal @register="accountModal"/>
+  <CustomerModal @register="customerModal" @success="handleCustomerModalSuccess"/>
+  <FinancialAccountModal @register="accountModal" @success="handleAccountModalSuccess"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
   <LinkReceiptModal @register="linkReceiptModal" @handleReceiptSuccess="handleReceiptSuccess"/>
@@ -208,7 +218,7 @@
 
 <script lang="ts">
 import {defineComponent, ref, h, watch} from 'vue';
-import {AccountBookTwoTone, UploadOutlined} from '@ant-design/icons-vue';
+import {AccountBookTwoTone, PlusOutlined, UploadOutlined} from '@ant-design/icons-vue';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import weekday from "dayjs/plugin/weekday";
@@ -233,7 +243,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   saleRefundFormState,
@@ -264,7 +274,7 @@ import MultipleAccountsModal from "@/views/basic/settlement-account/components/M
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -274,7 +284,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -311,6 +321,8 @@ export default defineComponent({
     'vxe-table': VXETable,
     'vxe-grid': VxeGrid,
     'vxe-input': VxeInput,
+    'plus-outlined': PlusOutlined,
+    'a-divider': Divider,
     'vxe-button': VxeButton,
     'upload-outlined': UploadOutlined,
   },
@@ -455,10 +467,18 @@ export default defineComponent({
       })
     }
 
+    function handleAccountModalSuccess() {
+      loadAccountList();
+    }
+
     function loadCustomerList() {
       getCustomerList().then(res => {
         customerList.value = res.data
       })
+    }
+
+    function handleCustomerModalSuccess() {
+      loadCustomerList();
     }
 
     function loadSalePersonalList() {
@@ -1114,7 +1134,9 @@ export default defineComponent({
       handleReceiptSuccess,
       productList,
       productLabelList,
-      selectBarCode
+      selectBarCode,
+      handleCustomerModalSuccess,
+      handleAccountModalSuccess
     };
   },
 });

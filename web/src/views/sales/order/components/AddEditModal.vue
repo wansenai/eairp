@@ -33,7 +33,7 @@
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
-                  <div style="padding: 4px 8px; cursor: pointer;"
+                  <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addCustomer">
                     <plus-outlined/>
                     新增客户
@@ -175,7 +175,7 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <CustomerModal @register="customerModal"/>
+  <CustomerModal @register="customerModal" @success="handleCustomerModalSuccess"/>
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
@@ -183,7 +183,7 @@
 
 <script lang="ts">
 import {defineComponent, ref, h, watch} from 'vue';
-import {AccountBookTwoTone, UploadOutlined} from '@ant-design/icons-vue';
+import {AccountBookTwoTone, PlusOutlined, UploadOutlined} from '@ant-design/icons-vue';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import weekday from "dayjs/plugin/weekday";
@@ -208,7 +208,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   formState,
@@ -239,7 +239,7 @@ import XEUtils from "xe-utils";
 import MultipleAccountsModal from "@/views/basic/settlement-account/components/MultipleAccountsModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {getWarehouseList} from "@/api/basic/warehouse";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -249,7 +249,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -286,7 +286,9 @@ export default defineComponent({
     'vxe-grid': VxeGrid,
     'vxe-input': VxeInput,
     'vxe-button': VxeButton,
+    'plus-outlined': PlusOutlined,
     'upload-outlined': UploadOutlined,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const {createMessage} = useMessage();
@@ -379,6 +381,10 @@ export default defineComponent({
       getCustomerList().then(res => {
         customerList.value = res.data
       })
+    }
+
+    function handleCustomerModalSuccess() {
+      loadCustomerList();
     }
 
     function loadSalePersonalList() {
@@ -982,7 +988,8 @@ export default defineComponent({
       handleAccountSuccess,
       productList,
       productLabelList,
-      selectBarCode
+      selectBarCode,
+      handleCustomerModalSuccess
     };
   },
 });
