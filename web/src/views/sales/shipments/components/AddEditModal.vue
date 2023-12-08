@@ -208,7 +208,7 @@
 
 <script lang="ts">
 import {defineComponent, ref, h, watch} from 'vue';
-import {AccountBookTwoTone} from '@ant-design/icons-vue';
+import {AccountBookTwoTone, UploadOutlined} from '@ant-design/icons-vue';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import weekday from "dayjs/plugin/weekday";
@@ -312,7 +312,8 @@ export default defineComponent({
     'vxe-table': VXETable,
     'vxe-grid': VxeGrid,
     'vxe-input': VxeInput,
-    'vxe-button': VxeButton
+    'vxe-button': VxeButton,
+    'upload-outlined': UploadOutlined,
   },
   setup(_, context) {
     const {createMessage} = useMessage();
