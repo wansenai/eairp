@@ -20,7 +20,8 @@
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
     <a-spin :spinning="confirmLoading">
-      <a-form ref="formRef" :model="formState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
+      <a-form ref="formRef" :model="formState"
+              style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="formState.id" v-show="false"/>
@@ -34,18 +35,19 @@
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
-                  <div style="padding: 4px 8px; cursor: pointer;"
-                       @mousedown="e => e.preventDefault()" @click="addMember">
-                    <plus-outlined/>
-                    新增会员
-                  </div>
+                    <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
+                         @mousedown="e => e.preventDefault()" @click="addMember">
+                      <plus-outlined/>
+                      新增会员
+                    </div>
                 </template>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="formState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
+              <a-date-picker v-model:value="formState.receiptDate" show-time placeholder="选择时间"
+                             format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
@@ -73,8 +75,11 @@
             <div class="table-operations">
               <vxe-grid ref='xGrid' v-bind="gridOptions">
                 <template #toolbar_buttons="{ row }">
-                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
-                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="formState.scanBarCode"
+                  <a-button v-if="showScanButton" type="primary" @click="scanEnter" style="margin-right: 10px">
+                    扫条码录入数据
+                  </a-button>
+                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码"
+                           style="width: 150px; margin-right: 10px" v-model:value="formState.scanBarCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
                   <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
                   <a-button @click="productModal" style="margin-right: 10px">批量添加出库商品</a-button>
@@ -88,7 +93,8 @@
                   <vxe-input v-model="row.amount"></vxe-input>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
+                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode"
+                              :options="productLabelList" clearable filterable></vxe-select>
                 </template>
               </vxe-grid>
             </div>
@@ -167,7 +173,7 @@
                       <template #dropdownRender="{ menuNode: menu }">
                         <v-nodes :vnodes="menu"/>
                         <a-divider style="margin: 4px 0"/>
-                        <div style="padding: 4px 8px; cursor: pointer;"
+                        <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                              @mousedown="e => e.preventDefault()" @click="addAccount">
                           <plus-outlined/>
                           新增结算账户
@@ -196,6 +202,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
+
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 import {
@@ -218,7 +225,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, MenuDivider, Divider,
 } from "ant-design-vue";
 import {
   formState,
@@ -239,13 +246,14 @@ import FinancialAccountModal from "@/views/basic/settlement-account/components/F
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
-import { addOrUpdateShipments, getShipmentsDetail} from "@/api/retail/shipments"
+import {addOrUpdateShipments, getShipmentsDetail} from "@/api/retail/shipments"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
 import {getProductSkuByBarCode} from "@/api/product/product";
 import XEUtils from "xe-utils";
 import {ProductExtendPriceResp, ProductStockSkuResp} from "@/api/product/model/productModel";
 import {AddOrUpdateShipmentsReq, ShipmentsData} from "@/api/retail/model/shipmentsModel";
-const VNodes = {
+
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -255,7 +263,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.locale('zh-cn');
 export default defineComponent({
   name: 'AddEditModal',
@@ -290,7 +298,8 @@ export default defineComponent({
     'vxe-table': VXETable,
     'vxe-grid': VxeGrid,
     'vxe-input': VxeInput,
-    'vxe-button': VxeButton
+    'vxe-button': VxeButton,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const {createMessage} = useMessage();
@@ -399,12 +408,12 @@ export default defineComponent({
     function selectBarCode() {
       const table = xGrid.value
       const selectRow = table?.getActiveRecord()
-      if(selectRow) {
+      if (selectRow) {
         const {columns} = gridOptions
         if (columns) {
           const barCodeColumn = selectRow.row.barCode
           const warehouseColumn = selectRow.row.warehouseId
-          if(barCodeColumn && warehouseColumn) {
+          if (barCodeColumn && warehouseColumn) {
             const product = productList.value.find(item => {
               return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
             });
@@ -427,50 +436,50 @@ export default defineComponent({
     }
 
     async function loadShipmentsDetail(id) {
-        clearData();
-        const result = await getShipmentsDetail(id)
-        if(result) {
-          const data = result.data
-          formState.id = id
-          formState.memberId = data.memberId
-          formState.receiptDate = dayjs(data.receiptDate);
-          formState.accountId = data.accountId
-          formState.receiptNumber = data.receiptNumber
-          formState.remark = data.remark
-          formState.paymentType = data.paymentType
-          // file
-          fileList.value = data.files.map(item => ({
-            id: item.id,
-            uid: item.uid,
-            name: item.fileName,
-            status: 'done',
-            url: item.fileUrl,
-            type: item.fileType,
-            size: item.fileSize,
-          }))
-          // table
-          const table = xGrid.value
-          if(table) {
-            data.tableData.forEach(item => {
-              const tableData : RowVO = {
-                warehouseId: item.warehouseId,
-                productId: item.productId,
-                barCode: item.barCode,
-                productName: item.productName,
-                productStandard: item.productStandard,
-                productUnit: item.productUnit,
-                stock: item.stock,
-                productNumber: item.productNumber,
-                amount: item.amount,
-                retailPrice: item.unitPrice,
-              };
-              table.insert(tableData)
-            })
-          }
-          receiptAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.receiptAmount), { digits: 2 })}`
-          collectAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.collectAmount), { digits: 2 })}`
-          backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.backAmount), { digits: 2 })}`
+      clearData();
+      const result = await getShipmentsDetail(id)
+      if (result) {
+        const data = result.data
+        formState.id = id
+        formState.memberId = data.memberId
+        formState.receiptDate = dayjs(data.receiptDate);
+        formState.accountId = data.accountId
+        formState.receiptNumber = data.receiptNumber
+        formState.remark = data.remark
+        formState.paymentType = data.paymentType
+        // file
+        fileList.value = data.files.map(item => ({
+          id: item.id,
+          uid: item.uid,
+          name: item.fileName,
+          status: 'done',
+          url: item.fileUrl,
+          type: item.fileType,
+          size: item.fileSize,
+        }))
+        // table
+        const table = xGrid.value
+        if (table) {
+          data.tableData.forEach(item => {
+            const tableData: RowVO = {
+              warehouseId: item.warehouseId,
+              productId: item.productId,
+              barCode: item.barCode,
+              productName: item.productName,
+              productStandard: item.productStandard,
+              productUnit: item.productUnit,
+              stock: item.stock,
+              productNumber: item.productNumber,
+              amount: item.amount,
+              retailPrice: item.unitPrice,
+            };
+            table.insert(tableData)
+          })
         }
+        receiptAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.receiptAmount), {digits: 2})}`
+        collectAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.collectAmount), {digits: 2})}`
+        backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.backAmount), {digits: 2})}`
+      }
     }
 
     function onChangePaymentAmount() {
@@ -479,7 +488,7 @@ export default defineComponent({
       const sumNumber = sum.replace(/,/g, '').replace(/￥/g, '')
       const collectNumber = collect.replace(/,/g, '').replace(/￥/g, '')
       const numberAmount = Number(collectNumber) - Number(sumNumber)
-      backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(numberAmount), { digits: 2 })}`
+      backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(numberAmount), {digits: 2})}`
     }
 
     function scanPressEnter() {
@@ -489,7 +498,7 @@ export default defineComponent({
         if (columns) {
           const {data} = res
           if (data) {
-            const productExtendPrice : ProductExtendPriceResp = data
+            const productExtendPrice: ProductExtendPriceResp = data
             const table = xGrid.value
             if (table) {
               //根据productExtendPrice.id判断表格中如果是同一个商品，数量加1 否则新增一行
@@ -561,7 +570,7 @@ export default defineComponent({
     }
 
     async function handleOk(type: number) {
-      const table:any = xGrid.value
+      const table: any = xGrid.value
       if (!formState.receiptDate) {
         createMessage.warn('请选择单据日期');
         return;
@@ -570,14 +579,14 @@ export default defineComponent({
         createMessage.warn('请选择收款账户');
         return;
       }
-      if(table) {
+      if (table) {
         const insertRecords = table.getInsertRecords()
-        if(insertRecords.length === 0) {
+        if (insertRecords.length === 0) {
           createMessage.warn("请添加一行数据")
           return;
         }
         const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
-        if(isBarCodeEmpty) {
+        if (isBarCodeEmpty) {
           createMessage.warn("请录入条码或者选择产品")
           return;
         }
@@ -585,11 +594,11 @@ export default defineComponent({
       // 库存校验
       const tableData = table.getTableData().tableData
       const isStockNotEnough = tableData.some(item => item.productNumber > item.stock)
-      if(isStockNotEnough) {
+      if (isStockNotEnough) {
         const tableDataNotEnough = tableData.filter(item => item.productNumber > item.stock)
         const tableDataNotEnoughBarCode = tableDataNotEnough.map(item => item.barCode)
         const tableDataNotEnoughBarCodeStr = tableDataNotEnoughBarCode.join(",")
-        createMessage.info("条码: "+tableDataNotEnoughBarCodeStr +"商品库存不足，请检查库存数量")
+        createMessage.info("条码: " + tableDataNotEnoughBarCodeStr + "商品库存不足，请检查库存数量")
         return;
       }
 
@@ -664,7 +673,7 @@ export default defineComponent({
       backAmount.value = '￥0.00'
       fileList.value = []
       const table = xGrid.value
-      if(table) {
+      if (table) {
         // 清空表格数据
         table.reloadData()
       }
@@ -680,7 +689,7 @@ export default defineComponent({
     }
 
     const uploadFiles = (options) => {
-      const { file, onSuccess, onError, onProgress } = options;
+      const {file, onSuccess, onError, onProgress} = options;
       const formData = new FormData();
       formData.append('files', file);
       // 调用 uploadOss 方法进行上传
@@ -706,7 +715,7 @@ export default defineComponent({
 
     function handleCheckSuccess(data) {
       const table = xGrid.value
-      if(table) {
+      if (table) {
         data.forEach(item => {
           item.productNumber = 1
         })
@@ -718,7 +727,7 @@ export default defineComponent({
       const table = xGrid.value
       const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
       const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
-      if(table) {
+      if (table) {
         table.insert({warehouseId: warehouseId})
       }
     }

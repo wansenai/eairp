@@ -34,7 +34,7 @@
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
-                  <div style="padding: 4px 8px; cursor: pointer;"
+                  <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addMember">
                     <plus-outlined/>
                     新增会员
@@ -161,7 +161,7 @@
                       <template #dropdownRender="{ menuNode: menu }">
                         <v-nodes :vnodes="menu"/>
                         <a-divider style="margin: 4px 0"/>
-                        <div style="padding: 4px 8px; cursor: pointer;"
+                        <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                              @mousedown="e => e.preventDefault()" @click="addAccount">
                           <plus-outlined/>
                           新增结算账户
@@ -210,7 +210,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   formState,
@@ -239,7 +239,7 @@ import {ProductExtendPriceResp, ProductStockSkuResp} from "@/api/product/model/p
 import {AddOrUpdateRefundReq} from "@/api/retail/model/refundModel";
 import {FileData, ShipmentsData} from "@/api/retail/model/shipmentsModel";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -249,7 +249,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -287,7 +287,8 @@ export default defineComponent({
     'vxe-table': VXETable,
     'vxe-grid': VxeGrid,
     'vxe-input': VxeInput,
-    'vxe-button': VxeButton
+    'vxe-button': VxeButton,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const {createMessage} = useMessage();

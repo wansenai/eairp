@@ -31,7 +31,7 @@
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
-                  <div style="padding: 4px 8px; cursor: pointer;"
+                  <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addSupplier">
                     <plus-outlined/>
                     新增供应商
@@ -218,7 +218,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   purchaseRefundFormState,
@@ -249,7 +249,7 @@ import {addSupplier, getSupplierList} from "@/api/basic/supplier";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -259,7 +259,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -300,6 +300,7 @@ export default defineComponent({
     'vxe-button': VxeButton,
     'plus-outlined': PlusOutlined,
     'upload-outlined': UploadOutlined,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const {createMessage} = useMessage();
