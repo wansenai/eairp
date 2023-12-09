@@ -2,7 +2,7 @@
     <BasicModal v-bind="$attrs" @register="registerModal">
       <BasicTable @register="registerTable">
         <template #toolbar>
-          <a-button type="primary" @click=""> 导出</a-button>
+          <a-button type="primary" @click="exportTable"> 导出</a-button>
         </template>
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'receiptNumber'">
@@ -29,7 +29,7 @@ import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {BasicModal, useModal, useModalInner} from "@/components/Modal";
 import {searchStockFlowSchema, stockFlowColumns} from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getProductStockFlow} from "@/api/report/report";
+import {getProductStockFlow, exportStockFlow} from "@/api/report/report";
 import ViewSaleOrderModal from "@/views/sales/order/components/ViewSaleOrderModal.vue";
 import ViewPurchaseOrderModal from "@/views/purchase/order/components/ViewOrderModal.vue";
 import ViewShipmentModal from "@/views/retail/shipments/components/ViewShipmentModal.vue";
@@ -38,6 +38,8 @@ import ViewPurchaseStorageModal from "@/views/purchase/storage/components/ViewSt
 import ViewPurchaseRefundModal from "@/views/purchase/refund/components/ViewRefundModal.vue";
 import ViewRefundModal from "@/views/retail/refund/components/ViewRefundModal.vue";
 import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundModal.vue";
+import {getTimestamp} from "@/utils/dateUtil";
+import {useMessage} from "@/hooks/web/useMessage";
 
 export default defineComponent({
   name: 'ProductStockModal',
@@ -49,6 +51,7 @@ export default defineComponent({
     ViewSaleShipmentsModal,
     ViewShipmentModal, ViewPurchaseOrderModal, ViewSaleOrderModal, BasicModal, Tag, TableAction, BasicTable},
   setup() {
+    const { createMessage } = useMessage();
     const productId = ref();
     const warehouseId = ref();
     const productBarcode = ref();
@@ -67,7 +70,7 @@ export default defineComponent({
       productBarcode.value = data.productBarcode;
     });
 
-    const [registerTable, {reload}] = useTable({
+    const [registerTable, {reload, getDataSource, getForm}] = useTable({
       api: getProductStockFlow,
       rowKey: 'id',
       columns: stockFlowColumns,
@@ -133,6 +136,29 @@ export default defineComponent({
       reload();
     }
 
+    function exportTable() {
+      if (getDataSource() === undefined || getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      data.productId = productId.value;
+      data.warehouseId = warehouseId.value;
+      data.productBarcode = productBarcode.value;
+      exportStockFlow(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "库存流水明细数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
+    }
+
     return {
       registerTable,
       registerModal,
@@ -146,7 +172,8 @@ export default defineComponent({
       handleSaleRefundModal,
       handlePurchaseOrderModal,
       handlePurchaseStorageModal,
-      handlePurchaseRefundModal
+      handlePurchaseRefundModal,
+      exportTable
     }
   }
 })
