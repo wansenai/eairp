@@ -31,6 +31,8 @@ export default defineComponent({
   setup() {
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
+    const printShipmentsNumber = ref(0);
+    const printShipmentsAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '出库汇总报表',
       api: getShipmentsSummary,
@@ -53,19 +55,9 @@ export default defineComponent({
     function handleSummary(tableData: Recordable[]) {
       const shipmentsNumber = tableData.reduce((prev, next) => prev + next.shipmentsNumber, 0);
       const shipmentsAmount = tableData.reduce((prev, next) => prev + next.shipmentsAmount, 0);
+      printShipmentsNumber.value = shipmentsNumber;
+      printShipmentsAmount.value = shipmentsAmount;
       printTableData.value = tableData;
-      printTableData.value.push({
-        shipmentsNumber: shipmentsNumber,
-        shipmentsAmount: `￥${XEUtils.commafy(XEUtils.toNumber(shipmentsAmount), { digits: 2 })}`,
-        productBarcode: '合计',
-        warehouseName: '',
-        productName: '',
-        productCategoryName: '',
-        productStandard: '',
-        productModel: '',
-        productUnit: '',
-        createTime: ''
-      });
       return [
         {
           _index: '合计',
@@ -103,6 +95,18 @@ export default defineComponent({
     }
 
     function primaryPrint() {
+      printTableData.value.push({
+        shipmentsNumber: printShipmentsNumber.value,
+        shipmentsAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printShipmentsAmount.value), { digits: 2 })}`,
+        productBarcode: '合计',
+        warehouseName: '',
+        productName: '',
+        productCategoryName: '',
+        productStandard: '',
+        productModel: '',
+        productUnit: '',
+        createTime: ''
+      });
       printJS({
         documentTitle: "EAIRP (出库汇总)",
         properties: shipmentsSummaryStatisticsColumns.map(item => {
@@ -113,6 +117,7 @@ export default defineComponent({
         gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
         type: 'json',
       });
+      printTableData.value.pop();
     }
 
     return {

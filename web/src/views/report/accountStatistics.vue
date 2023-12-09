@@ -38,6 +38,9 @@ export default defineComponent({
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
     const [registerModal, {openModal}] = useModal();
+    const printInitialAmount = ref(0);
+    const printThisMonthChangeAmount = ref(0);
+    const printCurrentAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '账户统计报表',
       api: getAccountStatistics,
@@ -62,14 +65,10 @@ export default defineComponent({
       const initialAmount = tableData.reduce((prev, next) => prev + next.initialAmount, 0);
       const thisMonthChangeAmount = tableData.reduce((prev, next) => prev + next.thisMonthChangeAmount, 0);
       const currentAmount = tableData.reduce((prev, next) => prev + next.currentAmount, 0);
+      printInitialAmount.value = initialAmount;
+      printThisMonthChangeAmount.value = thisMonthChangeAmount;
+      printCurrentAmount.value = currentAmount;
       printTableData.value = tableData;
-      printTableData.value.push({
-        accountName: '合计',
-        accountNumber: '',
-        initialAmount: `￥${XEUtils.commafy(XEUtils.toNumber(initialAmount), { digits: 2 })}`,
-        thisMonthChangeAmount: `￥${XEUtils.commafy(XEUtils.toNumber(thisMonthChangeAmount), { digits: 2 })}`,
-        currentAmount: `￥${XEUtils.commafy(XEUtils.toNumber(currentAmount), { digits: 2 })}`
-      });
       return [
         {
           _index: '合计',
@@ -114,6 +113,13 @@ export default defineComponent({
 
     function primaryPrint() {
       const printColumns = accountStatisticsColumns.filter(item => item.dataIndex !== 'accountId');
+      printTableData.value.push({
+        accountName: '合计',
+        accountNumber: '',
+        initialAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printInitialAmount.value), { digits: 2 })}`,
+        thisMonthChangeAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printThisMonthChangeAmount.value), { digits: 2 })}`,
+        currentAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printCurrentAmount.value), { digits: 2 })}`
+      });
       printJS({
         documentTitle: "EAIRP (账户统计-详情)",
         properties: printColumns.map(item => {
@@ -124,6 +130,7 @@ export default defineComponent({
         gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
         type: 'json',
       });
+      printTableData.value.pop();
     }
 
     return {

@@ -31,6 +31,8 @@ export default defineComponent({
   setup() {
     const printTableData = ref<any[]>([]);
     const {createMessage} = useMessage();
+    const printStorageNumber = ref(0);
+    const printStorageAmount = ref(0);
     const [registerTable, {reload, getForm, getDataSource}] = useTable({
       title: '入库汇总报表',
       api: getStorageSummary,
@@ -53,19 +55,9 @@ export default defineComponent({
     function handleSummary(tableData: Recordable[]) {
       const storageNumber = tableData.reduce((prev, next) => prev + next.storageNumber, 0);
       const storageAmount = tableData.reduce((prev, next) => prev + next.storageAmount, 0);
+      printStorageNumber.value = storageNumber;
+      printStorageAmount.value = storageAmount;
       printTableData.value = tableData;
-      printTableData.value.push({
-        storageNumber: storageNumber,
-        storageAmount: `￥${XEUtils.commafy(XEUtils.toNumber(storageAmount), {digits: 2})}`,
-        productBarcode: '合计',
-        warehouseName: '',
-        productName: '',
-        productCategoryName: '',
-        productStandard: '',
-        productModel: '',
-        productUnit: '',
-        createTime: ''
-      });
       return [
         {
           _index: '合计',
@@ -104,6 +96,18 @@ export default defineComponent({
     }
 
     function primaryPrint() {
+      printTableData.value.push({
+        storageNumber: printStorageNumber.value,
+        storageAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printStorageAmount.value), {digits: 2})}`,
+        productBarcode: '合计',
+        warehouseName: '',
+        productName: '',
+        productCategoryName: '',
+        productStandard: '',
+        productModel: '',
+        productUnit: '',
+        createTime: ''
+      });
       printJS({
         documentTitle: "EAIRP (入库汇总)",
         properties: storageSummaryStatisticsColumns.map(item => {
@@ -114,6 +118,7 @@ export default defineComponent({
         gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
         type: 'json',
       });
+      printTableData.value.pop();
     }
 
     return {
