@@ -36,6 +36,9 @@ export default defineComponent({
     const [registerModal, {openModal}] = useModal();
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
+    const printTotalInitStock = ref(0);
+    const printTotalCurrentStock = ref(0);
+    const printTotalStockAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '商品库存报表',
       api: getProductStock,
@@ -61,24 +64,10 @@ export default defineComponent({
       const totalCurrentStock = tableData.reduce((prev, next) => prev + next.currentStock, 0);
       const totalStockAmount = tableData.reduce((prev, next) => prev + next.stockAmount, 0);
       // 将数据写入到printTableData里面
+      printTotalInitStock.value = totalInitStock;
+      printTotalCurrentStock.value = totalCurrentStock;
+      printTotalStockAmount.value = totalStockAmount;
       printTableData.value = tableData;
-      printTableData.value.push({
-        initialStock: totalInitStock,
-        currentStock: totalCurrentStock,
-        stockAmount: `￥${XEUtils.commafy(XEUtils.toNumber(totalStockAmount), { digits: 2 })}`,
-        productBarcode: '合计',
-        // 将其他字段写成空字符串 为了打印的时候不显示
-        warehouseName: '',
-        productName: '',
-        productCategoryName: '',
-        productStandard: '',
-        productModel: '',
-        productWeight: '',
-        productColor: '',
-        productUnit: '',
-        warehouseShelves: '',
-        unitPrice: ''
-      });
       return [
         {
           _index: '合计',
@@ -124,6 +113,24 @@ export default defineComponent({
     function primaryPrint() {
       const printColumns = productStockColumns.filter(item => item.dataIndex !== 'productId' && item.dataIndex !== 'warehouseId'
           && item.dataIndex !== 'id');
+      printTableData.value.push({
+        initialStock: printTotalInitStock.value,
+        currentStock: printTotalCurrentStock.value,
+        stockAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalStockAmount.value), { digits: 2 })}`,
+        productBarcode: '合计',
+        // 将其他字段写成空字符串 为了打印的时候不显示
+        warehouseName: '',
+        productName: '',
+        productCategoryName: '',
+        productStandard: '',
+        productModel: '',
+        productWeight: '',
+        productColor: '',
+        productUnit: '',
+        warehouseShelves: '',
+        unitPrice: ''
+      });
+
       printJS({
         documentTitle: "EAIRP (商品库存-详情)",
         properties: printColumns.map(item => {
@@ -134,6 +141,9 @@ export default defineComponent({
         gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
         type: 'json',
       });
+
+      // 移除最后一条数据
+      printTableData.value.pop();
     }
 
     return {

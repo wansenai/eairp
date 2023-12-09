@@ -37,6 +37,13 @@ export default defineComponent({
   setup() {
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
+    const printFirstQuarterPayment = ref(0);
+    const printSecondQuarterPayment = ref(0);
+    const printThirdQuarterPayment = ref(0);
+    const printFourthQuarterPayment = ref(0);
+    const printTotalPayment = ref(0);
+    const printTotalArrears = ref(0);
+    const printRemainingPaymentArrears = ref(0);
     const [handleRegister, {openModal}] = useModal();
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '供应商对账报表',
@@ -65,20 +72,14 @@ export default defineComponent({
       const totalPayment = tableData.reduce((prev, next) => prev + next.totalPayment, 0);
       const totalArrears = tableData.reduce((prev, next) => prev + next.totalArrears, 0);
       const remainingPaymentArrears = tableData.reduce((prev, next) => prev + next.remainingPaymentArrears, 0);
+      printFirstQuarterPayment.value = firstQuarterPayment;
+      printSecondQuarterPayment.value = secondQuarterPayment;
+      printThirdQuarterPayment.value = thirdQuarterPayment;
+      printFourthQuarterPayment.value = fourthQuarterPayment;
+      printTotalPayment.value = totalPayment;
+      printTotalArrears.value = totalArrears;
+      printRemainingPaymentArrears.value = remainingPaymentArrears;
       printTableData.value = tableData;
-      printTableData.value.push({
-        firstQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterPayment), { digits: 2 })}`,
-        secondQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterPayment), { digits: 2 })}`,
-        thirdQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterPayment), { digits: 2 })}`,
-        fourthQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(fourthQuarterPayment), { digits: 2 })}`,
-        totalPayment:`￥${XEUtils.commafy(XEUtils.toNumber(totalPayment), { digits: 2 })}`,
-        totalArrears: `￥${XEUtils.commafy(XEUtils.toNumber(totalArrears), { digits: 2 })}`,
-        remainingPaymentArrears: `￥${XEUtils.commafy(XEUtils.toNumber(remainingPaymentArrears), { digits: 2 })}`,
-        supplierName: '合计',
-        contactName: '',
-        contactPhone: '',
-        email: '',
-      });
       return [
         {
           _index: '合计',
@@ -127,6 +128,19 @@ export default defineComponent({
     }
 
     function primaryPrint() {
+      printTableData.value.push({
+        firstQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printFirstQuarterPayment.value), { digits: 2 })}`,
+        secondQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printSecondQuarterPayment.value), { digits: 2 })}`,
+        thirdQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printThirdQuarterPayment.value), { digits: 2 })}`,
+        fourthQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printFourthQuarterPayment.value), { digits: 2 })}`,
+        totalPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printTotalPayment.value), { digits: 2 })}`,
+        totalArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalArrears.value), { digits: 2 })}`,
+        remainingPaymentArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printRemainingPaymentArrears.value), { digits: 2 })}`,
+        supplierName: '合计',
+        contactName: '',
+        contactPhone: '',
+        email: '',
+      });
       const printColumns = supplierBillColumns.filter(item => item.dataIndex !== 'supplierId');
       printJS({
         documentTitle: "EAIRP (供应商对账)",
@@ -138,6 +152,7 @@ export default defineComponent({
         gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
         type: 'json',
       });
+      printTableData.value.pop();
     }
 
     return {

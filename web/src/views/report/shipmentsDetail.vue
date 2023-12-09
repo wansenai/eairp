@@ -46,6 +46,9 @@ export default defineComponent({
     const [handleRetailShipmentModal, {openModal: openRetailShipmentModal}] = useModal();
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
+    const printProductNumber = ref(0);
+    const printAmount = ref(0);
+    const printTaxAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '出库明细报表',
       api: getShipmentsDetail,
@@ -69,24 +72,10 @@ export default defineComponent({
       const productNumber = tableData.reduce((prev, next) => prev + next.productNumber, 0);
       const amount = tableData.reduce((prev, next) => prev + next.amount, 0);
       const taxAmount = tableData.reduce((prev, next) => prev + next.taxAmount, 0);
+      printProductNumber.value = productNumber;
+      printAmount.value = amount;
+      printTaxAmount.value = taxAmount;
       printTableData.value = tableData;
-      printTableData.value.push({
-        productNumber: productNumber,
-        amount: `￥${XEUtils.commafy(XEUtils.toNumber(amount), { digits: 2 })}`,
-        taxAmount: `￥${XEUtils.commafy(XEUtils.toNumber(taxAmount), { digits: 2 })}`,
-        receiptNumber: '合计',
-        type: '',
-        name: '',
-        productBarcode: '',
-        warehouseName: '',
-        productName: '',
-        productStandard: '',
-        productModel: '',
-        productUnit: '',
-        unitPrice: '',
-        taxRate: '',
-        createTime: ''
-      });
       return [
         {
           _index: '合计',
@@ -141,6 +130,23 @@ export default defineComponent({
     }
 
     function primaryPrint() {
+      printTableData.value.push({
+        productNumber: printProductNumber.value,
+        amount: `￥${XEUtils.commafy(XEUtils.toNumber(printAmount.value), { digits: 2 })}`,
+        taxAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printTaxAmount.value), { digits: 2 })}`,
+        receiptNumber: '合计',
+        type: '',
+        name: '',
+        productBarcode: '',
+        warehouseName: '',
+        productName: '',
+        productStandard: '',
+        productModel: '',
+        productUnit: '',
+        unitPrice: '',
+        taxRate: '',
+        createTime: ''
+      });
       printJS({
         documentTitle: "EAIRP (出库明细)",
         properties: shipmentsDetailStatisticsColumns.map(item => {
@@ -151,6 +157,7 @@ export default defineComponent({
         gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
         type: 'json',
       });
+      printTableData.value.pop();
     }
 
     return {

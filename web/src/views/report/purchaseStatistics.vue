@@ -28,6 +28,11 @@ export default defineComponent({
   setup() {
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
+    const printPurchaseNumber = ref(0);
+    const printPurchaseAmount = ref(0);
+    const printPurchaseRefundNumber = ref(0);
+    const printPurchaseRefundAmount = ref(0);
+    const printPurchaseLastAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '采购统计报表',
       api: getPurchaseStatistics,
@@ -53,21 +58,12 @@ export default defineComponent({
       const purchaseRefundNumber = tableData.reduce((prev, next) => prev + next.purchaseRefundNumber, 0);
       const purchaseRefundAmount = tableData.reduce((prev, next) => prev + next.purchaseRefundAmount, 0);
       const purchaseLastAmount = tableData.reduce((prev, next) => prev + next.purchaseLastAmount, 0);
+      printPurchaseNumber.value = purchaseNumber;
+      printPurchaseAmount.value = purchaseAmount;
+      printPurchaseRefundNumber.value = purchaseRefundNumber;
+      printPurchaseRefundAmount.value = purchaseRefundAmount;
+      printPurchaseLastAmount.value = purchaseLastAmount;
       printTableData.value = tableData;
-      printTableData.value.push({
-        purchaseNumber: purchaseNumber,
-        purchaseAmount: `￥${XEUtils.commafy(XEUtils.toNumber(purchaseAmount), { digits: 2 })}`,
-        purchaseRefundNumber: purchaseRefundNumber,
-        purchaseRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(purchaseRefundAmount), { digits: 2 })}`,
-        purchaseLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(purchaseLastAmount), { digits: 2 })}`,
-        productBarcode: '合计',
-        warehouseName: '',
-        productName: '',
-        productStandard: '',
-        productModel: '',
-        productExtendInfo: '',
-        productUnit: '',
-      });
       return [
         {
           _index: '合计',
@@ -108,6 +104,20 @@ export default defineComponent({
     }
 
     function primaryPrint() {
+      printTableData.value.push({
+        purchaseNumber: printPurchaseNumber.value,
+        purchaseAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printPurchaseAmount.value), { digits: 2 })}`,
+        purchaseRefundNumber: printPurchaseRefundNumber.value,
+        purchaseRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printPurchaseRefundAmount.value), { digits: 2 })}`,
+        purchaseLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printPurchaseLastAmount.value), { digits: 2 })}`,
+        productBarcode: '合计',
+        warehouseName: '',
+        productName: '',
+        productStandard: '',
+        productModel: '',
+        productExtendInfo: '',
+        productUnit: '',
+      });
       printJS({
         documentTitle: "EAIRP (采购统计-详情)",
         properties: purchaseStatisticsColumns.map(item => {
@@ -118,6 +128,7 @@ export default defineComponent({
         gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
         type: 'json',
       });
+      printTableData.value.pop();
     }
 
     return {

@@ -28,6 +28,11 @@ export default defineComponent({
   setup() {
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
+    const printSalesNumber = ref(0);
+    const printSalesAmount = ref(0);
+    const printSalesRefundNumber = ref(0);
+    const printSalesRefundAmount = ref(0);
+    const printSalesLastAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '销售统计报表',
       api: getSalesStatistics,
@@ -53,21 +58,12 @@ export default defineComponent({
       const salesRefundNumber = tableData.reduce((prev, next) => prev + next.salesRefundNumber, 0);
       const salesRefundAmount = tableData.reduce((prev, next) => prev + next.salesRefundAmount, 0);
       const salesLastAmount = tableData.reduce((prev, next) => prev + next.salesLastAmount, 0);
+      printSalesNumber.value = salesNumber;
+      printSalesAmount.value = salesAmount;
+      printSalesRefundNumber.value = salesRefundNumber;
+      printSalesRefundAmount.value = salesRefundAmount;
+      printSalesLastAmount.value = salesLastAmount;
       printTableData.value = tableData;
-      printTableData.value.push({
-        salesNumber: salesNumber,
-        salesAmount: `￥${XEUtils.commafy(XEUtils.toNumber(salesAmount), { digits: 2 })}`,
-        salesRefundNumber: salesRefundNumber,
-        salesRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(salesRefundAmount), { digits: 2 })}`,
-        salesLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(salesLastAmount), { digits: 2 })}`,
-        productBarcode: '合计',
-        warehouseName: '',
-        productName: '',
-        productStandard: '',
-        productModel: '',
-        productExtendInfo: '',
-        productUnit: '',
-      });
       return [
         {
           _index: '合计',
@@ -108,6 +104,20 @@ export default defineComponent({
     }
 
     function primaryPrint() {
+      printTableData.value.push({
+        salesNumber: printSalesNumber.value,
+        salesAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printSalesAmount.value), { digits: 2 })}`,
+        salesRefundNumber: printSalesRefundNumber.value,
+        salesRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printSalesRefundAmount.value), { digits: 2 })}`,
+        salesLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printSalesLastAmount.value), { digits: 2 })}`,
+        productBarcode: '合计',
+        warehouseName: '',
+        productName: '',
+        productStandard: '',
+        productModel: '',
+        productExtendInfo: '',
+        productUnit: '',
+      });
       printJS({
         documentTitle: "EAIRP (销售统计-详情)",
         properties: salesStatisticsColumns.map(item => {
@@ -118,6 +128,7 @@ export default defineComponent({
         gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
         type: 'json',
       });
+      printTableData.value.pop();
     }
 
     return {
