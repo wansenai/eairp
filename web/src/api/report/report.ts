@@ -61,6 +61,9 @@ enum API {
     ExportStorageSummary = '/report/storageSummary/export',
     ExportCustomerBill = '/report/customerBill/export',
     ExportSupplierBill = '/report/supplierBill/export',
+    ExportProductStockFlowData = '/report/productStockFlow/export',
+    ExportCustomerBillDetail = '/report/customerBillDetail/export',
+    ExportSupplierBillDetail = '/report/supplierBillDetail/export',
 }
 
 
@@ -319,6 +322,36 @@ export function exportSupplierBill(params: QuerySupplierBillReq) {
     return defHttp.get<BaseDataResp<Blob>>(
         {
             url: `${API.ExportSupplierBill}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportStockFlow(params: QueryProductStockFlowReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportProductStockFlowData}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportCustomerBillDetail(params: QueryCustomerBillDetailReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportCustomerBillDetail}`,
+            params,
+            responseType: "blob"
+        }
+    );
+}
+
+export function exportSupplierBillDetail(params: QuerySupplierBillDetailReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.ExportSupplierBillDetail}`,
             params,
             responseType: "blob"
         }

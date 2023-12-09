@@ -2,8 +2,8 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle">
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click=""> 导出</a-button>
-        <a-button @click=""> 打印</a-button>
+        <a-button type="primary" @click="exportTable"> 导出</a-button>
+        <a-button @click="primaryPrint"> 打印</a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'receiptNumber'">
@@ -21,13 +21,19 @@
 <script lang="ts">
 import {defineComponent, ref} from "vue";
 import {BasicTable, TableAction, useTable} from "@/components/Table";
-import {supplierBillDetailColumns, searchSupplierBillDetailSchema} from "@/views/report/report.data";
+import {
+  supplierBillDetailColumns,
+  searchSupplierBillDetailSchema,
+} from "@/views/report/report.data";
 import {Tag} from "ant-design-vue";
-import {getSupplierBillDetail} from "@/api/report/report";
+import {getSupplierBillDetail, exportSupplierBillDetail} from "@/api/report/report";
 import XEUtils from "xe-utils";
 import {BasicModal, useModal, useModalInner} from "@/components/Modal";
 import ViewPurchaseStorageModal from "@/views/purchase/storage/components/ViewStorageModal.vue";
 import ViewPurchaseRefundModal from "@/views/purchase/refund/components/ViewRefundModal.vue";
+import {useMessage} from "@/hooks/web/useMessage";
+import {getTimestamp} from "@/utils/dateUtil";
+import printJS from "print-js";
 
 export default defineComponent({
   name: 'SupplierBillDetailModal',
@@ -37,11 +43,13 @@ export default defineComponent({
     BasicModal,
     Tag, TableAction, BasicTable},
   setup() {
+    const { createMessage } = useMessage();
+    const printTableData = ref<any[]>([]);
     const getTitle = ref('供应商欠款详情');
     const supplierId = ref('');
     const [handlePurchaseStorageModal, {openModal: openPurchaseStorageModal}] = useModal();
     const [handlePurchaseRefundModal, {openModal: openPurchaseRefundModal}] = useModal();
-    const [registerTable, { reload }] = useTable({
+    const [registerTable, { reload, getForm, getDataSource }] = useTable({
       api: getSupplierBillDetail,
       beforeFetch: (data) => {
         data.supplierId = supplierId.value;
@@ -100,6 +108,52 @@ export default defineComponent({
       }
     }
 
+    function exportTable() {
+      if (getDataSource() === undefined || getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      data.supplierId = supplierId.value;
+      exportSupplierBillDetail(data).then(res => {
+        const file: any = res;
+        if (file.size > 0) {
+          const blob = new Blob([file]);
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = getTimestamp(new Date());
+          link.download = "供应商欠款明细数据" + timestamp + ".xlsx";
+          link.target = "_blank";
+          link.click();
+        }
+      });
+    }
+
+    function primaryPrint() {
+      printTableData.value = getDataSource();
+      printTableData.value.push({
+        receiptNumber: '合计',
+        supplierName: '',
+        productInfo: '',
+        receiptDate: '',
+        operator: '',
+        thisReceiptArrears:  `￥${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.thisReceiptArrears, 0)), { digits: 2 })}`,
+        prepaidArrears: `￥${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.prepaidArrears, 0)), { digits: 2 })}`,
+        paymentArrears: `￥${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.paymentArrears, 0)), { digits: 2 })}`,
+      });
+      printJS({
+        documentTitle: "EAIRP (供应商欠款明细)",
+        properties: supplierBillDetailColumns.map(item => {
+          return { field: item.dataIndex, displayName: item.title }
+        }),
+        printable: printTableData.value,
+        gridHeaderStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
+        gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
+        type: 'json',
+      });
+      printTableData.value.pop();
+    }
+
     return {
       getTitle,
       registerModal,
@@ -109,6 +163,8 @@ export default defineComponent({
       handleCancel,
       handlePurchaseStorageModal,
       handlePurchaseRefundModal,
+      exportTable,
+      primaryPrint
     }
   }
 })

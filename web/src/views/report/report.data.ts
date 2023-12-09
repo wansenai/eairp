@@ -1248,7 +1248,7 @@ export const customerBillDetailColumns: BasicColumn[] = [
     {
         title: '客户',
         dataIndex: 'customerName',
-        width: 90,
+        width: 120,
     },
     {
         title: '商品信息',
@@ -1268,17 +1268,17 @@ export const customerBillDetailColumns: BasicColumn[] = [
     {
         title: '本单欠款',
         dataIndex: 'thisReceiptArrears',
-        width: 80,
+        width: 65,
     },
     {
         title: '已收欠款',
         dataIndex: 'receivedArrears',
-        width: 80,
+        width: 65,
     },
     {
         title: '待收欠款',
         dataIndex: 'receivableArrears',
-        width: 80,
+        width: 65,
     },
 ]
 
@@ -1417,7 +1417,7 @@ export const supplierBillDetailColumns: BasicColumn[] = [
     {
         title: '供应商',
         dataIndex: 'supplierName',
-        width: 90,
+        width: 140,
     },
     {
         title: '商品信息',
@@ -1432,21 +1432,21 @@ export const supplierBillDetailColumns: BasicColumn[] = [
     {
         title: '操作员',
         dataIndex: 'operator',
-        width: 80,
+        width: 70,
     },
     {
         title: '本单欠款',
         dataIndex: 'thisReceiptArrears',
-        width: 80,
+        width: 65,
     },
     {
         title: '已付欠款',
         dataIndex: 'prepaidArrears',
-        width: 80,
+        width: 65,
     },
     {
         title: '待付欠款',
         dataIndex: 'paymentArrears',
-        width: 80,
+        width: 65,
     },
 ]
