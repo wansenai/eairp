@@ -15,6 +15,7 @@ package com.wansenai.vo.report;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.Builder;
 import lombok.Data;
 
@@ -25,23 +26,31 @@ import java.time.LocalDateTime;
 @Builder
 public class CustomerBillDetailVO {
 
+    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
+    @ExcelExport(value = "客户")
     private String customerName;
 
+    @ExcelExport(value = "商品信息")
     private String productInfo;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ExcelExport(value = "单据日期")
     private LocalDateTime receiptDate;
 
+    @ExcelExport(value = "操作员")
     private String operator;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "本单欠款")
     private BigDecimal thisReceiptArrears;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "已收欠款")
     private BigDecimal receivedArrears;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "待收欠款")
     private BigDecimal receivableArrears;
 }
