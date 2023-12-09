@@ -117,7 +117,7 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
                              data-title="优惠率">
-                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" suffix="%"
+                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" addon-after="%"
                                   v-model:value="purchaseStorageFormState.paymentRate"/>
                 </a-form-item>
               </a-col>
@@ -984,15 +984,17 @@ export default defineComponent({
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
       const discountAmount = purchaseStorageFormState.paymentAmount
       const otherAmount = purchaseStorageFormState.otherAmount
-      const discountRate = discountAmount / discountLastAmount * 100
       const lastAmount = Number((discountLastAmount - discountAmount));
-
       purchaseStorageFormState.thisArrearsAmount = 0
-      purchaseStorageFormState.paymentRate = Number(discountRate.toFixed(2))
       purchaseStorageFormState.paymentAmount = Number(discountAmount.toFixed(2))
       purchaseStorageFormState.paymentLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
       purchaseStorageFormState.thisPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), {digits: 2})}`
-
+      if (discountLastAmount) {
+        const discountRate = discountAmount / discountLastAmount * 100
+        purchaseStorageFormState.paymentRate = Number(discountRate.toFixed(2))
+      } else {
+        purchaseStorageFormState.paymentRate = 0;
+      }
     }
 
     function otherAmountChange() {

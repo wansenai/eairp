@@ -109,7 +109,7 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
                              data-title="优惠率">
-                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" suffix="%" v-model:value="purchaseRefundFormState.refundOfferRate"/>
+                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" addon-after="%" v-model:value="purchaseRefundFormState.refundOfferRate"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
@@ -988,15 +988,17 @@ export default defineComponent({
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
       const discountAmount = purchaseRefundFormState.refundOfferAmount
       const otherAmount = purchaseRefundFormState.otherAmount
-      const discountRate = discountAmount / discountLastAmount * 100
       const lastAmount = Number((discountLastAmount - discountAmount));
-
       purchaseRefundFormState.thisArrearsAmount = 0
-      purchaseRefundFormState.refundOfferRate = Number(discountRate.toFixed(2))
       purchaseRefundFormState.refundOfferAmount = Number(discountAmount.toFixed(2))
       purchaseRefundFormState.refundLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
       purchaseRefundFormState.thisRefundAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
-
+      if (discountLastAmount) {
+        const discountRate = discountAmount / discountLastAmount * 100
+        purchaseRefundFormState.refundOfferRate = Number(discountRate.toFixed(2))
+      } else {
+        purchaseRefundFormState.refundOfferRate = 0
+      }
     }
 
     function otherAmountChange() {

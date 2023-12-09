@@ -112,7 +112,7 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
                              data-title="优惠率">
-                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" suffix="%" v-model:value="saleShipmentsFormState.collectOfferRate"/>
+                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" addon-after="%" v-model:value="saleShipmentsFormState.collectOfferRate"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
@@ -986,15 +986,17 @@ export default defineComponent({
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
       const discountAmount = saleShipmentsFormState.collectOfferAmount
       const otherAmount = saleShipmentsFormState.otherAmount
-      const discountRate = discountAmount / discountLastAmount * 100
       const lastAmount = Number((discountLastAmount - discountAmount));
-
       saleShipmentsFormState.thisArrearsAmount = 0
-      saleShipmentsFormState.collectOfferRate = Number(discountRate.toFixed(2))
       saleShipmentsFormState.collectOfferAmount = Number(discountAmount.toFixed(2))
       saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
       saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
-
+      if (discountLastAmount) {
+        const discountRate = discountAmount / discountLastAmount * 100
+        saleShipmentsFormState.collectOfferRate = Number(discountRate.toFixed(2))
+      } else {
+        saleShipmentsFormState.collectOfferRate = 0
+      }
     }
 
     function otherAmountChange() {
