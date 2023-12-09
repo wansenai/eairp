@@ -178,4 +178,19 @@ public class ReportController {
     public void exportSupplierBillExcel(@ModelAttribute QuerySupplierBillDTO querySupplierBillDTO, HttpServletResponse response) throws IOException {
         receiptService.exportSupplierBillExcel(querySupplierBillDTO, response);
     }
+
+    @GetMapping("/productStockFlow/export")
+    public void exportProductStockFlowExcel(@ModelAttribute QueryStockFlowDTO queryStockFlowDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportProductStockFlowExcel(queryStockFlowDTO, response);
+    }
+
+    @GetMapping("/customerBillDetail/export")
+    public void exportCustomerBillDetailExcel(@ModelAttribute QueryCustomerBillDetailDTO queryCustomerBillDetailDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportCustomerBillDetailExcel(queryCustomerBillDetailDTO, response);
+    }
+
+    @GetMapping("/supplierBillDetail/export")
+    public void exportSupplierBillDetailExcel(@ModelAttribute QuerySupplierBillDetailDTO querySupplierBillDetailDTO, HttpServletResponse response) throws IOException {
+        receiptService.exportSupplierBillDetailExcel(querySupplierBillDetailDTO, response);
+    }
 }
