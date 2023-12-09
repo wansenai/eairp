@@ -114,7 +114,7 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
                              data-title="优惠率">
-                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" suffix="%" v-model:value="formState.discountRate"/>
+                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" addon-after="%" v-model:value="formState.discountRate"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
@@ -896,9 +896,13 @@ export default defineComponent({
       const price = getTaxTotalPrice.value;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
       const discountAmount = formState.discountAmount
-      const discountRate = discountAmount / discountLastAmount * 100
-      formState.discountRate = Number(discountRate.toFixed(2))
       formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`
+      if (discountLastAmount) {
+        const discountRate = discountAmount / discountLastAmount * 100
+        formState.discountRate = Number(discountRate.toFixed(2))
+      } else {
+        formState.discountRate = 0
+      }
     }
 
     const selectAccountChange = (value: number) => {
