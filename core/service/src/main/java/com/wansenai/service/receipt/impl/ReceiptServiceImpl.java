@@ -698,16 +698,22 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .eq(ReceiptRetailSub::getWarehouseId, queryStockFlowDTO.getWarehouseId())
                 .eq(ReceiptRetailSub::getProductBarcode, queryStockFlowDTO.getProductBarcode())
                 .eq(ReceiptRetailSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasLength(queryStockFlowDTO.getStartDate()), ReceiptRetailSub::getCreateTime, queryStockFlowDTO.getStartDate())
+                .le(StringUtils.hasLength(queryStockFlowDTO.getEndDate()), ReceiptRetailSub::getCreateTime, queryStockFlowDTO.getEndDate())
                 .list();
         var salesData = receiptSaleSubService.lambdaQuery()
                 .eq(ReceiptSaleSub::getWarehouseId, queryStockFlowDTO.getWarehouseId())
                 .eq(ReceiptSaleSub::getProductBarcode, queryStockFlowDTO.getProductBarcode())
                 .eq(ReceiptSaleSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasLength(queryStockFlowDTO.getStartDate()), ReceiptSaleSub::getCreateTime, queryStockFlowDTO.getStartDate())
+                .le(StringUtils.hasLength(queryStockFlowDTO.getEndDate()), ReceiptSaleSub::getCreateTime, queryStockFlowDTO.getEndDate())
                 .list();
         var purchaseData = receiptPurchaseSubService.lambdaQuery()
                 .eq(ReceiptPurchaseSub::getWarehouseId, queryStockFlowDTO.getWarehouseId())
                 .eq(ReceiptPurchaseSub::getProductBarcode, queryStockFlowDTO.getProductBarcode())
                 .eq(ReceiptPurchaseSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasLength(queryStockFlowDTO.getStartDate()), ReceiptPurchaseSub::getCreateTime, queryStockFlowDTO.getStartDate())
+                .le(StringUtils.hasLength(queryStockFlowDTO.getEndDate()), ReceiptPurchaseSub::getCreateTime, queryStockFlowDTO.getEndDate())
                 .list();
 
         List<StockFlowVO> stockFlowVos = new ArrayList<StockFlowVO>(retailData.size() + salesData.size() + purchaseData.size());
@@ -715,6 +721,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             var receiptRetailMain = receiptRetailService.lambdaQuery()
                     .eq(ReceiptRetailMain::getId, item.getReceiptMainId())
                     .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .eq(StringUtils.hasLength(queryStockFlowDTO.getReceiptNumber()), ReceiptRetailMain::getReceiptNumber, queryStockFlowDTO.getReceiptNumber())
                     .one();
             if (receiptRetailMain != null) {
                 var stockFlowVO = StockFlowVO.builder()
@@ -733,6 +740,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             var receiptSaleMain = receiptSaleService.lambdaQuery()
                     .eq(ReceiptSaleMain::getId, item.getReceiptSaleMainId())
                     .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .eq(StringUtils.hasLength(queryStockFlowDTO.getReceiptNumber()), ReceiptSaleMain::getReceiptNumber, queryStockFlowDTO.getReceiptNumber())
                     .one();
             if (receiptSaleMain != null) {
                 var stockFlowVO = StockFlowVO.builder()
@@ -751,6 +759,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             var receiptPurchaseMain = receiptPurchaseService.lambdaQuery()
                     .eq(ReceiptPurchaseMain::getId, item.getReceiptPurchaseMainId())
                     .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .eq(StringUtils.hasLength(queryStockFlowDTO.getReceiptNumber()), ReceiptPurchaseMain::getReceiptNumber, queryStockFlowDTO.getReceiptNumber())
                     .one();
             if (receiptPurchaseMain != null) {
                 var stockFlowVO = StockFlowVO.builder()
@@ -964,7 +973,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         accountFlowVos.sort(Comparator.comparing(AccountFlowVO::getReceiptDate).reversed());
         // 进行余额计算
         accountFlowVos.forEach(item -> {
-            balance.updateAndGet(v -> v.add(item.getAmount()));
+            balance.updateAndGet(v -> (v != null) ? v.add(item.getAmount()) : item.getAmount());
             item.setBalance(balance.get());
         });
 
@@ -2318,6 +2327,36 @@ public class ReceiptServiceImpl implements ReceiptService {
         var queryData = getSupplierBill(querySupplierBillDTO);
         if (!queryData.getData().getRecords().isEmpty()) {
             ExcelUtils.export(response, "供应商对账报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportProductStockFlowExcel(QueryStockFlowDTO queryStockFlowDTO, HttpServletResponse response) {
+        queryStockFlowDTO.setPage(1);
+        queryStockFlowDTO.setPageSize(10000);
+        var queryData = getStockFlow(queryStockFlowDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "商品库存流水报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportCustomerBillDetailExcel(QueryCustomerBillDetailDTO queryCustomerBillDetailDTO, HttpServletResponse response) {
+        queryCustomerBillDetailDTO.setPage(1);
+        queryCustomerBillDetailDTO.setPageSize(10000);
+        var queryData = getCustomerBillDetail(queryCustomerBillDetailDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "客户对账明细报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
+        }
+    }
+
+    @Override
+    public void exportSupplierBillDetailExcel(QuerySupplierBillDetailDTO querySupplierBillDetailDTO, HttpServletResponse response) {
+        querySupplierBillDetailDTO.setPage(1);
+        querySupplierBillDetailDTO.setPageSize(10000);
+        var queryData = getSupplierBillDetail(querySupplierBillDetailDTO);
+        if (!queryData.getData().getRecords().isEmpty()) {
+            ExcelUtils.export(response, "供应商对账明细报表", ExcelUtils.getSheetData(queryData.getData().getRecords()));
         }
     }
 }

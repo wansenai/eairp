@@ -13,6 +13,7 @@
 package com.wansenai.vo.report;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.Builder;
 import lombok.Data;
 
@@ -22,18 +23,25 @@ import java.time.LocalDateTime;
 @Builder
 public class StockFlowVO {
 
+    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
+    @ExcelExport(value = "类型")
     private String type;
 
+    @ExcelExport(value = "商品条码")
     private String productBarcode;
 
+    @ExcelExport(value = "商品名称")
     private String productName;
 
+    @ExcelExport(value = "仓库")
     private String warehouseName;
 
+    @ExcelExport(value = "数量")
     private Integer productNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ExcelExport(value = "单据日期")
     private LocalDateTime receiptDate;
 }

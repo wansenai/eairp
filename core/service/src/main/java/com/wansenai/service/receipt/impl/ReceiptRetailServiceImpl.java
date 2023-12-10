@@ -23,6 +23,7 @@ import com.wansenai.dto.receipt.retail.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.retail.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.retail.RetailRefundDTO;
 import com.wansenai.dto.receipt.retail.RetailShipmentsDTO;
+import com.wansenai.entities.financial.FinancialAccount;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.wansenai.entities.receipt.ReceiptRetailMain;
@@ -99,7 +100,10 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
     }
 
     private String getAccountName(Long accountId) {
-        return (accountId != null) ? accountService.getById(accountId).getAccountName() : null;
+        return Optional.ofNullable(accountId)
+                .map(accountService::getById)
+                .map(FinancialAccount::getAccountName)
+                .orElse(null);
     }
 
     private String getUserName(Long userId) {

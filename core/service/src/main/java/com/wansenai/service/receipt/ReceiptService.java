@@ -95,4 +95,10 @@ public interface ReceiptService {
     void exportCustomerBillExcel (QueryCustomerBillDTO queryCustomerBillDTO, HttpServletResponse response) throws IOException;
 
     void exportSupplierBillExcel (QuerySupplierBillDTO querySupplierBillDTO, HttpServletResponse response) throws IOException;
+
+    void exportProductStockFlowExcel (QueryStockFlowDTO queryStockFlowDTO, HttpServletResponse response) throws IOException;
+
+    void exportCustomerBillDetailExcel (QueryCustomerBillDetailDTO queryCustomerBillDetailDTO, HttpServletResponse response) throws IOException;
+
+    void exportSupplierBillDetailExcel (QuerySupplierBillDetailDTO querySupplierBillDetailDTO, HttpServletResponse response) throws IOException;
 }

@@ -31,7 +31,7 @@
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
-                  <div style="padding: 4px 8px; cursor: pointer;"
+                  <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addSupplier">
                     <plus-outlined/>
                     新增供应商
@@ -109,7 +109,7 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
                              data-title="优惠率">
-                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" suffix="%" v-model:value="purchaseRefundFormState.refundOfferRate"/>
+                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" addon-after="%" v-model:value="purchaseRefundFormState.refundOfferRate"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
@@ -139,7 +139,17 @@
                   <a-select v-model:value="purchaseRefundFormState.accountId"
                             placeholder="请选择结算账户"
                             :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
-                            @change="selectAccountChange"/>
+                            @change="selectAccountChange">
+                    <template #dropdownRender="{ menuNode: menu }">
+                      <v-nodes :vnodes="menu"/>
+                      <a-divider style="margin: 4px 0"/>
+                      <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
+                           @mousedown="e => e.preventDefault()" @click="addAccount">
+                        <plus-outlined/>
+                        新增结算账户
+                      </div>
+                    </template>
+                  </a-select>
                 </a-form-item>
               </a-col>
               <a-col style="margin-left: -25px">
@@ -184,8 +194,8 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <SupplierModal @register="supplierModal"/>
-  <FinancialAccountModal @register="accountModal"/>
+  <SupplierModal @register="supplierModal" @success="handleSupplierModalSuccess"/>
+  <FinancialAccountModal @register="accountModal" @success="handleAccountModalSuccess"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
   <LinkReceiptModal @register="linkReceiptModal" @handleReceiptSuccess="handleReceiptSuccess"/>
@@ -218,7 +228,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   purchaseRefundFormState,
@@ -249,7 +259,7 @@ import {addSupplier, getSupplierList} from "@/api/basic/supplier";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -259,7 +269,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -300,6 +310,7 @@ export default defineComponent({
     'vxe-button': VxeButton,
     'plus-outlined': PlusOutlined,
     'upload-outlined': UploadOutlined,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const {createMessage} = useMessage();
@@ -418,11 +429,20 @@ export default defineComponent({
       })
     }
 
+    function handleAccountModalSuccess() {
+      loadAccountList();
+    }
+
     function loadSupplierList() {
       getSupplierList().then(res => {
         supplierList.value = res.data
       })
     }
+
+    function handleSupplierModalSuccess() {
+      loadSupplierList();
+    }
+
 
     function loadProductSku() {
       getProductStockSku().then(res => {
@@ -968,15 +988,17 @@ export default defineComponent({
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
       const discountAmount = purchaseRefundFormState.refundOfferAmount
       const otherAmount = purchaseRefundFormState.otherAmount
-      const discountRate = discountAmount / discountLastAmount * 100
       const lastAmount = Number((discountLastAmount - discountAmount));
-
       purchaseRefundFormState.thisArrearsAmount = 0
-      purchaseRefundFormState.refundOfferRate = Number(discountRate.toFixed(2))
       purchaseRefundFormState.refundOfferAmount = Number(discountAmount.toFixed(2))
       purchaseRefundFormState.refundLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
       purchaseRefundFormState.thisRefundAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
-
+      if (discountLastAmount) {
+        const discountRate = discountAmount / discountLastAmount * 100
+        purchaseRefundFormState.refundOfferRate = Number(discountRate.toFixed(2))
+      } else {
+        purchaseRefundFormState.refundOfferRate = 0
+      }
     }
 
     function otherAmountChange() {
@@ -1120,7 +1142,9 @@ export default defineComponent({
       handleReceiptSuccess,
       productList,
       productLabelList,
-      selectBarCode
+      selectBarCode,
+      handleAccountModalSuccess,
+      handleSupplierModalSuccess
     };
   },
 });

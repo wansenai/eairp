@@ -31,7 +31,7 @@
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
-                  <div style="padding: 4px 8px; cursor: pointer;"
+                  <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addSupplier">
                     <plus-outlined/>
                     新增供应商
@@ -102,12 +102,12 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
                              data-title="优惠率">
-                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" v-model:value="purchaseOrderFormState.discountRate"/>
+                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" v-model:value="purchaseOrderFormState.discountRate" addon-after="%"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="付款优惠" data-step="2"
-                             data-title="付款优惠">
+                             data-title="付款优惠" >
                   <a-input-number placeholder="请输入收款优惠" @change="discountAmountChange" v-model:value="purchaseOrderFormState.discountAmount"/>
                 </a-form-item>
               </a-col>
@@ -136,7 +136,7 @@
               <a-col :lg="6" :md="12" :sm="24" >
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="支付定金" data-step="2"
                              data-title="支付定金">
-                  <a-input-number placeholder="请输入支付定金" v-model:value="purchaseOrderFormState.deposit"/>
+                  <a-input-number placeholder="请输入支付定金" v-model:value="purchaseOrderFormState.deposit" />
                 </a-form-item>
               </a-col>
             </a-row>
@@ -163,7 +163,7 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <SupplierModal @register="supplierModal"/>
+  <SupplierModal @register="supplierModal" @success="handleSupplierModalSuccess"/>
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
   <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
@@ -196,7 +196,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   purchaseOrderFormState,
@@ -225,7 +225,7 @@ import MultipleAccountsModal from "@/views/basic/settlement-account/components/M
 import {SupplierResp} from "@/api/basic/model/supplierModel";
 import {addSupplier, getSupplierList} from "@/api/basic/supplier";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -235,7 +235,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -275,6 +275,7 @@ export default defineComponent({
     'vxe-button': VxeButton,
     'plus-outlined': PlusOutlined,
     'upload-outlined': UploadOutlined,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const {createMessage} = useMessage();
@@ -378,6 +379,10 @@ export default defineComponent({
       getSupplierList().then(res => {
         supplierList.value = res.data
       })
+    }
+
+    function handleSupplierModalSuccess() {
+      loadSupplierList();
     }
 
     function loadGenerateId() {
@@ -868,9 +873,14 @@ export default defineComponent({
       const price = getTaxTotalPrice.value;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
       const discountAmount = purchaseOrderFormState.discountAmount
-      const discountRate = discountAmount / discountLastAmount * 100
-      purchaseOrderFormState.discountRate = Number(discountRate.toFixed(2))
-      purchaseOrderFormState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`
+      if (discountLastAmount) {
+        const discountRate = discountAmount / discountLastAmount * 100;
+        purchaseOrderFormState.discountRate = Number(discountRate.toFixed(2));
+        purchaseOrderFormState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`;
+      } else {
+        purchaseOrderFormState.discountRate = 0;
+        purchaseOrderFormState.discountLastAmount = '￥0.00';
+      }
     }
 
     const selectAccountChange = (value: number) => {
@@ -959,6 +969,7 @@ export default defineComponent({
       productList,
       productLabelList,
       selectBarCode,
+      handleSupplierModalSuccess
     };
   },
 });

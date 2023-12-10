@@ -28,6 +28,11 @@ export default defineComponent({
   setup() {
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
+    const printRetailNumber = ref(0);
+    const printRetailAmount = ref(0);
+    const printRetailRefundNumber = ref(0);
+    const printRetailRefundAmount = ref(0);
+    const printRetailLastAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: '零售统计报表',
       api: getRetailStatistics,
@@ -54,21 +59,11 @@ export default defineComponent({
       const retailRefundAmount = tableData.reduce((prev, next) => prev + next.retailRefundAmount, 0);
       const retailLastAmount = tableData.reduce((prev, next) => prev + next.retailLastAmount, 0);
       // 将数据写入到printTableData里面
+      printRetailNumber.value = retailNumber;
+      printRetailAmount.value = retailAmount;
+      printRetailRefundNumber.value = retailRefundNumber;
+      printRetailRefundAmount.value = retailRefundAmount;
       printTableData.value = tableData;
-      printTableData.value.push({
-        retailNumber: retailNumber,
-        retailAmount: `￥${XEUtils.commafy(XEUtils.toNumber(retailAmount), { digits: 2 })}`,
-        retailRefundNumber: retailRefundNumber,
-        retailRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(retailRefundAmount), { digits: 2 })}`,
-        retailLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(retailLastAmount), { digits: 2 })}`,
-        productBarcode: '合计',
-        warehouseName: '',
-        productName: '',
-        productStandard: '',
-        productModel: '',
-        productExtendInfo: '',
-        productUnit: '',
-      });
       return [
         {
           _index: '合计',
@@ -109,6 +104,20 @@ export default defineComponent({
     }
 
     function primaryPrint() {
+      printTableData.value.push({
+        retailNumber: printRetailNumber.value,
+        retailAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printRetailAmount.value), { digits: 2 })}`,
+        retailRefundNumber: printRetailRefundNumber.value,
+        retailRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printRetailRefundAmount.value), { digits: 2 })}`,
+        retailLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printRetailLastAmount.value), { digits: 2 })}`,
+        productBarcode: '合计',
+        warehouseName: '',
+        productName: '',
+        productStandard: '',
+        productModel: '',
+        productExtendInfo: '',
+        productUnit: '',
+      });
       printJS({
         documentTitle: "EAIRP (零售统计-详情)",
         properties: retailStatisticsColumns.map(item => {
@@ -119,6 +128,7 @@ export default defineComponent({
         gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
         type: 'json',
       });
+      printTableData.value.pop();
     }
 
 

@@ -18,7 +18,8 @@
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
     <a-spin :spinning="confirmLoading">
-      <a-form ref="formRef" :model="purchaseStorageFormState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
+      <a-form ref="formRef" :model="purchaseStorageFormState"
+              style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="purchaseStorageFormState.id" v-show="false"/>
@@ -31,7 +32,7 @@
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
-                  <div style="padding: 4px 8px; cursor: pointer;"
+                  <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addSupplier">
                     <plus-outlined/>
                     新增供应商
@@ -42,21 +43,24 @@
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="purchaseStorageFormState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
+              <a-date-picker v-model:value="purchaseStorageFormState.receiptDate" show-time placeholder="选择时间"
+                             format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="purchaseStorageFormState.receiptNumber" :readOnly="true"/>
+              <a-input placeholder="请输入单据编号" v-model:value="purchaseStorageFormState.receiptNumber"
+                       :readOnly="true"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联订单" data-step="3"
                          data-title="关联订单"
                          data-intro="">
-              <a-input-search readonly="true" placeholder="请选择关联订单" v-model:value="purchaseStorageFormState.otherReceipt" @search="onSearch"/>
+              <a-input-search readonly="true" placeholder="请选择关联订单"
+                              v-model:value="purchaseStorageFormState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -65,8 +69,11 @@
             <div class="table-operations">
               <vxe-grid ref='xGrid' v-bind="gridOptions">
                 <template #toolbar_buttons="{ row }">
-                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
-                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="barCode"
+                  <a-button v-if="showScanButton" type="primary" @click="scanEnter" style="margin-right: 10px">
+                    扫条码录入数据
+                  </a-button>
+                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码"
+                           style="width: 150px; margin-right: 10px" v-model:value="barCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
                   <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
                   <a-button @click="productModal" style="margin-right: 10px">选择添加采购商品</a-button>
@@ -75,7 +82,8 @@
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
+                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode"
+                              :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
@@ -109,25 +117,29 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
                              data-title="优惠率">
-                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" suffix="%" v-model:value="purchaseStorageFormState.paymentRate"/>
+                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" addon-after="%"
+                                  v-model:value="purchaseStorageFormState.paymentRate"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="付款优惠" data-step="2"
                              data-title="付款优惠">
-                  <a-input-number placeholder="请输入收款优惠" @change="discountAmountChange" v-model:value="purchaseStorageFormState.paymentAmount"/>
+                  <a-input-number placeholder="请输入收款优惠" @change="discountAmountChange"
+                                  v-model:value="purchaseStorageFormState.paymentAmount"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠后金额" data-step="2"
                              data-title="优惠后金额">
-                  <a-input placeholder="请输入优惠后金额" v-model:value="purchaseStorageFormState.paymentLastAmount" :readOnly="true"/>
+                  <a-input placeholder="请输入优惠后金额" v-model:value="purchaseStorageFormState.paymentLastAmount"
+                           :readOnly="true"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="其他费用" data-step="2"
                              data-title="其他费用">
-                  <a-input-number placeholder="请输入其他费用" @change="otherAmountChange" v-model:value="purchaseStorageFormState.otherAmount" :readOnly="true"/>
+                  <a-input-number placeholder="请输入其他费用" @change="otherAmountChange"
+                                  v-model:value="purchaseStorageFormState.otherAmount" :readOnly="true"/>
                 </a-form-item>
               </a-col>
             </a-row>
@@ -139,25 +151,38 @@
                   <a-select v-model:value="purchaseStorageFormState.accountId"
                             placeholder="请选择结算账户"
                             :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
-                            @change="selectAccountChange"/>
+                            @change="selectAccountChange">
+                    <template #dropdownRender="{ menuNode: menu }">
+                      <v-nodes :vnodes="menu"/>
+                      <a-divider style="margin: 4px 0"/>
+                      <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
+                           @mousedown="e => e.preventDefault()" @click="addAccount">
+                        <plus-outlined/>
+                        新增结算账户
+                      </div>
+                    </template>
+                  </a-select>
                 </a-form-item>
               </a-col>
               <a-col style="margin-left: -25px">
                 <a-tooltip title="多账户明细">
-                  <a-button type="default" :icon="h(AccountBookTwoTone)" style="font-size: small; margin-left: 5px" v-show="manyAccountBtnStatus" @click="handleManyAccount"/>
+                  <a-button type="default" :icon="h(AccountBookTwoTone)" style="font-size: small; margin-left: 5px"
+                            v-show="manyAccountBtnStatus" @click="handleManyAccount"/>
                 </a-tooltip>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次付款" data-step="2"
                              data-title="本次付款"
                              :rules="[{ required: true}]">
-                  <a-input-number placeholder="请输入本次付款金额" @change="thisPaymentAmountChange" v-model:value="purchaseStorageFormState.thisPaymentAmount"/>
+                  <a-input-number placeholder="请输入本次付款金额" @change="thisPaymentAmountChange"
+                                  v-model:value="purchaseStorageFormState.thisPaymentAmount"/>
                 </a-form-item>
               </a-col>
-              <a-col :lg="6" :md="12" :sm="24" >
+              <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次欠款" data-step="2"
                              data-title="本次欠款">
-                  <a-input placeholder="请输入本次欠款金额" :readOnly="true" v-model:value="purchaseStorageFormState.thisArrearsAmount"/>
+                  <a-input placeholder="请输入本次欠款金额" :readOnly="true"
+                           v-model:value="purchaseStorageFormState.thisArrearsAmount"/>
                 </a-form-item>
               </a-col>
             </a-row>
@@ -184,10 +209,10 @@
       </a-form>
     </a-spin>
   </a-modal>
-  <SupplierModal @register="supplierModal"/>
-  <FinancialAccountModal @register="accountModal"/>
+  <SupplierModal @register="supplierModal" @success="handleSupplierModalSuccess"/>
+  <FinancialAccountModal @register="accountModal" @success="handleAccountModalSuccess"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
-  <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess" />
+  <MultipleAccountsModal @register="multipleAccountModal" @handleAccountSuccess="handleAccountSuccess"/>
   <LinkReceiptModal @register="linkReceiptModal" @handleReceiptSuccess="handleReceiptSuccess"/>
 </template>
 
@@ -218,7 +243,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   purchaseStorageFormState,
@@ -233,7 +258,7 @@ import {generateId, uploadOss} from "@/api/basic/common";
 import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
 import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
-import { addOrUpdatePurchaseStorage, getPurchaseStorageDetail} from "@/api/purchase/storage"
+import {addOrUpdatePurchaseStorage, getPurchaseStorageDetail} from "@/api/purchase/storage"
 import SupplierModal from "@/views/basic/supplier/components/SupplierModal.vue"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
 import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
@@ -249,7 +274,8 @@ import {addSupplier, getSupplierList} from "@/api/basic/supplier";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-const VNodes = {
+
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -259,7 +285,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -300,6 +326,7 @@ export default defineComponent({
     'vxe-button': VxeButton,
     'plus-outlined': PlusOutlined,
     'upload-outlined': UploadOutlined,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const {createMessage} = useMessage();
@@ -343,6 +370,7 @@ export default defineComponent({
     const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
+
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -378,7 +406,7 @@ export default defineComponent({
           warehouseList.value = res.data
         }
         const defaultWarehouse = res.data.find(item => item.isDefault === 1)
-        if(defaultWarehouse) {
+        if (defaultWarehouse) {
           purchaseStorageFormState.warehouseId = defaultWarehouse.id
         } else {
           purchaseStorageFormState.warehouseId = res.data[0].id
@@ -399,12 +427,12 @@ export default defineComponent({
     function selectBarCode() {
       const table = xGrid.value
       const selectRow = table?.getActiveRecord()
-      if(selectRow) {
+      if (selectRow) {
         const {columns} = gridOptions
         if (columns) {
           const barCodeColumn = selectRow.row.barCode
           const warehouseColumn = selectRow.row.warehouseId
-          if(barCodeColumn && warehouseColumn) {
+          if (barCodeColumn && warehouseColumn) {
             const product = productList.value.find(item => {
               return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
             });
@@ -431,16 +459,16 @@ export default defineComponent({
     function loadAccountList() {
       // 每次赋值前先清空
       accountList.value = []
-      const account : AccountResp = {
+      const account: AccountResp = {
         id: 0,
         accountName: '多账户',
       }
       accountList.value.push(account)
       getAccountList().then(res => {
         const data: AccountResp[] = res.data
-        if(data) {
+        if (data) {
           data.forEach(item => {
-            const account : AccountResp = {
+            const account: AccountResp = {
               id: item.id,
               accountName: item.accountName,
             }
@@ -450,10 +478,18 @@ export default defineComponent({
       })
     }
 
+    function handleAccountModalSuccess() {
+      loadAccountList();
+    }
+
     function loadSupplierList() {
       getSupplierList().then(res => {
         supplierList.value = res.data
       })
+    }
+
+    function handleSupplierModalSuccess() {
+      loadSupplierList();
     }
 
     function loadGenerateId() {
@@ -464,7 +500,7 @@ export default defineComponent({
 
     async function loadStorageDetail(id) {
       const result = await getPurchaseStorageDetail(id)
-      if(result) {
+      if (result) {
         const data = result.data
         purchaseStorageFormState.id = id
         purchaseStorageFormState.supplierId = data.supplierId
@@ -477,9 +513,9 @@ export default defineComponent({
         purchaseStorageFormState.otherReceipt = data.otherReceipt
         purchaseStorageFormState.otherAmount = data.otherAmount
         purchaseStorageFormState.thisPaymentAmount = data.thisPaymentAmount
-        purchaseStorageFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.thisArrearsAmount), { digits: 2 })}`
+        purchaseStorageFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.thisArrearsAmount), {digits: 2})}`
         // 判断多账户渲染
-        if(data.multipleAccountAmounts.length > 0 && data.multipleAccountIds.length > 0) {
+        if (data.multipleAccountAmounts.length > 0 && data.multipleAccountIds.length > 0) {
           manyAccountBtnStatus.value = true
           purchaseStorageFormState.accountId = 0
           multipleAccounts.value = {
@@ -507,9 +543,9 @@ export default defineComponent({
         }))
         // table
         const table = xGrid.value
-        if(table) {
+        if (table) {
           data.tableData.forEach(item => {
-            const tableData : RowVO = {
+            const tableData: RowVO = {
               warehouseId: item.warehouseId,
               productId: item.productId,
               barCode: item.barCode,
@@ -537,7 +573,7 @@ export default defineComponent({
         if (columns) {
           const {data} = res
           if (data) {
-            const purchase : PurchaseData = data
+            const purchase: PurchaseData = data
             const table = xGrid.value
             if (table) {
               //根据productExtendPrice.id判断表格中如果是同一个商品，数量加1 否则新增一行
@@ -556,7 +592,7 @@ export default defineComponent({
 
                 table.updateData()
               } else {
-                const tableData : RowVO = {
+                const tableData: RowVO = {
                   warehouseId: purchase.warehouseId,
                   productId: purchase.productId,
                   barCode: purchase.barCode,
@@ -611,11 +647,11 @@ export default defineComponent({
         return;
       }
       if (purchaseStorageFormState.accountId === 0) {
-        if(!multipleAccounts.value.accountOne && !multipleAccounts.value.accountTwo) {
+        if (!multipleAccounts.value.accountOne && !multipleAccounts.value.accountTwo) {
           createMessage.warn('请至少选择两个退款账户');
           return;
         }
-        if(!multipleAccounts.value.accountPriceOne && !multipleAccounts.value.accountPriceTwo) {
+        if (!multipleAccounts.value.accountPriceOne && !multipleAccounts.value.accountPriceTwo) {
           createMessage.warn('请输入退款金额');
           return;
         }
@@ -623,14 +659,14 @@ export default defineComponent({
         createMessage.warn('请选择结算账户');
         return;
       }
-      if(table) {
+      if (table) {
         const insertRecords = table.getInsertRecords()
-        if(insertRecords.length === 0) {
+        if (insertRecords.length === 0) {
           createMessage.warn("请添加一行数据")
           return;
         }
         const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
-        if(isBarCodeEmpty) {
+        if (isBarCodeEmpty) {
           createMessage.warn("请录入条码或者选择产品")
           return;
         }
@@ -683,22 +719,22 @@ export default defineComponent({
         purchaseStorageFormState.accountId = undefined
         purchaseStorageFormState.multipleAccountIds = []
         purchaseStorageFormState.multipleAccountAmounts = []
-        if(multipleAccounts.value.accountOne) {
+        if (multipleAccounts.value.accountOne) {
           purchaseStorageFormState.multipleAccountIds.push(multipleAccounts.value.accountOne)
         }
-        if(multipleAccounts.value.accountTwo){
+        if (multipleAccounts.value.accountTwo) {
           purchaseStorageFormState.multipleAccountIds.push(multipleAccounts.value.accountTwo)
         }
-        if(multipleAccounts.value.accountThree) {
+        if (multipleAccounts.value.accountThree) {
           purchaseStorageFormState.multipleAccountIds.push(multipleAccounts.value.accountThree)
         }
-        if(multipleAccounts.value.accountOne) {
+        if (multipleAccounts.value.accountOne) {
           purchaseStorageFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceOne)
         }
-        if(multipleAccounts.value.accountTwo){
+        if (multipleAccounts.value.accountTwo) {
           purchaseStorageFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceTwo)
         }
-        if(multipleAccounts.value.accountThree) {
+        if (multipleAccounts.value.accountThree) {
           purchaseStorageFormState.multipleAccountAmounts.push(multipleAccounts.value.accountPriceThree)
         }
       } else {
@@ -730,7 +766,7 @@ export default defineComponent({
 
     function clearTable() {
       const table = xGrid.value
-      if(table) {
+      if (table) {
         table.remove()
       }
     }
@@ -764,7 +800,7 @@ export default defineComponent({
     }
 
     const uploadFiles = (options) => {
-      const { file, onSuccess, onError, onProgress } = options;
+      const {file, onSuccess, onError, onProgress} = options;
       const formData = new FormData();
       formData.append('files', file);
       // 调用 uploadOss 方法进行上传
@@ -790,7 +826,7 @@ export default defineComponent({
 
     function handleCheckSuccess(data) {
       const table = xGrid.value
-      if(table) {
+      if (table) {
         data = data.map(item => {
           item.unitPrice = item.purchasePrice
           item.productNumber = 1
@@ -806,7 +842,7 @@ export default defineComponent({
         tableData.forEach(item => {
           total += item.taxTotalPrice
         })
-        purchaseStorageFormState.paymentLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
+        purchaseStorageFormState.paymentLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), {digits: 2})}`
       }
     }
 
@@ -814,7 +850,7 @@ export default defineComponent({
       const table = xGrid.value
       const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
       const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
-      if(table) {
+      if (table) {
         table.insert({warehouseId: warehouseId})
       }
     }
@@ -834,7 +870,7 @@ export default defineComponent({
 
     function productNumberChange() {
       const table = xGrid.value
-      if(table) {
+      if (table) {
         const data = table.getEditRecord().row;
         data.amount = data.productNumber * data.unitPrice
         data.taxAmount = data.amount * data.taxRate / 100
@@ -849,7 +885,7 @@ export default defineComponent({
 
     function unitPriceChange() {
       const table = xGrid.value
-      if(table) {
+      if (table) {
         // 通过单价 计算金额 税额 价税合计
         // 已知 数量 和 税率
         // 计算金额 = 单价 * 数量
@@ -868,21 +904,21 @@ export default defineComponent({
 
     function amountChange() {
       const table = xGrid.value
-      if(table) {
+      if (table) {
         const data = table.getEditRecord().row;
         data.unitPrice = data.amount / data.productNumber
         data.taxAmount = data.amount * data.taxRate / 100
         data.taxTotalPrice = Number(data.amount) + Number(data.taxAmount)
         data.unitPrice = Number(data.unitPrice.toFixed(2))
         data.taxAmount = Number(data.taxAmount.toFixed(2))
-        data.taxTotalPrice= Number(data.taxTotalPrice.toFixed(2))
+        data.taxTotalPrice = Number(data.taxTotalPrice.toFixed(2))
         table.updateData()
       }
     }
 
     function taxRateChange() {
       const table = xGrid.value
-      if(table) {
+      if (table) {
         const data = table.getEditRecord().row;
         // 计算税额 = 金额 * 税率 / 100 保留两位小数
         data.taxAmount = data.amount * data.taxRate / 100
@@ -896,7 +932,7 @@ export default defineComponent({
     function taxTotalPriceChange() {
 
       const table = xGrid.value
-      if(table) {
+      if (table) {
         const data = table.getEditRecord().row;
         // 通过价税合计 分别进行税额 和 金额 单价的计算
         // 已知税率 和 数量
@@ -913,8 +949,8 @@ export default defineComponent({
     }
 
     watch(getTaxTotalPrice, (newValue) => {
-        purchaseStorageFormState.paymentLastAmount = newValue
-        purchaseStorageFormState.thisPaymentAmount = newValue
+      purchaseStorageFormState.paymentLastAmount = newValue
+      purchaseStorageFormState.thisPaymentAmount = newValue
       discountAmountChange()
     });
 
@@ -938,8 +974,8 @@ export default defineComponent({
 
       purchaseStorageFormState.thisArrearsAmount = 0
       purchaseStorageFormState.paymentAmount = Number(discountAmount.toFixed(2))
-      purchaseStorageFormState.paymentLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
-      purchaseStorageFormState.thisPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
+      purchaseStorageFormState.paymentLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
+      purchaseStorageFormState.thisPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), {digits: 2})}`
 
     }
 
@@ -948,25 +984,27 @@ export default defineComponent({
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
       const discountAmount = purchaseStorageFormState.paymentAmount
       const otherAmount = purchaseStorageFormState.otherAmount
-      const discountRate = discountAmount / discountLastAmount * 100
       const lastAmount = Number((discountLastAmount - discountAmount));
-
       purchaseStorageFormState.thisArrearsAmount = 0
-      purchaseStorageFormState.paymentRate = Number(discountRate.toFixed(2))
       purchaseStorageFormState.paymentAmount = Number(discountAmount.toFixed(2))
-      purchaseStorageFormState.paymentLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
-      purchaseStorageFormState.thisPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
-
+      purchaseStorageFormState.paymentLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
+      purchaseStorageFormState.thisPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), {digits: 2})}`
+      if (discountLastAmount) {
+        const discountRate = discountAmount / discountLastAmount * 100
+        purchaseStorageFormState.paymentRate = Number(discountRate.toFixed(2))
+      } else {
+        purchaseStorageFormState.paymentRate = 0;
+      }
     }
 
     function otherAmountChange() {
       const price = purchaseStorageFormState.paymentLastAmount;
       const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
       const otherAmount = purchaseStorageFormState.otherAmount
-      const lastAmount =  Number((discountLastAmount + otherAmount));
+      const lastAmount = Number((discountLastAmount + otherAmount));
 
       purchaseStorageFormState.thisArrearsAmount = 0
-      purchaseStorageFormState.thisPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      purchaseStorageFormState.thisPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
     }
 
     function thisPaymentAmountChange() {
@@ -976,12 +1014,12 @@ export default defineComponent({
       const thisCollectAmount = purchaseStorageFormState.thisPaymentAmount
       const lastAmount = Number((discountLastAmount + otherAmount - thisCollectAmount));
 
-      purchaseStorageFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      purchaseStorageFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
 
     }
 
     const selectAccountChange = (value: number) => {
-      if(value == 0) {
+      if (value == 0) {
         manyAccountBtnStatus.value = true
         openManyAccountModal(true, {
           isUpdate: false,
@@ -1004,11 +1042,11 @@ export default defineComponent({
 
     function handleReceiptSuccess(data) {
       const table = xGrid.value
-      if(data && table) {
+      if (data && table) {
         purchaseStorageFormState.otherReceipt = data.receiptNumber;
         table.remove()
         data.receiptDetailData.forEach(item => {
-          const tableData : RowVO = {
+          const tableData: RowVO = {
             id: item.id,
             warehouseId: item.warehouseId,
             productId: item.productId,
@@ -1100,7 +1138,9 @@ export default defineComponent({
       handleReceiptSuccess,
       productList,
       productLabelList,
-      selectBarCode
+      selectBarCode,
+      handleSupplierModalSuccess,
+      handleAccountModalSuccess
     };
   },
 });

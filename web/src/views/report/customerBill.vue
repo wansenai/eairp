@@ -42,6 +42,13 @@ export default defineComponent({
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
     const [handleRegister, {openModal}] = useModal();
+    const printFirstQuarterReceivable = ref(0);
+    const printSecondQuarterReceivable = ref(0);
+    const printThirdQuarterReceivable = ref(0);
+    const printFourthQuarterReceivable = ref(0);
+    const printTotalQuarterArrears = ref(0);
+    const printTotalQuarterReceivable = ref(0);
+    const printRemainingReceivableArrears = ref(0);
     const [registerTable, {reload, getForm, getDataSource}] = useTable({
       title: '客户对账报表',
       api: getCustomerBill,
@@ -69,20 +76,14 @@ export default defineComponent({
       const totalQuarterArrears = tableData.reduce((prev, next) => prev + next.totalQuarterArrears, 0);
       const totalQuarterReceivable = tableData.reduce((prev, next) => prev + next.totalQuarterReceivable, 0);
       const remainingReceivableArrears = tableData.reduce((prev, next) => prev + next.remainingReceivableArrears, 0);
+      printFirstQuarterReceivable.value = firstQuarterReceivable;
+      printSecondQuarterReceivable.value = secondQuarterReceivable;
+      printThirdQuarterReceivable.value = thirdQuarterReceivable;
+      printFourthQuarterReceivable.value = fourthQuarterReceivable;
+      printTotalQuarterArrears.value = totalQuarterArrears;
+      printTotalQuarterReceivable.value = totalQuarterReceivable;
+      printRemainingReceivableArrears.value = remainingReceivableArrears;
       printTableData.value = tableData;
-      printTableData.value.push({
-        firstQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterReceivable), {digits: 2})}`,
-        secondQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterReceivable), {digits: 2})}`,
-        thirdQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterReceivable), {digits: 2})}`,
-        fourthQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(fourthQuarterReceivable), {digits: 2})}`,
-        totalQuarterArrears: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterArrears), {digits: 2})}`,
-        totalQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterReceivable), {digits: 2})}`,
-        remainingReceivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(remainingReceivableArrears), {digits: 2})}`,
-        customerName: '合计',
-        contactName: '',
-        contactPhone: '',
-        email: '',
-      });
       return [
         {
           _index: '合计',
@@ -133,6 +134,19 @@ export default defineComponent({
 
     function primaryPrint() {
       const printColumns = customerBillColumns.filter(item => item.dataIndex !== 'customerId');
+      printTableData.value.push({
+        firstQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printFirstQuarterReceivable.value), {digits: 2})}`,
+        secondQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printSecondQuarterReceivable.value), {digits: 2})}`,
+        thirdQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printThirdQuarterReceivable.value), {digits: 2})}`,
+        fourthQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printFourthQuarterReceivable.value), {digits: 2})}`,
+        totalQuarterArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalQuarterArrears.value), {digits: 2})}`,
+        totalQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalQuarterReceivable.value), {digits: 2})}`,
+        remainingReceivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printRemainingReceivableArrears.value), {digits: 2})}`,
+        customerName: '合计',
+        contactName: '',
+        contactPhone: '',
+        email: '',
+      });
       printJS({
         documentTitle: "EAIRP (客户对账)",
         properties: printColumns.map(item => {
@@ -143,6 +157,7 @@ export default defineComponent({
         gridStyle: 'border: 1px solid #ddd; font-size: 12px; text-align: center; padding: 8px;',
         type: 'json',
       });
+      printTableData.value.pop();
     }
 
     return {
