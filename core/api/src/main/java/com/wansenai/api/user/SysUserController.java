@@ -64,6 +64,11 @@ public class SysUserController {
         return userService.updatePassword(updatePasswordDto);
     }
 
+    @PutMapping(value = "userUpdatePassword")
+    public Response<String> userUpdatePassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+        return userService.resetPassword(resetPasswordDTO);
+    }
+
     @GetMapping(value = "operator")
     public Response<List<UserInfoVO>> operator() {
         return userService.operator();

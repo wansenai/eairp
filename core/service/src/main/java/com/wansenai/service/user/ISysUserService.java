@@ -39,6 +39,8 @@ public interface ISysUserService extends IService<SysUser> {
 
     Response<String> updatePassword(UpdatePasswordDto updatePasswordDto);
 
+    Response<String> resetPassword(ResetPasswordDTO resetPasswordDto);
+
     Response<UserInfoVO> userInfo();
 
     UserInfoVO getCurrentUser();
