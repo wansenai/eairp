@@ -46,7 +46,7 @@
       const { createMessage } = useMessage();
       const userStore = useUserStore();
 
-      const [register, { setFieldsValue, getFieldsValue, validate }] = useForm({
+      const [register, { setFieldsValue, validate }] = useForm({
         labelWidth: 120,
         schemas: baseSetSchemas,
         showActionButtonGroup: false,

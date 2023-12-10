@@ -19,6 +19,7 @@
     </List>
   </CollapseContainer>
   <BindPhoneModal @register="bindPhoneModal" @handleBindPhoneSuccess="handleBindPhoneSuccess"/>
+  <ResetPasswordModal @register="resetPasswordModal"/>
 </template>
 <script lang="ts">
   import { List } from 'ant-design-vue';
@@ -28,22 +29,28 @@
   import { secureSettingList } from './data';
   import {useUserStore} from "@/store/modules/user";
   import BindPhoneModal from "@/views/basic/account/BindPhoneModal.vue";
+  import ResetPasswordModal from "@/views/basic/account/ResetPasswordModal.vue";
   import {useModal} from "@/components/Modal";
 
   export default defineComponent({
-    components: {BindPhoneModal, CollapseContainer, List, ListItem: List.Item, ListItemMeta: List.Item.Meta },
+    components: {BindPhoneModal, ResetPasswordModal, CollapseContainer, List, ListItem: List.Item, ListItemMeta: List.Item.Meta },
     setup() {
       const userStore = useUserStore();
       const userInfo: any = userStore.getUserInfo;
-      const [bindPhoneModal, {openModal: openBindPhomeModal}] = useModal();
+      const [bindPhoneModal, {openModal: openBindPhoneModal}] = useModal();
+      const [resetPasswordModal, {openModal: openResetPasswordModal}] = useModal();
       userInfo.phoneNumber ? secureSettingList[1].description = '已绑定手机：' + userInfo.phoneNumber : secureSettingList[0].description = '未绑定';
       userInfo.email ? secureSettingList[2].description = '已绑定邮箱：' + userInfo.email : secureSettingList[1].description = '未绑定';
 
       function bindSetting(type: string) {
-        console.info(type)
         if (type === '密保手机') {
-          openBindPhomeModal(true, {
+          openBindPhoneModal(true, {
             phoneNumber: userInfo.phoneNumber
+          })
+        } else if (type === '账户密码') {
+          openResetPasswordModal(true, {
+            id: userInfo.id,
+            userName: userInfo.userName
           })
         }
       }
@@ -56,7 +63,8 @@
         list: secureSettingList,
         bindSetting,
         bindPhoneModal,
-        handleBindPhoneSuccess
+        handleBindPhoneSuccess,
+        resetPasswordModal
       };
     },
   });
