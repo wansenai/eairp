@@ -47,6 +47,11 @@ public class FileUtil {
         }
         return files;
     }
+    public static File convertMultipartFilesToFile(MultipartFile multipartFile) throws IOException {
+        File file = File.createTempFile("temp-", "-" + multipartFile.getOriginalFilename());
+        multipartFile.transferTo(file);
+        return file;
+    }
 
     public static void deleteFiles(List<File> files) {
         for (File file : files) {
