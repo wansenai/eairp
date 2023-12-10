@@ -23,6 +23,7 @@ export default {
   action: '操作',
 
   successful: '成功',
+  warning: '警告',
   failed: '失败',
   on: '启用',
   off: '停用',

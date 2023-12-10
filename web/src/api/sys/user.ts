@@ -10,8 +10,9 @@ import {
     updateUserInfoReq,
 } from './model/userModel';
 
-import {ErrorMessageMode, SuccessMessageMode} from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode, UploadFileParams} from '/#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
+import {ContentTypeEnum} from "@/enums/httpEnum";
 
 enum Api {
   Login = '/user/login',
@@ -30,6 +31,7 @@ enum Api {
   DeleteUser = '/user/delete',
   ResetPassword = '/user/resetPassword',
   GetUserOperatorList = '/user/operator',
+  UpdateAvatar = '/user/uploadAvatar'
 }
 
 /**
@@ -201,4 +203,18 @@ export function testRetry() {
       },
     },
   );
+}
+
+export function UpdateAvatar(params: UploadFileParams) {
+    return defHttp.post<BaseResp>(
+        {
+            url: Api.UpdateAvatar,
+            params,
+            headers: {
+                'Content-type': ContentTypeEnum.FORM_DATA,
+                // @ts-ignore
+                ignoreCancelToken: true,
+            },
+        }
+    );
 }

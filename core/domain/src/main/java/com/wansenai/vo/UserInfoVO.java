@@ -28,6 +28,18 @@ public class UserInfoVO {
     /** 用户昵称（别名 姓名） */
     private String name;
 
+    /** 职位 */
+    private String position;
+
+    /** 邮箱 */
+    private String email;
+
+    /** 电话号 */
+    private String phoneNumber;
+
+    /** 用户个人简介 */
+    private String description;
+
     /** 用户名（登陆的账户） */
     private String userName;
 

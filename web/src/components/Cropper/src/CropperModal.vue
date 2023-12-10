@@ -121,8 +121,9 @@
   import { dataURLtoBlob } from '/@/utils/file/base64Conver';
   import { isFunction } from '/@/utils/is';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import {useUserStore} from "@/store/modules/user";
 
-  type apiFunParams = { file: Blob; name: string; filename: string };
+  type apiFunParams = { file: Blob; name: string; userId: number | string };
 
   const props = {
     circled: { type: Boolean, default: true },
@@ -139,7 +140,7 @@
     props,
     emits: ['uploadSuccess', 'uploadError', 'register'],
     setup(props, { emit }) {
-      let filename = '';
+      let fileName = '';
       const src = ref(props.src || '');
       const previewSource = ref('');
       const cropper = ref<Cropper>();
@@ -149,6 +150,7 @@
       const { prefixCls } = useDesign('cropper-am');
       const [register, { closeModal, setModalProps }] = useModalInner();
       const { t } = useI18n();
+      const userStore = useUserStore();
 
       // Block upload
       function handleBeforeUpload(file: File) {
@@ -162,7 +164,7 @@
         previewSource.value = '';
         reader.onload = function (e) {
           src.value = (e.target?.result as string) ?? '';
-          filename = file.name;
+          fileName = file.name;
         };
         return false;
       }
@@ -191,8 +193,12 @@
           const blob = dataURLtoBlob(previewSource.value);
           try {
             setModalProps({ confirmLoading: true });
-            const result = await uploadApi({ name: 'file', file: blob, filename });
-            emit('uploadSuccess', { source: previewSource.value, data: result.url });
+            const userInfo = userStore.getUserInfo;
+            const result = await uploadApi({ name: fileName, file: blob, userId: userInfo.id});
+            // 在本地存储头像 由于是存放到OSS上 所以这里emit的时候读取url跨域
+            // Access to image at 'https://wansen-1317413588.cos.ap-shanghai.myqcloud.com/temp_1183486284031590400_1.jpg?timestamp=1702206822619'
+            // from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+            emit('uploadSuccess', { source: previewSource.value, data: result.data });
             closeModal();
           } finally {
             setModalProps({ confirmLoading: false });
