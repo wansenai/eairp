@@ -366,6 +366,31 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    public Response<String> resetPassword(ResetPasswordDTO resetPasswordDto) {
+        if(!StringUtils.hasLength(resetPasswordDto.getNewPassword()) || !StringUtils.hasLength(resetPasswordDto.getPassword())) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var user = lambdaQuery()
+                .eq(SysUser::getId, resetPasswordDto.getId())
+                .eq(SysUser::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+        if(user == null) {
+            return Response.responseMsg(UserCodeEnum.USER_NOT_EXISTS);
+        }
+        if(!user.getPassword().equals(CommonTools.md5Encryp(resetPasswordDto.getPassword()))) {
+            return Response.responseMsg(UserCodeEnum.USER_PASSWORD_ERROR);
+        }
+        var result = lambdaUpdate()
+                .eq(SysUser::getId, resetPasswordDto.getId())
+                .set(SysUser::getPassword, CommonTools.md5Encryp(resetPasswordDto.getNewPassword()))
+                .update();
+        if(!result) {
+            return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_ERROR);
+        }
+        return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_SUCCESS);
+    }
+
+    @Override
     public Response<UserInfoVO> userInfo() {
         var user = getCurrentUser();
         if (user == null) {

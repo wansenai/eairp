@@ -29,6 +29,8 @@ public enum UserCodeEnum {
 
     USER_NOT_EXISTS("A0201", "用户账户不存在"),
 
+    USER_PASSWORD_ERROR("A0218", "用户旧密码错误，请检查重新输入"),
+
     USER_REGISTER_PHONE_EXISTS("A0112", "当前手机号已注册，请直接登陆"),
 
     PHONE_EXISTS("A0113", "当前手机号已被绑定使用"),

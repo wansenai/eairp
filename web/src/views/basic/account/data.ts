@@ -106,16 +106,55 @@ export const secureSettingList: ListItem[] = [
 ];
 
 
-// 新消息通知 list
-export const msgNotifyList: ListItem[] = [
+export const resetPasswordFormSchema: FormSchema[] = [
   {
-    key: '1',
-    title: '系统消息',
-    description: '系统消息将以站内信的形式通知',
+    field: 'id',
+    component: 'Input',
+    ifShow: false,
   },
   {
-    key: '2',
-    title: '待办任务',
-    description: '待办任务将以站内信的形式通知',
+    field: 'userName',
+    component: 'Input',
+    ifShow: false,
   },
-];
+  {
+    label: '旧密码',
+    field: 'password',
+    component: 'InputPassword',
+    required: true,
+    rules: [
+        {
+            required: true,
+            message: '请输入旧密码',
+            trigger: 'change',
+        },
+    ],
+  },
+  {
+    label: '新密码',
+    field: 'newPassword',
+    valueField: 'newPassword',
+    component: 'InputPassword',
+    required: true,
+    rules: [
+        {
+            required: true,
+            message: '请输入新密码',
+            trigger: 'change',
+        },
+    ],
+  },
+  {
+    label: '确认密码',
+    field: 'confirmPassword',
+    component: 'InputPassword',
+    required: true,
+    rules: [
+        {
+            required: true,
+            message: '请输入确认密码',
+            trigger: 'change',
+        }
+    ],
+  },
+]

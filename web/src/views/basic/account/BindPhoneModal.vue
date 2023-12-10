@@ -6,12 +6,10 @@
           <a-input-number v-model:value="formData.oldPhoneNumber" disabled/>
         </a-form-item>
         <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="新手机号码"
-                     :rules="[{ required: true, message: '请输入正确的手机号',
-                      pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|16[6]|19[89]]|17[01345678]|18[0-9]|14[579])[0-9]{8}$/,
-                      trigger: 'change'}]">
+                     :rules="[{ required: true}]">
           <a-input placeholder="请输入新手机号码" v-model:value="formData.phoneNumber"/>
         </a-form-item>
-        <a-form-item label="验证码" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form-item label="验证码" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="[{ required: true}]">
           <CountdownInput
               size="large"
               class="fix-auto-fill"
@@ -32,6 +30,7 @@ import {BasicModal, useModalInner} from '/@/components/Modal';
 import {CountdownInput} from "@/components/CountDown";
 import {sendSmsRegister} from "@/api/sys/user";
 import {useFormRules, useFormValid} from "@/views/sys/login/useLogin";
+import {useMessage} from "@/hooks/web/useMessage";
 
 export default {
   name: 'BindPhoneModal',
@@ -47,6 +46,7 @@ export default {
     'a-input-number': InputNumber
   },
   setup(_, context) {
+    const { createMessage } = useMessage();
     const title = ref('更换密保手机');
     const openBindPhoneModal = ref(false);
     const labelCol = {
@@ -69,12 +69,21 @@ export default {
 
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width:600});
-      console.info(data)
       formData.oldPhoneNumber = data.phoneNumber
     });
 
     const handleSubmit = () => {
-      closeModal();
+      const pattern:any = /^(0|86|17951)?(13[0-9]|15[012356789]|16[6]|19[89]]|17[01345678]|18[0-9]|14[579])[0-9]{8}$/;
+      const valid = pattern.test(formData.phoneNumber);
+      if(!valid) {
+        createMessage.info("请输入正确的手机号码");
+        return;
+      }
+      if (!formData.sms) {
+        createMessage.info("请输入验证码");
+        return;
+      }
+
     };
 
     const handleCancel = () => {
@@ -82,8 +91,10 @@ export default {
     };
 
     async function sendCodeApi() {
-      const phoneNumber = await formRef.value.validateFields(['phoneNumber']);
-      if(phoneNumber == false) {
+      const pattern:any = /^(0|86|17951)?(13[0-9]|15[012356789]|16[6]|19[89]]|17[01345678]|18[0-9]|14[579])[0-9]{8}$/;
+      const valid = pattern.test(formData.phoneNumber);
+      if(!valid) {
+        createMessage.info("请输入正确的手机号码");
         return Promise.resolve(false)
       }
       // sen code
