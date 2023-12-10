@@ -22,6 +22,7 @@ export default {
 
   successful: 'Success',
   failed: 'Failed',
+  warning: 'Warning',
   on: 'On',
   off: 'Off',
   delete: 'Delete',
