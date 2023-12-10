@@ -17,7 +17,7 @@ import lombok.Data;
 @Data
 public class UpdateUserDTO {
 
-    private Long Id;
+    private Long id;
 
     private String name;
 
@@ -30,4 +30,6 @@ public class UpdateUserDTO {
     private String position;
 
     private Integer leaderFlag;
+
+    private String description;
 }
