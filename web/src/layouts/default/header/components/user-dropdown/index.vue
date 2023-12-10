@@ -12,6 +12,11 @@
     <template #overlay>
       <Menu @click="handleMenuClick">
         <MenuItem
+            key="setting"
+            :text="t('layout.header.dropdownItemSetting')"
+            icon="ant-design:user-outlined"
+        />
+        <MenuItem
           key="doc"
           :text="t('layout.header.dropdownItemDoc')"
           icon="ion:document-text-outline"
@@ -33,6 +38,7 @@
     </template>
   </Dropdown>
   <LockAction @register="register" />
+  <AccountSetting/>
 </template>
 <script lang="ts">
   // components
@@ -54,8 +60,9 @@
   import { openWindow } from '/@/utils';
 
   import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
+  import {useGo} from "@/hooks/web/usePage";
 
-  type MenuEvent = 'logout' | 'doc' | 'lock';
+  type MenuEvent = 'logout' | 'doc' | 'lock' | 'setting';
 
   export default defineComponent({
     name: 'UserDropdown',
@@ -74,6 +81,7 @@
       const { t } = useI18n();
       const { getShowDoc, getUseLockPage } = useHeaderSetting();
       const userStore = useUserStore();
+      const go = useGo();
 
       const getUserInfo = computed(() => {
         const { name = '', avatar, desc } = userStore.getUserInfo || {};
@@ -96,6 +104,10 @@
         openWindow(DOC_URL);
       }
 
+      function openAccountSetting() {
+        go("/basic/account");
+      }
+
       function handleMenuClick(e: MenuInfo) {
         switch (e.key as MenuEvent) {
           case 'logout':
@@ -106,6 +118,9 @@
             break;
           case 'lock':
             handleLock();
+            break;
+          case 'setting':
+            openAccountSetting();
             break;
         }
       }
