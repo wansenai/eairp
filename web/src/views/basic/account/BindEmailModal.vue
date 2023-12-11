@@ -3,19 +3,19 @@
     <a-spin :spinning="confirmLoading">
       <a-form ref="formRef" :model="formData" :label-col="labelCol" :wrapper-col="wrapperCol">
         <a-input v-model:value="userId" v-show="false"/>
-        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="原手机号码">
-          <a-input-number v-model:value="formData.oldPhoneNumber" disabled/>
+        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="原邮箱地址">
+          <a-input-number v-model:value="formData.oldEmail" disabled/>
         </a-form-item>
-        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="新手机号码"
+        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="新邮箱地址"
                      :rules="[{ required: true}]">
-          <a-input placeholder="请输入新手机号码" v-model:value="formData.phoneNumber"/>
+          <a-input placeholder="请输入新邮箱" v-model:value="formData.email"/>
         </a-form-item>
-        <a-form-item label="验证码" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="[{ required: true}]">
+        <a-form-item label="邮箱验证码" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="[{ required: true}]">
           <CountdownInput
               size="large"
               class="fix-auto-fill"
               count=120
-              v-model:value="formData.sms"
+              v-model:value="formData.emailCode"
               :sendCodeApi="sendCodeApi"
           />
         </a-form-item>
@@ -29,12 +29,12 @@ import {reactive, ref} from 'vue';
 import {Button, Form, FormItem, Input, InputNumber, Modal, Spin} from "ant-design-vue";
 import {BasicModal, useModalInner} from '/@/components/Modal';
 import {CountdownInput} from "@/components/CountDown";
-import {sendSmsRegister, resetPhoneNumber} from "@/api/sys/user";
+import {sendEmailCode, resetEmail} from "@/api/sys/user";
 import {useFormRules, useFormValid} from "@/views/sys/login/useLogin";
 import {useMessage} from "@/hooks/web/useMessage";
 
 export default {
-  name: 'BindPhoneModal',
+  name: 'BindEmailModal',
   components: {
     CountdownInput,
     Input,
@@ -49,7 +49,7 @@ export default {
   setup(_, context) {
     const { createMessage } = useMessage();
     const userId = ref('');
-    const title = ref('更换密保手机');
+    const title = ref('更换密保邮箱');
     const openBindPhoneModal = ref(false);
     const labelCol = {
       xs: {span: 24},
@@ -60,9 +60,9 @@ export default {
       sm: {span: 16},
     };
     const formData = reactive({
-      phoneNumber: '',
-      oldPhoneNumber: '',
-      sms: '',
+      oldEmail: '',
+      email: '',
+      emailCode: '',
     });
     const confirmLoading = ref(false);
     const formRef = ref();
@@ -71,30 +71,30 @@ export default {
 
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width:600});
-      formData.oldPhoneNumber = data.phoneNumber
+      formData.oldEmail = data.email
       userId.value = data.id
     });
 
     const handleSubmit = async () => {
-      const pattern:any = /^(0|86|17951)?(13[0-9]|15[012356789]|16[6]|19[89]]|17[01345678]|18[0-9]|14[579])[0-9]{8}$/;
-      const valid = pattern.test(formData.phoneNumber);
+      const pattern:any = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+      const valid = pattern.test(formData.email);
       if(!valid) {
-        createMessage.info("请输入正确的手机号码");
+        createMessage.info("请输入正确的邮箱地址");
         return;
       }
-      if (!formData.sms) {
-        createMessage.info("请输入验证码");
+      if (!formData.emailCode) {
+        createMessage.info("请输入邮箱验证码");
         return;
       }
       validForm().then(async () => {
         const data: any = {
           userId: userId.value,
-          oldPhoneNumber: formData.oldPhoneNumber,
-          phoneNumber: formData.phoneNumber,
-          sms: formData.sms
+          oldEmail: formData.oldEmail,
+          email: formData.email,
+          emailCode: formData.emailCode
         };
-        const result = await resetPhoneNumber(data);
-        if (result.code === "A0016") {
+        const result = await resetEmail(data);
+        if (result.code === "A0017") {
           handleCancel();
         }
       })
@@ -102,20 +102,19 @@ export default {
 
     const handleCancel = () => {
       closeModal();
-      // 清空formData里的数据
-      formData.phoneNumber = '';
-      formData.sms = '';
+      formData.email = '';
+      formData.emailCode = '';
     };
 
     async function sendCodeApi() {
-      const pattern:any = /^(0|86|17951)?(13[0-9]|15[012356789]|16[6]|19[89]]|17[01345678]|18[0-9]|14[579])[0-9]{8}$/;
-      const valid = pattern.test(formData.phoneNumber);
+      const pattern:any = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+      const valid = pattern.test(formData.email);
       if(!valid) {
+        createMessage.info("请输入正确的邮箱地址");
         return Promise.resolve(false)
       }
-      // sen code
-      const result = await sendSmsRegister(3, formData.phoneNumber);
-      if (result.code !== "A0100") {
+      const result = await sendEmailCode(1, formData.email);
+      if (result.code !== "A0101") {
         return Promise.resolve(false)
       }
       return Promise.resolve(true)

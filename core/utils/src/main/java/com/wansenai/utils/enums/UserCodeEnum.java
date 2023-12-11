@@ -33,7 +33,7 @@ public enum UserCodeEnum {
 
     USER_REGISTER_PHONE_EXISTS("A0112", "当前手机号已注册，请直接登陆"),
 
-    PHONE_EXISTS("A0113", "当前手机号已被绑定使用"),
+    PHONE_EXISTS("A0113", "当前手机号已被绑定使用, 请更换新的手机号"),
 
     USERNAME_OR_PASSWORD_ERROR("A0210", "登录失败，用户名或密码错误"),
 
@@ -50,6 +50,14 @@ public enum UserCodeEnum {
     USER_ACCOUNT_INVALID("A0203", "用户账户已作废"),
 
     EMAIL_EXISTS("A0502", "当前邮箱已被绑定使用"),
+
+    USER_PHONE_UPDATE_SUCCESS("A0016", "用户手机号换绑成功"),
+
+    USER_PHONE_UPDATE_ERROR("A0503", "用户手机号换绑失败"),
+
+    USER_EMAIL_UPDATE_SUCCESS("A0017", "用户邮箱换绑成功"),
+
+    USER_EMAIL_UPDATE_ERROR("A0504", "用户邮箱换绑失败"),
 
     // user list table business
     USER_ADD_SUCCESS("A0002", "用户添加成功"),

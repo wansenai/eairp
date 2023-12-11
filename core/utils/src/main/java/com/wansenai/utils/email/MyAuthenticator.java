@@ -10,23 +10,26 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.utils.constants;
+package com.wansenai.utils.email;
 
-public interface SmsConstants {
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
 
-    String SMS_SIGN_NAME = "万森云服务";
+public class MyAuthenticator extends Authenticator {
 
-    int SMS_TEMPLATE_REGISTER_USER = 0;
+    String userName = null;
 
-    int SMS_TEMPLATE_PHONE_LOGIN = 1;
+    String password = null;
 
-    int SMS_TEMPLATE_UPDATE_PASSWORD = 2;
+    public MyAuthenticator() {
+    }
 
-    String SMS_TEMPLATE_ID_REGISTER_USER = "1933307";
+    public MyAuthenticator(String username, String password) {
+        this.userName = username;
+        this.password = password;
+    }
 
-    String SMS_TEMPLATE_ID_PHONE_LOGIN = "1934058";
-
-    String SMS_TEMPLATE_ID_UPDATE_PASSWORD = "1933311";
-
-    String SMS_TEMPLATE_ID_UPDATE_PHONE = "2015000";
+    protected PasswordAuthentication getPasswordAuthentication() {
+        return new PasswordAuthentication(userName, password);
+    }
 }

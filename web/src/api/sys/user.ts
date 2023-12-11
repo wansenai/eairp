@@ -5,7 +5,7 @@ import {
     LoginReq,
     LoginResp,
     mobileLoginReq, queryUserListReq,
-    registerReq, resetPasswordReq,
+    registerReq, resetEmailReq, resetPasswordReq, resetPhoneNumberReq,
     updatePasswordReq,
     updateUserInfoReq,
 } from './model/userModel';
@@ -20,6 +20,7 @@ enum Api {
     Logout = '/user/logout',
     Register = '/user/register',
     SMS = '/v2/common/sms',
+    EmailSMS = '/v2/common/email',
     UpdatePassword = '/user/updatePassword',
     GetUserInfo = '/user/info',
     GetPermCode = '/user/perm',
@@ -33,6 +34,8 @@ enum Api {
     GetUserOperatorList = '/user/operator',
     UpdateAvatar = '/user/uploadAvatar',
     UserUpdatePassword = '/user/userUpdatePassword',
+    ResetPhoneNumber = '/user/resetPhoneNumber',
+    ResetEmail = '/user/resetEmail',
 }
 
 /**
@@ -81,6 +84,18 @@ export function sendSmsRegister(type: number, phoneNumber: string, successMode: 
     return defHttp.get<BaseResp>(
         {
             url: `${Api.SMS}/${type}/${phoneNumber}`
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
+    )
+}
+
+export function sendEmailCode(type: number, email: string, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
+    return defHttp.get<BaseResp>(
+        {
+            url: `${Api.EmailSMS}/${type}/${email}`
         },
         {
             successMessageMode: successMode,
@@ -225,6 +240,32 @@ export function userUpdatePassword(params: resetPasswordReq) {
         {
             url: Api.UserUpdatePassword,
             params,
+        }
+    );
+}
+
+export function resetPhoneNumber(params: resetPhoneNumberReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
+    return defHttp.put<BaseResp>(
+        {
+            url: Api.ResetPhoneNumber,
+            params,
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
+    );
+}
+
+export function resetEmail(params: resetEmailReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
+    return defHttp.put<BaseResp>(
+        {
+            url: Api.ResetEmail,
+            params,
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
         }
     );
 }

@@ -55,6 +55,11 @@ public class CommonController {
         return Response.responseMsg(BaseCodeEnum.SMS_VERIFY_SEND_SUCCESS);
     }
 
+    @GetMapping("email/{type}/{email}")
+    public Response<String> sendEmailCode(@PathVariable Integer type, @PathVariable String email) {
+        return commonService.sendEmailCode(type, email);
+    }
+
     @PostMapping("upload/excel")
     public Response<String> uploadExclsData(@RequestParam("file") MultipartFile file) {
         return commonService.uploadExclsData(file);

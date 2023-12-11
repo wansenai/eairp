@@ -99,7 +99,7 @@ export const secureSettingList: ListItem[] = [
   },
   {
     key: '3',
-    title: '备用邮箱',
+    title: '密保邮箱',
     description: '已绑定邮箱：',
     extra: '修改',
   },

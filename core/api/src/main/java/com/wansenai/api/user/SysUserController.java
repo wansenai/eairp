@@ -123,4 +123,14 @@ public class SysUserController {
     public Response<String> resetPassword(@RequestParam(value = "id") Long id) {
         return userService.resetPassword(id);
     }
+
+    @PutMapping(value = "resetPhoneNumber")
+    public Response<String> resetPhoneNumber(@RequestBody ResetPhoneDTO resetPhoneDTO) {
+        return userService.resetPhoneNumber(resetPhoneDTO);
+    }
+
+    @PutMapping(value = "resetEmail")
+    public Response<String> resetEmail(@RequestBody ResetEmailDTO resetEmailDTO) {
+        return userService.resetEmail(resetEmailDTO);
+    }
 }

@@ -10,23 +10,25 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.utils.constants;
+package com.wansenai.utils.email;
 
-public interface SmsConstants {
+import lombok.Builder;
+import lombok.Data;
 
-    String SMS_SIGN_NAME = "万森云服务";
+@Data
+@Builder
+public class SendEmailMessage {
 
-    int SMS_TEMPLATE_REGISTER_USER = 0;
-
-    int SMS_TEMPLATE_PHONE_LOGIN = 1;
-
-    int SMS_TEMPLATE_UPDATE_PASSWORD = 2;
-
-    String SMS_TEMPLATE_ID_REGISTER_USER = "1933307";
-
-    String SMS_TEMPLATE_ID_PHONE_LOGIN = "1934058";
-
-    String SMS_TEMPLATE_ID_UPDATE_PASSWORD = "1933311";
-
-    String SMS_TEMPLATE_ID_UPDATE_PHONE = "2015000";
+    // 格式类型，如 text/html;charset=gbk
+    private String type;
+    // 发送人
+    private String from;
+    // 主题
+    private String subject;
+    // 内容
+    private String text;
+    // 接收人，多个接收人用逗号分隔
+    private String recipient;
+    // 发送时间
+    private String datetime;
 }
