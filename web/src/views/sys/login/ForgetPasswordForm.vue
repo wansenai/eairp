@@ -97,7 +97,7 @@ async function sendCodeApi(): Promise<boolean> {
   }
   // send code
   const result = await sendSmsRegister(2, formData.phoneNumber);
-  if (result.code !== "A0002") {
+  if (result.code !== "A0100") {
     return Promise.resolve(false)
   }
   return Promise.resolve(true)
