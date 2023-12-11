@@ -137,7 +137,7 @@
     }
     // sen code
     const result = await sendSmsRegister(0, formData.phoneNumber);
-    if (result.code !== "A0002") {
+    if (result.code !== "A0100") {
       return Promise.resolve(false)
     }
     return Promise.resolve(true)

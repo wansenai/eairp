@@ -869,4 +869,68 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
         return Response.responseData(result);
     }
+
+    @Override
+    public Response<String> resetPhoneNumber(ResetPhoneDTO resetPhoneDTO) {
+        var verifyCode = redisUtil.getString(SecurityConstants.UPDATE_PHONE_VERIFY_CODE_CACHE_PREFIX + resetPhoneDTO.getPhoneNumber());
+        if (ObjectUtils.isEmpty(verifyCode)) {
+            return Response.responseMsg(BaseCodeEnum.SMS_VERIFY_CODE_EXPIRE);
+        }
+
+        if (!verifyCode.equals(resetPhoneDTO.getSms())) {
+            return Response.responseMsg(BaseCodeEnum.SMS_VERIFY_CODE_ERROR);
+        }
+
+        var phoneExist = lambdaQuery()
+                .eq(SysUser::getId, resetPhoneDTO.getUserId())
+                .eq(SysUser::getPhoneNumber, resetPhoneDTO.getPhoneNumber())
+                .one();
+        if (phoneExist == null) {
+            if(checkPhoneNumberExist(resetPhoneDTO.getPhoneNumber())) {
+                return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
+            }
+        }
+
+        var updateResult = lambdaUpdate()
+                .eq(SysUser::getId, resetPhoneDTO.getUserId())
+                .set(SysUser::getPhoneNumber, resetPhoneDTO.getPhoneNumber())
+                .update();
+
+        if(updateResult) {
+            return Response.responseMsg(UserCodeEnum.USER_PHONE_UPDATE_SUCCESS);
+        }
+        return Response.responseMsg(UserCodeEnum.USER_PHONE_UPDATE_ERROR);
+    }
+
+    @Override
+    public Response<String> resetEmail(ResetEmailDTO resetEmailDTO) {
+        var verifyCode = redisUtil.getString(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + resetEmailDTO.getEmail());
+        if (ObjectUtils.isEmpty(verifyCode)) {
+            return Response.responseMsg(BaseCodeEnum.EMAIL_VERIFY_CODE_EXPIRE);
+        }
+
+        if (!verifyCode.equals(resetEmailDTO.getEmailCode())) {
+            return Response.responseMsg(BaseCodeEnum.EMAIL_VERIFY_CODE_ERROR);
+        }
+
+        var emailExist = lambdaQuery()
+                .eq(SysUser::getId, resetEmailDTO.getUserId())
+                .eq(SysUser::getEmail, resetEmailDTO.getEmail())
+                .one();
+        if (emailExist == null) {
+            if(checkPhoneNumberExist(resetEmailDTO.getEmail())) {
+                return Response.responseMsg(UserCodeEnum.EMAIL_EXISTS);
+            }
+        }
+
+        var updateResult = lambdaUpdate()
+                .eq(SysUser::getId, resetEmailDTO.getUserId())
+                .set(SysUser::getEmail, resetEmailDTO.getEmail())
+                .update();
+
+        if(updateResult) {
+            return Response.responseMsg(UserCodeEnum.USER_EMAIL_UPDATE_SUCCESS);
+        }
+        return Response.responseMsg(UserCodeEnum.USER_EMAIL_UPDATE_ERROR);
+    }
 }

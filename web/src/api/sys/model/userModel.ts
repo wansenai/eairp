@@ -40,6 +40,20 @@ export interface resetPasswordReq {
   newPassword: string;
 }
 
+export interface resetPhoneNumberReq {
+  userId: number | string;
+  oldPhoneNumber: string;
+  phoneNumber: string;
+  sms: string;
+}
+
+export interface resetEmailReq {
+  userId: number | string;
+  oldEmail: string;
+  email: string;
+  emailCode: string;
+}
+
 export interface updateUserInfoReq {
   id: number | string;
   name: string;

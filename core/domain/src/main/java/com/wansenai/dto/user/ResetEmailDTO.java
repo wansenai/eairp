@@ -10,23 +10,18 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.utils.constants;
+package com.wansenai.dto.user;
 
-public interface SmsConstants {
+import lombok.Data;
 
-    String SMS_SIGN_NAME = "万森云服务";
+@Data
+public class ResetEmailDTO {
 
-    int SMS_TEMPLATE_REGISTER_USER = 0;
+    private Long userId;
 
-    int SMS_TEMPLATE_PHONE_LOGIN = 1;
+    private String oldEmail;
 
-    int SMS_TEMPLATE_UPDATE_PASSWORD = 2;
+    private String email;
 
-    String SMS_TEMPLATE_ID_REGISTER_USER = "1933307";
-
-    String SMS_TEMPLATE_ID_PHONE_LOGIN = "1934058";
-
-    String SMS_TEMPLATE_ID_UPDATE_PASSWORD = "1933311";
-
-    String SMS_TEMPLATE_ID_UPDATE_PHONE = "2015000";
+    private String emailCode;
 }

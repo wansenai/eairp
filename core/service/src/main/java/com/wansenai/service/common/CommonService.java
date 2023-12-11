@@ -25,6 +25,8 @@ public interface CommonService {
     CaptchaVO getCaptcha();
     Boolean sendSmsCode(Integer type, String phoneNumber);
 
+    Response<String> sendEmailCode(Integer type, String email);
+
     Response<String> uploadExclsData(MultipartFile file);
 
     File exportExcel(String type);

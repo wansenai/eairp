@@ -12,21 +12,19 @@
  */
 package com.wansenai.utils.constants;
 
-public interface SmsConstants {
+public interface EmailConstant {
 
-    String SMS_SIGN_NAME = "万森云服务";
+    /** 邮箱域 */
+    String EMAIL_HOST = "smtp.163.com";
 
-    int SMS_TEMPLATE_REGISTER_USER = 0;
+    String EMAIL_USER_NAME = "wanstech@163.com";
 
-    int SMS_TEMPLATE_PHONE_LOGIN = 1;
+    /** 邮箱授权码 */
+    String EMAIL_PASSWORD = "YSWXSMYYQSVDSBYL";
 
-    int SMS_TEMPLATE_UPDATE_PASSWORD = 2;
+    /** 邮件HMAC256加密算法头字符串 */
+    String EMAIL_HMAC256_TOKEN_HEAD = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
 
-    String SMS_TEMPLATE_ID_REGISTER_USER = "1933307";
-
-    String SMS_TEMPLATE_ID_PHONE_LOGIN = "1934058";
-
-    String SMS_TEMPLATE_ID_UPDATE_PASSWORD = "1933311";
-
-    String SMS_TEMPLATE_ID_UPDATE_PHONE = "2015000";
+    /** 邮件HMAC256加密算法ayload字符串 */
+    String EMAIL_HMAC256_TOKEN_PAYLOAD = "eyJsb2dpbkVtYWlsIjoiemhhb3dlaUBpaHVwLm9yZy5jbiIsImV4cCI6MTYwMDg0MDUyOSwidXNlcm5hbWUiOiJ6aGFvd2VpIn0";
 }

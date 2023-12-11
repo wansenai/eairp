@@ -37,9 +37,15 @@ public enum BaseCodeEnum {
 
     SMS_VERIFY_CODE_EXPIRE("A0243", "短信校验码已过期"),
 
-    SMS_VERIFY_SEND_SUCCESS("A0002", "短信验证码发送成功"),
+    SMS_VERIFY_SEND_SUCCESS("A0100", "短信验证码发送成功"),
 
     SMS_VERIFY_CODE_ERROR("A0131", "短信校验码错误"),
+
+    EMAIL_VERIFY_CODE_EXPIRE("A0244", "邮箱验证码已过期"),
+
+    EMAIL_VERIFY_SEND_SUCCESS("A0101", "邮箱验证码发送成功"),
+
+    EMAIL_VERIFY_CODE_ERROR("A0132", "邮箱验证码错误"),
 
     PHONE_NUMBER_FORMAT_ERROR("A0131", "手机格式校验失败"),
 
