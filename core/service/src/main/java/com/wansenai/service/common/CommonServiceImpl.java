@@ -33,6 +33,7 @@ import com.wansenai.utils.FileUtil;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.utils.constants.SecurityConstants;
 import com.wansenai.utils.constants.SmsConstants;
+import com.wansenai.utils.email.EmailUtils;
 import com.wansenai.utils.enums.*;
 import com.wansenai.utils.redis.RedisUtil;
 import com.wansenai.utils.response.Response;
@@ -179,6 +180,7 @@ public class CommonServiceImpl implements CommonService{
             case 0 -> SmsConstants.SMS_TEMPLATE_ID_REGISTER_USER;
             case 1 -> SmsConstants.SMS_TEMPLATE_ID_PHONE_LOGIN;
             case 2 -> SmsConstants.SMS_TEMPLATE_ID_UPDATE_PASSWORD;
+            case 3 -> SmsConstants.SMS_TEMPLATE_ID_UPDATE_PHONE;
             default -> "";
         };
 
@@ -186,6 +188,7 @@ public class CommonServiceImpl implements CommonService{
             case 0 -> SecurityConstants.REGISTER_VERIFY_CODE_CACHE_PREFIX;
             case 1 -> SecurityConstants.LOGIN_VERIFY_CODE_CACHE_PREFIX;
             case 2 -> SecurityConstants.UPDATE_PASSWORD_VERIFY_CODE_CACHE_PREFIX;
+            case 3 -> SecurityConstants.UPDATE_PHONE_VERIFY_CODE_CACHE_PREFIX;
             default -> "";
         };
 
@@ -220,6 +223,49 @@ public class CommonServiceImpl implements CommonService{
             log.error(String.format("用户手机号:%s, 验证码发送失败，错误消息:%s", phoneNumber, e.getMessage()));
             return false;
         }
+    }
+
+    public static String getForgetCode() {
+        Random random = new Random();
+        //把随机生成的数字转成字符串
+        String str = String.valueOf(random.nextInt(9));
+        for (int i = 0; i < 5; i++) {
+            str += random.nextInt(9);
+        }
+        return str;
+    }
+
+    @Override
+    public Response<String> sendEmailCode(Integer type, String email) {
+        if (!StringUtils.hasLength(email)) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        String resultCode = "";
+        if (redisUtil.hasKey(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + email)) {
+            resultCode = redisUtil.getString(email + ":forget_code");
+        } else {
+            resultCode = getForgetCode();
+            redisUtil.set(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + email, resultCode);
+            redisUtil.expire(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + email, 180);
+        }
+
+        try {
+            switch (type)
+            {
+                case 0:
+                    EmailUtils.forgetPasswordEmailNotice(resultCode, email);
+                    break;
+                case 1:
+                    EmailUtils.resetEmailNotice(resultCode, email);
+                    break;
+                default:
+                    break;
+            }
+        }catch (Exception e) {
+            log.error("邮箱验证码发送失败：" + e.getMessage());
+        }
+
+        return Response.responseMsg(BaseCodeEnum.EMAIL_VERIFY_SEND_SUCCESS);
     }
 
     @Override

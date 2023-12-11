@@ -27,4 +27,6 @@ public interface SmsConstants {
     String SMS_TEMPLATE_ID_PHONE_LOGIN = "1934058";
 
     String SMS_TEMPLATE_ID_UPDATE_PASSWORD = "1933311";
+
+    String SMS_TEMPLATE_ID_UPDATE_PHONE = "2015000";
 }
