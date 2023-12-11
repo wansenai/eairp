@@ -15,21 +15,13 @@ package com.wansenai.dto.user;
 import lombok.Data;
 
 @Data
-public class UpdateUserDTO {
+public class ResetPasswordDTO {
 
     private Long id;
 
-    private String name;
+    private String userName;
 
-    private Integer status;
+    private String password;
 
-    private String email;
-
-    private String phoneNumber;
-
-    private String position;
-
-    private Integer leaderFlag;
-
-    private String description;
+    private String newPassword;
 }

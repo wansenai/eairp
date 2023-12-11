@@ -1,23 +1,25 @@
-import { UploadApiResult } from './model/uploadModel';
 import { defHttp } from '/@/utils/http/axios';
-import { UploadFileParams } from '/#/axios';
-import { useGlobSetting } from '/@/hooks/setting';
-import { AxiosProgressEvent } from 'axios';
+import {ErrorMessageMode, SuccessMessageMode, UploadFileParams} from '/#/axios';
+import {BaseResp} from "@/api/model/baseModel";
+import {ContentTypeEnum} from "@/enums/httpEnum";
 
-const { uploadUrl = '' } = useGlobSetting();
+enum Api {
+    UploadOss = '/v2/common/uploadOss',
+}
 
-/**
- * @description: Upload interface
- */
-export function uploadApi(
-    params: UploadFileParams,
-    onUploadProgress: (progressEvent: AxiosProgressEvent) => void,
-) {
-    return defHttp.uploadFile<UploadApiResult>(
+export function uploadApi(params: UploadFileParams, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
+    return defHttp.post<BaseResp>(
         {
-            url: uploadUrl,
-            onUploadProgress,
-        },
-        params,
+            url: Api.UploadOss,
+            params,
+            headers: {
+                'Content-type': ContentTypeEnum.FORM_DATA,
+                // @ts-ignore
+                ignoreCancelToken: true,
+            },
+        },{
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
     );
 }

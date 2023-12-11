@@ -14,9 +14,13 @@ package com.wansenai.service.user.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.entities.system.SysPlatformConfig;
 import com.wansenai.entities.warehouse.Warehouse;
 import com.wansenai.mappers.warehouse.WarehouseMapper;
+import com.wansenai.middleware.oss.TencentOSS;
+import com.wansenai.service.system.ISysPlatformConfigService;
 import com.wansenai.utils.CommonTools;
+import com.wansenai.utils.FileUtil;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.dto.user.*;
 import com.wansenai.utils.constants.*;
@@ -52,9 +56,11 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -88,8 +94,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private final WarehouseMapper warehouseMapper;
 
+    private final ISysPlatformConfigService platformConfigService;
+
     public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService,
-                              ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper, SysMenuMapper menuMapper, SysRoleMenuRelService roleMenuRelService, WarehouseMapper warehouseMapper) {
+                              ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper, SysMenuMapper menuMapper, SysRoleMenuRelService roleMenuRelService, WarehouseMapper warehouseMapper, ISysPlatformConfigService platformConfigService) {
         this.userMapper = userMapper;
         this.redisUtil = redisUtil;
         this.jwtUtil = jwtUtil;
@@ -100,6 +108,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         this.menuMapper = menuMapper;
         this.roleMenuRelService = roleMenuRelService;
         this.warehouseMapper = warehouseMapper;
+        this.platformConfigService = platformConfigService;
     }
 
 
@@ -357,6 +366,31 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    public Response<String> resetPassword(ResetPasswordDTO resetPasswordDto) {
+        if(!StringUtils.hasLength(resetPasswordDto.getNewPassword()) || !StringUtils.hasLength(resetPasswordDto.getPassword())) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var user = lambdaQuery()
+                .eq(SysUser::getId, resetPasswordDto.getId())
+                .eq(SysUser::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
+        if(user == null) {
+            return Response.responseMsg(UserCodeEnum.USER_NOT_EXISTS);
+        }
+        if(!user.getPassword().equals(CommonTools.md5Encryp(resetPasswordDto.getPassword()))) {
+            return Response.responseMsg(UserCodeEnum.USER_PASSWORD_ERROR);
+        }
+        var result = lambdaUpdate()
+                .eq(SysUser::getId, resetPasswordDto.getId())
+                .set(SysUser::getPassword, CommonTools.md5Encryp(resetPasswordDto.getNewPassword()))
+                .update();
+        if(!result) {
+            return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_ERROR);
+        }
+        return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_SUCCESS);
+    }
+
+    @Override
     public Response<UserInfoVO> userInfo() {
         var user = getCurrentUser();
         if (user == null) {
@@ -388,6 +422,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 return UserInfoVO.builder()
                         .id(user.getId())
                         .name(user.getName())
+                        .email(user.getEmail())
+                        .position(user.getPosition())
+                        .description(user.getDescription())
+                        .phoneNumber(user.getPhoneNumber())
                         .userName(user.getUserName())
                         .avatar(user.getAvatar())
                         .build();
@@ -561,12 +599,33 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
 
+        var phoneExist = lambdaQuery()
+                .eq(SysUser::getId, updateUserDTO.getId())
+                .eq(SysUser::getPhoneNumber, updateUserDTO.getPhoneNumber())
+                .one();
+        if (phoneExist == null) {
+            if(checkPhoneNumberExist(updateUserDTO.getPhoneNumber())) {
+                return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
+            }
+        }
+        var existEmail = lambdaQuery()
+                .eq(SysUser::getEmail, updateUserDTO.getEmail())
+                .eq(SysUser::getId, updateUserDTO.getId())
+                .one();
+
+        if (existEmail == null) {
+            if(checkEmailExist(updateUserDTO.getEmail())) {
+                return Response.responseMsg(UserCodeEnum.EMAIL_EXISTS);
+            }
+        }
+
         var updateResult = lambdaUpdate()
                 .eq(SysUser::getId, updateUserDTO.getId())
-                .set(StringUtils.hasText(updateUserDTO.getName()), SysUser::getName, updateUserDTO.getName())
-                .set(StringUtils.hasText(updateUserDTO.getEmail()), SysUser::getEmail, updateUserDTO.getEmail())
-                .set(StringUtils.hasText(updateUserDTO.getPhoneNumber()), SysUser::getPhoneNumber, updateUserDTO.getPhoneNumber())
-                .set(StringUtils.hasText(updateUserDTO.getPosition()), SysUser::getPosition, updateUserDTO.getPosition())
+                .set(SysUser::getName, updateUserDTO.getName())
+                .set(SysUser::getEmail, updateUserDTO.getEmail())
+                .set(SysUser::getPhoneNumber, updateUserDTO.getPhoneNumber())
+                .set(SysUser::getPosition, updateUserDTO.getPosition())
+                .set(SysUser::getDescription, updateUserDTO.getDescription())
                 .set(null != updateUserDTO.getStatus(), SysUser::getStatus, updateUserDTO.getStatus())
                 .update();
 
@@ -575,6 +634,46 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
 
         return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS);
+    }
+
+    @Override
+    public Response<String> uploadAvatar(MultipartFile file, Long userId, String name) {
+        if (userId == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var platform = platformConfigService.list().stream().filter(item -> item.getPlatformKey().startsWith("tencent_oss")).toList();
+        var ossInfoMap = platform.stream().collect(Collectors.toMap(SysPlatformConfig::getPlatformKey, SysPlatformConfig::getPlatformValue));
+
+        if (ossInfoMap.get("tencent_oss_secret_id") == null || ossInfoMap.get("tencent_oss_secret_key") == null
+                || ossInfoMap.get("tencent_oss_region") == null || ossInfoMap.get("tencent_oss_bucket") == null) {
+            return Response.responseMsg(BaseCodeEnum.OSS_KEY_NOT_EXIST);
+        }
+
+        TencentOSS.getInstance().setBucket(ossInfoMap.get("tencent_oss_bucket"));
+        TencentOSS.getInstance().setRegion(ossInfoMap.get("tencent_oss_region"));
+        TencentOSS.getInstance().setSecretid(ossInfoMap.get("tencent_oss_secret_id"));
+        TencentOSS.getInstance().setSecretkey(ossInfoMap.get("tencent_oss_secret_key"));
+        var instance = TencentOSS.getInstance();
+        if(instance == null) {
+            return Response.responseMsg(BaseCodeEnum.OSS_GET_INSTANCE_ERROR);
+        }
+        try {
+            var key = "temp" + "_" + SnowflakeIdUtil.nextId() + "_" + name;
+            var result = instance.upload(FileUtil.convertMultipartFilesToFile(file), key);
+            log.info("上传文件信息: " + result);
+
+            var updateResult = lambdaUpdate()
+                    .eq(SysUser::getId, userId)
+                    .set(SysUser::getAvatar, result)
+                    .update();
+            if (updateResult) {
+                return Response.responseData(result);
+            }
+            return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+        }catch (Exception e) {
+            log.error("上传文件失败: " + e.getMessage());
+            return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+        }
     }
 
     private Boolean checkUserNameExist(String userName) {
@@ -586,6 +685,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     private Boolean checkPhoneNumberExist(String phoneNumber) {
         return lambdaQuery()
                 .eq(SysUser::getPhoneNumber, phoneNumber)
+                .exists();
+    }
+
+    private Boolean checkEmailExist(String email) {
+        return lambdaQuery()
+                .eq(SysUser::getEmail, email)
                 .exists();
     }
 

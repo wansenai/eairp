@@ -29,9 +29,11 @@ public enum UserCodeEnum {
 
     USER_NOT_EXISTS("A0201", "用户账户不存在"),
 
+    USER_PASSWORD_ERROR("A0218", "用户旧密码错误，请检查重新输入"),
+
     USER_REGISTER_PHONE_EXISTS("A0112", "当前手机号已注册，请直接登陆"),
 
-    PHONE_EXISTS("A0113", "当前手机号已存在"),
+    PHONE_EXISTS("A0113", "当前手机号已被绑定使用"),
 
     USERNAME_OR_PASSWORD_ERROR("A0210", "登录失败，用户名或密码错误"),
 
@@ -46,6 +48,8 @@ public enum UserCodeEnum {
     USER_ACCOUNT_FREEZE("A0202", "用户账户被冻结"),
 
     USER_ACCOUNT_INVALID("A0203", "用户账户已作废"),
+
+    EMAIL_EXISTS("A0502", "当前邮箱已被绑定使用"),
 
     // user list table business
     USER_ADD_SUCCESS("A0002", "用户添加成功"),

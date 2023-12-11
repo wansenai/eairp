@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.wansenai.vo.UserInfoVO;
 import com.wansenai.vo.UserListVO;
 import com.wansenai.vo.UserRoleVO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -37,6 +38,8 @@ public interface ISysUserService extends IService<SysUser> {
     Response<UserInfoVO> mobileLogin(MobileLoginDTO mobileLoginDto);
 
     Response<String> updatePassword(UpdatePasswordDto updatePasswordDto);
+
+    Response<String> resetPassword(ResetPasswordDTO resetPasswordDto);
 
     Response<UserInfoVO> userInfo();
 
@@ -57,6 +60,8 @@ public interface ISysUserService extends IService<SysUser> {
     Response<List<UserListVO>> userListAll();
 
     Response<String> updateUser(UpdateUserDTO updateUserDTO);
+
+    Response<String> uploadAvatar(MultipartFile file, Long userId, String name);
 
     Response<String> addOrUpdate(AddOrUpdateUserDTO addOrUpdateUserDTO);
 

@@ -33,6 +33,13 @@ export interface updatePasswordReq {
   sms: number;
 }
 
+export interface resetPasswordReq {
+  id: number | string;
+  userName: string;
+  password: string;
+  newPassword: string;
+}
+
 export interface updateUserInfoReq {
   id: number | string;
   name: string;

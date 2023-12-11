@@ -21,6 +21,7 @@ import com.wansenai.vo.UserInfoVO;
 import com.wansenai.vo.UserListVO;
 import com.wansenai.vo.UserRoleVO;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.List;
@@ -63,6 +64,11 @@ public class SysUserController {
         return userService.updatePassword(updatePasswordDto);
     }
 
+    @PutMapping(value = "userUpdatePassword")
+    public Response<String> userUpdatePassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+        return userService.resetPassword(resetPasswordDTO);
+    }
+
     @GetMapping(value = "operator")
     public Response<List<UserInfoVO>> operator() {
         return userService.operator();
@@ -96,6 +102,11 @@ public class SysUserController {
     @PostMapping(value = "update")
     public Response<String> update(@RequestBody UpdateUserDTO updateUserDTO) {
         return userService.updateUser(updateUserDTO);
+    }
+
+    @PostMapping("uploadAvatar")
+    public Response<String> uploadAvatar(@RequestParam("file") MultipartFile file, @RequestParam("userId") Long userId, @RequestParam("name") String name) {
+        return userService.uploadAvatar(file, userId, name);
     }
 
     @PostMapping(value = "addOrUpdate")
