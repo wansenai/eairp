@@ -70,4 +70,8 @@ public interface ISysUserService extends IService<SysUser> {
     Response<String> resetPassword(Long id);
 
     Response<List<UserInfoVO>> operator();
+
+    Response<String> resetPhoneNumber(ResetPhoneDTO resetPhoneDTO);
+
+    Response<String> resetEmail(ResetEmailDTO resetEmailDTO);
 }
