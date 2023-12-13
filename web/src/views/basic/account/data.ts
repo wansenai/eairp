@@ -43,33 +43,6 @@ export const baseSetSchemas: FormSchema[] = [
     required: true,
   },
   {
-    field: 'phoneNumber',
-    component: 'Input',
-    label: '联系电话',
-    colProps: { span: 18 },
-    rules: [
-      {
-        required: true,
-        pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|16[6]|19[89]]|17[01345678]|18[0-9]|14[579])[0-9]{8}$/,
-        message: "请输入正确的手机号",
-        trigger: 'change',
-      }
-    ],
-  },
-  {
-    field: 'email',
-    component: 'Input',
-    label: '邮箱',
-    colProps: { span: 18 },
-    rules: [
-      {
-        pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-        message: "请输入正确的邮箱",
-        trigger: 'change',
-      }
-    ],
-  },
-  {
     field: 'position',
     component: 'Input',
     label: '职位',
@@ -118,7 +91,7 @@ export const resetPasswordFormSchema: FormSchema[] = [
     ifShow: false,
   },
   {
-    label: '旧密码',
+    label: '原密码',
     field: 'password',
     component: 'InputPassword',
     required: true,
