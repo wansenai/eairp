@@ -114,7 +114,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
 
   import { useUserStore } from '/@/store/modules/user';
-  import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
+  import { LoginStateEnum, useLoginState, useFormRules, useFormValid, encryptByAES} from './useLogin';
   import { useDesign } from '/@/hooks/web/useDesign';
   import {PageEnum} from "@/enums/pageEnum";
   import {useGo} from "@/hooks/web/usePage";
@@ -157,9 +157,12 @@
     const data = await validForm();
     if (!data) return;
     loading.value = true;
+
+    const secretKey = 'QsCdA/3d8CkxZ6k5c6eA61==';
+    const encryptedPassword = encryptByAES(data.password, secretKey);
     userStore
       .login({
-        password: data.password,
+        password: encryptedPassword,
         username: data.account,
         captcha: data.captcha,
         captchaId: data.captchaId,
