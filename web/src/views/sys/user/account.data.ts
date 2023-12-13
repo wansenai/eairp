@@ -162,7 +162,6 @@ export const accountFormSchema: FormSchema[] = [
     field: 'email',
     label: t('sys.login.email'),
     component: 'Input',
-    required: true,
   },
   {
     field: 'remark',
