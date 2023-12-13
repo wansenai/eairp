@@ -75,10 +75,10 @@
   import { CountdownInput } from '/@/components/CountDown';
   import { useI18n } from '/@/hooks/web/useI18n';
   import {
-      useLoginState,
-      useFormRules,
-      useFormValid,
-      LoginStateEnum,
+    useLoginState,
+    useFormRules,
+    useFormValid,
+    LoginStateEnum, encryptByAES,
   } from './useLogin';
   import {register, sendSmsRegister} from '/@/api/sys/user'
 
@@ -110,9 +110,11 @@
     console.log(data);
     loading.value = true;
 
+    const secretKey = '7Fd2u4qF/3k0z6O1c9AeC7==';
+    const encryptedPassword = encryptByAES(data.password, secretKey);
     const result = await register({
       username: data.username,
-      password: data.password,
+      password: encryptedPassword,
       phoneNumber: data.phoneNumber,
       sms: data.sms,
     });

@@ -209,6 +209,6 @@ open class MemberServiceImpl(
                 return null;
             }
             return member
-        } ?: null
+        }
     }
 }
