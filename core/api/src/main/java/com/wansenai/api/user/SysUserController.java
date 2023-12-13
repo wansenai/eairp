@@ -55,7 +55,7 @@ public class SysUserController {
     }
 
     @PostMapping(value = "mobileLogin")
-    public Response<UserInfoVO> accountLogin(@RequestBody MobileLoginDTO mobileLoginDto) {
+    public Response<UserInfoVO> mobileLogin(@RequestBody MobileLoginDTO mobileLoginDto) {
         return userService.mobileLogin(mobileLoginDto);
     }
 

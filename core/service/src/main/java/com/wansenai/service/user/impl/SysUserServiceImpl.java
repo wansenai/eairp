@@ -20,6 +20,7 @@ import com.wansenai.mappers.warehouse.WarehouseMapper;
 import com.wansenai.middleware.oss.TencentOSS;
 import com.wansenai.service.system.ISysPlatformConfigService;
 import com.wansenai.utils.CommonTools;
+import com.wansenai.utils.CryptoUtils;
 import com.wansenai.utils.FileUtil;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.dto.user.*;
@@ -137,13 +138,25 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             return Response.responseMsg(UserCodeEnum.USER_REGISTER_PHONE_EXISTS);
         }
 
+        var password = "";
+        try {
+            password = CryptoUtils.decryptSymmetrically(SecurityConstants.REGISTER_SECURITY_KEY, null,
+                    accountRegisterDto.getPassword(), CryptoUtils.Algorithm.Encryption.AES_ECB_PKCS5);
+        } catch (Exception e) {
+            log.error("密码解密失败: " + e.getMessage());
+        }
+
+        if (!StringUtils.hasLength(password)) {
+            return Response.responseMsg(BaseCodeEnum.ERROR.getCode(), "密码解密失败");
+        }
+
         // start register
         var userId = SnowflakeIdUtil.nextId();
         var user = SysUser.builder()
                 .id(userId)
                 .userName(accountRegisterDto.getUsername())
                 .name("测试租户")
-                .password(CommonTools.md5Encryp(accountRegisterDto.getPassword()))
+                .password(CommonTools.md5Encryp(password))
                 .phoneNumber(accountRegisterDto.getPhoneNumber())
                 .tenantId(userId)
                 .createTime(LocalDateTime.now())
@@ -230,7 +243,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public Response<UserInfoVO> accountLogin(AccountLoginDTO accountLoginDto) {
+    public Response<UserInfoVO> accountLogin(AccountLoginDTO accountLoginDto){
 
         var verifyCode = redisUtil.get(SecurityConstants.EMAIL_VERIFY_CODE_CACHE_PREFIX + accountLoginDto.getCaptchaId());
         if (ObjectUtils.isEmpty(verifyCode)) {
@@ -240,10 +253,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (!String.valueOf(verifyCode).equals(accountLoginDto.getCaptcha())) {
             return Response.responseMsg(BaseCodeEnum.VERIFY_CODE_ERROR);
         }
-
+        var password = "";
+        try {
+            password = CryptoUtils.decryptSymmetrically(SecurityConstants.LOGIN_SECURITY_KEY, null,
+                    accountLoginDto.getPassword(), CryptoUtils.Algorithm.Encryption.AES_ECB_PKCS5);
+        } catch (Exception e) {
+            log.error("密码解密失败: " + e.getMessage());
+            return Response.responseMsg(UserCodeEnum.USERNAME_OR_PASSWORD_ERROR);
+        }
         var user = lambdaQuery()
                 .eq(SysUser::getUserName, accountLoginDto.getUsername())
-                .eq(SysUser::getPassword, CommonTools.md5Encryp(accountLoginDto.getPassword()))
+                .eq(SysUser::getPassword, CommonTools.md5Encryp(password))
                 .one();
 
         if (user == null) {
