@@ -108,8 +108,8 @@ export default {
     roleName: '角色',
     department: '所属部门',
     remake: '备注',
-    addAccount: '新增账号',
-    editAccount: '编辑账号',
+    addAccount: '新增账户',
+    editAccount: '编辑账户',
 
     // 用户数据表格操作
     viewUserDetails: '查看用户详情',
