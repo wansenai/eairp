@@ -19,6 +19,7 @@ import com.wansenai.dto.basic.QueryMemberDTO
 import com.wansenai.entities.basic.Member
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.MemberVO
+import jakarta.servlet.http.HttpServletResponse
 import java.math.BigDecimal
 
 interface MemberService: IService<Member> {
@@ -33,9 +34,11 @@ interface MemberService: IService<Member> {
 
     fun batchAddMember(members: List<Member>?): Boolean
 
-    fun getMemberList(): Response<List<MemberVO>>
+    fun getMemberList(memberDTO: QueryMemberDTO?): Response<List<MemberVO>>
 
     fun updateAdvanceChargeAmount(memberId: Long?, amount: BigDecimal): Boolean
 
     fun getMemberById(memberId: Long?): Member?
+
+    fun exportMemberData(memberDTO: QueryMemberDTO?, response: HttpServletResponse)
 }
