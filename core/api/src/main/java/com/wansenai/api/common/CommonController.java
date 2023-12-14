@@ -12,8 +12,11 @@
  */
 package com.wansenai.api.common;
 
+import com.wansenai.api.RateLimitException;
+import com.wansenai.api.config.RateLimiter;
 import com.wansenai.service.common.CommonService;
 import com.wansenai.utils.ExcelUtil;
+import com.wansenai.utils.enums.LimitType;
 import com.wansenai.utils.response.Response;
 import com.wansenai.utils.constants.ApiVersionConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
@@ -46,7 +49,13 @@ public class CommonController {
         return Response.responseData(captchaVo);
     }
 
+    @ExceptionHandler(RateLimitException.class)
+    public Response<String> handleRateLimitException(RateLimitException ex) {
+        return Response.responseMsg(BaseCodeEnum.FREQUENT_SYSTEM_ACCESS);
+    }
+
     @GetMapping("sms/{type}/{phoneNumber}")
+    @RateLimiter(key = "sms", time = 120, count = 1, limitType = LimitType.IP)
     public Response<String> sendSmsCode(@PathVariable Integer type, @PathVariable String phoneNumber) {
         boolean result = commonService.sendSmsCode(type, phoneNumber);
         if(!result) {
