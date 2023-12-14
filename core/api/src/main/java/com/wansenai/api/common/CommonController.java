@@ -74,7 +74,18 @@ public class CommonController {
         return commonService.uploadExclsData(file);
     }
 
+    /**
+     * @deprecatedjavadoc
+     *
+     * At present, exporting requires filtering based on query conditions, and the exportExcel method exports all data.
+     * It is more of a universal export method, and the implementation class of the method needs to match the array
+     * index mapping of exported columns, which is very complex. Therefore, it will be removed in the next version
+     *
+     * @param type export type name
+     * @param response HttpServletResponse object file
+     */
     @GetMapping("/export/excel")
+    @Deprecated(since = "2.1.0", forRemoval = true)
     public void exportExcel(@RequestParam("type") String type, HttpServletResponse response) {
         try {
             File file = commonService.exportExcel(type);
