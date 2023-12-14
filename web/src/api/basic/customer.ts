@@ -14,6 +14,7 @@ enum API {
     AddOrUpdateCustomer = '/basic/customer/addOrUpdate',
     DeleteBatch = '/basic/customer/deleteBatch',
     UpdateStatus = '/basic/customer/updateStatus',
+    Export = '/basic/customer/export',
 }
 
 export function getCustomerPageList(params: QueryCustomerReq) {
@@ -67,5 +68,15 @@ export function deleteBatchCustomer(ids: number[], successMode: SuccessMessageMo
             successMessageMode: successMode,
             errorMessageMode: errorMode,
         },
+    );
+}
+
+export function exportCustomer(params: QueryCustomerReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
+        }
     );
 }

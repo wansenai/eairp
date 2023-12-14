@@ -23,12 +23,15 @@ import com.wansenai.service.basic.MemberService
 import com.wansenai.utils.constants.CommonConstants
 import com.wansenai.utils.enums.BaseCodeEnum
 import com.wansenai.utils.enums.MemberCodeEnum
+import com.wansenai.utils.excel.ExcelUtils
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.MemberVO
+import jakarta.servlet.http.HttpServletResponse
 import lombok.extern.slf4j.Slf4j
 import org.springframework.beans.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.StringUtils
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -163,9 +166,13 @@ open class MemberServiceImpl(
         return saveBatch(memberEntities)
     }
 
-    override fun getMemberList(): Response<List<MemberVO>> {
+    override fun getMemberList(memberDTO: QueryMemberDTO?): Response<List<MemberVO>> {
         val memberList = list(
             LambdaQueryWrapper<Member>()
+                .eq(StringUtils.hasLength(memberDTO?.memberNumber), Member::getMemberNumber, memberDTO?.memberNumber)
+                .eq(StringUtils.hasLength(memberDTO?.phoneNumber), Member::getPhoneNumber, memberDTO?.phoneNumber)
+                .ge(StringUtils.hasLength(memberDTO?.startDate), Member::getCreateTime, memberDTO?.startDate)
+                .le(StringUtils.hasLength(memberDTO?.endDate), Member::getCreateTime, memberDTO?.endDate)
                 .eq(Member::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .orderByAsc(Member::getSort)
         )
@@ -209,6 +216,29 @@ open class MemberServiceImpl(
                 return null;
             }
             return member
+        }
+    }
+
+    override fun exportMemberData(memberDTO: QueryMemberDTO?, response: HttpServletResponse) {
+        val members = getMemberList(memberDTO)
+        if(members.data.isNotEmpty()) {
+            val exportData = ArrayList<MemberVO>()
+            members.data.forEach { member ->
+                val memberVO =  MemberVO(
+                    id = member.id,
+                    memberNumber = member.memberNumber,
+                    memberName = member.memberName,
+                    phoneNumber = member.phoneNumber,
+                    email = member.email,
+                    advancePayment = member.advancePayment,
+                    status = member.status,
+                    remark = member.remark,
+                    sort = member.sort,
+                    createTime = member.createTime
+                )
+                exportData.add(memberVO)
+            }
+            ExcelUtils.export(response, "会员数据", ExcelUtils.getSheetData(exportData))
         }
     }
 }

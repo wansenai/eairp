@@ -13,10 +13,12 @@
 package com.wansenai.api.basic
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
-import com.wansenai.dto.basic.*
+import com.wansenai.dto.basic.QueryCustomerDTO
+import com.wansenai.dto.basic.AddOrUpdateCustomerDTO
 import com.wansenai.service.basic.CustomerService
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.CustomerVO
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.ModelAttribute
 
 @RestController
 @RequestMapping("/basic/customer")
@@ -36,7 +39,7 @@ class CustomerController (private val customerService: CustomerService){
 
     @GetMapping("list")
     fun customerList() : Response<List<CustomerVO>> {
-        return customerService.getCustomerList()
+        return customerService.getCustomerList(null)
     }
 
     @PostMapping("/addOrUpdate")
@@ -52,5 +55,10 @@ class CustomerController (private val customerService: CustomerService){
     @PostMapping("/updateStatus")
     fun updateCustomerStatus(@RequestParam("ids") ids: List<Long>?, @RequestParam("status") status: Int?) : Response<String> {
         return customerService.updateCustomerStatus(ids, status)
+    }
+
+    @GetMapping("export")
+    fun export(@ModelAttribute queryCustomerDTO: QueryCustomerDTO, response: HttpServletResponse) {
+        customerService.exportCustomerData(queryCustomerDTO, response)
     }
 }

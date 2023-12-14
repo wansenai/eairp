@@ -21,6 +21,7 @@ import com.wansenai.dto.basic.UpdateSupplierStatusDTO
 import com.wansenai.entities.basic.Supplier
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.SupplierVO
+import jakarta.servlet.http.HttpServletResponse
 
 interface SupplierService : IService<Supplier> {
 
@@ -28,7 +29,7 @@ interface SupplierService : IService<Supplier> {
 
     fun addSupplier(supplier: AddSupplierDTO?): Response<String>
 
-    fun getSupplierList(): Response<List<SupplierVO>>
+    fun getSupplierList(supplier: QuerySupplierDTO?): Response<List<SupplierVO>>
 
     /**
      * 内部使用方法
@@ -40,4 +41,6 @@ interface SupplierService : IService<Supplier> {
     fun deleteSupplier(ids: List<Long>?): Response<String>
 
     fun updateSupplierStatus(updateSupplierStatusDTO: UpdateSupplierStatusDTO?): Response<String>
+
+    fun exportSupplierData(querySupplierDTO: QuerySupplierDTO, response: HttpServletResponse)
 }
