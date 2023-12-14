@@ -16,6 +16,7 @@ enum API {
     UpdateSupplier = '/basic/supplier/update',
     DeleteBatch = '/basic/supplier/deleteBatch',
     UpdateStatus = '/basic/supplier/updateStatus',
+    Export = '/basic/supplier/export',
 }
 
 export function getSupplierPageList(params: QuerySupplierReq) {
@@ -78,6 +79,16 @@ export function deleteBatchSuppliers(ids: number[], successMode: SuccessMessageM
         },{
             successMessageMode: successMode,
             errorMessageMode: errorMode,
+        }
+    );
+}
+
+export function exportSupplier(params: QuerySupplierReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
         }
     );
 }

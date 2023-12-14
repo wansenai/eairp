@@ -12,8 +12,11 @@
  */
 package com.wansenai.api.common;
 
+import com.wansenai.api.RateLimitException;
+import com.wansenai.api.config.RateLimiter;
 import com.wansenai.service.common.CommonService;
 import com.wansenai.utils.ExcelUtil;
+import com.wansenai.utils.enums.LimitType;
 import com.wansenai.utils.response.Response;
 import com.wansenai.utils.constants.ApiVersionConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
@@ -46,7 +49,13 @@ public class CommonController {
         return Response.responseData(captchaVo);
     }
 
+    @ExceptionHandler(RateLimitException.class)
+    public Response<String> handleRateLimitException(RateLimitException ex) {
+        return Response.responseMsg(BaseCodeEnum.FREQUENT_SYSTEM_ACCESS);
+    }
+
     @GetMapping("sms/{type}/{phoneNumber}")
+    @RateLimiter(key = "sms", time = 120, count = 1, limitType = LimitType.IP)
     public Response<String> sendSmsCode(@PathVariable Integer type, @PathVariable String phoneNumber) {
         boolean result = commonService.sendSmsCode(type, phoneNumber);
         if(!result) {
@@ -65,7 +74,18 @@ public class CommonController {
         return commonService.uploadExclsData(file);
     }
 
+    /**
+     * @deprecatedjavadoc
+     *
+     * At present, exporting requires filtering based on query conditions, and the exportExcel method exports all data.
+     * It is more of a universal export method, and the implementation class of the method needs to match the array
+     * index mapping of exported columns, which is very complex. Therefore, it will be removed in the next version
+     *
+     * @param type export type name
+     * @param response HttpServletResponse object file
+     */
     @GetMapping("/export/excel")
+    @Deprecated(since = "2.1.0", forRemoval = true)
     public void exportExcel(@RequestParam("type") String type, HttpServletResponse response) {
         try {
             File file = commonService.exportExcel(type);

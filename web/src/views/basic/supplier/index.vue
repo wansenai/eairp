@@ -5,7 +5,7 @@
         <a-button type="primary" @click="handleCreate"> 新增</a-button>
         <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
         <a-button type="primary" @click="handleOnStatus(0)"> 批量启用</a-button>
-        <a-button type="primary" @click="handleOnStatus(1)"> 批量禁用</a-button>
+        <a-button type="primary" @click="handleOnStatus(1)"> 批量停用</a-button>
         <a-button type="primary" @click="handleImport"> 导入</a-button>
         <a-button type="primary" @click="handleExport"> 导出</a-button>
       </template>
@@ -45,10 +45,9 @@ import {useModal} from "@/components/Modal";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getSupplierPageList} from "@/api/basic/supplier";
 import {columns, searchFormSchema} from "@/views/basic/supplier/supplier.data";
-import {deleteBatchSuppliers, updateSupplierStatus} from "@/api/basic/supplier";
+import {deleteBatchSuppliers, updateSupplierStatus, exportSupplier} from "@/api/basic/supplier";
 import SupplierModal from "@/views/basic/supplier/components/SupplierModal.vue";
 import ImportFileModal from '@/components/Tools/ImportFileModal.vue';
-import { exportXlsx } from '@/api/basic/common';
 
 export default defineComponent({
   name: 'Supplier',
@@ -59,7 +58,7 @@ export default defineComponent({
     const [registerModal, {openModal}] = useModal();
     const { createMessage } = useMessage();
     const importModalRef = ref(null);
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getDataSource, getForm }] = useTable({
       title: '供应商列表',
       api: getSupplierPageList,
       rowKey: 'id',
@@ -146,11 +145,6 @@ export default defineComponent({
       importModalRef.value.title = "供应商导入";
     }
 
-    const getCurrentTime = () => {
-      const date = new Date();
-      currentTime.value = date.toLocaleString();
-      timestamp.value = getTimestamp(date);
-    };
 
     const getTimestamp = (date) => {
       return (
@@ -163,17 +157,22 @@ export default defineComponent({
       ).toString();
     };
 
-
     async function handleExport() {
-      const file = await exportXlsx("供应商列表")
-      const blob = new Blob([file], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = "供应商数据" + timestamp + ".xlsx"; // 这里替换成你想要保存的文件名
-      link.target = "_blank";
-      link.click();
-      URL.revokeObjectURL(link.href);
+      if (getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      const file: any = await exportSupplier(data)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = "供应商信息数据" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
     return {

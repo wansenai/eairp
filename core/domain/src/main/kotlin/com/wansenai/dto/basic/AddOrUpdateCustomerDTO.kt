@@ -38,6 +38,8 @@ data class AddOrUpdateCustomerDTO(
 
     var totalAccountReceivable: BigDecimal?,
 
+    var fax: String?,
+
     var address: String?,
 
     var taxNumber: String?,

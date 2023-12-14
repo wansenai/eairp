@@ -5,7 +5,7 @@
         <a-button type="primary" @click="handleCreate"> 新增</a-button>
         <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
         <a-button type="primary" @click="handleOnStatus(0)"> 批量启用</a-button>
-        <a-button type="primary" @click="handleOnStatus(1)"> 批量禁用</a-button>
+        <a-button type="primary" @click="handleOnStatus(1)"> 批量停用</a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">

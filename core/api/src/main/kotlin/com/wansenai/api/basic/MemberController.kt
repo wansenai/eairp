@@ -18,6 +18,7 @@ import com.wansenai.dto.basic.QueryMemberDTO
 import com.wansenai.service.basic.MemberService
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.MemberVO
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ModelAttribute
 
 @RestController
 @RequestMapping("/basic/member")
@@ -52,6 +54,11 @@ class MemberController (private val memberService: MemberService){
 
     @GetMapping("/list")
     fun getMemberList() : Response<List<MemberVO>> {
-        return memberService.getMemberList()
+        return memberService.getMemberList(null)
+    }
+
+    @GetMapping("export")
+    fun export(@ModelAttribute queryMemberDTO: QueryMemberDTO, response: HttpServletResponse) {
+        memberService.exportMemberData(queryMemberDTO, response)
     }
 }

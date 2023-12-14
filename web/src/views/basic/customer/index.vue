@@ -5,7 +5,7 @@
         <a-button type="primary" @click="handleCreate"> 新增</a-button>
         <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
         <a-button type="primary" @click="handleOnStatus(0)"> 批量启用</a-button>
-        <a-button type="primary" @click="handleOnStatus(1)"> 批量禁用</a-button>
+        <a-button type="primary" @click="handleOnStatus(1)"> 批量停用</a-button>
         <a-button type="primary" @click="handleImport"> 导入</a-button>
         <a-button type="primary" @click="handleExport"> 导出</a-button>
       </template>
@@ -44,10 +44,9 @@ import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useModal} from "@/components/Modal";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/basic/customer/customer.data";
-import {getCustomerPageList, deleteBatchCustomer, updateCustomerStatus} from "@/api/basic/customer";
+import {getCustomerPageList, deleteBatchCustomer, updateCustomerStatus, exportCustomer} from "@/api/basic/customer";
 import CustomerModal from "@/views/basic/customer/components/CustomerModal.vue";
 import ImportFileModal from '@/components/Tools/ImportFileModal.vue';
-import { exportXlsx } from '@/api/basic/common';
 
 export default defineComponent({
   name: 'Customer',
@@ -58,7 +57,7 @@ export default defineComponent({
     const [registerModal, {openModal}] = useModal();
     const { createMessage } = useMessage();
     const importModalRef = ref(null);
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm, getDataSource }] = useTable({
       title: '客户信息列表',
       api: getCustomerPageList,
       rowKey: 'id',
@@ -156,9 +155,14 @@ export default defineComponent({
       ).toString();
     };
 
-
-    async function handleExport() {
-      const file = await exportXlsx("客户信息列表")
+  async function handleExport() {
+    if (getDataSource().length === 0) {
+      createMessage.warn('当前查询条件下无数据可导出');
+      return;
+    }
+    const data: any = getForm().getFieldsValue();
+    const file: any = await exportCustomer(data)
+    if (file.size > 0) {
       const blob = new Blob([file]);
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
@@ -167,6 +171,7 @@ export default defineComponent({
       link.target = "_blank";
       link.click();
     }
+  }
 
     return {
       registerTable,

@@ -14,6 +14,7 @@ enum API {
     AddOrUpdateMember = '/basic/member/addOrUpdate',
     DeleteBatch = '/basic/member/deleteBatch',
     UpdateStatus = '/basic/member/updateStatus',
+    Export = '/basic/member/export',
 }
 
 export function getMemberPageList(params: QueryMemberReq) {
@@ -63,6 +64,16 @@ export function getMemberList() {
     return defHttp.get<BaseDataResp<MemberResp>>(
         {
             url: API.List
+        }
+    );
+}
+
+export function exportMember(params: QueryMemberReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${API.Export}`,
+            params,
+            responseType: "blob"
         }
     );
 }

@@ -57,7 +57,11 @@ public enum BaseCodeEnum {
 
     OSS_GET_INSTANCE_ERROR("T0501", "腾讯云OSS对象存储实例获取失败"),
 
-    SNOWFLAKE_ID_GENERATE_ERROR("B0009", "雪花算法生成ID失败");
+    SNOWFLAKE_ID_GENERATE_ERROR("B0009", "雪花算法生成ID失败"),
+
+    FREQUENT_SYSTEM_ACCESS("B0010", "系统请求过于频繁，请稍后再试"),
+
+    SYSTEM_BUSY("B0020", "系统繁忙，请稍后再试");
 
     /**
      * 响应状态码
