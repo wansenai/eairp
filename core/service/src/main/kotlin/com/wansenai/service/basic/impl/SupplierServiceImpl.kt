@@ -25,8 +25,10 @@ import com.wansenai.service.basic.SupplierService
 import com.wansenai.utils.constants.CommonConstants
 import com.wansenai.utils.enums.BaseCodeEnum
 import com.wansenai.utils.enums.SupplierCodeEnum
+import com.wansenai.utils.excel.ExcelUtils
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.SupplierVO
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -126,8 +128,14 @@ open class SupplierServiceImpl(
         }
     }
 
-    override fun getSupplierList(): Response<List<SupplierVO>> {
+    override fun getSupplierList(supplier: QuerySupplierDTO?): Response<List<SupplierVO>> {
         val wrapper = LambdaQueryWrapper<Supplier>().apply {
+            supplier?.supplierName?.let { like(Supplier::getSupplierName, it) }
+            supplier?.contact?.let { like(Supplier::getContact, it) }
+            supplier?.contactNumber?.let { like(Supplier::getContactNumber, it) }
+            supplier?.phoneNumber?.let { like(Supplier::getPhoneNumber, it) }
+            supplier?.startDate?.let { ge(Supplier::getCreateTime, it) }
+            supplier?.endDate?.let { le(Supplier::getCreateTime, it) }
             eq(Supplier::getDeleteFlag, CommonConstants.NOT_DELETED)
         }
         val list = supplierMapper.selectList(wrapper)
@@ -256,5 +264,39 @@ open class SupplierServiceImpl(
             }
             return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_STATUS_SUCCESS)
         } ?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
+    }
+
+    override fun exportSupplierData(querySupplierDTO: QuerySupplierDTO, response: HttpServletResponse) {
+        val suppliers = getSupplierList(querySupplierDTO)
+        if(suppliers.data.isNotEmpty()) {
+            val exportData = ArrayList<SupplierVO>()
+            suppliers.data.forEach {supplier ->
+                val supplierVO =  SupplierVO(
+                    id = supplier.id,
+                    supplierName = supplier.supplierName,
+                    contact = supplier.contact,
+                    contactNumber = supplier.contactNumber,
+                    phoneNumber = supplier.phoneNumber,
+                    address = supplier.address,
+                    email = supplier.email,
+                    status = supplier.status,
+                    firstQuarterAccountPayment = supplier.firstQuarterAccountPayment,
+                    secondQuarterAccountPayment = supplier.secondQuarterAccountPayment,
+                    thirdQuarterAccountPayment = supplier.thirdQuarterAccountPayment,
+                    fourthQuarterAccountPayment = supplier.fourthQuarterAccountPayment,
+                    totalAccountPayment = supplier.totalAccountPayment,
+                    fax = supplier.fax,
+                    taxNumber = supplier.taxNumber,
+                    bankName = supplier.bankName,
+                    accountNumber = supplier.accountNumber,
+                    taxRate = supplier.taxRate,
+                    sort = supplier.sort,
+                    remark = supplier.remark,
+                    createTime = supplier.createTime
+                )
+                exportData.add(supplierVO)
+            }
+            ExcelUtils.export(response, "供应商数据", ExcelUtils.getSheetData(exportData))
+        }
     }
 }

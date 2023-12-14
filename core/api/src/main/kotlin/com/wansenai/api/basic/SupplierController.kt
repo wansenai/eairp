@@ -20,13 +20,8 @@ import com.wansenai.dto.basic.UpdateSupplierStatusDTO
 import com.wansenai.service.basic.SupplierService
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.SupplierVO
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/basic/supplier")
@@ -39,7 +34,7 @@ class SupplierController (private val supplierService: SupplierService){
 
     @GetMapping("/list")
     fun supplierList() : Response<List<SupplierVO>> {
-        return supplierService.getSupplierList()
+        return supplierService.getSupplierList(null)
     }
 
     @PostMapping("/add")
@@ -60,5 +55,10 @@ class SupplierController (private val supplierService: SupplierService){
     @PostMapping("/updateStatus")
     fun updateSupplierStatus(@RequestBody updateSupplierStatusDTO: UpdateSupplierStatusDTO) : Response<String> {
         return supplierService.updateSupplierStatus(updateSupplierStatusDTO)
+    }
+
+    @GetMapping("export")
+    fun export(@ModelAttribute querySupplierDTO: QuerySupplierDTO, response: HttpServletResponse) {
+        supplierService.exportSupplierData(querySupplierDTO, response)
     }
 }
