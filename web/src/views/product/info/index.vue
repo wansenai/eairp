@@ -5,7 +5,7 @@
         <a-button type="primary" @click="handleCreate"> 新增</a-button>
         <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
         <a-button type="primary" @click="handleOnStatus(0)"> 批量启用</a-button>
-        <a-button type="primary" @click="handleOnStatus(1)"> 批量禁用</a-button>
+        <a-button type="primary" @click="handleOnStatus(1)"> 批量停用</a-button>
         <a-button type="primary" @click="handleImport"> 导入</a-button>
         <a-button type="primary" @click="handleExport"> 导出</a-button>
         <a-button type="primary" @click="handleBatchProductInfo"> 批量编辑</a-button>
