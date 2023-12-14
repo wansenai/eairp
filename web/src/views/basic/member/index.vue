@@ -44,10 +44,9 @@ import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {useModal} from "@/components/Modal";
 import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/basic/member/member.data";
-import {getMemberPageList, deleteBatchMember, updateMemberStatus} from "@/api/basic/member";
+import {getMemberPageList, deleteBatchMember, updateMemberStatus, exportMember} from "@/api/basic/member";
 import MemberModal from "@/views/basic/member/components/MemberModal.vue";
 import ImportFileModal from '@/components/Tools/ImportFileModal.vue';
-import { exportXlsx } from '@/api/basic/common';
 
 export default defineComponent({
   name: 'Member',
@@ -58,7 +57,7 @@ export default defineComponent({
     const [registerModal, {openModal}] = useModal();
     const { createMessage } = useMessage();
     const importModalRef = ref(null);
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getDataSource, getForm }] = useTable({
       title: '会员信息列表',
       api: getMemberPageList,
       rowKey: 'id',
@@ -156,14 +155,21 @@ export default defineComponent({
     };
 
     async function handleExport() {
-      const file = await exportXlsx("会员信息列表")
-      const blob = new Blob([file]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = "会员信息数据" + timestamp + ".xlsx";
-      link.target = "_blank";
-      link.click();
+      if (getDataSource().length === 0) {
+        createMessage.warn('当前查询条件下无数据可导出');
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      const file: any = await exportMember(data)
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = "会员信息数据" + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
     return {
