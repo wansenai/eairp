@@ -67,7 +67,7 @@ const transform: AxiosTransform = {
     'U0002', 'U0003', 'U0004', 'M0001', 'M0002', 'M0003', 'M0004', 'W0001', 'W0002', 'W0003', 'W0004', 'O0001', 'O0002', 'O0003',
     'O0004', 'A0012', 'A0016', 'A0100', 'A0101', 'A0017']; // 定义包含可能值的数组
 
-    const warningCodes = ['A0404', 'A0113', 'A0502'];
+    const warningCodes = ['A0404', 'A0113', 'A0502', 'B0010', 'B0020'];
 
     if (validCodes.includes(res.data.code) || res.data.code === undefined) {
       if (options.successMessageMode === 'message') {
