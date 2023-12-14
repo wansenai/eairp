@@ -79,6 +79,11 @@ public class Customer implements Serializable {
     private BigDecimal totalAccountReceivable;
 
     /**
+     * 传真
+     */
+    private String fax;
+
+    /**
      * 地址
      */
     private String address;

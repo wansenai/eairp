@@ -19,12 +19,13 @@ import com.wansenai.dto.basic.QueryCustomerDTO
 import com.wansenai.entities.basic.Customer
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.CustomerVO
+import jakarta.servlet.http.HttpServletResponse
 
 interface CustomerService: IService<Customer> {
 
     fun getCustomerPageList(queryCustomerDTO: QueryCustomerDTO?): Response<Page<CustomerVO>>
 
-    fun getCustomerList(): Response<List<CustomerVO>>
+    fun getCustomerList(queryCustomerDTO: QueryCustomerDTO?): Response<List<CustomerVO>>
 
     fun addOrUpdateCustomer(addOrUpdateCustomerDTO: AddOrUpdateCustomerDTO): Response<String>
 
@@ -33,4 +34,6 @@ interface CustomerService: IService<Customer> {
     fun updateCustomerStatus(ids: List<Long>?, status: Int?): Response<String>
 
     fun batchAddCustomer(customers: List<Customer>?): Boolean
+
+    fun exportCustomerData(queryCustomerDTO: QueryCustomerDTO?, response: HttpServletResponse)
 }

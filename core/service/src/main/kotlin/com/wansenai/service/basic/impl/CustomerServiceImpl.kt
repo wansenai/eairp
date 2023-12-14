@@ -24,8 +24,10 @@ import com.wansenai.utils.SnowflakeIdUtil
 import com.wansenai.utils.constants.CommonConstants
 import com.wansenai.utils.enums.BaseCodeEnum
 import com.wansenai.utils.enums.CustomerCodeEnum
+import com.wansenai.utils.excel.ExcelUtils
 import com.wansenai.utils.response.Response
 import com.wansenai.vo.basic.CustomerVO
+import jakarta.servlet.http.HttpServletResponse
 import lombok.extern.slf4j.Slf4j
 import org.springframework.beans.BeanUtils
 import org.springframework.stereotype.Service
@@ -61,6 +63,7 @@ open class CustomerServiceImpl(
                     contact = customer.contact,
                     phoneNumber = customer.phoneNumber,
                     email = customer.email,
+                    fax = customer.fax,
                     firstQuarterAccountReceivable = customer.firstQuarterAccountReceivable,
                     secondQuarterAccountReceivable = customer.secondQuarterAccountReceivable,
                     thirdQuarterAccountReceivable = customer.thirdQuarterAccountReceivable,
@@ -88,8 +91,13 @@ open class CustomerServiceImpl(
             BaseCodeEnum.QUERY_DATA_EMPTY)
     }
 
-    override fun getCustomerList(): Response<List<CustomerVO>> {
+    override fun getCustomerList(queryCustomerDTO: QueryCustomerDTO?): Response<List<CustomerVO>> {
         val wrapper = LambdaQueryWrapper<Customer>().apply {
+            queryCustomerDTO?.customerName?.let { like(Customer::getCustomerName, it) }
+            queryCustomerDTO?.contact?.let { like(Customer::getContact, it) }
+            queryCustomerDTO?.phoneNumber?.let { like(Customer::getPhoneNumber, it) }
+            queryCustomerDTO?.startDate?.let { ge(Customer::getCreateTime, it) }
+            queryCustomerDTO?.endDate?.let { le(Customer::getCreateTime, it) }
             eq(Customer::getDeleteFlag, CommonConstants.NOT_DELETED)
         }
         val list = customerMapper.selectList(wrapper)
@@ -100,6 +108,7 @@ open class CustomerServiceImpl(
                 contact = customer.contact,
                 phoneNumber = customer.phoneNumber,
                 email = customer.email,
+                fax = customer.fax,
                 firstQuarterAccountReceivable = customer.firstQuarterAccountReceivable,
                 secondQuarterAccountReceivable = customer.secondQuarterAccountReceivable,
                 thirdQuarterAccountReceivable = customer.thirdQuarterAccountReceivable,
@@ -146,6 +155,7 @@ open class CustomerServiceImpl(
                     addOrUpdateCustomerDTO.fourthQuarterAccountReceivable
                 )
             )
+            fax = addOrUpdateCustomerDTO.fax.orEmpty()
             address = addOrUpdateCustomerDTO.address.orEmpty()
             taxNumber = addOrUpdateCustomerDTO.taxNumber.orEmpty()
             bankName = addOrUpdateCustomerDTO.bankName.orEmpty()
@@ -239,5 +249,38 @@ open class CustomerServiceImpl(
             }
         }
         return saveBatch(customerEntities)
+    }
+
+    override fun exportCustomerData(queryCustomerDTO: QueryCustomerDTO?, response: HttpServletResponse) {
+        val customers = getCustomerList(queryCustomerDTO)
+        if(customers.data.isNotEmpty()) {
+            val exportData = ArrayList<CustomerVO>()
+            customers.data.forEach { customer ->
+                val customerVO = CustomerVO(
+                    id = customer.id,
+                    customerName = customer.customerName,
+                    contact = customer.contact,
+                    phoneNumber = customer.phoneNumber,
+                    email = customer.email,
+                    fax = customer.fax,
+                    firstQuarterAccountReceivable = customer.firstQuarterAccountReceivable,
+                    secondQuarterAccountReceivable = customer.secondQuarterAccountReceivable,
+                    thirdQuarterAccountReceivable = customer.thirdQuarterAccountReceivable,
+                    fourthQuarterAccountReceivable = customer.fourthQuarterAccountReceivable,
+                    totalAccountReceivable = customer.totalAccountReceivable,
+                    address = customer.address,
+                    taxNumber = customer.taxNumber,
+                    bankName = customer.bankName,
+                    accountNumber = customer.accountNumber,
+                    taxRate = customer.taxRate,
+                    status = customer.status,
+                    remark = customer.remark,
+                    sort = customer.sort,
+                    createTime = customer.createTime,
+                )
+                exportData.add(customerVO)
+            }
+            ExcelUtils.export(response, "客户数据", ExcelUtils.getSheetData(exportData))
+        }
     }
 }
