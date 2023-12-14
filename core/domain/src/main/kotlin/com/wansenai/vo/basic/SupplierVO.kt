@@ -45,6 +45,7 @@ data class SupplierVO (
     @ExcelExport(value = "电子邮箱", sort = 5)
     var email: String?,
 
+    @ExcelExport(value = "状态", kv="0-启用;1-停用", sort = 7)
     var status: Int,
 
     @JsonSerialize(using = BigDecimalSerializerBO::class)
