@@ -15,7 +15,7 @@ import { addOrUpdateOperator } from '@/api/basic/operator';
 const rowId = ref('');
 const isUpdate = ref(true);
 const getTitle = computed(() => (!unref(isUpdate) ? '新增操作员' : '编辑操作员'));
-const emitSuccess = defineEmits(['success']);
+const emitSuccess = defineEmits(['success', 'register']);
 
 const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({
   labelWidth: 100,

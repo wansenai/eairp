@@ -24,14 +24,14 @@ import ViewSaleShipmentsModal from "@/views/sales/shipments/components/ViewSaleS
 export default defineComponent({
   name: 'SaleArrearsModal',
   components: {ViewSaleShipmentsModal, ViewSaleRefundModal, BasicModal, BasicTable, TableAction},
-  emits: ['selectedRows'],
+  emits: ['handleReceiptSuccess', 'register'],
   setup(_, context) {
     const [handleSaleShipmentsModal, {openModal: openSaleShipmentsModal}] = useModal();
     const [handleSaleRefundModal, {openModal: openSaleRefundModal}] = useModal();
     const getTitle = ref('选择销售欠款单据');
     const { createMessage } = useMessage();
     const customerId = ref('');
-    const [registerTable, { getSelectRows, reload}] = useTable({
+    const [registerTable, { getSelectRows}] = useTable({
       rowKey: 'id',
       columns: saleArrearsReceiptTableColumns,
       api: getArrearsPageList,

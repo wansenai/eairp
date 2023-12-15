@@ -15,7 +15,7 @@ import { addOrUpdateWarehouse } from '@/api/basic/warehouse';
 const rowId = ref('');
 const isUpdate = ref(true);
 const getTitle = computed(() => (!unref(isUpdate) ? '新增仓库' : '编辑仓库'));
-const emitSuccess = defineEmits(['success']);
+const emitSuccess = defineEmits(['success', 'register']);
 
 const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({
   labelWidth: 100,

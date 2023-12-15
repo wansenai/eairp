@@ -15,7 +15,7 @@ import { addOrUpdateIncomeExpense } from '@/api/basic/incomeExpense';
 const rowId = ref('');
 const isUpdate = ref(true);
 const getTitle = computed(() => (!unref(isUpdate) ? '新增收支项目' : '编辑收支项目'));
-const emitSuccess = defineEmits(['success']);
+const emitSuccess = defineEmits(['success', 'register']);
 
 const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({
   labelWidth: 100,
