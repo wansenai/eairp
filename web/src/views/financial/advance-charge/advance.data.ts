@@ -143,7 +143,7 @@ export const tableColumns = [
 ]
 
 interface FormState {
-    id: string;
+    id: string | undefined;
     memberId: string;
     receiptNumber: string;
     financialPersonnelId: string;
