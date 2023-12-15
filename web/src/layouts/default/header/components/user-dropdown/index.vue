@@ -38,7 +38,6 @@
     </template>
   </Dropdown>
   <LockAction @register="register" />
-  <AccountSetting/>
 </template>
 <script lang="ts">
   // components

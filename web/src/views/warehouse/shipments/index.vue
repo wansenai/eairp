@@ -89,9 +89,9 @@ export default defineComponent({
       formConfig: {
         labelWidth: 110,
         schemas: searchFormSchema,
+        autoSubmitOnEnter: true
       },
       bordered: true,
-      tableSetting: { fullScreen: true },
       useSearchForm: true,
       clickToRowSelect: false,
       showTableSetting: true,

@@ -28,7 +28,7 @@ import {ReceiptColumn, searchSchema} from "@/views/receipt/receipt.data"
 export default defineComponent({
   name: 'LinkReceiptModal',
   components: {Tag, BasicModal, BasicTable, TableAction, ReceiptDetailModal},
-  emits: ['selectedRows'],
+  emits: ['handleReceiptSuccess', 'register'],
   setup(_, context) {
     const getTitle = ref('操作');
     const [receiptDetailModal, {openModal: openReceiptDetailModal}] = useModal();
