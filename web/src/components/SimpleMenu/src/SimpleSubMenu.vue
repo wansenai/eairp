@@ -54,10 +54,12 @@
   import SubMenu from './components/SubMenuItem.vue';
   import { propTypes } from '/@/utils/propTypes';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import SimpleMenuTag from "@/components/SimpleMenu/src/SimpleMenuTag.vue";
 
   export default defineComponent({
     name: 'SimpleSubMenu',
     components: {
+      SimpleMenuTag,
       SubMenu,
       MenuItem,
       Icon,

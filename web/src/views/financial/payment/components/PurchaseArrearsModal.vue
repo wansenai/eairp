@@ -24,14 +24,14 @@ import ViewPurchaseStorageModal from "@/views/purchase/storage/components/ViewSt
 export default defineComponent({
   name: 'PurchaseArrearsModal',
   components: {ViewPurchaseStorageModal, ViewPurchaseRefundModal, BasicModal, BasicTable, TableAction},
-  emits: ['selectedRows'],
+  emits: ['handleReceiptSuccess', 'register'],
   setup(_, context) {
     const [handlePurchaseStorageModal, {openModal: openPurchaseStorageModal}] = useModal();
     const [handlePurchaseRefundModal, {openModal: openPurchaseRefundModal}] = useModal();
     const getTitle = ref('选择采购欠款单据');
     const { createMessage } = useMessage();
     const supplierId = ref('');
-    const [registerTable, { getSelectRows, reload}] = useTable({
+    const [registerTable, { getSelectRows}] = useTable({
       rowKey: 'id',
       columns: purchaseArrearsReceiptTableColumns,
       api: getArrearsPageList,

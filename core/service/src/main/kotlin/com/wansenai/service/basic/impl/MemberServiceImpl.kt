@@ -173,6 +173,7 @@ open class MemberServiceImpl(
                 .eq(StringUtils.hasLength(memberDTO?.phoneNumber), Member::getPhoneNumber, memberDTO?.phoneNumber)
                 .ge(StringUtils.hasLength(memberDTO?.startDate), Member::getCreateTime, memberDTO?.startDate)
                 .le(StringUtils.hasLength(memberDTO?.endDate), Member::getCreateTime, memberDTO?.endDate)
+                .eq(Member::getStatus, CommonConstants.STATUS_NORMAL)
                 .eq(Member::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .orderByAsc(Member::getSort)
         )

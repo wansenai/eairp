@@ -332,7 +332,6 @@ export default defineComponent({
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');
@@ -352,6 +351,7 @@ export default defineComponent({
         title.value = '新增-销售订单'
         loadGenerateId();
         formState.receiptDate = dayjs(new Date());
+        addRowData()
       }
     }
 

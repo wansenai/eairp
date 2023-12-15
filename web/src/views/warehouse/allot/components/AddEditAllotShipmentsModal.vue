@@ -46,19 +46,19 @@
                   <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
                 </template>
-                <template #warehouseId_default="{ row }">
+                <template #warehouse_default="{ row }">
                   <span>{{ formatWarehouseId(row.warehouseId) }}</span>
                 </template>
-                <template #warehouseId_edit="{ row }">
-                  <vxe-select placeholder="请选择仓库" v-model="row.warehouseId">
+                <template #warehouse_edit="{ row }">
+                  <vxe-select placeholder="请选择仓库" v-model="row.warehouseId" @change="selectBarCode" clearable filterable>
                     <vxe-option v-for="item in warehouseList" :key="item.id" :value="item.id" :label="item.warehouseName"></vxe-option>
                   </vxe-select>
                 </template>
-                <template #otherWarehouseId_default="{ row }">
+                <template #otherWarehouse_default="{ row }">
                   <span>{{ formatWarehouseId(row.otherWarehouseId) }}</span>
                 </template>
-                <template #otherWarehouseId_edit="{ row }">
-                  <vxe-select placeholder="请选择调入仓库" v-model="row.otherWarehouseId">
+                <template #otherWarehouse_edit="{ row }">
+                  <vxe-select placeholder="请选择调入仓库" v-model="row.otherWarehouseId" clearable filterable>
                     <vxe-option v-for="item in warehouseList" :key="item.id" :value="item.id" :label="item.warehouseName"></vxe-option>
                   </vxe-select>
                 </template>
@@ -228,7 +228,6 @@ export default defineComponent({
     const productLabelList = ref<any[]>([]);
 
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');
@@ -245,6 +244,10 @@ export default defineComponent({
         title.value = '新增-调拨出库'
         loadGenerateId();
         allotShipmentsFormState.receiptDate = dayjs(new Date());
+        const table = xGrid.value
+        if (table) {
+          table.insert({productNumber: 0})
+        }
       }
     }
 
@@ -374,6 +377,11 @@ export default defineComponent({
         const isOtherWarehouseEmpty = insertRecords.some(item => !item.otherWarehouseId)
         if(isOtherWarehouseEmpty) {
           createMessage.warn("调入方仓库不能为空")
+          return;
+        }
+        const isWarehouseEmpty = insertRecords.some(item => !item.warehouseId)
+        if(isWarehouseEmpty) {
+          createMessage.warn("请选择调出方仓库")
           return;
         }
       }

@@ -15,7 +15,7 @@ import { addOrUpdateMember } from '@/api/basic/member';
   const rowId = ref('');
   const isUpdate = ref(true);
   const getTitle = computed(() => (!unref(isUpdate) ? '新增会员信息' : '编辑会员信息'));
-  const emitSuccess = defineEmits(['success']);
+  const emitSuccess = defineEmits(['success','register']);
 
   const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({
     labelWidth: 100,

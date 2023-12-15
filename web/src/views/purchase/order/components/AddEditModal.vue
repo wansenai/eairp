@@ -49,7 +49,7 @@
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="purchaseOrderFormState.receiptNumber" :readOnly="true"/>
+              <a-input placeholder="请输入单据编号" v-model:value="purchaseOrderFormState.receiptNumber" readOnly/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -317,7 +317,6 @@ export default defineComponent({
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');
@@ -336,6 +335,7 @@ export default defineComponent({
         title.value = '新增-采购订单'
         loadGenerateId();
         purchaseOrderFormState.receiptDate = dayjs(new Date());
+        addRowData();
       }
     }
 

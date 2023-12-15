@@ -25,6 +25,7 @@ import {Rule} from 'ant-design-vue/es/form';
 
 export default {
   name: 'BatchSetPriceModal',
+  emits: ['ok'],
   components: {
     'a-modal': Modal,
     'a-button': Button,
@@ -37,7 +38,7 @@ export default {
     const title = ref('批量设置');
     const openPriceModal = ref(false);
     const isReadOnly = ref(false);
-    const batchPrice = ref('');
+    const batchPrice = ref(0);
     const batchType = ref('');
     const model = reactive({});
     const labelCol = {
@@ -71,7 +72,7 @@ export default {
       }
     };
 
-    const edit = (record) => {
+    const edit = () => {
       openPriceModal.value = true
     };
 
@@ -82,12 +83,12 @@ export default {
     const handleOk = () => {
       const price = batchPrice.value
       context.emit('ok', price, batchType.value);
-      batchPrice.value = null;
+      batchPrice.value = 0;
       close();
     };
 
     const handleCancel = () => {
-      batchPrice.value = null;
+      batchPrice.value = 0;
       close();
     };
 

@@ -247,6 +247,7 @@ open class AdvanceChargeServiceImpl(
             val financialPerson = operatorService.getOperatorById(financialMain.operatorId)
             val subData = financialSubService.lambdaQuery()
                 .eq(FinancialSub::getFinancialMainId, id)
+                .eq(FinancialSub::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list()
 
             val tableData = ArrayList<AdvanceChargeDataBO>()
@@ -288,7 +289,8 @@ open class AdvanceChargeServiceImpl(
                 collectedAmount = financialMain.changeAmount,
                 tableData = tableData,
                 remark = financialMain.remark,
-                files = filesData
+                files = filesData,
+                status = financialMain.status
             )
             return Response.responseData(resultVO);
         }

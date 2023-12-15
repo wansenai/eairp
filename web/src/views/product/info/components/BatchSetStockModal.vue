@@ -18,11 +18,12 @@
 </template>
 
 <script lang="ts">
-import { ref, reactive, UnwrapRef } from 'vue';
+import { ref, reactive} from 'vue';
 import {Button, Form, FormItem, InputNumber, Modal, Spin} from "ant-design-vue";
 
 export default {
   name: 'BatchSetStockModal',
+  emits: ['ok'],
   components: {
     'a-modal': Modal,
     'a-button': Button,
@@ -35,7 +36,7 @@ export default {
     const title = ref('批量设置');
     const openStockModal = ref(false);
     const isReadOnly = ref(false);
-    const batchNumber = ref('');
+    const batchNumber = ref(0);
     const batchType = ref('');
     const model = reactive({});
     const labelCol = {
@@ -72,12 +73,12 @@ export default {
     const handleOk = () => {
       const stockNumber = batchNumber.value
       context.emit('ok', stockNumber, batchType.value);
-      batchNumber.value = null;
+      batchNumber.value = 0;
       close();
     };
 
     const handleCancel = () => {
-      batchNumber.value = null;
+      batchNumber.value = 0;
       close();
     };
 

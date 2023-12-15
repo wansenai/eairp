@@ -15,7 +15,7 @@ import {getReceiptDetail} from "@/api/receipt/receipt";
 export default defineComponent({
   name: 'ReceiptDetailModal',
   components: {BasicModal, BasicTable, TableAction},
-  emits: ['selectedRows'],
+  emits: ['handleReceiptSuccess', 'register'],
   setup(_, context) {
     const getTitle = ref('选择单据明细');
     const { createMessage } = useMessage();

@@ -59,7 +59,7 @@
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联单据" data-step="3"
                          data-title="关联单据"
                          data-intro="">
-              <a-input-search readonly="true" placeholder="请选择关联出库单据" v-model:value="saleRefundFormState.otherReceipt" @search="onSearch"/>
+              <a-input-search :readonly="true" placeholder="请选择关联出库单据" v-model:value="saleRefundFormState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -75,8 +75,13 @@
                   <a-button @click="productModal" style="margin-right: 10px">选择添加退货商品</a-button>
                   <a-button @click="" style="margin-right: 10px">历史单据</a-button>
                   <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
-
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                </template>
+                <template #warehouse_default="{ row }">
+                  <span>{{ formatWarehouseId(row.warehouseId) }}</span>
+                </template>
+                <template #warehouse_edit="{ row }">
+                  <vxe-select v-model="row.warehouseId" placeholder="输选择仓库" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
                   <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
@@ -369,8 +374,8 @@ export default defineComponent({
     const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
+    const warehouseLabelList =  ref<any[]>([]);
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');
@@ -390,6 +395,10 @@ export default defineComponent({
         title.value = '新增-销售退货单'
         loadGenerateId();
         saleRefundFormState.receiptDate = dayjs(new Date());
+        const table = xGrid.value
+        if (table) {
+          table.insert({productNumber: 0})
+        }
       }
     }
 
@@ -403,6 +412,7 @@ export default defineComponent({
             warehouseColumn.editRender.options?.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
           }
           warehouseList.value = res.data
+          warehouseLabelList.value.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
         }
         const defaultWarehouse = res.data.find(item => item.isDefault === 1)
         if(defaultWarehouse) {
@@ -674,6 +684,11 @@ export default defineComponent({
         const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
         if(isBarCodeEmpty) {
           createMessage.warn("请录入条码或者选择产品")
+          return;
+        }
+        const isWarehouseEmpty = insertRecords.some(item => !item.warehouseId)
+        if(isWarehouseEmpty) {
+          createMessage.warn("请选择仓库")
           return;
         }
       }
@@ -1066,6 +1081,13 @@ export default defineComponent({
       }
     }
 
+    const formatWarehouseId = (value: string) => {
+      const item = warehouseList.value.find(item => item.id === value)
+      if(item) {
+        return item.warehouseName
+      }
+    }
+
     return {
       h,
       AccountBookTwoTone,
@@ -1138,7 +1160,9 @@ export default defineComponent({
       productLabelList,
       selectBarCode,
       handleCustomerModalSuccess,
-      handleAccountModalSuccess
+      handleAccountModalSuccess,
+      formatWarehouseId,
+      warehouseLabelList,
     };
   },
 });

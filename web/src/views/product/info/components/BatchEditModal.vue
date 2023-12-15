@@ -64,11 +64,11 @@
 <script lang="ts">
 import { ref, reactive } from 'vue';
 import {
-  Button,
+  Button, Col,
   Form,
   FormItem,
   InputNumber,
-  Modal, Popconfirm,
+  Modal, Row,
   Select,
   SelectOption,
   Spin,
@@ -78,10 +78,10 @@ import {
 import {getCategoryList} from "/@/api/product/productCategory"
 import {UpdateBatchProductInfoReq} from "/@/api/product/model/productModel"
 import {updateBatchProductInfo} from "/@/api/product/product"
-import {useMessage} from "@/hooks/web/useMessage";
 
 export default {
   name: 'BatchEditModal',
+  emits: ['success'],
   components: {
     'a-modal': Modal,
     'a-button': Button,
@@ -93,22 +93,22 @@ export default {
     'a-select': Select,
     'a-select-option': SelectOption,
     'a-tree-select': TreeSelect,
-    'a-popconfirm': Popconfirm,
+    'a-row': Row,
+    'a-col': Col,
   },
   setup(_, context) {
     const title = ref('批量编辑商品信息');
     const openBatchEditModal = ref(false);
 
-    const color = ref(null);
-    const weight = ref(null);
-    const expiryNum = ref(null);
-    const categoryId = ref(null);
-    const enableSerialNumber = ref(null);
-    const enableBatchNumber = ref(null);
-    const remark = ref(null);
+    const color = ref('');
+    const weight = ref(0);
+    const expiryNum = ref(0);
+    const categoryId = ref(0);
+    const enableSerialNumber = ref('');
+    const enableBatchNumber = ref('');
+    const remark = ref('');
     const categoryTree = reactive([]);
     const productIds = ref([])
-    const {createMessage} = useMessage();
 
     const confirmLoading = ref(false);
     const formRef = ref();

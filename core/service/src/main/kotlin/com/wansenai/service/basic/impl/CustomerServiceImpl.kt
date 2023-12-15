@@ -98,7 +98,9 @@ open class CustomerServiceImpl(
             queryCustomerDTO?.phoneNumber?.let { like(Customer::getPhoneNumber, it) }
             queryCustomerDTO?.startDate?.let { ge(Customer::getCreateTime, it) }
             queryCustomerDTO?.endDate?.let { le(Customer::getCreateTime, it) }
+            eq(Customer::getStatus, CommonConstants.STATUS_NORMAL)
             eq(Customer::getDeleteFlag, CommonConstants.NOT_DELETED)
+           .orderByAsc(Customer::getSort)
         }
         val list = customerMapper.selectList(wrapper)
         val listVo = list.map { customer ->

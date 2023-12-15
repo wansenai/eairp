@@ -59,7 +59,7 @@
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联单据" data-step="3"
                          data-title="关联单据"
                          data-intro="">
-              <a-input-search readonly="true" placeholder="请选择关联单据" v-model:value="formState.otherReceipt" @search="onSearch"/>
+              <a-input-search readonly placeholder="请选择关联单据" v-model:value="formState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -229,7 +229,7 @@ import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
 import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-import {VXETable, VxeGrid, VxeInput, VxeButton} from 'vxe-table'
+import {VXETable, VxeGrid, VxeInput, VxeButton, VxeSelect} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
 import { addOrUpdateRefund, getRefundDetail} from "@/api/retail/refund"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
@@ -288,6 +288,7 @@ export default defineComponent({
     'vxe-grid': VxeGrid,
     'vxe-input': VxeInput,
     'vxe-button': VxeButton,
+    'vxe-select': VxeSelect,
     'a-divider': Divider,
   },
   setup(_, context) {

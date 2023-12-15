@@ -159,7 +159,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   incomeFormState,
@@ -182,12 +182,12 @@ import {getRelatedPerson} from "@/api/report/report";
 import {getIncomeExpenseList} from "@/api/basic/incomeExpense";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
-import {AddOrUpdateIncomeReq, IncomeData} from "@/api/financial/model/incomeModel";
+import {AddOrUpdateIncomeReq} from "@/api/financial/model/incomeModel";
 import OperatorModal from "@/views/basic/operator/components/OperatorModal.vue";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import incomeExpense from "@/views/basic/income-expense/index.vue";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -197,7 +197,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -241,6 +241,7 @@ export default defineComponent({
     'vxe-button': VxeButton,
     'plus-outlined': PlusOutlined,
     'upload-outlined': UploadOutlined,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const [operatorModal, {openModal}] = useModal();
@@ -268,7 +269,6 @@ export default defineComponent({
     const accountList = ref<AccountResp[]>([]);
 
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');
@@ -287,6 +287,7 @@ export default defineComponent({
         title.value = '新增-收入单'
         loadGenerateId();
         incomeFormState.receiptDate = dayjs(new Date());
+        addRowData()
       }
     }
 
@@ -371,26 +372,38 @@ export default defineComponent({
 
     async function handleOk(type: number) {
       if (!incomeFormState.relatedPersonId) {
-        createMessage.error('请选择往来单位');
+        createMessage.warn('请选择往来单位');
         return;
       }
       if (!incomeFormState.receiptDate) {
-        createMessage.error('请选择单据日期');
+        createMessage.warn('请选择单据日期');
         return;
       }
       if (!incomeFormState.incomeAccountId) {
-        createMessage.error('请选择收入账户');
+        createMessage.warn('请选择收入账户');
         return;
       }
       if (!incomeFormState.incomeAmount) {
-        createMessage.error('请输入收入金额');
+        createMessage.warn('请输入收入金额');
         return;
       }
       const table = xGrid.value
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.error("请添加一行数据")
+          createMessage.warn("请添加一行数据")
+          return;
+        }
+
+        const isIncomeExpenseIdEmpty = insertRecords.some(item => !item.incomeExpenseId)
+        if(isIncomeExpenseIdEmpty) {
+          createMessage.warn("请选择收入项目")
+          return;
+        }
+
+        const isIncomeExpenseAmount = insertRecords.some(item => !item.incomeExpenseAmount)
+        if(isIncomeExpenseAmount) {
+          createMessage.warn("请输入收入金额")
           return;
         }
       }

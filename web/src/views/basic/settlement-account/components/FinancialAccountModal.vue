@@ -15,7 +15,7 @@ import { addOrUpdateAccount } from '@/api/financial/account';
 const rowId = ref('');
 const isUpdate = ref(true);
 const getTitle = computed(() => (!unref(isUpdate) ? '新增结算账户' : '编辑结算账户'));
-const emitSuccess = defineEmits(['success']);
+const emitSuccess = defineEmits(['success','register']);
 
 const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({
   labelWidth: 100,

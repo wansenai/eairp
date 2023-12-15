@@ -56,15 +56,8 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         slots: {
             buttons: 'toolbar_buttons'
         },
-        export: true, // 显示导出按钮
         zoom: true, // 显示全屏按钮
         custom: true // 显示自定义列按钮
-    },
-    proxyConfig: {
-        seq: true, // 启用动态序号代理，每一页的序号会根据当前页数变化
-        sort: false, // 启用排序代理，当点击排序时会自动触发 query 行为
-        filter: false, // 启用筛选代理，当点击筛选时会自动触发 query 行为
-        form: true, // 启用表单代理，当点击表单提交按钮时会自动触发 reload 行为
     },
     columns: [
         { type: 'checkbox', field:'id', title: 'ID', width: 180},
@@ -104,6 +97,14 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         reserve: true,
         highlight: true,
         range: true
+    },
+    editRules: {
+        incomeExpenseId: [
+            { required: true, message: '支出项目不能为空' }
+        ],
+        incomeExpenseAmount: [
+            { required: true, message: '支出金额不能为空' }
+        ]
     },
     editConfig: {
         trigger: 'click',

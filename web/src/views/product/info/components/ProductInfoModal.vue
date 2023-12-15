@@ -363,6 +363,8 @@ import {
   Tooltip,
   TreeSelect,
   Upload,
+  Tag,
+  Divider,
   UploadChangeParam,
 } from "ant-design-vue";
 import {cloneDeep} from 'lodash-es';
@@ -370,7 +372,7 @@ import {getUnitList} from "/@/api/product/productUnit";
 import {getCategoryList} from "/@/api/product/productCategory";
 import {ProductUnitQueryReq} from "/@/api/product/model/productUnitModel";
 import {DefaultOptionType} from "ant-design-vue/es/vc-tree-select/TreeSelect";
-import {getProductCode, getProductInfoDetail, addOrUpdateProduct} from "@/api/product/product";
+import {getProductInfoDetail, addOrUpdateProduct} from "@/api/product/product";
 import {getAttributeById, getAttributeList} from "@/api/product/productAttribute";
 import {useMessage} from "@/hooks/web/useMessage";
 import BatchSetPriceModal from "@/views/product/info/components/BatchSetPriceModal.vue";
@@ -386,7 +388,7 @@ import {ProductAttributeListReq} from "@/api/product/model/productAttributeModel
 import {ProductAttributeModel, ProductStockModel, Unit} from "@/views/product/info/model/productInfoModel";
 import {meTable, stock, productInfo, formState} from "@/views/product/info/info.data";
 
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -396,7 +398,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 
 export default defineComponent({
   name: 'ProductInfoModal',
@@ -423,6 +425,8 @@ export default defineComponent({
     'v-nodes': VNodes,
     'a-textarea': Textarea,
     'plus-outlined': PlusOutlined,
+    'a-divider': Divider,
+    'a-tag': Tag,
     BatchSetPriceModal,
     BatchSetStockModal,
     UnitModal,
@@ -454,8 +458,8 @@ export default defineComponent({
     const skuTwo = reactive([]);
     const skuThree = reactive([]);
 
-    const priceModalForm = ref<BatchSetPriceModal>();
-    const stockModalForm = ref<BatchSetStockModal>();
+    const priceModalForm = ref<any>();
+    const stockModalForm = ref<any>();
     const [registerModal, {openModal}] = useModal();
 
     const model = ref({});
@@ -477,7 +481,6 @@ export default defineComponent({
     }
 
     function handleCancel() {
-      close();
       if (formState.productId) {
         clearData()
       }
@@ -1029,11 +1032,11 @@ export default defineComponent({
           file.type === "image/bmp";
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isPNG) {
-        createMessage.error(`${file.name}，该文件不是图片类型`);
+        createMessage.warn(`${file.name}，该文件不是图片类型`);
         return isPNG || Upload.LIST_IGNORE
       }
       if (!isLt2M) {
-        createMessage.error(`${file.name}，该文件超过2MB大小限制`);
+        createMessage.warn(`${file.name}，该文件超过2MB大小限制`);
         return isLt2M || Upload.LIST_IGNORE
       }
     }
@@ -1116,20 +1119,20 @@ export default defineComponent({
 
     async function handleOk() {
       if (!formState.productName) {
-        createMessage.error('请输入商品名称');
+        createMessage.warn('请输入商品名称');
         return;
       }
       if (unitChecked.value) {
         if (!formState.productUnitId) {
-          createMessage.error('请选择商品单位');
+          createMessage.warn('请选择商品单位');
           return;
         }
       } else if (!formState.productUnit) {
-        createMessage.error('请输入商品单位');
+        createMessage.warn('请输入商品单位');
         return;
       }
       if (meTable.dataSource.length === 0) {
-        createMessage.error('请插入一行数据，录入商品条码价格信息');
+        createMessage.warn('请插入一行数据，录入商品条码价格信息');
         return;
       }
       // 检查库存信息是否为空
