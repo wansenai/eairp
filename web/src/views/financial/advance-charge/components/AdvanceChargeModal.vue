@@ -39,7 +39,7 @@
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
                          data-title="单据编号">
-              <a-input placeholder="请输入单据编号" v-model:value="formState.receiptNumber" :readOnly="true"/>
+              <a-input placeholder="请输入单据编号" v-model:value="formState.receiptNumber" readOnly/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">

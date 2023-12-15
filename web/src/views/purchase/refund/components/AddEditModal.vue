@@ -56,7 +56,7 @@
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联单据" data-step="3"
                          data-title="关联单据"
                          data-intro="">
-              <a-input-search readonly placeholder="请选择关联单据" v-model:value="purchaseRefundFormState.otherReceipt" @search="onSearch"/>
+              <a-input-search :readOnly="true" placeholder="请选择关联单据" v-model:value="purchaseRefundFormState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -73,6 +73,12 @@
                   <a-button @click="" style="margin-right: 10px">历史单据</a-button>
                   <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                </template>
+                <template #warehouse_default="{ row }">
+                  <span>{{ formatWarehouseId(row.warehouseId) }}</span>
+                </template>
+                <template #warehouse_edit="{ row }">
+                  <vxe-select v-model="row.warehouseId" placeholder="输选择仓库" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
                   <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
@@ -354,6 +360,7 @@ export default defineComponent({
     const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
+    const warehouseLabelList =  ref<any[]>([]);
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -374,6 +381,10 @@ export default defineComponent({
         title.value = '新增-采购退货'
         loadGenerateId();
         purchaseRefundFormState.receiptDate = dayjs(new Date());
+        const table = xGrid.value
+        if (table) {
+          table.insert({productNumber: 0})
+        }
       }
     }
 
@@ -387,6 +398,7 @@ export default defineComponent({
             warehouseColumn.editRender.options?.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
           }
           warehouseList.value = res.data
+          warehouseLabelList.value.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
         }
         const defaultWarehouse = res.data.find(item => item.isDefault === 1)
         if(defaultWarehouse) {
@@ -394,16 +406,6 @@ export default defineComponent({
         } else {
           purchaseRefundFormState.warehouseId = res.data[0].id
         }
-      })
-    }
-
-    function loadProductSku() {
-      getProductStockSku().then(res => {
-        productList.value = res.data
-        productLabelList.value.push(...res.data.map(item => ({value: item.productBarcode, label: item.productBarcode})))
-        productLabelList.value = productLabelList.value.filter((item, index, arr) => {
-          return arr.findIndex(item1 => item1.value === item.value) === index
-        })
       })
     }
 
@@ -664,6 +666,11 @@ export default defineComponent({
           createMessage.warn("请录入条码或者选择产品")
           return;
         }
+        const isWarehouseEmpty = insertRecords.some(item => !item.warehouseId)
+        if(isWarehouseEmpty) {
+          createMessage.warn("请选择仓库")
+          return;
+        }
       }
       // 库存校验
       const tableData = table.getTableData().tableData
@@ -855,7 +862,7 @@ export default defineComponent({
       const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
       const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
       if(table) {
-        table.insert({warehouseId: warehouseId})
+        table.insert({warehouseId: warehouseId, productNumber: 0})
       }
     }
 
@@ -1072,6 +1079,13 @@ export default defineComponent({
       }
     }
 
+    const formatWarehouseId = (value: string) => {
+      const item = warehouseList.value.find(item => item.id === value)
+      if(item) {
+        return item.warehouseName
+      }
+    }
+
     return {
       h,
       formRef,
@@ -1142,9 +1156,11 @@ export default defineComponent({
       handleReceiptSuccess,
       productList,
       productLabelList,
+      warehouseLabelList,
       selectBarCode,
       handleAccountModalSuccess,
-      handleSupplierModalSuccess
+      handleSupplierModalSuccess,
+      formatWarehouseId,
     };
   },
 });
