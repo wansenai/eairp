@@ -123,11 +123,11 @@ importers:
         specifier: ^4.1.0
         version: registry.npmmirror.com/vuedraggable@4.1.0(vue@3.3.4)
       vxe-table:
-        specifier: ^4.4.5
-        version: registry.npmmirror.com/vxe-table@4.5.8(vue@3.3.4)(xe-utils@3.5.12)
+        specifier: ^4.5.14
+        version: registry.npmmirror.com/vxe-table@4.5.14(vue@3.3.4)(xe-utils@3.5.12)
       vxe-table-plugin-export-xlsx:
-        specifier: ^3.0.4
-        version: registry.npmmirror.com/vxe-table-plugin-export-xlsx@3.0.5(vxe-table@4.5.8)
+        specifier: 3.1.0
+        version: registry.npmmirror.com/vxe-table-plugin-export-xlsx@3.1.0(vxe-table@4.5.14)
       xe-utils:
         specifier: ^3.5.11
         version: registry.npmmirror.com/xe-utils@3.5.12
@@ -9372,10 +9372,10 @@ packages:
     name: dom-scroll-into-view
     version: 2.0.1
 
-  registry.npmmirror.com/dom-zindex@1.0.0:
-    resolution: {integrity: sha512-pBKBPSfInArD3L+NPnGny/9l3g6NmFbbOEacpc0nB28PGXdcphZdnr794KFnPglNm2Wdt2hYOdUkYYej8CbvsQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/dom-zindex/-/dom-zindex-1.0.0.tgz}
+  registry.npmmirror.com/dom-zindex@1.0.1:
+    resolution: {integrity: sha512-M/MERVDZ8hguvjl6MAlLWSLYLS7PzEyXaTb5gEeJ+SF+e9iUC0sdvlzqe91MMDHBoy+nqw7wKcUOrDSyvMCrRg==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/dom-zindex/-/dom-zindex-1.0.1.tgz}
     name: dom-zindex
-    version: 1.0.0
+    version: 1.0.1
     dev: false
 
   registry.npmmirror.com/domexception@2.0.1:
@@ -13323,27 +13323,27 @@ packages:
       vue: 3.3.4
     dev: false
 
-  registry.npmmirror.com/vxe-table-plugin-export-xlsx@3.0.5(vxe-table@4.5.8):
-    resolution: {integrity: sha512-9vZuqIEFdyjNAiUaHsE2fc0RyI8q/DsbpsVvi2flOeTqyUDjvpyDYzTjiF9W3rXMPwxZ8w3DHc0OoCFooexcDw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/vxe-table-plugin-export-xlsx/-/vxe-table-plugin-export-xlsx-3.0.5.tgz}
-    id: registry.npmmirror.com/vxe-table-plugin-export-xlsx/3.0.5
+  registry.npmmirror.com/vxe-table-plugin-export-xlsx@3.1.0(vxe-table@4.5.14):
+    resolution: {integrity: sha512-ieEsN6h+QaKHgwQ6k1MtjvW17T+FCS9Bw2Xhg67HKIbuLMS+SprcF+EBrMtHIOfzQ2i41KAoLsCvXRbd5uChAA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/vxe-table-plugin-export-xlsx/-/vxe-table-plugin-export-xlsx-3.1.0.tgz}
+    id: registry.npmmirror.com/vxe-table-plugin-export-xlsx/3.1.0
     name: vxe-table-plugin-export-xlsx
-    version: 3.0.5
+    version: 3.1.0
     peerDependencies:
-      vxe-table: ^4.0.27
+      vxe-table: ^4.5.0
     dependencies:
-      vxe-table: registry.npmmirror.com/vxe-table@4.5.8(vue@3.3.4)(xe-utils@3.5.12)
+      vxe-table: registry.npmmirror.com/vxe-table@4.5.14(vue@3.3.4)(xe-utils@3.5.12)
     dev: false
 
-  registry.npmmirror.com/vxe-table@4.5.8(vue@3.3.4)(xe-utils@3.5.12):
-    resolution: {integrity: sha512-phfQ2C2/7b940VYYPQNDPKyJmKoAdB21U89kxmmAuUUWpuKMojzvB+3+Vd6LKrdyBqY6C0z0BCJcPIjTayEMmg==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/vxe-table/-/vxe-table-4.5.8.tgz}
-    id: registry.npmmirror.com/vxe-table/4.5.8
+  registry.npmmirror.com/vxe-table@4.5.14(vue@3.3.4)(xe-utils@3.5.12):
+    resolution: {integrity: sha512-S+6pAYQsoY5DZj9qLXQLDKcA/+AO5CSrs9tGn+/By8WxYWJNLw3i5cjbXsriUaJeuj8Qi1aYfdhrNfeMCwE9Iw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/vxe-table/-/vxe-table-4.5.14.tgz}
+    id: registry.npmmirror.com/vxe-table/4.5.14
     name: vxe-table
-    version: 4.5.8
+    version: 4.5.14
     peerDependencies:
       vue: ^3.2.28
       xe-utils: ^3.5.0
     dependencies:
-      dom-zindex: registry.npmmirror.com/dom-zindex@1.0.0
+      dom-zindex: registry.npmmirror.com/dom-zindex@1.0.1
       vue: 3.3.4
       xe-utils: registry.npmmirror.com/xe-utils@3.5.12
     dev: false
