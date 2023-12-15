@@ -76,11 +76,6 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         zoom: true,
         custom: true
     },
-    proxyConfig: {
-        sort: false,
-        filter: false,
-        form: true,
-    },
     columns: [
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
         {   field: 'warehouseId',
