@@ -81,8 +81,8 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         {   field: 'warehouseId',
             width:120,
             title: '仓库',
-            slots: { edit: 'warehouseId_edit',default: 'warehouseId_default' },
-            editRender: {}
+            slots: { edit: 'warehouse_edit',default: 'warehouse_default' },
+            editRender: {name: 'input', attrs: { placeholder: '请选择仓库' }}
         },
         {   field: 'barCode',
             width:160,
