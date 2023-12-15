@@ -148,7 +148,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   transferFormState,
@@ -173,7 +173,7 @@ import {AddOrUpdateTransferReq} from "@/api/financial/model/transferModel";
 import OperatorModal from "@/views/basic/operator/components/OperatorModal.vue";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -183,7 +183,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -222,6 +222,7 @@ export default defineComponent({
     'vxe-button': VxeButton,
     'plus-outlined': PlusOutlined,
     'upload-outlined': UploadOutlined,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const [operatorModal, {openModal}] = useModal();
@@ -247,7 +248,6 @@ export default defineComponent({
     const accountList = ref<AccountResp[]>([]);
 
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');
@@ -264,6 +264,7 @@ export default defineComponent({
         title.value = '新增-转账单'
         loadGenerateId();
         transferFormState.receiptDate = dayjs(new Date());
+        addRowData();
       }
     }
 
@@ -335,22 +336,32 @@ export default defineComponent({
 
     async function handleOk(type: number) {
       if (!transferFormState.receiptDate) {
-        createMessage.error('请选择单据日期');
+        createMessage.warn('请选择单据日期');
         return;
       }
       if (!transferFormState.paymentAccountId) {
-        createMessage.error('请选择付款账户');
+        createMessage.warn('请选择付款账户');
         return;
       }
       if (!transferFormState.paymentAmount) {
-        createMessage.error('请输入实付金额');
+        createMessage.warn('请输入实付金额');
         return;
       }
       const table = xGrid.value
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.error("请添加一行数据")
+          createMessage.warn("请添加一行数据")
+          return;
+        }
+        const isAccount = insertRecords.some(item => !item.accountId)
+        if(isAccount) {
+          createMessage.warn("请选择转账账户")
+          return;
+        }
+        const isAmount = insertRecords.some(item => !item.transferAmount)
+        if(isAmount) {
+          createMessage.warn("请输入转账金额")
           return;
         }
       }

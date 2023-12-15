@@ -92,17 +92,6 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         zoom: true, // 显示全屏按钮
         custom: true // 显示自定义列按钮
     },
-    proxyConfig: {
-        seq: true, // 启用动态序号代理，每一页的序号会根据当前页数变化
-        sort: false, // 启用排序代理，当点击排序时会自动触发 query 行为
-        filter: false, // 启用筛选代理，当点击筛选时会自动触发 query 行为
-        form: true, // 启用表单代理，当点击表单提交按钮时会自动触发 reload 行为
-        props: {
-            // 对应响应结果 Promise<{ result: [], page: { total: 100 } }>
-            result: 'result', // 配置响应结果列表字段
-            total: 'page.total' // 配置响应结果总页数字段
-        },
-    },
     columns: [
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
         {
@@ -184,11 +173,6 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
                 return ''
             })
         ]
-    },
-    exportConfig: {
-        remote: true,
-        types: ['xlsx'],
-        modes: ['current', 'selected', 'all'],
     },
     checkboxConfig: {
         labelField: 'id',

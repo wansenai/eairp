@@ -224,7 +224,6 @@ export default defineComponent({
     const productLabelList = ref<any[]>([]);
 
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');

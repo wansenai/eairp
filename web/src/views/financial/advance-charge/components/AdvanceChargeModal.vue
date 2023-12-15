@@ -5,7 +5,7 @@
       :confirm-loading="confirmLoading"
       v-bind:prefixNo="prefixNo"
       :id="prefixNo"
-      :keyboard="false"
+      :keyboard="true"
       :forceRender="true"
       switchHelp
       switchFullscreen
@@ -39,7 +39,7 @@
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
                          data-title="单据编号">
-              <a-input placeholder="请输入单据编号" v-model:value="formState.receiptNumber" :readOnly="true"/>
+              <a-input placeholder="请输入单据编号" v-model:value="formState.receiptNumber" readOnly/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
@@ -78,7 +78,7 @@
                     v-model:value="editableData[record.key][column.key]"
                     style="width: 100%"
                     placeholder="请选择账户名称"
-                    @change="handleAccountChange(record.key, column.key, $event)">
+                    @change="handleAccountChange(record.key, column.key, $event)" >
                   <a-select-option v-for="(item,index) in accountList" :key="index" :value="item.id">
                     {{ item.accountName }}
                   </a-select-option>
@@ -87,7 +87,7 @@
               <template v-else>
                 <template v-if="column.key !== 'accountId'">
                   <a-input v-model:value="editableData[record.key][column.key]"
-                           :placeholder="`请输入${getColumnTitle(column)}`" @change="valueChange"/>
+                           :placeholder="`请输入${getColumnTitle(column)}`" @change="valueChange" :rules="[{ required: true}]"/>
                 </template>
                 <template v-else>
                   {{ record[column.key] }}
@@ -177,6 +177,10 @@ import {AccountResp} from "@/api/financial/model/accountModel";
 import {useMessage} from "@/hooks/web/useMessage";
 import {addOrUpdateAdvance, getAdvanceDetail} from "@/api/financial/advance";
 import {AddOrUpdateAdvanceReq, AdvanceChargeData} from "@/api/financial/model/advanceModel";
+import weekday from "dayjs/plugin/weekday";
+import localeData from "dayjs/plugin/localeData";
+dayjs.extend(weekday);
+dayjs.extend(localeData);
 dayjs.locale('zh-cn');
 export default defineComponent({
   name: 'AdvanceChargeModal',
@@ -241,7 +245,6 @@ export default defineComponent({
     const totalPrice = ref<number>(0.00);
 
     function handleCancelModal() {
-      close();
       open.value = false;
       context.emit('cancel');
       clearData();
@@ -340,17 +343,30 @@ export default defineComponent({
 
     async function handleOk(review: number) {
       if (!formState.memberId) {
-        createMessage.error('请选择付款会员');
+        createMessage.warn('请选择付款会员');
         return;
       }
       if (!formState.receiptDate) {
-        createMessage.error('请选择单据日期');
+        createMessage.warn('请选择单据日期');
         return;
       }
       if (tableData.value.length === 0) {
-        createMessage.error('请插入一行数据，录入收预付款信息');
+        createMessage.warn('请插入一行数据，录入收预付款信息');
         return;
       }
+      console.info(editableData)
+      for (const key in editableData) {
+        console.info(editableData[key])
+        if (!editableData[key].accountId) {
+          createMessage.warn('请选择账户名称');
+          return;
+        }
+        if (!editableData[key].amount) {
+          createMessage.warn('请输入金额');
+          return;
+        }
+      }
+
 
       const files = [];
       if (fileList && fileList.value) {
@@ -397,6 +413,7 @@ export default defineComponent({
 
     const clearData = () => {
       formRef.value.resetFields();
+      formState.id = undefined;
       formState.receiptNumber = '';
       formState.receiptDate = undefined;
       formState.memberId = '';
@@ -407,6 +424,9 @@ export default defineComponent({
       tableData.value = [];
       fileList.value = [];
       totalPrice.value = 0.00;
+      for (const key in editableData) {
+        delete editableData[key];
+      }
     };
 
     const editableData = reactive({});
@@ -477,7 +497,7 @@ export default defineComponent({
     function beforeUpload(file: any) {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        createMessage.error(`${file.name}，该文件超过2MB大小限制`);
+        createMessage.warn(`${file.name}，该文件超过2MB大小限制`);
         return isLt2M || Upload.LIST_IGNORE
       }
     }

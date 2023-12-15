@@ -59,7 +59,7 @@
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联订单" data-step="3"
                          data-title="关联订单"
                          data-intro="">
-              <a-input-search readonly="true" placeholder="请选择关联订单"
+              <a-input-search :readonly="true" placeholder="请选择关联订单"
                               v-model:value="purchaseStorageFormState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
@@ -80,6 +80,12 @@
                   <a-button @click="" style="margin-right: 10px">历史单据</a-button>
                   <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                </template>
+                <template #warehouse_default="{ row }">
+                  <span>{{ formatWarehouseId(row.warehouseId) }}</span>
+                </template>
+                <template #warehouse_edit="{ row }">
+                  <vxe-select v-model="row.warehouseId" placeholder="输选择仓库" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
                   <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode"
@@ -370,6 +376,7 @@ export default defineComponent({
     const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
+    const warehouseLabelList =  ref<any[]>([]);
 
     function handleCancelModal() {
       clearData();
@@ -391,6 +398,10 @@ export default defineComponent({
         title.value = '新增-采购入库'
         loadGenerateId();
         purchaseStorageFormState.receiptDate = dayjs(new Date());
+        const table = xGrid.value
+        if (table) {
+          table.insert({productNumber: 0})
+        }
       }
     }
 
@@ -404,6 +415,7 @@ export default defineComponent({
             warehouseColumn.editRender.options?.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
           }
           warehouseList.value = res.data
+          warehouseLabelList.value.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
         }
         const defaultWarehouse = res.data.find(item => item.isDefault === 1)
         if (defaultWarehouse) {
@@ -670,6 +682,11 @@ export default defineComponent({
           createMessage.warn("请录入条码或者选择产品")
           return;
         }
+        const isWarehouseEmpty = insertRecords.some(item => !item.warehouseId)
+        if(isWarehouseEmpty) {
+          createMessage.warn("请选择仓库")
+          return;
+        }
       }
 
       const files = [];
@@ -851,7 +868,7 @@ export default defineComponent({
       const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
       const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
       if (table) {
-        table.insert({warehouseId: warehouseId})
+        table.insert({warehouseId: warehouseId, productNumber: 0})
       }
     }
 
@@ -1068,6 +1085,13 @@ export default defineComponent({
       }
     }
 
+    const formatWarehouseId = (value: string) => {
+      const item = warehouseList.value.find(item => item.id === value)
+      if(item) {
+        return item.warehouseName
+      }
+    }
+
     return {
       h,
       formRef,
@@ -1140,7 +1164,9 @@ export default defineComponent({
       productLabelList,
       selectBarCode,
       handleSupplierModalSuccess,
-      handleAccountModalSuccess
+      handleAccountModalSuccess,
+      formatWarehouseId,
+      warehouseLabelList
     };
   },
 });

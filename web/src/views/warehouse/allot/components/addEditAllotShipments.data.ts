@@ -63,22 +63,16 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         slots: {
             buttons: 'toolbar_buttons'
         },
-        export: true,
         zoom: true,
         custom: true
-    },
-    proxyConfig: {
-        sort: false,
-        filter: false,
-        form: true,
     },
     columns: [
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
         {   field: 'warehouseId',
             width:150,
             title: '仓库',
-            slots: { edit: 'warehouseId_edit',default: 'warehouseId_default' },
-            editRender: {}
+            slots: { edit: 'warehouse_edit',default: 'warehouse_default' },
+            editRender: { name: 'input', attrs: { placeholder: '请选择仓库' } }
         },
         {   field: 'barCode',
             width:160,
@@ -97,7 +91,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         {   field: 'otherWarehouseId',
             width:150,
             title: '调入仓库',
-            slots: { edit: 'otherWarehouseId_edit',default: 'otherWarehouseId_default' },
+            slots: { edit: 'otherWarehouse_edit',default: 'otherWarehouse_default' },
             editRender: {}
         },
         { field: 'productUnit', title: '单位',  width: 70},

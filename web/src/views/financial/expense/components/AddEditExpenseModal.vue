@@ -159,7 +159,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   expenseFormState,
@@ -186,7 +186,7 @@ import {AddOrUpdateExpenseReq} from "@/api/financial/model/expenseModel";
 import OperatorModal from "@/views/basic/operator/components/OperatorModal.vue";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -196,7 +196,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -235,6 +235,7 @@ export default defineComponent({
     'vxe-button': VxeButton,
     'plus-outlined': PlusOutlined,
     'upload-outlined': UploadOutlined,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const [operatorModal, {openModal}] = useModal();
@@ -262,7 +263,6 @@ export default defineComponent({
     const accountList = ref<AccountResp[]>([]);
 
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');
@@ -281,6 +281,7 @@ export default defineComponent({
         title.value = '新增-支出单'
         loadGenerateId();
         expenseFormState.receiptDate = dayjs(new Date());
+        addRowData()
       }
     }
 
@@ -365,26 +366,38 @@ export default defineComponent({
 
     async function handleOk(type: number) {
       if (!expenseFormState.relatedPersonId) {
-        createMessage.error('请选择往来单位');
+        createMessage.warn('请选择往来单位');
         return;
       }
       if (!expenseFormState.receiptDate) {
-        createMessage.error('请选择单据日期');
+        createMessage.warn('请选择单据日期');
         return;
       }
       if (!expenseFormState.expenseAccountId) {
-        createMessage.error('请选择支出账户');
+        createMessage.warn('请选择支出账户');
         return;
       }
       if (!expenseFormState.expenseAmount) {
-        createMessage.error('请输入支出金额');
+        createMessage.warn('请输入支出金额');
         return;
       }
       const table = xGrid.value
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.error("请添加一行数据")
+          createMessage.warn("请添加一行数据")
+          return;
+        }
+
+        const isIncomeExpenseIdEmpty = insertRecords.some(item => !item.incomeExpenseId)
+        if(isIncomeExpenseIdEmpty) {
+          createMessage.warn("请选择支出项目")
+          return;
+        }
+
+        const isIncomeExpenseAmount = insertRecords.some(item => !item.incomeExpenseAmount)
+        if(isIncomeExpenseAmount) {
+          createMessage.warn("请输入支出金额")
           return;
         }
       }

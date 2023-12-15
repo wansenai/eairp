@@ -164,7 +164,7 @@ import {
   Tabs,
   Tooltip,
   TreeSelect,
-  Upload,
+  Upload, Divider,
 } from "ant-design-vue";
 import {
   paymentFormState,
@@ -193,7 +193,7 @@ import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import {SupplierResp} from "@/api/basic/model/supplierModel";
-const VNodes = {
+const VNodes = defineComponent({
   props: {
     vnodes: {
       type: Object,
@@ -203,7 +203,7 @@ const VNodes = {
   render() {
     return this.vnodes;
   },
-};
+});
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -243,6 +243,7 @@ export default defineComponent({
     'vxe-button': VxeButton,
     'plus-outlined': PlusOutlined,
     'upload-outlined': UploadOutlined,
+    'a-divider': Divider,
   },
   setup(_, context) {
     const [operatorModal, {openModal}] = useModal();
@@ -271,7 +272,6 @@ export default defineComponent({
     const supplierList = ref<SupplierResp[]>([]);
 
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');
@@ -291,6 +291,10 @@ export default defineComponent({
         loadGenerateId();
         paymentFormState.receiptDate = dayjs(new Date());
         disabledStatus.value = false
+        const table = xGrid.value
+        if(table) {
+          table.remove()
+        }
       }
     }
 
@@ -375,26 +379,26 @@ export default defineComponent({
 
     async function handleOk(type: number) {
       if (!paymentFormState.supplierId) {
-        createMessage.error('请选择供应商');
+        createMessage.warn('请选择供应商');
         return;
       }
       if (!paymentFormState.receiptDate) {
-        createMessage.error('请选择单据日期');
+        createMessage.warn('请选择单据日期');
         return;
       }
       if (!paymentFormState.paymentAccountId) {
-        createMessage.error('请选择付款账户');
+        createMessage.warn('请选择付款账户');
         return;
       }
       if (paymentFormState.discountAmount === undefined) {
-        createMessage.error('请输入优惠金额');
+        createMessage.warn('请输入优惠金额');
         return;
       }
       const table = xGrid.value
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.error("请添加一行数据")
+          createMessage.warn("请选择供应商单据")
           return;
         }
       }
@@ -504,7 +508,7 @@ export default defineComponent({
 
     function chooseReceipt() {
       if (!paymentFormState.supplierId) {
-        createMessage.error('请先选择供应商');
+        createMessage.warn('请先选择供应商');
         return;
       }
       openPurchaseArrearsModal(true, {

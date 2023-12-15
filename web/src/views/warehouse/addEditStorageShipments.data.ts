@@ -76,18 +76,13 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         zoom: true,
         custom: true
     },
-    proxyConfig: {
-        sort: false,
-        filter: false,
-        form: true,
-    },
     columns: [
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
         {   field: 'warehouseId',
             width:120,
             title: '仓库',
-            slots: { edit: 'warehouseId_edit',default: 'warehouseId_default' },
-            editRender: {}
+            slots: { edit: 'warehouse_edit',default: 'warehouse_default' },
+            editRender: {name: 'input', attrs: { placeholder: '请选择仓库' }}
         },
         {   field: 'barCode',
             width:160,

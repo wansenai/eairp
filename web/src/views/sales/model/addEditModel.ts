@@ -130,21 +130,9 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
             buttons: 'toolbar_buttons'
         },
         refresh: true, // 显示刷新按钮
-        export: true, // 显示导出按钮
         print: true, // 显示打印按钮
         zoom: true, // 显示全屏按钮
         custom: true // 显示自定义列按钮
-    },
-    proxyConfig: {
-        seq: true, // 启用动态序号代理，每一页的序号会根据当前页数变化
-        sort: false, // 启用排序代理，当点击排序时会自动触发 query 行为
-        filter: false, // 启用筛选代理，当点击筛选时会自动触发 query 行为
-        form: true, // 启用表单代理，当点击表单提交按钮时会自动触发 reload 行为
-        props: {
-            // 对应响应结果 Promise<{ result: [], page: { total: 100 } }>
-            result: 'result', // 配置响应结果列表字段
-            total: 'page.total' // 配置响应结果总页数字段
-        },
     },
     columns: [
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
@@ -152,7 +140,6 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
             width:160,
             title: '条码',
             slots: { edit: 'barCode_edit' },
-            sortable: true,
             titlePrefix: { content: '输入条码商品信息自动带出！' },
             editRender: { name: 'input', attrs: { placeholder: '请输入条码并回车' } }
         },
@@ -224,11 +211,6 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
                 return ''
             })
         ]
-    },
-    exportConfig: {
-        remote: true,
-        types: ['xlsx'],
-        modes: ['current', 'selected', 'all'],
     },
     checkboxConfig: {
         labelField: 'id',
@@ -299,21 +281,9 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             buttons: 'toolbar_buttons'
         },
         refresh: true, // 显示刷新按钮
-        export: true, // 显示导出按钮
         print: true, // 显示打印按钮
         zoom: true, // 显示全屏按钮
         custom: true // 显示自定义列按钮
-    },
-    proxyConfig: {
-        seq: true, // 启用动态序号代理，每一页的序号会根据当前页数变化
-        sort: false, // 启用排序代理，当点击排序时会自动触发 query 行为
-        filter: false, // 启用筛选代理，当点击筛选时会自动触发 query 行为
-        form: true, // 启用表单代理，当点击表单提交按钮时会自动触发 reload 行为
-        props: {
-            // 对应响应结果 Promise<{ result: [], page: { total: 100 } }>
-            result: 'result', // 配置响应结果列表字段
-            total: 'page.total' // 配置响应结果总页数字段
-        },
     },
     columns: [
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
@@ -321,13 +291,13 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             field: 'warehouseId',
             title: '仓库',
             width: 130,
-            editRender: { name: '$select', options: [], props: { placeholder: '请选择仓库' } }
+            slots: { edit: 'warehouse_edit', default: 'warehouse_default' },
+            editRender: { name: 'input', attrs: { placeholder: '请选择仓库' } }
         },
         {   field: 'barCode',
             width:160,
             title: '条码',
             slots: { edit: 'barCode_edit' },
-            sortable: true,
             titlePrefix: { content: '输入条码商品信息自动带出！' },
             editRender: { name: 'input', attrs: { placeholder: '请输入条码并回车' } }
         },
@@ -399,11 +369,6 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
                 return ''
             })
         ]
-    },
-    exportConfig: {
-        remote: true,
-        types: ['xlsx'],
-        modes: ['current', 'selected', 'all'],
     },
     checkboxConfig: {
         labelField: 'id',

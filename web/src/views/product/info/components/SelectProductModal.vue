@@ -14,7 +14,7 @@ import {BasicModal, useModalInner} from "@/components/Modal";
 export default defineComponent({
   name: 'productModal',
   components: {BasicModal, BasicTable, TableAction},
-  emits: ['selectedRows'],
+  emits: ['register', 'handleCheckSuccess'],
   setup(_, context) {
     const getTitle = ref('选择商品');
     const { createMessage } = useMessage();

@@ -66,11 +66,11 @@
                   <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
                   <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
                 </template>
-                <template #warehouseId_default="{ row }">
+                <template #warehouse_default="{ row }">
                   <span>{{ formatWarehouseId(row.warehouseId) }}</span>
                 </template>
-                <template #warehouseId_edit="{ row }">
-                  <vxe-select placeholder="请选择仓库" v-model="row.warehouseId">
+                <template #warehouse_edit="{ row }">
+                  <vxe-select placeholder="请选择仓库" v-model="row.warehouseId" @change="selectBarCode" clearable filterable>
                     <vxe-option v-for="item in warehouseList" :key="item.id" :value="item.id" :label="item.warehouseName"></vxe-option>
                   </vxe-select>
                 </template>
@@ -253,7 +253,6 @@ export default defineComponent({
     const productLabelList = ref<any[]>([]);
 
     function handleCancelModal() {
-      close();
       clearData();
       open.value = false;
       context.emit('cancel');
@@ -271,6 +270,10 @@ export default defineComponent({
         title.value = '新增-其他出库'
         loadGenerateId();
         otherShipmentFormState.receiptDate = dayjs(new Date());
+        const table = xGrid.value
+        if (table) {
+          table.insert({productNumber: 0})
+        }
       }
     }
 
@@ -409,6 +412,11 @@ export default defineComponent({
         const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
         if(isBarCodeEmpty) {
           createMessage.warn("请录入条码或者选择产品")
+          return;
+        }
+        const isWarehouseEmpty = insertRecords.some(item => !item.warehouseId)
+        if(isWarehouseEmpty) {
+          createMessage.warn("请选择仓库")
           return;
         }
       }

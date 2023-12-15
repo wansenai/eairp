@@ -52,4 +52,6 @@ data class AdvanceChargeDetailVO (
     var files: List<FileDataBO>? = null,
 
     var remark: String? = null,
+
+    var status: Int? = null,
 )
