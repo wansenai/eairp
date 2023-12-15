@@ -7,7 +7,7 @@ export interface FileData {
     fileSize: number;
 }
 
-interface AdvanceChargeData {
+export interface AdvanceChargeData {
     accountId: number | string;
     accountName: string;
     amount: number;

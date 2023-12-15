@@ -340,15 +340,15 @@ export default defineComponent({
 
     async function handleOk(review: number) {
       if (!formState.memberId) {
-        createMessage.error('请选择付款会员');
+        createMessage.warn('请选择付款会员');
         return;
       }
       if (!formState.receiptDate) {
-        createMessage.error('请选择单据日期');
+        createMessage.warn('请选择单据日期');
         return;
       }
       if (tableData.value.length === 0) {
-        createMessage.error('请插入一行数据，录入收预付款信息');
+        createMessage.warn('请插入一行数据，录入收预付款信息');
         return;
       }
 
@@ -477,7 +477,7 @@ export default defineComponent({
     function beforeUpload(file: any) {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        createMessage.error(`${file.name}，该文件超过2MB大小限制`);
+        createMessage.warn(`${file.name}，该文件超过2MB大小限制`);
         return isLt2M || Upload.LIST_IGNORE
       }
     }
