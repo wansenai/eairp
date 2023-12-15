@@ -297,7 +297,7 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
         if(!otherStorageDTO.getTableData().isEmpty()) {
             for (StorageShipmentStockBO stockBO : otherStorageDTO.getTableData()) {
                 totalProductNumber += stockBO.getProductNumber();
-                totalAmount = totalAmount.add(stockBO.getAmount());
+                totalAmount = totalAmount.add(Optional.ofNullable(stockBO.getAmount()).orElse(BigDecimal.ZERO));
             }
         }
 

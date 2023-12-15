@@ -294,7 +294,7 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         if(!otherShipmentsDTO.getTableData().isEmpty()) {
             for (StorageShipmentStockBO stockBO : otherShipmentsDTO.getTableData()) {
                 totalProductNumber += stockBO.getProductNumber();
-                totalAmount = totalAmount.add(stockBO.getAmount());
+                totalAmount = totalAmount.add(Optional.ofNullable(stockBO.getAmount()).orElse(BigDecimal.ZERO));
             }
         }
 
