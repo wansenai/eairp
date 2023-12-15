@@ -56,7 +56,7 @@
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联单据" data-step="3"
                          data-title="关联单据"
                          data-intro="">
-              <a-input-search readonly="true" placeholder="请选择关联单据" v-model:value="purchaseRefundFormState.otherReceipt" @search="onSearch"/>
+              <a-input-search readonly placeholder="请选择关联单据" v-model:value="purchaseRefundFormState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
         </a-row>
