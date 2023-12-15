@@ -136,7 +136,9 @@ open class SupplierServiceImpl(
             supplier?.phoneNumber?.let { like(Supplier::getPhoneNumber, it) }
             supplier?.startDate?.let { ge(Supplier::getCreateTime, it) }
             supplier?.endDate?.let { le(Supplier::getCreateTime, it) }
+            eq(Supplier::getStatus, CommonConstants.STATUS_NORMAL)
             eq(Supplier::getDeleteFlag, CommonConstants.NOT_DELETED)
+            orderByAsc(Supplier::getSort)
         }
         val list = supplierMapper.selectList(wrapper)
         val listVo = list.map { supplier ->
