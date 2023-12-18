@@ -107,7 +107,13 @@
     "vxe-table": "^4.5.14",
     "vxe-table-plugin-export-xlsx": "3.1.0",
     "xe-utils": "^3.5.11",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "bpmn-js": "^16.1.0",
+    "@bpmn-io/properties-panel": "^3.13.0",
+    "bpmn-js-properties-panel": "^5.6.1",
+    "camunda-bpmn-moddle": "^7.0.1",
+    "diagram-js-grid-bg": "^1.0.3",
+    "diagram-js-minimap": "4.1.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.6",
