@@ -21,3 +21,6 @@ spring:
           max-idle: 20
           min-idle: 5
       timeout: 10000
+flowable:
+  async-executor-activate: true
+  database-schema-update: true
