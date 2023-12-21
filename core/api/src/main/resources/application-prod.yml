@@ -28,3 +28,7 @@ spring:
           max-idle: 16     #最大等待连接中的数量,设 0 为没有限制
           max-wait: 300ms  #最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。
           min-idle: 16     #最小等待连接中的数量,设 0 为没有限制
+
+flowable:
+  async-executor-activate: false
+  database-schema-update: true
