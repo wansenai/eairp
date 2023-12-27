@@ -83,8 +83,7 @@ Licensed under either of
 at your option.
 
 ## Community
-WeChat Group: 关注微信公众号**万森工业技术**点击开源交流按钮扫码进群，欢迎进群交流
-(由于微信的群规则，每周会更新一次二维码链接推送)
+微信群: 请添加微信`wansensoft`备注ERP开源.
 
 ## Contribution
 We welcome every contributor, both in terms of code and documentation.
