@@ -63,8 +63,7 @@ docker run --name eairp -d -p 9998:8088 wansenai/eairp:2.0.3
   一些功能模块正在开发和改进中, 请参阅我们的[开发计划](https://github.com/wansenai/eairp-web/issues/42), 用爱发电很不容易, 如果这个项目对你有帮助, 请点击Star非常感谢.
 
 ### Repository code
-- [wansen-erp](https://github.com/wansenai/wansen-erp) - **Current version**
-- [wansen-erp-core](https://github.com/wansenai/wansen-erp-core) - **Current API version**
+- [wansen-erp](https://github.com/wansenai/wansen-erp) - **ERP Web Template**
 
 ## Browser support
 
@@ -88,26 +87,28 @@ Support modern browsers, not IE
 - Get the project code
 
 ```bash
-git clone https://github.com/wansenai/wansen-erp.git
+git clone https://github.com/wansenai/eairp.git
+
+cd eairp
+```
+
+If you have not installed the pnpm tool, please use the following command to install pnpm first
+```bash
+npm install -g pnpm
 ```
 
 - Installation dependencies
 
 ```bash
-cd wansen-erp
-
 pnpm install
-
 ```
 
 - run
-
 ```bash
 pnpm serve
 ```
 
 - build
-
 ```bash
 pnpm build
 ```
