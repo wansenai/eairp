@@ -26,6 +26,7 @@
 
 <script lang="ts">
 import {reactive, ref} from 'vue';
+import { useI18n } from '/@/hooks/web/useI18n';
 import {Button, Form, FormItem, Input, InputNumber, Modal, Spin} from "ant-design-vue";
 import {BasicModal, useModalInner} from '/@/components/Modal';
 import {CountdownInput} from "@/components/CountDown";
@@ -48,6 +49,7 @@ export default {
   },
   setup(_, context) {
     const { createMessage } = useMessage();
+    const { t } = useI18n();
     const userId = ref('');
     const title = ref('更换密保手机');
     const openBindPhoneModal = ref(false);
