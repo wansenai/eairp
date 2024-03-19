@@ -117,5 +117,18 @@ export default {
     resetUserPassword: '重置密码',
     confirmPasswordReset: '确定重置密码为123456吗',
     deleteUserAccount: '删除账号'
+  },
+  table: {
+    add: '新增',
+    edit: '编辑',
+    delete: '删除',
+    batchDelete: '批量删除',
+    exportData: '导出数据',
+    approve: '审核',
+    reject: '驳回',
+    audited: '已审核',
+    unaudited: '未审核',
+    viewReceiptDetails: '查看单据详情',
+    confirmDelete: '是否确认删除数据？',
   }
 };

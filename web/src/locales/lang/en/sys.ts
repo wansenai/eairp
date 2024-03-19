@@ -93,6 +93,7 @@ export default {
     accountPlaceholder: 'Please input username',
     passwordPlaceholder: 'Please input password',
     captchaPlaceholder: 'Please input verification code',
+    correctMobilePlaceholder: 'Please enter the correct phone number',
     smsPlaceholder: 'Please input sms code',
     mobilePlaceholder: 'Please input mobile',
     policyPlaceholder: 'Register after checking',
@@ -123,5 +124,23 @@ export default {
     resetUserPassword: 'Reset User Password',
     confirmPasswordReset: 'Are you sure to reset the password to 123456',
     deleteUserAccount: 'Delete User Account'
+  },
+  table: {
+    add: 'Add Data',
+    edit: 'Edit Data',
+    delete: 'Delete Data',
+    batchDelete: 'Batch Delete Data',
+    exportData: 'Export Data',
+    approve: 'Receipt Approval',
+    reject: 'Receipt Rejection',
+    audited: 'Audited',
+    unaudited: 'Unaudited',
+    viewReceiptDetails: 'View Receipt Detail',
+    confirmDelete: 'Are you sure to delete this data?',
+    confirmExport: 'Confirm Export',
+    confirmExportTextOne: 'Export',
+    confirmExportTextTwo: 'piece of data, please be patient.',
+    confirmExportTextThree: 'If you need to export detailed data (which may take a long time), please check the box below.',
+    confirmExportTextFour: 'Need to export detailed data',
   }
 };
