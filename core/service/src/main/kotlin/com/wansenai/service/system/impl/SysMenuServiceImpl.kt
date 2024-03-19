@@ -172,6 +172,7 @@ open class SysMenuServiceImpl(
                         val menuVo = menuVoBuilder.build()
                         menuVos.add(menuVo)
                     }
+                    menuVos.sortBy { it.sort }
                 }
                 menuData["total"] = menuVos.size
                 menuData["data"] = menuVos
