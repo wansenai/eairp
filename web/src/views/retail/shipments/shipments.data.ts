@@ -8,52 +8,52 @@ export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '会员',
+        title: t('retail.shipments.table.customer'),
         dataIndex: 'memberName',
         width: 60,
     },
     {
-        title: '单据编号',
+        title: t('retail.shipments.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 130,
     },
     {
-        title: '商品信息',
+        title: t('retail.shipments.table.productInformation'),
         dataIndex: 'productInfo',
         width: 80,
     },
     {
-        title: '数量',
+        title: t('retail.shipments.table.productQuantity'),
         dataIndex: 'productNumber',
         width: 60,
     },
     {
-        title: '金额合计',
+        title: t('retail.shipments.table.totalAmount'),
         dataIndex: 'totalPrice',
         width: 60,
     },
     {
-        title: '收款金额',
+        title: t('retail.shipments.table.amountCollection'),
         dataIndex: 'collectionAmount',
         width: 80,
     },
     {
-        title: '找零金额',
+        title: t('retail.shipments.table.changeAmount'),
         dataIndex: 'backAmount',
         width: 80,
     },
     {
-        title: '单据日期',
+        title: t('retail.shipments.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '操作员',
+        title: t('retail.shipments.table.operator'),
         dataIndex: 'operator',
         width: 60,
     },
     {
-        title: '状态',
+        title: t('retail.shipments.table.status'),
         dataIndex: 'status',
         width: 80,
     },
@@ -61,7 +61,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('retail.shipments.table.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -71,16 +71,16 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('retail.shipments.table.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('retail.shipments.header.startDate'), t('retail.shipments.header.endDate')],
         },
         colProps: { span: 7 },
     },
     {
-        label: '结算账户',
+        label: t('retail.shipments.header.settlementAccount'),
         field: 'accountId',
         component: 'ApiSelect',
         componentProps: {
@@ -95,7 +95,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
+        label: t('retail.shipments.table.productInformation'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -104,7 +104,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '会员卡号',
+        label: t('retail.shipments.table.customer'),
         field: 'memberId',
         component: 'ApiSelect',
         componentProps: {
@@ -134,7 +134,7 @@ export const searchFormSchema: FormSchema[] = [
     //     },
     // },
     {
-        label: '单据状态',
+        label: t('retail.shipments.table.status'),
         field: 'status',
         component: 'Select',
         colProps: {
@@ -143,13 +143,13 @@ export const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '未审核', value: 0, key: 0 },
-                { label: '已审核', value: 1, key: 1 },
+                { label: t('sys.table.unaudited'), value: 0, key: 0 },
+                { label: t('sys.table.audited'), value: 1, key: 1 },
             ],
         },
     },
     {
-        label: '单据备注',
+        label: t('retail.shipments.header.receiptRemark'),
         field: 'remark',
         component: 'Input',
         colProps: {
