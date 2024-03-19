@@ -118,21 +118,6 @@ export const searchFormSchema: FormSchema[] = [
             xxl: 8,
         },
     },
-    // {
-    //     label: '仓库',
-    //     field: 'warehouseId',
-    //     component: 'ApiSelect',
-    //     componentProps: {
-    //         api: getWarehouseList,
-    //         resultField: 'data',
-    //         labelField: 'warehouseName',
-    //         valueField: 'id',
-    //     },
-    //     colProps: {
-    //         xl: 8,
-    //         xxl: 8,
-    //     },
-    // },
     {
         label: t('retail.shipments.table.status'),
         field: 'status',
