@@ -1,4 +1,7 @@
 import {ref} from "vue";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export interface GrowCardItem {
   icon: string;
@@ -12,121 +15,121 @@ export interface GrowCardItem {
 
 export const growCardList: GrowCardItem[] = [
   {
-    title: '今日零售',
+    title: t('home.todayRetail'),
     dataIndex: 'todayRetailSales',
     icon: 'visit-count|svg',
     value: 0,
     total: 0,
     color: 'green',
-    action: '今日',
+    action: t('home.today'),
   },
   {
-    title: '今日销售',
+    title: t('home.todaySales'),
     dataIndex: 'todaySales',
     icon: 'visit-count|svg',
     value: 0,
     total: 0,
     color: 'green',
-    action: '今日',
+    action: t('home.today'),
   },
   {
-    title: '今日采购',
+    title: t('home.todayPurchase'),
     dataIndex: 'todayPurchase',
     icon: 'visit-count|svg',
     value: 0,
     total: 0,
     color: 'green',
-    action: '今日',
+    action: t('home.today'),
   },
 ];
 
 export const growCardTwoList: GrowCardItem[] = [
   {
-    title: '昨日零售',
+    title: t('home.yesterdayRetail'),
     dataIndex: 'yesterdayRetailSales',
     icon: 'visit-count|svg',
     value: 0,
     total: 0,
     color: 'blue',
-    action: '昨日',
+    action: t('home.yesterday'),
   },
   {
-    title: '昨日销售',
+    title: t('home.yesterdaySales'),
     dataIndex: 'yesterdaySales',
     icon: 'total-sales|svg',
     value: 0,
     total: 0,
     color: 'blue',
-    action: '昨日',
+    action: t('home.yesterday'),
   },
   {
-    title: '昨日采购',
+    title: t('home.yesterdayPurchase'),
     dataIndex: 'yesterdayPurchase',
     icon: 'download-count|svg',
     value: 0,
     total: 0,
     color: 'blue',
-    action: '昨日',
+    action: t('home.yesterday'),
   },
 ];
 
 export const growCardThreeList: GrowCardItem[] = [
   {
-    title: '本月累计零售',
+    title: t('home.thisMonthRetail'),
     dataIndex: 'monthRetailSales',
     icon: 'total-sales|svg',
     value: 0,
     total: 0,
     color: 'orange',
-    action: '本月',
+    action: t('home.thisMonth'),
   },
   {
-    title: '本月累计销售',
+    title: t('home.thisMonthSales'),
     dataIndex: 'monthSales',
     icon: 'total-sales|svg',
     value: 0,
     total: 0,
     color: 'orange',
-    action: '本月',
+    action: t('home.thisMonth'),
   },
   {
-    title: '本月累计采购',
+    title: t('home.thisMonthPurchase'),
     dataIndex: 'monthPurchase',
     icon: 'total-sales|svg',
     value: 0,
     total: 0,
     color: 'orange',
-    action: '本月',
+    action: t('home.thisMonth'),
   },
 ];
 
 export const growCardFourList: GrowCardItem[] = [
   {
-    title: '今年累计零售',
+    title: t('home.thisYearRetail'),
     dataIndex: 'yearRetailSales',
     icon: 'transaction|svg',
     value: 0,
     total: 0,
     color: 'purple',
-    action: '今年',
+    action: t('home.thisYear'),
   },
   {
-    title: '今年累计销售',
+    title: t('home.thisYearSales'),
     dataIndex: 'yearSales',
     icon: 'transaction|svg',
     value: 0,
     total: 0,
     color: 'purple',
-    action: '今年',
+    action: t('home.thisYear'),
   },
   {
-    title: '今年累计采购',
+    title: t('home.thisYearPurchase'),
     dataIndex: 'yearPurchase',
     icon: 'transaction|svg',
     value: 0,
     total: 0,
     color: 'purple',
-    action: '今年',
+    action: t('home.thisYear'),
   },
 ];
 
