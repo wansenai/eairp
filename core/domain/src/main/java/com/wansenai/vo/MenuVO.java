@@ -38,6 +38,8 @@ public class MenuVO {
 
     private String title;
 
+    private String titleEnglish;
+
     private String path;
 
     private String component;
