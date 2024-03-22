@@ -4,7 +4,7 @@ export default {
     shipments:{
         title: 'Retail Shipments List',
         table:{
-            customer: 'Customer',
+            member: 'Member',
             receiptNumber: 'Receipt number',
             productInformation: 'Product information',
             productQuantity: 'Product quantity',
@@ -29,7 +29,7 @@ export default {
     refund:{
         title: 'Retail Return List',
         table:{
-            customer: 'Customer',
+            member: 'Member',
             receiptNumber: 'Receipt number',
             productInformation: 'Product information',
             totalAmount: 'Total amount',
