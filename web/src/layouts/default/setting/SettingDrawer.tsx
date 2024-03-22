@@ -415,12 +415,12 @@ export default defineComponent({
         {/*{renderSiderTheme()}*/}
         {/*<Divider>{() => t('layout.setting.interfaceFunction')}</Divider>*/}
         {/*{renderFeatures()}*/}
-        <Divider>{() => t('layout.setting.interfaceDisplay')}</Divider>
-        {renderContent()}
+        {/*<Divider>{() => t('layout.setting.interfaceDisplay')}</Divider>*/}
+        {/*{renderContent()}*/}
         {/*<Divider>{() => t('layout.setting.animation')}</Divider>*/}
         {/*{renderTransition()}*/}
-        <Divider />
-        <SettingFooter />
+        {/*<Divider />*/}
+        {/*<SettingFooter />*/}
       </BasicDrawer>
     );
   },

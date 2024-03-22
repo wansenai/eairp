@@ -8,7 +8,7 @@ export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: t('retail.refund.table.customer'),
+        title: t('retail.refund.table.member'),
         dataIndex: 'memberName',
         width: 60,
     },
@@ -99,7 +99,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: t('retail.refund.table.customer'),
+        label: t('retail.refund.table.member'),
         field: 'memberId',
         component: 'ApiSelect',
         componentProps: {

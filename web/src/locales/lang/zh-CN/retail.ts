@@ -4,7 +4,7 @@ export default {
     shipments:{
         title: '零售出库列表',
         table:{
-            customer: '会员',
+            member: '会员',
             receiptNumber: '单据编号',
             productInformation: '商品信息',
             productQuantity: '商品数量',
@@ -29,7 +29,7 @@ export default {
     refund:{
         title: '零售退货列表',
         table:{
-            customer: '会员',
+            member: '会员',
             receiptNumber: '单据编号',
             productInformation: '商品信息',
             totalAmount: '金额合计',

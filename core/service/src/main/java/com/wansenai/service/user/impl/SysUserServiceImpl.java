@@ -446,6 +446,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                         .position(user.getPosition())
                         .description(user.getDescription())
                         .phoneNumber(user.getPhoneNumber())
+                        .userLanguage(user.getSystemLanguage())
                         .userName(user.getUserName())
                         .avatar(user.getAvatar())
                         .build();
