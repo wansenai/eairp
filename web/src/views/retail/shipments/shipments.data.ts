@@ -8,7 +8,7 @@ export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: t('retail.shipments.table.customer'),
+        title: t('retail.shipments.table.member'),
         dataIndex: 'memberName',
         width: 60,
     },
@@ -104,7 +104,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: t('retail.shipments.table.customer'),
+        label: t('retail.shipments.table.member'),
         field: 'memberId',
         component: 'ApiSelect',
         componentProps: {

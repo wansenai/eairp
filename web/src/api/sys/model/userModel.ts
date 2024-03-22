@@ -116,4 +116,6 @@ export interface GetUserInfoModel {
   roleName: string;
   // 头像
   avatar: string;
+  // 用户语言
+  userLanguage: string;
 }
