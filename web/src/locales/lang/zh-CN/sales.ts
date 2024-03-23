@@ -1,6 +1,8 @@
 export default {
     selectData: '请选择一条数据',
     modifyDataPrompt: '抱歉，只有未审核的单据才能编辑！',
+    partialSales: '部分销售',
+    completeSales: '完成销售',
     order:{
         title: '销售订单列表',
         table:{
