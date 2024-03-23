@@ -42,12 +42,12 @@ export const columns: BasicColumn[] = [
         width: 80,
     },
     {
-        title: t('sales.refund.table.thisRefundAmount'),
+        title: t('sales.refund.table.thisTimeRefundAmount'),
         dataIndex: 'thisRefundAmount',
         width: 80,
     },
     {
-        title: t('sales.refund.table.thisArrearsAmount'),
+        title: t('sales.refund.table.thisTimeArrearsAmount'),
         dataIndex: 'thisArrearsAmount',
         width: 80,
     },
@@ -92,7 +92,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '客户',
+        label: t('sales.refund.table.customer'),
         field: t('sales.refund.table.customer'),
         component: 'ApiSelect',
         componentProps: {
@@ -107,7 +107,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
+        label: t('sales.refund.table.productInformation'),
         field:  t('sales.refund.table.productInformation'),
         component: 'Input',
         colProps: {

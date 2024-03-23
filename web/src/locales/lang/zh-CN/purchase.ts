@@ -1,12 +1,12 @@
 export default {
     selectData: '请选择一条数据',
     modifyDataPrompt: '抱歉，只有未审核的单据才能编辑！',
-    partialSales: '部分销售',
-    completeSales: '完成销售',
+    partialPurchase: '部分采购',
+    completePurchase: '完成采购',
     order:{
-        title: '销售订单列表',
+        title: '采购订单列表',
         table:{
-            customer: '客户',
+            supplier: '供应商',
             receiptNumber: '单据编号',
             productInformation: '商品信息',
             productQuantity: '商品数量',
@@ -23,21 +23,21 @@ export default {
             receiptRemark: '单据备注',
         },
         export: {
-            exportData: '销售订单数据 ',
+            exportData: '采购订单数据 ',
             noData: '无可用数据导出',
         }
     },
-    shipments:{
-        title: '销售出库列表',
+    storage:{
+        title: '采购入库列表',
         table:{
-            customer: '客户',
+            supplier: '供应商',
             receiptNumber: '单据编号',
             productInformation: '商品信息',
             productQuantity: '商品数量',
             totalAmount: '金额合计',
             totalIncludingTax: '含税合计',
-            collectAmount: '待收金额',
-            thisTimeCollectAmount: '本次收款',
+            paymentAmount: '待付金额',
+            thisTimePaymentAmount: '本次付款',
             thisTimeArrearsAmount: '本次欠款',
             receiptDate: '单据日期',
             operator: '操作员',
@@ -49,14 +49,14 @@ export default {
             receiptRemark: '单据备注',
         },
         export: {
-            exportData: '销售出库数据 ',
+            exportData: '采购入库数据 ',
             noData: '无可用数据导出',
         }
     },
     refund:{
-        title: '销售退货列表',
+        title: '采购退货列表',
         table:{
-            customer: '客户',
+            supplier: '供应商',
             receiptNumber: '单据编号',
             productInformation: '商品信息',
             productQuantity: '商品数量',
@@ -75,7 +75,7 @@ export default {
             receiptRemark: '单据备注',
         },
         export: {
-            exportData: '销售退货数据 ',
+            exportData: '采购退货数据 ',
             noData: '无可用数据导出',
         }
     }

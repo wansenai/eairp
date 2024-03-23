@@ -7,52 +7,52 @@ export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '供应商',
+        title: t('purchase.order.table.supplier'),
         dataIndex: 'supplierName',
         width: 130,
     },
     {
-        title: '单据编号',
+        title: t('purchase.order.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 130,
     },
     {
-        title: '商品信息',
+        title: t('purchase.order.table.productInformation'),
         dataIndex: 'productInfo',
         width: 80,
     },
     {
-        title: '数量',
+        title: t('purchase.order.table.productQuantity'),
         dataIndex: 'productNumber',
         width: 50,
     },
     {
-        title: '金额合计',
+        title: t('purchase.order.table.totalAmount'),
         dataIndex: 'totalAmount',
         width: 60,
     },
     {
-        title: '含税合计',
+        title: t('purchase.order.table.totalIncludingTax'),
         dataIndex: 'taxRateTotalAmount',
         width: 80,
     },
     {
-        title: '收取定金',
+        title: t('purchase.order.table.collectDeposit'),
         dataIndex: 'deposit',
         width: 80,
     },
     {
-        title: '单据日期',
+        title: t('purchase.order.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '操作员',
+        title: t('purchase.order.table.operator'),
         dataIndex: 'operator',
         width: 60,
     },
     {
-        title: '状态',
+        title: t('purchase.order.table.status'),
         dataIndex: 'status',
         width: 80,
     },
@@ -60,7 +60,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('purchase.order.table.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -70,11 +70,11 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('purchase.order.table.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('purchase.order.header.startDate'), t('purchase.order.header.endDate'),],
         },
         colProps: {
             xl: 8,
@@ -82,7 +82,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '供应商',
+        label: t('purchase.order.table.supplier'),
         field: 'supplierId',
         component: 'ApiSelect',
         componentProps: {
@@ -97,7 +97,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
+        label: t('purchase.order.table.productInformation'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -106,7 +106,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据状态',
+        label: t('purchase.order.table.status'),
         field: 'status',
         component: 'Select',
         colProps: {
@@ -115,15 +115,15 @@ export const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '未审核', value: 0, key: 0 },
-                { label: '已审核', value: 1, key: 1 },
-                { label: '部分采购', value: 2, key: 2 },
-                { label: '完成采购', value: 3, key: 3 },
+                { label: t('sys.table.unaudited'), value: 0, key: 0 },
+                { label: t('sys.table.audited'), value: 1, key: 1 },
+                { label: t('purchase.partialPurchase'), value: 2, key: 2 },
+                { label: t('purchase.completePurchase'), value: 3, key: 3 },
             ],
         },
     },
     {
-        label: '单据备注',
+        label: t('purchase.order.header.receiptRemark'),
         field: 'remark',
         component: 'Input',
         colProps: {

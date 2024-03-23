@@ -206,7 +206,7 @@
                   + 插入一行
                 </a-button>
                 <a-button style="margin-left: 8px" danger @click="deleteRows" type="primary"> 删除选中行</a-button>
-                <a-button style="margin-left: 8px" @click="batchSetPrice('purchase')">采购价-批量</a-button>
+                <a-button style="margin-left: 8px" @click="batchSetPrice('purchase.ts')">采购价-批量</a-button>
                 <a-button style="margin-left: 8px" @click="batchSetPrice('retail')">零售价-批量</a-button>
                 <a-button style="margin-left: 8px" @click="batchSetPrice('sale')">销售价-批量</a-button>
                 <a-button style="margin-left: 8px" @click="batchSetPrice('low')">最低售价-批量</a-button>
@@ -916,7 +916,7 @@ export default defineComponent({
         createMessage.warn('请先录入条码、单位等信息！');
         return;
       }
-      if (batchType === 'purchase') {
+      if (batchType === 'purchase.ts') {
         for (let i = 0; i < meTable.dataSource.length; i++) {
           meTable.dataSource[i].purchasePrice = price
         }
