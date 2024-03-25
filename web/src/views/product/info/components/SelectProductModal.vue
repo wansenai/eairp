@@ -11,15 +11,17 @@ import {useMessage} from "@/hooks/web/useMessage";
 import {extendPriceColumn, searchFormSchema} from "@/views/product/info/info.data";
 import {getProductSkuPage} from "@/api/product/product";
 import {BasicModal, useModalInner} from "@/components/Modal";
+import {useI18n} from "vue-i18n";
 export default defineComponent({
   name: 'productModal',
   components: {BasicModal, BasicTable, TableAction},
   emits: ['register', 'handleCheckSuccess'],
   setup(_, context) {
-    const getTitle = ref('选择商品');
+    const { t } = useI18n();
+    const getTitle = ref(t('product.selectProduct'));
     const { createMessage } = useMessage();
     const [registerTable, { getSelectRows }] = useTable({
-      title: '商品列表',
+      title: t('product.productList'),
       rowKey: 'id',
       columns: extendPriceColumn,
       api: getProductSkuPage,
@@ -45,7 +47,7 @@ export default defineComponent({
     function handleSubmit() {
       const rows = getSelectRows();
       if (rows.length === 0) {
-        createMessage.error('请选择商品');
+        createMessage.warn(t('product.inputSelectProduct'));
         return;
       }
       context.emit('handleCheckSuccess', rows);
@@ -53,6 +55,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       registerModal,
       getTitle,

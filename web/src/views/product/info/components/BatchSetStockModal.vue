@@ -9,8 +9,8 @@
       style="top:30%;height: 30%;">
     <a-spin :spinning="confirmLoading">
       <a-form ref="formRef" :label-col="labelCol" :wrapper-col="wrapperCol">
-        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="请输入数量">
-          <a-input-number placeholder="请输入数量" v-model:value="batchNumber" />
+        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('product.info.form.inventoryQuantity.number')">
+          <a-input-number :placeholder="t('product.info.form.inventoryQuantity.inputNumber')" v-model:value="batchNumber" />
         </a-form-item>
       </a-form>
     </a-spin>
@@ -20,6 +20,7 @@
 <script lang="ts">
 import { ref, reactive} from 'vue';
 import {Button, Form, FormItem, InputNumber, Modal, Spin} from "ant-design-vue";
+import {useI18n} from "vue-i18n";
 
 export default {
   name: 'BatchSetStockModal',
@@ -33,6 +34,7 @@ export default {
     'a-input-number': InputNumber
   },
   setup(_, context) {
+    const { t } = useI18n();
     const title = ref('批量设置');
     const openStockModal = ref(false);
     const isReadOnly = ref(false);
@@ -49,16 +51,15 @@ export default {
     };
     const confirmLoading = ref(false);
     const formRef = ref();
-
     const add = (type) => {
       openStockModal.value = true
       batchType.value = type;
       if (type === 'initStock') {
-        title.value = '期初库存-批量设置';
+        title.value = t('product.info.form.inventoryQuantity.batchInitialQuantity');
       } else if (type === 'lowSafeStock') {
-        title.value = '最低安全库存-批量设置';
+        title.value = t('product.info.form.inventoryQuantity.batchMinSafetyQuantity');
       } else if (type === 'highSafeStock') {
-        title.value = '最高安全库存-批量设置';
+        title.value = t('product.info.form.inventoryQuantity.batchMaxSafetyQuantity');
       }
     };
 
@@ -83,6 +84,7 @@ export default {
     };
 
     return {
+      t,
       title,
       isReadOnly,
       batchType,
