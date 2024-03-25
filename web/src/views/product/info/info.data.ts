@@ -13,67 +13,67 @@ const { t } = useI18n();
 
 const columns: BasicColumn[] = [
     {
-        title: '条码',
+        title: t('product.info.table.barCode'),
         dataIndex: 'productBarcode',
         width: 80,
     },
     {
-        title: '名称',
+        title: t('product.info.table.productName'),
         dataIndex: 'productName',
         width: 100,
     },
     {
-        title: '规格',
+        title: t('product.info.table.productStandard'),
         dataIndex: 'productStandard',
         width: 80,
     },
     {
-        title: '型号',
+        title: t('product.info.table.productModel'),
         dataIndex: 'productModel',
         width: 100,
     },
     {
-        title: '颜色',
+        title: t('product.info.table.productColor'),
         dataIndex: 'productColor',
         width: 60,
     },
     {
-        title: '类别',
+        title: t('product.info.table.productCategory'),
         dataIndex: 'productCategoryName',
         width: 80,
     },
     {
-        title: '单位',
+        title: t('product.info.table.productUnit'),
         dataIndex: 'productUnit',
         width: 80,
     },
     {
-        title: '库存',
+        title: t('product.info.table.productStock'),
         dataIndex: 'productStock',
         width: 60,
     },
     {
-        title: '采购价',
+        title: t('product.info.table.purchasePrice'),
         dataIndex: 'purchasePrice',
         width: 60,
     },
     {
-        title: '零售价',
+        title: t('product.info.table.retailPrice'),
         dataIndex: 'retailPrice',
         width: 60,
     },
     {
-        title: '销售价',
+        title: t('product.info.table.salesPrice'),
         dataIndex: 'salePrice',
         width: 60,
     },
     {
-        title: '最低售价',
+        title: t('product.info.table.lowestSellPrice'),
         dataIndex: 'lowPrice',
         width: 60,
     },
     {
-        title: '状态',
+        title: t('product.info.table.status'),
         dataIndex: 'status',
         width: 80,
         customRender: ({ record }) => {
@@ -105,7 +105,7 @@ const columns: BasicColumn[] = [
         }
     },
     {
-        title: '创建时间',
+        title: t('product.info.table.createTime'),
         dataIndex: 'createTime',
         width: 80,
     }
@@ -114,72 +114,72 @@ const columns: BasicColumn[] = [
 
 const extendPriceColumn: BasicColumn[] = [
     {
-        title: '条码',
+        title: t('product.info.table.barCode'),
         dataIndex: 'barCode',
         width: 80,
     },
     {
-        title: '名称',
+        title: t('product.info.table.productName'),
         dataIndex: 'productName',
         width: 100,
     },
     {
-        title: '分类',
+        title: t('product.info.table.productCategory'),
         dataIndex: 'productCategoryName',
         width: 100,
     },
     {
-        title: '所属仓库',
+        title: t('product.info.header.warehouse'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '规格',
+        title: t('product.info.table.productStandard'),
         dataIndex: 'productStandard',
         width: 80,
     },
     {
-        title: '型号',
+        title:  t('product.info.table.productModel'),
         dataIndex: 'productModel',
         width: 100,
     },
     {
-        title: '颜色',
+        title:  t('product.info.table.productColor'),
         dataIndex: 'productColor',
         width: 60,
     },
     {
-        title: '类别',
+        title: t('product.info.table.productCategory'),
         dataIndex: 'productCategoryName',
         width: 80,
     },
     {
-        title: '单位',
+        title: t('product.info.table.productUnit'),
         dataIndex: 'productUnit',
         width: 80,
     },
     {
-        title: '库存',
+        title: t('product.info.table.productStock'),
         dataIndex: 'stock',
         width: 60,
     },
     {
-        title: '零售价',
+        title: t('product.info.table.retailPrice'),
         dataIndex: 'retailPrice',
         width: 60,
     },
     {
-        title: '销售价',
+        title: t('product.info.table.salesPrice'),
         dataIndex: 'salePrice',
         width: 60,
     },
     {
-        title: '采购价',
+        title: t('product.info.table.purchasePrice'),
         dataIndex: 'purchasePrice',
         width: 60,
     },
     {
-        title: '扩展信息',
+        title: t('product.info.form.extendInfo.title'),
         dataIndex: 'extendInfo',
         width: 60,
     },
@@ -187,7 +187,7 @@ const extendPriceColumn: BasicColumn[] = [
 
 const searchFormSchema: FormSchema[] = [
     {
-        label: '商品类别',
+        label: t('product.info.header.categoryName'),
         field: 'productCategoryId',
         component: 'ApiTreeSelect',
         colProps: {
@@ -202,7 +202,7 @@ const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '关键词',
+        label: t('product.info.header.keyWord'),
         field: 'keywords',
         component: 'Input',
         colProps: {
@@ -211,7 +211,7 @@ const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '序列号',
+        label: t('product.info.header.serialNumber'),
         field: 'enableSerialNumber',
         component: 'Select',
         colProps: {
@@ -220,13 +220,13 @@ const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '无', value: 0, key: 0 },
-                { label: '有', value: 1, key: 1 },
+                { label: t('product.info.header.none'), value: 0, key: 0 },
+                { label: t('product.info.header.have'), value: 1, key: 1 },
             ],
         },
     },
     {
-        label: '批次号',
+        label: t('product.info.header.batchNumber'),
         field: 'enableBatchNumber',
         component: 'Select',
         colProps: {
@@ -235,13 +235,13 @@ const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '无', value: 0, key: 0 },
-                { label: '有', value: 1, key: 1 },
+                { label: t('product.info.header.none'), value: 0, key: 0 },
+                { label: t('product.info.header.have'), value: 1, key: 1 },
             ],
         },
     },
     {
-        label: '仓库',
+        label: t('product.info.header.warehouse'),
         field: 'warehouseId',
         component: 'ApiTreeSelect',
         colProps: {
@@ -262,52 +262,52 @@ const meTable: MeTable = reactive({
     dataSource: ref([]),
     columns: [
         {
-            title: '条码',
+            title: t('product.info.form.basic.table.barCode'),
             key: 'barCode',
             type: 'inputNumber',
-            placeholder: '请输入${title}',
+            placeholder: t('product.info.form.basic.table.pleaseEnter')+'${title}',
         },
         {
-            title: '单位',
+            title: t('product.info.form.basic.table.unit'),
             key: 'productUnit',
             type: 'input',
-            placeholder: '请输入${title}',
+            placeholder: t('product.info.form.basic.table.pleaseEnter')+'${title}',
             validateRules: [{ required: true, message: '单位不能为空' }],
         },
         {
-            title: '多属性',
+            title: t('product.info.form.basic.table.multipleAttributes'),
             key: 'multiAttribute',
             type: 'input',
             readonly: true,
-            placeholder: '请输入${title}',
+            placeholder: t('product.info.form.basic.table.pleaseEnter')+'${title}',
         },
         {
-            title: '采购价',
+            title: t('product.info.form.basic.table.purchasePrice'),
             key: 'purchasePrice',
             type: 'inputNumber',
             defaultValue: '',
-            placeholder: '请输入${title}',
+            placeholder: t('product.info.form.basic.table.pleaseEnter')+'${title}',
         },
         {
-            title: '零售价',
+            title: t('product.info.form.basic.table.retailPrice'),
             key: 'retailPrice',
             type: 'inputNumber',
             defaultValue: '',
-            placeholder: '请输入${title}',
+            placeholder: t('product.info.form.basic.table.pleaseEnter')+'${title}',
         },
         {
-            title: '销售价',
+            title: t('product.info.form.basic.table.salesPrice'),
             key: 'salesPrice',
             type: 'inputNumber',
             defaultValue: '',
-            placeholder: '请输入${title}',
+            placeholder: t('product.info.form.basic.table.pleaseEnter')+'${title}',
         },
         {
-            title: '最低售价',
+            title: t('product.info.form.basic.table.lowestSellPrice'),
             key: 'lowSalesPrice',
             type: 'inputNumber',
             defaultValue: '',
-            placeholder: '请输入${title}',
+            placeholder: t('product.info.form.basic.table.pleaseEnter')+'${title}',
         },
     ],
 });
@@ -317,27 +317,24 @@ const stock: any = reactive({
     dataSource: ref([]),
     columns: [
         {
-            title: '仓库 (商品条码/商品单位)',
+            title: t('product.info.form.inventoryQuantity.warehouse'),
             key: 'warehouseName',
             type: 'input',
         },
         {
-            title: '期初库存数量',
+            title: t('product.info.form.inventoryQuantity.initialQuantity'),
             key: 'initStockQuantity',
             type: 'inputNumber',
-            placeholder: '请输入${title}',
         },
         {
-            title: '最低安全库存数量',
+            title: t('product.info.form.inventoryQuantity.minSafetyQuantity'),
             key: 'lowStockQuantity',
             type: 'inputNumber',
-            placeholder: '请输入${title}',
         },
         {
-            title: '最高安全库存数量',
+            title: t('product.info.form.inventoryQuantity.maxSafetyQuantity'),
             key: 'highStockQuantity',
             type: 'inputNumber',
-            placeholder: '请输入${title}',
         },
     ],
 });

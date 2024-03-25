@@ -12,46 +12,46 @@
         <a-form>
           <a-row class="form-row" :gutter="24">
             <a-col :md="8" :sm="24">
-              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="颜色">
-                <a-input placeholder="请输入颜色" v-model:value="color"/>
+              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('product.info.form.basic.color')">
+                <a-input :placeholder="t('product.info.form.basic.inputColor')" v-model:value="color"/>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="基础重量">
-                <a-input-number placeholder="请输入基础重量(kg)" v-model:value="weight" />
+              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('product.info.form.basic.weight')">
+                <a-input-number :placeholder="t('product.info.form.basic.inputWeight')" v-model:value="weight" />
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="保质期">
-                <a-input-number placeholder="请输入保质期(天)" v-model:value="expiryNum" />
+              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('product.info.form.basic.sheIfLife')">
+                <a-input-number :placeholder="t('product.info.form.basic.inputSheIfLife')" v-model:value="expiryNum" />
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="类别">
+              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('product.info.form.basic.category')">
                 <a-tree-select :dropdownStyle="{maxHeight:'200px',overflow:'auto'}" allow-clear
-                               :tree-data="categoryTree" v-model:value="categoryId" placeholder="请选择类别">
+                               :tree-data="categoryTree" v-model:value="categoryId" :placeholder="t('product.info.form.basic.inputCategory')">
                 </a-tree-select>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="序列号">
-                <a-select placeholder="有无序列号" v-model:value="enableSerialNumber">
-                  <a-select-option value="1">有</a-select-option>
-                  <a-select-option value="0">无</a-select-option>
+              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('product.info.form.basic.serialNumber')">
+                <a-select :placeholder="t('product.info.form.basic.serialNumberTip')" v-model:value="enableSerialNumber">
+                  <a-select-option value="1">{{ t('product.info.header.have') }}</a-select-option>
+                  <a-select-option value="0">{{ t('product.info.header.none') }}</a-select-option>
                 </a-select>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="批号">
-                <a-select placeholder="有无批号" v-model:value="enableBatchNumber">
-                  <a-select-option value="1">有</a-select-option>
-                  <a-select-option value="0">无</a-select-option>
+              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('product.info.form.basic.batchNumber')">
+                <a-select :placeholder="t('product.info.form.basic.batchNumberTip')" v-model:value="enableBatchNumber">
+                  <a-select-option value="1">{{ t('product.info.header.have') }}</a-select-option>
+                  <a-select-option value="0">{{ t('product.info.header.none') }}</a-select-option>
                 </a-select>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="备注">
-                <a-textarea :rows="1" placeholder="请输入备注" v-model:value="remark" style="margin-top:8px;"/>
+              <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('product.info.form.basic.remark')">
+                <a-textarea :rows="1" :placeholder="t('product.info.form.basic.inputRemark')" v-model:value="remark" style="margin-top:8px;"/>
               </a-form-item>
             </a-col>
           </a-row>
@@ -78,6 +78,7 @@ import {
 import {getCategoryList} from "/@/api/product/productCategory"
 import {UpdateBatchProductInfoReq} from "/@/api/product/model/productModel"
 import {updateBatchProductInfo} from "/@/api/product/product"
+import {useI18n} from "vue-i18n";
 
 export default {
   name: 'BatchEditModal',
@@ -97,6 +98,7 @@ export default {
     'a-col': Col,
   },
   setup(_, context) {
+    const { t } = useI18n();
     const title = ref('批量编辑商品信息');
     const openBatchEditModal = ref(false);
 
@@ -182,6 +184,7 @@ export default {
     };
 
     return {
+      t,
       title,
       color,
       weight,

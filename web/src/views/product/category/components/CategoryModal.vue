@@ -9,19 +9,22 @@
 import {defineComponent, ref, computed, unref} from 'vue';
 import {BasicModal, useModalInner} from '/@/components/Modal';
 import {BasicForm, useForm} from '/@/components/Form/index';
-import {CategorySchema} from "@/views/product/category/category.data";
+import {CategorySchema, t} from "@/views/product/category/category.data";
 import {AddOrUpdateProductCategoryReq} from "@/api/product/model/productCategoryModel";
 import {addOrUpdateCategory} from "@/api/product/productCategory";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'CategoryModal',
   components: {BasicModal, BasicForm},
   emits: ['success', 'register'],
   setup(_, {emit}) {
+    const { t } = useI18n();
     const rowId = ref('');
     const isUpdate = ref(true);
-    const getTitle = computed(() => (!unref(isUpdate) ? '新增产品分类' : '编辑产品分类'));
-
+    const addProduct = t('product.category.add');
+    const editProduct = t('product.category.table.edite');
+    const getTitle = computed(() => (!unref(isUpdate) ? addProduct : editProduct));
     const [registerForm, {setFieldsValue, resetFields, validate}] = useForm({
       labelWidth: 100,
       baseColProps: {span: 24},
