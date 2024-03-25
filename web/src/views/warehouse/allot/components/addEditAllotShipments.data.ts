@@ -2,6 +2,9 @@ import {reactive, ref} from "vue";
 import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export interface RowVO {
     [key: string]: any,
@@ -70,41 +73,41 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
         {   field: 'warehouseId',
             width:150,
-            title: '仓库',
+            title: t('warehouse.allotShipments.form.table.outWarehouse'),
             slots: { edit: 'warehouse_edit',default: 'warehouse_default' },
-            editRender: { name: 'input', attrs: { placeholder: '请选择仓库' } }
+            editRender: { name: 'input', attrs: { placeholder: t('warehouse.allotShipments.form.table.outWarehouse') } }
         },
         {   field: 'barCode',
             width:160,
-            title: '条码',
+            title: t('warehouse.allotShipments.form.table.barCode'),
             slots: { edit: 'barCode_edit' },
-            titlePrefix: { content: '输入条码商品信息自动带出！' },
+            titlePrefix: { content: t('warehouse.allotShipments.form.noticeSex') },
             editRender: { name: 'input', attrs: { placeholder: '请输入条码并回车' } }
         },
         {
             field: 'productName',
-            title: '名称',
+            title:  t('warehouse.allotShipments.form.table.name'),
             width:140,
         },
-        { field: 'productStandard', title: '规格', width: 110,  },
-        { field: 'stock', title: '库存',  width: 70},
+        { field: 'productStandard', title: t('warehouse.allotShipments.form.table.standard'), width: 110,  },
+        { field: 'stock', title: t('warehouse.allotShipments.form.table.stock'),  width: 70},
         {   field: 'otherWarehouseId',
             width:150,
-            title: '调入仓库',
+            title: t('warehouse.allotShipments.form.table.inWarehouse'),
             slots: { edit: 'otherWarehouse_edit',default: 'otherWarehouse_default' },
             editRender: {}
         },
-        { field: 'productUnit', title: '单位',  width: 70},
-        { field: 'productNumber', title: '数量', width:80,
+        { field: 'productUnit', title: t('warehouse.allotShipments.form.table.unit'),  width: 70},
+        { field: 'productNumber', title: t('warehouse.allotShipments.form.table.quantity'), width:80,
             slots: { edit: 'product_number_edit' },
             editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } }, },
-        { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } }, width: 150},
+        { field: 'remark', title: t('warehouse.allotShipments.form.table.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } }, width: 150},
     ],
     footerMethod ({ columns, data }) {
         return [
             columns.map((column, columnIndex) => {
                 if (columnIndex === 0) {
-                    return '总计'
+                    return t('warehouse.allotShipments.form.total')
                 }
                 if (['productNumber'].includes(column.field)) {
                     return sumNum(data, column.field)
@@ -129,13 +132,13 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     },
     editRules: {
         warehouseId: [
-            { required: true, message: '仓库不能为空' }
+            { required: true, message: t('warehouse.allotShipments.form.noticeThree') }
         ],
         barCode: [
-            { required: true, message: '商品条码不能为空' }
+            { required: true, message: t('warehouse.allotShipments.form.noticeFour') }
         ],
         otherWarehouseId: [
-            { required: true, message: '调入方仓库不能为空' }
+            { required: true, message: t('warehouse.allotShipments.form.noticeFive') }
         ]
     },
 })

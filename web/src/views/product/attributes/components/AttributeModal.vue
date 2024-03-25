@@ -11,15 +11,17 @@ import {BasicForm, useForm} from '/@/components/Form/index';
 import {formSchema} from "@/views/product/attributes/attributes.data";
 import {AddOrUpdateProductAttributeReq} from "@/api/product/model/productAttributeModel";
 import {addOrUpdateAttribute} from "@/api/product/productAttribute";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'AttributeModal',
   components: {BasicModal, BasicForm},
   emits: ['success', 'register'],
   setup(_, {emit}) {
+    const { t } = useI18n();
     const rowId = ref('');
     const isUpdate = ref(true);
-    const getTitle = computed(() => (!unref(isUpdate) ? '新增产品属性' : '编辑产品属性'));
+    const getTitle = computed(() => (!unref(isUpdate) ? t('product.attribute.addProductAttribute') : t('product.attribute.editProductAttribute')));
 
     const [registerForm, {setFieldsValue, resetFields, validate}] = useForm({
       labelWidth: 100,
@@ -63,6 +65,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerModal,
       registerForm,
       handleSubmit,

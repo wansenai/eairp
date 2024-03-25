@@ -499,13 +499,13 @@ export default defineComponent({
       loadCategoryTreeData()
       loadAttributeTreeData()
       if (id) {
-        title.value = '修改商品信息'
+        title.value = t('product.info.editProductInfo')
         loadProductInfoDetail(id)
         manySkuStatus.value = false
         manySkuItem.value = false
         manySkuSelected.value = 0
       } else {
-        title.value = '新增商品'
+        title.value = t('product.info.addProductInfo')
         loadWarehouse()
         manySkuItem.value = true
       }

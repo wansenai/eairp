@@ -17,7 +17,7 @@ export default {
             remark: 'Remark',
             createTime: 'Create Time',
             operate: 'Operate',
-            edite: 'Edite product category',
+            edit: 'Edite product category',
             delete: 'Delete product category'
         }
     },
@@ -30,6 +30,8 @@ export default {
         import: 'Import',
         export: 'Export',
         batchEdit: 'Batch Edit',
+        addProductInfo: 'Add Product Info',
+        editProductInfo: 'Edit Product Info',
         header: {
             categoryName: 'Product category',
             keyWord: 'Keyword',
@@ -149,5 +151,49 @@ export default {
                 tip: 'Upload prompt: Up to 4 images can be uploaded, supporting JPG, JPEG, and PNG formats, with a maximum support of 2M',
             },
         }
+    },
+    attribute: {
+        title: 'Product Multi Attribute List',
+        add: 'Add product attributes',
+        batchDelete: 'Batch delete product attributes',
+        addProductAttribute: 'Add Product Attribute',
+        editProductAttribute: 'Edit Product Attribute',
+        table: {
+            attributeName: 'Attribute name',
+            attributeValue: 'Attribute values (separated by |)',
+            sort: 'Sort',
+            remark: 'Remark',
+            createTime: 'Create Time',
+            operate: 'Operate',
+            edit: 'Edit product attributes',
+            delete: 'Delete product attributes'
+        }
+    },
+    unit: {
+        title: 'Product Units List',
+        add: 'Add product unit',
+        batchDelete: 'Batch delete product unit',
+        addProductUnit: 'Add Product Measurement Unit',
+        editProductUnit: 'Edit Product Measurement Unit',
+        table: {
+            unitName: 'Unit of measurement',
+            basicUnit: 'Basic unit',
+            inputBasicUnit: 'Please enter the base unit (Small unit)',
+            deputyUnitOne: 'Deputy Unit 1',
+            inputDeputyUnitOne: 'Please enter the deputy unit (Major unit)',
+            inputProportionOne: 'Please enter the proportion',
+            deputyUnitTwo: 'Deputy Unit 2',
+            inputDeputyUnitTwo: 'Please enter deputy Unit 2 (Major Unit)',
+            inputProportionTwo: 'Please enter the proportion 2',
+            deputyUnitThree: 'Deputy Unit 3',
+            inputDeputyUnitThree: 'Please enter deputy Unit 3 (Major Unit)',
+            inputProportionThree: 'Please enter the proportion 3',
+            status: 'Status',
+            createTime: 'Create Time',
+            operate: 'Operate',
+            edit: 'Edit product unit',
+            delete: 'Delete product unit'
+        },
+        noticeOne: 'Sorry, the proportion of sub units cannot be empty',
     }
 };

@@ -17,7 +17,7 @@ export default {
             remark: '备注',
             createTime: '创建时间',
             operate: '操作',
-            edite: '编辑产品分类',
+            edit: '编辑产品分类',
             delete: '删除产品分类'
         }
     },
@@ -30,6 +30,8 @@ export default {
         import: '导入',
         export: '导出',
         batchEdit: '批量编辑',
+        addProductInfo: '新增商品信息',
+        editProductInfo: '修改商品信息',
         header: {
             categoryName: '商品类别',
             keyWord: '关键词',
@@ -150,5 +152,49 @@ export default {
                 tip: '上传提示：最多上传4张图片，支持jpg、jpeg、png格式，最大支持2M',
             },
         }
+    },
+    attribute: {
+        title: '商品多属性列表',
+        add: '新增产品属性',
+        batchDelete: '批量删除产品属性',
+        addProductAttribute: '新增产品属性',
+        editProductAttribute: '编辑产品属性',
+        table: {
+            attributeName: '属性名称',
+            attributeValue: '属性值(用|隔开)',
+            sort: '排序',
+            remark: '属性备注',
+            createTime: '创建时间',
+            operate: '操作',
+            edit: '编辑产品属性',
+            delete: '删除产品属性'
+        }
+    },
+    unit: {
+        title: '商品计量单位列表',
+        add: '新增商品单位',
+        batchDelete: '批量删除商品单位',
+        addProductUnit: '新增商品计量单位',
+        editProductUnit: '编辑商品计量单位',
+        table: {
+            unitName: '计量单位',
+            basicUnit: '基本单位',
+            inputBasicUnit: '请输入基本单位(小单位)',
+            deputyUnitOne: '副单位1',
+            inputDeputyUnitOne: '请输入副单位(大单位)',
+            inputProportionOne: '请输入比例',
+            deputyUnitTwo: '副单位2',
+            inputDeputyUnitTwo: '请输入副单位2(大单位)',
+            inputProportionTwo: '请输入比例2',
+            deputyUnitThree: '副单位3',
+            inputDeputyUnitThree: '请输入副单位3(大单位)',
+            inputProportionThree: '请输入比例3',
+            status: '状态',
+            createTime: '创建时间',
+            operate: '操作',
+            edit: '编辑商品单位',
+            delete: '删除商品单位'
+        },
+        noticeOne: '抱歉，副单位的比例不能为空值',
     }
 };

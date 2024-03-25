@@ -23,7 +23,7 @@ export default defineComponent({
     const rowId = ref('');
     const isUpdate = ref(true);
     const addProduct = t('product.category.add');
-    const editProduct = t('product.category.table.edite');
+    const editProduct = t('product.category.table.edit');
     const getTitle = computed(() => (!unref(isUpdate) ? addProduct : editProduct));
     const [registerForm, {setFieldsValue, resetFields, validate}] = useForm({
       labelWidth: 100,

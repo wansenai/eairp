@@ -2,45 +2,48 @@ import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
 import {getCustomerList} from "@/api/basic/customer";
 import {getUserOperatorList} from "@/api/sys/user";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '客户',
+        title: t('warehouse.otherShipments.table.customer'),
         dataIndex: 'customerName',
         width: 170,
     },
     {
-        title: '单据编号',
+        title: t('warehouse.otherShipments.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 130,
     },
     {
-        title: '商品信息',
+        title: t('warehouse.otherShipments.table.productInfo'),
         dataIndex: 'productInfo',
         width: 150,
     },
     {
-        title: '单据日期',
+        title: t('warehouse.otherShipments.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '数量',
+        title: t('warehouse.otherShipments.table.productNumber'),
         dataIndex: 'productNumber',
         width: 100,
     },
     {
-        title: '金额合计',
+        title: t('warehouse.otherShipments.table.totalAmount'),
         dataIndex: 'totalAmount',
         width: 70,
     },
     {
-        title: '操作员',
+        title: t('warehouse.otherShipments.table.operator'),
         dataIndex: 'operator',
         width: 70,
     },
     {
-        title: '状态',
+        title: t('warehouse.otherShipments.table.status'),
         dataIndex: 'status',
         width: 70,
     },
@@ -48,7 +51,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('warehouse.otherShipments.header.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -58,16 +61,16 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('warehouse.otherShipments.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('warehouse.otherShipments.header.starDate'), t('warehouse.otherShipments.header.endDate')],
         },
         colProps: { span: 7 },
     },
     {
-        label: '客户',
+        label: t('warehouse.otherShipments.header.customer'),
         field: 'customerId',
         component: 'ApiSelect',
         componentProps: {
@@ -82,7 +85,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '操作员',
+        label: t('warehouse.otherShipments.header.operator'),
         field: 'operatorId',
         component: 'ApiSelect',
         componentProps: {
@@ -97,7 +100,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据状态',
+        label: t('warehouse.otherShipments.header.status'),
         field: 'status',
         component: 'Select',
         colProps: {
@@ -106,13 +109,13 @@ export const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '未审核', value: 0, key: 0 },
-                { label: '已审核', value: 1, key: 1 },
+                { label: t('sys.table.unaudited'), value: 0, key: 0 },
+                { label: t('sys.table.audited'), value: 1, key: 1 },
             ],
         },
     },
     {
-        label: '单据备注',
+        label: t('warehouse.otherShipments.header.remark'),
         field: 'remark',
         component: 'Input',
         colProps: {
@@ -124,62 +127,62 @@ export const searchFormSchema: FormSchema[] = [
 
 export const otherShipmentTableColumns: BasicColumn[] = [
     {
-        title: '仓库名称',
+        title: t('warehouse.otherStorage.view.warehouseName'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '条码',
+        title: t('warehouse.otherStorage.view.barCode'),
         dataIndex: 'barCode',
         width: 120,
     },
     {
-        title: '商品名称',
+        title: t('warehouse.otherStorage.view.productName'),
         dataIndex: 'productName',
         width: 150,
     },
     {
-        title: '规格',
+        title: t('warehouse.otherStorage.view.productStandard'),
         dataIndex: 'productStandard',
         width: 100,
     },
     {
-        title: '型号',
+        title: t('warehouse.otherStorage.view.productModel'),
         dataIndex: 'productModel',
         width: 100,
     },
     {
-        title: '扩展信息',
+        title: t('warehouse.otherStorage.view.productExtendInfo'),
         dataIndex: 'productExtendInfo',
         width: 150,
     },
     {
-        title: '库存',
+        title: t('warehouse.otherStorage.view.stock'),
         dataIndex: 'stock',
         width: 70,
     },
     {
-        title: '单位',
+        title: t('warehouse.otherStorage.view.productUnit'),
         dataIndex: 'productUnit',
         width: 70,
     },
     {
-        title: '数量',
+        title: t('warehouse.otherStorage.view.productNumber'),
         dataIndex: 'productNumber',
         width: 70,
     },
     {
-        title: '单价',
+        title:  t('warehouse.otherStorage.view.unitPrice'),
         dataIndex: 'unitPrice',
         width: 70,
     },
     {
-        title: '金额',
+        title: t('warehouse.otherStorage.view.amount'),
         dataIndex: 'amount',
         width: 70,
     },
     {
-        title: '备注',
+        title: t('warehouse.otherStorage.view.remark'),
         dataIndex: 'remark',
         width: 130,
     },
