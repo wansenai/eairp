@@ -1,29 +1,32 @@
 import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '属性名称',
+        title: t('product.attribute.table.attributeName'),
         dataIndex: 'attributeName',
         width: 100,
     },
     {
-        title: '属性值 (用|隔开)',
+        title: t('product.attribute.table.attributeValue'),
         dataIndex: 'attributeValue',
         width: 150,
     },
     {
-        title: '排序',
+        title: t('product.attribute.table.sort'),
         dataIndex: 'sort',
         width: 80,
     },
     {
-        title: '备注',
+        title: t('product.attribute.table.remark'),
         dataIndex: 'remark',
         width: 150,
     },
     {
-        title: '创建时间',
+        title: t('product.attribute.table.createTime'),
         dataIndex: 'createTime',
         width: 150,
     }
@@ -31,7 +34,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '属性名称',
+        label: t('product.attribute.table.attributeName'),
         field: 'attributeName',
         component: 'Input',
         colProps: { span: 8 },
@@ -46,25 +49,25 @@ export const formSchema: FormSchema[] = [
         component: 'Input',
     },
     {
-        label: '属性名称',
+        label: t('product.attribute.table.attributeName'),
         field: 'attributeName',
         component: 'Input',
         required: true,
     },
     {
-        label: '属性值',
+        label: t('product.attribute.table.attributeValue'),
         helpMessage: '多个属性值用|隔开',
         field: 'attributeValue',
         component: 'InputTextArea',
         required: true,
     },
     {
-        label: '排序',
+        label: t('product.attribute.table.sort'),
         field: 'sort',
         component: 'InputNumber',
     },
     {
-        label: '备注',
+        label: t('product.attribute.table.remark'),
         field: 'remark',
         component: 'InputTextArea',
     }

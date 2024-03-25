@@ -11,13 +11,13 @@
               :actions="[
               {
                 icon: 'clarity:note-edit-line',
-                tooltip: t('sys.table.edit'),
+                tooltip: t('product.category.table.edit'),
                 onClick: handleEdit.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
-                tooltip: t('sys.table.delete'),
+                tooltip: t('product.category.table.delete'),
                 popConfirm: {
                   title: t('sys.table.confirmDelete'),
                   placement: 'left',
