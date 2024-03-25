@@ -15,19 +15,19 @@
       <a-spin :spinning="confirmLoading">
         <a-row class="form-row" :gutter="24">
           <a-col :md="24" :sm="24">
-            <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="第一步：">
+            <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.importInfo.setup1')">
               <a target="_blank" :href="templateUrl"><b>{{templateName}}</b></a>
-              <p>提示：模板中的第一行请勿删除</p>
+              <p>{{ t('product.info.importInfo.tip') }} </p>
             </a-form-item>
           </a-col>
         </a-row>
         <a-row class="form-row" :gutter="24">
           <a-col :md="24" :sm="24">
-            <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="第二步：">
+            <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.importInfo.setup2')">
             <a-upload name="file" :showUploadList="false" :multiple="false" :customRequest="uploadFile">
               <a-button type="primary">
                 <cloud-upload-outlined />
-                导入
+                {{ t('product.info.import') }}
               </a-button>
             </a-upload>
           </a-form-item>
@@ -45,6 +45,7 @@ import type { UploadChangeParam } from 'ant-design-vue';
 import {useMessage} from "@/hooks/web/useMessage";
 import {UploadFileParams, uploadXlsx} from "@/api/basic/common";
 import {useTable} from "@/components/Table";
+import {useI18n} from "vue-i18n";
 export default {
   name: 'ImportFileModal',
   emits: ['success', 'cancel'],
@@ -59,6 +60,7 @@ export default {
     CloudUploadOutlined
   },
   setup(_, context) {
+    const { t } = useI18n();
     const { createMessage } = useMessage();
     const title = ref('');
     const open = ref(false);
@@ -103,6 +105,7 @@ export default {
     }
 
     return {
+      t,
       title,
       labelCol,
       wrapperCol,
