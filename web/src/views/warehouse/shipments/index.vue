@@ -184,7 +184,7 @@ export default defineComponent({
     async function handleExport() {
       dataSum.value = getDataSource().length;
       if (dataSum.value === 0) {
-        createMessage.warn(t('warehouse.export.name'));
+        createMessage.warn(t('warehouse.otherShipments.export.noData'));
         return;
       }
       openExportData.value = true;

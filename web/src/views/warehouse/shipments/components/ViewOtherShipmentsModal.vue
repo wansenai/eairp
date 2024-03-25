@@ -13,7 +13,6 @@
         <a-descriptions size="small" :column="3">
           <a-descriptions-item :label="t('warehouse.otherShipments.header.customer')">{{ customerName }}</a-descriptions-item>
           <a-descriptions-item :label="t('warehouse.otherShipments.header.receiptDate')">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item ></a-descriptions-item>
           <a-descriptions-item :label="t('warehouse.otherShipments.header.remark')">
             {{ remark }}
           </a-descriptions-item>
