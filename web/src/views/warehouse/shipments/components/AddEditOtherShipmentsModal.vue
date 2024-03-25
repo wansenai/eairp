@@ -11,9 +11,9 @@
       v-model:open="open"
       style="left: 5%; height: 95%;">
     <template #footer>
-      <a-button @click="handleCancelModal">取消</a-button>
-      <a-button v-if="checkFlag" :loading="confirmLoading" @click="handleOk(1)">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
+      <a-button @click="handleCancelModal">{{ t('warehouse.otherShipments.form.cancel') }}</a-button>
+      <a-button v-if="checkFlag" :loading="confirmLoading" @click="handleOk(1)">{{ t('warehouse.otherShipments.form.saveApprove') }}</a-button>
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">{{ t('warehouse.otherShipments.form.save') }}</a-button>
       <!--发起多级审核-->
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
@@ -22,11 +22,11 @@
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="otherShipmentFormState.id" v-show="false"/>
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="客户" data-step="1"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('warehouse.otherShipments.form.customer')" data-step="1"
                          data-title="客户" :rules="[{ required: true}]">
               <a-select v-model:value="otherShipmentFormState.customerId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
-                        placeholder="请选择客户"
+                        :placeholder="t('warehouse.otherShipments.form.inputCustomer')"
                         :options="customerList.map(item => ({ value: item.id, label: item.customerName }))">
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
@@ -41,15 +41,15 @@
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="otherShipmentFormState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('warehouse.otherShipments.form.receiptDate')" :rules="[{ required: true}]">
+              <a-date-picker v-model:value="otherShipmentFormState.receiptDate" show-time :placeholder="t('warehouse.otherShipments.form.inputReceiptDate')" format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="7" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('warehouse.otherShipments.form.receiptNumber')" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="otherShipmentFormState.receiptNumber" :readOnly="true"/>
+              <a-input :placeholder="t('warehouse.otherShipments.form.inputReceiptNumber')" v-model:value="otherShipmentFormState.receiptNumber" :readOnly="true"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -58,24 +58,26 @@
             <div class="table-operations">
               <vxe-grid ref='xGrid' v-bind="gridOptions">
                 <template #toolbar_buttons="{ row }">
-                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
-                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="barCode"
+                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">
+                    {{ t('warehouse.otherShipments.form.scanCodeData') }}
+                  </a-button>
+                  <a-input v-if="showScanPressEnter" :placeholder="t('warehouse.otherShipments.form.scanCodeTip')" style="width: 150px; margin-right: 10px" v-model:value="barCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
-                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
-                  <a-button @click="productModal" style="margin-right: 10px">选择添加入库商品</a-button>
-                  <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
-                  <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">{{ t('warehouse.otherShipments.form.collapseScanCode') }}</a-button>
+                  <a-button @click="productModal" style="margin-right: 10px">{{ t('warehouse.otherShipments.form.addProduct') }}</a-button>
+                  <a-button @click="addRowData" style="margin-right: 10px">{{ t('warehouse.otherShipments.form.insertRow') }}</a-button>
+                  <a-button @click="deleteRowData" style="margin-right: 10px">{{ t('warehouse.otherShipments.form.deleteRow') }}</a-button>
                 </template>
                 <template #warehouse_default="{ row }">
                   <span>{{ formatWarehouseId(row.warehouseId) }}</span>
                 </template>
                 <template #warehouse_edit="{ row }">
-                  <vxe-select placeholder="请选择仓库" v-model="row.warehouseId" @change="selectBarCode" clearable filterable>
+                  <vxe-select :placeholder="t('warehouse.otherShipments.form.table.inputWarehouse')" v-model="row.warehouseId" @change="selectBarCode" clearable filterable>
                     <vxe-option v-for="item in warehouseList" :key="item.id" :value="item.id" :label="item.warehouseName"></vxe-option>
                   </vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
+                  <vxe-select v-model="row.barCode" :placeholder="t('warehouse.otherShipments.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
@@ -91,14 +93,14 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-textarea :rows="3" placeholder="请输入备注" v-model:value="otherShipmentFormState.remark"
+                  <a-textarea :rows="3" :placeholder="t('warehouse.otherShipments.form.inputRemark')" v-model:value="otherShipmentFormState.remark"
                               style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="附件" data-step="9"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('warehouse.otherShipments.form.annex')" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
                   <a-upload
@@ -108,7 +110,7 @@
                       multiple>
                     <a-button>
                       <upload-outlined/>
-                      点击上传附件
+                      {{ t('warehouse.otherShipments.form.uploadAnnex') }}
                     </a-button>
                   </a-upload>
                 </a-form-item>
@@ -172,6 +174,7 @@ import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue";
 import CustomerModal from "@/views/basic/customer/components/CustomerModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
+import {useI18n} from "vue-i18n";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -224,6 +227,7 @@ export default defineComponent({
     'a-divider': Divider,
   },
   setup(_, context) {
+    const { t } = useI18n();
     const [supplierModal, {openModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
     const {createMessage} = useMessage();
@@ -264,10 +268,10 @@ export default defineComponent({
       loadWarehouseList();
       loadProductSku();
       if (id) {
-        title.value = '编辑-其他出库'
+        title.value = t('warehouse.otherShipments.editOtherShipments');
         loadOtherShipmentsDetail(id);
       } else {
-        title.value = '新增-其他出库'
+        title.value = t('warehouse.otherShipments.addOtherShipments');
         loadGenerateId();
         otherShipmentFormState.receiptDate = dayjs(new Date());
         const table = xGrid.value
@@ -395,28 +399,28 @@ export default defineComponent({
 
     async function handleOk(type: number) {
       if (!otherShipmentFormState.customerId) {
-        createMessage.warn('请选择客户');
+        createMessage.warn(t('warehouse.otherShipments.form.inputCustomer'));
         return;
       }
       if (!otherShipmentFormState.receiptDate) {
-        createMessage.warn('请选择单据日期');
+        createMessage.warn(t('warehouse.otherShipments.form.inputReceiptDate'));
         return;
       }
       const table = xGrid.value
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.warn("请添加一行数据")
+          createMessage.warn(t('warehouse.otherShipments.form.addRowData'))
           return;
         }
         const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
         if(isBarCodeEmpty) {
-          createMessage.warn("请录入条码或者选择产品")
+          createMessage.warn(t('warehouse.otherShipments.form.noticeOne'))
           return;
         }
         const isWarehouseEmpty = insertRecords.some(item => !item.warehouseId)
         if(isWarehouseEmpty) {
-          createMessage.warn("请选择仓库")
+          createMessage.warn(t('warehouse.otherShipments.form.noticeTwo'))
           return;
         }
       }
@@ -657,6 +661,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       h,
       AccountBookTwoTone,
       open,
