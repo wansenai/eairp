@@ -2,18 +2,18 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="组装单-详情"
+          :title="t('warehouse.assemble.detailAssemble')"
           :sub-title= "receiptNumber">
         <template #extra>
-          <a-button @click="exportTable">导出</a-button>
-          <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+          <a-button @click="exportTable" v-text="t('warehouse.assemble.export.name')"/>
+          <a-button @click="primaryPrint" type="primary" v-text="t('warehouse.regularPrint')"/>
           <!--          <a-button key="triplePrint">三联打印</a-button>-->
           <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
         <a-descriptions size="small" :column="3">
-          <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('warehouse.assemble.header.receiptDate')">{{ receiptDate }}</a-descriptions-item>
           <a-descriptions-item ></a-descriptions-item>
-          <a-descriptions-item label="备注">
+          <a-descriptions-item :label="t('warehouse.assemble.header.remark')">
             {{ remark }}
           </a-descriptions-item>
         </a-descriptions>
@@ -27,8 +27,8 @@
             }"
           >
             <a-statistic
-                title="单据状态"
-                :value="status === 1 ? '已审核' : '未审核'"
+                :title="t('warehouse.assemble.header.remark')"
+                :value="status === 1 ? t('sys.table.audited') : t('sys.table.unaudited')"
                 :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                 :style="{
                 marginRight: '32px',
@@ -57,6 +57,7 @@ import {
 } from 'ant-design-vue';
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ViewAssembleModal',
@@ -69,13 +70,14 @@ export default defineComponent({
     'a-statistic': Statistic,
   },
   setup() {
+    const { t } = useI18n();
     const receiptNumber = ref('');
     const receiptDate = ref('');
     const remark = ref('')
     const status = ref();
     const tableData = ref([]);
     const [registerTable] = useTable({
-      title: '组装单表数据',
+      title: t('warehouse.assemble.export.exportData'),
       columns: assembleTableColumns,
       dataSource: tableData,
       pagination: false,
@@ -104,7 +106,7 @@ export default defineComponent({
         const link = document.createElement("a");
         const timestamp = getTimestamp(new Date());
         link.href = URL.createObjectURL(blob);
-        link.download = "组装单单据详情" + timestamp + ".xlsx";
+        link.download = t('warehouse.assemble.export.exportData') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
@@ -115,14 +117,14 @@ export default defineComponent({
     function primaryPrint() {
       const header = `
   <div style="${flexContainer}">
-    <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
-    <div style="${flexItem}">单据日期：${receiptDate.value}</div>
-    <div style="${flexItem}">备注：${remark.value}</div>
+    <div style="${flexItem}">${t('warehouse.assemble.header.receiptNumber')}：${receiptNumber.value}</div>
+    <div style="${flexItem}">${t('warehouse.assemble.header.receiptDate')}：${receiptDate.value}</div>
+    <div style="${flexItem}">${t('warehouse.assemble.header.remark')}：${remark.value}</div>
   </div>
 
 `;
       printJS({
-        documentTitle: "EAIRP (组装单单据-详情)",
+        documentTitle: "EAIRP "+ t('warehouse.assemble.detailReceipt'),
         header: header,
         properties: assembleTableColumns.map((item) => {
           return {
@@ -138,6 +140,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       receiptNumber,
       receiptDate,
       remark,
