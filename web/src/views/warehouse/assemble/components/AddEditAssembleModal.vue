@@ -11,9 +11,9 @@
       v-model:open="open"
       style="left: 5%; height: 95%;">
     <template #footer>
-      <a-button @click="handleCancelModal">取消</a-button>
-      <a-button v-if="checkFlag" :loading="confirmLoading" @click="handleOk(1)">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
+      <a-button @click="handleCancelModal">{{ t('warehouse.assemble.form.cancel') }}</a-button>
+      <a-button v-if="checkFlag" :loading="confirmLoading" @click="handleOk(1)">{{ t('warehouse.assemble.form.saveApprove') }}</a-button>
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">{{ t('warehouse.assemble.form.save') }}</a-button>
       <!--发起多级审核-->
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
@@ -21,15 +21,15 @@
       <a-form ref="formRef" :model="assembleFormState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px; margin-bottom: -150px">
         <a-row class="form-row" :gutter="24">
           <a-col :lg="8" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="assembleFormState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('warehouse.assemble.form.receiptDate')" :rules="[{ required: true}]">
+              <a-date-picker v-model:value="assembleFormState.receiptDate" show-time :placeholder="t('warehouse.assemble.form.inputReceiptDate')" format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="8" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('warehouse.assemble.form.receiptNumber')" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="assembleFormState.receiptNumber" :readOnly="true"/>
+              <a-input :placeholder="t('warehouse.assemble.form.inputReceiptNumber')" v-model:value="assembleFormState.receiptNumber" :readOnly="true"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -38,24 +38,26 @@
             <div class="table-operations">
               <vxe-grid ref='xGrid' v-bind="gridOptions">
                 <template #toolbar_buttons="{ row }">
-                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
-                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="barCode"
+                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">
+                    {{ t('warehouse.assemble.form.scanCodeData') }}
+                  </a-button>
+                  <a-input v-if="showScanPressEnter" :placeholder="t('warehouse.assemble.form.scanCodeTip')" style="width: 150px; margin-right: 10px" v-model:value="barCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
-                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
-                  <a-button @click="productModal" style="margin-right: 10px">选择添加组装商品</a-button>
-                  <a-button @click="addRowSubData" style="margin-right: 10px">添加一行</a-button>
-                  <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">{{ t('warehouse.assemble.form.collapseScanCode') }}</a-button>
+                  <a-button @click="productModal" style="margin-right: 10px">{{ t('warehouse.assemble.form.addProduct') }}</a-button>
+                  <a-button @click="addRowSubData" style="margin-right: 10px">{{ t('warehouse.assemble.form.insertRow') }}</a-button>
+                  <a-button @click="deleteRowData" style="margin-right: 10px">{{ t('warehouse.assemble.form.deleteRow') }}</a-button>
                 </template>
                 <template #warehouseId_default="{ row }">
                   <span>{{ formatWarehouseId(row.warehouseId) }}</span>
                 </template>
                 <template #warehouseId_edit="{ row }">
-                  <vxe-select placeholder="请选择仓库" v-model="row.warehouseId">
+                  <vxe-select :placeholder="t('warehouse.assemble.form.table.inputWarehouse')" v-model="row.warehouseId">
                     <vxe-option v-for="item in warehouseList" :key="item.id" :value="item.id" :label="item.warehouseName"></vxe-option>
                   </vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
+                  <vxe-select v-model="row.barCode" :placeholder="t('warehouse.assemble.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
@@ -71,14 +73,14 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-textarea :rows="3" placeholder="请输入备注" v-model:value="assembleFormState.remark"
+                  <a-textarea :rows="3" :placeholder="t('warehouse.assemble.form.table.inputRemark')" v-model:value="assembleFormState.remark"
                               style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="附件" data-step="9"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('warehouse.assemble.form.table.annex')" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
                   <a-upload
@@ -88,7 +90,7 @@
                       multiple>
                     <a-button>
                       <upload-outlined/>
-                      点击上传附件
+                      {{ t('warehouse.assemble.form.table.uploadAnnex') }}
                     </a-button>
                   </a-upload>
                 </a-form-item>
@@ -143,10 +145,11 @@ import { addOrUpdateAssemble, getAssembleDetailById} from "@/api/warehouse/assem
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
-import {getDefaultWarehouse, getWarehouseList} from "@/api/basic/warehouse";
+import {getWarehouseList} from "@/api/basic/warehouse";
 import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
+import {useI18n} from "vue-i18n";
 const VNodes = {
   props: {
     vnodes: {
@@ -197,6 +200,7 @@ export default defineComponent({
     'upload-outlined': UploadOutlined,
   },
   setup(_, context) {
+    const { t } = useI18n();
     const [supplierModal, {openModal}] = useModal();
     const [selectProductModal, {openModal: openProductModal}] = useModal();
     const {createMessage} = useMessage();
@@ -235,10 +239,10 @@ export default defineComponent({
       loadWarehouseList();
       loadProductSku();
       if (id) {
-        title.value = '编辑-组装单'
+        title.value = t('warehouse.assemble.editAssemble')
         loadAssembleReceipt(id);
       } else {
-        title.value = '新增-组装单'
+        title.value = t('warehouse.assemble.addAssemble')
         loadGenerateId();
         assembleFormState.receiptDate = dayjs(new Date());
         addRowData();
@@ -379,19 +383,19 @@ export default defineComponent({
 
     async function handleOk(type: number) {
       if (!assembleFormState.receiptDate) {
-        createMessage.error('请选择单据日期');
+        createMessage.warn(t('warehouse.assemble.form.inputReceiptDate'));
         return;
       }
       const table = xGrid.value
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.error("请添加一行数据")
+          createMessage.warn(t('warehouse.selectData'))
           return;
         }
         const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
         if(isBarCodeEmpty) {
-          createMessage.warn("请录入条码或者选择产品")
+          createMessage.warn(t('warehouse.assemble.form.noticeOne'))
           return;
         }
       }
@@ -675,6 +679,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       h,
       AccountBookTwoTone,
       open,
