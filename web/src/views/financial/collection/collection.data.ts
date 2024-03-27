@@ -3,55 +3,58 @@ import {BasicColumn} from "@/components/Table";
 import {getAccountList} from "@/api/financial/account";
 import {getCustomerList} from "@/api/basic/customer";
 import {getOperatorList} from "@/api/basic/operator";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '客户',
+        title: t('financial.collection.table.customer'),
         dataIndex: 'customerName',
         width: 120,
     },
     {
-        title: '单据编号',
+        title: t('financial.collection.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 130,
     },
     {
-        title: '单据日期',
+        title: t('financial.collection.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '财务人员',
+        title: t('financial.collection.table.financialPerson'),
         dataIndex: 'financialPerson',
         width: 70,
     },
     {
-        title: '收款账户',
+        title: t('financial.collection.table.collectionAccount'),
         dataIndex: 'collectionAccountName',
         width: 100,
     },
     {
-        title: '合计收款',
+        title: t('financial.collection.table.totalCollection'),
         dataIndex: 'totalCollectionAmount',
         width: 70,
     },
     {
-        title: '优惠金额',
+        title: t('financial.collection.table.discountAmount'),
         dataIndex: 'discountAmount',
         width: 70,
     },
     {
-        title: '实际收款',
+        title: t('financial.collection.table.actualCollection'),
         dataIndex: 'actualCollectionAmount',
         width: 70,
     },
     {
-        title: '备注',
+        title: t('financial.collection.table.remark'),
         dataIndex: 'remark',
         width: 150,
     },
     {
-        title: '状态',
+        title: t('financial.collection.table.status'),
         dataIndex: 'status',
         width: 70,
     },
@@ -59,7 +62,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('financial.collection.header.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -69,16 +72,16 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('financial.collection.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('financial.collection.header.starDate'), t('financial.collection.header.endDate')],
         },
         colProps: { span: 7 },
     },
     {
-        label: '收款账户',
+        label: t('financial.collection.header.collectionAccount'),
         field: 'accountId',
         component: 'ApiSelect',
         componentProps: {
@@ -93,7 +96,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '客户',
+        label: t('financial.collection.header.customer'),
         field: 'customerId',
         component: 'ApiSelect',
         componentProps: {
@@ -108,7 +111,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '财务人员',
+        label: t('financial.collection.header.financialPerson'),
         field: 'financialPersonId',
         component: 'ApiSelect',
         componentProps: {
@@ -124,7 +127,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据状态',
+        label: t('financial.collection.header.status'),
         field: 'status',
         component: 'Select',
         colProps: {
@@ -133,13 +136,13 @@ export const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '未审核', value: 0, key: 0 },
-                { label: '已审核', value: 1, key: 1 },
+                { label: t('sys.table.unaudited'), value: 0, key: 0 },
+                { label: t('sys.table.audited'), value: 1, key: 1 },
             ],
         },
     },
     {
-        label: '单据备注',
+        label: t('financial.collection.header.remark'),
         field: 'remark',
         component: 'Input',
         colProps: {
@@ -151,27 +154,27 @@ export const searchFormSchema: FormSchema[] = [
 
 export const collectionReceiptTableColumns: BasicColumn[] = [
     {
-        title: '销售单据编号',
+        title:  t('financial.collection.view.saleReceiptNumber'),
         dataIndex: 'saleReceiptNumber',
         width: 180,
     },
     {
-        title: '应收欠款',
+        title: t('financial.collection.view.receivableArrears'),
         dataIndex: 'receivableArrears',
         width: 80,
     },
     {
-        title: '已收欠款',
+        title: t('financial.collection.view.receivedArrears'),
         dataIndex: 'receivedArrears',
         width: 80,
     },
     {
-        title: '本次收款',
+        title: t('financial.collection.view.thisTimeCollection'),
         dataIndex: 'thisCollectionAmount',
         width: 80,
     },
     {
-        title: '备注',
+        title: t('financial.collection.view.remark'),
         dataIndex: 'remark',
         width: 200,
     },
@@ -179,7 +182,7 @@ export const collectionReceiptTableColumns: BasicColumn[] = [
 
 export const searchSaleArrearsFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('financial.collection.header.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -188,7 +191,7 @@ export const searchSaleArrearsFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
+        label: t('financial.collection.header.productInfo'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -198,11 +201,11 @@ export const searchSaleArrearsFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('financial.collection.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('financial.collection.header.starDate'), t('financial.collection.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -219,47 +222,47 @@ export const saleArrearsReceiptTableColumns: BasicColumn[] = [
         width: 0,
     },
     {
-        title: '客户',
+        title: t('financial.collection.table.customer'),
         dataIndex: 'customerName',
         width: 90,
     },
     {
-        title: '单据编号',
+        title: t('financial.collection.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 200,
     },
     {
-        title: '单据日期',
+        title: t('financial.collection.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 150,
     },
     {
-        title: '商品信息',
+        title: t('financial.collection.header.productInfo'),
         dataIndex: 'productInfo',
         width: 150,
     },
     {
-        title: '本单欠款',
+        title: t('financial.collection.view.thisReceiptArrears'),
         dataIndex: 'thisReceiptArrears',
         width: 80,
     },
     {
-        title: '已收欠款',
+        title: t('financial.collection.view.receivedArrears'),
         dataIndex: 'receivedArrears',
         width: 80,
     },
     {
-        title: '待收欠款',
+        title: t('financial.collection.view.receivableArrears'),
         dataIndex: 'receivableArrears',
         width: 80,
     },
     {
-        title: '操作员',
+        title: t('financial.collection.view.operator'),
         dataIndex: 'operatorName',
         width: 80,
     },
     {
-        title: '备注',
+        title: t('financial.collection.view.remark'),
         dataIndex: 'remark',
         width: 140,
     },

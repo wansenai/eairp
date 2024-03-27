@@ -13,18 +13,18 @@
       @cancel="handleCancelModal"
       style="left: 5%; height: 75%;">
     <template #footer >
-      <a-button @click="handleCancelModal">取消</a-button>
-      <a-button :loading="confirmLoading" @click="handleOk(1)">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
+      <a-button @click="handleCancelModal" v-text="t('financial.advance.form.cancel')"/>
+      <a-button :loading="confirmLoading" @click="handleOk(1)" v-text="t('financial.advance.form.saveApprove')"/>
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)"  v-text="t('financial.advance.form.save')"/>
     </template>
     <a-spin :spinning="confirmLoading">
       <a-form ref="formRef" :model="formState" style="margin-top: 20px; margin-right: 20px; margin-left: 20px">
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="formState.id" v-show="false"/>
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="付款会员" data-step="1"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.advance.form.paymentMember')" data-step="1"
                          data-title="付款会员" :rules="[{ required: true}]">
-              <a-select v-model:value="formState.memberId" placeholder="选择付款会员">
+              <a-select v-model:value="formState.memberId" :placeholder="t('financial.advance.form.inputCustomer')">
                 <a-select-option v-for="(item,index) in memberList" :key="index" :value="item.id">
                   {{ item.memberName }}
                 </a-select-option>
@@ -32,20 +32,20 @@
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="formState.receiptDate" show-time placeholder="选择时间" @change="dateChange"/>
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.advance.form.receiptDate')" :rules="[{ required: true}]">
+              <a-date-picker v-model:value="formState.receiptDate" show-time :placeholder="t('financial.advance.form.inputReceiptDate')" @change="dateChange"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.advance.form.receiptNumber')" data-step="2"
                          data-title="单据编号">
-              <a-input placeholder="请输入单据编号" v-model:value="formState.receiptNumber" readOnly/>
+              <a-input :placeholder="t('financial.advance.form.inputReceiptNumber')" v-model:value="formState.receiptNumber" readOnly/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="财务人员" data-step="3"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.advance.form.financialPerson')" data-step="3"
                          data-title="财务人员">
-              <a-select placeholder="请财务人员" v-model:value="formState.financialPersonnelId"
+              <a-select :placeholder="t('financial.advance.form.inputFinancialPerson')" v-model:value="formState.financialPersonnelId"
                         :dropdownMatchSelectWidth="false">
                 <a-select-option v-for="(item,index) in operatorList" :key="index" :value="item.id">
                   {{ item.name }}
@@ -59,10 +59,10 @@
               <a-row :gutter="24" style="float:left; margin-bottom: 10px; margin-left: 1px" data-step="4"
                      data-title="插入一行">
                 <a-col :md="6" :sm="24">
-                  <a-button type="primary" @click="addRow">插入一行</a-button>
+                  <a-button type="primary" @click="addRow" v-text="t('financial.advance.form.insertRow')" />
                 </a-col>
                 <a-col :md="6" :sm="24" style="margin-left: 30px">
-                  <a-button danger @click="deleteRows" type="primary" :disabled="!hasSelected"> 删除选中行</a-button>
+                  <a-button danger @click="deleteRows" type="primary" :disabled="!hasSelected" v-text="t('financial.advance.form.deleteRow')" />
                 </a-col>
               </a-row>
             </div>
@@ -94,31 +94,31 @@
                 </template>
               </template>
             </template>
-            <template #footer >总计: {{totalPrice}}</template>
+            <template #footer >{{ t('financial.advance.form.total') }}: {{totalPrice}}</template>
           </a-table>
         <a-row class="form-row" :gutter="24">
           <a-col :lg="24" :md="24" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-              <a-textarea :rows="3" placeholder="请输入备注" v-model:value="formState.remark"
+              <a-textarea :rows="3" :placeholder="t('financial.advance.form.inputRemark')" v-model:value="formState.remark"
                           style="margin-top:8px;"/>
             </a-form-item>
           </a-col>
         </a-row>
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="合计金额">
+            <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('financial.advance.form.totalAmount')">
               <a-input placeholder="请输入合计收款" v-model:value="formState.totalAmount" :readOnly="true"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="收款金额">
+            <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('financial.advance.form.amountCollected')">
               <a-input placeholder="请输入收款金额" v-model:value="formState.collectedAmount" :readOnly="true"/>
             </a-form-item>
           </a-col>
         </a-row>
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="附件" data-step="9"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.advance.form.annex')" data-step="9"
                          data-title="附件"
                          data-intro="可以上传与单据相关的图片、文档，支持多个文件">
               <a-upload
@@ -128,7 +128,7 @@
                   multiple>
                 <a-button>
                   <upload-outlined/>
-                  点击上传附件
+                  {{ t('financial.advance.form.uploadAnnex') }}
                 </a-button>
               </a-upload>
             </a-form-item>
@@ -179,6 +179,7 @@ import {addOrUpdateAdvance, getAdvanceDetail} from "@/api/financial/advance";
 import {AddOrUpdateAdvanceReq, AdvanceChargeData} from "@/api/financial/model/advanceModel";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
+import {useI18n} from "vue-i18n";
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -209,6 +210,7 @@ export default defineComponent({
     'upload-outlined': UploadOutlined,
   },
   setup(_, context) {
+    const { t } = useI18n();
     const {createMessage} = useMessage();
     const formRef = ref();
     const confirmLoading = ref<boolean>(false);
@@ -256,11 +258,11 @@ export default defineComponent({
       loadOperatorList();
       loadAccountList();
       if (id) {
-        title.value = '编辑-收预付款单';
+        title.value = t('financial.advance.editAdvanceReceipt')
         loadAdvanceChargeData(id)
         formState.id = id;
       } else {
-        title.value = '新增-收预付款单';
+        title.value = t('financial.advance.addAdvanceReceipt')
         loadGenerateId();
       }
     }
@@ -343,26 +345,26 @@ export default defineComponent({
 
     async function handleOk(review: number) {
       if (!formState.memberId) {
-        createMessage.warn('请选择付款会员');
+        createMessage.warn(t('financial.advance.form.inputCustomer'));
         return;
       }
       if (!formState.receiptDate) {
-        createMessage.warn('请选择单据日期');
+        createMessage.warn(t('financial.advance.form.inputReceiptDate'));
         return;
       }
       if (tableData.value.length === 0) {
-        createMessage.warn('请插入一行数据，录入收预付款信息');
+        createMessage.warn(t('financial.advance.form.noticeFour'));
         return;
       }
       console.info(editableData)
       for (const key in editableData) {
         console.info(editableData[key])
         if (!editableData[key].accountId) {
-          createMessage.warn('请选择账户名称');
+          createMessage.warn(t('financial.advance.form.noticeFive'));
           return;
         }
         if (!editableData[key].amount) {
-          createMessage.warn('请输入金额');
+          createMessage.warn(t('financial.advance.form.noticeSix'));
           return;
         }
       }
@@ -497,7 +499,7 @@ export default defineComponent({
     function beforeUpload(file: any) {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        createMessage.warn(`${file.name}，该文件超过2MB大小限制`);
+        createMessage.warn(`${file.name}，` + t('financial.advance.form.noticeThree'));
         return isLt2M || Upload.LIST_IGNORE
       }
     }
@@ -522,6 +524,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       open,
       formRef,
       checkFlag,

@@ -3,45 +3,48 @@ import {BasicColumn} from "@/components/Table";
 import {getAccountList} from "@/api/financial/account";
 import {getRelatedPerson} from "@/api/report/report";
 import {getOperatorList} from "@/api/basic/operator";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '名称',
+        title: t('financial.expense.table.name'),
         dataIndex: 'name',
         width: 120,
     },
     {
-        title: '单据编号',
+        title: t('financial.expense.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 130,
     },
     {
-        title: '单据日期',
+        title: t('financial.expense.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '财务人员',
+        title: t('financial.expense.table.financialPerson'),
         dataIndex: 'financialPerson',
         width: 70,
     },
     {
-        title: '支出账户',
+        title: t('financial.expense.table.expenseAccount'),
         dataIndex: 'expenseAccountName',
         width: 70,
     },
     {
-        title: '支出金额',
+        title: t('financial.expense.table.expenseAmount'),
         dataIndex: 'expenseAmount',
         width: 70,
     },
     {
-        title: '备注',
+        title: t('financial.expense.table.remark'),
         dataIndex: 'remark',
         width: 150,
     },
     {
-        title: '状态',
+        title: t('financial.expense.table.status'),
         dataIndex: 'status',
         width: 70,
     },
@@ -49,7 +52,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('financial.expense.header.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -59,16 +62,16 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('financial.expense.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('financial.expense.header.starDate'), t('financial.expense.header.endDate')],
         },
         colProps: { span: 7 },
     },
     {
-        label: '支出账户',
+        label: t('financial.expense.header.expenseAccount'),
         field: 'accountId',
         component: 'ApiSelect',
         componentProps: {
@@ -83,7 +86,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '往来单位',
+        label: t('financial.expense.header.correspondenceUnit'),
         field: 'relatedPersonId',
         component: 'ApiSelect',
         componentProps: {
@@ -98,7 +101,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '财务人员',
+        label: t('financial.expense.header.financialPerson'),
         field: 'financialPersonId',
         component: 'ApiSelect',
         componentProps: {
@@ -114,7 +117,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据状态',
+        label: t('financial.expense.header.status'),
         field: 'status',
         component: 'Select',
         colProps: {
@@ -123,13 +126,13 @@ export const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '未审核', value: 0, key: 0 },
-                { label: '已审核', value: 1, key: 1 },
+                { label: t('sys.table.unaudited'), value: 0, key: 0 },
+                { label: t('sys.table.audited'), value: 1, key: 1 },
             ],
         },
     },
     {
-        label: '单据备注',
+        label: t('financial.expense.header.remark'),
         field: 'remark',
         component: 'Input',
         colProps: {
@@ -142,17 +145,17 @@ export const searchFormSchema: FormSchema[] = [
 
 export const expenseReceiptTableColumns: BasicColumn[] = [
     {
-        title: '支出项目',
+        title: t('financial.expense.view.expenseName'),
         dataIndex: 'incomeExpenseName',
         width: 200,
     },
     {
-        title: '金额',
+        title: t('financial.expense.view.amount'),
         dataIndex: 'incomeExpenseAmount',
         width: 180,
     },
     {
-        title: '备注',
+        title: t('financial.expense.view.remark'),
         dataIndex: 'remark',
         width: 200,
     },

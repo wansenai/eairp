@@ -21,14 +21,16 @@ import {BasicModal, useModal, useModalInner} from "@/components/Modal";
 import {getArrearsPageList} from "@/api/financial/payment";
 import ViewPurchaseRefundModal from "@/views/purchase/refund/components/ViewRefundModal.vue";
 import ViewPurchaseStorageModal from "@/views/purchase/storage/components/ViewStorageModal.vue";
+import {useI18n} from "vue-i18n";
 export default defineComponent({
   name: 'PurchaseArrearsModal',
   components: {ViewPurchaseStorageModal, ViewPurchaseRefundModal, BasicModal, BasicTable, TableAction},
   emits: ['handleReceiptSuccess', 'register'],
   setup(_, context) {
+    const { t } = useI18n();
     const [handlePurchaseStorageModal, {openModal: openPurchaseStorageModal}] = useModal();
     const [handlePurchaseRefundModal, {openModal: openPurchaseRefundModal}] = useModal();
-    const getTitle = ref('选择采购欠款单据');
+    const getTitle = ref(t('financial.payment.selectPurchaseArrearsReceipt'));
     const { createMessage } = useMessage();
     const supplierId = ref('');
     const [registerTable, { getSelectRows}] = useTable({
@@ -74,7 +76,7 @@ export default defineComponent({
     function handleSubmit() {
       const rows = getSelectRows();
       if (rows.length === 0) {
-        createMessage.error('请选择单据');
+        createMessage.error(t('financial.payment.form.noticeOne'));
         return;
       }
       context.emit('handleReceiptSuccess', rows);
@@ -82,6 +84,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       registerModal,
       getTitle,

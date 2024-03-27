@@ -2,6 +2,10 @@ import {reactive, ref} from "vue";
 import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
+
 
 export interface RowVO {
     [key: string]: any,
@@ -63,26 +67,26 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         { type: 'checkbox', field:'id', title: 'ID', width: 180},
         {   field: 'incomeExpenseId',
             width:200,
-            title: '支出项目',
+            title: t('financial.expense.view.expenseName'),
             slots: { edit: 'id_edit',default: 'id_default' },
             sortable: true,
             editRender: {}
         },
         {   field: 'incomeExpenseAmount',
             width:200,
-            title: '支出金额',
+            title: t('financial.expense.view.amount'),
             slots: { edit: 'amount_edit' },
             sortable: true,
             editRender: { name: 'input', attrs: { placeholder: '请输入金额' } }
         },
-        { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
+        { field: 'remark', title: t('financial.expense.view.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
 
     ],
     footerMethod ({ columns, data }) {
         return [
             columns.map((column, columnIndex) => {
                 if (columnIndex === 0) {
-                    return '总计'
+                    return t('financial.expense.form.total')
                 }
                 if (['incomeExpenseAmount', 'rate'].includes(column.field)) {
                     expenseFormState.expenseAmount = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
@@ -100,10 +104,10 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     },
     editRules: {
         incomeExpenseId: [
-            { required: true, message: '支出项目不能为空' }
+            { required: true, message: t('financial.expense.form.noticeOne') }
         ],
         incomeExpenseAmount: [
-            { required: true, message: '支出金额不能为空' }
+            { required: true, message: t('financial.expense.form.noticeTwo') }
         ]
     },
     editConfig: {

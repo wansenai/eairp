@@ -2,23 +2,23 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="付款单-详情"
+          :title="t('financial.payment.paymentReceiptDetail')"
           :sub-title= "receiptNumber">
         <template #extra>
-          <a-button @click="exportTable">导出</a-button>
-          <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+          <a-button @click="exportTable" v-text="t('financial.payment.export.name')"/>
+          <a-button @click="primaryPrint" type="primary" v-text="t('financial.regularPrint')"/>
           <!--          <a-button key="triplePrint">三联打印</a-button>-->
           <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
         <a-descriptions size="small" :column="3">
-          <a-descriptions-item label="供应商">{{ supplierName }}</a-descriptions-item>
-          <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item label="财务人员">{{ financialPersonName }}</a-descriptions-item>
-          <a-descriptions-item label="付款账户">{{ paymentAccountName }}</a-descriptions-item>
-          <a-descriptions-item label="合计付款">{{ totalPaymentAmount }}</a-descriptions-item>
-          <a-descriptions-item label="优惠金额">{{ discountAmount }}</a-descriptions-item>
-          <a-descriptions-item label="实际付款">{{ actualPaymentAmount }}</a-descriptions-item>
-          <a-descriptions-item label="备注">
+          <a-descriptions-item :label="t('financial.payment.header.supplier')">{{ supplierName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.payment.header.receiptDate')">{{ receiptDate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.payment.header.financialPerson')">{{ financialPersonName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.payment.table.paymentAccount')">{{ paymentAccountName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.payment.table.totalPayment')">{{ totalPaymentAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.payment.table.discountAmount')">{{ discountAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.payment.table.actualPayment')">{{ actualPaymentAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.payment.table.remark')">
             {{ remark }}
           </a-descriptions-item>
         </a-descriptions>
@@ -32,15 +32,15 @@
             }"
           >
             <a-statistic
-                title="单据状态"
-                :value="status === 1 ? '已审核' : '未审核'"
+                :title="t('financial.payment.table.status')"
+                :value="status === 1 ? t('sys.table.audited') : t('sys.table.unaudited')"
                 :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                 :style="{
                 marginRight: '32px',
                 color: 'green',
               }"
             />
-            <a-statistic title="单据金额"
+            <a-statistic :title="t('financial.payment.table.totalPayment')"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="totalPaymentAmount"/>
@@ -66,6 +66,7 @@ import {
 import {paymentReceiptTableColumns} from "@/views/financial/payment/payment.data";
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 export default defineComponent({
   name: 'ViewExpenseModal',
   components: {
@@ -77,6 +78,7 @@ export default defineComponent({
     'a-statistic': Statistic,
   },
   setup() {
+    const { t } = useI18n();
     const receiptNumber = ref('');
     const supplierName = ref('');
     const receiptDate = ref('');
@@ -89,7 +91,7 @@ export default defineComponent({
     const tableData = ref([]);
     const status = ref(-1);
     const [registerTable] = useTable({
-      title: '付款单详情数据',
+      title: t('financial.payment.receiptDetail'),
       columns: paymentReceiptTableColumns,
       dataSource: tableData,
       pagination: false,
@@ -97,7 +99,7 @@ export default defineComponent({
       bordered: true,
       canResize: false,
     });
-    const getTitle = ref('单据详情');
+    const getTitle = ref(t('financial.payment.receiptDetail'));
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1000, showOkBtn: false});
       const res = await getPaymentDetailById(data.id);
@@ -125,7 +127,7 @@ export default defineComponent({
         const link = document.createElement("a");
         const timestamp = getTimestamp(new Date());
         link.href = URL.createObjectURL(blob);
-        link.download = "付款单单据详情" + timestamp + ".xlsx";
+        link.download = t('financial.payment.receiptDetail') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
@@ -136,23 +138,23 @@ export default defineComponent({
     function primaryPrint() {
       const header = `
   <div style="${flexContainer}">
-    <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
-    <div style="${flexItem}">单据日期：${receiptDate.value}</div>
-    <div style="${flexItem}">单据金额：${totalPaymentAmount.value}</div>
+    <div style="${flexItem}">${t('financial.payment.header.receiptNumber')}：${receiptNumber.value}</div>
+    <div style="${flexItem}">${t('financial.payment.header.receiptDate')}：${receiptDate.value}</div>
+    <div style="${flexItem}">${t('financial.payment.table.totalPayment')}：${totalPaymentAmount.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">付款账户：${paymentAccountName.value}</div>
-    <div style="${flexItem}">优惠金额：${discountAmount.value}</div>
-    <div style="${flexItem}">实际付款：${actualPaymentAmount.value}</div>
+    <div style="${flexItem}">${t('financial.payment.table.paymentAccount')}：${paymentAccountName.value}</div>
+    <div style="${flexItem}">${t('financial.payment.table.discountAmount')}：${discountAmount.value}</div>
+    <div style="${flexItem}">${t('financial.payment.table.actualPayment')}：${actualPaymentAmount.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">供应商：${supplierName.value}</div>
-    <div style="${flexItem}">财务人员：${financialPersonName.value}</div>
-    <div style="${flexItem}">备注：${remark.value}</div>
+    <div style="${flexItem}">${t('financial.payment.table.supplier')}：${supplierName.value}</div>
+    <div style="${flexItem}">${t('financial.payment.table.financialPerson')}：${financialPersonName.value}</div>
+    <div style="${flexItem}">${t('financial.payment.table.remark')}：${remark.value}</div>
   </div>
 `;
       printJS({
-        documentTitle: "EAIRP (付款单单据-详情)",
+        documentTitle: "EAIRP " + t('financial.payment.export.exportData'),
         header: header,
         properties: paymentReceiptTableColumns.map((item) => {
           return {
@@ -168,6 +170,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       receiptNumber,
       supplierName,
       receiptDate,

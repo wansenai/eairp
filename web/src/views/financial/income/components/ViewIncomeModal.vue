@@ -2,21 +2,21 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="收入单-详情"
+          :title="t('financial.income.incomeReceiptDetail')"
           :sub-title= "receiptNumber">
         <template #extra>
-          <a-button @click="exportTable">导出</a-button>
-          <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+          <a-button @click="exportTable" v-text="t('financial.income.export.name')"/>
+          <a-button @click="primaryPrint" type="primary" v-text="t('financial.regularPrint')"/>
           <!--          <a-button key="triplePrint">三联打印</a-button>-->
           <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
         <a-descriptions size="small" :column="3">
-          <a-descriptions-item label="往来单位">{{ relatedPersonName }}</a-descriptions-item>
-          <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item label="财务人员">{{ financialPersonName }}</a-descriptions-item>
-          <a-descriptions-item label="收入账户">{{ incomeAccountName }}</a-descriptions-item>
-          <a-descriptions-item label="收入金额">{{ incomeAmount }}</a-descriptions-item>
-          <a-descriptions-item label="备注">
+          <a-descriptions-item :label="t('financial.income.header.correspondenceUnit')">{{ relatedPersonName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.income.header.receiptDate')">{{ receiptDate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.income.header.financialPerson')">{{ financialPersonName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.income.header.incomeAccount')">{{ incomeAccountName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.income.table.incomeAmount')">{{ incomeAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.income.header.remark')">
             {{ remark }}
           </a-descriptions-item>
         </a-descriptions>
@@ -30,15 +30,15 @@
             }"
           >
             <a-statistic
-                title="单据状态"
-                :value="status === 1 ? '已审核' : '未审核'"
+                :title="t('financial.income.header.remark')"
+                :value="status === 1 ? t('sys.table.audited') : t('sys.table.unaudited')"
                 :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                 :style="{
                 marginRight: '32px',
                 color: 'green',
               }"
             />
-            <a-statistic title="单据金额"
+            <a-statistic :title="t('financial.income.table.incomeAmount')"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="incomeAmount"/>
@@ -64,6 +64,7 @@ import {
 import {incomeReceiptTableColumns} from "@/views/financial/income/income.data";
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ViewIncomeModal',
@@ -76,6 +77,7 @@ export default defineComponent({
     'a-statistic': Statistic,
   },
   setup() {
+    const { t } = useI18n();
     const receiptNumber = ref('');
     const relatedPersonName = ref('');
     const receiptDate = ref('');
@@ -86,7 +88,7 @@ export default defineComponent({
     const tableData = ref([]);
     const status = ref(-1);
     const [registerTable] = useTable({
-      title: '收入单详情数据',
+      title: t('financial.income.receiptDetail'),
       columns: incomeReceiptTableColumns,
       dataSource: tableData,
       pagination: false,
@@ -120,7 +122,7 @@ export default defineComponent({
         const link = document.createElement("a");
         const timestamp = getTimestamp(new Date());
         link.href = URL.createObjectURL(blob);
-        link.download = "收入单单据详情" + timestamp + ".xlsx";
+        link.download = t('financial.income.receiptDetail') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
@@ -131,18 +133,18 @@ export default defineComponent({
     function primaryPrint() {
       const header = `
   <div style="${flexContainer}">
-    <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
-    <div style="${flexItem}">单据日期：${receiptDate.value}</div>
-    <div style="${flexItem}">单据金额：${incomeAmount.value}</div>
+    <div style="${flexItem}">${t('financial.income.header.receiptNumber')}：${receiptNumber.value}</div>
+    <div style="${flexItem}">${t('financial.income.header.receiptDate')}：${receiptDate.value}</div>
+    <div style="${flexItem}">${t('financial.income.table.incomeAmount')}：${incomeAmount.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">收入账户：${incomeAccountName.value}</div>
-    <div style="${flexItem}">财务人员：${financialPersonName.value}</div>
-    <div style="${flexItem}">备注：${remark.value}</div>
+    <div style="${flexItem}">${t('financial.income.header.incomeAccount')}：${incomeAccountName.value}</div>
+    <div style="${flexItem}">${t('financial.income.header.financialPerson')}：${financialPersonName.value}</div>
+    <div style="${flexItem}">${t('financial.income.header.remark')}：${remark.value}</div>
   </div>
 `;
       printJS({
-        documentTitle: "EAIRP (收入单单据-详情)",
+        documentTitle: "EAIRP " + t('financial.income.incomeReceiptDetail'),
         header: header,
         properties: incomeReceiptTableColumns.map((item) => {
           return {
@@ -158,6 +160,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       receiptNumber,
       relatedPersonName,
       receiptDate,

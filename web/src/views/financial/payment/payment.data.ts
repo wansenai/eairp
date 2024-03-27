@@ -3,55 +3,58 @@ import {BasicColumn} from "@/components/Table";
 import {getAccountList} from "@/api/financial/account";
 import {getSupplierList} from "@/api/basic/supplier";
 import {getOperatorList} from "@/api/basic/operator";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '供应商',
+        title: t('financial.payment.table.supplier'),
         dataIndex: 'supplierName',
         width: 120,
     },
     {
-        title: '单据编号',
+        title: t('financial.payment.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 130,
     },
     {
-        title: '单据日期',
+        title: t('financial.payment.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '财务人员',
+        title: t('financial.payment.table.financialPerson'),
         dataIndex: 'financialPerson',
         width: 70,
     },
     {
-        title: '付款账户',
+        title: t('financial.payment.table.paymentAccount'),
         dataIndex: 'paymentAccountName',
         width: 100,
     },
     {
-        title: '合计付款',
+        title: t('financial.payment.table.totalPayment'),
         dataIndex: 'totalPaymentAmount',
         width: 70,
     },
     {
-        title: '优惠金额',
+        title: t('financial.payment.table.discountAmount'),
         dataIndex: 'discountAmount',
         width: 70,
     },
     {
-        title: '实际付款',
+        title: t('financial.payment.table.actualPayment'),
         dataIndex: 'actualPaymentAmount',
         width: 70,
     },
     {
-        title: '备注',
+        title: t('financial.payment.table.remark'),
         dataIndex: 'remark',
         width: 150,
     },
     {
-        title: '状态',
+        title: t('financial.payment.table.status'),
         dataIndex: 'status',
         width: 70,
     },
@@ -59,7 +62,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('financial.payment.header.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -69,16 +72,16 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('financial.payment.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('financial.payment.header.starDate'), t('financial.payment.header.endDate')],
         },
         colProps: { span: 7 },
     },
     {
-        label: '付款账户',
+        label: t('financial.payment.header.paymentAccount'),
         field: 'accountId',
         component: 'ApiSelect',
         componentProps: {
@@ -93,7 +96,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '供应商',
+        label: t('financial.payment.header.supplier'),
         field: 'supplierId',
         component: 'ApiSelect',
         componentProps: {
@@ -108,7 +111,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '财务人员',
+        label: t('financial.payment.header.financialPerson'),
         field: 'financialPersonId',
         component: 'ApiSelect',
         componentProps: {
@@ -124,7 +127,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据状态',
+        label: t('financial.payment.header.status'),
         field: 'status',
         component: 'Select',
         colProps: {
@@ -133,13 +136,13 @@ export const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '未审核', value: 0, key: 0 },
-                { label: '已审核', value: 1, key: 1 },
+                { label: t('sys.table.unaudited'), value: 0, key: 0 },
+                { label: t('sys.table.audited'), value: 1, key: 1 },
             ],
         },
     },
     {
-        label: '单据备注',
+        label: t('financial.payment.header.remark'),
         field: 'remark',
         component: 'Input',
         colProps: {
@@ -151,27 +154,27 @@ export const searchFormSchema: FormSchema[] = [
 
 export const paymentReceiptTableColumns: BasicColumn[] = [
     {
-        title: '采购单据编号',
+        title:  t('financial.payment.view.purchaseReceiptNumber'),
         dataIndex: 'purchaseReceiptNumber',
         width: 180,
     },
     {
-        title: '应付欠款',
+        title: t('financial.payment.view.payableArrears'),
         dataIndex: 'paymentArrears',
         width: 80,
     },
     {
-        title: '已付欠款',
+        title: t('financial.payment.view.paidArrears'),
         dataIndex: 'prepaidArrears',
         width: 80,
     },
     {
-        title: '本次付款',
+        title: t('financial.payment.view.thisTimePayment'),
         dataIndex: 'thisPaymentAmount',
         width: 80,
     },
     {
-        title: '备注',
+        title: t('financial.payment.view.remark'),
         dataIndex: 'remark',
         width: 200,
     },
@@ -179,7 +182,7 @@ export const paymentReceiptTableColumns: BasicColumn[] = [
 
 export const searchPurchaseArrearsFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('financial.payment.header.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -188,7 +191,7 @@ export const searchPurchaseArrearsFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
+        label: t('financial.payment.header.productInfo'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -198,11 +201,11 @@ export const searchPurchaseArrearsFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('financial.payment.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('financial.payment.header.starDate'), t('financial.payment.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -219,47 +222,47 @@ export const purchaseArrearsReceiptTableColumns: BasicColumn[] = [
         width: 0,
     },
     {
-        title: '供应商',
+        title: t('financial.payment.table.supplier'),
         dataIndex: 'supplierName',
         width: 130,
     },
     {
-        title: '单据编号',
+        title: t('financial.payment.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 200,
     },
     {
-        title: '单据日期',
+        title: t('financial.payment.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 140,
     },
     {
-        title: '商品信息',
+        title: t('financial.payment.header.productInfo'),
         dataIndex: 'productInfo',
         width: 150,
     },
     {
-        title: '本单欠款',
+        title: t('financial.payment.view.thisReceiptArrears'),
         dataIndex: 'thisReceiptArrears',
         width: 75,
     },
     {
-        title: '已付欠款',
+        title:  t('financial.payment.view.paidArrears'),
         dataIndex: 'prepaidArrears',
         width: 75,
     },
     {
-        title: '待付欠款',
+        title: t('financial.payment.view.payableArrears'),
         dataIndex: 'paymentArrears',
         width: 75,
     },
     {
-        title: '操作员',
+        title: t('financial.payment.view.operator'),
         dataIndex: 'operatorName',
         width: 75,
     },
     {
-        title: '备注',
+        title: t('financial.payment.view.remark'),
         dataIndex: 'remark',
         width: 140,
     },

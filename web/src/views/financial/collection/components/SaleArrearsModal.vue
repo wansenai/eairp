@@ -21,14 +21,16 @@ import {BasicModal, useModal, useModalInner} from "@/components/Modal";
 import {getArrearsPageList} from "@/api/financial/collection";
 import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundModal.vue";
 import ViewSaleShipmentsModal from "@/views/sales/shipments/components/ViewSaleShipmentsModal.vue";
+import {useI18n} from "vue-i18n";
 export default defineComponent({
   name: 'SaleArrearsModal',
   components: {ViewSaleShipmentsModal, ViewSaleRefundModal, BasicModal, BasicTable, TableAction},
   emits: ['handleReceiptSuccess', 'register'],
   setup(_, context) {
+    const { t } = useI18n();
     const [handleSaleShipmentsModal, {openModal: openSaleShipmentsModal}] = useModal();
     const [handleSaleRefundModal, {openModal: openSaleRefundModal}] = useModal();
-    const getTitle = ref('选择销售欠款单据');
+    const getTitle = ref(t('financial.collection.selectSaleArrearsReceipt'));
     const { createMessage } = useMessage();
     const customerId = ref('');
     const [registerTable, { getSelectRows}] = useTable({
@@ -74,7 +76,7 @@ export default defineComponent({
     function handleSubmit() {
       const rows = getSelectRows();
       if (rows.length === 0) {
-        createMessage.error('请选择单据');
+        createMessage.error(t('financial.collection.selectSaleArrearsReceipt'));
         return;
       }
       context.emit('handleReceiptSuccess', rows);
@@ -82,6 +84,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       registerModal,
       getTitle,
