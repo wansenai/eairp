@@ -2,6 +2,9 @@ import {reactive, ref} from "vue";
 import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export interface RowVO {
     [key: string]: any,
@@ -67,31 +70,31 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         { type: 'checkbox', field:'id', title: 'ID', width: 180},
         {   field: 'saleReceiptNumber',
             width:200,
-            title: '销售单据编号',
+            title:  t('financial.collection.view.saleReceiptNumber'),
         },
         {   field: 'receivableArrears',
             width:180,
-            title: '应收欠款',
+            title: t('financial.collection.view.receivableArrears'),
         },
         {   field: 'receivedArrears',
             width:180,
-            title: '已收欠款',
+            title: t('financial.collection.view.receivedArrears'),
         },
         {   field: 'thisCollectionAmount',
             width:200,
-            title: '本次收款',
+            title: t('financial.collection.view.thisTimeCollection'),
             slots: { edit: 'amount_edit' },
             sortable: true,
             editRender: { name: 'input', attrs: { placeholder: '请输入本次收款金额' } }
         },
-        { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
+        { field: 'remark', title: t('financial.collection.view.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
 
     ],
     footerMethod ({ columns, data }) {
         return [
             columns.map((column, columnIndex) => {
                 if (columnIndex === 0) {
-                    return '总计'
+                    return t('financial.collection.form.total')
                 }
                 if (['thisCollectionAmount', 'rate'].includes(column.field)) {
                     collectionFormState.actualCollectionAmount = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`

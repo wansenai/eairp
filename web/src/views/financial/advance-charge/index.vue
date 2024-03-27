@@ -2,11 +2,11 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> 新增</a-button>
-        <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
-        <a-button type="primary" @click="handleExport"> 导出</a-button>
-        <a-button type="primary" @click="handleOnStatus(1)"> 批量审核</a-button>
-        <a-button type="primary" @click="handleOnStatus(0)"> 批量反审核</a-button>
+        <a-button type="primary" @click="handleCreate" v-text="t('financial.advance.add')" />
+        <a-button type="primary" @click="handleBatchDelete" v-text="t('financial.advance.batchDelete')" />
+        <a-button type="primary" @click="handleExport" v-text="t('financial.advance.export.name')" />
+        <a-button type="primary" @click="handleOnStatus(1)" v-text="t('sys.table.approve')" />
+        <a-button type="primary" @click="handleOnStatus(0)" v-text="t('sys.table.reject')" />
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -14,18 +14,20 @@
               :actions="[
               {
                 icon: 'clarity:info-standard-line',
-                tooltip: '查看收预付款单详情',
+                tooltip: t('financial.advance.viewAdvanceReceiptDetail'),
                 onClick: handleView.bind(null, record),
               },
               {
                 icon: 'clarity:note-edit-line',
+                tooltip: t('sys.table.edit'),
                 onClick: handleEdit.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
+                tooltip: t('sys.table.delete'),
                 color: 'error',
                 popConfirm: {
-                  title: '是否确认删除',
+                  title: t('sys.table.confirmDelete'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
                 },
@@ -35,17 +37,17 @@
         </template>
         <template v-else-if="column.key === 'status'">
           <Tag :color="record.status === 1 ? 'green' : 'red'">
-            {{ record.status === 1 ? '已审核' : '未审核' }}
+            {{ record.status === 1 ? t('sys.table.audited') : t('sys.table.unaudited') }}
           </Tag>
         </template>
       </template>
     </BasicTable>
-    <a-modal v-model:open="openExportData" title="确认导出" :confirm-loading="confirmLoading"
-             @ok="handleExportOk" @cancel="handleExportCancel" okText="导出">
+    <a-modal v-model:open="openExportData" :title="t('sys.table.confirmExport')" :confirm-loading="confirmLoading"
+             @ok="handleExportOk" @cancel="handleExportCancel" :ok-text="t('sys.table.confirmExportTextOne')">
       <div style="text-align: center">
-        <p>即将导出{{dataSum}}条数据，请耐心等待。</p>
-        <p>如需导出明细数据（可能耗时较长），请勾选下方复选框。</p>
-        <a-checkbox v-model:checked="exportDetailData">需要导出明细数据</a-checkbox>
+        <p>{{ t('sys.table.confirmExportTextOne') }} {{ dataSum }} {{ t('sys.table.confirmExportTextTwo') }}</p>
+        <p>{{ t('sys.table.confirmExportTextThree') }}</p>
+        <a-checkbox v-model:checked="exportDetailData">{{ t('sys.table.confirmExportTextFour') }}</a-checkbox>
       </div>
     </a-modal>
     <AdvanceChargeModal ref="advanceChargeModalRef" @cancel="handleCancel"></AdvanceChargeModal>
@@ -66,10 +68,12 @@ import AdvanceChargeModal from "@/views/financial/advance-charge/components/Adva
 import ViewAdvanceChargeModal from "@/views/financial/advance-charge/components/ViewAdvanceChargeModal.vue";
 import {Checkbox, Modal, Tag} from "ant-design-vue";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 export default defineComponent({
   name: 'advanceCharge',
   components: {'a-modal': Modal, 'a-checkbox': Checkbox, Tag, TableAction, BasicTable, AdvanceChargeModal, ViewAdvanceChargeModal},
   setup() {
+    const { t } = useI18n();
     const [viewAdvanceChargeModalRef, {openModal: openAdvanceChargeModal}] = useModal();
     const { createMessage } = useMessage();
     const advanceChargeModalRef = ref(null);
@@ -78,7 +82,7 @@ export default defineComponent({
     const confirmLoading = ref<boolean>(false);
     const dataSum = ref<number>(0);
     const [registerTable, { reload, getSelectRows, getForm, getDataSource }] = useTable({
-      title: '收预付款列表',
+      title: t('financial.advance.title'),
       api: getAdvancePageList,
       rowKey: 'id',
       columns: columns,
@@ -98,7 +102,7 @@ export default defineComponent({
       showIndexColumn: true,
       actionColumn: {
         width: 80,
-        title: '操作',
+        title: t('common.operating'),
         dataIndex: 'action',
         fixed: undefined,
       },
@@ -111,7 +115,7 @@ export default defineComponent({
     async function handleBatchDelete(record: Recordable) {
       const data = getSelectRows();
       if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
+        createMessage.warn(t('financial.selectData'));
         return;
       }
       const ids = data.map((item) => item.id);
@@ -123,7 +127,7 @@ export default defineComponent({
 
     async function handleEdit(record: Recordable) {
       if (record.status === 1) {
-        createMessage.warn('抱歉，只有未审核的单据才能编辑！');
+        createMessage.warn(t('financial.modifyDataPrompt'));
         return;
       }
       advanceChargeModalRef.value.openAdvanceChargeModal(record.id);
@@ -143,7 +147,7 @@ export default defineComponent({
     async function handleOnStatus(newStatus: number) {
       const data = getSelectRows();
       if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
+        createMessage.warn(t('financial.selectData'));
         return;
       }
 
@@ -167,7 +171,7 @@ export default defineComponent({
     async function handleExport() {
       dataSum.value = getDataSource().length;
       if (dataSum.value === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('financial.advance.export.noData'));
         return;
       }
       openExportData.value = true;
@@ -189,7 +193,7 @@ export default defineComponent({
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         const timestamp = getTimestamp(new Date());
-        link.download = "收预付款单数据" + timestamp + ".xlsx";
+        link.download = t('financial.advance.export.exportData') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
@@ -199,6 +203,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       handleCreate,
       handleDelete,

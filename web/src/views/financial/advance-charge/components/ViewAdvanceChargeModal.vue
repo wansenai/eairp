@@ -2,21 +2,21 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="收预付款单-详情"
+          :title="t('financial.advance.advanceReceiptDetail')"
           :sub-title= "receiptNumber">
         <template #extra>
-          <a-button @click="exportTable">导出</a-button>
-          <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+          <a-button @click="exportTable" v-text="t('financial.advance.export.name')"/>
+          <a-button @click="primaryPrint" type="primary" v-text="t('financial.regularPrint')"/>
           <!--          <a-button key="triplePrint">三联打印</a-button>-->
           <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
         <a-descriptions size="small" :column="3">
-          <a-descriptions-item label="付款会员">{{ memberName }}</a-descriptions-item>
-          <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item label="财务人员">{{ financialPersonnel }}</a-descriptions-item>
-          <a-descriptions-item label="合计金额">{{ totalAmount }}</a-descriptions-item>
-          <a-descriptions-item label="收款金额">{{ collectedAmount }}</a-descriptions-item>
-          <a-descriptions-item label="备注">
+          <a-descriptions-item :label="t('financial.advance.header.paymentMember')">{{ memberName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.advance.header.receiptDate')">{{ receiptDate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.advance.table.financialPerson')">{{ financialPersonnel }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.advance.table.totalAmount')">{{ totalAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.advance.table.amountCollected')">{{ collectedAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('financial.advance.table.remark')">
             {{ remark }}
           </a-descriptions-item>
         </a-descriptions>
@@ -30,15 +30,15 @@
             }"
           >
             <a-statistic
-                title="单据状态"
-                :value="status === 1 ? '已审核' : '未审核'"
+                :title="t('financial.advance.table.status')"
+                :value="status === 1 ? t('sys.table.audited') : t('sys.table.unaudited')"
                 :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                 :style="{
                 marginRight: '32px',
                 color: 'green',
               }"
             />
-            <a-statistic title="单据金额"
+            <a-statistic :title="t('financial.advance.table.amountCollected')"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="collectedAmount"/>
@@ -64,6 +64,7 @@ import {
 import {advanceChargeTableColumns} from "@/views/financial/advance-charge/advance.data";
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ViewIncomeModal',
@@ -76,6 +77,7 @@ export default defineComponent({
     'a-statistic': Statistic,
   },
   setup() {
+    const { t } = useI18n();
     const receiptNumber = ref('');
     const memberName = ref('');
     const receiptDate = ref('');
@@ -86,7 +88,7 @@ export default defineComponent({
     const tableData = ref([]);
     const status = ref(-1);
     const [registerTable] = useTable({
-      title: '收预付款单据详情数据',
+      title: t('financial.advance.receiptDetail'),
       columns: advanceChargeTableColumns,
       dataSource: tableData,
       pagination: false,
@@ -94,7 +96,7 @@ export default defineComponent({
       bordered: true,
       canResize: false,
     });
-    const getTitle = ref('单据详情');
+    const getTitle = ref(t('financial.advance.receiptDetail'));
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1000, showOkBtn: false});
       const res = await getAdvanceDetail(data.id);
@@ -120,7 +122,7 @@ export default defineComponent({
         const link = document.createElement("a");
         const timestamp = getTimestamp(new Date());
         link.href = URL.createObjectURL(blob);
-        link.download = "收预付款单据详情" + timestamp + ".xlsx";
+        link.download = t('financial.advance.export.exportData') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
@@ -131,18 +133,18 @@ export default defineComponent({
     function primaryPrint() {
       const header = `
   <div style="${flexContainer}">
-    <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
-    <div style="${flexItem}">单据日期：${receiptDate.value}</div>
-    <div style="${flexItem}">单据金额：${totalAmount.value}</div>
+    <div style="${flexItem}">${t('financial.advance.header.receiptNumber')}：${receiptNumber.value}</div>
+    <div style="${flexItem}">${t('financial.advance.header.receiptDate')}：${receiptDate.value}</div>
+    <div style="${flexItem}">${t('financial.advance.table.totalAmount')}：${totalAmount.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">付款会员：${memberName.value}</div>
-    <div style="${flexItem}">财务人员：${financialPersonnel.value}</div>
-    <div style="${flexItem}">备注：${remark.value}</div>
+    <div style="${flexItem}">${t('financial.advance.table.paymentMember')}：${memberName.value}</div>
+    <div style="${flexItem}">${t('financial.advance.table.financialPerson')}：${financialPersonnel.value}</div>
+    <div style="${flexItem}">${t('financial.advance.table.remark')}：${remark.value}</div>
   </div>
 `;
       printJS({
-        documentTitle: "EAIRP (收预付款单单据-详情)",
+        documentTitle: "EAIRP " + t('financial.advance.receiptDetail'),
         header: header,
         properties: advanceChargeTableColumns.map((item) => {
           return {
@@ -158,6 +160,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       receiptNumber,
       memberName,
       receiptDate,

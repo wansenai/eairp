@@ -11,9 +11,9 @@
       v-model:open="open"
       style="left: 5%; height: 95%;">
     <template #footer>
-      <a-button @click="handleCancelModal">取消</a-button>
-      <a-button v-if="checkFlag" :loading="confirmLoading" @click="handleOk(1)">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
+      <a-button @click="handleCancelModal" v-text="t('financial.collection.form.cancel')"/>
+      <a-button v-if="checkFlag" :loading="confirmLoading" @click="handleOk(1)" v-text="t('financial.collection.form.saveApprove')"/>
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)" v-text="t('financial.collection.form.save')"/>
       <!--发起多级审核-->
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
@@ -22,33 +22,33 @@
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="collectionFormState.id" v-show="false"/>
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="客户" data-step="1"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.collection.form.customer')" data-step="1"
                          data-title="客户" :rules="[{ required: true}]">
               <a-select v-model:value="collectionFormState.customerId" :disabled= "disabledStatus"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
-                        placeholder="请选择客户"
+                        :placeholder="t('financial.collection.form.inputCustomer')"
                         :options="customerList.map(item => ({ value: item.id, label: item.customerName }))">
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="collectionFormState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.collection.form.receiptDate')" :rules="[{ required: true}]">
+              <a-date-picker v-model:value="collectionFormState.receiptDate" show-time :placeholder="t('financial.collection.form.inputReceiptDate')" format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="7" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.collection.form.receiptNumber')" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="collectionFormState.receiptNumber" :readOnly="true"/>
+              <a-input :placeholder="t('financial.collection.form.inputReceiptNumber')" v-model:value="collectionFormState.receiptNumber" :readOnly="true"/>
             </a-form-item>
           </a-col>
           <a-col :lg="5" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="财务人员" data-step="3"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.collection.form.financialPerson')" data-step="3"
                          data-title="财务人员"
                          data-intro="">
               <a-select v-model:value="collectionFormState.financialPersonId"
-                        placeholder="请选择财务人员"
+                        :placeholder="t('financial.collection.form.inputFinancialPerson')"
                         :options="financialPersonalList.map(item => ({ value: item.id, label: item.name }))">
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
@@ -56,7 +56,7 @@
                   <div style="padding: 4px 8px; cursor: pointer;"
                        @mousedown="e => e.preventDefault()" @click="addOperator">
                     <plus-outlined/>
-                    新增财务人员
+                    {{ t('financial.collection.form.addFinancialPerson') }}
                   </div>
                 </template>
               </a-select>
@@ -68,8 +68,8 @@
             <div class="table-operations">
               <vxe-grid ref='xGrid' v-bind="gridOptions">
                 <template #toolbar_buttons="{ row }">
-                  <a-button type="primary" @click="chooseReceipt" style="margin-right: 10px">选择单据</a-button>
-                  <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                  <a-button type="primary" @click="chooseReceipt" style="margin-right: 10px" v-text="t('financial.collection.form.selectReceipt')" />
+                  <a-button @click="deleteRowData" style="margin-right: 10px" v-text="t('financial.collection.form.deleteRow')" />
                 </template>
                 <template #amount_edit="{ row }">
                   <vxe-input type="number" v-model="row.thisCollectionAmount"></vxe-input>
@@ -79,34 +79,34 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-textarea :rows="3" placeholder="请输入备注" v-model:value="collectionFormState.remark"
+                  <a-textarea :rows="3" :placeholder="t('financial.collection.form.inputRemark')" v-model:value="collectionFormState.remark"
                               style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="收款账户" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.collection.table.collectionAccount')" data-step="2"
                              data-title="支出账户" :rules="[{ required: true}]">
                   <a-select v-model:value="collectionFormState.collectionAccountId"
-                            placeholder="请选择支出账户"
+                            :placeholder="t('financial.collection.form.noticeOne')"
                             :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24" >
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="合计金额" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.collection.table.totalCollection')" data-step="2"
                              data-title="合计金额">
                   <a-input-number placeholder="请输入金额" v-model:value="collectionFormState.totalCollectionAmount" readonly/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24" >
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠金额" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.collection.table.discountAmount')" data-step="2"
                              data-title="优惠金额" :rules="[{ required: true}]">
                   <a-input-number placeholder="请输入优惠金额" @change="discountAmountChange" v-model:value="collectionFormState.discountAmount"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24" >
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="实际收款" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.collection.table.actualCollection')" data-step="2"
                              data-title="实际收款">
                   <a-input-number placeholder="请输入金额" v-model:value="collectionFormState.actualCollectionAmount" readonly/>
                 </a-form-item>
@@ -114,7 +114,7 @@
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="附件" data-step="9"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.collection.form.annex')" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
                   <a-upload
@@ -124,7 +124,7 @@
                       multiple>
                     <a-button>
                       <upload-outlined/>
-                      点击上传附件
+                      {{ t('financial.collection.form.uploadAnnex') }}
                     </a-button>
                   </a-upload>
                 </a-form-item>
@@ -193,6 +193,7 @@ import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import {CustomerResp} from "@/api/basic/model/customerModel";
+import {useI18n} from "vue-i18n";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -246,6 +247,7 @@ export default defineComponent({
     'a-divider': Divider,
   },
   setup(_, context) {
+    const { t } = useI18n();
     const [operatorModal, {openModal}] = useModal();
     const [saleArrearsModal, {openModal: openSaleArrearsModal}] = useModal();
     const {createMessage} = useMessage();
@@ -283,11 +285,11 @@ export default defineComponent({
       loadAccountList();
       loadCustomerList();
       if (id) {
-        title.value = '编辑-收款单'
+        title.value = t('financial.collection.addCollectionReceipt')
         loadCollectionDetail(id);
         disabledStatus.value = true
       } else {
-        title.value = '新增-收款单'
+        title.value = t('financial.collection.editCollectionReceipt')
         loadGenerateId();
         collectionFormState.receiptDate = dayjs(new Date());
         disabledStatus.value = false
@@ -379,26 +381,26 @@ export default defineComponent({
 
     async function handleOk(type: number) {
       if (!collectionFormState.customerId) {
-        createMessage.warn('请选择客户');
+        createMessage.warn(t('financial.collection.form.inputCustomer'));
         return;
       }
       if (!collectionFormState.receiptDate) {
-        createMessage.warn('请选择单据日期');
+        createMessage.warn(t('financial.collection.form.inputReceiptDate'));
         return;
       }
       if (!collectionFormState.collectionAccountId) {
-        createMessage.warn('请选择收款账户');
+        createMessage.warn(t('financial.collection.form.noticeTwo'));
         return;
       }
       if (collectionFormState.discountAmount === undefined) {
-        createMessage.warn('请输入优惠金额');
+        createMessage.warn(t('financial.collection.form.noticeFive'));
         return;
       }
       const table = xGrid.value
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.warn("请选择客户单据")
+          createMessage.warn(t('financial.collection.form.selectReceipt'))
           return;
         }
       }
@@ -476,7 +478,7 @@ export default defineComponent({
     function beforeUpload(file: any) {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        createMessage.error(`${file.name}，该文件超过2MB大小限制`);
+        createMessage.error(`${file.name}，` + t('financial.collection.form.noticeThree'));
         return isLt2M || Upload.LIST_IGNORE
       }
     }
@@ -508,7 +510,7 @@ export default defineComponent({
 
     function chooseReceipt() {
       if (!collectionFormState.customerId) {
-        createMessage.warn('请先选择客户');
+        createMessage.warn(t('financial.collection.form.inputCustomer'));
         return;
       }
       openSaleArrearsModal(true, {
@@ -519,7 +521,7 @@ export default defineComponent({
 
     async function deleteRowData() {
       // 删除选中行
-      const type = await VXETable.modal.confirm('确定要删除选中的数据?')
+      const type = await VXETable.modal.confirm(t('financial.collection.form.noticeFour'))
       const table = xGrid.value
       // 获取VXETable选中行
       const selectRow = table.getCheckboxRecords()
@@ -573,6 +575,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       h,
       AccountBookTwoTone,
       open,

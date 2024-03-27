@@ -2,40 +2,43 @@ import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
 import {getAccountList} from "@/api/financial/account";
 import {getOperatorList} from "@/api/basic/operator";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '单据编号',
+        title: t('financial.transfer.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 130,
     },
     {
-        title: '单据日期',
+        title: t('financial.transfer.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '财务人员',
+        title: t('financial.transfer.table.financialPerson'),
         dataIndex: 'financialPerson',
         width: 60,
     },
     {
-        title: '付款账户',
+        title: t('financial.transfer.table.paymentAccount'),
         dataIndex: 'paymentAccountName',
         width: 130,
     },
     {
-        title: '实付金额',
+        title: t('financial.transfer.table.paymentAmount'),
         dataIndex: 'paymentAmount',
         width: 60,
     },
     {
-        title: '备注',
+        title: t('financial.transfer.table.remark'),
         dataIndex: 'remark',
         width: 200,
     },
     {
-        title: '状态',
+        title: t('financial.transfer.table.status'),
         dataIndex: 'status',
         width: 60,
     },
@@ -43,7 +46,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('financial.transfer.header.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -53,11 +56,11 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('financial.transfer.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('financial.transfer.header.starDate'), t('financial.transfer.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -65,7 +68,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '付款账户',
+        label: t('financial.transfer.header.paymentAccount'),
         field: 'accountId',
         component: 'ApiSelect',
         componentProps: {
@@ -80,7 +83,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '财务人员',
+        label: t('financial.transfer.header.financialPerson'),
         field: 'financialPersonId',
         component: 'ApiSelect',
         componentProps: {
@@ -96,7 +99,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据状态',
+        label: t('financial.transfer.header.status'),
         field: 'status',
         component: 'Select',
         colProps: {
@@ -105,13 +108,13 @@ export const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '未审核', value: 0, key: 0 },
-                { label: '已审核', value: 1, key: 1 },
+                { label: t('sys.table.unaudited'), value: 0, key: 0 },
+                { label: t('sys.table.audited'), value: 1, key: 1 },
             ],
         },
     },
     {
-        label: '单据备注',
+        label: t('financial.transfer.header.remark'),
         field: 'remark',
         component: 'Input',
         colProps: {
@@ -124,17 +127,17 @@ export const searchFormSchema: FormSchema[] = [
 
 export const transferReceiptTableColumns: BasicColumn[] = [
     {
-        title: '账户名称',
+        title: t('financial.transfer.view.accountName'),
         dataIndex: 'accountName',
         width: 150,
     },
     {
-        title: '金额',
+        title: t('financial.transfer.view.amount'),
         dataIndex: 'transferAmount',
         width: 100,
     },
     {
-        title: '备注',
+        title: t('financial.transfer.view.remark'),
         dataIndex: 'remark',
         width: 200,
     },

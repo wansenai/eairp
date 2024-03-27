@@ -2,6 +2,9 @@ import {reactive, ref} from "vue";
 import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export interface RowVO {
     [key: string]: any,
@@ -62,26 +65,26 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         { type: 'checkbox', field:'id', title: 'ID', width: 180},
         {   field: 'accountId',
             width:200,
-            title: '账户名称',
+            title: t('financial.transfer.view.accountName'),
             slots: { edit: 'id_edit',default: 'id_default' },
             sortable: true,
             editRender: {}
         },
         {   field: 'transferAmount',
             width:200,
-            title: '金额',
+            title: t('financial.transfer.view.amount'),
             slots: { edit: 'amount_edit' },
             sortable: true,
             editRender: { name: 'input', attrs: { placeholder: '请输入金额' } }
         },
-        { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
+        { field: 'remark', title: t('financial.transfer.view.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
 
     ],
     footerMethod ({ columns, data }) {
         return [
             columns.map((column, columnIndex) => {
                 if (columnIndex === 0) {
-                    return '总计'
+                    return t('financial.transfer.form.total')
                 }
                 if (['transferAmount'].includes(column.field)) {
                     transferFormState.paymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
@@ -99,10 +102,10 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     },
     editRules: {
         accountId: [
-            { required: true, message: '转账账户不能为空' }
+            { required: true, message: t('financial.transfer.form.noticeOne') }
         ],
         transferAmount: [
-            { required: true, message: '转账金额不能为空' }
+            { required: true, message: t('financial.transfer.form.noticeTwo') }
         ]
     },
     editConfig: {
