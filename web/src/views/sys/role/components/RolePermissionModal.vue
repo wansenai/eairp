@@ -8,7 +8,7 @@
           :fieldNames="{ title: 'meta.title', key: 'id' }"
           checkable
           toolbar
-          title="菜单分配"
+          :title="t('system.role.menuAllocation')"
           v-if="treeData.length > 0"
         />
       </template>
@@ -25,7 +25,9 @@
   import { rolePermission } from '@/api/sys/role';
   import {array2tree} from "@axolo/tree-array";
   import {addOrUpdateRolePermissionReq} from "@/api/sys/model/roleModel";
+  import {useI18n} from "vue-i18n";
 
+  const { t } = useI18n();
   const treeData = ref<TreeItem[]>([]);
   const emit = defineEmits(['success', 'register']);
   const [registerForm, {setFieldsValue, validate}] = useForm({

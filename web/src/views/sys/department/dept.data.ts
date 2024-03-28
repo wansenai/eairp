@@ -2,43 +2,46 @@ import {BasicColumn, FormSchema} from "@/components/Table";
 import { h } from 'vue';
 import { Tag } from 'ant-design-vue';
 import {getDeptList} from "@/api/sys/dept";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '部门名称',
+        title: t('system.department.table.name'),
         dataIndex: 'deptName',
         width: 160,
         align: "left",
     },
     {
-        title: '部门编号',
+        title: t('system.department.table.number'),
         dataIndex: 'deptNumber',
         width: 160,
     },
     {
-        title: '部门负责人',
+        title: t('system.department.table.manager'),
         dataIndex: 'leader',
         width: 160,
     },
     {
-        title: '状态',
+        title: t('system.department.table.status'),
         dataIndex: 'status',
         width: 80,
         customRender: ({ record }) => {
             const status = record.status;
             const enable = ~~status === 0;
             const color = enable ? 'green' : 'red';
-            const text = enable ? '启用' : '停用';
+            const text = enable ? t('system.department.form.enable') : t('system.department.form.disable');
             return h(Tag, { color: color }, () => text);
         },
     },
     {
-        title: '创建时间',
+        title: t('system.department.table.createTime'),
         dataIndex: 'createTime',
         width: 180,
     },
     {
-        title: '备注',
+        title: t('system.department.table.remark'),
         dataIndex: 'remark',
         width: 180
     },
@@ -47,7 +50,7 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
     {
         field: 'deptName',
-        label: '部门名称',
+        label: t('system.department.header.name'),
         component: 'Input',
         colProps: { span: 8 },
     }
@@ -62,20 +65,20 @@ export const formSchema: FormSchema[] = [
     },
     {
         field: 'deptName',
-        label: '部门名称',
+        label: t('system.department.form.name'),
         component: 'Input',
         required: true,
     },
     {
         field: 'deptNumber',
-        label: '部门编号',
+        label: t('system.department.form.number'),
         component: 'Input',
     },
     {
         field: 'parentId',
-        label: '上级部门',
+        label: t('system.department.form.parent'),
         component: 'ApiTreeSelect',
-        helpMessage: ['如果不填写，则默认为父级部门'],
+        helpMessage: [t('system.department.form.notice')],
         componentProps: {
             api: getDeptList,
             resultField: 'data',
@@ -86,18 +89,18 @@ export const formSchema: FormSchema[] = [
     },
     {
         field: 'leader',
-        label: '部门负责人',
+        label:  t('system.department.form.manager'),
         component: 'Input',
     },
     {
         field: 'status',
-        label: '状态',
+        label: t('system.department.form.status'),
         component: 'RadioButtonGroup',
         defaultValue: 0,
         componentProps: {
             options: [
-                { label: '启用', value: 0 },
-                { label: '停用', value: 1 },
+                { label: t('system.department.form.enable'), value: 0 },
+                { label: t('system.department.form.disable'), value: 1 },
             ],
         },
         required: true,
@@ -105,11 +108,11 @@ export const formSchema: FormSchema[] = [
 
     {
         field: 'sort',
-        label: '排序',
+        label: t('system.department.form.sort'),
         component: 'InputNumber',
     },
     {
-        label: '备注',
+        label: t('system.department.form.remark'),
         field: 'remark',
         component: 'InputTextArea',
     },
