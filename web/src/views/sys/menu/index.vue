@@ -2,7 +2,7 @@
   <div>
     <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> 新增菜单 </a-button>
+        <a-button type="primary" @click="handleCreate"> {{ t('system.menu.addMenu') }} </a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -10,13 +10,15 @@
               :actions="[
               {
                 icon: 'clarity:note-edit-line',
+                tooltip: t('sys.table.edit'),
                 onClick: handleEdit.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
+                tooltip: t('sys.table.delete'),
                 popConfirm: {
-                  title: '是否确认删除',
+                  title: t('sys.table.confirmDelete'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
                 },
@@ -38,14 +40,16 @@ import {deleteMenu, getMenuList} from '/@/api/sys/menu';
 import { useDrawer } from '/@/components/Drawer';
 import MenuDrawer from './MenuDrawer.vue';
 import { columns, searchFormSchema } from './menu.data';
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'MenuManagement',
   components: { BasicTable, MenuDrawer, TableAction },
   setup() {
+    const { t } = useI18n();
     const [registerDrawer, { openDrawer }] = useDrawer();
     const [registerTable, { reload, expandAll }] = useTable({
-      title: '菜单列表',
+      title: t('system.menu.title'),
       api: getMenuList,
       columns,
       formConfig: {
@@ -62,7 +66,7 @@ export default defineComponent({
       canResize: false,
       actionColumn: {
         width: 80,
-        title: '操作',
+        title: t('common.operating'),
         dataIndex: 'action',
         fixed: undefined,
       },
@@ -98,6 +102,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       registerDrawer,
       handleCreate,

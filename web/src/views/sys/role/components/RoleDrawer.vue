@@ -18,9 +18,11 @@ import {useForm} from "@/components/Form";
 import BasicForm from "@/components/Form/src/BasicForm.vue";
 import { addOrUpdateRole } from '/@/api/sys/role'
 import {addOrUpdateRoleInfoReq} from "@/api/sys/model/roleModel";
+import {useI18n} from "vue-i18n";
 const emit = defineEmits(['success', 'register']);
 const isUpdate = ref(true);
 const rowId = ref('');
+const { t } = useI18n();
 
 const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
   labelWidth: 90,
@@ -43,7 +45,7 @@ const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (
   }
 });
 
-const getTitle = computed(() => (!unref(isUpdate) ? '新增角色' : '编辑角色'));
+const getTitle = computed(() => (!unref(isUpdate) ? t('system.role.addRole') : t('system.role.editRole')));
 
 async function handleSubmit() {
   try {

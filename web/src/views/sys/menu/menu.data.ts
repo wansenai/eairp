@@ -4,16 +4,19 @@ import { Tag } from 'ant-design-vue';
 import Icon from '@/components/Icon/Icon.vue';
 import {getMenuList} from "@/api/sys/menu";
 import {ParentIdEnum} from "@/enums/appEnum";
+import {useI18n} from "@/hooks/web/useI18n";
+
+const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '菜单名称',
+        title: t('system.menu.table.menuTitle'),
         dataIndex: 'title',
         width: 150,
         align: 'left',
     },
     {
-        title: '图标',
+        title: t('system.menu.table.icon'),
         dataIndex: 'icon',
         width: 80,
         customRender: ({ record }) => {
@@ -21,34 +24,34 @@ export const columns: BasicColumn[] = [
         },
     },
     {
-        title: '路径',
+        title: t('system.menu.table.path'),
         dataIndex: 'path',
         width: 180,
     },
     {
-        title: '组件',
+        title: t('system.menu.table.component'),
         dataIndex: 'component',
         width: 200,
     },
     {
-        title: '排序',
+        title: t('system.menu.table.sort'),
         dataIndex: 'sort',
         width: 50,
     },
     {
-        title: '状态',
+        title: t('system.menu.table.status'),
         dataIndex: 'status',
         width: 80,
         customRender: ({ record }) => {
             const status = record.status;
             const enable = ~~status === 0;
             const color = enable ? 'green' : 'red';
-            const text = enable ? '启用' : '停用';
+            const text = enable ? t('system.menu.form.enable') : t('system.menu.form.disable');
             return h(Tag, { color: color }, () => text);
         },
     },
     {
-        title: '创建时间',
+        title: t('system.menu.table.createTime'),
         dataIndex: 'createTime',
         width: 180,
     },
@@ -58,18 +61,18 @@ const isMenu = (type: number) => type === 1;
 export const searchFormSchema: FormSchema[] = [
     {
         field: 'title',
-        label: '菜单名称',
+        label: t('system.menu.table.menuTitle'),
         component: 'Input',
         colProps: { span: 8 },
     },
     {
         field: 'status',
-        label: '状态',
+        label: t('system.menu.table.status'),
         component: 'Select',
         componentProps: {
             options: [
-                { label: '启用', value: 0 },
-                { label: '停用', value: 1 },
+                { label: t('system.menu.form.enable'), value: 0 },
+                { label: t('system.menu.form.disable'), value: 1 },
             ],
         },
         colProps: { span: 8 },
@@ -85,34 +88,34 @@ export const formSchema: FormSchema[] = [
     },
     {
         field: 'menuType',
-        label: '菜单类型',
+        label: t('system.menu.form.menuType'),
         component: 'RadioButtonGroup',
         defaultValue: 1,
         componentProps: {
             options: [
-                { label: '目录', value: 0 },
-                { label: '菜单', value: 1 },
+                { label: t('system.menu.form.catalogue'), value: 0 },
+                { label: t('system.menu.form.menu'), value: 1 },
             ],
         },
         colProps: { lg: 24, md: 24 },
     },
     {
         field: 'name',
-        label: '菜单名称',
+        label: t('system.menu.form.menuName'),
         component: 'Input',
         required: true,
     },
     {
         field: 'title',
-        label: '菜单标题',
+        label: t('system.menu.form.menuTitle'),
         component: 'Input',
         required: true,
     },
     {
         field: 'parentId',
-        label: '上级菜单',
+        label: t('system.menu.form.parent'),
         component: 'ApiTreeSelect',
-        helpMessage: ['如果不填写，则默认为目录'],
+        helpMessage: [t('system.menu.form.notice')],
         componentProps: {
             api: getMenuList,
             resultField: 'data.data',
@@ -121,58 +124,58 @@ export const formSchema: FormSchema[] = [
             defaultValue: {
                 id: ParentIdEnum.DEFAULT,
                 parentId: -1,
-                label: '根菜单',
+                label: t('system.menu.form.rootMenu'),
                 value: ParentIdEnum.DEFAULT,
             },
         },
     },
     {
         field: 'sort',
-        label: '排序',
+        label: t('system.menu.form.sort'),
         component: 'InputNumber',
         required: true,
     },
     {
         field: 'icon',
-        label: '图标',
+        label: t('system.menu.form.icon'),
         component: 'IconPicker',
         required: true,
     },
 
     {
         field: 'path',
-        label: '路由地址',
+        label: t('system.menu.form.routeAddress'),
         component: 'Input',
         required: true,
         ifShow: ({ values }) => isMenu(values.menuType),
     },
     {
         field: 'component',
-        label: '组件路径',
+        label: t('system.menu.form.componentPath'),
         component: 'Input',
         ifShow: ({ values }) => isMenu(values.menuType),
     },
     {
         field: 'status',
-        label: '状态',
+        label: t('system.menu.form.status'),
         component: 'RadioButtonGroup',
         defaultValue: 0,
         componentProps: {
             options: [
-                { label: '启用', value: 0 },
-                { label: '禁用', value: 1 },
+                { label: t('system.menu.form.enable'), value: 0 },
+                { label: t('system.menu.form.disable'), value: 1 },
             ],
         },
     },
     {
         field: 'blank',
-        label: '是否外链',
+        label: t('system.menu.form.isExternalLink'),
         component: 'RadioButtonGroup',
         defaultValue: 0,
         componentProps: {
             options: [
-                { label: '否', value: 0 },
-                { label: '是', value: 1 },
+                { label: t('system.menu.form.no'), value: 0 },
+                { label: t('system.menu.form.yes'), value: 1 },
             ],
         },
         ifShow: ({ values }) => isMenu(values.menuType),
@@ -180,13 +183,13 @@ export const formSchema: FormSchema[] = [
 
     {
         field: 'ignoreKeepAlive',
-        label: '是否缓存',
+        label: t('system.menu.form.isCached'),
         component: 'RadioButtonGroup',
         defaultValue: 0,
         componentProps: {
             options: [
-                { label: '否', value: 0 },
-                { label: '是', value: 1 },
+                { label: t('system.menu.form.no'), value: 0 },
+                { label: t('system.menu.form.yes'), value: 1 },
             ],
         },
         ifShow: ({ values }) => isMenu(values.menuType),
@@ -194,13 +197,13 @@ export const formSchema: FormSchema[] = [
 
     {
         field: 'hideMenu',
-        label: '是否显示',
+        label: t('system.menu.form.isDisplayed'),
         component: 'RadioButtonGroup',
         defaultValue: 0,
         componentProps: {
             options: [
-                { label: '是', value: 0 },
-                { label: '否', value: 1 },
+                { label: t('system.menu.form.yes'), value: 0 },
+                { label: t('system.menu.form.no'), value: 1 },
             ],
         },
         ifShow: ({ values }) => isMenu(values.menuType),

@@ -8,31 +8,31 @@ const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '角色名称',
+        title: t('system.role.table.roleName'),
         dataIndex: 'roleName',
         width: 150,
     },
     {
-        title: '类型',
+        title: t('system.role.table.type'),
         dataIndex: 'type',
         width: 120,
     },
     {
-        title: '价格屏蔽',
+        title: t('system.role.table.priceBlocking'),
         dataIndex: 'priceLimit',
         width: 120,
         customRender: ({record}) => {
             if(record.priceLimit === 1) {
-                return '屏蔽采购价'
+                return t('system.role.header.blockPurchasePrice')
             } else if(record.priceLimit === 2) {
-                return '屏蔽零售价'
+                return t('system.role.header.blockRetailPrice')
             } else if(record.priceLimit === 3) {
-                return '屏蔽销售价'
+                return t('system.role.header.blockSalesPrice')
             }
         }
     },
     {
-        title: '状态',
+        title: t('system.role.table.status'),
         dataIndex: 'status',
         width: 120,
         customRender: ({ record }) => {
@@ -59,12 +59,12 @@ export const columns: BasicColumn[] = [
         },
     },
     {
-        title: '创建时间',
+        title: t('system.role.table.createTime'),
         dataIndex: 'createTime',
         width: 180,
     },
     {
-        title: '备注',
+        title: t('system.role.table.remark'),
         dataIndex: 'description',
         width: 180,
     },
@@ -73,18 +73,18 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
     {
         field: 'roleName',
-        label: '角色名称',
+        label: t('system.role.header.roleName'),
         component: 'Input',
         colProps: { span: 8 },
     },
     {
         field: 'status',
-        label: '状态',
+        label: t('system.role.header.status'),
         component: 'Select',
         componentProps: {
             options: [
-                { label: '启用', value: 0 },
-                { label: '停用', value: 1 },
+                { label: t('system.role.header.enable'), value: 0 },
+                { label: t('system.role.header.disable'), value: 1 },
             ],
         },
         colProps: { span: 8 },
@@ -100,48 +100,48 @@ export const formSchema: FormSchema[] = [
     },
     {
         field: 'roleName',
-        label: '角色名称',
+        label: t('system.role.form.roleName'),
         required: true,
         component: 'Input',
     },
     {
         field: 'type',
-        label: '类型',
+        label: t('system.role.form.type'),
         required: true,
         component: 'Select',
         componentProps: {
             options: [
-                { label: '查看全部数据', value: '全部数据' },
-                { label: '查看个人数据', value: '个人数据' },
+                { label: t('system.role.header.viewAllData'), value: '全部数据' },
+                { label: t('system.role.header.viewPersonalData'), value: '个人数据' },
             ],
         },
     },
     {
         field: 'priceLimit',
-        label: '价格屏蔽',
+        label: t('system.role.form.priceBlocking'),
         component: 'Select',
         componentProps: {
             options: [
-                { label: '屏蔽采购价', value: 1, key: 1},
-                { label: '屏蔽零售价', value: 2, key: 2 },
-                { label: '屏蔽销售价', value: 3, key: 3 },
+                { label: t('system.role.header.blockPurchasePrice'), value: 1, key: 1},
+                { label: t('system.role.header.blockRetailPrice'), value: 2, key: 2 },
+                { label: t('system.role.header.blockSalesPrice'), value: 3, key: 3 },
             ],
         },
     },
     {
         field: 'status',
-        label: '状态',
+        label: t('system.role.form.status'),
         component: 'RadioButtonGroup',
         defaultValue: 0,
         componentProps: {
             options: [
-                { label: '启用', value: 0 },
-                { label: '停用', value: 1 },
+                { label: t('system.role.header.enable'), value: 0 },
+                { label: t('system.role.header.disable'), value: 1 },
             ],
         },
     },
     {
-        label: '备注',
+        label: t('system.role.form.remark'),
         field: 'description',
         component: 'InputTextArea',
     },

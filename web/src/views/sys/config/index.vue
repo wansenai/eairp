@@ -1,8 +1,8 @@
 <template>
   <PageWrapper
-      title="系统配置"
+      :title="t('system.configure.title')"
       contentBackground
-      content="此页面功能主要对当前系统进行一些配置。"
+      :content="t('system.configure.tip')"
       contentClass="p-4"
   >
     <BasicForm @register="register" />
@@ -15,11 +15,13 @@ import { schemas } from './config.data';
 import { PageWrapper } from '/@/components/Page';
 import {addOrUpdateConfigInfo, getConfigInfo} from '@/api/sys/config'
 import {useMessage} from "@/hooks/web/useMessage";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'SystemConfig',
   components: { BasicForm, PageWrapper},
   setup() {
+    const { t } = useI18n();
     const {createMessage} = useMessage()
     const [register, { validate, setProps, setFieldsValue }] = useForm({
       labelCol: {
@@ -66,13 +68,14 @@ export default defineComponent({
             },
           });
         }, 500);
-        createMessage.success('修改成功');
+        createMessage.success(t('system.configure.updateSuccess'));
       } catch (error) {
-        createMessage.error('修改失败');
+        createMessage.error(t('system.configure.updateFailed'));
       }
     }
 
     return {
+      t,
       register
     };
   },
