@@ -11,32 +11,32 @@ const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '仓库名称',
+        title: t('basic.warehouse.table.warehouseName'),
         dataIndex: 'warehouseName',
         width: 180,
     },
     {
-        title: '仓库地址',
+        title: t('basic.warehouse.table.warehouseAddress'),
         dataIndex: 'address',
         width: 80,
     },
     {
-        title: '仓储费',
+        title: t('basic.warehouse.table.storageFees'),
         dataIndex: 'price',
         width: 120,
     },
     {
-        title: '搬运费',
+        title: t('basic.warehouse.table.handlingFees'),
         dataIndex: 'truckage',
         width: 120,
     },
     {
-        title: '负责人',
+        title: t('basic.warehouse.table.manager'),
         dataIndex: 'warehouseManagerName',
         width: 90,
     },
     {
-        title: '状态',
+        title: t('basic.warehouse.table.status'),
         dataIndex: 'status',
         width: 100,
         customRender: ({ record }) => {
@@ -68,17 +68,17 @@ export const columns: BasicColumn[] = [
         }
     },
     {
-        title: '默认仓库',
+        title: t('basic.warehouse.table.default'),
         dataIndex: 'isDefault',
         width: 80,
     },
     {
-        title: '排序',
+        title: t('basic.warehouse.table.sort'),
         dataIndex: 'sort',
         width: 80,
     },
     {
-        title: '创建时间',
+        title: t('basic.warehouse.table.createTime'),
         dataIndex: 'createTime',
         width: 150,
     }
@@ -86,13 +86,13 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '仓库名称',
+        label: t('basic.warehouse.header.warehouse'),
         field: 'warehouseName',
         component: 'Input',
         colProps: { span: 5 },
     },
     {
-        label: '备注',
+        label: t('basic.warehouse.header.remark'),
         field: 'remark',
         component: 'Input',
         colProps: { span: 5 },
@@ -101,40 +101,40 @@ export const searchFormSchema: FormSchema[] = [
 
 export const formSchema: FormSchema[] = [
     {
-        label: '仓库名称',
+        label: t('basic.warehouse.form.warehouseName'),
         field: 'warehouseName',
         component: 'Input',
         required: true,
     },
     {
-        label: '仓库地址',
+        label: t('basic.warehouse.form.warehouseAddress'),
         field: 'address',
         component: 'Input',
     },
     {
-        label: '仓储费',
+        label: t('basic.warehouse.form.storageFees'),
         field: 'price',
         component: 'InputNumber',
     },
     {
-        label: '搬运费',
+        label: t('basic.warehouse.form.handlingFees'),
         field: 'truckage',
         component: 'InputNumber',
     },
     {
-        label: '默认仓库',
+        label: t('basic.warehouse.form.default'),
         field: 'isDefault',
-        helpMessage: '只允许有一个默认仓库，如果选择是，之前的默认仓库将会变成非默认仓库',
+        helpMessage: t('basic.warehouse.form.defaultTip'),
         component: 'RadioGroup',
         defaultValue: 0,
         componentProps: {
             options: [
                 {
-                    label: '不是',
+                    label: t('basic.warehouse.no'),
                     value: 0,
                 },
                 {
-                    label: '是',
+                    label: t('basic.warehouse.yes'),
                     value: 1,
                 },
             ],
@@ -142,9 +142,9 @@ export const formSchema: FormSchema[] = [
     },
     {
         field: 'warehouseManager',
-        label: '负责人',
+        label: t('basic.warehouse.form.manager'),
         component: 'ApiSelect',
-        helpMessage: ['用户列表中的用户'],
+        helpMessage: [t('basic.warehouse.form.managerTip')],
         componentProps: {
             api: getTenantUserList,
             resultField: 'data',
@@ -153,12 +153,12 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '备注',
+        label: t('basic.warehouse.form.remark'),
         field: 'remark',
         component: 'InputTextArea',
     },
     {
-        label: '排序',
+        label: t('basic.warehouse.form.sort'),
         field: 'sort',
         component: 'InputNumber',
     }

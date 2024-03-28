@@ -11,12 +11,13 @@ import { BasicForm, useForm } from '/@/components/Form/index';
 import { formSchema } from '@/views/basic/income-expense/incomeExpense.data';
 import { AddOrUpdateIncomeExpenseReq } from '@/api/basic/model/incomeExpenseModel';
 import { addOrUpdateIncomeExpense } from '@/api/basic/incomeExpense';
+import {useI18n} from "vue-i18n";
 
 const rowId = ref('');
 const isUpdate = ref(true);
-const getTitle = computed(() => (!unref(isUpdate) ? '新增收支项目' : '编辑收支项目'));
+const getTitle = computed(() => (!unref(isUpdate) ? t('basic.incomeExpense.addIncomeExpense') : t('basic.incomeExpense.editIncomeExpense')));
 const emitSuccess = defineEmits(['success', 'register']);
-
+const { t } = useI18n();
 const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({
   labelWidth: 100,
   baseColProps: { span: 24 },

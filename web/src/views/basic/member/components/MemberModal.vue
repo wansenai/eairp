@@ -11,10 +11,11 @@ import { BasicForm, useForm } from '/@/components/Form/index';
 import { formSchema } from '@/views/basic/member/member.data';
 import { AddOrUpdateMemberReq } from '@/api/basic/model/memberModel';
 import { addOrUpdateMember } from '@/api/basic/member';
-
+import {useI18n} from "vue-i18n";
+  const { t } = useI18n();
   const rowId = ref('');
   const isUpdate = ref(true);
-  const getTitle = computed(() => (!unref(isUpdate) ? '新增会员信息' : '编辑会员信息'));
+  const getTitle = computed(() => (!unref(isUpdate) ? t('basic.member.addMember') : t('basic.member.editMember')));
   const emitSuccess = defineEmits(['success','register']);
 
   const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({

@@ -1,5 +1,5 @@
 <template>
-  <CollapseContainer title="安全设置" :canExpan="false">
+  <CollapseContainer :title="t('basic.account.safeSetting')" :canExpan="false">
     <List>
       <template v-for="item in list" :key="item.key">
         <ListItem>
@@ -33,17 +33,19 @@
   import BindEmailModal from "@/views/basic/account/BindEmailModal.vue";
   import ResetPasswordModal from "@/views/basic/account/ResetPasswordModal.vue";
   import {useModal} from "@/components/Modal";
+  import {useI18n} from "@/hooks/web/useI18n";
 
   export default defineComponent({
     components: {BindPhoneModal, BindEmailModal, ResetPasswordModal, CollapseContainer, List, ListItem: List.Item, ListItemMeta: List.Item.Meta },
     setup() {
+      const { t } = useI18n();
       const userStore = useUserStore();
       const userInfo: any = userStore.getUserInfo;
       const [bindPhoneModal, {openModal: openBindPhoneModal}] = useModal();
       const [bindEmailModal, {openModal: openBindEmailModal}] = useModal();
       const [resetPasswordModal, {openModal: openResetPasswordModal}] = useModal();
-      userInfo.phoneNumber ? secureSettingList[1].description = '已绑定手机：' + userInfo.phoneNumber : secureSettingList[1].description = '未绑定';
-      userInfo.email ? secureSettingList[2].description = '已绑定邮箱：' + userInfo.email : secureSettingList[2].description = '未绑定';
+      userInfo.phoneNumber ? secureSettingList[1].description = t('basic.account.accountPhoneTip') + userInfo.phoneNumber : secureSettingList[1].description = t('basic.account.noticeTwo');
+      userInfo.email ? secureSettingList[2].description = t('basic.account.accountEmailTip') + userInfo.email : secureSettingList[2].description = t('basic.account.noticeTwo');
 
       function bindSetting(type: string) {
         if (type === '密保手机') {
@@ -71,6 +73,7 @@
       }
 
       return {
+        t,
         list: secureSettingList,
         bindSetting,
         bindPhoneModal,

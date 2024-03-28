@@ -7,6 +7,9 @@ import {getSupplierList} from "@/api/basic/supplier";
 import {getCustomerList} from "@/api/basic/customer";
 import {getRelatedPerson} from "@/api/report/report";
 import {getOperatorList} from "@/api/basic/operator";
+import {useI18n} from "@/hooks/web/useI18n";
+
+const { t } = useI18n();
 export const productStockColumns: BasicColumn[] = [
     {
         title: '产品id',
@@ -21,77 +24,77 @@ export const productStockColumns: BasicColumn[] = [
         ifShow: false
     },
     {
-        title: '库存流水',
+        title: t('reports.productStock.table.stockFlow'),
         dataIndex: 'id',
         width: 80,
     },
     {
-        title: '商品条码',
+        title: t('reports.productStock.table.productBarcode'),
         dataIndex: 'productBarcode',
         width: 120,
     },
     {
-        title: '仓库',
+        title: t('reports.productStock.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 120,
     },
     {
-        title: '商品名称',
+        title: t('reports.productStock.table.productName'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '商品类别',
+        title: t('reports.productStock.table.productCategory'),
         dataIndex: 'productCategoryName',
         width: 80,
     },
     {
-        title: '规格',
+        title: t('reports.productStock.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('reports.productStock.table.model'),
         dataIndex: 'productModel',
         width: 120,
     },
     {
-        title: '重量',
+        title: t('reports.productStock.table.weight'),
         dataIndex: 'productWeight',
         width: 80,
     },
     {
-        title: '颜色',
+        title: t('reports.productStock.table.color'),
         dataIndex: 'productColor',
         width: 80,
     },
     {
-        title: '单位',
+        title: t('reports.productStock.table.unit'),
         dataIndex: 'productUnit',
         width: 80,
     },
     {
-        title: '仓位货架',
+        title: t('reports.productStock.table.warehouseShelves'),
         dataIndex: 'warehouseShelves',
         width: 100,
     },
     {
-        title: '单价',
+        title: t('reports.productStock.table.unitPrice'),
         dataIndex: 'unitPrice',
         width: 70,
     },
     {
-        title: '初始库存',
+        title: t('reports.productStock.table.initStock'),
         dataIndex: 'initialStock',
         width: 70,
     },
     {
-        title: '当前库存',
+        title: t('reports.productStock.table.currentStock'),
         dataIndex: 'currentStock',
         width: 70,
     },
     {
-        title: '库存金额',
+        title: t('reports.productStock.table.stockAmount'),
         dataIndex: 'stockAmount',
         width: 90,
     },

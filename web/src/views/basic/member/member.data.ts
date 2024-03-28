@@ -10,32 +10,32 @@ const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '会员卡号',
+        title: t('basic.member.table.memberNumber'),
         dataIndex: 'memberNumber',
         width: 180,
     },
     {
-        title: '会员名称',
+        title: t('basic.member.table.memberName'),
         dataIndex: 'memberName',
         width: 80,
     },
     {
-        title: '手机号',
+        title: t('basic.member.table.phoneNumber'),
         dataIndex: 'phoneNumber',
         width: 120,
     },
     {
-        title: '电子邮箱',
+        title: t('basic.member.table.email'),
         dataIndex: 'email',
         width: 120,
     },
     {
-        title: '预付款',
+        title: t('basic.member.table.advancePayment'),
         dataIndex: 'advancePayment',
         width: 90,
     },
     {
-        title: '状态',
+        title: t('basic.member.table.status'),
         dataIndex: 'status',
         width: 100,
         customRender: ({ record }) => {
@@ -67,17 +67,17 @@ export const columns: BasicColumn[] = [
         }
     },
     {
-        title: '备注',
+        title: t('basic.member.table.remark'),
         dataIndex: 'remark',
         width: 80,
     },
     {
-        title: '排序',
+        title: t('basic.member.table.sort'),
         dataIndex: 'sort',
         width: 80,
     },
     {
-        title: '创建时间',
+        title: t('basic.member.table.createTime'),
         dataIndex: 'createTime',
         width: 150,
     }
@@ -85,24 +85,24 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '会员卡号',
+        label: t('basic.member.header.memberNumber'),
         field: 'memberNumber',
         component: 'Input',
         colProps: { span: 5 },
     },
     {
-        label: '手机号码',
+        label: t('basic.member.header.phoneNumber'),
         field: 'phoneNumber',
         component: 'Input',
         colProps: { span: 5 },
     },
     {
         field: '[startDate, endDate]',
-        label: '时间',
+        label: t('basic.member.header.createTime'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('basic.member.header.startDate'), t('basic.member.header.endDate')],
         },
         colProps: { span: 7 },
     },
@@ -110,7 +110,7 @@ export const searchFormSchema: FormSchema[] = [
 
 export const formSchema: FormSchema[] = [
     {
-        label: '会员卡号',
+        label: t('basic.member.form.memberNumber'),
         field: 'memberNumber',
         component: 'Input',
         colProps: {
@@ -119,7 +119,7 @@ export const formSchema: FormSchema[] = [
         required: true,
     },
     {
-        label: '会员名称',
+        label: t('basic.member.form.memberName'),
         field: 'memberName',
         component: 'Input',
         colProps: {
@@ -128,7 +128,7 @@ export const formSchema: FormSchema[] = [
         required: true,
     },
     {
-        label: '手机号码',
+        label: t('basic.member.form.phoneNumber'),
         field: 'phoneNumber',
         component: 'Input',
         colProps: {
@@ -136,7 +136,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '电子邮箱',
+        label: t('basic.member.form.email'),
         field: 'email',
         component: 'Input',
         colProps: {
@@ -144,7 +144,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '预付款',
+        label: t('basic.member.form.advancePayment'),
         field: 'advancePayment',
         component: 'InputNumber',
         colProps: {
@@ -152,7 +152,7 @@ export const formSchema: FormSchema[] = [
         }
     },
     {
-        label: '备注',
+        label: t('basic.member.table.remark'),
         field: 'remark',
         component: 'InputTextArea',
         colProps: {
@@ -160,7 +160,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '排序',
+        label: t('basic.member.table.sort'),
         field: 'sort',
         component: 'InputNumber',
         colProps: {

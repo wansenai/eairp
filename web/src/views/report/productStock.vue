@@ -2,12 +2,12 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button @click="exportTable">导出</a-button>
-        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+        <a-button @click="exportTable" v-text="t('reports.productStock.export')"/>
+        <a-button @click="primaryPrint" type="primary" v-text="t('reports.productStock.regularPrint')"/>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'id'">
-          <a @click="handleStockFlow(record)">流水</a>
+          <a @click="handleStockFlow(record)"> {{ t('reports.productStock.table.flow') }} </a>
         </template>
       </template>
     </BasicTable>
@@ -29,10 +29,12 @@ import StockFlowModal from "@/views/report/modal/StockFlowModal.vue";
 import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 export default defineComponent({
   name: 'ProductStock',
   components: {Tag, TableAction, BasicTable, StockFlowModal},
   setup() {
+    const { t } = useI18n();
     const [registerModal, {openModal}] = useModal();
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
@@ -40,7 +42,7 @@ export default defineComponent({
     const printTotalCurrentStock = ref(0);
     const printTotalStockAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
-      title: '商品库存报表',
+      title: t('reports.productStock.title'),
       api: getProductStock,
       rowKey: 'id',
       columns: productStockColumns,
@@ -70,7 +72,7 @@ export default defineComponent({
       printTableData.value = tableData;
       return [
         {
-          _index: '合计',
+          _index: 'Total',
           initialStock: totalInitStock,
           currentStock: totalCurrentStock,
           stockAmount: `￥${XEUtils.commafy(XEUtils.toNumber(totalStockAmount), { digits: 2 })}`
@@ -92,7 +94,7 @@ export default defineComponent({
 
     function exportTable() {
       if (getDataSource() === undefined || getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('reports.productStock.table.notice'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -103,7 +105,7 @@ export default defineComponent({
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           const timestamp = getTimestamp(new Date());
-          link.download = "商品库存数据" + timestamp + ".xlsx";
+          link.download = t('reports.productStock.data') + timestamp + ".xlsx";
           link.target = "_blank";
           link.click();
         }
@@ -117,7 +119,7 @@ export default defineComponent({
         initialStock: printTotalInitStock.value,
         currentStock: printTotalCurrentStock.value,
         stockAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalStockAmount.value), { digits: 2 })}`,
-        productBarcode: '合计',
+        productBarcode: t('reports.productStock.table.total'),
         // 将其他字段写成空字符串 为了打印的时候不显示
         warehouseName: '',
         productName: '',
@@ -132,7 +134,7 @@ export default defineComponent({
       });
 
       printJS({
-        documentTitle: "EAIRP (商品库存-详情)",
+        documentTitle: "EAIRP " + t('reports.productStock.detail'),
         properties: printColumns.map(item => {
           return { field: item.dataIndex, displayName: item.title }
         }),
@@ -147,6 +149,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       handleSuccess,
       handleCancel,

@@ -1,16 +1,16 @@
 <template>
-  <CollapseContainer title="基本设置" :canExpan="false">
+  <CollapseContainer :title="t('basic.account.basicSetting')" :canExpan="false">
     <a-row :gutter="24">
       <a-col :span="14">
         <BasicForm @register="register" />
       </a-col>
       <a-col :span="10">
         <div class="change-avatar">
-          <div class="mb-2">头像（更新头像后，请刷新浏览器）</div>
+          <div class="mb-2">{{ t('basic.account.avatarTip') }}</div>
           <CropperAvatar
             :uploadApi="uploadApi"
             :value="avatar"
-            btnText="更换头像"
+            :btnText="t('basic.account.avatar')"
             :btnProps="{ preIcon: 'ant-design:cloud-upload-outlined' }"
             @change="updateAvatar"
             width="150"
@@ -18,7 +18,7 @@
         </div>
       </a-col>
     </a-row>
-    <Button type="primary" @click="handleSubmit"> 更新基本信息 </Button>
+    <Button type="primary" @click="handleSubmit"> {{ t('basic.account.updateInfo') }} </Button>
   </CollapseContainer>
 </template>
 <script lang="ts">
@@ -32,7 +32,7 @@
   import {baseSetSchemas} from './data';
   import { useUserStore } from '/@/store/modules/user';
   import {getUserInfo, UpdateAvatar, updateUser} from '/@/api/sys/user'
-
+  import {useI18n} from "vue-i18n";
   export default defineComponent({
     components: {
       BasicForm,
@@ -43,6 +43,7 @@
       CropperAvatar,
     },
     setup() {
+      const { t } = useI18n();
       const { createMessage } = useMessage();
       const userStore = useUserStore();
 
@@ -74,11 +75,12 @@
         const values = await validate();
         const result = await updateUser(values)
         if(result.code !== 'A0014') {
-            createMessage.warn("用户资料修改失败")
+            createMessage.warn(t('basic.account.noticeOne'))
         }
       }
 
       return {
+        t,
         avatar,
         register,
         uploadApi: UpdateAvatar as any,

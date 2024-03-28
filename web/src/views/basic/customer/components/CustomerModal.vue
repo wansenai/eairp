@@ -11,6 +11,7 @@ import {BasicForm, useForm} from '/@/components/Form/index';
 import {formSchema} from '@/views/basic/customer/customer.data';
 import { AddOrUpdateCustomerReq } from '@/api/basic/model/customerModel';
 import { addOrUpdateCustomer } from '@/api/basic/customer';
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'CustomerModal',
@@ -19,8 +20,8 @@ export default defineComponent({
   setup(_, {emit}) {
     const rowId = ref('');
     const isUpdate = ref(true);
-    const getTitle = computed(() => (!unref(isUpdate) ? '新增客户' : '编辑客户信息'));
-
+    const getTitle = computed(() => (!unref(isUpdate) ? t('basic.customer.addCustomer') : t('basic.customer.editCustomer')));
+    const { t } = useI18n();
     const [registerForm, {setFieldsValue, resetFields, validate}] = useForm({
       labelWidth: 100,
       baseColProps: {span: 24},

@@ -89,7 +89,7 @@ export default {
         export: {
             name: 'Export',
             exportData: 'Other Storage Data ',
-            noData: 'No data available',
+            noData: 'No available data export',
         },
     },
     otherShipments: {
@@ -150,7 +150,7 @@ export default {
         export: {
             name: 'Export',
             exportData: 'Other Shipments Data ',
-            noData: 'No data available',
+            noData: 'No available data export',
         }
     },
     allotShipments: {
@@ -225,7 +225,7 @@ export default {
         export: {
             name: 'Export',
             exportData: 'Allot Shipments Data ',
-            noData: 'No data available',
+            noData: 'No available data export',
         }
     },
     assemble: {
@@ -314,7 +314,7 @@ export default {
         export: {
             name: 'Export',
             exportData: 'Assemble Receipt Data ',
-            noData: 'No data available',
+            noData: 'No available data export',
         }
     },
     disassemble: {
@@ -386,7 +386,7 @@ export default {
         export: {
             name: 'Export',
             exportData: 'DisAssemble Receipt Data ',
-            noData: 'No data available',
+            noData: 'No available data export',
         }
     }
 }

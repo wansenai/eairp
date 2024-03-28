@@ -11,6 +11,7 @@ import {BasicForm, useForm} from '/@/components/Form/index';
 import {formSchema} from '@/views/basic/supplier/supplier.data';
 import { AddSupplierReq, UpdateSupplierReq } from '@/api/basic/model/supplierModel';
 import { addSupplier, updateSupplier } from '@/api/basic/supplier';
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({ 
   name: 'SupplierModal',
@@ -19,8 +20,8 @@ export default defineComponent({
   setup(_, {emit}) {
     const rowId = ref('');
     const isUpdate = ref(true);
-    const getTitle = computed(() => (!unref(isUpdate) ? '新增供应商' : '编辑供应商'));
-
+    const getTitle = computed(() => (!unref(isUpdate) ? t('basic.supplier.addSupplier') : t('basic.supplier.editSupplier')));
+    const { t } = useI18n();
     const [registerForm, {setFieldsValue, resetFields, validate}] = useForm({
       labelWidth: 100,
       baseColProps: {span: 24},
@@ -91,6 +92,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerModal,
       registerForm,
       handleSubmit,

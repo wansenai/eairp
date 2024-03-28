@@ -1,5 +1,5 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" :title="title" @ok="handleSubmit">
+  <BasicModal v-bind="$attrs" @register="registerModal" :title="t('basic.account.accountPassword')" @ok="handleSubmit">
     <BasicForm @register="registerForm" />
   </BasicModal>
 </template>
@@ -11,9 +11,9 @@ import {BasicModal, useModalInner} from '/@/components/Modal';
 import {BasicForm, useForm} from "@/components/Form";
 import {resetPasswordFormSchema} from "@/views/basic/account/data";
 import {userUpdatePassword} from "@/api/sys/user";
-
+import {useI18n} from "@/hooks/web/useI18n";
+const { t } = useI18n();
 const {createMessage} = useMessage();
-const title = ref('更换账户密码');
 
 const [registerModal, { setModalProps, closeModal }] = useModalInner(async (data) => {
   resetFields();
@@ -38,12 +38,12 @@ const handleSubmit = async () => {
   const valid = await validate();
   if (!valid) return;
   if (data.newPassword !== data.confirmPassword) {
-    createMessage.info('两次输入的密码不一致');
+    createMessage.info(t('basic.account.password.noticeOne'));
     return;
   }
   const res = await userUpdatePassword(data);
   if (res.code === "A0015") {
-    createMessage.success('密码修改成功');
+    createMessage.success(t('basic.account.password.updateSuccess'));
     closeModal();
   }
 }

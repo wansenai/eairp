@@ -1,37 +1,37 @@
 <template>
-  <CollapseContainer title="新消息通知" :canExpan="false">
+  <CollapseContainer :title="t('basic.account.notice.title')" :canExpan="false">
     <List>
         <ListItem>
           <ListItemMeta>
             <template #title>
-              系统消息
+              {{ t('basic.account.notice.systemInfo') }}
               <Switch
                 class="extra"
                 v-model:checked="checkedSystemInfo"
-                checked-children="开"
-                un-checked-children="关"
+                :checked-children="t('basic.account.notice.on')"
+                :un-checked-children="t('basic.account.notice.off')"
                 onchange="switchChange"
               />
             </template>
             <template #description>
-              <div>系统消息将以站内信的形式通知</div>
+              <div>{{ t('basic.account.notice.systemInfoTip') }}</div>
             </template>
           </ListItemMeta>
         </ListItem>
         <ListItem>
           <ListItemMeta>
             <template #title>
-              待办任务
+              {{ t('basic.account.notice.todo') }}
               <Switch
                   class="extra"
                   v-model:checked="checkedTodoTask"
-                  checked-children="开"
-                  un-checked-children="关"
+                  :checked-children="t('basic.account.notice.on')"
+                  :un-checked-children="t('basic.account.notice.off')"
                   onchange="switchChange"
               />
             </template>
             <template #description>
-              <div>待办任务将以站内信的形式通知</div>
+              <div>{{ t('basic.account.notice.todoTip') }}</div>
             </template>
           </ListItemMeta>
         </ListItem>
@@ -42,6 +42,7 @@
   import { List, Switch } from 'ant-design-vue';
   import { defineComponent, ref } from 'vue';
   import { CollapseContainer } from '@/components/Container';
+  import {useI18n} from "@/hooks/web/useI18n";
 
   export default defineComponent({
     components: {
@@ -52,6 +53,7 @@
       Switch,
     },
     setup() {
+      const { t } = useI18n();
       const checkedSystemInfo = ref<boolean>(true);
       const checkedTodoTask = ref<boolean>(true);
       function switchChange() {
@@ -59,6 +61,7 @@
       }
 
       return {
+        t,
         switchChange,
         checkedSystemInfo,
         checkedTodoTask

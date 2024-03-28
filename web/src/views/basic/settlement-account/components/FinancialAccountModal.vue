@@ -11,10 +11,12 @@ import { BasicForm, useForm } from '/@/components/Form/index';
 import { formSchema } from '@/views/basic/settlement-account/financialAccount.data';
 import { AddOrUpdateAccountReq } from '@/api/financial/model/accountModel';
 import { addOrUpdateAccount } from '@/api/financial/account';
+import {useI18n} from "vue-i18n";
 
+const { t } = useI18n();
 const rowId = ref('');
 const isUpdate = ref(true);
-const getTitle = computed(() => (!unref(isUpdate) ? '新增结算账户' : '编辑结算账户'));
+const getTitle = computed(() => (!unref(isUpdate) ? t('basic.settlement.addSettlementAccount') : t('basic.settlement.editSettlementAccount')));
 const emitSuccess = defineEmits(['success','register']);
 
 const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({
