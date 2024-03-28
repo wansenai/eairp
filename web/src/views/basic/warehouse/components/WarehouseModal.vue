@@ -11,12 +11,13 @@ import { BasicForm, useForm } from '/@/components/Form/index';
 import { formSchema } from '@/views/basic/warehouse/warehouse.data';
 import { AddOrUpdateWarehouseReq } from '@/api/basic/model/warehouseModel';
 import { addOrUpdateWarehouse } from '@/api/basic/warehouse';
+import {useI18n} from "vue-i18n";
 
 const rowId = ref('');
 const isUpdate = ref(true);
-const getTitle = computed(() => (!unref(isUpdate) ? '新增仓库' : '编辑仓库'));
+const getTitle = computed(() => (!unref(isUpdate) ? t('basic.warehouse.addWarehouse') : t('basic.warehouse.editWarehouse')));
 const emitSuccess = defineEmits(['success', 'register']);
-
+const { t } = useI18n();
 const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({
   labelWidth: 100,
   baseColProps: { span: 24 },

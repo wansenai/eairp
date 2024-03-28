@@ -2,10 +2,10 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> 新增</a-button>
-        <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
-        <a-button type="primary" @click="handleOnStatus(0)"> 批量启用</a-button>
-        <a-button type="primary" @click="handleOnStatus(1)"> 批量停用</a-button>
+        <a-button type="primary" @click="handleCreate" v-text="t('basic.settlement.add')"/>
+        <a-button type="primary" @click="handleBatchDelete" v-text="t('basic.settlement.batchDelete')"/>
+        <a-button type="primary" @click="handleOnStatus(0)" v-text="t('basic.settlement.batchEnable')"/>
+        <a-button type="primary" @click="handleOnStatus(1)" v-text="t('basic.settlement.batchDisable')"/>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -13,13 +13,15 @@
               :actions="[
               {
                 icon: 'clarity:note-edit-line',
+                tooltip: t('sys.table.edit'),
                 onClick: handleEdit.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
+                tooltip: t('sys.table.delete'),
                 color: 'error',
                 popConfirm: {
-                  title: '是否确认删除',
+                  title: t('sys.table.confirmDelete'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
                 },
@@ -29,7 +31,7 @@
         </template>
         <template v-else-if="column.key === 'isDefault'">
           <Tag :color="record.isDefault === 1 ? 'green' : 'red'">
-            {{ record.isDefault === 1 ? '是' : '否' }}
+            {{ record.isDefault === 1 ? t('basic.settlement.yes') : t('basic.settlement.no') }}
           </Tag>
         </template>
       </template>
@@ -49,15 +51,17 @@ import {columns, searchFormSchema} from "@/views/basic/settlement-account/financ
 import {getAccountPageList, deleteBatchAccount, updateAccountStatus} from "@/api/financial/account";
 import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
 import { Tag } from 'ant-design-vue';
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'financialAccount',
   components: {TableAction, BasicTable, Tag, FinancialAccountModal },
   setup() {
+    const { t } = useI18n();
     const [registerModal, {openModal}] = useModal();
     const { createMessage } = useMessage();
     const [registerTable, { reload, getSelectRows }] = useTable({
-      title: '结算账户列表',
+      title: t('basic.settlement.title'),
       api: getAccountPageList,
       rowKey: 'id',
       columns: columns,
@@ -77,7 +81,7 @@ export default defineComponent({
       showIndexColumn: true,
       actionColumn: {
         width: 80,
-        title: '操作',
+        title: t('common.operating'),
         dataIndex: 'action',
         fixed: undefined,
       },
@@ -92,7 +96,7 @@ export default defineComponent({
     async function handleBatchDelete(record: Recordable) {
       const data = getSelectRows();
       if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
+        createMessage.warn(t('basic.selectData'));
         return;
       }
       const ids = data.map((item) => item.id);
@@ -123,7 +127,7 @@ export default defineComponent({
     async function handleOnStatus(newStatus: number) {
       const data = getSelectRows();
       if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
+        createMessage.warn(t('basic.selectData'));
         return;
       }
       const ids = data.map((item) => item.id);
@@ -138,6 +142,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       registerModal,
       handleCreate,

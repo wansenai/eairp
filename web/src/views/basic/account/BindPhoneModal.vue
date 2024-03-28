@@ -1,16 +1,16 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" :title="title" @ok="handleSubmit" @cancel="handleCancel">
+  <BasicModal v-bind="$attrs" @register="registerModal" :title="t('basic.account.accountPhone')" @ok="handleSubmit" @cancel="handleCancel">
     <a-spin :spinning="confirmLoading">
       <a-form ref="formRef" :model="formData" :label-col="labelCol" :wrapper-col="wrapperCol">
         <a-input v-model:value="userId" v-show="false"/>
-        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="原手机号码">
+        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('basic.account.phone.oldPhone')">
           <a-input-number v-model:value="formData.oldPhoneNumber" disabled/>
         </a-form-item>
-        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="新手机号码"
+        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('basic.account.phone.newPhone')"
                      :rules="[{ required: true}]">
-          <a-input placeholder="请输入新手机号码" v-model:value="formData.phoneNumber"/>
+          <a-input :placeholder="t('basic.account.phone.inputNewPhone')" v-model:value="formData.phoneNumber"/>
         </a-form-item>
-        <a-form-item label="验证码" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="[{ required: true}]">
+        <a-form-item :label="t('basic.account.phone.code')" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="[{ required: true}]">
           <CountdownInput
               size="large"
               class="fix-auto-fill"
@@ -51,7 +51,6 @@ export default {
     const { createMessage } = useMessage();
     const { t } = useI18n();
     const userId = ref('');
-    const title = ref('更换密保手机');
     const openBindPhoneModal = ref(false);
     const labelCol = {
       xs: {span: 24},
@@ -81,11 +80,11 @@ export default {
       const pattern:any = /^(0|86|17951)?(13[0-9]|15[012356789]|16[6]|19[89]]|17[01345678]|18[0-9]|14[579])[0-9]{8}$/;
       const valid = pattern.test(formData.phoneNumber);
       if(!valid) {
-        createMessage.info("请输入正确的手机号码");
+        createMessage.info(t('basic.account.phone.notice'));
         return;
       }
       if (!formData.sms) {
-        createMessage.info("请输入验证码");
+        createMessage.info(t('basic.account.phone.inputCode'));
         return;
       }
       validForm().then(async () => {
@@ -124,8 +123,8 @@ export default {
     }
 
     return {
+      t,
       registerModal,
-      title,
       formData,
       labelCol,
       wrapperCol,
