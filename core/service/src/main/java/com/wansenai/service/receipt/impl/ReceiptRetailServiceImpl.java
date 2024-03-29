@@ -857,6 +857,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .receiptAmount(refund.getTotalAmount())
                 .backAmount(refund.getBackAmount())
                 .remark(refund.getRemark())
+                .status(refund.getStatus())
                 .tableData(tableData)
                 .files(fileList)
                 .status(refund.getStatus())

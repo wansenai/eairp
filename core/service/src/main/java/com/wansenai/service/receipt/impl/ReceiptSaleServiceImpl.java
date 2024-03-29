@@ -435,6 +435,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 .otherReceipt(sale.getOtherReceipt())
                 .deposit(sale.getDeposit())
                 .remark(sale.getRemark())
+                .status(sale.getStatus())
                 .tableData(tableData)
                 .files(fileList)
                 .build();
@@ -742,6 +743,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 .multipleAccountIds(multipleAccountIds)
                 .multipleAccountAmounts(multipleAccountAmounts)
                 .remark(sale.getRemark())
+                .status(sale.getStatus())
                 .tableData(tableData)
                 .files(fileList)
                 .build();
@@ -1092,6 +1094,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 .multipleAccountIds(multipleAccountIds)
                 .multipleAccountAmounts(multipleAccountAmounts)
                 .remark(sale.getRemark())
+                .status(sale.getStatus())
                 .tableData(tableData)
                 .files(fileList)
                 .build();
