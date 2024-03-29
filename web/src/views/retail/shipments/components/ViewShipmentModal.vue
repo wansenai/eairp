@@ -2,26 +2,26 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="零售出库-详情"
+          :title="t('retail.shipments.detail')"
           :sub-title="receiptNumber">
         <template #extra>
-          <a-button @click="exportTable">导出</a-button>
-          <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+          <a-button @click="exportTable" v-text="t('retail.shipments.export.name')"/>
+          <a-button @click="primaryPrint" type="primary" v-text="t('retail.regularPrint')"/>
 <!--          <a-button key="triplePrint">三联打印</a-button>-->
 <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
         <a-descriptions size="small" :column="3">
-          <a-descriptions-item label="会员">{{ memberName }}</a-descriptions-item>
-          <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item label="收款类型">{{ paymentType }}</a-descriptions-item>
-          <a-descriptions-item label="单据金额">{{ receiptAmount }}</a-descriptions-item>
-          <a-descriptions-item label="收款金额">{{ collectAmount }}</a-descriptions-item>
-          <a-descriptions-item label="找零">{{ backAmount }}</a-descriptions-item>
-          <a-descriptions-item label="收款账户">{{ accountName }}</a-descriptions-item>
-          <a-descriptions-item label="退货单号">
+          <a-descriptions-item :label="t('retail.shipments.view.member')">{{ memberName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('retail.shipments.view.receiptDate')">{{ receiptDate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('retail.shipments.view.collectionType')">{{ paymentType }}</a-descriptions-item>
+          <a-descriptions-item :label="t('retail.shipments.view.receiptAmount')">{{ receiptAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('retail.shipments.view.collectionAmount')">{{ collectAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('retail.shipments.view.changeAmount')">{{ backAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('retail.shipments.view.collectionAccount')">{{ accountName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('retail.shipments.view.refundReceipt')">
             <a @click="viewRefundReceipt">{{ otherReceipt }}</a>
           </a-descriptions-item>
-          <a-descriptions-item label="备注">
+          <a-descriptions-item :label="t('retail.shipments.view.remark')">
             {{ remark }}
           </a-descriptions-item>
         </a-descriptions>
@@ -35,15 +35,15 @@
             }"
           >
             <a-statistic
-                title="单据状态"
-                :value="status === 1 ? '已审核' : '未审核'"
+                :title="t('retail.shipments.view.status')"
+                :value="status === 1 ? t('sys.table.audited') : t('sys.table.unaudited')"
                 :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                 :style="{
                 marginRight: '32px',
                 color: 'green',
               }"
             />
-            <a-statistic title="单据金额"
+            <a-statistic :title="t('retail.shipments.view.receiptAmount')"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="receiptAmount"/>
@@ -69,6 +69,7 @@ import {
 } from 'ant-design-vue';
 import {retailShipmentsTableColumns} from "@/views/retail/shipments/shipments.data";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ViewShipmentModal',
@@ -81,6 +82,7 @@ export default defineComponent({
     'a-statistic': Statistic,
   },
   setup() {
+    const { t } = useI18n();
     const receiptNumber = ref('');
     const otherReceipt = ref('');
     const memberName = ref<any>('');
@@ -96,14 +98,14 @@ export default defineComponent({
 
     const tableData = ref<any>([]);
     const [registerTable] = useTable({
-      title: '出库商品表数据',
+      title: t('retail.shipments.detail'),
       columns: retailShipmentsTableColumns,
       dataSource: tableData,
       pagination: false,
       showIndexColumn: false,
       bordered: true,
     });
-    const getTitle = ref('单据详情');
+    const getTitle = ref(t('retail.shipments.receipt'));
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200, showOkBtn: false});
       const res = await getLinkShipmentsDetail(data.receiptNumber);
@@ -136,7 +138,7 @@ export default defineComponent({
         const link = document.createElement("a");
         const timestamp = getTimestamp(new Date());
         link.href = URL.createObjectURL(blob);
-        link.download = "零售出库单据详情" + timestamp + ".xlsx";
+        link.download = t('retail.shipments.export.exportData') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
@@ -147,23 +149,23 @@ export default defineComponent({
     function primaryPrint() {
       const header = `
   <div style="${flexContainer}">
-    <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
-    <div style="${flexItem}">单据金额：${receiptAmount.value}</div>
-    <div style="${flexItem}">单据日期：${receiptDate.value}</div>
+    <div style="${flexItem}">${t('retail.shipments.table.receiptNumber')}：${receiptNumber.value}</div>
+    <div style="${flexItem}">${t('retail.shipments.view.receiptAmount')}：${receiptAmount.value}</div>
+    <div style="${flexItem}">${t('retail.shipments.view.receiptDate')}：${receiptDate.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">收款账户：${accountName.value}</div>
-    <div style="${flexItem}">收款类型：${paymentType.value}</div>
-    <div style="${flexItem}">收款金额：${collectAmount.value}</div>
+    <div style="${flexItem}">${t('retail.shipments.view.collectionAccount')}：${accountName.value}</div>
+    <div style="${flexItem}">${t('retail.shipments.view.collectionType')}：${paymentType.value}</div>
+    <div style="${flexItem}">${t('retail.shipments.view.collectionAmount')}：${collectAmount.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">找零：${backAmount.value}</div>
-    <div style="${flexItem}">会员：${memberName.value}</div>
-    <div style="${flexItem}">备注：${remark.value}</div>
+    <div style="${flexItem}">${t('retail.shipments.view.changeAmount')}：${backAmount.value}</div>
+    <div style="${flexItem}">${t('retail.shipments.view.member')}：${memberName.value}</div>
+    <div style="${flexItem}">${t('retail.shipments.view.remark')}：${remark.value}</div>
   </div>
 `;
       printJS({
-        documentTitle: "EAIRP (零售出库单据-详情)",
+        documentTitle: "EAIRP " + t('retail.shipments.export.exportData'),
         header: header,
         properties: retailShipmentsTableColumns.map((item) => {
           return {
@@ -183,6 +185,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       receiptNumber,
       otherReceipt,
       memberName,

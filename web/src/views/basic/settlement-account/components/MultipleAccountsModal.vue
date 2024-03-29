@@ -3,52 +3,52 @@
     <a-form ref="formRef">
       <a-row class="form-row" :gutter="24">
         <a-col :lg="12" :md="12" :sm="24">
-          <a-form-item :label="t('basic.settlement.accountOne')" :label-col="labelCol" :wrapper-col="wrapperCol"
-                       :rules="[{ required: true, message: t('basic.settlement.inputAccount') }]">
+          <a-form-item :label="t('basic.settlement.other.accountOne')" :label-col="labelCol" :wrapper-col="wrapperCol"
+                       :rules="[{ required: true, message: t('basic.settlement.other.inputAccount') }]">
             <a-select v-model:value="multipleAccounts.accountOne"
-                      :placeholder="t('basic.settlement.inputAccount')"
+                      :placeholder="t('basic.settlement.other.inputAccount')"
                       :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
                       @change=""/>
           </a-form-item>
         </a-col>
         <a-col :lg="12" :md="12" :sm="24">
-          <a-form-item :label="t('basic.settlement.amountOne')" :label-col="labelCol" :wrapper-col="wrapperCol"
-                       :rules="[{ required: true, message: t('basic.settlement.inputAmount') }]">
-            <a-input-number v-model:value="multipleAccounts.accountPriceOne" :placeholder="t('basic.settlement.inputAmount')" min="0" max="9999999999.99"
+          <a-form-item :label="t('basic.settlement.other.amountOne')" :label-col="labelCol" :wrapper-col="wrapperCol"
+                       :rules="[{ required: true, message: t('basic.settlement.other.inputAmount') }]">
+            <a-input-number v-model:value="multipleAccounts.accountPriceOne" :placeholder="t('basic.settlement.other.inputAmount')" min="0" max="9999999999.99"
                             step="0.01"/>
           </a-form-item>
         </a-col>
       </a-row>
       <a-row class="form-row" :gutter="24">
         <a-col :lg="12" :md="12" :sm="24">
-          <a-form-item :label="t('basic.settlement.accountTwo')" :label-col="labelCol" :wrapper-col="wrapperCol"
-                       :rules="[{ required: true, message: t('basic.settlement.inputAccount') }]">
+          <a-form-item :label="t('basic.settlement.other.accountTwo')" :label-col="labelCol" :wrapper-col="wrapperCol"
+                       :rules="[{ required: true, message: t('basic.settlement.other.inputAccount') }]">
             <a-select v-model:value="multipleAccounts.accountTwo"
-                      :placeholder="t('basic.settlement.inputAccount')"
+                      :placeholder="t('basic.settlement.other.inputAccount')"
                       :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
                       @change=""/>
           </a-form-item>
         </a-col>
         <a-col :lg="12" :md="12" :sm="24">
-          <a-form-item :label="t('basic.settlement.amountTwo')" :label-col="labelCol" :wrapper-col="wrapperCol"
-                       :rules="[{ required: true, message: t('basic.settlement.inputAmount') }]">
-            <a-input-number v-model:value="multipleAccounts.accountPriceTwo" :placeholder="t('basic.settlement.inputAmount')" min="0" max="9999999999.99"
+          <a-form-item :label="t('basic.settlement.other.amountTwo')" :label-col="labelCol" :wrapper-col="wrapperCol"
+                       :rules="[{ required: true, message: t('basic.settlement.other.inputAmount') }]">
+            <a-input-number v-model:value="multipleAccounts.accountPriceTwo" :placeholder="t('basic.settlement.other.inputAmount')" min="0" max="9999999999.99"
                             step="0.01"/>
           </a-form-item>
         </a-col>
       </a-row>
       <a-row class="form-row" :gutter="24">
         <a-col :lg="12" :md="24" :sm="24">
-          <a-form-item :label="t('basic.settlement.accountThree')" :label-col="labelCol" :wrapper-col="wrapperCol">
+          <a-form-item :label="t('basic.settlement.other.accountThree')" :label-col="labelCol" :wrapper-col="wrapperCol">
             <a-select v-model:value="multipleAccounts.accountThree"
-                      :placeholder="t('basic.settlement.inputAccount')"
+                      :placeholder="t('basic.settlement.other.inputAccount')"
                       :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
                       @change=""/>
           </a-form-item>
         </a-col>
         <a-col :lg="12" :md="24" :sm="24">
-          <a-form-item :label="t('basic.settlement.amountThree')" :label-col="labelCol" :wrapper-col="wrapperCol">
-            <a-input-number v-model:value="multipleAccounts.accountPriceThree" :placeholder="t('basic.settlement.inputAmount')" min="0" max="9999999999.99"
+          <a-form-item :label="t('basic.settlement.other.amountThree')" :label-col="labelCol" :wrapper-col="wrapperCol">
+            <a-input-number v-model:value="multipleAccounts.accountPriceThree" :placeholder="t('basic.settlement.other.inputAmount')" min="0" max="9999999999.99"
                             step="0.01"/>
           </a-form-item>
         </a-col>

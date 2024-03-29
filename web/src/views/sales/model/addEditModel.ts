@@ -2,6 +2,9 @@ import {reactive, ref} from "vue";
 import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export interface RowVO {
     [key: string]: any,
@@ -138,26 +141,26 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
         {   field: 'barCode',
             width:160,
-            title: '条码',
+            title: t('sales.shipments.form.table.barCode'),
             slots: { edit: 'barCode_edit' },
             titlePrefix: { content: '输入条码商品信息自动带出！' },
             editRender: { name: 'input', attrs: { placeholder: '请输入条码并回车' } }
         },
         {
             field: 'productName',
-            title: '名称',
+            title: t('sales.shipments.form.table.name'),
             width:160,
         },
-        { field: 'productStandard', title: '规格', width: 120,  },
-        { field: 'stock', title: '库存',  width: 70},
-        { field: 'productUnit', title: '单位',  width: 70},
-        { field: 'productNumber', title: '数量',  sortable: true, width:100,
+        { field: 'productStandard', title: t('sales.shipments.form.table.standard'), width: 120,  },
+        { field: 'stock', title: t('sales.shipments.form.table.stock'),  width: 70},
+        { field: 'productUnit', title: t('sales.shipments.form.table.unit'),  width: 70},
+        { field: 'productNumber', title: t('sales.shipments.form.table.quantity'),  sortable: true, width:100,
             slots: { edit: 'product_number_edit' },
             editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } },
         },
         {
             field: 'unitPrice',
-            title: '单价', width:105,
+            title: t('sales.shipments.form.table.unitPrice'), width:105,
             formatter ({ cellValue }) {
                 return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
@@ -166,33 +169,33 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
         },
         {
             field: 'amount',
-            title: '金额', width:105,
+            title: t('sales.shipments.form.table.amount'), width:105,
             formatter ({ cellValue }) {
                 return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
             slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
         },
-        { field: 'taxRate', title: '税率', width: 105,
+        { field: 'taxRate', title: t('sales.shipments.form.table.taxRate'), width: 105,
             slots: { edit: 'tax_rate_edit' },
             editRender: { name: '$input', attrs: { type: 'float', digits: 2, placeholder: '请输入税率' } }
         },
-        { field: 'taxAmount', title: '税额',  width: 105,
+        { field: 'taxAmount', title: t('sales.shipments.form.table.taxAmount'),  width: 105,
             editRender:{attrs: {type: 'float', digits: 2}},
             slots: { edit: 'tax_amount_edit' },
         },
-        { field: 'taxTotalPrice', title: '价税合计',  width: 105,
+        { field: 'taxTotalPrice', title: t('sales.shipments.form.table.totalPriceAndTax'),  width: 105,
             slots: { edit: 'tax_total_price_edit' },
             editRender: { name: '$input', attrs: {type: 'float', digits: 2, placeholder: '请输入价税合计' } }
         },
-        { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
+        { field: 'remark', title: t('sales.shipments.form.table.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
 
     ],
     footerMethod ({ columns, data }) {
         return [
             columns.map((column, columnIndex) => {
                 if (columnIndex === 0) {
-                    return '总计'
+                    return t('sales.shipments.form.table.total')
                 }
                 if (['amount', 'rate'].includes(column.field)) {
                     return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
@@ -220,7 +223,7 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
     },
     editRules: {
         barCode: [
-            { required: true, message: '商品条码不能为空' }
+            { required: true, message: t('sales.shipments.form.table.inputBarCode') }
         ]
     },
     editConfig: {
@@ -289,33 +292,33 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
         {
             field: 'warehouseId',
-            title: '仓库',
+            title: t('sales.shipments.form.table.warehouse'),
             width: 130,
             slots: { edit: 'warehouse_edit', default: 'warehouse_default' },
-            editRender: { name: 'input', attrs: { placeholder: '请选择仓库' } }
+            editRender: { name: 'input', attrs: { placeholder:  t('sales.shipments.form.noticeEight') } }
         },
         {   field: 'barCode',
             width:160,
-            title: '条码',
+            title: t('sales.shipments.form.table.barCode'),
             slots: { edit: 'barCode_edit' },
             titlePrefix: { content: '输入条码商品信息自动带出！' },
             editRender: { name: 'input', attrs: { placeholder: '请输入条码并回车' } }
         },
         {
             field: 'productName',
-            title: '名称',
+            title: t('sales.shipments.form.table.name'),
             width:160,
         },
-        { field: 'productStandard', title: '规格', width: 120,  },
-        { field: 'stock', title: '库存',  width: 70},
-        { field: 'productUnit', title: '单位',  width: 70},
-        { field: 'productNumber', title: '数量',  sortable: true, width:100,
+        { field: 'productStandard', title: t('sales.shipments.form.table.standard'), width: 120,  },
+        { field: 'stock', title: t('sales.shipments.form.table.stock'),  width: 70},
+        { field: 'productUnit', title: t('sales.shipments.form.table.unit'),  width: 70},
+        { field: 'productNumber', title: t('sales.shipments.form.table.quantity'),  sortable: true, width:100,
             slots: { edit: 'product_number_edit' },
             editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } },
         },
         {
             field: 'unitPrice',
-            title: '单价', width:105,
+            title: t('sales.shipments.form.table.unitPrice'), width:105,
             formatter ({ cellValue }) {
                 return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
@@ -324,33 +327,33 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         },
         {
             field: 'amount',
-            title: '金额', width:105,
+            title: t('sales.shipments.form.table.amount'), width:105,
             formatter ({ cellValue }) {
                 return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
             slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
         },
-        { field: 'taxRate', title: '税率', width: 105,
+        { field: 'taxRate', title: t('sales.shipments.form.table.taxRate'), width: 105,
             slots: { edit: 'tax_rate_edit' },
             editRender: { name: '$input', attrs: { type: 'float', digits: 2, placeholder: '请输入税率' } }
         },
-        { field: 'taxAmount', title: '税额',  width: 105,
+        { field: 'taxAmount', title: t('sales.shipments.form.table.taxAmount'),  width: 105,
             editRender:{attrs: {type: 'float', digits: 2}},
             slots: { edit: 'tax_amount_edit' },
         },
-        { field: 'taxTotalPrice', title: '价税合计',  width: 105,
+        { field: 'taxTotalPrice', title: t('sales.shipments.form.table.totalPriceAndTax'),  width: 105,
             slots: { edit: 'tax_total_price_edit' },
             editRender: { name: '$input', attrs: {type: 'float', digits: 2, placeholder: '请输入价税合计' } }
         },
-        { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
+        { field: 'remark', title: t('sales.shipments.form.table.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
 
     ],
     footerMethod ({ columns, data }) {
         return [
             columns.map((column, columnIndex) => {
                 if (columnIndex === 0) {
-                    return '总计'
+                    return t('sales.shipments.form.table.total')
                 }
                 if (['amount', 'rate'].includes(column.field)) {
                     return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
@@ -378,10 +381,10 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     },
     editRules: {
         warehouseId: [
-            { required: true, message: '仓库不能为空' }
+            { required: true, message: t('sales.shipments.form.noticeEight') }
         ],
         barCode: [
-            { required: true, message: '商品条码不能为空' }
+            { required: true, message: t('sales.shipments.form.table.inputBarCode') }
         ]
     },
     editConfig: {

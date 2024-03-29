@@ -13,9 +13,9 @@
       v-model:open="open"
       style="left: 5%; height: 95%;">
     <template #footer>
-      <a-button @click="handleCancelModal">取消</a-button>
-      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
+      <a-button @click="handleCancelModal" v-text="t('retail.shipments.form.cancel')" />
+      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)" v-text="t('retail.shipments.form.saveApprove')" />
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)" v-text="t('retail.shipments.form.save')"/>
       <!--发起多级审核-->
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
@@ -25,10 +25,10 @@
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="formState.id" v-show="false"/>
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="会员卡号" data-step="1"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('retail.shipments.form.member')" data-step="1"
                          data-title="会员卡号"
                          data-intro="如果发现需要选择的会员卡号尚未录入，可以在下拉框中点击新增会员信息进行录入">
-              <a-select placeholder="选择会员卡号" v-model:value="formState.memberId"
+              <a-select :placeholder="t('retail.shipments.form.inputMember')" v-model:value="formState.memberId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
                         @change="onMemberChange"
                         :options="memberList.map(item => ({ value: item.id, label: item.memberName }))">
@@ -38,30 +38,30 @@
                     <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                          @mousedown="e => e.preventDefault()" @click="addMember">
                       <plus-outlined/>
-                      新增会员
+                      {{ t('retail.shipments.form.addMember') }}
                     </div>
                 </template>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="formState.receiptDate" show-time placeholder="选择时间"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('retail.shipments.form.receiptDate')" :rules="[{ required: true}]">
+              <a-date-picker v-model:value="formState.receiptDate" show-time :placeholder="t('retail.shipments.form.inputReceiptDate')"
                              format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('retail.shipments.form.receiptNumber')" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="formState.receiptNumber" :readOnly="true"/>
+              <a-input v-model:value="formState.receiptNumber" :readOnly="true"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="收款类型" data-step="3"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('retail.shipments.form.collectionType')" data-step="3"
                          data-title="收款类型"
                          data-intro="收款类型可以有现付和预付款两种类型，当选择了会员之后，如果该会员有预付款，在此处会显示具体预付款的金额，而且系统会优先默认选中预付款">
-              <a-select placeholder="请选择付款类型" v-model:value="formState.paymentType"
+              <a-select :placeholder="t('retail.shipments.form.inputCollectionType')" v-model:value="formState.paymentType"
                         :dropdownMatchSelectWidth="false">
                 <a-select-option v-for="(item,index) in payTypeList" :key="index" :value="item.value">
                   {{ item.text }}
@@ -76,15 +76,15 @@
               <vxe-grid ref='xGrid' v-bind="gridOptions">
                 <template #toolbar_buttons="{ row }">
                   <a-button v-if="showScanButton" type="primary" @click="scanEnter" style="margin-right: 10px">
-                    扫条码录入数据
+                    {{ t('retail.shipments.form.scanCodeData') }}
                   </a-button>
-                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码"
+                  <a-input v-if="showScanPressEnter" :placeholder="t('retail.shipments.form.scanCodeTip')"
                            style="width: 150px; margin-right: 10px" v-model:value="formState.scanBarCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
-                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
-                  <a-button @click="productModal" style="margin-right: 10px">批量添加出库商品</a-button>
-                  <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
-                  <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan" v-text="t('retail.shipments.form.collapseScanCode')"/>
+                  <a-button @click="productModal" style="margin-right: 10px" v-text="t('retail.shipments.form.addProduct')"/>
+                  <a-button @click="addRowData" style="margin-right: 10px" v-text="t('retail.shipments.form.insertRow')"/>
+                  <a-button @click="deleteRowData" style="margin-right: 10px" v-text="t('retail.shipments.form.deleteRow')"/>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber"></vxe-input>
@@ -93,7 +93,7 @@
                   <vxe-input v-model="row.amount"></vxe-input>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode"
+                  <vxe-select v-model="row.barCode" :placeholder="t('retail.shipments.form.table.inputBarCode')" @change="selectBarCode"
                               :options="productLabelList" clearable filterable></vxe-select>
                 </template>
               </vxe-grid>
@@ -101,14 +101,14 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-textarea :rows="1" placeholder="请输入备注" v-model:value="formState.remark"
+                  <a-textarea :rows="1" :placeholder="t('retail.shipments.form.table.inputRemark')" v-model:value="formState.remark"
                               style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="附件" data-step="9"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('retail.shipments.form.table.annex')" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
                   <a-upload
@@ -118,7 +118,7 @@
                       multiple>
                     <a-button>
                       <upload-outlined/>
-                      点击上传附件
+                      {{ t('retail.shipments.form.table.uploadAnnex') }}
                     </a-button>
                   </a-upload>
                 </a-form-item>
@@ -132,7 +132,7 @@
                   <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" data-step="5" data-title="单据金额"
                                data-intro="单据金额等于左侧商品的总金额">
                     <template #label>
-                      <span style="font-size: 20px;line-height:20px">单据金额</span>
+                      <span style="font-size: 20px;line-height:20px">{{ t('retail.shipments.view.receiptAmount') }}</span>
                     </template>
                     <a-input v-model:value="receiptAmount" :style="{color:'purple', height:'35px'}"
                              :readOnly="true"/>
@@ -142,7 +142,7 @@
                   <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" data-step="6" data-title="收款金额"
                                data-intro="收款金额为收银员收取用户的实际金额">
                     <template #label>
-                      <span style="font-size: 20px;line-height:20px">收款金额</span>
+                      <span style="font-size: 20px;line-height:20px">{{ t('retail.shipments.view.collectionAmount') }}</span>
                     </template>
                     <a-input v-model:value="collectAmount" :style="{color:'red', height:'35px'}"
                              defaultValue="0"
@@ -153,7 +153,7 @@
                   <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" data-step="7" data-title="找零"
                                data-intro="找零等于收款金额减去实收金额">
                     <template #label>
-                      <span style="font-size: 20px;line-height:20px">找零</span>
+                      <span style="font-size: 20px;line-height:20px">{{ t('retail.shipments.view.changeAmount') }}</span>
                     </template>
                     <a-input v-model:value="backAmount" :style="{color:'green', height:'35px'}"
                              :readOnly="true"
@@ -165,9 +165,9 @@
                                data-intro="收款账户的信息来自基本资料菜单下的【结算账户】"
                                :rules="[{ required: true}]">
                     <template #label>
-                      <span style="font-size: 20px;line-height:20px">收款账户</span>
+                      <span style="font-size: 20px;line-height:20px">{{ t('retail.shipments.view.collectionAccount') }}</span>
                     </template>
-                    <a-select placeholder="选择收款账户" style="font-size:20px;"
+                    <a-select :placeholder="t('retail.shipments.view.inputCollectionAccount')" style="font-size:20px;"
                               v-model:value="formState.accountId" :dropdownMatchSelectWidth="false"
                               :options="accountList.map(item => ({ value: item.id, label: item.accountName }))">
                       <template #dropdownRender="{ menuNode: menu }">
@@ -176,7 +176,7 @@
                         <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                              @mousedown="e => e.preventDefault()" @click="addAccount">
                           <plus-outlined/>
-                          新增结算账户
+                          {{ t('retail.shipments.view.addAccount') }}
                         </div>
                       </template>
                     </a-select>
@@ -252,6 +252,7 @@ import {getProductSkuByBarCode} from "@/api/product/product";
 import XEUtils from "xe-utils";
 import {ProductExtendPriceResp, ProductStockSkuResp} from "@/api/product/model/productModel";
 import {AddOrUpdateShipmentsReq, ShipmentsData} from "@/api/retail/model/shipmentsModel";
+import {useI18n} from "vue-i18n";
 
 const VNodes = defineComponent({
   props: {
@@ -302,6 +303,7 @@ export default defineComponent({
     'a-divider': Divider,
   },
   setup(_, context) {
+    const { t } = useI18n();
     const {createMessage} = useMessage();
     const confirmLoading = ref<boolean>(false);
     const open = ref<boolean>(false);
@@ -353,10 +355,10 @@ export default defineComponent({
       loadWarehouseList();
       loadProductSku();
       if (id) {
-        title.value = '编辑-零售出库'
+        title.value = t('retail.shipments.editShipments')
         loadShipmentsDetail(id);
       } else {
-        title.value = '新增-零售出库'
+        title.value = t('retail.shipments.addShipments')
         loadGenerateId();
         // 获取系统时间然后转成dayjs格式
         formState.receiptDate = dayjs(new Date());
@@ -428,7 +430,7 @@ export default defineComponent({
               selectRow.row.productNumber = 1
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
-              createMessage.warn("该条码查询不到商品信息")
+              createMessage.warn(t('retail.shipments.form.noticeSix'))
             }
           }
         }
@@ -557,12 +559,12 @@ export default defineComponent({
       const member = memberList.value.find(item => item.id === value)
       if (member.advancePayment > 0) {
         payTypeList.value = [
-          {value: '预付款', text: '预付款（' + member.advancePayment + '）'},
-          {value: '现付', text: '现付'},
+          {value: '预付款', text: t('retail.shipments.form.advancePayment') +'（' + member.advancePayment + '）'},
+          {value: '现付', text: t('retail.shipments.form.cashPayment')},
         ]
       } else {
         payTypeList.value = [
-          {value: '现付', text: '现付'},
+          {value: '现付', text: t('retail.shipments.form.cashPayment')},
         ]
       }
     }
@@ -580,22 +582,22 @@ export default defineComponent({
     async function handleOk(type: number) {
       const table: any = xGrid.value
       if (!formState.receiptDate) {
-        createMessage.warn('请选择单据日期');
+        createMessage.warn(t('retail.shipments.form.inputReceiptDate'));
         return;
       }
       if (!formState.accountId) {
-        createMessage.warn('请选择收款账户');
+        createMessage.warn(t('retail.shipments.view.inputCollectionAccount'));
         return;
       }
       if (table) {
         const insertRecords = table.getInsertRecords()
         if (insertRecords.length === 0) {
-          createMessage.warn("请添加一行数据")
+          createMessage.warn(t('retail.shipments.form.addRowData'))
           return;
         }
         const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
         if (isBarCodeEmpty) {
-          createMessage.warn("请录入条码或者选择产品")
+          createMessage.warn(t('retail.shipments.form.noticeTwo'))
           return;
         }
       }
@@ -606,7 +608,7 @@ export default defineComponent({
         const tableDataNotEnough = tableData.filter(item => item.productNumber > item.stock)
         const tableDataNotEnoughBarCode = tableDataNotEnough.map(item => item.barCode)
         const tableDataNotEnoughBarCodeStr = tableDataNotEnoughBarCode.join(",")
-        createMessage.info("条码: " + tableDataNotEnoughBarCodeStr + "商品库存不足，请检查库存数量")
+        createMessage.info(t('retail.shipments.form.table.barCode') + tableDataNotEnoughBarCodeStr + t('retail.shipments.form.noticeSeven'))
         return;
       }
 
@@ -691,7 +693,7 @@ export default defineComponent({
     function beforeUpload(file: any) {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        createMessage.error(`${file.name}，该文件超过2MB大小限制`);
+        createMessage.error(`${file.name}，` + t('retail.shipments.form.noticeFive'));
         return isLt2M || Upload.LIST_IGNORE
       }
     }
@@ -742,7 +744,7 @@ export default defineComponent({
 
     async function deleteRowData() {
       // 删除选中行
-      const type = await VXETable.modal.confirm('确定要删除选中的数据?')
+      const type = await VXETable.modal.confirm(t('retail.shipments.form.noticeFour'))
       const table = xGrid.value
       // 获取VXETable选中行
       const selectRow = table.getCheckboxRecords()
@@ -754,6 +756,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       open,
       checkFlag,
       isCanCheck,

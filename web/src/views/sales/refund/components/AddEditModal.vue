@@ -13,9 +13,9 @@
       v-model:open="open"
       style="left: 5%; height: 95%;">
     <template #footer>
-      <a-button @click="handleCancelModal">取消</a-button>
-      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
+      <a-button @click="handleCancelModal" v-text="t('sales.refund.form.cancel')"/>
+      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)" v-text="t('sales.refund.form.saveApprove')"/>
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)" v-text="t('sales.refund.form.save')"/>
       <!--发起多级审核-->
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
@@ -24,12 +24,12 @@
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="saleRefundFormState.id" v-show="false"/>
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="客户" data-step="1"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.form.customer')" data-step="1"
                          data-title="客户卡号"
                          :rules="[{ required: true}]">
               <a-select v-model:value="saleRefundFormState.customerId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
-                        placeholder="请选择客户"
+                        :placeholder="t('sales.refund.form.inputCustomer')"
                         :options="customerList.map(item => ({ value: item.id, label: item.customerName }))">
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
@@ -37,29 +37,29 @@
                   <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addCustomer">
                     <plus-outlined/>
-                    新增客户
+                    {{ t('sales.refund.form.addCustomer') }}
                   </div>
                 </template>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="saleRefundFormState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.form.receiptDate')" :rules="[{ required: true}]">
+              <a-date-picker v-model:value="saleRefundFormState.receiptDate" show-time :placeholder="t('sales.refund.form.inputReceiptDate')" format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.form.receiptNumber')" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="saleRefundFormState.receiptNumber" :readOnly="true"/>
+              <a-input v-model:value="saleRefundFormState.receiptNumber" :readOnly="true"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联单据" data-step="3"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.form.relatedShipments')" data-step="3"
                          data-title="关联单据"
                          data-intro="">
-              <a-input-search :readonly="true" placeholder="请选择关联出库单据" v-model:value="saleRefundFormState.otherReceipt" @search="onSearch"/>
+              <a-input-search :readonly="true" :placeholder="t('sales.refund.form.inputRelatedShipments')" v-model:value="saleRefundFormState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -68,23 +68,22 @@
             <div class="table-operations">
               <vxe-grid ref='xGrid' v-bind="gridOptions">
                 <template #toolbar_buttons="{ row }">
-                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
-                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="barCode"
+                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px" v-text="t('sales.refund.form.scanCodeData')"/>
+                  <a-input v-if="showScanPressEnter" :placeholder="t('sales.refund.form.scanCodeTip')" style="width: 150px; margin-right: 10px" v-model:value="barCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
-                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
-                  <a-button @click="productModal" style="margin-right: 10px">选择添加退货商品</a-button>
-                  <a-button @click="" style="margin-right: 10px">历史单据</a-button>
-                  <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
-                  <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan" v-text="t('sales.refund.form.collapseScanCode')"/>
+                  <a-button @click="productModal" style="margin-right: 10px" v-text="t('sales.refund.form.addProduct')"/>
+                  <a-button @click="addRowData" style="margin-right: 10px" v-text="t('sales.refund.form.insertRow')"/>
+                  <a-button @click="deleteRowData" style="margin-right: 10px" v-text="t('sales.refund.form.deleteRow')"/>
                 </template>
                 <template #warehouse_default="{ row }">
                   <span>{{ formatWarehouseId(row.warehouseId) }}</span>
                 </template>
                 <template #warehouse_edit="{ row }">
-                  <vxe-select v-model="row.warehouseId" placeholder="输选择仓库" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
+                  <vxe-select v-model="row.warehouseId" :placeholder="t('sales.refund.form.noticeEight')" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
+                  <vxe-select v-model="row.barCode" :placeholder="t('sales.refund.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
@@ -109,32 +108,32 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-textarea :rows="1" placeholder="请输入备注" v-model:value="saleRefundFormState.remark"
+                  <a-textarea :rows="1" :placeholder="t('sales.refund.form.table.inputRemark')" v-model:value="saleRefundFormState.remark"
                               style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.form.table.discount')" data-step="2"
                              data-title="优惠率">
                   <a-input-number placeholder="请输入优惠率" @change="discountRateChange" addon-after="%" v-model:value="saleRefundFormState.refundOfferRate"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="退款优惠" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.form.table.returnDiscount')" data-step="2"
                              data-title="退款优惠">
                   <a-input-number placeholder="请输入退款优惠" @change="discountAmountChange" v-model:value="saleRefundFormState.refundOfferAmount"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠后金额" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.form.table.discountAmount')" data-step="2"
                              data-title="优惠后金额">
                   <a-input placeholder="请输入优惠后金额" v-model:value="saleRefundFormState.refundLastAmount" :readOnly="true"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="其他费用" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.view.otherFees')" data-step="2"
                              data-title="其他费用">
                   <a-input-number placeholder="请输入其他费用" @change="otherAmountChange" v-model:value="saleRefundFormState.otherAmount" :readOnly="true"/>
                 </a-form-item>
@@ -142,11 +141,11 @@
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="退款账户" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.form.table.returnAccount')" data-step="2"
                              data-title="退款账户"
                              :rules="[{ required: true}]">
                   <a-select v-model:value="saleRefundFormState.accountId"
-                            placeholder="请选择退款账户"
+                            :placeholder="t('sales.refund.form.table.inputAccount')"
                             :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
                             @change="selectAccountChange">
                     <template #dropdownRender="{ menuNode: menu }">
@@ -155,7 +154,7 @@
                       <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                            @mousedown="e => e.preventDefault()" @click="addAccount">
                         <plus-outlined/>
-                        新增结算账户
+                        {{ t('sales.refund.form.addSettlementAccount') }}
                       </div>
                     </template>
                   </a-select>
@@ -167,13 +166,13 @@
                 </a-tooltip>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次退款" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.view.thisTimeReturnAmount')" data-step="2"
                              data-title="本次退款">
                   <a-input-number placeholder="请输入本次退款金额" @change="thisRefundAmountChange" v-model:value="saleRefundFormState.thisRefundAmount"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24" >
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次欠款" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.view.thisTimeArrearsAmount')" data-step="2"
                              data-title="本次欠款">
                   <a-input placeholder="请输入本次欠款金额" :readOnly="true" v-model:value="saleRefundFormState.thisArrearsAmount"/>
                 </a-form-item>
@@ -181,11 +180,11 @@
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="销售人员" data-step="3"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.view.salesPerson')" data-step="3"
                              data-title="销售人员"
                              data-intro="">
                   <a-select v-model:value="saleRefundFormState.operatorIds"
-                            placeholder="请选择销售人员"
+                            :placeholder="t('sales.refund.form.inputSalesPerson')"
                             mode="multiple"
                             :options="salePersonalList.map(item => ({ value: item.id, label: item.name }))"/>
                 </a-form-item>
@@ -193,7 +192,7 @@
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="附件" data-step="9"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.form.table.annex')" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
                   <a-upload
@@ -203,7 +202,7 @@
                       multiple>
                     <a-button>
                       <upload-outlined/>
-                      点击上传附件
+                      {{ t('sales.refund.form.table.uploadAnnex') }}
                     </a-button>
                   </a-upload>
                 </a-form-item>
@@ -279,6 +278,7 @@ import MultipleAccountsModal from "@/views/basic/settlement-account/components/M
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
+import {useI18n} from "vue-i18n";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -332,6 +332,7 @@ export default defineComponent({
     'upload-outlined': UploadOutlined,
   },
   setup(_, context) {
+    const { t } = useI18n();
     const {createMessage} = useMessage();
     const confirmLoading = ref<boolean>(false);
     const open = ref<boolean>(false);
@@ -389,10 +390,10 @@ export default defineComponent({
       loadAccountList();
       loadProductSku();
       if (id) {
-        title.value = '编辑-销售退货单'
+        title.value = t('sales.refund.editRefund')
         loadSaleRefundDetail(id);
       } else {
-        title.value = '新增-销售退货单'
+        title.value = t('sales.refund.addRefund')
         loadGenerateId();
         saleRefundFormState.receiptDate = dayjs(new Date());
         const table = xGrid.value
@@ -447,7 +448,7 @@ export default defineComponent({
               selectRow.row.productNumber = 1
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
-              createMessage.warn("该条码查询不到商品信息")
+              createMessage.warn(t('sales.refund.form.noticeFour'))
             }
           }
         }
@@ -659,36 +660,36 @@ export default defineComponent({
     async function handleOk(type: number) {
       const table = xGrid.value
       if (!saleRefundFormState.customerId) {
-        createMessage.warn('请选择客户');
+        createMessage.warn(t('sales.refund.form.inputCustomer'));
         return;
       }
       if (saleRefundFormState.accountId === 0) {
         if(!multipleAccounts.value.accountOne && !multipleAccounts.value.accountTwo) {
-          createMessage.warn('请至少选择两个退款账户');
+          createMessage.warn(t('sales.refund.form.noticeFive'));
           return;
         }
         if(!multipleAccounts.value.accountPriceOne && !multipleAccounts.value.accountPriceTwo) {
-          createMessage.warn('请输入退款金额');
+          createMessage.warn(t('sales.refund.form.noticeSix'));
           return;
         }
       } else if (!saleRefundFormState.accountId) {
-        createMessage.warn('请选择退款账户');
+        createMessage.warn(t('sales.refund.form.inputReturnAccount'));
         return;
       }
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.warn("请添加一行数据")
+          createMessage.warn(t('sales.refund.form.addRowData'))
           return;
         }
         const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
         if(isBarCodeEmpty) {
-          createMessage.warn("请录入条码或者选择产品")
+          createMessage.warn(t('sales.refund.form.noticeOne'))
           return;
         }
         const isWarehouseEmpty = insertRecords.some(item => !item.warehouseId)
         if(isWarehouseEmpty) {
-          createMessage.warn("请选择仓库")
+          createMessage.warn(t('sales.refund.form.noticeEight'))
           return;
         }
       }
@@ -807,7 +808,7 @@ export default defineComponent({
     function beforeUpload(file: any) {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        createMessage.error(`${file.name}，该文件超过2MB大小限制`);
+        createMessage.error(`${file.name}，` + t('sales.refund.form.noticeThree'));
         return isLt2M || Upload.LIST_IGNORE
       }
     }
@@ -870,7 +871,7 @@ export default defineComponent({
     }
 
     async function deleteRowData() {
-      const type = await VXETable.modal.confirm('确定要删除选中的数据?')
+      const type = await VXETable.modal.confirm(t('sales.refund.form.noticeTwo'))
       const table = xGrid.value
       const selectRow = table.getCheckboxRecords()
       if (table) {
@@ -1089,6 +1090,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       h,
       AccountBookTwoTone,
       open,

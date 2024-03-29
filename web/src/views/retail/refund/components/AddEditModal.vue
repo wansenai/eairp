@@ -13,9 +13,9 @@
       v-model:open="open"
       style="left: 5%; height: 95%;">
     <template #footer>
-      <a-button @click="handleCancelModal">取消</a-button>
-      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
+      <a-button @click="handleCancelModal" v-text="t('retail.refund.form.cancel')" />
+      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)" v-text="t('retail.refund.form.cancel')" />
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)" v-text="t('retail.refund.form.save')" />
       <!--发起多级审核-->
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
@@ -24,12 +24,11 @@
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="formState.id" v-show="false"/>
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="会员卡号" data-step="1"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('retail.refund.form.member')" data-step="1"
                          data-title="会员卡号"
                          data-intro="如果发现需要选择的会员卡号尚未录入，可以在下拉框中点击新增会员信息进行录入">
-              <a-select placeholder="选择会员卡号" v-model:value="formState.memberId" :disabled= "disabledStatus"
+              <a-select :placeholder="t('retail.refund.form.inputMember')" v-model:value="formState.memberId" :disabled= "disabledStatus"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
-                        @change="onMemberChange"
                         :options="memberList.map(item => ({ value: item.id, label: item.memberName }))">
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
@@ -37,29 +36,29 @@
                   <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addMember">
                     <plus-outlined/>
-                    新增会员
+                    {{ t('retail.refund.form.addMember') }}
                   </div>
                 </template>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="formState.receiptDate" show-time placeholder="选择时间" format="YYYY-MM-DD HH:mm:ss"/>
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('retail.refund.form.receiptDate')" :rules="[{ required: true}]">
+              <a-date-picker v-model:value="formState.receiptDate" show-time :placeholder="t('retail.refund.form.inputReceiptDate')" format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('retail.refund.form.receiptNumber')" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="formState.receiptNumber" :readOnly="true"/>
+              <a-input v-model:value="formState.receiptNumber" :readOnly="true"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联单据" data-step="3"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('retail.refund.form.relatedReceipt')" data-step="3"
                          data-title="关联单据"
                          data-intro="">
-              <a-input-search readonly placeholder="请选择关联单据" v-model:value="formState.otherReceipt" @search="onSearch"/>
+              <a-input-search readonly v-model:value="formState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -68,13 +67,13 @@
             <div class="table-operations">
               <vxe-grid ref='xGrid' v-bind="gridOptions">
                 <template #toolbar_buttons="{ row }">
-                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px">扫条码录入数据</a-button>
-                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码" style="width: 150px; margin-right: 10px" v-model:value="formState.scanBarCode"
+                  <a-button v-if="showScanButton" type="primary"  @click="scanEnter" style="margin-right: 10px" v-text="t('retail.refund.form.collapseScanCode')"/>
+                  <a-input v-if="showScanPressEnter" :placeholder="t('retail.refund.form.scanCodeTip')" style="width: 150px; margin-right: 10px" v-model:value="formState.scanBarCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
-                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
-                  <a-button @click="productModal" style="margin-right: 10px">选择添加退货商品</a-button>
-                  <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
-                  <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan" v-text="t('retail.refund.form.collapseScanCode')"/>
+                  <a-button @click="productModal" style="margin-right: 10px" v-text="t('retail.refund.form.addProduct')"/>
+                  <a-button @click="addRowData" style="margin-right: 10px" v-text="t('retail.refund.form.insertRow')"/>
+                  <a-button @click="deleteRowData" style="margin-right: 10px" v-text="t('retail.refund.form.deleteRow')"/>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber"></vxe-input>
@@ -83,7 +82,7 @@
                   <vxe-input v-model="row.amount"></vxe-input>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
+                  <vxe-select v-model="row.barCode" :placeholder="t('retail.refund.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #return_number_edit="{ row }">
                   <vxe-input v-model="row.returnNumber"></vxe-input>
@@ -93,14 +92,14 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-textarea :rows="1" placeholder="请输入备注" v-model:value="formState.remark"
+                  <a-textarea :rows="1" :placeholder="t('retail.refund.form.table.inputRemark')" v-model:value="formState.remark"
                               style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="附件" data-step="9"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('retail.refund.form.table.annex')" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
                   <a-upload
@@ -110,7 +109,7 @@
                       multiple>
                     <a-button>
                       <upload-outlined/>
-                      点击上传附件
+                      {{ t('retail.refund.form.table.uploadAnnex') }}
                     </a-button>
                   </a-upload>
                 </a-form-item>
@@ -124,7 +123,7 @@
                   <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" data-step="5" data-title="单据金额"
                                data-intro="单据金额等于左侧商品的总金额">
                     <template #label>
-                      <span style="font-size: 20px;line-height:20px">单据金额</span>
+                      <span style="font-size: 20px;line-height:20px">{{ t('retail.refund.view.receiptAmount') }}</span>
                     </template>
                     <a-input v-model:value="receiptAmount" :style="{color:'purple', height:'35px'}"
                              :readOnly="true"/>
@@ -133,7 +132,7 @@
                 <a-col :lg="24" :md="6" :sm="6">
                   <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" data-step="6" data-title="付款金额">
                     <template #label>
-                      <span style="font-size: 20px;line-height:20px">付款金额</span>
+                      <span style="font-size: 20px;line-height:20px">{{ t('retail.refund.view.paymentAmount') }}</span>
                     </template>
                     <a-input v-model:value="paymentAmount" :style="{color:'red', height:'35px'}"
                              defaultValue="0"
@@ -143,7 +142,7 @@
                 <a-col :lg="24" :md="6" :sm="6">
                   <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" data-step="7" data-title="找零">
                     <template #label>
-                      <span style="font-size: 20px;line-height:20px">找零</span>
+                      <span style="font-size: 20px;line-height:20px">{{ t('retail.refund.view.changeAmount') }}</span>
                     </template>
                     <a-input v-model:value="backAmount" :style="{color:'green', height:'35px'}"
                              :readOnly="true"
@@ -153,9 +152,9 @@
                 <a-col :lg="24" :md="6" :sm="6">
                   <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" data-step="8" data-title="付款账户" :rules="[{ required: true}]">
                     <template #label>
-                      <span style="font-size: 20px;line-height:20px">付款账户</span>
+                      <span style="font-size: 20px;line-height:20px">{{ t('retail.refund.view.paymentAccount') }}</span>
                     </template>
-                    <a-select placeholder="选择付款账户" style="font-size:20px;"
+                    <a-select :placeholder="t('retail.refund.view.inputPaymentAccount')" style="font-size:20px;"
                               v-model:value="formState.accountId" :dropdownMatchSelectWidth="false"
                               :options="accountList.map(item => ({ value: item.id, label: item.accountName }))">
                       <template #dropdownRender="{ menuNode: menu }">
@@ -164,7 +163,7 @@
                         <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                              @mousedown="e => e.preventDefault()" @click="addAccount">
                           <plus-outlined/>
-                          新增结算账户
+                          {{ t('retail.refund.view.addAccount') }}
                         </div>
                       </template>
                     </a-select>
@@ -239,6 +238,7 @@ import {ProductExtendPriceResp, ProductStockSkuResp} from "@/api/product/model/p
 import {AddOrUpdateRefundReq} from "@/api/retail/model/refundModel";
 import {FileData, ShipmentsData} from "@/api/retail/model/shipmentsModel";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
+import {useI18n} from "vue-i18n";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -292,6 +292,7 @@ export default defineComponent({
     'a-divider': Divider,
   },
   setup(_, context) {
+    const { t } = useI18n();
     const {createMessage} = useMessage();
     const confirmLoading = ref<boolean>(false);
     const open = ref<boolean>(false);
@@ -346,11 +347,11 @@ export default defineComponent({
       loadWarehouseList();
       loadProductSku();
       if (id) {
-        title.value = '编辑-零售退货'
+        title.value = t('retail.refund.editRefund')
         loadRefundDetail(id);
         disabledStatus.value = true
       } else {
-        title.value = '新增-零售退货'
+        title.value = t('retail.refund.addRefund')
         loadGenerateId();
         disabledStatus.value = false
         formState.receiptDate = dayjs(new Date());
@@ -422,7 +423,7 @@ export default defineComponent({
               selectRow.row.productNumber = 1
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
-              createMessage.warn("该条码查询不到商品信息")
+              createMessage.warn(t('retail.refund.form.noticeSix'))
             }
           }
         }
@@ -547,21 +548,6 @@ export default defineComponent({
       loadMemberList();
     }
 
-    function onMemberChange(value) {
-      payTypeList.value = []
-      const member = memberList.value.find(item => item.id === value)
-      if (member.advancePayment > 0) {
-        payTypeList.value = [
-          {value: '预付款', text: '预付款（' + member.advancePayment + '）'},
-          {value: '现付', text: '现付'},
-        ]
-      } else {
-        payTypeList.value = [
-          {value: '现付', text: '现付'},
-        ]
-      }
-    }
-
     function addAccount() {
       openAccountModal(true, {
         isUpdate: false,
@@ -575,22 +561,22 @@ export default defineComponent({
     async function handleOk(type: number) {
       const table = xGrid.value
       if (!formState.receiptDate) {
-        createMessage.warn('请选择单据日期');
+        createMessage.warn(t('retail.refund.form.inputReceiptDate'));
         return;
       }
       if (!formState.accountId) {
-        createMessage.warn('请选择付款账户');
+        createMessage.warn(t('retail.refund.view.inputPaymentAccount'));
         return;
       }
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
-          createMessage.warn("请添加一行数据")
+          createMessage.warn(t('retail.refund.form.addRowData'))
           return;
         }
         const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
         if(isBarCodeEmpty) {
-          createMessage.warn("请录入条码或者选择产品")
+          createMessage.warn(t('retail.refund.form.noticeTwo'))
           return;
         }
       }
@@ -677,7 +663,7 @@ export default defineComponent({
     function beforeUpload(file: any) {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        createMessage.error(`${file.name}，该文件超过2MB大小限制`);
+        createMessage.error(`${file.name}，` + t('retail.refund.form.noticeFive'));
         return isLt2M || Upload.LIST_IGNORE
       }
     }
@@ -752,7 +738,7 @@ export default defineComponent({
 
     async function deleteRowData() {
       // 删除选中行
-      const type = await VXETable.modal.confirm('确定要删除选中的数据?')
+      const type = await VXETable.modal.confirm(t('retail.refund.form.noticeFour'))
       const table = xGrid.value
       // 获取VXETable选中行
       const selectRow = table.getCheckboxRecords()
@@ -772,6 +758,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       open,
       checkFlag,
       isCanCheck,
@@ -805,7 +792,6 @@ export default defineComponent({
       showScanPressEnter,
       memberModal,
       addMember,
-      onMemberChange,
       accountModal,
       addAccount,
       handleOk,
