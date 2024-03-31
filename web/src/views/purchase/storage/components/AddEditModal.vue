@@ -11,9 +11,9 @@
       v-model:open="open"
       style="left: 5%; height: 95%;">
     <template #footer>
-      <a-button @click="handleCancelModal">取消</a-button>
-      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)">保存并审核</a-button>
-      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)">保存</a-button>
+      <a-button @click="handleCancelModal" v-text="t('purchase.storage.form.cancel')" />
+      <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)" v-text="t('purchase.storage.form.saveApprove')" />
+      <a-button type="primary" :loading="confirmLoading" @click="handleOk(0)" v-text="t('purchase.storage.form.save')" />
       <!--发起多级审核-->
       <a-button v-if="!checkFlag" @click="" type="primary">提交流程</a-button>
     </template>
@@ -23,11 +23,11 @@
         <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-input v-model:value="purchaseStorageFormState.id" v-show="false"/>
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="供应商" data-step="1"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.supplier')" data-step="1"
                          data-title="供应商" :rules="[{ required: true}]">
               <a-select v-model:value="purchaseStorageFormState.supplierId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
-                        placeholder="请选择供应商"
+                        :placeholder="t('purchase.storage.form.inputSupplier')"
                         :options="Array.isArray(supplierList) ? supplierList.map(item => ({ value: item.id, label: item.supplierName })) : []">
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
@@ -35,31 +35,31 @@
                   <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                        @mousedown="e => e.preventDefault()" @click="addSupplier">
                     <plus-outlined/>
-                    新增供应商
+                    {{ t('purchase.storage.form.addSupplier') }}
                   </div>
                 </template>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据日期" :rules="[{ required: true}]">
-              <a-date-picker v-model:value="purchaseStorageFormState.receiptDate" show-time placeholder="选择时间"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.receiptDate')" :rules="[{ required: true}]">
+              <a-date-picker v-model:value="purchaseStorageFormState.receiptDate" show-time :placeholder="t('purchase.storage.form.inputReceiptDate')"
                              format="YYYY-MM-DD HH:mm:ss"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="单据编号" data-step="2"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.receiptNumber')" data-step="2"
                          data-title="单据编号"
                          data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input placeholder="请输入单据编号" v-model:value="purchaseStorageFormState.receiptNumber"
+              <a-input v-model:value="purchaseStorageFormState.receiptNumber"
                        :readOnly="true"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="关联订单" data-step="3"
+            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.relatedOrder')" data-step="3"
                          data-title="关联订单"
                          data-intro="">
-              <a-input-search :readonly="true" placeholder="请选择关联订单"
+              <a-input-search :readonly="true"
                               v-model:value="purchaseStorageFormState.otherReceipt" @search="onSearch"/>
             </a-form-item>
           </a-col>
@@ -70,25 +70,24 @@
               <vxe-grid ref='xGrid' v-bind="gridOptions">
                 <template #toolbar_buttons="{ row }">
                   <a-button v-if="showScanButton" type="primary" @click="scanEnter" style="margin-right: 10px">
-                    扫条码录入数据
+                    {{ t('purchase.storage.form.scanCodeData') }}
                   </a-button>
-                  <a-input v-if="showScanPressEnter" placeholder="鼠标点击此处扫条码"
+                  <a-input v-if="showScanPressEnter" :placeholder="t('purchase.storage.form.scanCodeTip')"
                            style="width: 150px; margin-right: 10px" v-model:value="barCode"
                            @pressEnter="scanPressEnter" ref="scanBarCode"/>
-                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan">收起扫码</a-button>
-                  <a-button @click="productModal" style="margin-right: 10px">选择添加采购商品</a-button>
-                  <a-button @click="" style="margin-right: 10px">历史单据</a-button>
-                  <a-button @click="addRowData" style="margin-right: 10px">添加一行</a-button>
-                  <a-button @click="deleteRowData" style="margin-right: 10px">删除选中行</a-button>
+                  <a-button v-if="showScanPressEnter" style="margin-right: 10px" @click="stopScan" v-text="t('purchase.storage.form.collapseScanCode')"/>
+                  <a-button @click="productModal" style="margin-right: 10px" v-text="t('purchase.storage.form.addProduct')"/>
+                  <a-button @click="addRowData" style="margin-right: 10px" v-text="t('purchase.storage.form.insertRow')"/>
+                  <a-button @click="deleteRowData" style="margin-right: 10px" v-text="t('purchase.storage.form.deleteRow')"/>
                 </template>
                 <template #warehouse_default="{ row }">
                   <span>{{ formatWarehouseId(row.warehouseId) }}</span>
                 </template>
                 <template #warehouse_edit="{ row }">
-                  <vxe-select v-model="row.warehouseId" placeholder="输选择仓库" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
+                  <vxe-select v-model="row.warehouseId" :placeholder="t('purchase.storage.form.table.inputWarehouse')" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-select v-model="row.barCode" placeholder="输入商品条码" @change="selectBarCode"
+                  <vxe-select v-model="row.barCode" :placeholder="t('purchase.storage.form.table.inputBarCode')" @change="selectBarCode"
                               :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
@@ -114,48 +113,48 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-textarea :rows="1" placeholder="请输入备注" v-model:value="purchaseStorageFormState.remark"
+                  <a-textarea :rows="1" :placeholder="t('purchase.storage.form.table.inputRemark')" v-model:value="purchaseStorageFormState.remark"
                               style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠率" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.discountRate')" data-step="2"
                              data-title="优惠率">
-                  <a-input-number placeholder="请输入优惠率" @change="discountRateChange" addon-after="%"
+                  <a-input-number @change="discountRateChange" addon-after="%"
                                   v-model:value="purchaseStorageFormState.paymentRate"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="付款优惠" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.paymentDiscount')" data-step="2"
                              data-title="付款优惠">
-                  <a-input-number placeholder="请输入收款优惠" @change="discountAmountChange"
+                  <a-input-number @change="discountAmountChange"
                                   v-model:value="purchaseStorageFormState.paymentAmount"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="优惠后金额" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.discountAmount')" data-step="2"
                              data-title="优惠后金额">
-                  <a-input placeholder="请输入优惠后金额" v-model:value="purchaseStorageFormState.paymentLastAmount"
+                  <a-input v-model:value="purchaseStorageFormState.paymentLastAmount"
                            :readOnly="true"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="其他费用" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.otherFees')" data-step="2"
                              data-title="其他费用">
-                  <a-input-number placeholder="请输入其他费用" @change="otherAmountChange"
+                  <a-input-number @change="otherAmountChange"
                                   v-model:value="purchaseStorageFormState.otherAmount" :readOnly="true"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="结算账户" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.settlementAccount')" data-step="2"
                              data-title="结算账户"
                              :rules="[{ required: true}]">
                   <a-select v-model:value="purchaseStorageFormState.accountId"
-                            placeholder="请选择结算账户"
+                            :placeholder="t('purchase.storage.view.inputSettlementAccount')"
                             :options="accountList.map(item => ({ value: item.id, label: item.accountName }))"
                             @change="selectAccountChange">
                     <template #dropdownRender="{ menuNode: menu }">
@@ -164,7 +163,7 @@
                       <div style="padding: 4px 8px; cursor: pointer; color: #1c1e21"
                            @mousedown="e => e.preventDefault()" @click="addAccount">
                         <plus-outlined/>
-                        新增结算账户
+                        {{ t('purchase.storage.view.addSettlementAccount') }}
                       </div>
                     </template>
                   </a-select>
@@ -177,24 +176,24 @@
                 </a-tooltip>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次付款" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.thisTimePaymentAmount')" data-step="2"
                              data-title="本次付款"
                              :rules="[{ required: true}]">
-                  <a-input-number placeholder="请输入本次付款金额" @change="thisPaymentAmountChange"
+                  <a-input-number @change="thisPaymentAmountChange"
                                   v-model:value="purchaseStorageFormState.thisPaymentAmount"/>
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="本次欠款" data-step="2"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.thisTimeArrearsAmount')" data-step="2"
                              data-title="本次欠款">
-                  <a-input placeholder="请输入本次欠款金额" :readOnly="true"
+                  <a-input :readOnly="true"
                            v-model:value="purchaseStorageFormState.thisArrearsAmount"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="附件" data-step="9"
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.table.annex')" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
                   <a-upload
@@ -204,7 +203,7 @@
                       multiple>
                     <a-button>
                       <upload-outlined/>
-                      点击上传附件
+                      {{ t('purchase.storage.form.table.uploadAnnex') }}
                     </a-button>
                   </a-upload>
                 </a-form-item>
@@ -280,6 +279,7 @@ import {addSupplier, getSupplierList} from "@/api/basic/supplier";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
+import {useI18n} from "vue-i18n";
 
 const VNodes = defineComponent({
   props: {
@@ -335,6 +335,7 @@ export default defineComponent({
     'a-divider': Divider,
   },
   setup(_, context) {
+    const { t } = useI18n();
     const {createMessage} = useMessage();
     const confirmLoading = ref<boolean>(false);
     const open = ref<boolean>(false);
@@ -392,10 +393,10 @@ export default defineComponent({
       loadAccountList();
       loadProductSku();
       if (id) {
-        title.value = '编辑-采购入库'
+        title.value = t('purchase.storage.editStorage')
         loadStorageDetail(id);
       } else {
-        title.value = '新增-采购入库'
+        title.value = t('purchase.storage.addStorage')
         loadGenerateId();
         purchaseStorageFormState.receiptDate = dayjs(new Date());
         const table = xGrid.value
@@ -461,7 +462,7 @@ export default defineComponent({
               selectRow.row.taxRate = 0
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
-              createMessage.warn("该条码查询不到商品信息")
+              createMessage.warn(t('purchase.storage.form.noticeFour'))
             }
           }
         }
@@ -655,36 +656,36 @@ export default defineComponent({
     async function handleOk(type: number) {
       const table = xGrid.value
       if (!purchaseStorageFormState.supplierId) {
-        createMessage.warn('请选择供应商');
+        createMessage.warn(t('purchase.storage.form.inputSupplier'));
         return;
       }
       if (purchaseStorageFormState.accountId === 0) {
         if (!multipleAccounts.value.accountOne && !multipleAccounts.value.accountTwo) {
-          createMessage.warn('请至少选择两个退款账户');
+          createMessage.warn(t('purchase.storage.form.noticeSeven'));
           return;
         }
         if (!multipleAccounts.value.accountPriceOne && !multipleAccounts.value.accountPriceTwo) {
-          createMessage.warn('请输入退款金额');
+          createMessage.warn(t('purchase.storage.form.noticeEight'));
           return;
         }
       } else if (!purchaseStorageFormState.accountId) {
-        createMessage.warn('请选择结算账户');
+        createMessage.warn(t('purchase.storage.view.inputSettlementAccount'));
         return;
       }
       if (table) {
         const insertRecords = table.getInsertRecords()
         if (insertRecords.length === 0) {
-          createMessage.warn("请添加一行数据")
+          createMessage.warn(t('purchase.storage.form.addRowData'))
           return;
         }
         const isBarCodeEmpty = insertRecords.some(item => !item.barCode)
         if (isBarCodeEmpty) {
-          createMessage.warn("请录入条码或者选择产品")
+          createMessage.warn(t('purchase.storage.form.noticeOne'))
           return;
         }
         const isWarehouseEmpty = insertRecords.some(item => !item.warehouseId)
         if(isWarehouseEmpty) {
-          createMessage.warn("请选择仓库")
+          createMessage.warn(t('purchase.storage.form.table.inputWarehouse'))
           return;
         }
       }
@@ -771,12 +772,12 @@ export default defineComponent({
 
       const result = await addOrUpdatePurchaseStorage(params)
       if (result.code === 'P0018' || result.code === 'P0019') {
-        createMessage.success('操作成功');
+        createMessage.success(t('sys.api.operationSuccess'));
         handleCancelModal();
         clearData();
 
       } else {
-        createMessage.error('操作失败');
+        createMessage.error(t('sys.api.operationFailed'));
       }
       clearData();
     }
@@ -811,7 +812,7 @@ export default defineComponent({
     function beforeUpload(file: any) {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        createMessage.error(`${file.name}，该文件超过2MB大小限制`);
+        createMessage.error(`${file.name}，` + t('purchase.storage.form.noticeThree'));
         return isLt2M || Upload.LIST_IGNORE
       }
     }
@@ -874,7 +875,7 @@ export default defineComponent({
 
     async function deleteRowData() {
       // 删除选中行
-      const type = await VXETable.modal.confirm('确定要删除选中的数据?')
+      const type = await VXETable.modal.confirm(t('purchase.storage.form.noticeTwo'))
       const table = xGrid.value
       // 获取VXETable选中行
       const selectRow = table.getCheckboxRecords()
@@ -1093,6 +1094,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       h,
       formRef,
       AccountBookTwoTone,

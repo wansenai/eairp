@@ -2,28 +2,28 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="采购入库-详情"
+          :title="t('purchase.storage.detail')"
           :sub-title= "receiptNumber">
         <template #extra>
-          <a-button @click="exportTable">导出</a-button>
-          <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+          <a-button @click="exportTable" v-text="t('purchase.storage.export.name')"/>
+          <a-button @click="primaryPrint" type="primary" v-text="t('purchase.regularPrint')"/>
           <!--          <a-button key="triplePrint">三联打印</a-button>-->
           <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
         <a-descriptions size="small" :column="4">
-          <a-descriptions-item label="供应商">{{ supplierName }}</a-descriptions-item>
-          <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item label="采购单据">
+          <a-descriptions-item :label="t('purchase.storage.view.supplier')">{{ supplierName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.storage.view.receiptDate')">{{ receiptDate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.storage.view.purchaseOrder')">
             <a @click="viewOrderReceipt">{{ otherReceipt }}</a>
           </a-descriptions-item>
-          <a-descriptions-item label="优惠率">{{ paymentRate }}</a-descriptions-item>
-          <a-descriptions-item label="付款优惠">{{ paymentAmount }}</a-descriptions-item>
-          <a-descriptions-item label="优惠后金额">{{ paymentLastAmount }}</a-descriptions-item>
-          <a-descriptions-item label="其它费用">{{ otherAmount }}</a-descriptions-item>
-          <a-descriptions-item label="结算账户">{{ accountName }}</a-descriptions-item>
-          <a-descriptions-item label="本次付款">{{ thisPaymentAmount }}</a-descriptions-item>
-          <a-descriptions-item label="本次欠款">{{ thisArrearsAmount }}</a-descriptions-item>
-          <a-descriptions-item label="备注">
+          <a-descriptions-item :label="t('purchase.storage.view.discountRate')">{{ paymentRate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.storage.view.paymentDiscount')">{{ paymentAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.storage.view.discountAmount')">{{ paymentLastAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.storage.view.otherFees')">{{ otherAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.storage.view.settlementAccount')">{{ accountName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.storage.view.thisTimePaymentAmount')">{{ thisPaymentAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.storage.view.thisTimeArrearsAmount')">{{ thisArrearsAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.storage.view.remark')">
             {{ remark }}
           </a-descriptions-item>
         </a-descriptions>
@@ -37,15 +37,15 @@
             }"
           >
             <a-statistic
-                title="单据状态"
-                :value="status === 1 ? '已审核' : '未审核'"
+                :title="t('purchase.storage.view.status')"
+                :value="status === 1 ? t('sys.table.audited') : t('sys.table.unaudited')"
                 :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                 :style="{
                 marginRight: '32px',
                 color: 'green',
               }"
             />
-            <a-statistic title="单据金额"
+            <a-statistic :title="t('purchase.storage.view.receiptAmount')"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="paymentLastAmount"/>
@@ -73,6 +73,7 @@ import {
 } from 'ant-design-vue';
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ViewPurchaseStorageModal',
@@ -86,6 +87,7 @@ export default defineComponent({
     'a-statistic': Statistic,
   },
   setup() {
+    const { t } = useI18n();
     const receiptNumber = ref('');
     const otherReceipt = ref('');
     const supplierName = ref(0);
@@ -102,14 +104,14 @@ export default defineComponent({
     const [viewOrderReceiptModal, {openModal: openViewOrderModal}] = useModal();
     const tableData = ref([]);
     const [registerTable] = useTable({
-      title: '采购入库表数据',
+      title: t('purchase.storage.view.title'),
       columns: purchaseOrderTableColumns,
       dataSource: tableData,
       pagination: false,
       showIndexColumn: false,
       bordered: true,
     });
-    const getTitle = ref('单据详情');
+    const getTitle = ref(t('purchase.storage.receipt'));
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200, showOkBtn: false});
       const res = await getLinkStorageDetail(data.receiptNumber);
@@ -148,7 +150,7 @@ export default defineComponent({
         const link = document.createElement("a");
         const timestamp = getTimestamp(new Date());
         link.href = URL.createObjectURL(blob);
-        link.download = "采购入库单据详情" + timestamp + ".xlsx";
+        link.download = t('purchase.storage.export.exportData') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
@@ -159,25 +161,25 @@ export default defineComponent({
     function primaryPrint() {
       const header = `
   <div style="${flexContainer}">
-    <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
-    <div style="${flexItem}">单据金额：${paymentLastAmount.value}</div>
-    <div style="${flexItem}">单据日期：${receiptDate.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.table.receiptNumber')}：${receiptNumber.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.view.receiptAmount')}：${paymentLastAmount.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.view.receiptDate')}：${receiptDate.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">结算账户：${accountName.value}</div>
-    <div style="${flexItem}">优惠率：${paymentRate.value}</div>
-    <div style="${flexItem}">付款优惠：${paymentAmount.value}</div>
-    <div style="${flexItem}">其他费用：${otherAmount.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.view.settlementAccount')}：${accountName.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.view.discountRate')}：${paymentRate.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.view.paymentDiscount')}：${paymentAmount.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.view.otherFees')}：${otherAmount.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">本次付款：${thisPaymentAmount.value}</div>
-    <div style="${flexItem}">本次欠款：${thisArrearsAmount.value}</div>
-    <div style="${flexItem}">供应商：${supplierName.value}</div>
-    <div style="${flexItem}">备注：${remark.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.view.thisTimePaymentAmount')}：${thisPaymentAmount.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.view.thisTimeArrearsAmount')}：${thisArrearsAmount.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.view.supplier')}：${supplierName.value}</div>
+    <div style="${flexItem}">${t('purchase.storage.view.remark')}：${remark.value}</div>
   </div>
 `;
       printJS({
-        documentTitle: "EAIRP (采购入库单据-详情)",
+        documentTitle: "EAIRP " + t('purchase.storage.detail'),
         header: header,
         properties: purchaseOrderTableColumns.map((item) => {
           return {
@@ -193,6 +195,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       receiptNumber,
       otherReceipt,
       supplierName,
