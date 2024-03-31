@@ -130,5 +130,7 @@ export default {
     unaudited: '未审核',
     viewReceiptDetails: '查看单据详情',
     confirmDelete: '是否确认删除数据？',
+    type: '类型',
+    subType: '子类型',
   }
 };

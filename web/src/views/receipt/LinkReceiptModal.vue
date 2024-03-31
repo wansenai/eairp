@@ -25,11 +25,13 @@ import {Tag} from "ant-design-vue";
 import {getReceipt} from "@/api/receipt/receipt";
 import ReceiptDetailModal from "@/views/receipt/ReceiptDetailModal.vue";
 import {ReceiptColumn, searchSchema} from "@/views/receipt/receipt.data"
+import {useI18n} from "vue-i18n";
 export default defineComponent({
   name: 'LinkReceiptModal',
   components: {Tag, BasicModal, BasicTable, TableAction, ReceiptDetailModal},
   emits: ['handleReceiptSuccess', 'register'],
   setup(_, context) {
+    const { t } = useI18n();
     const getTitle = ref('操作');
     const [receiptDetailModal, {openModal: openReceiptDetailModal}] = useModal();
     const { createMessage } = useMessage();
@@ -92,6 +94,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       registerModal,
       getTitle,

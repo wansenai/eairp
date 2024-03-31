@@ -42,12 +42,12 @@ export const columns: BasicColumn[] = [
         width: 80,
     },
     {
-        title: t('sales.refund.table.thisTimeRefundAmount'),
+        title: t('sales.refund.view.thisTimeReturnAmount'),
         dataIndex: 'thisRefundAmount',
         width: 80,
     },
     {
-        title: t('sales.refund.table.thisTimeArrearsAmount'),
+        title: t('sales.refund.view.thisTimeArrearsAmount'),
         dataIndex: 'thisArrearsAmount',
         width: 80,
     },

@@ -136,77 +136,77 @@ export const searchFormSchema: FormSchema[] = [
 
 export const purchaseOrderTableColumns: BasicColumn[] = [
     {
-        title: '仓库名称',
+        title: t('purchase.order.form.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '条码',
+        title: t('purchase.order.form.table.barCode'),
         dataIndex: 'barCode',
         width: 100,
     },
     {
-        title: '商品名称',
+        title: t('purchase.order.form.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '规格',
+        title: t('purchase.order.form.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('purchase.order.form.table.model'),
         dataIndex: 'productModel',
         width: 120,
     },
     {
-        title: '颜色',
+        title: t('purchase.order.form.table.color'),
         dataIndex: 'productColor',
         width: 70,
     },
     {
-        title: '库存',
+        title: t('purchase.order.form.table.stock'),
         dataIndex: 'stock',
         width: 80,
     },
     {
-        title: '单位',
+        title: t('purchase.order.form.table.unit'),
         dataIndex: 'productUnit',
         width: 60,
     },
     {
-        title: '数量',
+        title: t('purchase.order.form.table.quantity'),
         dataIndex: 'productNumber',
         width: 60,
     },
     {
-        title: '单价',
+        title: t('purchase.order.form.table.unitPrice'),
         dataIndex: 'unitPrice',
         width: 60,
     },
     {
-        title: '金额',
+        title: t('purchase.order.form.table.amount'),
         dataIndex: 'amount',
         width: 60,
     },
     {
-        title: '税率(%)',
+        title: t('purchase.order.form.table.taxRate'),
         dataIndex: 'taxRate',
         width: 60,
     },
     {
-        title: '税额',
+        title: t('purchase.order.form.table.taxAmount'),
         dataIndex: 'taxAmount',
         width: 60,
     },
     {
-        title: '价税合计',
+        title: t('purchase.order.form.table.totalIncludingTax'),
         dataIndex: 'taxTotalPrice',
         width: 80,
     },
     {
-        title: '备注',
+        title: t('purchase.order.form.table.remark'),
         dataIndex: 'remark',
         width: 100,
     },
