@@ -406,6 +406,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .deposit(purchaseMain.getDeposit())
                 .remark(purchaseMain.getRemark())
                 .tableData(tableData)
+                .status(purchaseMain.getStatus())
                 .files(fileList)
                 .status(purchaseMain.getStatus())
                 .build();

@@ -2,6 +2,9 @@ import {reactive, ref} from "vue";
 import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 interface FormState {
     id: number | string | undefined;
@@ -96,31 +99,31 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
         {
             field: 'warehouseId',
-            title: '仓库名称',
+            title: t('retail.shipments.form.table.warehouse'),
             width: 130,
-            editRender: { name: '$select', options: [], props: { placeholder: '请选择仓库' } }
+            editRender: { name: '$select', options: [], props: { placeholder: t('retail.shipments.form.table.inputWarehouse') } }
         },
         {   field: 'barCode',
             width:160,
-            title: '条码',
+            title: t('retail.shipments.form.table.barCode'),
             slots: { edit: 'barCode_edit' },
-            titlePrefix: { content: '需要在商品管理添加商品' },
+            titlePrefix: { content: t('retail.shipments.form.noticeThree') },
             editRender: { name: '$select', options: []}
         },
         {
             field: 'productName',
-            title: '名称',
+            title: t('retail.shipments.form.table.name'),
             width:160,
         },
-        { field: 'productStandard', title: '规格', width: 120,  },
-        { field: 'stock', title: '库存',  width: 70},
-        { field: 'productUnit', title: '单位',  width: 70},
-        { field: 'productNumber', title: '数量',  sortable: true, width:100,
+        { field: 'productStandard', title: t('retail.shipments.form.table.standard'), width: 120,  },
+        { field: 'stock', title: t('retail.shipments.form.table.stock'),  width: 70},
+        { field: 'productUnit', title: t('retail.shipments.form.table.unit'),  width: 70},
+        { field: 'productNumber', title: t('retail.shipments.form.table.quantity'),  sortable: true, width:100,
             slots: { edit: 'product_number_edit' },
             editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } }, },
         {
             field: 'retailPrice',
-            title: '单价', width:105,
+            title: t('retail.shipments.form.table.unitPrice'), width:105,
             formatter ({ cellValue }) {
                 return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
@@ -128,7 +131,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         },
         {
             field: 'amount',
-            title: '金额', width:105,
+            title: t('retail.shipments.form.table.amount'), width:105,
             formatter ({ cellValue }) {
                 return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
@@ -142,7 +145,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         return [
             columns.map((column, columnIndex) => {
                 if (columnIndex === 0) {
-                    return '总计'
+                    return t('retail.shipments.form.table.total')
                 }
                 if (['amount', 'rate'].includes(column.field)) {
                     // 设置单价 = 金额 / 数量 设置保留两位小数
@@ -182,7 +185,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     },
     editRules: {
         warehouseId: [
-            { required: true, message: '仓库名称不能为空' }
+            { required: true, message: t('retail.shipments.form.noticeOne') }
         ]
     },
     editConfig: {

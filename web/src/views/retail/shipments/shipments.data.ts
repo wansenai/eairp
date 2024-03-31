@@ -147,62 +147,62 @@ export const searchFormSchema: FormSchema[] = [
 
 export const retailShipmentsTableColumns: BasicColumn[] = [
     {
-        title: '仓库名称',
+        title: t('retail.shipments.view.member'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '条码',
+        title: t('retail.shipments.form.table.barCode'),
         dataIndex: 'barCode',
         width: 100,
     },
     {
-        title: '商品名称',
+        title: t('retail.shipments.form.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '规格',
+        title: t('retail.shipments.form.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('retail.shipments.form.table.model'),
         dataIndex: 'productModel',
         width: 120,
     },
     {
-        title: '颜色',
+        title: t('retail.shipments.form.table.color'),
         dataIndex: 'productColor',
         width: 70,
     },
     {
-        title: '库存',
+        title: t('retail.shipments.form.table.stock'),
         dataIndex: 'stock',
         width: 80,
     },
     {
-        title: '单位',
+        title: t('retail.shipments.form.table.unit'),
         dataIndex: 'productUnit',
         width: 60,
     },
     {
-        title: '数量',
+        title: t('retail.shipments.form.table.quantity'),
         dataIndex: 'productNumber',
         width: 60,
     },
     {
-        title: '单价',
+        title: t('retail.shipments.form.table.unitPrice'),
         dataIndex: 'unitPrice',
         width: 60,
     },
     {
-        title: '金额',
+        title: t('retail.shipments.form.table.amount'),
         dataIndex: 'amount',
         width: 60,
     },
     {
-        title: '备注',
+        title: t('retail.shipments.view.remark'),
         dataIndex: 'remark',
         width: 100,
     },
