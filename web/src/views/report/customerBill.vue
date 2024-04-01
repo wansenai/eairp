@@ -2,12 +2,12 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button @click="exportTable">导出</a-button>
-        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+        <a-button @click="exportTable" v-text="t('reports.customerBill.export')"/>
+        <a-button @click="primaryPrint" type="primary" v-text="t('reports.customerBill.regularPrint')"/>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'customerId'">
-          <a @click="openReceipt(record.customerId)"> 详情 </a>
+          <a @click="openReceipt(record.customerId)"> {{ t('reports.customerBill.table.detail') }} </a>
         </template>
       </template>
     </BasicTable>
@@ -32,6 +32,7 @@ import CustomerBillDetailModal from "@/views/report/modal/CustomerBillDetailModa
 import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'CustomerBill',
@@ -39,6 +40,7 @@ export default defineComponent({
     CustomerBillDetailModal, Tag, TableAction, BasicTable
   },
   setup() {
+    const { t } = useI18n();
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
     const [handleRegister, {openModal}] = useModal();
@@ -50,7 +52,7 @@ export default defineComponent({
     const printTotalQuarterReceivable = ref(0);
     const printRemainingReceivableArrears = ref(0);
     const [registerTable, {reload, getForm, getDataSource}] = useTable({
-      title: '客户对账报表',
+      title: t('reports.customerBill.title'),
       api: getCustomerBill,
       columns: customerBillColumns,
       formConfig: {
@@ -86,7 +88,7 @@ export default defineComponent({
       printTableData.value = tableData;
       return [
         {
-          _index: '合计',
+          _index: t('reports.customerBill.table.total'),
           firstQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterReceivable), {digits: 2})}`,
           secondQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterReceivable), {digits: 2})}`,
           thirdQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterReceivable), {digits: 2})}`,
@@ -114,7 +116,7 @@ export default defineComponent({
 
     function exportTable() {
       if (getDataSource() === undefined || getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('reports.customerBill.notice'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -125,7 +127,7 @@ export default defineComponent({
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           const timestamp = getTimestamp(new Date());
-          link.download = "客户对账数据" + timestamp + ".xlsx";
+          link.download = t('reports.customerBill.data') + timestamp + ".xlsx";
           link.target = "_blank";
           link.click();
         }
@@ -142,13 +144,13 @@ export default defineComponent({
         totalQuarterArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalQuarterArrears.value), {digits: 2})}`,
         totalQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalQuarterReceivable.value), {digits: 2})}`,
         remainingReceivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printRemainingReceivableArrears.value), {digits: 2})}`,
-        customerName: '合计',
+        customerName: t('reports.customerBill.table.total'),
         contactName: '',
         contactPhone: '',
         email: '',
       });
       printJS({
-        documentTitle: "EAIRP (客户对账)",
+        documentTitle: "EAIRP " + t('reports.customerBill.detail'),
         properties: printColumns.map(item => {
           return {field: item.dataIndex, displayName: item.title}
         }),
@@ -161,6 +163,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       openReceipt,
       registerTable,
       handleSuccess,

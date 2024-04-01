@@ -2,12 +2,12 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button @click="exportTable">导出</a-button>
-        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+        <a-button @click="exportTable" v-text="t('reports.supplierBill.export')"/>
+        <a-button @click="primaryPrint" type="primary" v-text="t('reports.supplierBill.regularPrint')"/>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'supplierId'">
-          <a @click="openReceipt(record.supplierId)"> 详情 </a>
+          <a @click="openReceipt(record.supplierId)"> {{ t('reports.supplierBill.table.detail') }} </a>
         </template>
       </template>
     </BasicTable>
@@ -29,12 +29,14 @@ import SupplierBillDetailModal from "@/views/report/modal/SupplierBillDetailModa
 import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'SupplierBill',
   components: {
     SupplierBillDetailModal, Tag, TableAction, BasicTable},
   setup() {
+    const { t } = useI18n();
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
     const printFirstQuarterPayment = ref(0);
@@ -46,7 +48,7 @@ export default defineComponent({
     const printRemainingPaymentArrears = ref(0);
     const [handleRegister, {openModal}] = useModal();
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
-      title: '供应商对账报表',
+      title: t('reports.supplierBill.title'),
       api: getSupplierBill,
       columns: supplierBillColumns,
       formConfig: {
@@ -82,7 +84,7 @@ export default defineComponent({
       printTableData.value = tableData;
       return [
         {
-          _index: '合计',
+          _index: t('reports.supplierBill.table.total'),
           firstQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterPayment), { digits: 2 })}`,
           secondQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterPayment), { digits: 2 })}`,
           thirdQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterPayment), { digits: 2 })}`,
@@ -109,7 +111,7 @@ export default defineComponent({
 
     function exportTable() {
       if (getDataSource() === undefined || getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('reports.supplierBill.notice'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -120,7 +122,7 @@ export default defineComponent({
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           const timestamp = getTimestamp(new Date());
-          link.download = "供应商对账数据" + timestamp + ".xlsx";
+          link.download = t('reports.supplierBill.data') + timestamp + ".xlsx";
           link.target = "_blank";
           link.click();
         }
@@ -136,14 +138,14 @@ export default defineComponent({
         totalPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printTotalPayment.value), { digits: 2 })}`,
         totalArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalArrears.value), { digits: 2 })}`,
         remainingPaymentArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printRemainingPaymentArrears.value), { digits: 2 })}`,
-        supplierName: '合计',
+        supplierName: t('reports.supplierBill.table.total'),
         contactName: '',
         contactPhone: '',
         email: '',
       });
       const printColumns = supplierBillColumns.filter(item => item.dataIndex !== 'supplierId');
       printJS({
-        documentTitle: "EAIRP (供应商对账)",
+        documentTitle: "EAIRP " + t('reports.supplierBill.detail'),
         properties: printColumns.map(item => {
           return { field: item.dataIndex, displayName: item.title }
         }),
@@ -156,6 +158,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       openReceipt,
       registerTable,
       handleSuccess,

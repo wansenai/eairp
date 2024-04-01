@@ -2,12 +2,12 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button @click="exportTable">导出</a-button>
-        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+        <a-button @click="exportTable" v-text="t('reports.account.export')"/>
+        <a-button @click="primaryPrint" type="primary" v-text="t('reports.account.regularPrint')"/>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'accountId'">
-          <a @click="handleAccountFlow(record)">流水</a>
+          <a @click="handleAccountFlow(record)"> {{ t('reports.account.table.flow') }} </a>
         </template>
       </template>
     </BasicTable>
@@ -30,11 +30,13 @@ import {useModal} from "@/components/Modal";
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useMessage} from "@/hooks/web/useMessage";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'AccountStatistics',
   components: {StockFlowModal, AccountFlowModal, Tag, TableAction, BasicTable},
   setup() {
+    const { t } = useI18n();
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
     const [registerModal, {openModal}] = useModal();
@@ -42,7 +44,7 @@ export default defineComponent({
     const printThisMonthChangeAmount = ref(0);
     const printCurrentAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
-      title: '账户统计报表',
+      title: t('reports.account.title'),
       api: getAccountStatistics,
       rowKey: 'id',
       columns: accountStatisticsColumns,
@@ -71,7 +73,7 @@ export default defineComponent({
       printTableData.value = tableData;
       return [
         {
-          _index: '合计',
+          _index: 'Total',
           initialAmount: `￥${XEUtils.commafy(XEUtils.toNumber(initialAmount), { digits: 2 })}`,
           thisMonthChangeAmount: `￥${XEUtils.commafy(XEUtils.toNumber(thisMonthChangeAmount), { digits: 2 })}`,
           currentAmount: `￥${XEUtils.commafy(XEUtils.toNumber(currentAmount), { digits: 2 })}`
@@ -93,7 +95,7 @@ export default defineComponent({
 
     function exportTable() {
       if (getDataSource() === undefined || getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('reports.account.notice'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -104,7 +106,7 @@ export default defineComponent({
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           const timestamp = getTimestamp(new Date());
-          link.download = "账户统计数据" + timestamp + ".xlsx";
+          link.download = t('reports.account.data') + timestamp + ".xlsx";
           link.target = "_blank";
           link.click();
         }
@@ -114,14 +116,14 @@ export default defineComponent({
     function primaryPrint() {
       const printColumns = accountStatisticsColumns.filter(item => item.dataIndex !== 'accountId');
       printTableData.value.push({
-        accountName: '合计',
+        accountName: t('reports.account.table.total'),
         accountNumber: '',
         initialAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printInitialAmount.value), { digits: 2 })}`,
         thisMonthChangeAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printThisMonthChangeAmount.value), { digits: 2 })}`,
         currentAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printCurrentAmount.value), { digits: 2 })}`
       });
       printJS({
-        documentTitle: "EAIRP (账户统计-详情)",
+        documentTitle: "EAIRP " + t('reports.account.detail'),
         properties: printColumns.map(item => {
           return { field: item.dataIndex, displayName: item.title }
         }),
@@ -134,6 +136,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerModal,
       registerTable,
       handleSuccess,

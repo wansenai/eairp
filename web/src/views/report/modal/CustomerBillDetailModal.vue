@@ -2,8 +2,8 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle">
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="exportTable"> 导出</a-button>
-        <a-button @click="primaryPrint"> 打印</a-button>
+        <a-button type="primary" @click="exportTable" v-text="t('reports.customerBill.export')"/>
+        <a-button @click="primaryPrint" v-text="t('reports.customerBill.regularPrint')"/>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'receiptNumber'">
@@ -34,6 +34,7 @@ import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundM
 import {getTimestamp} from "@/utils/dateUtil";
 import {useMessage} from "@/hooks/web/useMessage";
 import printJS from "print-js";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'CustomerBillDetailModal',
@@ -42,8 +43,9 @@ export default defineComponent({
     ViewSaleShipmentsModal,
     ViewSaleRefundModal, Tag, TableAction, BasicTable},
   setup() {
+    const { t } = useI18n();
     const { createMessage } = useMessage();
-    const getTitle = ref('客户欠款详情');
+    const getTitle = ref(t('reports.other.customerArrearsDetail'));
     const customerId = ref('');
     const printTableData = ref<any[]>([]);
     const [handleSaleShipmentsModal, {openModal: openSaleShipmentsModal}] = useModal();
@@ -80,7 +82,7 @@ export default defineComponent({
       const receivedArrears = tableData.reduce((prev, next) => prev + next.receivedArrears, 0);
       return [
         {
-          _index: '合计',
+          _index: t('reports.customerBill.table.total'),
           thisReceiptArrears:`￥${XEUtils.commafy(XEUtils.toNumber(thisReceiptArrears), { digits: 2 })}`,
           receivableArrears:`￥${XEUtils.commafy(XEUtils.toNumber(receivableArrears), { digits: 2 })}`,
           receivedArrears:`￥${XEUtils.commafy(XEUtils.toNumber(receivedArrears), { digits: 2 })}`,
@@ -109,7 +111,7 @@ export default defineComponent({
 
     function exportTable() {
       if (getDataSource() === undefined || getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('reports.customerBill.notice'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -121,7 +123,7 @@ export default defineComponent({
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           const timestamp = getTimestamp(new Date());
-          link.download = "客户欠款明细数据" + timestamp + ".xlsx";
+          link.download = t('reports.other.customerArrearsData') + timestamp + ".xlsx";
           link.target = "_blank";
           link.click();
         }
@@ -131,7 +133,7 @@ export default defineComponent({
     function primaryPrint() {
       printTableData.value = getDataSource();
       printTableData.value.push({
-        receiptNumber: '合计',
+        receiptNumber: t('reports.customerBill.table.total'),
         customerName: '',
         productInfo: '',
         receiptDate: '',
@@ -141,7 +143,7 @@ export default defineComponent({
         receivedArrears: `￥${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.receivedArrears, 0)), { digits: 2 })}`,
       });
       printJS({
-        documentTitle: "EAIRP (客户欠款明细)",
+        documentTitle: "EAIRP " + t('reports.other.customerArrearsDetail'),
         properties: customerBillDetailColumns.map(item => {
           return { field: item.dataIndex, displayName: item.title }
         }),
@@ -154,6 +156,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       getTitle,
       registerModal,
       openReceipt,

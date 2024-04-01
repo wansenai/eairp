@@ -2,8 +2,8 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button @click="exportTable">导出</a-button>
-        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+        <a-button @click="exportTable" v-text="t('reports.sales.export')"/>
+        <a-button @click="primaryPrint" type="primary" v-text="t('reports.sales.regularPrint')"/>
       </template>
     </BasicTable>
   </div>
@@ -21,11 +21,13 @@ import XEUtils from "xe-utils";
 import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'SalesStatistics',
   components: {Tag, TableAction, BasicTable},
   setup() {
+    const { t } = useI18n();
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
     const printSalesNumber = ref(0);
@@ -34,7 +36,7 @@ export default defineComponent({
     const printSalesRefundAmount = ref(0);
     const printSalesLastAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
-      title: '销售统计报表',
+      title: t('reports.sales.title'),
       api: getSalesStatistics,
       columns: salesStatisticsColumns,
       formConfig: {
@@ -66,7 +68,7 @@ export default defineComponent({
       printTableData.value = tableData;
       return [
         {
-          _index: '合计',
+          _index: t('reports.sales.table.total'),
           salesNumber: salesNumber,
           salesAmount: `￥${XEUtils.commafy(XEUtils.toNumber(salesAmount), { digits: 2 })}`,
           salesRefundNumber: salesRefundNumber,
@@ -85,7 +87,7 @@ export default defineComponent({
 
     function exportTable() {
       if (getDataSource() === undefined || getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('reports.sales.notice'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -96,7 +98,7 @@ export default defineComponent({
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           const timestamp = getTimestamp(new Date());
-          link.download = "销售统计数据" + timestamp + ".xlsx";
+          link.download = t('reports.sales.data') + timestamp + ".xlsx";
           link.target = "_blank";
           link.click();
         }
@@ -110,7 +112,7 @@ export default defineComponent({
         salesRefundNumber: printSalesRefundNumber.value,
         salesRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printSalesRefundAmount.value), { digits: 2 })}`,
         salesLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printSalesLastAmount.value), { digits: 2 })}`,
-        productBarcode: '合计',
+        productBarcode: t('reports.sales.table.total'),
         warehouseName: '',
         productName: '',
         productStandard: '',
@@ -119,7 +121,7 @@ export default defineComponent({
         productUnit: '',
       });
       printJS({
-        documentTitle: "EAIRP (销售统计-详情)",
+        documentTitle: "EAIRP " + t('reports.sales.table.detail'),
         properties: salesStatisticsColumns.map(item => {
           return { field: item.dataIndex, displayName: item.title }
         }),
@@ -132,6 +134,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       handleSuccess,
       handleCancel,

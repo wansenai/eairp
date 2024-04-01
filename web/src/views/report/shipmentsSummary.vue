@@ -2,8 +2,8 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button @click="exportTable">导出</a-button>
-        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+        <a-button @click="exportTable" v-text="t('reports.shipmentsSummary.export')"/>
+        <a-button @click="primaryPrint" type="primary" v-text="t('reports.shipmentsSummary.regularPrint')"/>
       </template>
     </BasicTable>
   </div>
@@ -24,17 +24,19 @@ import XEUtils from "xe-utils";
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useMessage} from "@/hooks/web/useMessage";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ShipmentsSummaryStatistics',
   components: {Tag, TableAction, BasicTable},
   setup() {
+    const { t } = useI18n();
     const printTableData = ref<any[]>([]);
     const { createMessage } = useMessage();
     const printShipmentsNumber = ref(0);
     const printShipmentsAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
-      title: '出库汇总报表',
+      title: t('reports.shipmentsSummary.title'),
       api: getShipmentsSummary,
       columns: shipmentsSummaryStatisticsColumns,
       formConfig: {
@@ -60,7 +62,7 @@ export default defineComponent({
       printTableData.value = tableData;
       return [
         {
-          _index: '合计',
+          _index: t('reports.shipmentsSummary.table.total'),
           shipmentsNumber: shipmentsNumber,
           shipmentsAmount: `￥${XEUtils.commafy(XEUtils.toNumber(shipmentsAmount), { digits: 2 })}`,
         },
@@ -76,7 +78,7 @@ export default defineComponent({
 
     function exportTable() {
       if (getDataSource() === undefined || getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('reports.shipmentsSummary.notice'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -87,7 +89,7 @@ export default defineComponent({
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           const timestamp = getTimestamp(new Date());
-          link.download = "出库汇总数据" + timestamp + ".xlsx";
+          link.download = t('reports.shipmentsSummary.data') + timestamp + ".xlsx";
           link.target = "_blank";
           link.click();
         }
@@ -98,7 +100,7 @@ export default defineComponent({
       printTableData.value.push({
         shipmentsNumber: printShipmentsNumber.value,
         shipmentsAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printShipmentsAmount.value), { digits: 2 })}`,
-        productBarcode: '合计',
+        productBarcode: t('reports.shipmentsSummary.table.total'),
         warehouseName: '',
         productName: '',
         productCategoryName: '',
@@ -108,7 +110,7 @@ export default defineComponent({
         createTime: ''
       });
       printJS({
-        documentTitle: "EAIRP (出库汇总)",
+        documentTitle: "EAIRP " + t('reports.shipmentsSummary.detail'),
         properties: shipmentsSummaryStatisticsColumns.map(item => {
           return { field: item.dataIndex, displayName: item.title }
         }),
@@ -121,6 +123,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       handleSuccess,
       handleCancel,
