@@ -35,6 +35,7 @@ import ViewPurchaseStorageModal from "@/views/purchase/storage/components/ViewSt
 import ViewPurchaseRefundModal from "@/views/purchase/refund/components/ViewRefundModal.vue";
 import ViewRefundModal from "@/views/retail/refund/components/ViewRefundModal.vue";
 import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundModal.vue";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'AccountFlowModal',
@@ -46,6 +47,7 @@ export default defineComponent({
     ViewSaleShipmentsModal,
     ViewShipmentModal, ViewPurchaseOrderModal, ViewSaleOrderModal, BasicModal, Tag, TableAction, BasicTable},
   setup() {
+    const { t } = useI18n();
     const accountId = ref();
     const [handleRetailShipmentModal, {openModal: openRetailShipmentModal}] = useModal();
     const [handleRetailRefundModal, {openModal: openRetailRefundModal}] = useModal();
@@ -60,9 +62,9 @@ export default defineComponent({
         confirmLoading: false,
         destroyOnClose: true,
         width: 1000,
-        title: '查看账户流水',
+        title: t('reports.other.viewAccountFlow'),
         showOkBtn: false,
-        helpMessage: '账户的流水统计是由前往后，最后面的余额是最终余额',
+        helpMessage: t('reports.other.viewAccountFlowHelpMessage'),
       });
       accountId.value = data.accountId;
     });
@@ -130,6 +132,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       registerModal,
       handleSuccess,

@@ -119,7 +119,7 @@ export default defineComponent({
         initialStock: printTotalInitStock.value,
         currentStock: printTotalCurrentStock.value,
         stockAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalStockAmount.value), { digits: 2 })}`,
-        productBarcode: t('reports.productStock.table.total'),
+        productBarcode: 'Total',
         // 将其他字段写成空字符串 为了打印的时候不显示
         warehouseName: '',
         productName: '',

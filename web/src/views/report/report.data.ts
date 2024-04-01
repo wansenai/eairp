@@ -102,7 +102,7 @@ export const productStockColumns: BasicColumn[] = [
 
 export const searchProductStockSchema: FormSchema[] = [
     {
-        label: '仓库',
+        label: t('reports.productStock.table.warehouse'),
         field: 'warehouseId',
         component: 'ApiSelect',
         componentProps: {
@@ -114,13 +114,13 @@ export const searchProductStockSchema: FormSchema[] = [
         colProps: { span: 5 },
     },
     {
-        label: '商品信息',
+        label: t('reports.productStock.header.productInfo'),
         field: 'productInfo',
         component: 'Input',
         colProps: { span: 5 },
     },
     {
-        label: '商品类别',
+        label: t('reports.productStock.table.productCategory'),
         field: 'productCategoryId',
         component: 'ApiTreeSelect',
         componentProps: {
@@ -132,7 +132,7 @@ export const searchProductStockSchema: FormSchema[] = [
         colProps: { span: 5 }
     },
     {
-        label: '仓位货架',
+        label: t('reports.productStock.table.warehouseShelves'),
         field: 'warehouseShelves',
         component: 'Input',
         colProps: { span: 5 },
@@ -141,37 +141,37 @@ export const searchProductStockSchema: FormSchema[] = [
 
 export const stockFlowColumns: BasicColumn[] = [
     {
-        title: '单据编号',
+        title: t('reports.shipmentsDetail.header.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 180,
     },
     {
-        title: '类型',
+        title: t('reports.shipmentsDetail.table.type'),
         dataIndex: 'type',
         width: 80,
     },
     {
-        title: '商品条码',
+        title: t('reports.retail.table.barCode'),
         dataIndex: 'productBarcode',
         width: 120,
     },
     {
-        title: '商品名称',
+        title: t('reports.retail.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '仓库',
+        title: t('reports.retail.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 120,
     },
     {
-        title: '数量',
+        title: t('reports.shipmentsDetail.table.quantity'),
         dataIndex: 'productNumber',
         width: 60,
     },
     {
-        title: '单据日期',
+        title: t('reports.storageSummary.header.receiptDate'),
         dataIndex: 'receiptDate',
         width: 150,
     }
@@ -179,18 +179,18 @@ export const stockFlowColumns: BasicColumn[] = [
 
 export const searchStockFlowSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('reports.shipmentsDetail.header.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: { span: 10 },
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('reports.retail.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.retail.header.startDate'), t('reports.retail.header.endDate')],
         },
         colProps: { span: 10 },
     },
@@ -198,32 +198,32 @@ export const searchStockFlowSchema: FormSchema[] = [
 
 export const accountStatisticsColumns: BasicColumn[] = [
     {
-        title: '账户流水',
+        title: t('reports.account.table.accountFlow'),
         dataIndex: 'accountId',
         width: 80,
     },
     {
-        title: '账户名称',
+        title: t('reports.account.table.accountName'),
         dataIndex: 'accountName',
         width: 180,
     },
     {
-        title: '账户编号',
+        title: t('reports.account.table.accountNumber'),
         dataIndex: 'accountNumber',
         width: 120,
     },
     {
-        title: '期初金额',
+        title: t('reports.account.table.initialAmount'),
         dataIndex: 'initialAmount',
         width: 120,
     },
     {
-        title: '本月发生金额',
+        title: t('reports.account.table.thisMonthAmount'),
         dataIndex: 'thisMonthChangeAmount',
         width: 120,
     },
     {
-        title: '当前余额',
+        title: t('reports.account.table.currentAmount'),
         dataIndex: 'currentAmount',
         width: 120,
     },
@@ -231,13 +231,13 @@ export const accountStatisticsColumns: BasicColumn[] = [
 
 export const searchAccountSchema: FormSchema[] = [
     {
-        label: '账户名称',
+        label: t('reports.account.header.account'),
         field: 'accountName',
         component: 'Input',
         colProps: { span: 10 },
     },
     {
-        label: '账户编号',
+        label: t('reports.account.header.accountNumber'),
         field: 'accountNumber',
         component: 'Input',
         colProps: { span: 10 },
@@ -246,37 +246,37 @@ export const searchAccountSchema: FormSchema[] = [
 
 export const accountFlowColumns: BasicColumn[] = [
     {
-        title: '单据编号',
+        title: t('reports.shipmentsDetail.header.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 180,
     },
     {
-        title: '单据类型',
+        title: t('reports.shipmentsDetail.table.type'),
         dataIndex: 'subType',
         width: 80,
     },
     {
-        title: '收付款放',
+        title: t('reports.other.subType'),
         dataIndex: 'useType',
         width: 90,
     },
     {
-        title: '名称',
+        title: t('reports.storageDetail.table.name'),
         dataIndex: 'name',
         width: 120,
     },
     {
-        title: '金额',
+        title: t('reports.retail.table.amount'),
         dataIndex: 'amount',
         width: 110,
     },
     {
-        title: '余额',
+        title: t('reports.other.balance'),
         dataIndex: 'balance',
         width: 110,
     },
     {
-        title: '单据日期',
+        title: t('reports.retail.header.receiptDate'),
         dataIndex: 'receiptDate',
         width: 150,
     }
@@ -284,23 +284,23 @@ export const accountFlowColumns: BasicColumn[] = [
 
 export const searchRetailSchema: FormSchema[] = [
     {
-        label: '商品信息',
+        label: t('reports.retail.header.productInfo'),
         field: 'productExtendInfo',
         component: 'Input',
         colProps: { span: 7 },
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('reports.retail.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.retail.header.startDate'), t('reports.retail.header.endDate')],
         },
         colProps: { span: 7 },
     },
     {
-        label: '会员卡号',
+        label: t('reports.retail.header.member'),
         field: 'memberId',
         component: 'ApiSelect',
         componentProps: {
@@ -315,62 +315,62 @@ export const searchRetailSchema: FormSchema[] = [
 
 export const retailStatisticsColumns: BasicColumn[] = [
     {
-        title: '商品条码',
+        title: t('reports.retail.table.barCode'),
         dataIndex: 'productBarcode',
         width: 100,
     },
     {
-        title: '仓库',
+        title: t('reports.retail.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '商品名称',
+        title: t('reports.retail.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '规格',
+        title: t('reports.retail.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('reports.retail.table.model'),
         dataIndex: 'productModel',
         width: 90,
     },
     {
-        title: '扩展信息',
+        title: t('reports.retail.table.extendInfo'),
         dataIndex: 'productExtendInfo',
         width: 120,
     },
     {
-        title: '单位',
+        title: t('reports.retail.table.unit'),
         dataIndex: 'productUnit',
         width: 80,
     },
     {
-        title: '零售数量',
+        title: t('reports.retail.table.quantity'),
         dataIndex: 'retailNumber',
         width: 70,
     },
     {
-        title: '零售金额',
+        title: t('reports.retail.table.amount'),
         dataIndex: 'retailAmount',
         width: 70,
     },
     {
-        title: '零售退货数量',
+        title: t('reports.retail.table.refundQuantity'),
         dataIndex: 'retailRefundNumber',
         width: 70,
     },
     {
-        title: '零售退货金额',
+        title: t('reports.retail.table.refundAmount'),
         dataIndex: 'retailRefundAmount',
         width: 70,
     },
     {
-        title: '实际零售金额',
+        title: t('reports.retail.table.actualAmount'),
         dataIndex: 'retailLastAmount',
         width: 70,
     }
@@ -379,23 +379,23 @@ export const retailStatisticsColumns: BasicColumn[] = [
 
 export const searchPurchaseSchema: FormSchema[] = [
     {
-        label: '商品信息',
+        label: t('reports.purchase.header.productInfo'),
         field: 'productExtendInfo',
         component: 'Input',
         colProps: { span: 7 },
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('reports.purchase.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.purchase.header.startDate'), t('reports.purchase.header.endDate')],
         },
         colProps: { span: 7 },
     },
     {
-        label: '供应商',
+        label: t('reports.purchase.header.supplier'),
         field: 'supplierId',
         component: 'ApiSelect',
         componentProps: {
@@ -410,62 +410,62 @@ export const searchPurchaseSchema: FormSchema[] = [
 
 export const purchaseStatisticsColumns: BasicColumn[] = [
     {
-        title: '商品条码',
+        title: t('reports.purchase.table.barCode'),
         dataIndex: 'productBarcode',
         width: 100,
     },
     {
-        title: '仓库',
+        title: t('reports.purchase.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '商品名称',
+        title: t('reports.purchase.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '规格',
+        title: t('reports.purchase.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('reports.purchase.table.model'),
         dataIndex: 'productModel',
         width: 90,
     },
     {
-        title: '扩展信息',
+        title: t('reports.purchase.table.extendInfo'),
         dataIndex: 'productExtendInfo',
         width: 120,
     },
     {
-        title: '单位',
+        title: t('reports.purchase.table.unit'),
         dataIndex: 'productUnit',
         width: 80,
     },
     {
-        title: '采购数量',
+        title: t('reports.purchase.table.quantity'),
         dataIndex: 'purchaseNumber',
         width: 70,
     },
     {
-        title: '采购金额',
+        title: t('reports.purchase.table.amount'),
         dataIndex: 'purchaseAmount',
         width: 70,
     },
     {
-        title: '采购退货数量',
+        title: t('reports.purchase.table.refundQuantity'),
         dataIndex: 'purchaseRefundNumber',
         width: 70,
     },
     {
-        title: '采购退货金额',
+        title: t('reports.purchase.table.refundAmount'),
         dataIndex: 'purchaseRefundAmount',
         width: 70,
     },
     {
-        title: '实际采购金额',
+        title: t('reports.purchase.table.actualAmount'),
         dataIndex: 'purchaseLastAmount',
         width: 70,
     }
@@ -473,23 +473,23 @@ export const purchaseStatisticsColumns: BasicColumn[] = [
 
 export const searchSalesSchema: FormSchema[] = [
     {
-        label: '商品信息',
+        label: t('reports.sales.header.productInfo'),
         field: 'productExtendInfo',
         component: 'Input',
         colProps: { span: 7 },
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('reports.sales.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.sales.header.startDate'), t('reports.sales.header.endDate')],
         },
         colProps: { span: 7 },
     },
     {
-        label: '客户',
+        label: t('reports.sales.header.customer'),
         field: 'customerId',
         component: 'ApiSelect',
         componentProps: {
@@ -504,62 +504,62 @@ export const searchSalesSchema: FormSchema[] = [
 
 export const salesStatisticsColumns: BasicColumn[] = [
     {
-        title: '商品条码',
+        title: t('reports.sales.table.barCode'),
         dataIndex: 'productBarcode',
         width: 100,
     },
     {
-        title: '仓库',
+        title: t('reports.sales.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '商品名称',
+        title: t('reports.sales.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '规格',
+        title: t('reports.sales.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('reports.sales.table.model'),
         dataIndex: 'productModel',
         width: 90,
     },
     {
-        title: '扩展信息',
+        title: t('reports.sales.table.extendInfo'),
         dataIndex: 'productExtendInfo',
         width: 120,
     },
     {
-        title: '单位',
+        title: t('reports.sales.table.unit'),
         dataIndex: 'productUnit',
         width: 80,
     },
     {
-        title: '销售数量',
+        title: t('reports.sales.table.quantity'),
         dataIndex: 'salesNumber',
         width: 70,
     },
     {
-        title: '销售金额',
+        title: t('reports.sales.table.amount'),
         dataIndex: 'salesAmount',
         width: 70,
     },
     {
-        title: '销售退货数量',
+        title: t('reports.sales.table.refundQuantity'),
         dataIndex: 'salesRefundNumber',
         width: 70,
     },
     {
-        title: '销售退货金额',
+        title: t('reports.sales.table.refundAmount'),
         dataIndex: 'salesRefundAmount',
         width: 70,
     },
     {
-        title: '实际销售金额',
+        title: t('reports.sales.table.actualAmount'),
         dataIndex: 'salesLastAmount',
         width: 70,
     }
@@ -567,7 +567,7 @@ export const salesStatisticsColumns: BasicColumn[] = [
 
 export const searchShipmentsDetailSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('reports.shipmentsDetail.header.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -577,11 +577,11 @@ export const searchShipmentsDetailSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('reports.shipmentsDetail.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.shipmentsDetail.header.startDate'), t('reports.shipmentsDetail.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -589,7 +589,7 @@ export const searchShipmentsDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
+        label: t('reports.shipmentsDetail.header.productInfo'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -598,7 +598,7 @@ export const searchShipmentsDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '往来单位',
+        label: t('reports.shipmentsDetail.header.contact'),
         field: 'relatedPersonId',
         component: 'ApiSelect',
         componentProps: {
@@ -613,7 +613,7 @@ export const searchShipmentsDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '仓库',
+        label: t('reports.shipmentsDetail.header.warehouse'),
         field: 'warehouseId',
         component: 'ApiSelect',
         componentProps: {
@@ -628,7 +628,7 @@ export const searchShipmentsDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '操作人员',
+        label: t('reports.shipmentsDetail.header.operator'),
         field: 'operatorId',
         component: 'ApiSelect',
         componentProps: {
@@ -644,7 +644,7 @@ export const searchShipmentsDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据备注',
+        label: t('reports.shipmentsDetail.header.remark'),
         field: 'remark',
         component: 'Input',
         colProps: {
@@ -656,77 +656,77 @@ export const searchShipmentsDetailSchema: FormSchema[] = [
 
 export const shipmentsDetailStatisticsColumns: BasicColumn[] = [
     {
-        title: '单据编号',
+        title: t('reports.shipmentsDetail.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 170,
     },
     {
-        title: '类型',
+        title: t('reports.shipmentsDetail.table.type'),
         dataIndex: 'type',
         width: 70,
     },
     {
-        title: '往来人员',
+        title: t('reports.shipmentsDetail.table.contact'),
         dataIndex: 'name',
         width: 70,
     },
     {
-        title: '商品条码',
+        title: t('reports.shipmentsDetail.table.barCode'),
         dataIndex: 'productBarcode',
         width: 100,
     },
     {
-        title: '仓库',
+        title: t('reports.shipmentsDetail.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '商品名称',
+        title: t('reports.shipmentsDetail.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '规格',
+        title: t('reports.shipmentsDetail.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('reports.shipmentsDetail.table.model'),
         dataIndex: 'productModel',
         width: 90,
     },
     {
-        title: '单位',
+        title: t('reports.shipmentsDetail.table.unit'),
         dataIndex: 'productUnit',
         width: 60,
     },
     {
-        title: '数量',
+        title: t('reports.shipmentsDetail.table.quantity'),
         dataIndex: 'productNumber',
         width: 65,
     },
     {
-        title: '单价',
+        title: t('reports.shipmentsDetail.table.unitPrice'),
         dataIndex: 'unitPrice',
         width: 65,
     },
     {
-        title: '金额',
+        title: t('reports.shipmentsDetail.table.amount'),
         dataIndex: 'amount',
         width: 75,
     },
     {
-        title: '税率(%)',
+        title: t('reports.shipmentsDetail.table.taxRate'),
         dataIndex: 'taxRate',
         width: 65,
     },
     {
-        title: '税额',
+        title: t('reports.shipmentsDetail.table.taxAmount'),
         dataIndex: 'taxAmount',
         width: 70,
     },
     {
-        title: '出库时间',
+        title: t('reports.shipmentsDetail.table.shipmentsDate'),
         dataIndex: 'createTime',
         width: 140,
     },
@@ -734,7 +734,7 @@ export const shipmentsDetailStatisticsColumns: BasicColumn[] = [
 
 export const searchStorageDetailSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('reports.storageDetail.header.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -744,11 +744,11 @@ export const searchStorageDetailSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('reports.storageDetail.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.storageDetail.header.startDate'), t('reports.storageDetail.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -756,7 +756,7 @@ export const searchStorageDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
+        label: t('reports.storageDetail.header.productInfo'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -765,7 +765,7 @@ export const searchStorageDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '往来单位',
+        label: t('reports.storageDetail.header.contact'),
         field: 'relatedPersonId',
         component: 'ApiSelect',
         componentProps: {
@@ -780,7 +780,7 @@ export const searchStorageDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '仓库',
+        label: t('reports.storageDetail.header.warehouse'),
         field: 'warehouseId',
         component: 'ApiSelect',
         componentProps: {
@@ -795,7 +795,7 @@ export const searchStorageDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '操作人员',
+        label: t('reports.storageDetail.header.operator'),
         field: 'operatorId',
         component: 'ApiSelect',
         componentProps: {
@@ -811,7 +811,7 @@ export const searchStorageDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据备注',
+        label: t('reports.storageDetail.header.remark'),
         field: 'remark',
         component: 'Input',
         colProps: {
@@ -823,77 +823,77 @@ export const searchStorageDetailSchema: FormSchema[] = [
 
 export const storageDetailStatisticsColumns: BasicColumn[] = [
     {
-        title: '单据编号',
+        title: t('reports.storageDetail.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 170,
     },
     {
-        title: '类型',
+        title: t('reports.storageDetail.table.type'),
         dataIndex: 'type',
         width: 70,
     },
     {
-        title: '往来人员',
+        title: t('reports.storageDetail.table.contact'),
         dataIndex: 'name',
         width: 70,
     },
     {
-        title: '商品条码',
+        title: t('reports.storageDetail.table.barCode'),
         dataIndex: 'productBarcode',
         width: 100,
     },
     {
-        title: '仓库',
+        title: t('reports.storageDetail.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '商品名称',
+        title: t('reports.storageDetail.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '规格',
+        title: t('reports.storageDetail.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('reports.storageDetail.table.model'),
         dataIndex: 'productModel',
         width: 90,
     },
     {
-        title: '单位',
+        title: t('reports.storageDetail.table.unit'),
         dataIndex: 'productUnit',
         width: 80,
     },
     {
-        title: '数量',
+        title: t('reports.storageDetail.table.quantity'),
         dataIndex: 'productNumber',
         width: 65,
     },
     {
-        title: '单价',
+        title: t('reports.storageDetail.table.unitPrice'),
         dataIndex: 'unitPrice',
         width: 65,
     },
     {
-        title: '金额',
+        title: t('reports.storageDetail.table.amount'),
         dataIndex: 'amount',
         width: 65,
     },
     {
-        title: '税率(%)',
+        title: t('reports.storageDetail.table.taxRate'),
         dataIndex: 'taxRate',
         width: 65,
     },
     {
-        title: '税额',
+        title: t('reports.storageDetail.table.taxAmount'),
         dataIndex: 'taxAmount',
         width: 65,
     },
     {
-        title: '入库时间',
+        title: t('reports.storageDetail.table.storageDate'),
         dataIndex: 'createTime',
         width: 140,
     },
@@ -901,7 +901,7 @@ export const storageDetailStatisticsColumns: BasicColumn[] = [
 
 export const searchShipmentsSummarySchema: FormSchema[] = [
     {
-        label: '商品信息',
+        label: t('reports.shipmentsSummary.header.productInfo'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -911,11 +911,11 @@ export const searchShipmentsSummarySchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('reports.shipmentsSummary.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.shipmentsSummary.header.startDate'), t('reports.shipmentsSummary.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -923,7 +923,7 @@ export const searchShipmentsSummarySchema: FormSchema[] = [
         },
     },
     {
-        label: '往来单位',
+        label: t('reports.shipmentsSummary.header.contact'),
         field: 'relatedPersonId',
         component: 'ApiSelect',
         componentProps: {
@@ -938,7 +938,7 @@ export const searchShipmentsSummarySchema: FormSchema[] = [
         },
     },
     {
-        label: '仓库',
+        label: t('reports.shipmentsSummary.header.warehouse'),
         field: 'warehouseId',
         component: 'ApiSelect',
         componentProps: {
@@ -956,52 +956,52 @@ export const searchShipmentsSummarySchema: FormSchema[] = [
 
 export const shipmentsSummaryStatisticsColumns: BasicColumn[] = [
     {
-        title: '商品条码',
+        title: t('reports.shipmentsSummary.table.barCode'),
         dataIndex: 'productBarcode',
         width: 100,
     },
     {
-        title: '仓库',
+        title: t('reports.shipmentsSummary.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '商品名称',
+        title: t('reports.shipmentsSummary.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '商品分类',
+        title: t('reports.shipmentsSummary.table.category'),
         dataIndex: 'productCategoryName',
         width: 100,
     },
     {
-        title: '规格',
+        title: t('reports.shipmentsSummary.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('reports.shipmentsSummary.table.model'),
         dataIndex: 'productModel',
         width: 90,
     },
     {
-        title: '单位',
+        title: t('reports.shipmentsSummary.table.unit'),
         dataIndex: 'productUnit',
         width: 60,
     },
     {
-        title: '出库数量',
+        title: t('reports.shipmentsSummary.table.quantity'),
         dataIndex: 'shipmentsNumber',
         width: 65,
     },
     {
-        title: '出库金额',
+        title: t('reports.shipmentsSummary.table.amount'),
         dataIndex: 'shipmentsAmount',
         width: 65,
     },
     {
-        title: '出库时间',
+        title: t('reports.shipmentsSummary.table.shipmentsDate'),
         dataIndex: 'createTime',
         width: 140,
     },
@@ -1009,7 +1009,7 @@ export const shipmentsSummaryStatisticsColumns: BasicColumn[] = [
 
 export const searchStorageSummarySchema: FormSchema[] = [
     {
-        label: '商品信息',
+        label: t('reports.storageSummary.header.productInfo'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -1019,11 +1019,11 @@ export const searchStorageSummarySchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('reports.storageSummary.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.storageSummary.header.startDate'), t('reports.storageSummary.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -1031,7 +1031,7 @@ export const searchStorageSummarySchema: FormSchema[] = [
         },
     },
     {
-        label: '往来单位',
+        label: t('reports.storageSummary.header.contact'),
         field: 'relatedPersonId',
         component: 'ApiSelect',
         componentProps: {
@@ -1046,7 +1046,7 @@ export const searchStorageSummarySchema: FormSchema[] = [
         },
     },
     {
-        label: '仓库',
+        label: t('reports.storageSummary.header.warehouse'),
         field: 'warehouseId',
         component: 'ApiSelect',
         componentProps: {
@@ -1064,52 +1064,52 @@ export const searchStorageSummarySchema: FormSchema[] = [
 
 export const storageSummaryStatisticsColumns: BasicColumn[] = [
     {
-        title: '商品条码',
+        title: t('reports.storageSummary.table.barCode'),
         dataIndex: 'productBarcode',
         width: 100,
     },
     {
-        title: '仓库',
+        title: t('reports.storageSummary.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '商品名称',
+        title: t('reports.storageSummary.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '商品分类',
+        title: t('reports.storageSummary.table.category'),
         dataIndex: 'productCategoryName',
         width: 100,
     },
     {
-        title: '规格',
+        title: t('reports.storageSummary.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('reports.storageSummary.table.model'),
         dataIndex: 'productModel',
         width: 90,
     },
     {
-        title: '单位',
+        title: t('reports.storageSummary.table.unit'),
         dataIndex: 'productUnit',
         width: 60,
     },
     {
-        title: '入库数量',
+        title: t('reports.storageSummary.table.quantity'),
         dataIndex: 'storageNumber',
         width: 65,
     },
     {
-        title: '入库金额',
+        title: t('reports.storageSummary.table.amount'),
         dataIndex: 'storageAmount',
         width: 65,
     },
     {
-        title: '入库时间',
+        title: t('reports.storageSummary.table.storageDate'),
         dataIndex: 'createTime',
         width: 140,
     },
@@ -1117,7 +1117,7 @@ export const storageSummaryStatisticsColumns: BasicColumn[] = [
 
 export const searchCustomerBillSchema: FormSchema[] = [
     {
-        label: '客户',
+        label: t('reports.customerBill.header.customer'),
         field: 'customerId',
         component: 'ApiSelect',
         componentProps: {
@@ -1130,11 +1130,11 @@ export const searchCustomerBillSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '账单日期',
+        label: t('reports.customerBill.header.billDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.customerBill.header.startDate'), t('reports.customerBill.header.endDate')],
         },
         colProps: {
             xl: 9,
@@ -1145,72 +1145,72 @@ export const searchCustomerBillSchema: FormSchema[] = [
 
 export const customerBillColumns: BasicColumn[] = [
     {
-        title: '欠款详情',
+        title: t('reports.customerBill.table.arrearsDetail'),
         dataIndex: 'customerId',
         width: 60,
     },
     {
-        title: '客户',
+        title: t('reports.customerBill.table.customer'),
         dataIndex: 'customerName',
         width: 100,
     },
     {
-        title: '联系人',
+        title: t('reports.customerBill.table.contacts'),
         dataIndex: 'contactName',
         width: 80,
     },
     {
-        title: '联系电话',
+        title: t('reports.customerBill.table.contactNumber'),
         dataIndex: 'contactPhone',
         width: 100,
     },
     {
-        title: '电子邮箱',
+        title: t('reports.customerBill.table.email'),
         dataIndex: 'email',
-        width: 120,
+        width: 110,
     },
     {
-        title: '一季度应收账款',
+        title: t('reports.customerBill.table.firstQuarterCollection'),
         dataIndex: 'firstQuarterReceivable',
         width: 80,
     },
     {
-        title: '二季度应收账款',
+        title: t('reports.customerBill.table.secondQuarterCollection'),
         dataIndex: 'secondQuarterReceivable',
         width: 80,
     },
     {
-        title: '三季度应收账款',
+        title: t('reports.customerBill.table.thirdQuarterCollection'),
         dataIndex: 'thirdQuarterReceivable',
         width: 80,
     },
     {
-        title: '四季度应收账款',
+        title: t('reports.customerBill.table.fourthQuarterCollection'),
         dataIndex: 'fourthQuarterReceivable',
         width: 80,
     },
     {
-        title: '累计欠款',
+        title: t('reports.customerBill.table.totalArrears'),
         dataIndex: 'totalQuarterArrears',
         width: 100,
     },
     {
-        title: '累计收款',
+        title: t('reports.customerBill.table.totalCollection'),
         dataIndex: 'totalQuarterReceivable',
         width: 100,
     },
     {
-        title: '应收欠款',
+        title: t('reports.customerBill.table.receivableArrears'),
         dataIndex: 'remainingReceivableArrears',
         width: 100,
-        helpMessage: '应收欠款=4个季度的应收账款+累计欠款'
+        helpMessage: t('reports.customerBill.table.helpMessage'),
     },
 ]
 
 
 export const searchCustomerBillDetailSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('reports.storageDetail.table.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -1219,7 +1219,7 @@ export const searchCustomerBillDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
+        label: t('reports.storageSummary.header.productInfo'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -1229,11 +1229,11 @@ export const searchCustomerBillDetailSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '账单日期',
+        label: t('reports.customerBill.header.billDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.customerBill.header.startDate'), t('reports.customerBill.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -1244,42 +1244,42 @@ export const searchCustomerBillDetailSchema: FormSchema[] = [
 
 export const customerBillDetailColumns: BasicColumn[] = [
     {
-        title: '单据编号',
+        title: t('reports.storageDetail.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 180,
     },
     {
-        title: '客户',
+        title: t('reports.customerBill.table.customer'),
         dataIndex: 'customerName',
         width: 120,
     },
     {
-        title: '商品信息',
+        title: t('reports.storageSummary.header.productInfo'),
         dataIndex: 'productInfo',
         width: 150,
     },
     {
-        title: '单据日期',
+        title: t('reports.storageSummary.header.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '操作员',
+        title: t('reports.storageDetail.header.operator'),
         dataIndex: 'operator',
         width: 80,
     },
     {
-        title: '本单欠款',
+        title: t('reports.other.thisReceiptArrears'),
         dataIndex: 'thisReceiptArrears',
         width: 65,
     },
     {
-        title: '已收欠款',
+        title: t('reports.other.receivedArrears'),
         dataIndex: 'receivedArrears',
         width: 65,
     },
     {
-        title: '待收欠款',
+        title: t('reports.other.receivableArrears'),
         dataIndex: 'receivableArrears',
         width: 65,
     },
@@ -1287,7 +1287,7 @@ export const customerBillDetailColumns: BasicColumn[] = [
 
 export const searchSupplierBillSchema: FormSchema[] = [
     {
-        label: '供应商',
+        label: t('reports.supplierBill.header.supplier'),
         field: 'supplierId',
         component: 'ApiSelect',
         componentProps: {
@@ -1300,11 +1300,11 @@ export const searchSupplierBillSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '账单周期',
+        label: t('reports.supplierBill.header.billDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.supplierBill.header.startDate'), t('reports.supplierBill.header.endDate')],
         },
         colProps: {
             xl: 9,
@@ -1315,71 +1315,71 @@ export const searchSupplierBillSchema: FormSchema[] = [
 
 export const supplierBillColumns: BasicColumn[] = [
     {
-        title: '欠款详情',
+        title: t('reports.supplierBill.table.arrearsDetail'),
         dataIndex: 'supplierId',
         width: 60,
     },
     {
-        title: '供应商',
+        title: t('reports.supplierBill.table.supplier'),
         dataIndex: 'supplierName',
         width: 100,
     },
     {
-        title: '联系人',
+        title: t('reports.supplierBill.table.contacts'),
         dataIndex: 'contactName',
         width: 80,
     },
     {
-        title: '联系电话',
+        title: t('reports.supplierBill.table.contactNumber'),
         dataIndex: 'contactPhone',
         width: 100,
     },
     {
-        title: '电子邮箱',
+        title: t('reports.supplierBill.table.email'),
         dataIndex: 'email',
-        width: 120,
+        width: 110,
     },
     {
-        title: '一季度应付账款',
+        title: t('reports.supplierBill.table.firstQuarterPayment'),
         dataIndex: 'firstQuarterPayment',
         width: 80,
     },
     {
-        title: '二季度应付账款',
+        title: t('reports.supplierBill.table.secondQuarterPayment'),
         dataIndex: 'secondQuarterPayment',
         width: 80,
     },
     {
-        title: '三季度应付账款',
+        title: t('reports.supplierBill.table.thirdQuarterPayment'),
         dataIndex: 'thirdQuarterPayment',
         width: 80,
     },
     {
-        title: '四季度应付账款',
+        title: t('reports.supplierBill.table.fourthQuarterPayment'),
         dataIndex: 'fourthQuarterPayment',
         width: 80,
     },
     {
-        title: '累计欠款',
+        title: t('reports.supplierBill.table.totalArrears'),
         dataIndex: 'totalArrears',
         width: 100,
     },
     {
-        title: '累计付款',
+        title: t('reports.supplierBill.table.totalPayment'),
         dataIndex: 'totalPayment',
         width: 100,
     },
     {
-        title: '应付欠款',
+        title: t('reports.supplierBill.table.payableArrears'),
         dataIndex: 'remainingPaymentArrears',
         width: 100,
-        helpMessage: '应付欠款=4个季度的应付账款+累计欠款'
+        helpMessage: t('reports.supplierBill.table.helpMessage'),
     },
 ]
 
 export const searchSupplierBillDetailSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('reports.storageDetail.table.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -1388,7 +1388,7 @@ export const searchSupplierBillDetailSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
+        label: t('reports.storageSummary.header.productInfo'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -1398,11 +1398,11 @@ export const searchSupplierBillDetailSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '账单日期',
+        label: t('reports.supplierBill.header.billDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('reports.supplierBill.header.startDate'), t('reports.supplierBill.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -1413,42 +1413,42 @@ export const searchSupplierBillDetailSchema: FormSchema[] = [
 
 export const supplierBillDetailColumns: BasicColumn[] = [
     {
-        title: '单据编号',
+        title: t('reports.storageDetail.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 180,
     },
     {
-        title: '供应商',
+        title: t('reports.supplierBill.table.supplier'),
         dataIndex: 'supplierName',
         width: 140,
     },
     {
-        title: '商品信息',
+        title: t('reports.storageSummary.header.productInfo'),
         dataIndex: 'productInfo',
         width: 150,
     },
     {
-        title: '单据日期',
+        title: t('reports.storageSummary.header.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '操作员',
+        title: t('reports.storageDetail.header.operator'),
         dataIndex: 'operator',
         width: 70,
     },
     {
-        title: '本单欠款',
+        title: t('reports.other.thisReceiptArrears'),
         dataIndex: 'thisReceiptArrears',
         width: 65,
     },
     {
-        title: '已付欠款',
+        title: t('reports.other.paidArrears'),
         dataIndex: 'prepaidArrears',
         width: 65,
     },
     {
-        title: '待付欠款',
+        title: t('reports.supplierBill.table.payableArrears'),
         dataIndex: 'paymentArrears',
         width: 65,
     },

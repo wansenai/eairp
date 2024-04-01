@@ -2,8 +2,8 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button @click="exportTable">导出</a-button>
-        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+        <a-button @click="exportTable" v-text="t('reports.storageSummary.export')"/>
+        <a-button @click="primaryPrint" type="primary" v-text="t('reports.storageSummary.regularPrint')"/>
       </template>
     </BasicTable>
   </div>
@@ -24,17 +24,19 @@ import XEUtils from "xe-utils";
 import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'StorageSummaryStatistics',
   components: {Tag, TableAction, BasicTable},
   setup() {
+    const { t } = useI18n();
     const printTableData = ref<any[]>([]);
     const {createMessage} = useMessage();
     const printStorageNumber = ref(0);
     const printStorageAmount = ref(0);
     const [registerTable, {reload, getForm, getDataSource}] = useTable({
-      title: '入库汇总报表',
+      title: t('reports.storageSummary.title'),
       api: getStorageSummary,
       columns: storageSummaryStatisticsColumns,
       formConfig: {
@@ -60,7 +62,7 @@ export default defineComponent({
       printTableData.value = tableData;
       return [
         {
-          _index: '合计',
+          _index: t('reports.storageSummary.table.total'),
           storageNumber: storageNumber,
           storageAmount: `￥${XEUtils.commafy(XEUtils.toNumber(storageAmount), {digits: 2})}`,
         },
@@ -77,7 +79,7 @@ export default defineComponent({
 
     function exportTable() {
       if (getDataSource() === undefined || getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('reports.storageSummary.notice'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -88,7 +90,7 @@ export default defineComponent({
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           const timestamp = getTimestamp(new Date());
-          link.download = "入库汇总数据" + timestamp + ".xlsx";
+          link.download = t('reports.storageSummary.data') + timestamp + ".xlsx";
           link.target = "_blank";
           link.click();
         }
@@ -99,7 +101,7 @@ export default defineComponent({
       printTableData.value.push({
         storageNumber: printStorageNumber.value,
         storageAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printStorageAmount.value), {digits: 2})}`,
-        productBarcode: '合计',
+        productBarcode: t('reports.storageSummary.table.total'),
         warehouseName: '',
         productName: '',
         productCategoryName: '',
@@ -109,7 +111,7 @@ export default defineComponent({
         createTime: ''
       });
       printJS({
-        documentTitle: "EAIRP (入库汇总)",
+        documentTitle: "EAIRP " + t('reports.storageSummary.detail'),
         properties: storageSummaryStatisticsColumns.map(item => {
           return {field: item.dataIndex, displayName: item.title}
         }),
@@ -122,6 +124,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       handleSuccess,
       handleCancel,
