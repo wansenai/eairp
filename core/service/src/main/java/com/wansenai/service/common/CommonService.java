@@ -29,6 +29,8 @@ public interface CommonService {
 
     Response<String> uploadExclsData(MultipartFile file);
 
+    Response<String> productCoverUpload(MultipartFile file, Integer type);
+
     File exportExcel(String type);
 
     Response<List<String>> uploadOss(List<MultipartFile> files);

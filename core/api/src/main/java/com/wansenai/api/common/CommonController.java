@@ -74,6 +74,11 @@ public class CommonController {
         return commonService.uploadExclsData(file);
     }
 
+    @PostMapping("upload/productCoverUpload")
+    public Response<String> productCoverUpload(@RequestParam("file") MultipartFile file, @RequestParam("type") Integer type) {
+        return commonService.productCoverUpload(file, type);
+    }
+
     /**
      * @deprecatedjavadoc
      *

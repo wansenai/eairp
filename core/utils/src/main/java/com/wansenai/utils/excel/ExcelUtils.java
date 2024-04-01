@@ -361,11 +361,11 @@ public class ExcelUtils {
 
     public static String getCellValue(Cell cell) {
         // 空白或空
-        if (cell == null || cell.getCellTypeEnum() == CellType.BLANK) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
             return "";
         }
         // String类型
-        if (cell.getCellTypeEnum() == CellType.STRING) {
+        if (cell.getCellType() == CellType.STRING) {
             String val = cell.getStringCellValue();
             if (val == null || val.trim().length() == 0) {
                 return "";
@@ -373,7 +373,7 @@ public class ExcelUtils {
             return val.trim();
         }
         // 数字类型
-        if (cell.getCellTypeEnum() == CellType.NUMERIC) {
+        if (cell.getCellType() == CellType.NUMERIC) {
             String s = cell.getNumericCellValue() + "";
             // 去掉尾巴上的小数点0
             if (Pattern.matches(".*\\.0*", s)) {
@@ -383,7 +383,7 @@ public class ExcelUtils {
             }
         }
         // 布尔值类型
-        if (cell.getCellTypeEnum() == CellType.BOOLEAN) {
+        if (cell.getCellType() == CellType.BOOLEAN) {
             return cell.getBooleanCellValue() + "";
         }
         // 错误类型
