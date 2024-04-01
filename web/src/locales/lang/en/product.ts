@@ -32,6 +32,7 @@ export default {
         batchEdit: 'Batch Edit',
         addProductInfo: 'Add Product Info',
         editProductInfo: 'Edit Product Info',
+        checkBarCodeExist: 'Import Data - Detect duplicate products',
         header: {
             categoryName: 'Product category',
             keyWord: 'Keyword',

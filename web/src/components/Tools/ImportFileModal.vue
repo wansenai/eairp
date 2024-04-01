@@ -38,7 +38,7 @@
     </div>
 </template>
 <script lang="ts">
-import {ref} from 'vue';
+import {ref, h} from 'vue';
 import {Modal, Upload, Button, Spin, Row, Col, FormItem} from "ant-design-vue";
 import { CloudUploadOutlined  } from '@ant-design/icons-vue';
 import type { UploadChangeParam } from 'ant-design-vue';
@@ -46,6 +46,7 @@ import {useMessage} from "@/hooks/web/useMessage";
 import {UploadFileParams, uploadXlsx} from "@/api/basic/common";
 import {useTable} from "@/components/Table";
 import {useI18n} from "vue-i18n";
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 export default {
   name: 'ImportFileModal',
   emits: ['success', 'cancel'],
@@ -95,13 +96,38 @@ export default {
       context.emit('cancel');
     }
 
+    const productBarcodeExistModal = (message: string) => {
+      Modal.confirm({
+        title: t('product.info.checkBarCodeExist'),
+        icon: h(ExclamationCircleOutlined),
+        content: h('div', { style: 'color:red;' }, message),
+        okText() {
+          return t('sys.modal.cover');
+        },
+        cancelText() {
+          return t('sys.modal.cancel');
+        },
+        onOk() {
+          console.info('OK');
+        },
+        onCancel() {
+          console.info('Cancel');
+        },
+      });
+    };
+
     async function uploadFile(info: UploadChangeParam) {
       const fileObject: UploadFileParams = {
         file: info.file,
       }
-      await uploadXlsx(fileObject);
-      handleCancel()
-      await reload();
+      const result = await uploadXlsx(fileObject);
+      if (result.code === 'P0512') {
+        close();
+        productBarcodeExistModal(result.msg)
+      } else {
+        handleCancel()
+        await reload();
+      }
     }
 
     return {
