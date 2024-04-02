@@ -66,6 +66,8 @@ export default {
         name: '昵称',
         position: '职位',
         personalProfile: '个人简介',
+        systemLanguage: '系统语言',
+        systemLanguageTip: '此设置可修改左侧菜单中英文语言',
         avatar: '更换头像',
         avatarTip: '头像（更新头像后，请刷新浏览器）',
         safeSetting: '安全设置',

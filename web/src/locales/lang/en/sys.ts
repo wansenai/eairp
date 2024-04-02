@@ -148,5 +148,9 @@ export default {
   modal: {
     cover: 'Ok',
     cancel: 'Cancel',
+  },
+  language: {
+    enUS: 'English',
+    zhCN: '简体中文',
   }
 };

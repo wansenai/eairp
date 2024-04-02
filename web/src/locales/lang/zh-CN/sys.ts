@@ -136,5 +136,9 @@ export default {
   modal: {
     cover: '确认',
     cancel: '取消',
+  },
+  language: {
+    enUS: 'English',
+    zhCN: '简体中文',
   }
 };
