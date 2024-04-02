@@ -12,6 +12,8 @@
  */
 package com.wansenai.service.common;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.code.kaptcha.Producer;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.profile.ClientProfile;
@@ -297,7 +299,6 @@ public class CommonServiceImpl implements CommonService{
                      }
                      return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_SUCCESS);
                  } else if (filename.contains("商品") || filename.contains("product") || filename.contains("Product")) {
-                     // 检验是否
                      var message = checkProductBarCodeExist(file);
                      if (StringUtils.hasLength(message)) {
                          return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR.getCode(), message);
@@ -443,22 +444,31 @@ public class CommonServiceImpl implements CommonService{
             }
         }
         var message = NullString;
-        for (var entry : codeMap.entrySet()) {
-            if (entry.getValue() > 1) {
-                message += "商品名称：" + codeListMap.stream().filter(item -> item.get("productBarcode").equals(entry.getKey())).map(item -> item.get("productName")).collect(Collectors.joining()) + "商品条码：" + entry.getKey() + "重复.";
-                return message;
-            }
-        }
-        workbook.close();
-
         // 获取codeListMap的productBarcode 检查DB里是否存在重复的barcode
         var productCodes = codeListMap.stream()
                 .map(item -> item.get("productBarcode"))
                 .collect(Collectors.toList());
         if (productStockKeepUnitService.checkProductCode(productCodes)) {
-            message += "数据库中存在重复的商品条码";
+            message += "existDataBase";
+            return message;
         }
 
+        JSONArray jsonArray = new JSONArray();
+        for (var entry : codeMap.entrySet()) {
+            if (entry.getValue() > 1) {
+                var jsonObject = new JSONObject();
+                jsonObject.put("productCode", entry.getKey());
+                var productNameList = codeListMap.stream().filter(item -> item.get("productBarcode").equals(entry.getKey())).map(item -> item.get("productName")).collect(Collectors.toList());
+                jsonObject.put("productName", productNameList);
+                jsonArray.add(jsonObject);
+                message = jsonArray.toJSONString();
+            }
+        }
+        if (StringUtils.hasLength(message)) {
+            workbook.close();
+            return message;
+        }
+        workbook.close();
         return message;
     }
 
@@ -539,9 +549,60 @@ public class CommonServiceImpl implements CommonService{
             productStocks.add(productStock);
             workbook.close();
         }
-        // products检测出相同的barcode，// 如果type为0 默认不覆盖，如果为1则覆盖
-        // 不覆盖：相同的barcode只保留想同的barcode下标最前面的一条数据
-        // 覆盖：想同的barcode移除掉最前面的，只保留想同的barcode下标最后面的一条数据
+        if (type == 1) {
+            Set<String> existingBarcodes = new HashSet<>();
+            Iterator<ProductStockKeepUnit> iterator = productStockKeepUnits.iterator();
+            while (iterator.hasNext()) {
+                ProductStockKeepUnit productStockKeepUnit = iterator.next();
+                String barcode = productStockKeepUnit.getProductBarCode();
+                // 如果当前 barcode 已经存在于集合中，则移除相关数据
+                if (existingBarcodes.contains(barcode)) {
+                    iterator.remove();
+                    // 从 products 中移除对应 productId 的数据
+                    products.removeIf(product -> product.getId().equals(productStockKeepUnit.getProductId()));
+                    productStocks.removeIf(productStock ->
+                            productStock.getProductSkuId().equals(productStockKeepUnit.getId()));
+                } else {
+                    existingBarcodes.add(barcode);
+                }
+            }
+        } else if (type == 0) {
+            // 用于存储每个 barcode 的最后一条数据的索引
+            Map<String, Integer> lastBarcodeIndexes = new HashMap<>();
+
+            // 遍历 productStockKeepUnits 列表以确定每个 barcode 的最后一条数据的索引
+            for (int i = productStockKeepUnits.size() - 1; i >= 0; i--) {
+                ProductStockKeepUnit productStockKeepUnit = productStockKeepUnits.get(i);
+                String barcode = productStockKeepUnit.getProductBarCode();
+                // 如果当前 barcode 已经存在于集合中，则更新索引
+                if (!lastBarcodeIndexes.containsKey(barcode)) {
+                    lastBarcodeIndexes.put(barcode, i);
+                }
+            }
+
+            // 创建一个新的 productStockKeepUnits 列表来存储最后一条数据
+            List<ProductStockKeepUnit> updatedProductStockKeepUnits = new ArrayList<>();
+
+            // 遍历 productStockKeepUnits 列表以只保留每个 barcode 的最后一条数据
+            for (int i = 0; i < productStockKeepUnits.size(); i++) {
+                ProductStockKeepUnit productStockKeepUnit = productStockKeepUnits.get(i);
+                String barcode = productStockKeepUnit.getProductBarCode();
+                int lastIndex = lastBarcodeIndexes.get(barcode);
+                // 只添加最后一条数据
+                if (i == lastIndex) {
+                    updatedProductStockKeepUnits.add(productStockKeepUnit);
+                } else {
+                    // 如果不是最后一条数据，则从 products 和 productStocks 中移除对应的条目
+                    products.removeIf(product -> product.getId().equals(productStockKeepUnit.getProductId()));
+                    productStocks.removeIf(productStock ->
+                            productStock.getProductSkuId().equals(productStockKeepUnit.getId()));
+                }
+            }
+
+            // 更新 productStockKeepUnits 列表
+            productStockKeepUnits = updatedProductStockKeepUnits;
+        }
+
 
         boolean addProductResult = productService.batchAddProduct(products);
         boolean addProductPriceResult = productStockKeepUnitService.saveBatch(productStockKeepUnits);
