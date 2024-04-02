@@ -481,11 +481,7 @@ public class CommonServiceImpl implements CommonService{
         Sheet sheet = workbook.getSheetAt(0);
         DataFormatter dataFormatter = new DataFormatter();
 
-        Long warehouseId = null;
-        if(getCellValue(sheet.getRow(1).getCell(23), dataFormatter) != null) {
-            var warehouse = warehouseService.getWarehouseByName(getCellValue(sheet.getRow(1).getCell(23), dataFormatter));
-            warehouseId = warehouse.getId();
-        }
+        var warehouseId =  warehouseService.getDefaultWarehouse().getData().getId();
         var userId = baseService.getCurrentUserId();
 
         for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
