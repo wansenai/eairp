@@ -52,6 +52,21 @@ export const baseSetSchemas: FormSchema[] = [
     colProps: { span: 18 },
   },
   {
+    field: 'systemLanguage',
+    component: 'Select',
+    label: t('basic.account.systemLanguage'),
+    helpMessage(renderCallbackParams) {
+        return t('basic.account.systemLanguageTip');
+    },
+    componentProps: {
+      options: [
+        { label: t('sys.language.zhCN'), value: 'zh_CN', key: 'zh_CN' },
+        { label: t('sys.language.enUS'), value: 'en_US', key: 'en_US' },
+      ],
+    },
+    colProps: { span: 18 },
+  },
+  {
     field: 'description',
     component: 'InputTextArea',
     label: t('basic.account.personalProfile'),

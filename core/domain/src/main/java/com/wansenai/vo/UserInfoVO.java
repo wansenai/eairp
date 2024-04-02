@@ -47,7 +47,7 @@ public class UserInfoVO {
     private String avatar;
 
     /** 用户语言 */
-    private String userLanguage;
+    private String systemLanguage;
 
     /** 用户token */
     private String token;

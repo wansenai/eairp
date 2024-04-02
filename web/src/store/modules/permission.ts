@@ -227,8 +227,8 @@ export const usePermissionStore = defineStore({
             const menus = await getMenuList();
             // 从localStorage中获取用户信息userInfo,获取userLanguage的值 如果是en_US，这里菜单就需要显示英文 重写菜单的title
             const { userInfo } = userStore;
-            const userLanguage = userInfo?.userLanguage;
-            if (userLanguage === 'en_US') {
+            const systemLanguage = userInfo?.systemLanguage;
+            if (systemLanguage === 'en_US') {
               menus.data.data.forEach((item: any) => {
                 item.meta.title = item.titleEnglish;
               });
@@ -237,7 +237,6 @@ export const usePermissionStore = defineStore({
                     item.meta.title = item.title;
                 });
             }
-            console.info(menus.data.data)
             const menuTree = array2tree(menus.data.data);
             routeList = menuTree as AppRouteRecordRaw[];
           } catch (error) {

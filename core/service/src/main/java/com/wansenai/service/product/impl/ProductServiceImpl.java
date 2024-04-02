@@ -323,6 +323,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 if (!stock.isEmpty()) {
                     var currentStockQuantity = stock.stream()
                             .map(ProductStock::getCurrentStockQuantity)
+                            .filter(Objects::nonNull)
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
                     productVO.setProductStock(currentStockQuantity);
                 }

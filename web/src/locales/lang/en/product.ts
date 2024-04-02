@@ -34,7 +34,7 @@ export default {
         editProductInfo: 'Edit Product Info',
         checkBarCodeExist: 'Import Data - Detect duplicate products',
         dataBaseExist: 'There are duplicate product barcodes in the database, please check.',
-        dataCover: 'Do you need to perform data cover?',
+        dataCover: 'Do you need overwrite the existing data?',
         header: {
             categoryName: 'Product category',
             keyWord: 'Keyword',

@@ -66,6 +66,8 @@ export default {
         name: 'Name',
         position: 'Position',
         personalProfile: 'Personal profile',
+        systemLanguage: 'Language',
+        systemLanguageTip: 'This setting can modify the Chinese and English language in the left menu',
         avatar: 'Update Avatar',
         avatarTip: 'Avatar (After updating the avatar, please refresh the browser)',
         safeSetting: 'Security setting',

@@ -146,7 +146,11 @@ export default {
     subType: 'Sub Type',
   },
   modal: {
-    cover: 'Ok',
-    cancel: 'Cancel',
+    cover: 'Yes',
+    cancel: 'No',
+  },
+  language: {
+    enUS: 'English',
+    zhCN: '简体中文',
   }
 };
