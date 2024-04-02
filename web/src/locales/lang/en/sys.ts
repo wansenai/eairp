@@ -144,5 +144,9 @@ export default {
     confirmExportTextFour: 'Need to export detailed data',
     type: 'Type',
     subType: 'Sub Type',
+  },
+  modal: {
+    cover: 'Ok',
+    cancel: 'Cancel',
   }
 };

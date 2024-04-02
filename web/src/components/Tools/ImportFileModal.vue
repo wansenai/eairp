@@ -38,14 +38,15 @@
     </div>
 </template>
 <script lang="ts">
-import {ref} from 'vue';
-import {Modal, Upload, Button, Spin, Row, Col, FormItem} from "ant-design-vue";
+import {ref, h} from 'vue';
+import {Modal, Upload, Button, Spin, Row, Col, FormItem, UploadFile} from "ant-design-vue";
 import { CloudUploadOutlined  } from '@ant-design/icons-vue';
 import type { UploadChangeParam } from 'ant-design-vue';
 import {useMessage} from "@/hooks/web/useMessage";
-import {UploadFileParams, uploadXlsx} from "@/api/basic/common";
+import {productCoverUpload, UploadCoverProductParams, UploadFileParams, uploadXlsx} from "@/api/basic/common";
 import {useTable} from "@/components/Table";
 import {useI18n} from "vue-i18n";
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 export default {
   name: 'ImportFileModal',
   emits: ['success', 'cancel'],
@@ -95,13 +96,73 @@ export default {
       context.emit('cancel');
     }
 
+    const productBarcodeExistModal = (message: string, info: UploadFile) => {
+      if(message === 'existDataBase') {
+        message = t('product.info.dataBaseExist')
+        Modal.info({
+          title: t('product.info.checkBarCodeExist'),
+          icon: h(ExclamationCircleOutlined),
+          content: h('div', { style: 'color:red;' }, message),
+        });
+      } else {
+        const messageList = JSON.parse(message)
+        const contentMessage = messageList.map((item: { productCode: string; productName: string[]; }) => {
+          return h('div', [
+            h('div', {}, t('product.info.table.productName') + ': '),
+            item.productName.map(name => h('div', { style: 'color:red;' }, name)), // 使用map函数处理换行
+            h('div', {}, t('product.info.table.barCode') + ': '),
+            h('p', { style: 'color:red;' }, item.productCode),
+            h('p'),
+          ])
+        })
+        contentMessage.push(h('strong', {style: 'color:black;'}, t('product.info.dataCover')))
+        Modal.confirm({
+          title: t('product.info.checkBarCodeExist'),
+          icon: h(ExclamationCircleOutlined),
+          content: contentMessage,
+          okText() {
+            return t('sys.modal.cover');
+          },
+          cancelText() {
+            return t('sys.modal.cancel');
+          },
+          async onOk() {
+            const fileObject: UploadCoverProductParams = {
+              file: info,
+              type: 0,
+            }
+            await productCoverUpload(fileObject);
+            handleCancel()
+          },
+          async onCancel() {
+            const fileObject: UploadCoverProductParams = {
+              file: info,
+              type: 1,
+            }
+            await productCoverUpload(fileObject);
+            handleCancel()
+          },
+          // 添加bodyStyle以显示滚动条
+          bodyStyle: {
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto',
+          },
+        });
+      }
+    };
+
     async function uploadFile(info: UploadChangeParam) {
       const fileObject: UploadFileParams = {
         file: info.file,
       }
-      await uploadXlsx(fileObject);
-      handleCancel()
-      await reload();
+      const result = await uploadXlsx(fileObject);
+      if (result.code === 'P0512') {
+        close();
+        productBarcodeExistModal(result.msg, info.file)
+      } else {
+        handleCancel()
+        await reload();
+      }
     }
 
     return {

@@ -153,7 +153,7 @@ export default defineComponent({
     }
 
     function handleImport() {
-      const templateUrl  = 'https://wansen-1317413588.cos.ap-shanghai.myqcloud.com/%E4%BC%9A%E5%91%98%E4%BF%A1%E6%81%AF%E6%A8%A1%E6%9D%BF.xlsx'
+      const templateUrl  = 'https://wansen-1317413588.cos.ap-shanghai.myqcloud.com/%E5%95%86%E5%93%81%E4%BF%A1%E6%81%AF%E6%A8%A1%E6%9D%BF%28Product%20Info%20Templete%29.xlsx'
       const templateName  = t('product.info.importInfo.templateName')
       importModalRef.value.initModal(templateUrl, templateName);
       importModalRef.value.title = t('product.info.importInfo.title')

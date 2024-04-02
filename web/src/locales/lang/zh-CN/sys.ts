@@ -132,5 +132,9 @@ export default {
     confirmDelete: '是否确认删除数据？',
     type: '类型',
     subType: '子类型',
+  },
+  modal: {
+    cover: '确认',
+    cancel: '取消',
   }
 };
