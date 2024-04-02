@@ -482,8 +482,8 @@ public class CommonServiceImpl implements CommonService{
         DataFormatter dataFormatter = new DataFormatter();
 
         Long warehouseId = null;
-        if(getCellValue(sheet.getRow(1).getCell(24), dataFormatter) != null) {
-            var warehouse = warehouseService.getWarehouseByName(getCellValue(sheet.getRow(1).getCell(24), dataFormatter));
+        if(getCellValue(sheet.getRow(1).getCell(23), dataFormatter) != null) {
+            var warehouse = warehouseService.getWarehouseByName(getCellValue(sheet.getRow(1).getCell(23), dataFormatter));
             warehouseId = warehouse.getId();
         }
         var userId = baseService.getCurrentUserId();
@@ -510,14 +510,15 @@ public class CommonServiceImpl implements CommonService{
                     .productWeight(getNumericCellValue(row.getCell(5)))
                     .productExpiryNum(getIntegerCellValue(row.getCell(6)))
                     .productUnit(getCellValue(row.getCell(7), dataFormatter))
-                    .enableSerialNumber(getIntegerCellValue(row.getCell(16)))
-                    .enableBatchNumber(getIntegerCellValue(row.getCell(17)))
-                    .warehouseShelves(getCellValue(row.getCell(18), dataFormatter))
-                    .productManufacturer(getCellValue(row.getCell(19), dataFormatter))
-                    .otherFieldOne(getCellValue(row.getCell(20), dataFormatter))
-                    .otherFieldTwo(getCellValue(row.getCell(21), dataFormatter))
-                    .otherFieldThree(getCellValue(row.getCell(22), dataFormatter))
-                    .remark(getCellValue(row.getCell(23), dataFormatter))
+                    .enableSerialNumber(getIntegerCellValue(row.getCell(15)))
+                    .enableBatchNumber(getIntegerCellValue(row.getCell(16)))
+                    .warehouseShelves(getCellValue(row.getCell(17), dataFormatter))
+                    .productManufacturer(getCellValue(row.getCell(18), dataFormatter))
+                    .otherFieldOne(getCellValue(row.getCell(19), dataFormatter))
+                    .otherFieldTwo(getCellValue(row.getCell(20), dataFormatter))
+                    .otherFieldThree(getCellValue(row.getCell(21), dataFormatter))
+                    .status(0)
+                    .remark(getCellValue(row.getCell(22), dataFormatter))
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();
@@ -527,11 +528,11 @@ public class CommonServiceImpl implements CommonService{
                     .id(SnowflakeIdUtil.nextId())
                     .productId(productId)
                     .productBarCode(productCode)
-                    .multiAttribute(getCellValue(row.getCell(11), dataFormatter))
-                    .purchasePrice(getNumericCellValue(row.getCell(12)))
-                    .retailPrice(getNumericCellValue(row.getCell(13)))
-                    .salePrice(getNumericCellValue(row.getCell(14)))
-                    .lowPrice(getNumericCellValue(row.getCell(15)))
+                    .multiAttribute(getCellValue(row.getCell(10), dataFormatter))
+                    .purchasePrice(getNumericCellValue(row.getCell(11)))
+                    .retailPrice(getNumericCellValue(row.getCell(12)))
+                    .salePrice(getNumericCellValue(row.getCell(13)))
+                    .lowPrice(getNumericCellValue(row.getCell(14)))
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();
@@ -541,8 +542,8 @@ public class CommonServiceImpl implements CommonService{
                     .id(SnowflakeIdUtil.nextId())
                     .productSkuId(productPrice.getId())
                     .warehouseId(warehouseId)
-                    .initStockQuantity(getNumericCellValue(row.getCell(24)))
-                    .currentStockQuantity(getNumericCellValue(row.getCell(24)))
+                    .initStockQuantity(getNumericCellValue(row.getCell(23)))
+                    .currentStockQuantity(getNumericCellValue(row.getCell(23)))
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();

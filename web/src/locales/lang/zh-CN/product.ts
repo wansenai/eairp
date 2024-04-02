@@ -34,7 +34,7 @@ export default {
         editProductInfo: '修改商品信息',
         checkBarCodeExist: '导入数据-检测商品出现重复',
         dataBaseExist: '数据库中存在重复的商品条码，请检查。',
-        dataCover: '是否需要进行数据覆盖？',
+        dataCover: '是否需要覆盖现有数据？',
         header: {
             categoryName: '商品类别',
             keyWord: '关键词',

@@ -22,7 +22,7 @@ export interface UploadCoverProductParams {
     type: number;
 }
 
-export function uploadXlsx(params: UploadFileParams, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
+export function uploadXlsx(params: UploadFileParams) {
     return defHttp.post<BaseResp>(
         {
             url: Api.UploadXlsx,
@@ -32,14 +32,11 @@ export function uploadXlsx(params: UploadFileParams, successMode: SuccessMessage
                 // @ts-ignore
                 ignoreCancelToken: true,
             },
-        },{
-            successMessageMode: successMode,
-            errorMessageMode: errorMode,
         }
     );
 }
 
-export function productCoverUpload(params: UploadCoverProductParams, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
+export function productCoverUpload(params: UploadCoverProductParams) {
     return defHttp.post<BaseResp>(
         {
             url: Api.productCoverUpload,
@@ -49,9 +46,6 @@ export function productCoverUpload(params: UploadCoverProductParams, successMode
                 // @ts-ignore
                 ignoreCancelToken: true,
             },
-        },{
-            successMessageMode: successMode,
-            errorMessageMode: errorMode,
         }
     );
 }

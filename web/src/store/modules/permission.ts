@@ -237,7 +237,6 @@ export const usePermissionStore = defineStore({
                     item.meta.title = item.title;
                 });
             }
-            console.info(menus.data.data)
             const menuTree = array2tree(menus.data.data);
             routeList = menuTree as AppRouteRecordRaw[];
           } catch (error) {
