@@ -446,7 +446,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                         .position(user.getPosition())
                         .description(user.getDescription())
                         .phoneNumber(user.getPhoneNumber())
-                        .userLanguage(user.getSystemLanguage())
+                        .systemLanguage(user.getSystemLanguage())
                         .userName(user.getUserName())
                         .avatar(user.getAvatar())
                         .build();
@@ -647,6 +647,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .set(SysUser::getPhoneNumber, updateUserDTO.getPhoneNumber())
                 .set(SysUser::getPosition, updateUserDTO.getPosition())
                 .set(SysUser::getDescription, updateUserDTO.getDescription())
+                .set(SysUser::getSystemLanguage, updateUserDTO.getSystemLanguage())
                 .set(null != updateUserDTO.getStatus(), SysUser::getStatus, updateUserDTO.getStatus())
                 .update();
 
