@@ -35,22 +35,22 @@
 
 ### 拉取镜像
 ```shell
-docker pull wansenai/eairp-web:2.0.3
+docker pull wansenai/eairp-web:2.1.1
 ```
 
 ### 运行服务
 请注意该 `API_BASE_URL`参数，这是后端接口映射的地址。如果你是在你的服务器
 上部署，请将此处的localhost地址修改为你的服务器IP地址。
 ```shell
-docker run --name eairp-web -d -p 3000:80 -e API_BASE_URL=http://localhost:8080/erp-api wansenai/eairp-web:2.0.3
+docker run --name eairp-web -d -p 3000:80 -e API_BASE_URL=http://localhost:8080/erp-api wansenai/eairp-web:2.1.1
 ```
 如果你想使用Docker部署API，也可以拉取API镜像
 ```shell
-docker pull wansenai/eairp:2.0.3
+docker pull wansenai/eairp:2.1.1
 ```
 并且运行API服务
 ```shell
-docker run --name eairp -d -p 9998:8088 wansenai/eairp:2.0.3 
+docker run --name eairp -d -p 9998:8088 wansenai/eairp:2.1.1
 ```
 
 ### 在线预览
