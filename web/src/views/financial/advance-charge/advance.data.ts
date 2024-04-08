@@ -78,7 +78,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: t('financial.advance.paymentMember.paymentMember'),
+        label: t('financial.advance.header.paymentMember'),
         field: 'paymentMember',
         component: 'Input',
         colProps: {
