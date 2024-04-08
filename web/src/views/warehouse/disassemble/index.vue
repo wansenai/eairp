@@ -4,7 +4,7 @@
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-text="t('warehouse.disassemble.add')" />
         <a-button type="primary" @click="handleBatchDelete" v-text="t('warehouse.disassemble.batchDelete')" />
-        <a-button type="primary" @click="handleExport"  v-text="t('warehouse.export.name')" />
+        <a-button type="primary" @click="handleExport"  v-text="t('warehouse.disassemble.export.name')" />
         <a-button type="primary" @click="handleOnStatus(1)" v-text="t('sys.table.approve')" />
         <a-button type="primary" @click="handleOnStatus(0)" v-text="t('sys.table.reject')" />
       </template>
