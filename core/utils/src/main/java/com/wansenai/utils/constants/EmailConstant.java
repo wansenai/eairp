@@ -20,7 +20,7 @@ public interface EmailConstant {
     String EMAIL_USER_NAME = "wanstech@163.com";
 
     /** 邮箱授权码 */
-    String EMAIL_PASSWORD = "YSWXSMYYQSVDSBYL";
+    String EMAIL_PASSWORD = "ICGUDLCLYOEZOAJF";
 
     /** 邮件HMAC256加密算法头字符串 */
     String EMAIL_HMAC256_TOKEN_HEAD = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";

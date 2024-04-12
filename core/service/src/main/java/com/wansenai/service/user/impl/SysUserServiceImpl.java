@@ -156,6 +156,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .id(userId)
                 .userName(accountRegisterDto.getUsername())
                 .name("测试租户")
+                .email(accountRegisterDto.getEmail())
                 .password(CommonTools.md5Encryp(password))
                 .phoneNumber(accountRegisterDto.getPhoneNumber())
                 .tenantId(userId)
@@ -349,6 +350,57 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    public Response<UserInfoVO> emailLogin(EmailLoginDTO emailLoginDTO) {
+        if (emailLoginDTO == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var verifyCode = redisUtil.getString(SecurityConstants.EMAIL_LOGIN_VERIFY_CODE_CACHE_PREFIX + emailLoginDTO.getEmail());
+        if (ObjectUtils.isEmpty(verifyCode)) {
+            return Response.responseMsg(BaseCodeEnum.VERIFY_CODE_EXPIRE);
+        }
+        if (!verifyCode.equals(emailLoginDTO.getEmailCode())) {
+            return Response.responseMsg(BaseCodeEnum.VERIFY_CODE_ERROR);
+        }
+
+        var user = lambdaQuery()
+                .eq(SysUser::getEmail, emailLoginDTO.getEmail())
+                .one();
+
+        if (user == null) {
+            return Response.responseMsg(UserCodeEnum.USER_NOT_EXISTS);
+        }
+
+        if (user.getStatus() == UserConstants.USER_STATUS_DISABLE) {
+            return Response.responseMsg(UserCodeEnum.USER_ACCOUNT_FREEZE);
+        }
+
+        if (user.getDeleteFlag() == CommonConstants.DELETED) {
+            return Response.responseMsg(UserCodeEnum.USER_ACCOUNT_INVALID);
+        }
+
+        var token = "";
+        if (redisUtil.hasKey(user.getUserName() + ":token")) {
+            token = String.valueOf(redisUtil.get(user.getUserName() + ":token"));
+        } else {
+            // 生成JWT的令牌
+            token = jwtUtil.createToken(user.getUserName());
+            redisUtil.set(user.getUserName() + ":token", token);
+            redisUtil.expire(user.getUserName() + ":token", 86400);
+            var userId = String.valueOf(user.getId());
+            var tenantId = String.valueOf(user.getTenantId());
+            redisUtil.set(token + ":userName", user.getUserName(), 86400);
+            redisUtil.set(token + ":userId", userId, 86400);
+            redisUtil.set(token + ":tenantId", tenantId, 86400);
+        }
+
+        return Response.responseData(UserInfoVO.builder()
+                .id(user.getId())
+                .token(token)
+                .expire(1694757956L)
+                .build());
+    }
+
+    @Override
     public Response<String> updatePassword(UpdatePasswordDto updatePasswordDto) {
         if (updatePasswordDto == null) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
@@ -364,7 +416,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
 
         var isExists = lambdaQuery()
-                .eq(SysUser::getUserName, updatePasswordDto.getUsername())
                 .eq(SysUser::getPhoneNumber, updatePasswordDto.getPhoneNumber())
                 .one();
 
@@ -373,9 +424,45 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
 
         var result = lambdaUpdate()
-                .eq(SysUser::getUserName, updatePasswordDto.getUsername())
+                .eq(SysUser::getUserName, isExists.getUserName())
                 .eq(SysUser::getPhoneNumber, updatePasswordDto.getPhoneNumber())
                 .set(SysUser::getPassword, CommonTools.md5Encryp(updatePasswordDto.getPassword()))
+                .update();
+
+        if (!result) {
+            return Response.responseMsg(UserCodeEnum.UPDATE_PASSWORD_ERROR);
+        }
+
+        return Response.responseMsg(UserCodeEnum.UPDATE_PASSWORD_SUCCESS);
+    }
+
+    @Override
+    public Response<String> updatePasswordByEmail(UpdatePasswordByEmailDto updatePasswordByEmailDto) {
+        if (updatePasswordByEmailDto == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        var verifyCode = redisUtil.getString(SecurityConstants.EMAIL_RESET_PASSWORD_LOGIN_VERIFY_CODE_CACHE_PREFIX + updatePasswordByEmailDto.getEmail());
+        if (ObjectUtils.isEmpty(verifyCode)) {
+            return Response.responseMsg(BaseCodeEnum.VERIFY_CODE_EXPIRE);
+        }
+
+        if (!verifyCode.equals(updatePasswordByEmailDto.getEmailCode())) {
+            return Response.responseMsg(BaseCodeEnum.VERIFY_CODE_ERROR);
+        }
+
+        var isExists = lambdaQuery()
+                .eq(SysUser::getEmail, updatePasswordByEmailDto.getEmail())
+                .one();
+
+        if (isExists == null) {
+            return Response.responseMsg(UserCodeEnum.USER_NOT_EXISTS);
+        }
+
+        var result = lambdaUpdate()
+                .eq(SysUser::getUserName, isExists.getUserName())
+                .eq(SysUser::getEmail, updatePasswordByEmailDto.getEmail())
+                .set(SysUser::getPassword, CommonTools.md5Encryp(updatePasswordByEmailDto.getPassword()))
                 .update();
 
         if (!result) {

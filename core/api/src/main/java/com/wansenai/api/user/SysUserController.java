@@ -59,9 +59,19 @@ public class SysUserController {
         return userService.mobileLogin(mobileLoginDto);
     }
 
+    @PostMapping(value = "emailLogin")
+    public Response<UserInfoVO> emailLogin(@RequestBody EmailLoginDTO emailLoginDTO) {
+        return userService.emailLogin(emailLoginDTO);
+    }
+
     @PostMapping(value = "updatePassword")
-    public Response<String> updatePassword(@RequestBody UpdatePasswordDto updatePasswordDto) {
+    public Response<String> updatePasswordByPhone(@RequestBody UpdatePasswordDto updatePasswordDto) {
         return userService.updatePassword(updatePasswordDto);
+    }
+
+    @PostMapping(value = "updatePasswordByEmail")
+    public Response<String> updatePasswordByEmail(@RequestBody UpdatePasswordByEmailDto updatePasswordByEmailDto) {
+        return userService.updatePasswordByEmail(updatePasswordByEmailDto);
     }
 
     @PutMapping(value = "userUpdatePassword")

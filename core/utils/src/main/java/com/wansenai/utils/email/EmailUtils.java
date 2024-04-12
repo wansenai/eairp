@@ -275,6 +275,22 @@ public class EmailUtils {
         emailUtils.send();
     }
 
+    public static void loginEmailNotice(String code, String to) throws Exception {
+        String subject = "【万森ERP系统】: 邮箱登录验证码"; // 主题
+
+        String body = "<pre>\n" +
+                "您好,\n" +
+                "\n" +
+                "   您正在登录与此电子邮件地址 ("+ to + ")关联的 万森ERP系统帐户.\n\n" +
+                "   本次验证码是：<b>" + code + "</b>, 该验证码3分钟有效\n\n" +
+                "   如果您没有发起此请求，请忽略此电子邮件, \n" +
+                "   谢谢, \n\n\n" +
+                "   万森AI团队." +
+                "</pre>";
+        EmailUtils emailUtils = EmailUtils.entity(EmailConstant.EMAIL_HOST, EmailConstant.EMAIL_USER_NAME, EmailConstant.EMAIL_PASSWORD, to, null, subject, body, null);
+        emailUtils.send();
+    }
+
     /**
      * 项目合同通知邮件模板
      *

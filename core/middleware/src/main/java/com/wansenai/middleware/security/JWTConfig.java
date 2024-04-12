@@ -35,7 +35,10 @@ public class JWTConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/user/login")
                 .excludePathPatterns("/user/mobileLogin")
                 .excludePathPatterns("/user/updatePassword")
+                .excludePathPatterns("/user/updatePasswordByEmail")
+                .excludePathPatterns("/user/emailLogin")
                 .excludePathPatterns("/v2/common/sms/{type}/{phoneNumber}")
+                .excludePathPatterns("/v2/common/email/{type}/{email}")
                 .excludePathPatterns("/v2/common/nextId/{type}")
                 .excludePathPatterns("/sys/config/getCompanyInfo");
     }

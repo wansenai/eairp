@@ -17,8 +17,6 @@ import lombok.Data;
 @Data
 public class UpdatePasswordDto {
 
-    String username;
-
     String password;
 
     String phoneNumber;

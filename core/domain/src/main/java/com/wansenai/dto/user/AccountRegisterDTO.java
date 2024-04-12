@@ -28,4 +28,6 @@ public class AccountRegisterDTO {
     String phoneNumber;
 
     String sms;
+
+    String email;
 }

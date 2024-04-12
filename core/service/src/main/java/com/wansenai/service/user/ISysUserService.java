@@ -37,7 +37,11 @@ public interface ISysUserService extends IService<SysUser> {
 
     Response<UserInfoVO> mobileLogin(MobileLoginDTO mobileLoginDto);
 
+    Response<UserInfoVO> emailLogin(EmailLoginDTO emailLoginDTO);
+
     Response<String> updatePassword(UpdatePasswordDto updatePasswordDto);
+
+    Response<String> updatePasswordByEmail(UpdatePasswordByEmailDto updatePasswordByEmailDto);
 
     Response<String> resetPassword(ResetPasswordDTO resetPasswordDto);
 
