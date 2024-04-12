@@ -28,6 +28,14 @@
           :sendCodeApi="sendCodeApi"
         />
       </FormItem>
+      <FormItem name="email" class="enter-x">
+        <Input
+            size="large"
+            v-model:value="formData.email"
+            :placeholder="t('sys.login.email')"
+            class="fix-auto-fill"
+        />
+      </FormItem>
       <FormItem name="password" class="enter-x">
         <StrengthMeter
           size="large"
@@ -96,6 +104,7 @@
     confirmPassword: '',
     phoneNumber: '',
     sms: '',
+    email: '',
     policy: false,
   });
 
@@ -116,6 +125,7 @@
       username: data.username,
       password: encryptedPassword,
       phoneNumber: data.phoneNumber,
+      email: data.email,
       sms: data.sms,
     });
 

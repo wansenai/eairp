@@ -10,6 +10,7 @@ export enum LoginStateEnum {
     RESET_PASSWORD,
     MOBILE,
     QR_CODE,
+    EMAIL
 }
 
 /**
@@ -92,6 +93,7 @@ export function useFormRules(formData?: Recordable) {
     const getCaptchaFormRule = computed(() => createRule(t('sys.login.captchaPlaceholder')));
     const getSmsFormRule = computed(() => createRule(t('sys.login.smsPlaceholder')));
     const getMobileFormRule = computed(() => phoneNumberRule());
+    const getEmailFormRule = computed( () => emailRule());
 
     const validatePolicy = async (_: RuleObject, value: boolean) => {
         return !value ? Promise.reject(t('sys.login.policyPlaceholder')) : Promise.resolve();
@@ -115,6 +117,7 @@ export function useFormRules(formData?: Recordable) {
         const captchaFormRule = unref(getCaptchaFormRule);
         const smsFormRule = unref(getSmsFormRule);
         const mobileFormRule = unref(getMobileFormRule);
+        const emailFormRule = unref(getEmailFormRule);
 
         const mobileRule = {
             sms: smsFormRule,
@@ -150,6 +153,12 @@ export function useFormRules(formData?: Recordable) {
                     phoneNumber: mobileFormRule,
                     sms: smsFormRule,
                 };
+            // email form rules
+            case LoginStateEnum.EMAIL:
+                return {
+                    email: emailFormRule,
+                    emailCode: smsFormRule,
+                }
 
             // login form rules
             default:
@@ -180,6 +189,18 @@ function phoneNumberRule() {
             required: true,
             pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|16[6]|19[89]]|17[01345678]|18[0-9]|14[579])[0-9]{8}$/,
             message: t('sys.login.correctMobilePlaceholder'),
+            trigger: 'change',
+        }
+    ];
+}
+
+function emailRule() {
+    const {t} = useI18n();
+    return [
+        {
+            required: true,
+            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: t('sys.login.correctEmailPlaceholder'),
             trigger: 'change',
         }
     ];

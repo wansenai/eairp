@@ -6,10 +6,11 @@ import { PageEnum } from '/@/enums/pageEnum';
 import { ROLES_KEY, ROLES_NAME_KEY, TOKEN_KEY, USER_INFO_KEY } from '/@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '/@/utils/auth';
 import {
+  emailLoginReq,
   GetUserInfoModel,
   LoginReq, mobileLoginReq, updatePasswordReq,
 } from '/@/api/sys/model/userModel';
-import {doLogout, getUserInfo, login, mobileLogin} from '/@/api/sys/user';
+import {doLogout, emailLogin, getUserInfo, login, mobileLogin} from '/@/api/sys/user';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { router } from '/@/router';
@@ -129,6 +130,28 @@ export const useUserStore = defineStore({
       try {
         const { goHome = true, mode, ...mobileLoginReq } = params;
         const data = await mobileLogin(mobileLoginReq, mode);
+        if (data.code !== '00000') {
+          return Promise.reject(null);
+        }
+        const { token } = data.data;
+
+        // save token
+        this.setToken(token);
+        return this.afterLoginAction(goHome);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    },
+
+    async emailLogin(
+        params: emailLoginReq & {
+          goHome?: boolean;
+          mode?: ErrorMessageMode;
+        },
+    ): Promise<GetUserInfoModel | null> {
+      try {
+        const { goHome = true, mode, ...emailLoginReq } = params;
+        const data = await emailLogin(emailLoginReq, mode);
         if (data.code !== '00000') {
           return Promise.reject(null);
         }

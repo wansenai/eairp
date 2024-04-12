@@ -14,10 +14,17 @@ export interface mobileLoginReq {
   type: number;
 }
 
+export interface emailLoginReq {
+  email: string;
+  emailCode: string;
+  type: number;
+}
+
 export interface registerReq {
   username: string;
   password: string;
   phoneNumber: string;
+  email: string;
   sms: number;
 }
 
@@ -27,10 +34,15 @@ export interface queryUserListReq {
 }
 
 export interface updatePasswordReq {
-  username: string;
   password: string;
   phoneNumber: string;
   sms: number;
+}
+
+export interface updatePasswordByEmailReq {
+  password: string;
+  email: string;
+  emailCode: number;
 }
 
 export interface resetPasswordReq {

@@ -41,6 +41,7 @@
             <RegisterForm />
             <MobileForm />
             <QrCodeForm />
+            <EmailForm />
           </div>
         </div>
       </div>
@@ -59,6 +60,7 @@ import { useGlobSetting } from '/@/hooks/setting';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useDesign } from '/@/hooks/web/useDesign';
 import { useLocaleStore } from '/@/store/modules/locale';
+import EmailForm from "@/views/sys/login/EmailForm.vue";
 
 defineProps({
   sessionTimeout: {
