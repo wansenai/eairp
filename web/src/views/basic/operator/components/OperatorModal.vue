@@ -11,12 +11,13 @@ import { BasicForm, useForm } from '/@/components/Form/index';
 import { formSchema } from '@/views/basic/operator/operator.data';
 import { AddOrUpdateOperatorReq } from '@/api/basic/model/operatorModel';
 import { addOrUpdateOperator } from '@/api/basic/operator';
+import {useI18n} from "vue-i18n";
 
 const rowId = ref('');
 const isUpdate = ref(true);
-const getTitle = computed(() => (!unref(isUpdate) ? '新增操作员' : '编辑操作员'));
+const getTitle = computed(() => (!unref(isUpdate) ? t('basic.operator.addOperator') : t('basic.operator.editOperator')));
 const emitSuccess = defineEmits(['success', 'register']);
-
+const { t } = useI18n();
 const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({
   labelWidth: 100,
   baseColProps: { span: 24 },

@@ -10,27 +10,27 @@ const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '账户编号',
+        title: t('basic.settlement.table.accountNumber'),
         dataIndex: 'accountNumber',
         width: 90,
     },
     {
-        title: '账户名称',
+        title: t('basic.settlement.table.accountName'),
         dataIndex: 'accountName',
         width: 120,
     },
     {
-        title: '期初金额',
+        title: t('basic.settlement.table.openingAmount'),
         dataIndex: 'initialAmount',
         width: 120,
     },
     {
-        title: '当前余额',
+        title: t('basic.settlement.table.currentBalance'),
         dataIndex: 'currentAmount',
         width: 120,
     },
     {
-        title: '状态',
+        title: t('basic.settlement.table.status'),
         dataIndex: 'status',
         width: 100,
         customRender: ({ record }) => {
@@ -62,17 +62,17 @@ export const columns: BasicColumn[] = [
         }
     },
     {
-        title: '排序',
+        title: t('basic.settlement.table.sort'),
         dataIndex: 'sort',
         width: 80,
     },
     {
-        title: '是否默认账户',
+        title: t('basic.settlement.table.default'),
         dataIndex: 'isDefault',
         width: 80,
     },
     {
-        title: '创建时间',
+        title: t('basic.settlement.table.createTime'),
         dataIndex: 'createTime',
         width: 150,
     }
@@ -80,13 +80,13 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '账户编号',
+        label: t('basic.settlement.header.accountNumber'),
         field: 'accountNumber',
         component: 'Input',
         colProps: { span: 5 },
     },
     {
-        label: '账户名称',
+        label: t('basic.settlement.header.accountName'),
         field: 'accountName',
         component: 'Input',
         colProps: { span: 5 },
@@ -95,52 +95,52 @@ export const searchFormSchema: FormSchema[] = [
 
 export const formSchema: FormSchema[] = [
     {
-        label: '账户名称',
+        label: t('basic.settlement.form.accountName'),
         field: 'accountName',
         component: 'Input',
         required: true,
     },
     {
-        label: '账户编号',
+        label: t('basic.settlement.form.accountNumber'),
         field: 'accountNumber',
         component: 'Input',
     },
     {
-        label: '期初金额',
+        label: t('basic.settlement.form.openingAmount'),
         field: 'initialAmount',
         component: 'InputNumber',
     },
     {
-        label: '当前余额',
+        label: t('basic.settlement.form.currentBalance'),
         field: 'currentAmount',
         component: 'InputNumber',
     },
     {
-        label: '默认账户',
+        label: t('basic.settlement.form.default'),
         field: 'isDefault',
-        helpMessage: '只允许有一个默认账户，如果选择是，之前的默认账户将会变成非默认账户',
+        helpMessage: t('basic.settlement.form.notice'),
         component: 'RadioGroup',
         defaultValue: 0,
         componentProps: {
             options: [
                 {
-                    label: '不是',
+                    label: t('basic.settlement.no'),
                     value: 0,
                 },
                 {
-                    label: '是',
+                    label: t('basic.settlement.yes'),
                     value: 1,
                 },
             ],
         },
     },
     {
-        label: '备注',
+        label: t('basic.settlement.form.remark'),
         field: 'remark',
         component: 'InputTextArea',
     },
     {
-        label: '排序',
+        label: t('basic.settlement.form.sort'),
         field: 'sort',
         component: 'InputNumber',
     }

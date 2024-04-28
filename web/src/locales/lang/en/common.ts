@@ -19,7 +19,7 @@ export default {
   dark: 'Dark',
 
   action: 'Action',
-
+  operating: 'Operate',
   successful: 'Success',
   failed: 'Failed',
   warning: 'Warning',

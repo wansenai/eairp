@@ -1,65 +1,63 @@
 import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
-import {h, reactive, UnwrapRef} from 'vue';
-import {Switch} from "ant-design-vue";
-import {useMessage} from "@/hooks/web/useMessage";
+import {reactive, UnwrapRef} from 'vue';
+import {Dayjs} from "dayjs";
 import {useI18n} from "@/hooks/web/useI18n";
-import dayjs, {Dayjs} from "dayjs";
 
-const {t} = useI18n();
+export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '付款会员',
+        title: t('financial.advance.table.paymentMember'),
         dataIndex: 'memberName',
         width: 120,
     },
     {
-        title: '单据编号',
+        title: t('financial.advance.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 150,
     },
     {
-        title: '单据日期',
+        title: t('financial.advance.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 150,
     },
     {
-        title: '收款金额',
+        title: t('financial.advance.table.amountCollected'),
         dataIndex: 'collectedAmount',
         width: 90,
     },
     {
-        title: '合计金额',
+        title: t('financial.advance.table.totalAmount'),
         dataIndex: 'totalAmount',
         width: 90,
     },
     {
-        title: '备注',
-        dataIndex: 'remark',
-        width: 150,
-    },
-    {
-        title: '财务人员',
+        title: t('financial.advance.table.financialPerson'),
         dataIndex: 'financialPersonnel',
         width: 80,
     },
     {
-        title: '操作员',
+        title: t('financial.advance.table.operator'),
         dataIndex: 'operator',
         width: 80,
     },
     {
-        title: '状态',
+        title: t('financial.advance.table.status'),
         dataIndex: 'status',
         width: 100,
-    }
+    },
+    {
+        title: t('financial.advance.table.remark'),
+        dataIndex: 'remark',
+        width: 150,
+    },
 ]
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
-        field: 'memberNumber',
+        label: t('financial.advance.header.receiptNumber'),
+        field: 'receiptNumber',
         component: 'Input',
         colProps: {
             xl: 8,
@@ -68,11 +66,11 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('financial.advance.header.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('financial.advance.header.starDate'), t('financial.advance.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -80,8 +78,8 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '付款会员',
-        field: 'phoneNumber',
+        label: t('financial.advance.header.paymentMember'),
+        field: 'paymentMember',
         component: 'Input',
         colProps: {
             xl: 8,
@@ -89,7 +87,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据状态',
+        label: t('financial.advance.header.status'),
         field: 'type',
         component: 'Select',
         colProps: {
@@ -98,13 +96,13 @@ export const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                {label: '未审核', value: 0, key: 0},
-                {label: '已审核', value: 1, key: 1},
+                { label: t('sys.table.unaudited'), value: 0, key: 0 },
+                { label: t('sys.table.audited'), value: 1, key: 1 },
             ],
         },
     },
     {
-        label: '单据备注',
+        label: t('financial.advance.header.remark'),
         field: 'type',
         component: 'Input',
         colProps: {
@@ -118,7 +116,7 @@ export const formSchema: FormSchema[] = []
 
 export const tableColumns = [
     {
-        title: '账户名称',
+        title: t('financial.advance.view.accountName'),
         key: 'accountId',
         width: '25%',
         placeholder: '请选择${title}',
@@ -127,7 +125,7 @@ export const tableColumns = [
         validateRules: [{required: true, message: '${title}不能为空'}],
     },
     {
-        title: '金额',
+        title: t('financial.advance.view.amount'),
         key: 'amount',
         width: '20%',
         statistics: true,
@@ -135,7 +133,7 @@ export const tableColumns = [
         validateRules: [{required: true, message: '${title}不能为空'}]
     },
     {
-        title: '备注',
+        title: t('financial.advance.view.remark'),
         key: 'remark',
         width: '50%',
         placeholder: '请选择${title}'
@@ -166,17 +164,17 @@ export const formState: UnwrapRef<FormState> = reactive<FormState>({
 
 export const advanceChargeTableColumns: BasicColumn[] = [
     {
-        title: '账户名称',
+        title: t('financial.advance.view.accountName'),
         dataIndex: 'accountName',
         width: 200,
     },
     {
-        title: '金额',
+        title: t('financial.advance.view.amount'),
         dataIndex: 'amount',
         width: 180,
     },
     {
-        title: '备注',
+        title: t('financial.advance.view.remark'),
         dataIndex: 'remark',
         width: 200,
     },

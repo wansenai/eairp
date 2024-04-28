@@ -2,8 +2,8 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button @click="exportTable">导出</a-button>
-        <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+        <a-button @click="exportTable" v-text="t('reports.shipmentsDetail.export')"/>
+        <a-button @click="primaryPrint" type="primary" v-text="t('reports.shipmentsDetail.regularPrint')"/>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'receiptNumber'">
@@ -36,11 +36,13 @@ import ViewPurchaseRefundModal from "@/views/purchase/refund/components/ViewRefu
 import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ShipmentsDetailStatistics',
   components: {ViewPurchaseRefundModal, ViewSaleShipmentsModal, ViewShipmentModal, Tag, TableAction, BasicTable},
   setup() {
+    const { t } = useI18n();
     const [handleSaleShipmentsModal, {openModal: openSaleShipmentsModal}] = useModal();
     const [handlePurchaseRefundModal, {openModal: openPurchaseRefundModal}] = useModal();
     const [handleRetailShipmentModal, {openModal: openRetailShipmentModal}] = useModal();
@@ -50,7 +52,7 @@ export default defineComponent({
     const printAmount = ref(0);
     const printTaxAmount = ref(0);
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
-      title: '出库明细报表',
+      title: t('reports.shipmentsDetail.title'),
       api: getShipmentsDetail,
       columns: shipmentsDetailStatisticsColumns,
       formConfig: {
@@ -78,7 +80,7 @@ export default defineComponent({
       printTableData.value = tableData;
       return [
         {
-          _index: '合计',
+          _index: t('reports.shipmentsDetail.table.total'),
           productNumber: productNumber,
           amount: `￥${XEUtils.commafy(XEUtils.toNumber(amount), { digits: 2 })}`,
           taxAmount: `￥${XEUtils.commafy(XEUtils.toNumber(taxAmount), { digits: 2 })}`
@@ -111,7 +113,7 @@ export default defineComponent({
 
     function exportTable() {
       if (getDataSource() === undefined || getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('reports.shipmentsDetail.notice'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -122,7 +124,7 @@ export default defineComponent({
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           const timestamp = getTimestamp(new Date());
-          link.download = "出库明细数据" + timestamp + ".xlsx";
+          link.download = t('reports.shipmentsDetail.data') + timestamp + ".xlsx";
           link.target = "_blank";
           link.click();
         }
@@ -134,7 +136,7 @@ export default defineComponent({
         productNumber: printProductNumber.value,
         amount: `￥${XEUtils.commafy(XEUtils.toNumber(printAmount.value), { digits: 2 })}`,
         taxAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printTaxAmount.value), { digits: 2 })}`,
-        receiptNumber: '合计',
+        receiptNumber: t('reports.shipmentsDetail.table.total'),
         type: '',
         name: '',
         productBarcode: '',
@@ -148,7 +150,7 @@ export default defineComponent({
         createTime: ''
       });
       printJS({
-        documentTitle: "EAIRP (出库明细)",
+        documentTitle: "EAIRP " + t('reports.shipmentsDetail.detail'),
         properties: shipmentsDetailStatisticsColumns.map(item => {
           return { field: item.dataIndex, displayName: item.title }
         }),
@@ -161,6 +163,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       openReceipt,
       registerTable,
       handleSuccess,

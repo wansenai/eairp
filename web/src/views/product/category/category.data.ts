@@ -1,31 +1,33 @@
 import {FormSchema} from "@/components/Form";
 import {BasicColumn} from "@/components/Table";
 import {getCategoryList} from "@/api/product/productCategory";
+import {useI18n} from "@/hooks/web/useI18n";
+export const { t } = useI18n();
 export const columns: BasicColumn[] = [
     {
-        title: '分类名称',
+        title: t('product.category.table.categoryName'),
         dataIndex: 'categoryName',
         width: 150,
         align: 'left',
     },
     {
-        title: '分类编号',
+        title: t('product.category.table.categoryNumber'),
         dataIndex: 'categoryNumber',
     },
     {
-        title: '上级分类',
+        title: t('product.category.table.categoryParent'),
         dataIndex: 'parentName',
     },
     {
-        title: '排序',
+        title: t('product.category.table.sort'),
         dataIndex: 'sort',
     },
     {
-        title: '备注',
+        title: t('product.category.table.remark'),
         dataIndex: 'remark',
     },
     {
-        title: '创建时间',
+        title: t('product.category.table.createTime'),
         dataIndex: 'createTime',
     }
 ]
@@ -38,19 +40,19 @@ export const CategorySchema: FormSchema[] = [
     },
     {
         field: 'categoryName',
-        label: '分类名称',
+        label: t('product.category.table.categoryName'),
         component: 'Input',
         required: true,
     },
     {
-        label: '分类编号',
+        label: t('product.category.table.categoryNumber'),
         field: 'categoryNumber',
         component: 'Input',
         required: true,
     },
     {
         field: 'parentId',
-        label: '上级分类',
+        label: t('product.category.table.categoryParent'),
         component: 'ApiTreeSelect',
         componentProps: {
             api: getCategoryList,
@@ -60,12 +62,12 @@ export const CategorySchema: FormSchema[] = [
         },
     },
     {
-        label: '排序',
+        label: t('product.category.table.sort'),
         field: 'sort',
         component: 'InputNumber',
     },
     {
-        label: '备注',
+        label: t('product.category.table.remark'),
         field: 'remark',
         component: 'InputTextArea',
     },

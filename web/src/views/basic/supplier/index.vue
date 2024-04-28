@@ -2,12 +2,12 @@
     <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> 新增</a-button>
-        <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
-        <a-button type="primary" @click="handleOnStatus(0)"> 批量启用</a-button>
-        <a-button type="primary" @click="handleOnStatus(1)"> 批量停用</a-button>
-        <a-button type="primary" @click="handleImport"> 导入</a-button>
-        <a-button type="primary" @click="handleExport"> 导出</a-button>
+        <a-button type="primary" @click="handleCreate" v-text="t('basic.supplier.add')"/>
+        <a-button type="primary" @click="handleBatchDelete" v-text="t('basic.supplier.batchDelete')"/>
+        <a-button type="primary" @click="handleOnStatus(0)" v-text="t('basic.supplier.batchEnable')"/>
+        <a-button type="primary" @click="handleOnStatus(1)" v-text="t('basic.supplier.batchDisable')"/>
+        <a-button type="primary" @click="handleImport" v-text="t('basic.supplier.Import')"/>
+        <a-button type="primary" @click="handleExport" v-text="t('basic.supplier.Export')"/>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -15,13 +15,15 @@
               :actions="[
               {
                 icon: 'clarity:note-edit-line',
+                tooltip: t('sys.table.edit'),
                 onClick: handleEdit.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
+                tooltip: t('sys.table.delete'),
                 color: 'error',
                 popConfirm: {
-                  title: '是否确认删除',
+                  title: t('sys.table.confirmDelete'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
                 },
@@ -48,18 +50,20 @@ import {columns, searchFormSchema} from "@/views/basic/supplier/supplier.data";
 import {deleteBatchSuppliers, updateSupplierStatus, exportSupplier} from "@/api/basic/supplier";
 import SupplierModal from "@/views/basic/supplier/components/SupplierModal.vue";
 import ImportFileModal from '@/components/Tools/ImportFileModal.vue';
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'Supplier',
   components: {TableAction, BasicTable, SupplierModal, ImportFileModal },
   setup() {
+    const { t } = useI18n();
     const currentTime = ref(null);
     const timestamp = ref(null);
     const [registerModal, {openModal}] = useModal();
     const { createMessage } = useMessage();
     const importModalRef = ref(null);
     const [registerTable, { reload, getSelectRows, getDataSource, getForm }] = useTable({
-      title: '供应商列表',
+      title: t('basic.supplier.title'),
       api: getSupplierPageList,
       rowKey: 'id',
       columns: columns,
@@ -77,7 +81,7 @@ export default defineComponent({
       showIndexColumn: true,
       actionColumn: {
         width: 80,
-        title: '操作',
+        title: t('common.operating'),
         dataIndex: 'action',
         fixed: undefined,
       },
@@ -92,7 +96,7 @@ export default defineComponent({
     async function handleBatchDelete(record: Recordable) {
       const data = getSelectRows();
       if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
+        createMessage.warn(t('basic.selectData'));
         return;
       }
       const ids = data.map((item) => item.id);
@@ -124,7 +128,7 @@ export default defineComponent({
       // 获取选中行的id组成一个数组
       const data = getSelectRows();
       if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
+        createMessage.warn(t('basic.selectData'));
         return;
       }
       const ids = data.map((item) => item.id);
@@ -140,9 +144,9 @@ export default defineComponent({
 
     function handleImport() {
       const templateUrl  = 'https://wansen-1317413588.cos.ap-shanghai.myqcloud.com/%E4%BE%9B%E5%BA%94%E5%95%86%E6%A8%A1%E6%9D%BF.xlsx'
-      const templateName  = '供应商Excel模板[下载]'
+      const templateName  = t('basic.supplier.export.templateDownload')
       importModalRef.value.initModal(templateUrl, templateName);
-      importModalRef.value.title = "供应商导入";
+      importModalRef.value.title = t('basic.supplier.export.import');
     }
 
 
@@ -159,7 +163,7 @@ export default defineComponent({
 
     async function handleExport() {
       if (getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('basic.supplier.export.noData'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -169,13 +173,14 @@ export default defineComponent({
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         const timestamp = getTimestamp(new Date());
-        link.download = "供应商信息数据" + timestamp + ".xlsx";
+        link.download = t('basic.supplier.export.data') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
     }
 
     return {
+      t,
       registerTable,
       registerModal,
       handleCreate,

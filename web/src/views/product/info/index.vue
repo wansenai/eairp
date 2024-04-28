@@ -2,14 +2,13 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> 新增</a-button>
-        <a-button type="primary" @click="handleBatchDelete"> 批量删除</a-button>
-        <a-button type="primary" @click="handleOnStatus(0)"> 批量启用</a-button>
-        <a-button type="primary" @click="handleOnStatus(1)"> 批量停用</a-button>
-        <a-button type="primary" @click="handleImport"> 导入</a-button>
-        <a-button type="primary" @click="handleExport"> 导出</a-button>
-        <a-button type="primary" @click="handleBatchProductInfo"> 批量编辑</a-button>
-        <a-button type="primary" @click=""> 修正库存</a-button>
+        <a-button type="primary" @click="handleCreate" v-text="t('product.info.add')" />
+        <a-button type="primary" @click="handleBatchDelete" v-text="t('product.info.batchDelete')" />
+        <a-button type="primary" @click="handleOnStatus(0)" v-text="t('product.info.batchEnable')" />
+        <a-button type="primary" @click="handleOnStatus(1)" v-text="t('product.info.batchDisable')" />
+        <a-button type="primary" @click="handleImport"  v-text="t('product.info.import')" />
+        <a-button type="primary" @click="handleExport" v-text="t('product.info.export')" />
+        <a-button type="primary" @click="handleBatchProductInfo" v-text="t('product.info.batchEdit')" />
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -17,13 +16,15 @@
               :actions="[
               {
                 icon: 'clarity:note-edit-line',
+                tooltip: t('sys.table.edit'),
                 onClick: handleEdit.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
+                tooltip: t('sys.table.delete'),
                 popConfirm: {
-                  title: '是否确认删除',
+                  title: t('sys.table.confirmDelete'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
                 },
@@ -51,17 +52,19 @@ import BatchEditModal from "@/views/product/info/components/BatchEditModal.vue";
 import {getProductInfo, deleteProduct, updateProductStatus} from "@/api/product/product";
 import ImportFileModal from "@/components/Tools/ImportFileModal.vue";
 import {exportXlsx} from "@/api/basic/common";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ProductInfo',
   components: {TableAction, BasicTable, ProductInfoModal, BatchEditModal, ImportFileModal},
   setup() {
+    const { t } = useI18n();
     const { createMessage } = useMessage();
     const importModalRef = ref(null);
     const productModalRef = ref(null);
     const batchProductInfoModalRef = ref(null);
     const [registerTable, { reload, getSelectRows }] = useTable({
-      title: '商品信息列表',
+      title: t('product.info.title'),
       rowKey: 'id',
       columns: columns,
       api: getProductInfo,
@@ -79,7 +82,7 @@ export default defineComponent({
       showTableSetting: true,
       actionColumn: {
         width: 80,
-        title: '操作',
+        title: t('common.operating'),
         dataIndex: 'action',
         fixed: undefined,
       },
@@ -92,7 +95,7 @@ export default defineComponent({
     async function handleBatchDelete() {
       const data = getSelectRows();
       if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
+        createMessage.warn(t('product.selectData'));
         return;
       }
       const ids = data.map((item) => item.id);
@@ -121,7 +124,7 @@ export default defineComponent({
     async function handleOnStatus(newStatus: number) {
       const data = getSelectRows();
       if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
+        createMessage.warn(t('product.selectData'));
         return;
       }
       const ids = data.map((item) => item.id);
@@ -142,7 +145,7 @@ export default defineComponent({
     function handleBatchProductInfo() {
       const data = getSelectRows();
       if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
+        createMessage.warn(t('product.selectData'));
         return;
       }
       const ids = data.map((item) => item.id);
@@ -150,10 +153,10 @@ export default defineComponent({
     }
 
     function handleImport() {
-      const templateUrl  = 'https://wansen-1317413588.cos.ap-shanghai.myqcloud.com/%E4%BC%9A%E5%91%98%E4%BF%A1%E6%81%AF%E6%A8%A1%E6%9D%BF.xlsx'
-      const templateName  = '商品信息Excel模板[下载]'
+      const templateUrl  = 'https://wansen-1317413588.cos.ap-shanghai.myqcloud.com/Commodity%20information%20template%28%E5%95%86%E5%93%81%E4%BF%A1%E6%81%AF%E6%A8%A1%E6%9D%BF%29.xlsx'
+      const templateName  = t('product.info.importInfo.templateName')
       importModalRef.value.initModal(templateUrl, templateName);
-      importModalRef.value.title = "商品信息数据导入";
+      importModalRef.value.title = t('product.info.importInfo.title')
     }
 
     const getTimestamp = (date) => {
@@ -173,13 +176,14 @@ export default defineComponent({
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       const timestamp = getTimestamp(new Date());
-      link.download = "商品信息数据" + timestamp + ".xlsx";
+      link.download = t('product.importInfo.infoData') + timestamp + ".xlsx";
       link.target = "_blank";
       link.click();
     }
 
 
     return {
+      t,
       registerTable,
       handleCreate,
       handleDelete,

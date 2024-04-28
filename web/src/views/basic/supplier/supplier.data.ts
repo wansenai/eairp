@@ -10,27 +10,27 @@ const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '名称',
+        title: t('basic.supplier.table.name'),
         dataIndex: 'supplierName',
         width: 180,
     },
     {
-        title: '联系人',
+        title: t('basic.supplier.table.contact'),
         dataIndex: 'contact',
         width: 80,
     },
     {
-        title: '手机号',
+        title: t('basic.supplier.table.phoneNumber'),
         dataIndex: 'phoneNumber',
         width: 120,
     },
     {
-        title: '电子邮箱',
+        title: t('basic.supplier.table.email'),
         dataIndex: 'email',
         width: 120,
     },
     {
-        title: '状态',
+        title: t('basic.supplier.table.status'),
         dataIndex: 'status',
         width: 100,
         customRender: ({ record }) => {
@@ -62,22 +62,22 @@ export const columns: BasicColumn[] = [
         }
     },
     {
-        title: '累计应付账款',
+        title: t('basic.supplier.table.accumulatedAccountsPayable'),
         dataIndex: 'totalAccountPayment',
         width: 90,
     },
     {
-        title: '税率(%)',
+        title: t('basic.supplier.table.rate'),
         dataIndex: 'taxRate',
         width: 80,
     },
     {
-        title: '排序',
+        title: t('basic.supplier.table.sort'),
         dataIndex: 'sort',
         width: 80,
     },
     {
-        title: '创建时间',
+        title: t('basic.supplier.table.createTime'),
         dataIndex: 'createTime',
         width: 150,
     }
@@ -85,24 +85,24 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '名称',
+        label: t('basic.supplier.header.name'),
         field: 'supplierName',
         component: 'Input',
         colProps: { span: 5 },
     },
     {
-        label: '联系电话',
+        label: t('basic.supplier.header.contactPhone'),
         field: 'contactNumber',
         component: 'Input',
         colProps: { span: 5 },
     },
     {
         field: '[startDate, endDate]',
-        label: '时间',
+        label: t('basic.supplier.header.createTime'),
         component: 'RangePicker',
         componentProps: {
           format: 'YYYY/MM/DD',
-          placeholder: ['开始日期', '结束日期'],
+          placeholder: [t('basic.supplier.header.startDate'), t('basic.supplier.header.endDate')],
         },
         colProps: { span: 7 },
     },
@@ -110,9 +110,9 @@ export const searchFormSchema: FormSchema[] = [
 
 export const formSchema: FormSchema[] = [
     {
-        label: '名称',
+        label: t('basic.supplier.form.name'),
         field: 'supplierName',
-        helpMessage: '供应商的名字, 也可以是个人',
+        helpMessage: t('basic.supplier.form.notice'),
         component: 'Input',
         colProps: {
             span: 11,
@@ -120,7 +120,7 @@ export const formSchema: FormSchema[] = [
         required: true,
     },
     {
-        label: '联系人',
+        label: t('basic.supplier.form.contact'),
         field: 'contact',
         component: 'Input',
         colProps: {
@@ -129,7 +129,7 @@ export const formSchema: FormSchema[] = [
         required: true,
     },
     {
-        label: '手机号码',
+        label: t('basic.supplier.form.phoneNumber'),
         field: 'phoneNumber',
         component: 'Input',
         colProps: {
@@ -138,8 +138,8 @@ export const formSchema: FormSchema[] = [
         required: true,
     },
     {
-        label: '联系电话',
-        helpMessage: '座机号码 (010/021之类)',
+        label: t('basic.supplier.form.contactPhone'),
+        helpMessage: t('basic.supplier.form.noticeTwo'),
         field: 'contactNumber',
         component: 'Input',
         colProps: {
@@ -147,7 +147,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '电子邮箱',
+        label: t('basic.supplier.form.email'),
         field: 'email',
         component: 'Input',
         colProps: {
@@ -155,7 +155,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '传真',
+        label: t('basic.supplier.form.fax'),
         field: 'fax',
         component: 'Input',
         colProps: {
@@ -163,7 +163,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '地址',
+        label: t('basic.supplier.form.address'),
         field: 'address',
         component: 'InputTextArea',
         colProps: {
@@ -171,7 +171,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '备注',
+        label: t('basic.supplier.form.remark'),
         field: 'remark',
         component: 'InputTextArea',
         colProps: {
@@ -181,13 +181,13 @@ export const formSchema: FormSchema[] = [
     {
         field: '',
         component: 'Divider',
-        label: '应付账款信息',
+        label: t('basic.supplier.form.accountsPayableInfo'),
         colProps: {
           span: 22,
         },
     },
     {
-        label: '一季度付款',
+        label: t('basic.supplier.form.firstQuarterPayment'),
         field: 'firstQuarterAccountPayment',
         component: 'InputNumber',
         colProps: {
@@ -195,7 +195,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '二季度付款',
+        label: t('basic.supplier.form.secondQuarterPayment'),
         field: 'secondQuarterAccountPayment',
         component: 'InputNumber',
         colProps: {
@@ -203,7 +203,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '三季度付款',
+        label: t('basic.supplier.form.thirdQuarterPayment'),
         field: 'thirdQuarterAccountPayment',
         component: 'InputNumber',
         colProps: {
@@ -211,7 +211,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '四季度付款',
+        label: t('basic.supplier.form.fourthQuarterPayment'),
         field: 'fourthQuarterAccountPayment',
         component: 'InputNumber',
         colProps: {
@@ -221,13 +221,13 @@ export const formSchema: FormSchema[] = [
     {
         field: '',
         component: 'Divider',
-        label: '账户信息',
+        label: t('basic.supplier.form.accountInfo'),
         colProps: {
           span: 22,
         },
     },
     {
-        label: '纳税人识别号',
+        label: t('basic.supplier.form.taxNumber'),
         field: 'taxNumber',
         component: 'Input',
         colProps: {
@@ -235,7 +235,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '税率(%)',
+        label: t('basic.supplier.form.rate'),
         field: 'taxRate',
         component: 'InputNumber',
         colProps: {
@@ -243,7 +243,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '开户行',
+        label: t('basic.supplier.form.bankName'),
         field: 'bankName',
         component: 'Input',
         colProps: {
@@ -251,7 +251,7 @@ export const formSchema: FormSchema[] = [
         },
     },
     {
-        label: '银行账号',
+        label: t('basic.supplier.form.bankAccount'),
         field: 'accountNumber',
         component: 'InputNumber',
         colProps: {

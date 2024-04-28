@@ -10,17 +10,17 @@ const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '姓名',
+        title: t('basic.operator.table.name'),
         dataIndex: 'name',
         width: 90,
     },
     {
-        title: '类型',
+        title: t('basic.operator.table.type'),
         dataIndex: 'type',
         width: 120,
     },
     {
-        title: '状态',
+        title: t('basic.operator.table.status'),
         dataIndex: 'status',
         width: 100,
         customRender: ({ record }) => {
@@ -52,12 +52,12 @@ export const columns: BasicColumn[] = [
         }
     },
     {
-        title: '排序',
+        title: t('basic.operator.table.sort'),
         dataIndex: 'sort',
         width: 80,
     },
     {
-        title: '创建时间',
+        title: t('basic.operator.table.createTime'),
         dataIndex: 'createTime',
         width: 150,
     }
@@ -65,21 +65,21 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '姓名',
+        label: t('basic.operator.header.name'),
         field: 'name',
         component: 'Input',
         colProps: { span: 5 },
     },
     {
-        label: '类型',
+        label: t('basic.operator.header.type'),
         field: 'type',
         component: 'Select',
         colProps: { span: 5 },
         componentProps: {
             options: [
-                { label: '业务员', value: '业务员', key: 0 },
-                { label: '财务员', value: '财务员', key: 1 },
-                { label: '销售员', value: '销售员', key: 2 },
+                { label: t('basic.operator.businessPerson'), value: '业务员', key: 0 },
+                { label: t('basic.operator.financialPerson'), value: '财务员', key: 1 },
+                { label: t('basic.operator.salesPerson'), value: '销售员', key: 2 },
             ],
         },
     }
@@ -87,31 +87,31 @@ export const searchFormSchema: FormSchema[] = [
 
 export const formSchema: FormSchema[] = [
     {
-        label: '姓名',
+        label: t('basic.operator.form.name'),
         field: 'name',
         component: 'Input',
         required: true,
     },
     {
-        label: '类型',
+        label: t('basic.operator.form.type'),
         field: 'type',
         component: 'Select',
         componentProps: {
             options: [
-                { label: '业务员', value: '业务员', key: 0 },
-                { label: '财务员', value: '财务员', key: 1 },
-                { label: '销售员', value: '销售员', key: 2 },
+                { label: t('basic.operator.businessPerson'), value: '业务员', key: 0 },
+                { label: t('basic.operator.financialPerson'), value: '财务员', key: 1 },
+                { label: t('basic.operator.salesPerson'), value: '销售员', key: 2 },
             ],
         },
         required: true,
     },
     {
-        label: '排序',
+        label: t('basic.operator.form.sort'),
         field: 'sort',
         component: 'InputNumber',
     },
     {
-        label: '备注',
+        label: t('basic.operator.form.remark'),
         field: 'remark',
         component: 'InputTextArea',
     }

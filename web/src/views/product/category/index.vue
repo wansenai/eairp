@@ -2,8 +2,8 @@
   <div>
     <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> 新增产品分类</a-button>
-        <a-button type="primary" @click="handleBatchDelete"> 批量删除产品分类</a-button>
+        <a-button type="primary" @click="handleCreate" v-text="t('product.category.add')" />
+        <a-button type="primary" @click="handleBatchDelete" v-text="t('product.category.batchDelete')" />
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -11,13 +11,15 @@
               :actions="[
               {
                 icon: 'clarity:note-edit-line',
+                tooltip: t('product.category.table.edit'),
                 onClick: handleEdit.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
+                tooltip: t('product.category.table.delete'),
                 popConfirm: {
-                  title: '是否确认删除',
+                  title: t('sys.table.confirmDelete'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
                 },
@@ -39,6 +41,7 @@ import {BasicTable, TableAction, useTable} from "@/components/Table";
 import {getCategoryList, deleteCategory} from "@/api/product/productCategory";
 import {columns} from "@/views/product/category/category.data";
 import {useMessage} from "@/hooks/web/useMessage";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ProductCategory',
@@ -46,10 +49,11 @@ export default defineComponent({
     BasicTable, TableAction, CategoryModal,
   },
   setup() {
+    const { t } = useI18n();
     const { createMessage } = useMessage();
     const [registerModal, {openModal}] = useModal();
     const [registerTable, {reload, expandAll, getSelectRows}] = useTable({
-      title: '产品分类列表',
+      title: t('product.category.title'),
       api: getCategoryList,
       columns,
       formConfig: {
@@ -59,7 +63,7 @@ export default defineComponent({
       rowSelection: {
         type: 'checkbox',
       },
-      titleHelpMessage: '产品分类列表可以添加多个产品分类和下级分类',
+      titleHelpMessage: t('product.category.tip'),
       // 产品分类不开启分页和行选中
       pagination: false,
       clickToRowSelect: false,
@@ -71,7 +75,7 @@ export default defineComponent({
       canResize: false,
       actionColumn: {
         width: 80,
-        title: '操作',
+        title: t('common.operating'),
         dataIndex: 'action',
         fixed: undefined,
       },
@@ -109,7 +113,7 @@ export default defineComponent({
       // 通过getSelectRowKeys获取勾选的复选框，如果没有勾选复选框，就提示选择一条数据
       const data = getSelectRows();
       if (data.length === 0) {
-        createMessage.warn('请选择一条数据');
+        createMessage.warn(t('product.selectData'));
         return;
       }
       const ids = data.map((item) => item.id);
@@ -120,6 +124,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerModal,
       registerTable,
       handleEdit,

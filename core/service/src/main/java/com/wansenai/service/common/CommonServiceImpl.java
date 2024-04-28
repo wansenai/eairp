@@ -12,6 +12,8 @@
  */
 package com.wansenai.service.common;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.code.kaptcha.Producer;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.profile.ClientProfile;
@@ -62,6 +64,7 @@ import com.wansenai.vo.product.ExportProductVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FastByteArrayOutputStream;
@@ -276,33 +279,37 @@ public class CommonServiceImpl implements CommonService{
                  if(filename == null || filename.isEmpty()) {
                     return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_NO_FILENAME_MATCH);
 
-                 } else if (filename.contains("供应商")) {
+                 } else if (filename.contains("供应商") || filename.contains("supplier")) {
                     var result = readSuppliersFromExcel(file);
                     if(!result){
                         return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR);
                     }
                      return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS);
 
-                } else if (filename.contains("客户")) {
+                } else if (filename.contains("客户") || filename.contains("customer") || filename.contains("Customer")) {
                      var result = readCustomerFromExcel(file);
                      if(!result){
                          return Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_ERROR);
                      }
                      return Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_SUCCESS);
-                } else if (filename.contains("会员")) {
+                } else if (filename.contains("会员") || filename.contains("member") || filename.contains("Member")) {
                      var result = readMemberFromExcel(file);
                      if(!result){
                          return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_ERROR);
                      }
                      return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_SUCCESS);
-                 } else if (filename.contains("商品")) {
-                     var result = readProductFromExcel(file);
+                 } else if (filename.contains("商品") || filename.contains("product") || filename.contains("Product")) {
+                     var message = checkProductBarCodeExist(file);
+                     if (StringUtils.hasLength(message)) {
+                         return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR.getCode(), message);
+                     }
+                     var result = readProductFromExcel(file, null);
                      if(!result){
                          return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
                      }
                      return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS);
                  } else {
-                    log.error("上传Excel文件失败: 文件名不匹配");
+                    log.warn("上传Excel文件失败: 文件名不匹配");
                     return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_NO_FILENAME_MATCH);
                 }
             } catch (Exception e) {
@@ -311,6 +318,20 @@ public class CommonServiceImpl implements CommonService{
             }
         }
         return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+    }
+
+    @Override
+    public Response<String> productCoverUpload(MultipartFile file, Integer type) {
+        try {
+            var result = readProductFromExcel(file, type);
+            if(!result){
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
+            }
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS);
+        } catch (Exception e) {
+            log.error("上传Excel文件失败: " + e.getMessage());
+            return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+        }
     }
 
     private boolean readSuppliersFromExcel(MultipartFile file) throws IOException {
@@ -397,7 +418,61 @@ public class CommonServiceImpl implements CommonService{
         return memberService.batchAddMember(members);
     }
 
-    private boolean readProductFromExcel(MultipartFile file) throws IOException {
+    private String checkProductBarCodeExist(MultipartFile file) throws IOException {
+        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+        DataFormatter dataFormatter = new DataFormatter();
+        var codeListMap = new ArrayList<Map<String, String>>();
+        for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
+            Row row = sheet.getRow(i);
+            var productBarcode = getCellValue(row.getCell(1), dataFormatter);
+            var productName = getCellValue(row.getCell(0), dataFormatter);
+            if (StringUtils.hasLength(productBarcode)) {
+                var codeMap = new HashMap<String, String>();
+                codeMap.put("productBarcode", productBarcode);
+                codeMap.put("productName", productName);
+                codeListMap.add(codeMap);
+            }
+        }
+        var codeList = codeListMap.stream().map(item -> item.get("productBarcode")).collect(Collectors.toList());
+        var codeMap = new HashMap<String, Integer>();
+        for (var code : codeList) {
+            if (codeMap.containsKey(code)) {
+                codeMap.put(code, codeMap.get(code) + 1);
+            } else {
+                codeMap.put(code, 1);
+            }
+        }
+        var message = NullString;
+        // 获取codeListMap的productBarcode 检查DB里是否存在重复的barcode
+        var productCodes = codeListMap.stream()
+                .map(item -> item.get("productBarcode"))
+                .collect(Collectors.toList());
+        if (productStockKeepUnitService.checkProductCode(productCodes)) {
+            message += "existDataBase";
+            return message;
+        }
+
+        JSONArray jsonArray = new JSONArray();
+        for (var entry : codeMap.entrySet()) {
+            if (entry.getValue() > 1) {
+                var jsonObject = new JSONObject();
+                jsonObject.put("productCode", entry.getKey());
+                var productNameList = codeListMap.stream().filter(item -> item.get("productBarcode").equals(entry.getKey())).map(item -> item.get("productName")).collect(Collectors.toList());
+                jsonObject.put("productName", productNameList);
+                jsonArray.add(jsonObject);
+                message = jsonArray.toJSONString();
+            }
+        }
+        if (StringUtils.hasLength(message)) {
+            workbook.close();
+            return message;
+        }
+        workbook.close();
+        return message;
+    }
+
+    private boolean readProductFromExcel(MultipartFile file, Integer type) throws IOException {
         List<Product> products = new ArrayList<>();
         List<ProductStockKeepUnit> productStockKeepUnits = new ArrayList<>();
         List<ProductStock> productStocks = new ArrayList<>();
@@ -406,21 +481,12 @@ public class CommonServiceImpl implements CommonService{
         Sheet sheet = workbook.getSheetAt(0);
         DataFormatter dataFormatter = new DataFormatter();
 
-        Long warehouseId = null;
-        if(getCellValue(sheet.getRow(1).getCell(24), dataFormatter) != null) {
-            var warehouse = warehouseService.getWarehouseByName(getCellValue(sheet.getRow(1).getCell(24), dataFormatter));
-            warehouseId = warehouse.getId();
-        }
+        var warehouseId =  warehouseService.getDefaultWarehouse().getData().getId();
         var userId = baseService.getCurrentUserId();
 
         for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
             Row row = sheet.getRow(i);
-            var productCode = getCellValue(row.getCell(9), dataFormatter);
-
-            // 检查商品条码是否重复存在于数据库中 重复则不导入 比较商品条码是否有重复
-            if (productStockKeepUnitService.checkProductCode(List.of(productCode))) {
-                return false;
-            }
+            var productCode = getCellValue(row.getCell(1), dataFormatter);
 
             var productId = SnowflakeIdUtil.nextId();
             Long productCategoryId = null;
@@ -433,21 +499,22 @@ public class CommonServiceImpl implements CommonService{
             var product = Product.builder()
                     .id(productId)
                     .productName(getCellValue(row.getCell(0), dataFormatter))
-                    .productStandard(getCellValue(row.getCell(1), dataFormatter))
+                    .productStandard(getCellValue(row.getCell(9), dataFormatter))
                     .productModel(getCellValue(row.getCell(2), dataFormatter))
                     .productColor(getCellValue(row.getCell(3), dataFormatter))
                     .productCategoryId(productCategoryId)
                     .productWeight(getNumericCellValue(row.getCell(5)))
                     .productExpiryNum(getIntegerCellValue(row.getCell(6)))
                     .productUnit(getCellValue(row.getCell(7), dataFormatter))
-                    .enableSerialNumber(getIntegerCellValue(row.getCell(16)))
-                    .enableBatchNumber(getIntegerCellValue(row.getCell(17)))
-                    .warehouseShelves(getCellValue(row.getCell(18), dataFormatter))
-                    .productManufacturer(getCellValue(row.getCell(19), dataFormatter))
-                    .otherFieldOne(getCellValue(row.getCell(20), dataFormatter))
-                    .otherFieldTwo(getCellValue(row.getCell(21), dataFormatter))
-                    .otherFieldThree(getCellValue(row.getCell(22), dataFormatter))
-                    .remark(getCellValue(row.getCell(23), dataFormatter))
+                    .enableSerialNumber(getIntegerCellValue(row.getCell(15)))
+                    .enableBatchNumber(getIntegerCellValue(row.getCell(16)))
+                    .warehouseShelves(getCellValue(row.getCell(17), dataFormatter))
+                    .productManufacturer(getCellValue(row.getCell(18), dataFormatter))
+                    .otherFieldOne(getCellValue(row.getCell(19), dataFormatter))
+                    .otherFieldTwo(getCellValue(row.getCell(20), dataFormatter))
+                    .otherFieldThree(getCellValue(row.getCell(21), dataFormatter))
+                    .status(0)
+                    .remark(getCellValue(row.getCell(22), dataFormatter))
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();
@@ -457,11 +524,11 @@ public class CommonServiceImpl implements CommonService{
                     .id(SnowflakeIdUtil.nextId())
                     .productId(productId)
                     .productBarCode(productCode)
-                    .multiAttribute(getCellValue(row.getCell(11), dataFormatter))
-                    .purchasePrice(getNumericCellValue(row.getCell(12)))
-                    .retailPrice(getNumericCellValue(row.getCell(13)))
-                    .salePrice(getNumericCellValue(row.getCell(14)))
-                    .lowPrice(getNumericCellValue(row.getCell(15)))
+                    .multiAttribute(getCellValue(row.getCell(10), dataFormatter))
+                    .purchasePrice(getNumericCellValue(row.getCell(11)))
+                    .retailPrice(getNumericCellValue(row.getCell(12)))
+                    .salePrice(getNumericCellValue(row.getCell(13)))
+                    .lowPrice(getNumericCellValue(row.getCell(14)))
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();
@@ -471,14 +538,69 @@ public class CommonServiceImpl implements CommonService{
                     .id(SnowflakeIdUtil.nextId())
                     .productSkuId(productPrice.getId())
                     .warehouseId(warehouseId)
-                    .initStockQuantity(getNumericCellValue(row.getCell(24)))
-                    .currentStockQuantity(getNumericCellValue(row.getCell(24)))
+                    .initStockQuantity(getNumericCellValue(row.getCell(23)))
+                    .currentStockQuantity(getNumericCellValue(row.getCell(23)))
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();
             productStocks.add(productStock);
             workbook.close();
         }
+        if (type == 1) {
+            Set<String> existingBarcodes = new HashSet<>();
+            Iterator<ProductStockKeepUnit> iterator = productStockKeepUnits.iterator();
+            while (iterator.hasNext()) {
+                ProductStockKeepUnit productStockKeepUnit = iterator.next();
+                String barcode = productStockKeepUnit.getProductBarCode();
+                // 如果当前 barcode 已经存在于集合中，则移除相关数据
+                if (existingBarcodes.contains(barcode)) {
+                    iterator.remove();
+                    // 从 products 中移除对应 productId 的数据
+                    products.removeIf(product -> product.getId().equals(productStockKeepUnit.getProductId()));
+                    productStocks.removeIf(productStock ->
+                            productStock.getProductSkuId().equals(productStockKeepUnit.getId()));
+                } else {
+                    existingBarcodes.add(barcode);
+                }
+            }
+        } else if (type == 0) {
+            // 用于存储每个 barcode 的最后一条数据的索引
+            Map<String, Integer> lastBarcodeIndexes = new HashMap<>();
+
+            // 遍历 productStockKeepUnits 列表以确定每个 barcode 的最后一条数据的索引
+            for (int i = productStockKeepUnits.size() - 1; i >= 0; i--) {
+                ProductStockKeepUnit productStockKeepUnit = productStockKeepUnits.get(i);
+                String barcode = productStockKeepUnit.getProductBarCode();
+                // 如果当前 barcode 已经存在于集合中，则更新索引
+                if (!lastBarcodeIndexes.containsKey(barcode)) {
+                    lastBarcodeIndexes.put(barcode, i);
+                }
+            }
+
+            // 创建一个新的 productStockKeepUnits 列表来存储最后一条数据
+            List<ProductStockKeepUnit> updatedProductStockKeepUnits = new ArrayList<>();
+
+            // 遍历 productStockKeepUnits 列表以只保留每个 barcode 的最后一条数据
+            for (int i = 0; i < productStockKeepUnits.size(); i++) {
+                ProductStockKeepUnit productStockKeepUnit = productStockKeepUnits.get(i);
+                String barcode = productStockKeepUnit.getProductBarCode();
+                int lastIndex = lastBarcodeIndexes.get(barcode);
+                // 只添加最后一条数据
+                if (i == lastIndex) {
+                    updatedProductStockKeepUnits.add(productStockKeepUnit);
+                } else {
+                    // 如果不是最后一条数据，则从 products 和 productStocks 中移除对应的条目
+                    products.removeIf(product -> product.getId().equals(productStockKeepUnit.getProductId()));
+                    productStocks.removeIf(productStock ->
+                            productStock.getProductSkuId().equals(productStockKeepUnit.getId()));
+                }
+            }
+
+            // 更新 productStockKeepUnits 列表
+            productStockKeepUnits = updatedProductStockKeepUnits;
+        }
+
+
         boolean addProductResult = productService.batchAddProduct(products);
         boolean addProductPriceResult = productStockKeepUnitService.saveBatch(productStockKeepUnits);
         boolean addProductStockResult = productStockService.saveBatch(productStocks);

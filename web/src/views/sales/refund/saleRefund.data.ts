@@ -7,62 +7,62 @@ export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '客户',
+        title: t('sales.refund.table.customer'),
         dataIndex: 'customerName',
         width: 60,
     },
     {
-        title: '单据编号',
+        title: t('sales.refund.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 140,
     },
     {
-        title: '商品信息',
+        title: t('sales.refund.table.productInformation'),
         dataIndex: 'productInfo',
         width: 80,
     },
     {
-        title: '数量',
+        title: t('sales.refund.table.productQuantity'),
         dataIndex: 'productNumber',
         width: 80,
     },
     {
-        title: '金额合计',
+        title: t('sales.refund.table.totalAmount'),
         dataIndex: 'totalAmount',
         width: 60,
     },
     {
-        title: '含税合计',
+        title: t('sales.refund.table.totalIncludingTax'),
         dataIndex: 'taxIncludedAmount',
         width: 80,
     },
     {
-        title: '待退金额',
+        title: t('sales.refund.table.refundAmount'),
         dataIndex: 'refundTotalAmount',
         width: 80,
     },
     {
-        title: '本次退款',
+        title: t('sales.refund.view.thisTimeReturnAmount'),
         dataIndex: 'thisRefundAmount',
         width: 80,
     },
     {
-        title: '本次欠款',
+        title: t('sales.refund.view.thisTimeArrearsAmount'),
         dataIndex: 'thisArrearsAmount',
         width: 80,
     },
     {
-        title: '单据日期',
+        title: t('sales.refund.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '操作员',
+        title: t('sales.refund.table.operator'),
         dataIndex: 'operator',
         width: 60,
     },
     {
-        title: '状态',
+        title: t('sales.refund.table.status'),
         dataIndex: 'status',
         width: 80,
     },
@@ -70,7 +70,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('sales.refund.table.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -80,11 +80,11 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('sales.refund.table.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('sales.refund.header.startDate'), t('sales.refund.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -92,8 +92,8 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '客户',
-        field: 'customerId',
+        label: t('sales.refund.table.customer'),
+        field: t('sales.refund.table.customer'),
         component: 'ApiSelect',
         componentProps: {
             api: getCustomerList,
@@ -107,8 +107,8 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
-        field: 'productInfo',
+        label: t('sales.refund.table.productInformation'),
+        field:  t('sales.refund.table.productInformation'),
         component: 'Input',
         colProps: {
             xl: 8,
@@ -116,7 +116,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据状态',
+        label: t('sales.refund.table.status'),
         field: 'status',
         component: 'Select',
         colProps: {
@@ -125,13 +125,13 @@ export const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '未审核', value: 0, key: 0 },
-                { label: '已审核', value: 1, key: 1 },
+                { label: t('sys.table.unaudited'), value: 0, key: 0 },
+                { label: t('sys.table.audited'), value: 1, key: 1 },
             ],
         },
     },
     {
-        label: '单据备注',
+        label: t('sales.refund.header.receiptRemark'),
         field: 'remark',
         component: 'Input',
         colProps: {

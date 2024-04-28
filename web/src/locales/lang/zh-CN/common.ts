@@ -21,7 +21,7 @@ export default {
   dark: '黑暗主题',
 
   action: '操作',
-
+  operating: '操作',
   successful: '成功',
   warning: '警告',
   failed: '失败',

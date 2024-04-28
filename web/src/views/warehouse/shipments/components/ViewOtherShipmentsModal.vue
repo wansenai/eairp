@@ -2,19 +2,18 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="其他出库-详情"
+          :title="t('warehouse.otherShipments.detailOtherShipments')"
           :sub-title= "receiptNumber">
         <template #extra>
-          <a-button @click="exportTable">导出</a-button>
-          <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+          <a-button @click="exportTable">{{ t('warehouse.otherShipments.export.name') }}</a-button>
+          <a-button @click="primaryPrint" type="primary"> {{ t('warehouse.regularPrint') }} </a-button>
           <!--          <a-button key="triplePrint">三联打印</a-button>-->
           <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
         <a-descriptions size="small" :column="3">
-          <a-descriptions-item label="客户">{{ customerName }}</a-descriptions-item>
-          <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item ></a-descriptions-item>
-          <a-descriptions-item label="备注">
+          <a-descriptions-item :label="t('warehouse.otherShipments.header.customer')">{{ customerName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('warehouse.otherShipments.header.receiptDate')">{{ receiptDate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('warehouse.otherShipments.header.remark')">
             {{ remark }}
           </a-descriptions-item>
         </a-descriptions>
@@ -28,8 +27,8 @@
             }"
           >
             <a-statistic
-                title="单据状态"
-                :value="status === 1 ? '已审核' : '未审核'"
+                :title="t('warehouse.otherShipments.header.status')"
+                :value="status === 1 ? t('sys.table.audited') : t('sys.table.unaudited')"
                 :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                 :style="{
                 marginRight: '32px',
@@ -49,7 +48,7 @@ import {defineComponent, ref} from 'vue';
 import {BasicTable, useTable} from '/src/components/Table';
 import {BasicModal, useModal, useModalInner} from "@/components/Modal";
 import {getOtherShipmentsDetailById, exportOtherShipmentsDetail} from "@/api/warehouse/shipments";
-import {otherShipmentTableColumns} from "@/views/warehouse/shipments/otherShipments.data";
+import {otherShipmentTableColumns, t} from "@/views/warehouse/shipments/otherShipments.data";
 import {
   Descriptions,
   DescriptionsItem,
@@ -58,6 +57,7 @@ import {
 } from 'ant-design-vue';
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ViewOtherStorageModal',
@@ -70,6 +70,7 @@ export default defineComponent({
     'a-statistic': Statistic,
   },
   setup() {
+    const { t } = useI18n();
     const receiptNumber = ref('');
     const otherReceipt = ref('');
     const receiptDate = ref('');
@@ -79,7 +80,7 @@ export default defineComponent({
     const [viewOrderReceiptModal, {openModal: openViewOrderModal}] = useModal();
     const tableData = ref([]);
     const [registerTable] = useTable({
-      title: '其他出库表数据',
+      title: t('warehouse.otherShipments.export.exportData'),
       columns: otherShipmentTableColumns,
       dataSource: tableData,
       pagination: false,
@@ -116,7 +117,7 @@ export default defineComponent({
         const link = document.createElement("a");
         const timestamp = getTimestamp(new Date());
         link.href = URL.createObjectURL(blob);
-        link.download = "其他出库单据详情" + timestamp + ".xlsx";
+        link.download = t('warehouse.otherShipments.export.exportData') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
@@ -127,15 +128,15 @@ export default defineComponent({
     function primaryPrint() {
       const header = `
   <div style="${flexContainer}">
-    <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
-    <div style="${flexItem}">单据日期：${receiptDate.value}</div>
-    <div style="${flexItem}">客户：${customerName.value}</div>
-    <div style="${flexItem}">备注：${remark.value}</div>
+    <div style="${flexItem}">${t('warehouse.otherShipments.header.receiptNumber')}：${receiptNumber.value}</div>
+    <div style="${flexItem}">${t('warehouse.otherShipments.header.receiptDate')}：${receiptDate.value}</div>
+    <div style="${flexItem}">${t('warehouse.otherShipments.header.customer')}：${customerName.value}</div>
+    <div style="${flexItem}">${t('warehouse.otherShipments.header.remark')}：${remark.value}</div>
   </div>
 
 `;
       printJS({
-        documentTitle: "EAIRP (其他出库单单据-详情)",
+        documentTitle: "EAIRP " + t('warehouse.otherShipments.detailReceipt'),
         header: header,
         properties: otherShipmentTableColumns.map((item) => {
           return {
@@ -151,6 +152,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       receiptNumber,
       customerName,
       receiptDate,

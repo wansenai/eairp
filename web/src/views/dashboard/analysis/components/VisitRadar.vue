@@ -1,5 +1,5 @@
 <template>
-  <Card title="销售统计" :loading="loading">
+  <Card :title="t('home.salesStatistics')" :loading="loading">
     <div ref="chartRef" :style="{ width, height }"></div>
   </Card>
 </template>
@@ -8,6 +8,7 @@
   import { Card } from 'ant-design-vue';
   import { useECharts } from '/@/hooks/web/useECharts';
   import { saleAxisStatisticalData } from '../data';
+  import {useI18n} from "@/hooks/web/useI18n";
 
   const props = defineProps({
     loading: Boolean,
@@ -22,6 +23,7 @@
   });
   const chartRef = ref<HTMLDivElement | null>(null);
   const { setOptions } = useECharts(chartRef as Ref<HTMLDivElement>);
+  const { t } = useI18n();
 
   watch(
     () => props.loading,

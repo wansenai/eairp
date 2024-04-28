@@ -2,23 +2,23 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="采购订单-详情"
+          :title="t('purchase.order.detail')"
           :sub-title= "receiptNumber">
         <template #extra>
-          <a-button @click="exportTable">导出</a-button>
-          <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+          <a-button @click="exportTable" v-text="t('purchase.order.export.name')"/>
+          <a-button @click="primaryPrint" type="primary" v-text="t('purchase.regularPrint')"/>
           <!--          <a-button key="triplePrint">三联打印</a-button>-->
           <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
         <a-descriptions size="small" :column="3">
-          <a-descriptions-item label="供应商">{{ supplierName }}</a-descriptions-item>
-          <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item label="结算账户">{{ accountName }}</a-descriptions-item>
-          <a-descriptions-item label="优惠率">{{ discountRate }}</a-descriptions-item>
-          <a-descriptions-item label="付款优惠">{{ discountAmount }}</a-descriptions-item>
-          <a-descriptions-item label="优惠后金额">{{ discountLastAmount }}</a-descriptions-item>
-          <a-descriptions-item label="支付订金">{{ deposit }}</a-descriptions-item>
-          <a-descriptions-item label="备注">
+          <a-descriptions-item :label="t('purchase.order.view.supplier')">{{ supplierName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.order.view.receiptDate')">{{ receiptDate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.order.view.settlementAccount')">{{ accountName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.order.view.discountRate')">{{ discountRate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.order.view.paymentDiscount')">{{ discountAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.order.view.discountAmount')">{{ discountLastAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.order.view.paymentDeposit')">{{ deposit }}</a-descriptions-item>
+          <a-descriptions-item :label="t('purchase.order.view.remark')">
             {{ remark }}
           </a-descriptions-item>
         </a-descriptions>
@@ -32,15 +32,15 @@
             }"
           >
             <a-statistic
-                title="单据状态"
-                :value="status === 1 ? '已审核' : '未审核'"
+                :title="t('purchase.order.view.status')"
+                :value="status === 1 ? t('sys.table.audited') : t('sys.table.unaudited')"
                 :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                 :style="{
                 marginRight: '32px',
                 color: 'green',
               }"
             />
-            <a-statistic title="单据金额"
+            <a-statistic :title="t('purchase.order.view.receiptAmount')"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="discountLastAmount"/>
@@ -66,6 +66,7 @@ import {
 } from 'ant-design-vue';
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ViewPurchaseOrderModal',
@@ -78,6 +79,7 @@ export default defineComponent({
     'a-statistic': Statistic,
   },
   setup() {
+    const { t } = useI18n();
     const receiptNumber = ref('');
     const otherReceipt = ref('');
     const supplierName = ref(0);
@@ -92,18 +94,17 @@ export default defineComponent({
 
     const tableData = ref([]);
     const [registerTable] = useTable({
-      title: '采购订单表数据',
+      title: t('purchase.order.view.title'),
       columns: purchaseOrderTableColumns,
       dataSource: tableData,
       pagination: false,
       showIndexColumn: false,
       bordered: true,
     });
-    const getTitle = ref('单据详情');
+    const getTitle = ref(t('purchase.order.receipt'));
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200, showOkBtn: false});
       const res = await getLinkOrderDetail(data.receiptNumber);
-      console.info(res.data);
       tableData.value = res.data.tableData;
       receiptNumber.value = res.data.receiptNumber;
       supplierName.value = res.data.supplierName;
@@ -128,7 +129,7 @@ export default defineComponent({
         const link = document.createElement("a");
         const timestamp = getTimestamp(new Date());
         link.href = URL.createObjectURL(blob);
-        link.download = "采购订单单据详情" + timestamp + ".xlsx";
+        link.download = t('purchase.order.export.exportData') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
@@ -139,23 +140,23 @@ export default defineComponent({
     function primaryPrint() {
       const header = `
   <div style="${flexContainer}">
-    <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
-    <div style="${flexItem}">单据金额：${discountLastAmount.value}</div>
-    <div style="${flexItem}">单据日期：${receiptDate.value}</div>
+    <div style="${flexItem}">${t('purchase.order.table.receiptNumber')}：${receiptNumber.value}</div>
+    <div style="${flexItem}">${t('purchase.order.view.receiptAmount')}：${discountLastAmount.value}</div>
+    <div style="${flexItem}">${t('purchase.order.view.receiptDate')}：${receiptDate.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">结算账户：${accountName.value}</div>
-    <div style="${flexItem}">优惠率：${discountRate.value}</div>
-    <div style="${flexItem}">付款优惠：${discountAmount.value}</div>
+    <div style="${flexItem}">${t('purchase.order.view.settlementAccount')}：${accountName.value}</div>
+    <div style="${flexItem}">${t('purchase.order.view.discountRate')}：${discountRate.value}</div>
+    <div style="${flexItem}">${t('purchase.order.view.paymentDiscount')}：${discountAmount.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">支付定金：${deposit.value}</div>
-    <div style="${flexItem}">供应商：${supplierName.value}</div>
-    <div style="${flexItem}">备注：${remark.value}</div>
+    <div style="${flexItem}">${t('purchase.order.view.paymentDeposit')}：${deposit.value}</div>
+    <div style="${flexItem}">${t('purchase.order.view.supplier')}：${supplierName.value}</div>
+    <div style="${flexItem}">${t('purchase.order.view.remark')}：${remark.value}</div>
   </div>
 `;
       printJS({
-        documentTitle: "EAIRP (采购订单单据-详情)",
+        documentTitle: "EAIRP " + t('purchase.order.detail'),
         header: header,
         properties: purchaseOrderTableColumns.map((item) => {
           return {
@@ -171,6 +172,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       receiptNumber,
       otherReceipt,
       supplierName,

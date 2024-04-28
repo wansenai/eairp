@@ -1,8 +1,11 @@
 import { FormSchema } from '/@/components/Form';
+import {useI18n} from "@/hooks/web/useI18n";
 
 const colProps = {
     span: 12,
 };
+
+const { t } = useI18n();
 
 export const schemas: FormSchema[] = [
     {
@@ -14,11 +17,11 @@ export const schemas: FormSchema[] = [
     {
         field: 'companyName',
         component: 'Input',
-        label: '公司名称',
-        helpMessage: '更换公司名称后，请刷新浏览器生效',
+        label: t('system.configure.name'),
+        helpMessage: t('system.configure.noticeOne'),
         colProps,
         componentProps: {
-            placeholder: '请输入公司名称',
+            placeholder: t('system.configure.inputName'),
         },
         defaultValue: 'EAIRP',
         required: true,
@@ -26,56 +29,56 @@ export const schemas: FormSchema[] = [
     {
         field: 'companyContact',
         component: 'Input',
-        label: '联系人',
+        label: t('system.configure.contact'),
         colProps,
         componentProps: {
-            placeholder: '请输入联系人',
+            placeholder: t('system.configure.inputContact'),
         },
     },
     {
         field: 'companyAddress',
         component: 'Input',
-        label: '公司地址',
+        label: t('system.configure.address'),
         colProps,
         componentProps: {
-            placeholder: '请输入公司地址',
+            placeholder: t('system.configure.inputAddress'),
         },
     },
     {
         field: 'companyPhone',
         component: 'Input',
-        label: '公司电话',
+        label: t('system.configure.phone'),
         colProps,
         componentProps: {
-            placeholder: '请输入公司电话',
+            placeholder: t('system.configure.inputPhone'),
         },
     },
     {
         field: 'companyFax',
         component: 'Input',
-        label: '公司传真',
+        label: t('system.configure.fax'),
         colProps,
         componentProps: {
-            placeholder: '请输入公司传真',
+            placeholder: t('system.configure.inputFax'),
         },
     },
     {
         field: 'companyPostCode',
         component: 'Input',
-        label: '公司邮编',
+        label: t('system.configure.postalCode'),
         colProps,
         componentProps: {
-            placeholder: '请输入公司邮编',
+            placeholder: t('system.configure.inputPostalCode'),
         },
     },
     {
         field: 'saleAgreement',
         component: 'InputTextArea',
-        label: '销售协议',
-        subLabel: '( 选填 )',
+        label: t('system.configure.salesProtocol'),
+        subLabel: t('system.configure.noticeTwo'),
         colProps,
         componentProps: {
-            placeholder: '请输入销售协议',
+            placeholder: t('system.configure.inputSalesProtocol'),
             rows: 4,
         },
     },

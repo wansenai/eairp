@@ -8,14 +8,21 @@ enum Api {
     ExportXlsx = '/v2/common/export/excel',
     UploadOss = '/v2/common/uploadOss',
     GenerateId = '/v2/common/nextId',
+    productCoverUpload = '/v2/common/upload/productCoverUpload',
 }
 
 export interface UploadFileParams {
     // file name
-    file: File;
+    file: File | any;
 }
 
-export function uploadXlsx(params: UploadFileParams, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
+export interface UploadCoverProductParams {
+    // file name
+    file: File | any;
+    type: number;
+}
+
+export function uploadXlsx(params: UploadFileParams) {
     return defHttp.post<BaseResp>(
         {
             url: Api.UploadXlsx,
@@ -25,9 +32,20 @@ export function uploadXlsx(params: UploadFileParams, successMode: SuccessMessage
                 // @ts-ignore
                 ignoreCancelToken: true,
             },
-        },{
-            successMessageMode: successMode,
-            errorMessageMode: errorMode,
+        }
+    );
+}
+
+export function productCoverUpload(params: UploadCoverProductParams) {
+    return defHttp.post<BaseResp>(
+        {
+            url: Api.productCoverUpload,
+            params,
+            headers: {
+                'Content-type': ContentTypeEnum.FORM_DATA,
+                // @ts-ignore
+                ignoreCancelToken: true,
+            },
         }
     );
 }

@@ -1,4 +1,7 @@
 import { FormSchema } from '/@/components/Form/index';
+import {useI18n} from "@/hooks/web/useI18n";
+
+const { t } = useI18n();
 
 export interface ListItem {
   key: string;
@@ -13,17 +16,17 @@ export interface ListItem {
 export const settingList = [
   {
     key: '1',
-    name: '基本设置',
+    name: t('basic.account.basicSetting'),
     component: 'BaseSetting',
   },
   {
     key: '2',
-    name: '安全设置',
+    name: t('basic.account.safeSetting'),
     component: 'SecureSetting',
   },
   {
     key: '4',
-    name: '新消息通知',
+    name: t('basic.account.notice.title'),
     component: 'MsgNotify',
   },
 ];
@@ -38,20 +41,35 @@ export const baseSetSchemas: FormSchema[] = [
   {
     field: 'name',
     component: 'Input',
-    label: '昵称',
+    label: t('basic.account.name'),
     colProps: { span: 18 },
     required: true,
   },
   {
     field: 'position',
     component: 'Input',
-    label: '职位',
+    label: t('basic.account.position'),
+    colProps: { span: 18 },
+  },
+  {
+    field: 'systemLanguage',
+    component: 'Select',
+    label: t('basic.account.systemLanguage'),
+    helpMessage(renderCallbackParams) {
+        return t('basic.account.systemLanguageTip');
+    },
+    componentProps: {
+      options: [
+        { label: t('sys.language.zhCN'), value: 'zh_CN', key: 'zh_CN' },
+        { label: t('sys.language.enUS'), value: 'en_US', key: 'en_US' },
+      ],
+    },
     colProps: { span: 18 },
   },
   {
     field: 'description',
     component: 'InputTextArea',
-    label: '个人简介',
+    label: t('basic.account.personalProfile'),
     colProps: { span: 18 },
   },
 ];
@@ -61,20 +79,20 @@ export const secureSettingList: ListItem[] = [
   {
     key: '1',
     title: '账户密码',
-    description: '当前密码强度：中',
-    extra: '修改',
+    description: t('basic.account.accountPasswordTip'),
+    extra: t('basic.account.update'),
   },
   {
     key: '2',
     title: '密保手机',
     description: '已绑定手机：',
-    extra: '修改',
+    extra: t('basic.account.update'),
   },
   {
     key: '3',
     title: '密保邮箱',
     description: '已绑定邮箱：',
-    extra: '修改',
+    extra: t('basic.account.update'),
   },
 ];
 
@@ -91,20 +109,20 @@ export const resetPasswordFormSchema: FormSchema[] = [
     ifShow: false,
   },
   {
-    label: '原密码',
+    label: t('basic.account.password.oldPassword'),
     field: 'password',
     component: 'InputPassword',
     required: true,
     rules: [
         {
             required: true,
-            message: '请输入旧密码',
+            message: t('basic.account.password.inputOldPassword'),
             trigger: 'change',
         },
     ],
   },
   {
-    label: '新密码',
+    label: t('basic.account.password.newPassword'),
     field: 'newPassword',
     valueField: 'newPassword',
     component: 'InputPassword',
@@ -112,20 +130,20 @@ export const resetPasswordFormSchema: FormSchema[] = [
     rules: [
         {
             required: true,
-            message: '请输入新密码',
+            message: t('basic.account.password.inputNewPassword'),
             trigger: 'change',
         },
     ],
   },
   {
-    label: '确认密码',
+    label: t('basic.account.password.confirmPassword'),
     field: 'confirmPassword',
     component: 'InputPassword',
     required: true,
     rules: [
         {
             required: true,
-            message: '请输入确认密码',
+            message: t('basic.account.password.inputConfirmPassword'),
             trigger: 'change',
         }
     ],

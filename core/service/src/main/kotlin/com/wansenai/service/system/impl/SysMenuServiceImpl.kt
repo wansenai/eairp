@@ -153,6 +153,7 @@ open class SysMenuServiceImpl(
                             .id(menu.id)
                             .name(menu.name)
                             .title(menu.title)
+                            .titleEnglish(menu.titleEnglish)
                             .menuType(menu.menuType)
                             .path(menu.path)
                             .component(menu.component)
@@ -172,6 +173,7 @@ open class SysMenuServiceImpl(
                         val menuVo = menuVoBuilder.build()
                         menuVos.add(menuVo)
                     }
+                    menuVos.sortBy { it.sort }
                 }
                 menuData["total"] = menuVos.size
                 menuData["data"] = menuVos

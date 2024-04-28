@@ -174,11 +174,12 @@ function createRule(message: string) {
 }
 
 function phoneNumberRule() {
+    const {t} = useI18n();
     return [
         {
             required: true,
             pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|16[6]|19[89]]|17[01345678]|18[0-9]|14[579])[0-9]{8}$/,
-            message: "请输入正确的手机号",
+            message: t('sys.login.correctMobilePlaceholder'),
             trigger: 'change',
         }
     ];

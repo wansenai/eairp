@@ -2,7 +2,7 @@
     <BasicModal v-bind="$attrs" @register="registerModal">
       <BasicTable @register="registerTable">
         <template #toolbar>
-          <a-button type="primary" @click="exportTable"> 导出</a-button>
+          <a-button type="primary" @click="exportTable" v-text="t('reports.customerBill.export')"/>
         </template>
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'receiptNumber'">
@@ -40,6 +40,7 @@ import ViewRefundModal from "@/views/retail/refund/components/ViewRefundModal.vu
 import ViewSaleRefundModal from "@/views/sales/refund/components/ViewSaleRefundModal.vue";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useMessage} from "@/hooks/web/useMessage";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ProductStockModal',
@@ -51,6 +52,7 @@ export default defineComponent({
     ViewSaleShipmentsModal,
     ViewShipmentModal, ViewPurchaseOrderModal, ViewSaleOrderModal, BasicModal, Tag, TableAction, BasicTable},
   setup() {
+    const { t } = useI18n();
     const { createMessage } = useMessage();
     const productId = ref();
     const warehouseId = ref();
@@ -64,7 +66,7 @@ export default defineComponent({
     const [handlePurchaseStorageModal, {openModal: openPurchaseStorageModal}] = useModal();
     const [handlePurchaseRefundModal, {openModal: openPurchaseRefundModal}] = useModal();
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
-      setModalProps({confirmLoading: false, destroyOnClose: true, width: 1000, title: '查看商品库存流水'});
+      setModalProps({confirmLoading: false, destroyOnClose: true, width: 1000, title: t('reports.other.viewProductStockFlow')});
       productId.value = data.productId;
       warehouseId.value = data.warehouseId;
       productBarcode.value = data.productBarcode;
@@ -138,7 +140,7 @@ export default defineComponent({
 
     function exportTable() {
       if (getDataSource() === undefined || getDataSource().length === 0) {
-        createMessage.warn('当前查询条件下无数据可导出');
+        createMessage.warn(t('reports.customerBill.notice'));
         return;
       }
       const data: any = getForm().getFieldsValue();
@@ -152,7 +154,7 @@ export default defineComponent({
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           const timestamp = getTimestamp(new Date());
-          link.download = "库存流水明细数据" + timestamp + ".xlsx";
+          link.download = t('reports.other.stockFlowDetailData') + timestamp + ".xlsx";
           link.target = "_blank";
           link.click();
         }
@@ -160,6 +162,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerTable,
       registerModal,
       handleSuccess,

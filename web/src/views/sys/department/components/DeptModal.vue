@@ -12,6 +12,7 @@ import { formSchema } from '@/views/sys/department/dept.data';
 
 import { addOrUpdateDept } from '@/api/sys/dept';
 import {addOrUpdateDeptReq} from "@/api/sys/model/dpetModel";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'DeptModal',
@@ -19,7 +20,7 @@ export default defineComponent({
   emits: ['success', 'register'],
   setup(_, { emit }) {
     const isUpdate = ref(true);
-
+    const { t } = useI18n();
     const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
       labelWidth: 100,
       baseColProps: { span: 24 },
@@ -39,7 +40,7 @@ export default defineComponent({
       }
     });
 
-    const getTitle = computed(() => (!unref(isUpdate) ? '新增部门' : '编辑部门'));
+    const getTitle = computed(() => (!unref(isUpdate) ? t('system.department.addDepartment') : t('system.department.editDepartment')));
 
     async function handleSubmit() {
       try {
@@ -67,7 +68,7 @@ export default defineComponent({
       }
     }
 
-    return { registerModal, registerForm, getTitle, handleSubmit };
+    return { t, registerModal, registerForm, getTitle, handleSubmit };
   },
 });
 </script >

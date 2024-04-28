@@ -7,52 +7,52 @@ export const { t } = useI18n();
 
 export const columns: BasicColumn[] = [
     {
-        title: '客户',
+        title: t('sales.order.table.customer'),
         dataIndex: 'customerName',
         width: 60,
     },
     {
-        title: '单据编号',
+        title: t('sales.order.table.receiptNumber'),
         dataIndex: 'receiptNumber',
         width: 130,
     },
     {
-        title: '商品信息',
+        title: t('sales.order.table.productInformation'),
         dataIndex: 'productInfo',
         width: 80,
     },
     {
-        title: '数量',
+        title: t('sales.order.table.productQuantity'),
         dataIndex: 'productNumber',
         width: 80,
     },
     {
-        title: '金额合计',
+        title: t('sales.order.table.totalAmount'),
         dataIndex: 'totalPrice',
         width: 60,
     },
     {
-        title: '含税合计',
+        title: t('sales.order.table.totalIncludingTax'),
         dataIndex: 'taxRateTotalPrice',
         width: 80,
     },
     {
-        title: '收取定金',
+        title: t('sales.order.table.collectDeposit'),
         dataIndex: 'deposit',
         width: 80,
     },
     {
-        title: '单据日期',
+        title: t('sales.order.table.receiptDate'),
         dataIndex: 'receiptDate',
         width: 130,
     },
     {
-        title: '操作员',
+        title: t('sales.order.table.operator'),
         dataIndex: 'operator',
         width: 60,
     },
     {
-        title: '状态',
+        title: t('sales.order.table.status'),
         dataIndex: 'status',
         width: 80,
     },
@@ -60,7 +60,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
     {
-        label: '单据编号',
+        label: t('sales.order.table.receiptNumber'),
         field: 'receiptNumber',
         component: 'Input',
         colProps: {
@@ -70,11 +70,11 @@ export const searchFormSchema: FormSchema[] = [
     },
     {
         field: '[startDate, endDate]',
-        label: '单据日期',
+        label: t('sales.order.table.receiptDate'),
         component: 'RangePicker',
         componentProps: {
             format: 'YYYY/MM/DD',
-            placeholder: ['开始日期', '结束日期'],
+            placeholder: [t('sales.order.header.startDate'), t('sales.order.header.endDate')],
         },
         colProps: {
             xl: 8,
@@ -82,7 +82,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '客户',
+        label: t('sales.order.table.customer'),
         field: 'customerId',
         component: 'ApiSelect',
         componentProps: {
@@ -97,7 +97,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '商品信息',
+        label: t('sales.order.table.productInformation'),
         field: 'productInfo',
         component: 'Input',
         colProps: {
@@ -106,7 +106,7 @@ export const searchFormSchema: FormSchema[] = [
         },
     },
     {
-        label: '单据状态',
+        label: t('sales.order.table.status'),
         field: 'status',
         component: 'Select',
         colProps: {
@@ -115,15 +115,15 @@ export const searchFormSchema: FormSchema[] = [
         },
         componentProps: {
             options: [
-                { label: '未审核', value: 0, key: 0 },
-                { label: '已审核', value: 1, key: 1 },
-                { label: '部分销售', value: 2, key: 2 },
-                { label: '完成销售', value: 3, key: 3 },
+                { label: t('sys.table.unaudited'), value: 0, key: 0 },
+                { label: t('sys.table.audited'), value: 1, key: 1 },
+                { label: t('sales.partialSales'), value: 2, key: 2 },
+                { label: t('sales.completeSales'), value: 3, key: 3 },
             ],
         },
     },
     {
-        label: '单据备注',
+        label: t('sales.order.header.receiptRemark'),
         field: 'remark',
         component: 'Input',
         colProps: {
@@ -136,77 +136,77 @@ export const searchFormSchema: FormSchema[] = [
 
 export const TableColumns: BasicColumn[] = [
     {
-        title: '仓库名称',
+        title: t('sales.order.form.table.warehouse'),
         dataIndex: 'warehouseName',
         width: 100,
     },
     {
-        title: '条码',
+        title: t('sales.order.form.table.barCode'),
         dataIndex: 'barCode',
         width: 100,
     },
     {
-        title: '商品名称',
+        title: t('sales.order.form.table.name'),
         dataIndex: 'productName',
         width: 120,
     },
     {
-        title: '规格',
+        title: t('sales.order.form.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
     },
     {
-        title: '型号',
+        title: t('sales.order.form.table.standard'),
         dataIndex: 'productModel',
         width: 120,
     },
     {
-        title: '颜色',
+        title: t('sales.order.form.table.color'),
         dataIndex: 'productColor',
         width: 70,
     },
     {
-        title: '库存',
+        title: t('sales.order.form.table.stock'),
         dataIndex: 'stock',
         width: 80,
     },
     {
-        title: '单位',
+        title: t('sales.order.form.table.unit'),
         dataIndex: 'productUnit',
         width: 60,
     },
     {
-        title: '数量',
+        title: t('sales.order.form.table.quantity'),
         dataIndex: 'productNumber',
         width: 60,
     },
     {
-        title: '单价',
+        title: t('sales.order.form.table.unitPrice'),
         dataIndex: 'unitPrice',
         width: 60,
     },
     {
-        title: '金额',
+        title: t('sales.order.form.table.amount'),
         dataIndex: 'amount',
         width: 60,
     },
     {
-        title: '税率(%)',
+        title: t('sales.order.form.table.taxRate'),
         dataIndex: 'taxRate',
         width: 60,
     },
     {
-        title: '税额',
+        title: t('sales.order.form.table.taxAmount'),
         dataIndex: 'taxAmount',
         width: 60,
     },
     {
-        title: '价税合计',
+        title: t('sales.order.form.table.totalPriceAndTax'),
         dataIndex: 'taxTotalPrice',
         width: 60,
     },
     {
-        title: '备注',
+        title: t('sales.order.form.table.remark'),
         dataIndex: 'remark',
         width: 100,
     },

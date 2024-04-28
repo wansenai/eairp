@@ -2,6 +2,9 @@ import {reactive, ref} from "vue";
 import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
+import {useI18n} from "@/hooks/web/useI18n";
+
+export const { t } = useI18n();
 
 export interface RowVO {
     [key: string]: any,
@@ -67,31 +70,31 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         { type: 'checkbox', field:'id', title: 'ID', width: 180},
         {   field: 'purchaseReceiptNumber',
             width:200,
-            title: '采购单据编号',
+            title: t('financial.payment.view.purchaseReceiptNumber'),
         },
         {   field: 'paymentArrears',
             width:180,
-            title: '应付欠款',
+            title: t('financial.payment.view.payableArrears'),
         },
         {   field: 'prepaidArrears',
             width:180,
-            title: '已付欠款',
+            title: t('financial.payment.view.paidArrears'),
         },
         {   field: 'thisPaymentAmount',
             width:200,
-            title: '本次付款',
+            title: t('financial.payment.view.thisTimePayment'),
             slots: { edit: 'amount_edit' },
             sortable: true,
             editRender: { name: 'input', attrs: { placeholder: '请输入本次收款金额' } }
         },
-        { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
+        { field: 'remark', title: t('financial.payment.view.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
 
     ],
     footerMethod ({ columns, data }) {
         return [
             columns.map((column, columnIndex) => {
                 if (columnIndex === 0) {
-                    return '总计'
+                    return t('financial.payment.form.total')
                 }
                 if (['thisPaymentAmount', 'rate'].includes(column.field)) {
                     paymentFormState.actualPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`

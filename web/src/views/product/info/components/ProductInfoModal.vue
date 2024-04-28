@@ -15,31 +15,31 @@
       <a-form ref="productFormRef" :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol"
               style="margin-top: 20px; margin-right: 20px; margin-left: 20px">
         <a-tabs default-active-key="1" size="small">
-          <a-tab-pane key="1" tab="基本信息" id="materialHeadModal" forceRender>
+          <a-tab-pane key="1" :tab="t('product.info.form.basic.title')" id="materialHeadModal" forceRender>
             <a-row class="form-row" :gutter="24">
               <a-col :md="6" :sm="24">
                 <a-input v-model:value="formState.productId" v-show="false"/>
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="名称" data-step="1" data-title="名称"
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.basic.name')" data-step="1" data-title="名称"
                              data-intro="名称必填，可以重复" :rules="[{ required: true}]">
-                  <a-input v-model:value="formState.productName" placeholder="请输入名称"/>
+                  <a-input v-model:value="formState.productName" :placeholder="t('product.info.form.basic.inputName')"/>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="规格" data-step="2" data-title="规格"
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.basic.standard')" data-step="2" data-title="规格"
                              data-intro="规格不必填，比如：10克">
-                  <a-input v-model:value="formState.productStandard" placeholder="请输入规格"/>
+                  <a-input v-model:value="formState.productStandard" :placeholder="t('product.info.form.basic.inputStandard')"/>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="型号" data-step="3" data-title="型号"
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.basic.model')" data-step="3" data-title="型号"
                              data-intro="型号是比规格更小的属性，比如：RX-01">
-                  <a-input v-model:value="formState.productModel" placeholder="请输入型号"/>
+                  <a-input v-model:value="formState.productModel" :placeholder="t('product.info.form.basic.inputModel')"/>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
                 <a-form-item :labelCol="{ xs: { span: 24 }, sm: { span: 4 } }"
                              :wrapperCol="{ xs: { span: 24 }, sm: { span: 20 } }"
-                             label="单位"
+                             :label="t('product.info.form.basic.unit')"
                              :data-step="4"
                              data-title="单位"
                              :data-intro="`此处支持单个单位和多单位，勾选多单位就可以切换到多单位的下拉框，多单位需要先在【计量单位】页面进行录入。
@@ -48,12 +48,12 @@
                   <a-row class="form-row" :gutter="24">
                     <a-col :lg="15" :md="15" :sm="24" style="padding:0px 0px 0px 12px;">
                       <a-input v-if="!unitChecked"
-                               placeholder="输入单位"
+                               :placeholder="t('product.info.form.basic.inputUnit')"
                                v-model:value="formState.productUnit"
                                :rules="[{ required: true}]"
                                @change="onlyUnitOnChange"/>
                       <a-select v-else
-                                placeholder="选择多单位"
+                                :placeholder="t('product.info.form.basic.inputManyUnit')"
                                 v-model:value="formState.productUnitId"
                                 :rules="[{ required: true}]"
                                 @change="manyUnitOnChange(formState.productUnitId)"
@@ -82,80 +82,80 @@
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :md="6" :sm="24">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="颜色" data-step="5" data-title="颜色"
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.basic.color')" data-step="5" data-title="颜色"
                              data-intro="请填写商品的颜色，如果是多属性商品可以不填（下面有多属性开关）">
-                  <a-input placeholder="请输入颜色" v-model:value="formState.productColor"/>
+                  <a-input :placeholder="t('product.info.form.basic.inputColor')" v-model:value="formState.productColor"/>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="基础重量" data-step="6"
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.basic.weight')" data-step="6"
                              data-title="基础重量"
                              data-intro="请填写基本单位对应的重量，用于计算按重量分摊费用时单据中各行商品分摊的费用成本">
-                  <a-input-number style="width: 100%" placeholder="请输入基础重量(kg)"
+                  <a-input-number style="width: 100%" :placeholder="t('product.info.form.basic.inputWeight')"
                                   v-model:value="formState.productWeight"/>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="保质期" data-step="7"
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.basic.sheIfLife')" data-step="7"
                              data-title="保质期"
                              data-intro="保质期指的是商品的保质期(天)，主要针对带生产日期的，此类商品一般有批号">
-                  <a-input-number style="width: 100%" placeholder="请输入保质期(天)"
+                  <a-input-number style="width: 100%" :placeholder="t('product.info.form.basic.inputSheIfLife')"
                                   v-model:value="formState.productExpiryNum"/>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
                 <a-form-item :labelCol="{xs: { span: 24 },sm: { span: 4 }}"
-                             :wrapperCol="{xs: { span: 24 },sm: { span: 20 }}" label="类别"
+                             :wrapperCol="{xs: { span: 24 },sm: { span: 20 }}" :label="t('product.info.form.basic.category')"
                              data-step="8" data-title="类别"
                              data-intro="类别需要在【商品类别】页面进行录入，录入之后在此处进行调用">
                   <a-tree-select style="width:100%" :dropdownStyle="{maxHeight:'200px',overflow:'auto'}" allow-clear
                                  :treeData="categoryTree.value" v-model:value="formState.productCategoryId"
-                                 placeholder="请选择类别">
+                                 :placeholder="t('product.info.form.basic.inputCategory')">
                   </a-tree-select>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :md="6" :sm="24">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="序列号" data-step="9"
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.basic.serialNumber')" data-step="9"
                              data-title="序列号"
                              data-intro="此处是商品的序列号开关，如果选择了有，则在采购入库单据需要录入该商品的序列号，在销售出库单据需要选择该商品的序列号进行出库">
-                  <a-tooltip title="如果选择为有，则在采购入库单需要录入该商品的序列号">
-                    <a-select placeholder="有无序列号" v-model:value="formState.enableSerialNumber">
-                      <a-select-option value="1">有</a-select-option>
-                      <a-select-option value="0">无</a-select-option>
+                  <a-tooltip :title="t('product.info.form.basic.serialNumberTip')">
+                    <a-select :placeholder="t('product.info.form.basic.inputSerialNumber')" v-model:value="formState.enableSerialNumber">
+                      <a-select-option value="1">{{ t('product.info.header.have') }}</a-select-option>
+                      <a-select-option value="0">{{ t('product.info.header.none') }}</a-select-option>
                     </a-select>
                   </a-tooltip>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="批号" data-step="10" data-title="批号"
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.basic.batchNumber')" data-step="10" data-title="批号"
                              data-intro="此处是商品的批号开关，如果选择了有，则在采购入库单据需要录入该商品的批号和有效期，在销售出库单据需要选择该商品的批号进行出库">
-                  <a-tooltip title="如果选择为有，则在采购入库单需要录入该商品的批号和有效期">
-                    <a-select placeholder="有无批号" v-model:value="formState.enableBatchNumber">
-                      <a-select-option value="1">有</a-select-option>
-                      <a-select-option value="0">无</a-select-option>
+                  <a-tooltip :title="t('product.info.form.basic.batchNumberTip')">
+                    <a-select :placeholder="t('product.info.form.basic.inputBatchNumber')" v-model:value="formState.enableBatchNumber">
+                      <a-select-option value="1">{{ t('product.info.header.have') }}</a-select-option>
+                      <a-select-option value="0">{{ t('product.info.header.none') }}</a-select-option>
                     </a-select>
                   </a-tooltip>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="仓位货架" data-step="11"
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.basic.warehouseShelves')" data-step="11"
                              data-title="仓位货架"
                              data-intro="仓位货架指的是仓库中的仓位和货架号，主要适用于仓库较大的场景，方便查找商品的准确位置">
-                  <a-input style="width: 100%" placeholder="请输入仓位货架" v-model:value="formState.warehouseShelves"/>
+                  <a-input style="width: 100%" :placeholder="t('product.info.form.basic.inputWarehouseShelves')" v-model:value="formState.warehouseShelves"/>
                 </a-form-item>
               </a-col>
               <a-col :md="6" :sm="24">
                 <a-form-item :labelCol="{xs: { span: 24 },sm: { span: 4 }}"
-                             :wrapperCol="{xs: { span: 24 },sm: { span: 20 }}" label="多属性" data-step="12"
+                             :wrapperCol="{xs: { span: 24 },sm: { span: 20 }}" :label="t('product.info.form.basic.multipleAttributes')" data-step="12"
                              data-title="多属性"
                              v-show="manySkuItem"
                              data-intro="多属性是针对的sku商品（比如服装、鞋帽行业），此处开关如果启用就可以在下方进行多sku的配置，配置具体的颜色、尺码之类的组合">
-                  <a-tooltip title="多属性针对服装、鞋帽等行业，需要先录入单位才能激活此处输入框">
-                    <a-tag class="tag-info" v-if="!manySkuStatus">需要先录入单位才能激活</a-tag>
+                  <a-tooltip :title="t('product.info.form.basic.multipleAttributesTip')">
+                    <a-tag class="tag-info" v-if="!manySkuStatus">{{ t('product.info.form.basic.unitTip') }}</a-tag>
                     <a-select mode="multiple" showSearch optionFilterProp="children"
-                              placeholder="请选择多属性（可多选）" @change="onManySkuChange" v-show="manySkuStatus">
+                              :placeholder="t('product.info.form.basic.inputMultipleAttributes')" @change="onManySkuChange" v-show="manySkuStatus">
                       <a-select-option v-for="(item,index) in productAttributeList" :key="index" :value="item.id"
                                        :disabled="item.disabled">
                         {{ item.attributeName }}
@@ -203,13 +203,13 @@
             <div style="margin-top:8px;" id="productDetailModal">
               <div style="margin-bottom: 16px">
                 <a-button type="primary" @click="addRow">
-                  + 插入一行
+                  + {{ t('product.info.form.basic.insertRow') }}
                 </a-button>
-                <a-button style="margin-left: 8px" danger @click="deleteRows" type="primary"> 删除选中行</a-button>
-                <a-button style="margin-left: 8px" @click="batchSetPrice('purchase')">采购价-批量</a-button>
-                <a-button style="margin-left: 8px" @click="batchSetPrice('retail')">零售价-批量</a-button>
-                <a-button style="margin-left: 8px" @click="batchSetPrice('sale')">销售价-批量</a-button>
-                <a-button style="margin-left: 8px" @click="batchSetPrice('low')">最低售价-批量</a-button>
+                <a-button style="margin-left: 8px" danger @click="deleteRows" type="primary"> {{ t('product.info.form.basic.deleteRow') }} </a-button>
+                <a-button style="margin-left: 8px" @click="batchSetPrice('purchase.ts')">{{ t('product.info.form.basic.purchasePriceBatch') }}</a-button>
+                <a-button style="margin-left: 8px" @click="batchSetPrice('retail')">{{ t('product.info.form.basic.retailPriceBatch') }}</a-button>
+                <a-button style="margin-left: 8px" @click="batchSetPrice('sale')">{{ t('product.info.form.basic.salesPriceBatch') }}</a-button>
+                <a-button style="margin-left: 8px" @click="batchSetPrice('low')">{{ t('product.info.form.basic.lowestSellPriceBatch') }}</a-button>
                 <span style="margin-left: 8px">
                </span>
               </div>
@@ -223,7 +223,7 @@
                   <template #bodyCell="{ column, record }">
                     <template v-if="editableData[record.key]">
                       <a-input v-model:value="editableData[record.key][column.key]"
-                               :placeholder="`请输入${getColumnTitle(column)}`"
+                               :placeholder="t('product.info.form.basic.table.pleaseEnter')+ `${getColumnTitle(column)}`"
                                @change="meTableValueChange(record.key)"/>
                     </template>
                   </template>
@@ -234,46 +234,46 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="24" :md="24" :sm="24">
                 <a-form-item :labelCol="labelCol" :wrapperCol="{xs: { span: 24 },sm: { span: 24 }}" label="">
-                  <a-input v-model:vale="formState.remark" placeholder="请输入备注" style="margin-top:8px;"/>
+                  <a-input v-model:vale="formState.remark" :placeholder="t('product.info.form.basic.inputRemark')" style="margin-top:8px;"/>
                 </a-form-item>
               </a-col>
             </a-row>
           </a-tab-pane>
-          <a-tab-pane key="2" tab="扩展信息" forceRender>
+          <a-tab-pane key="2" :tab="t('product.info.form.extendInfo.title')" forceRender>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="6" :sm="6">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="productInfo.mfrs">
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.extendInfo.manufacturer')">
                   <a-input v-model:value="formState.productManufacturer"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="6" :sm="6">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="productInfo.otherField1">
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.extendInfo.customOne')">
                   <a-input v-model:value="formState.otherFieldOne"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="6" :sm="6">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="productInfo.otherField2">
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.extendInfo.customTwo')">
                   <a-input v-model:value="formState.otherFieldTwo"/>
                 </a-form-item>
               </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="6" :sm="6">
-                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="productInfo.otherField3">
+                <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.form.extendInfo.customThree')">
                   <a-input v-model:value="formState.otherFieldThree"/>
                 </a-form-item>
               </a-col>
             </a-row>
           </a-tab-pane>
-          <a-tab-pane key="3" tab="库存数量" forceRender>
+          <a-tab-pane key="3" :tab="t('product.info.form.inventoryQuantity.title')" forceRender>
             <a-row class="form-row" :gutter="24">
-              <a-button style="margin: 0px 0px 8px 0px" @click="batchSetStock('initStock')">期初库存-批量</a-button>
-              <a-button style="margin-left: 8px" @click="batchSetStock('lowSafeStock')">最低安全库存-批量</a-button>
-              <a-button style="margin-left: 8px" @click="batchSetStock('highSafeStock')">最高安全库存-批量</a-button>
+              <a-button style="margin: 0px 0px 8px 0px" @click="batchSetStock('initStock')">{{ t('product.info.form.inventoryQuantity.initialQuantity') }}</a-button>
+              <a-button style="margin-left: 8px" @click="batchSetStock('lowSafeStock')">{{ t('product.info.form.inventoryQuantity.minSafetyQuantity') }}</a-button>
+              <a-button style="margin-left: 8px" @click="batchSetStock('highSafeStock')">{{ t('product.info.form.inventoryQuantity.maxSafetyQuantity') }}</a-button>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-table :loading="stock.loading"
@@ -288,7 +288,7 @@
                   </template>
                   <template v-else-if="editStockData[record.key]">
                     <a-input v-model:value="editStockData[record.key][column.key]"
-                             :placeholder="`请输入${getColumnTitle(column)}`"
+                             :placeholder="t('product.info.form.basic.table.pleaseEnter')+ `${getColumnTitle(column)}`"
                              @change="stockTableValueChange(record.key)"/>
                   </template>
                 </template>
@@ -296,11 +296,11 @@
             </a-row>
             <batch-set-stock-modal ref="stockModalForm" @ok="batchSetStockModalFormOk"></batch-set-stock-modal>
           </a-tab-pane>
-          <a-tab-pane key="4" tab="图片信息" forceRender>
+          <a-tab-pane key="4" :tab="t('product.info.form.images.title')" forceRender>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="18" :md="18" :sm="24">
                 <a-form-item :labelCol="{xs: { span: 24 },sm: { span: 3 }}"
-                             :wrapperCol="{xs: { span: 24 },sm: { span: 20 }}" label="图片信息">
+                             :wrapperCol="{xs: { span: 24 },sm: { span: 20 }}" :label="t('product.info.form.images.title')">
                   <a-upload
                       v-model:file-list="fileList"
                       :custom-request="uploadImage"
@@ -313,7 +313,7 @@
                   >
                     <div v-if="fileList.length < 4">
                       <plus-outlined/>
-                      <div style="margin-top: 8px">上传图片</div>
+                      <div style="margin-top: 8px">{{ t('product.info.form.images.upload') }}</div>
                     </div>
                   </a-upload>
                   <a-modal :open="previewVisible" :title="previewTitle" :footer="null" @cancel="handleImageViewCancel">
@@ -326,8 +326,8 @@
             <a-row class="form-row" :gutter="24">
               <a-col :lg="18" :md="18" :sm="24">
                 <a-form-item :labelCol="{xs: { span: 24 },sm: { span: 3 }}"
-                             :wrapperCol="{xs: { span: 24 },sm: { span: 20 }}" label="上传提示">
-                  图片最多4张，且单张大小不超过2M
+                             :wrapperCol="{xs: { span: 24 },sm: { span: 20 }}">
+                  {{ t('product.info.form.images.tip') }}
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="6" :sm="24"></a-col>
@@ -387,6 +387,7 @@ import {ProductCategoryResp} from '/@/api/product/model/productCategoryModel';
 import {ProductAttributeListReq} from "@/api/product/model/productAttributeModel";
 import {ProductAttributeModel, ProductStockModel, Unit} from "@/views/product/info/model/productInfoModel";
 import {meTable, stock, productInfo, formState} from "@/views/product/info/info.data";
+import {useI18n} from "vue-i18n";
 
 const VNodes = defineComponent({
   props: {
@@ -433,6 +434,7 @@ export default defineComponent({
     VNodes
   },
   setup(_, context) {
+    const { t } = useI18n();
     const {createMessage} = useMessage();
     const productStandard = ref<String>('');
     const productName = ref<String>('');
@@ -497,13 +499,13 @@ export default defineComponent({
       loadCategoryTreeData()
       loadAttributeTreeData()
       if (id) {
-        title.value = '修改商品信息'
+        title.value = t('product.info.editProductInfo')
         loadProductInfoDetail(id)
         manySkuStatus.value = false
         manySkuItem.value = false
         manySkuSelected.value = 0
       } else {
-        title.value = '新增商品'
+        title.value = t('product.info.addProductInfo')
         loadWarehouse()
         manySkuItem.value = true
       }
@@ -902,7 +904,7 @@ export default defineComponent({
         priceModalForm.value.add(type);
         priceModalForm.value.openPriceModal = true;
       } else {
-        createMessage.warn('抱歉，您还没有选择多属性，开启多属性后才能批量设置金额');
+        createMessage.warn(t('product.info.form.basic.noticeThree'));
       }
     }
 
@@ -913,10 +915,10 @@ export default defineComponent({
 
     function batchSetPriceModalFormOk(price: number, batchType: string) {
       if (meTable.dataSource.length === 0) {
-        createMessage.warn('请先录入条码、单位等信息！');
+        createMessage.warn(t('product.info.form.basic.noticeFour'));
         return;
       }
-      if (batchType === 'purchase') {
+      if (batchType === 'purchase.ts') {
         for (let i = 0; i < meTable.dataSource.length; i++) {
           meTable.dataSource[i].purchasePrice = price
         }
@@ -1119,25 +1121,25 @@ export default defineComponent({
 
     async function handleOk() {
       if (!formState.productName) {
-        createMessage.warn('请输入商品名称');
+        createMessage.warn(t('product.info.form.basic.inputName'));
         return;
       }
       if (unitChecked.value) {
         if (!formState.productUnitId) {
-          createMessage.warn('请选择商品单位');
+          createMessage.warn(t('product.info.form.basic.inputManyUnit'));
           return;
         }
       } else if (!formState.productUnit) {
-        createMessage.warn('请输入商品单位');
+        createMessage.warn(t('product.info.form.basic.inputUnit'));
         return;
       }
       if (meTable.dataSource.length === 0) {
-        createMessage.warn('请插入一行数据，录入商品条码价格信息');
+        createMessage.warn(t('product.info.form.basic.noticeOne'));
         return;
       }
       // 检查库存信息是否为空
       if (stock.dataSource.length === 0) {
-        createMessage.warn('系统检查到您没有仓库信息，请在基本资料菜单栏->添加至少1条仓库信息');
+        createMessage.warn(t('product.info.form.basic.noticeTwo'));
         return;
       }
 
@@ -1211,6 +1213,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       confirmLoading,
       openProductInfoModal,
       closeModal,

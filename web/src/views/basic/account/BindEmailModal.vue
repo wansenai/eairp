@@ -1,16 +1,16 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" :title="title" @ok="handleSubmit" @cancel="handleCancel">
+  <BasicModal v-bind="$attrs" @register="registerModal" :title="t('basic.account.accountEmail')" @ok="handleSubmit" @cancel="handleCancel">
     <a-spin :spinning="confirmLoading">
       <a-form ref="formRef" :model="formData" :label-col="labelCol" :wrapper-col="wrapperCol">
         <a-input v-model:value="userId" v-show="false"/>
-        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="原邮箱地址">
+        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('basic.account.email.oldEmail')">
           <a-input-number v-model:value="formData.oldEmail" disabled/>
         </a-form-item>
-        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="新邮箱地址"
+        <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('basic.account.email.newEmail')"
                      :rules="[{ required: true}]">
-          <a-input placeholder="请输入新邮箱" v-model:value="formData.email"/>
+          <a-input :placeholder="t('basic.account.email.inputNewEmail')" v-model:value="formData.email"/>
         </a-form-item>
-        <a-form-item label="邮箱验证码" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="[{ required: true}]">
+        <a-form-item :label="t('basic.account.email.code')" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="[{ required: true}]">
           <CountdownInput
               size="large"
               class="fix-auto-fill"
@@ -32,6 +32,7 @@ import {CountdownInput} from "@/components/CountDown";
 import {sendEmailCode, resetEmail} from "@/api/sys/user";
 import {useFormRules, useFormValid} from "@/views/sys/login/useLogin";
 import {useMessage} from "@/hooks/web/useMessage";
+import {useI18n} from "vue-i18n";
 
 export default {
   name: 'BindEmailModal',
@@ -47,9 +48,9 @@ export default {
     'a-input-number': InputNumber
   },
   setup(_, context) {
+    const { t } = useI18n();
     const { createMessage } = useMessage();
     const userId = ref('');
-    const title = ref('更换密保邮箱');
     const openBindPhoneModal = ref(false);
     const labelCol = {
       xs: {span: 24},
@@ -79,11 +80,11 @@ export default {
       const pattern:any = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
       const valid = pattern.test(formData.email);
       if(!valid) {
-        createMessage.info("请输入正确的邮箱地址");
+        createMessage.info(t('basic.account.email.notice'));
         return;
       }
       if (!formData.emailCode) {
-        createMessage.info("请输入邮箱验证码");
+        createMessage.info(t('basic.account.email.inputCode'));
         return;
       }
       validForm().then(async () => {
@@ -110,7 +111,7 @@ export default {
       const pattern:any = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
       const valid = pattern.test(formData.email);
       if(!valid) {
-        createMessage.info("请输入正确的邮箱地址");
+        createMessage.info(t('basic.account.email.notice'));
         return Promise.resolve(false)
       }
       const result = await sendEmailCode(1, formData.email);
@@ -121,8 +122,8 @@ export default {
     }
 
     return {
+      t,
       registerModal,
-      title,
       formData,
       labelCol,
       wrapperCol,

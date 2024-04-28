@@ -84,6 +84,11 @@ public class SysUser implements Serializable {
     private String phoneNumber;
 
     /**
+     * 系统语言
+     */
+    private String systemLanguage;
+
+    /**
      * 是否为管理者 0==管理者 1==员工
      */
     private Integer isManager;

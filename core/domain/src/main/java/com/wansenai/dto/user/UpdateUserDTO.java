@@ -32,4 +32,6 @@ public class UpdateUserDTO {
     private Integer leaderFlag;
 
     private String description;
+
+    private String systemLanguage;
 }

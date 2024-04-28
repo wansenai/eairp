@@ -57,6 +57,12 @@ public class SysMenu implements Serializable {
     private String title;
 
     /**
+     * 英文标题
+     */
+    @TableField("title_english")
+    private String titleEnglish;
+
+    /**
      * 父级菜单id
      */
     @TableField("parent_id")

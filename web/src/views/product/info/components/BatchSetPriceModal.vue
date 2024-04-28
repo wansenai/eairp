@@ -10,8 +10,8 @@
         style="top:30%;height: 30%;">
       <a-spin :spinning="confirmLoading">
         <a-form ref="formRef" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
-          <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" label="请输入价格">
-            <a-input-number placeholder="请输入价格" v-model:value="batchPrice" />
+          <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('product.info.form.basic.price')">
+            <a-input-number :placeholder="t('product.info.form.basic.inputPrice')" v-model:value="batchPrice" />
           </a-form-item>
         </a-form>
       </a-spin>
@@ -22,6 +22,7 @@
 import { ref, reactive } from 'vue';
 import {Button, Form, FormItem, InputNumber, Modal, Spin} from "ant-design-vue";
 import {Rule} from 'ant-design-vue/es/form';
+import {useI18n} from "vue-i18n";
 
 export default {
   name: 'BatchSetPriceModal',
@@ -35,6 +36,7 @@ export default {
     'a-input-number': InputNumber
   },
   setup(_, context) {
+    const { t } = useI18n();
     const title = ref('批量设置');
     const openPriceModal = ref(false);
     const isReadOnly = ref(false);
@@ -54,7 +56,7 @@ export default {
 
     const rules: Record<string, Rule[]> = {
       batchPrice: [
-        {required: true, message: '请输入价格', trigger: 'change'},
+        {required: true, message: t('product.info.form.basic.inputPrice'), trigger: 'change'},
       ]
     }
 
@@ -62,13 +64,15 @@ export default {
       openPriceModal.value = true
       batchType.value = type;
       if (type === 'purchase') {
-        title.value = '采购价-批量设置';
+        title.value = t('product.info.form.basic.purchasePriceBatch')
       } else if (type === 'retail') {
-        title.value = '零售价-批量设置';
+        title.value = t('product.info.form.basic.retailPriceBatch')
       } else if (type === 'sale') {
-        title.value = '销售价-批量设置';
+        title.value = t('product.info.form.basic.salesPriceBatch')
       } else if (type === 'low') {
-        title.value = '最低售价-批量设置';
+        title.value = t('product.info.form.basic.lowestSellPriceBatch')
+      } else {
+        title.value = t('product.info.form.basic.batchSet')
       }
     };
 
@@ -93,6 +97,7 @@ export default {
     };
 
     return {
+      t,
       title,
       isReadOnly,
       batchType,

@@ -63,7 +63,7 @@ const transform: AxiosTransform = {
     'S0016', 'S0017', 'S0018', 'S0013', 'S0014', 'S0015', 'S0010', 'S0011', 'S0012', 'A0020', 'A0021', 'A0022', 'D0001', 'D0002',
     'D0003', 'F0000', 'F0002', 'F0003', 'F0004', 'F0005', 'F0006', 'F0007', 'I0001', 'I0002', 'I0003', 'I0004', 'I0005', 'I0006',
     'E0004', 'E0005', 'E0006', 'T0001', 'T0002', 'T0003', 'C0001', 'C0003', 'C0004', 'P0024', 'P0025', 'P0026', 'P0001', 'P0000',
-    'P0002', 'P0003', 'P0004', 'P0005', 'P0006', 'P0007', 'P0008', 'P0009', 'P0010', 'P0011', 'P0012', 'P0013', 'P0014', 'U0001',
+    'P0002', 'P0003', 'P0004', 'P0005', 'P0006', 'P0007', 'P0008', 'P0009', 'P0010', 'P0011', 'P 0012', 'P0013', 'P0014', 'U0001',
     'U0002', 'U0003', 'U0004', 'M0001', 'M0002', 'M0003', 'M0004', 'W0001', 'W0002', 'W0003', 'W0004', 'O0001', 'O0002', 'O0003',
     'O0004', 'A0012', 'A0016', 'A0100', 'A0101', 'A0017']; // 定义包含可能值的数组
 
@@ -97,7 +97,9 @@ const transform: AxiosTransform = {
         }
         return res.data;
     } else {
-      if (options.errorMessageMode === 'message') {
+      if (res.data.code === 'P0512') {
+            return res.data;
+      } else if (options.errorMessageMode === 'message') {
         createMessage.error(res.data.msg);
       } else if (options.errorMessageMode === 'modal') {
         createErrorModal({ title: res.data.msg, content: res.data.msg });

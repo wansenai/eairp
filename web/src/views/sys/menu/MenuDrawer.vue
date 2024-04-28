@@ -17,12 +17,14 @@ import { formSchema } from './menu.data';
 import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 import {AddOrUpdateMenuReq} from "@/api/sys/model/menuModel";
 import {addOrUpdateMenu} from "@/api/sys/menu";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'MenuDrawer',
   components: { BasicDrawer, BasicForm },
   emits: ['success', 'register'],
   setup(_, { emit }) {
+    const { t } = useI18n();
     const isUpdate = ref(true);
     const menuId = ref<number>(0);
     const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
@@ -47,7 +49,7 @@ export default defineComponent({
       }
     });
 
-    const getTitle = computed(() => (!unref(isUpdate) ? '新增菜单' : '编辑菜单'));
+    const getTitle = computed(() => (!unref(isUpdate) ? t('system.menu.addMenu') : t('system.menu.editMenu')));
 
     async function handleSubmit() {
       try {
@@ -86,7 +88,7 @@ export default defineComponent({
       }
     }
 
-    return { registerDrawer, registerForm, getTitle, handleSubmit };
+    return { t, registerDrawer, registerForm, getTitle, handleSubmit };
   },
 });
 </script>

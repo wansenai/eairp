@@ -12,15 +12,17 @@ import {formSchema} from "@/views/product/units/units.data";
 import {AddOrUpdateProductUnitReq} from "@/api/product/model/productUnitModel";
 import {addOrUpdateUnit} from "@/api/product/productUnit";
 import {useMessage} from "@/hooks/web/useMessage";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'UnitModal',
   components: {BasicModal, BasicForm},
   emits: ['success', 'register'],
   setup(_, {emit}) {
+    const { t } = useI18n();
     const rowId = ref('');
     const isUpdate = ref(true);
-    const getTitle = computed(() => (!unref(isUpdate) ? '新增商品计量单位' : '编辑商品计量单位'));
+    const getTitle = computed(() => (!unref(isUpdate) ? t('product.unit.addProductUnit') : t('product.unit.editProductUnit')));
     const { createMessage } = useMessage();
     const [registerForm, {setFieldsValue, resetFields, validate}] = useForm({
       labelWidth: 100,
@@ -56,7 +58,7 @@ export default defineComponent({
 
       if (!values.ratio) {
         setModalProps({confirmLoading: false,});
-        createMessage.warn('抱歉，副单位的比例不能为空值');
+        createMessage.warn(t('product.unit.noticeOne'));
         return;
       }
 
@@ -80,6 +82,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       registerModal,
       registerForm,
       handleSubmit,

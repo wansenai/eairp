@@ -2,30 +2,30 @@
   <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
     <div class="components-page-header-demo-responsive" style="border: 1px solid rgb(235, 237, 240)">
       <a-page-header
-          title="销售出库-详情"
+          :title="t('sales.shipments.detail')"
           :sub-title= "receiptNumber">
         <template #extra>
-          <a-button @click="exportTable">导出</a-button>
-          <a-button @click="primaryPrint" type="primary">普通打印</a-button>
+          <a-button @click="exportTable" v-text="t('sales.shipments.export.name')"/>
+          <a-button @click="primaryPrint" type="primary" v-text="t('sales.regularPrint')"/>
           <!--          <a-button key="triplePrint">三联打印</a-button>-->
           <!--          <a-button key="2" type="primary">发起流程审批</a-button>-->
         </template>
         <a-descriptions size="small" :column="4">
-          <a-descriptions-item label="客户">{{ customerName }}</a-descriptions-item>
-          <a-descriptions-item label="单据日期">{{ receiptDate }}</a-descriptions-item>
-          <a-descriptions-item label="订单单据">
+          <a-descriptions-item :label="t('sales.shipments.view.customer')">{{ customerName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('sales.shipments.view.receiptDate')">{{ receiptDate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('sales.shipments.view.salesOrder')">
             <a @click="viewOrderReceipt">{{ otherReceipt }}</a>
           </a-descriptions-item>
-          <a-descriptions-item label="优惠率">{{ collectOfferRate }}</a-descriptions-item>
-          <a-descriptions-item label="收款优惠">{{ collectOfferAmount }}</a-descriptions-item>
-          <a-descriptions-item label="优惠后金额">{{ collectOfferLastAmount }}</a-descriptions-item>
-          <a-descriptions-item label="其它费用">{{ otherAmount }}</a-descriptions-item>
-          <a-descriptions-item label="结算账户">{{ accountName }}</a-descriptions-item>
-          <a-descriptions-item label="本次收款">{{ thisCollectAmount }}</a-descriptions-item>
-          <a-descriptions-item label="本次欠款">{{ thisArrearsAmount }}</a-descriptions-item>
-          <a-descriptions-item label="销售人员">{{  }}</a-descriptions-item>
+          <a-descriptions-item :label="t('sales.shipments.view.discountRate')">{{ collectOfferRate }}</a-descriptions-item>
+          <a-descriptions-item :label="t('sales.shipments.view.collectionDiscount')">{{ collectOfferAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('sales.shipments.view.discountAmount')">{{ collectOfferLastAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('sales.shipments.view.otherFees')">{{ otherAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('sales.shipments.view.settlementAccount')">{{ accountName }}</a-descriptions-item>
+          <a-descriptions-item :label="t('sales.shipments.view.thisTimeCollectAmount')">{{ thisCollectAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('sales.shipments.view.thisTimeArrearsAmount')">{{ thisArrearsAmount }}</a-descriptions-item>
+          <a-descriptions-item :label="t('sales.shipments.view.salesPerson')">{{  }}</a-descriptions-item>
           <a-descriptions-item ></a-descriptions-item>
-          <a-descriptions-item label="备注">
+          <a-descriptions-item :label="t('sales.shipments.view.remark')">
             {{ remark }}
           </a-descriptions-item>
         </a-descriptions>
@@ -39,15 +39,15 @@
             }"
           >
             <a-statistic
-                title="单据状态"
-                :value="status === 1 ? '已审核' : '未审核'"
+                :title="t('sales.shipments.view.status')"
+                :value="status === 1 ? t('sys.table.audited') : t('sys.table.unaudited')"
                 :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                 :style="{
                 marginRight: '32px',
                 color: 'green',
               }"
             />
-            <a-statistic title="单据金额"
+            <a-statistic :title="t('sales.shipments.view.receiptAmount')"
                          prefix="￥"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="thisCollectAmount"/>
@@ -75,6 +75,7 @@ import {
 } from 'ant-design-vue';
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
+import {useI18n} from "vue-i18n";
 
 export default defineComponent({
   name: 'ViewSaleShipmentsModal',
@@ -88,6 +89,7 @@ export default defineComponent({
     'a-statistic': Statistic,
   },
   setup() {
+    const { t } = useI18n();
     const receiptNumber = ref('');
     const otherReceipt = ref('');
     const customerName = ref(0);
@@ -104,14 +106,14 @@ export default defineComponent({
     const [viewOrderReceiptModal, {openModal: openViewOrderModal}] = useModal();
     const tableData = ref([]);
     const [registerTable] = useTable({
-      title: '销售出库表数据',
+      title: t('sales.shipments.view.title'),
       columns: TableColumns,
       dataSource: tableData,
       pagination: false,
       showIndexColumn: false,
       bordered: true,
     });
-    const getTitle = ref('单据详情');
+    const getTitle = ref(t('sales.shipments.receipt'));
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200, showOkBtn: false});
       const res = await getLinkShipmentsDetail(data.receiptNumber);
@@ -149,7 +151,7 @@ export default defineComponent({
         const link = document.createElement("a");
         const timestamp = getTimestamp(new Date());
         link.href = URL.createObjectURL(blob);
-        link.download = "销售出库单据详情" + timestamp + ".xlsx";
+        link.download = t('sales.shipments.export.exportData') + timestamp + ".xlsx";
         link.target = "_blank";
         link.click();
       }
@@ -160,25 +162,25 @@ export default defineComponent({
     function primaryPrint() {
       const header = `
   <div style="${flexContainer}">
-    <div style="${flexItem}">单据编号：${receiptNumber.value}</div>
-    <div style="${flexItem}">单据金额：${collectOfferLastAmount.value}</div>
-    <div style="${flexItem}">单据日期：${receiptDate.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.table.receiptNumber')}：${receiptNumber.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.view.receiptAmount')}：${collectOfferLastAmount.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.view.receiptDate')}：${receiptDate.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">结算账户：${accountName.value}</div>
-    <div style="${flexItem}">优惠率：${collectOfferRate.value}</div>
-    <div style="${flexItem}">收款优惠：${collectOfferAmount.value}</div>
-    <div style="${flexItem}">其它费用：${otherAmount.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.view.settlementAccount')}：${accountName.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.view.discountRate')}：${collectOfferRate.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.view.collectionDiscount')}：${collectOfferAmount.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.view.otherFees')}：${otherAmount.value}</div>
   </div>
   <div style="${flexContainer}">
-    <div style="${flexItem}">本次收款：${thisCollectAmount.value}</div>
-    <div style="${flexItem}">本次欠款：${thisArrearsAmount.value}</div>
-    <div style="${flexItem}">客户：${customerName.value}</div>
-    <div style="${flexItem}">备注：${remark.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.view.thisTimeCollectAmount')}：${thisCollectAmount.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.view.thisTimeArrearsAmount')}：${thisArrearsAmount.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.view.customer')}：${customerName.value}</div>
+    <div style="${flexItem}">${t('sales.shipments.view.remark')}：${remark.value}</div>
   </div>
 `;
       printJS({
-        documentTitle: "EAIRP (销售出库单单据-详情)",
+        documentTitle: "EAIRP " + t('sales.shipments.detail'),
         header: header,
         properties: TableColumns.map((item) => {
           return {
@@ -194,6 +196,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       receiptNumber,
       otherReceipt,
       customerName,
