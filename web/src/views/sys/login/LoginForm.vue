@@ -76,17 +76,22 @@
       </Button> -->
     </FormItem>
     <ARow class="enter-x" :gutter="[16, 16]">
-      <ACol :md="8" :xs="24">
+      <ACol :md="6" :xs="24">
         <Button block @click="setLoginState(LoginStateEnum.MOBILE)">
           {{ t('sys.login.mobileSignInFormTitle') }}
         </Button>
       </ACol>
-      <ACol :md="8" :xs="24">
+      <ACol :md="6" :xs="24">
+        <Button block @click="setLoginState(LoginStateEnum.EMAIL)">
+          {{ t('sys.login.emailFormTitle') }}
+        </Button>
+      </ACol>
+      <ACol :md="6" :xs="24">
         <Button block @click="setLoginState(LoginStateEnum.QR_CODE)">
           {{ t('sys.login.qrSignInFormTitle') }}
         </Button>
       </ACol>
-      <ACol :md="8" :xs="24">
+      <ACol :md="6" :xs="24">
         <Button block @click="setLoginState(LoginStateEnum.REGISTER)">
           {{ t('sys.login.registerButton') }}
         </Button>

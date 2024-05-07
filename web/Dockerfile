@@ -1,14 +1,17 @@
 FROM node:18.18.0 as build-stage
 MAINTAINER WanSen AI<team@wansenai.com>
-WORKDIR app
+WORKDIR /app
 
 COPY . ./
 
+# 设置 node 阿里镜像
+RUN npm config set registry https://registry.npmmirror.com
+
 ENV NODE_OPTIONS --max-old-space-size=16384
 
-RUN npm install pnpm -g
-RUN pnpm install --frozen-lockfile
-RUN pnpm build:docker
+RUN npm install pnpm -g && \
+    pnpm install --frozen-lockfile && \
+    pnpm build:docker
 
 RUN echo "Build Success"
 

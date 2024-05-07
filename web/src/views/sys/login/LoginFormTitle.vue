@@ -19,6 +19,7 @@
       [LoginStateEnum.REGISTER]: t('sys.login.signUpFormTitle'),
       [LoginStateEnum.MOBILE]: t('sys.login.mobileSignInFormTitle'),
       [LoginStateEnum.QR_CODE]: t('sys.login.qrSignInFormTitle'),
+      [LoginStateEnum.EMAIL]: t('sys.login.emailFormTitle'),
     };
     return titleObj[unref(getLoginState)];
   });

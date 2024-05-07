@@ -243,23 +243,44 @@ public class CommonServiceImpl implements CommonService{
         if (!StringUtils.hasLength(email)) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
-        String resultCode = "";
-        if (redisUtil.hasKey(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + email)) {
-            resultCode = redisUtil.getString(email + ":forget_code");
-        } else {
-            resultCode = getForgetCode();
-            redisUtil.set(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + email, resultCode);
-            redisUtil.expire(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + email, 180);
-        }
-
         try {
             switch (type)
             {
                 case 0:
-                    EmailUtils.forgetPasswordEmailNotice(resultCode, email);
+                    String resultCode = "";
+                    if (redisUtil.hasKey(SecurityConstants.EMAIL_RESET_PASSWORD_LOGIN_VERIFY_CODE_CACHE_PREFIX + email)) {
+                        resultCode = redisUtil.getString(SecurityConstants.EMAIL_RESET_PASSWORD_LOGIN_VERIFY_CODE_CACHE_PREFIX + email);
+                        EmailUtils.forgetPasswordEmailNotice(resultCode, email);
+                    } else {
+                        resultCode = getForgetCode();
+                        redisUtil.set(SecurityConstants.EMAIL_RESET_PASSWORD_LOGIN_VERIFY_CODE_CACHE_PREFIX + email, resultCode);
+                        redisUtil.expire(SecurityConstants.EMAIL_RESET_PASSWORD_LOGIN_VERIFY_CODE_CACHE_PREFIX + email, 180);
+                        EmailUtils.forgetPasswordEmailNotice(resultCode, email);
+                    }
                     break;
                 case 1:
-                    EmailUtils.resetEmailNotice(resultCode, email);
+                    String resultCode2 = "";
+                    if (redisUtil.hasKey(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + email)) {
+                        resultCode2 = redisUtil.getString(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + email);
+                        EmailUtils.resetEmailNotice(resultCode2, email);
+                    } else {
+                        resultCode2 = getForgetCode();
+                        redisUtil.set(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + email, resultCode2);
+                        redisUtil.expire(SecurityConstants.EMAIL_RESET_VERIFY_CODE_CACHE_PREFIX + email, 180);
+                        EmailUtils.resetEmailNotice(resultCode2, email);
+                    }
+                    break;
+                case 2:
+                    String resultCode3 = "";
+                    if (redisUtil.hasKey(SecurityConstants.EMAIL_LOGIN_VERIFY_CODE_CACHE_PREFIX + email)) {
+                        resultCode3 = redisUtil.getString(SecurityConstants.EMAIL_LOGIN_VERIFY_CODE_CACHE_PREFIX + email);
+                        EmailUtils.loginEmailNotice(resultCode3, email);
+                    } else {
+                        resultCode3 = getForgetCode();
+                        redisUtil.set(SecurityConstants.EMAIL_LOGIN_VERIFY_CODE_CACHE_PREFIX + email, resultCode3);
+                        redisUtil.expire(SecurityConstants.EMAIL_LOGIN_VERIFY_CODE_CACHE_PREFIX + email, 180);
+                        EmailUtils.loginEmailNotice(resultCode3, email);
+                    }
                     break;
                 default:
                     break;

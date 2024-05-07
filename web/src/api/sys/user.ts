@@ -1,11 +1,11 @@
 import {defHttp} from '/@/utils/http/axios';
 import {
-    addOrUpdateUserReq,
+    addOrUpdateUserReq, emailLoginReq,
     GetUserInfoModel,
     LoginReq,
     LoginResp,
     mobileLoginReq, queryUserListReq,
-    registerReq, resetEmailReq, resetPasswordReq, resetPhoneNumberReq,
+    registerReq, resetEmailReq, resetPasswordReq, resetPhoneNumberReq, updatePasswordByEmailReq,
     updatePasswordReq,
     updateUserInfoReq,
 } from './model/userModel';
@@ -17,11 +17,13 @@ import {ContentTypeEnum} from "@/enums/httpEnum";
 enum Api {
     Login = '/user/login',
     MobileLogin = '/user/mobileLogin',
+    EmailLogin = '/user/emailLogin',
     Logout = '/user/logout',
     Register = '/user/register',
     SMS = '/v2/common/sms',
     EmailSMS = '/v2/common/email',
     UpdatePassword = '/user/updatePassword',
+    UpdatePasswordByEmail = '/user/updatePasswordByEmail',
     GetUserInfo = '/user/info',
     GetPermCode = '/user/perm',
     TestRetry = '/testRetry',
@@ -58,6 +60,19 @@ export function mobileLogin(params: mobileLoginReq, successMode: SuccessMessageM
     return defHttp.post<BaseDataResp<LoginResp>>(
         {
             url: Api.MobileLogin,
+            params,
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        },
+    );
+}
+
+export function emailLogin(params: emailLoginReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
+    return defHttp.post<BaseDataResp<LoginResp>>(
+        {
+            url: Api.EmailLogin,
             params,
         },
         {
@@ -108,6 +123,18 @@ export function updatePassword(params: updatePasswordReq, successMode: SuccessMe
     return defHttp.post<BaseResp>(
         {
             url: Api.UpdatePassword,
+            params,
+        },
+        {
+            successMessageMode: successMode,
+            errorMessageMode: errorMode,
+        }
+    )
+}
+export function UpdatePasswordByEmail(params: updatePasswordByEmailReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
+    return defHttp.post<BaseResp>(
+        {
+            url: Api.UpdatePasswordByEmail,
             params,
         },
         {
