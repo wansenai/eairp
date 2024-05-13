@@ -22,6 +22,7 @@ import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'SalesStatistics',
@@ -35,6 +36,13 @@ export default defineComponent({
     const printSalesRefundNumber = ref(0);
     const printSalesRefundAmount = ref(0);
     const printSalesLastAmount = ref(0);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: t('reports.sales.title'),
       api: getSalesStatistics,
@@ -70,10 +78,10 @@ export default defineComponent({
         {
           _index: t('reports.sales.table.total'),
           salesNumber: salesNumber,
-          salesAmount: `￥${XEUtils.commafy(XEUtils.toNumber(salesAmount), { digits: 2 })}`,
+          salesAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(salesAmount), { digits: 2 })}`,
           salesRefundNumber: salesRefundNumber,
-          salesRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(salesRefundAmount), { digits: 2 })}`,
-          salesLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(salesLastAmount), { digits: 2 })}`
+          salesRefundAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(salesRefundAmount), { digits: 2 })}`,
+          salesLastAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(salesLastAmount), { digits: 2 })}`
         },
       ];
     }
@@ -108,10 +116,10 @@ export default defineComponent({
     function primaryPrint() {
       printTableData.value.push({
         salesNumber: printSalesNumber.value,
-        salesAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printSalesAmount.value), { digits: 2 })}`,
+        salesAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printSalesAmount.value), { digits: 2 })}`,
         salesRefundNumber: printSalesRefundNumber.value,
-        salesRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printSalesRefundAmount.value), { digits: 2 })}`,
-        salesLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printSalesLastAmount.value), { digits: 2 })}`,
+        salesRefundAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printSalesRefundAmount.value), { digits: 2 })}`,
+        salesLastAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printSalesLastAmount.value), { digits: 2 })}`,
         productBarcode: t('reports.sales.table.total'),
         warehouseName: '',
         productName: '',

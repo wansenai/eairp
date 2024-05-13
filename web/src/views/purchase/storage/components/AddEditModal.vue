@@ -280,6 +280,7 @@ import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 const VNodes = defineComponent({
   props: {
@@ -378,7 +379,13 @@ export default defineComponent({
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
     const warehouseLabelList =  ref<any[]>([]);
-
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -526,7 +533,7 @@ export default defineComponent({
         purchaseStorageFormState.otherReceipt = data.otherReceipt
         purchaseStorageFormState.otherAmount = data.otherAmount
         purchaseStorageFormState.thisPaymentAmount = data.thisPaymentAmount
-        purchaseStorageFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.thisArrearsAmount), {digits: 2})}`
+        purchaseStorageFormState.thisArrearsAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.thisArrearsAmount), {digits: 2})}`
         // 判断多账户渲染
         if (data.multipleAccountAmounts.length > 0 && data.multipleAccountIds.length > 0) {
           manyAccountBtnStatus.value = true
@@ -760,9 +767,9 @@ export default defineComponent({
         purchaseStorageFormState.multipleAccountAmounts = []
       }
 
-      purchaseStorageFormState.thisPaymentAmount = purchaseStorageFormState.thisPaymentAmount.toString().replace(/,/g, '').replace(/￥/g, '')
-      purchaseStorageFormState.paymentLastAmount = purchaseStorageFormState.paymentLastAmount.toString().replace(/,/g, '').replace(/￥/g, '')
-      purchaseStorageFormState.thisArrearsAmount = purchaseStorageFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      purchaseStorageFormState.thisPaymentAmount = purchaseStorageFormState.thisPaymentAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
+      purchaseStorageFormState.paymentLastAmount = purchaseStorageFormState.paymentLastAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
+      purchaseStorageFormState.thisArrearsAmount = purchaseStorageFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdatePurchaseStorageReq = {
         ...purchaseStorageFormState,
         tableData: dataArray,
@@ -860,7 +867,7 @@ export default defineComponent({
         tableData.forEach(item => {
           total += item.taxTotalPrice
         })
-        purchaseStorageFormState.paymentLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), {digits: 2})}`
+        purchaseStorageFormState.paymentLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(total), {digits: 2})}`
       }
     }
 
@@ -983,7 +990,7 @@ export default defineComponent({
 
     function discountRateChange() {
       const price = getTaxTotalPrice.value;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const discountRate = purchaseStorageFormState.paymentRate
       const discountAmount = discountLastAmount * discountRate / 100
       const otherAmount = purchaseStorageFormState.otherAmount
@@ -992,21 +999,21 @@ export default defineComponent({
 
       purchaseStorageFormState.thisArrearsAmount = 0
       purchaseStorageFormState.paymentAmount = Number(discountAmount.toFixed(2))
-      purchaseStorageFormState.paymentLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
-      purchaseStorageFormState.thisPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), {digits: 2})}`
+      purchaseStorageFormState.paymentLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
+      purchaseStorageFormState.thisPaymentAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), {digits: 2})}`
 
     }
 
     function discountAmountChange() {
       const price = getTaxTotalPrice.value;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const discountAmount = purchaseStorageFormState.paymentAmount
       const otherAmount = purchaseStorageFormState.otherAmount
       const lastAmount = Number((discountLastAmount - discountAmount));
       purchaseStorageFormState.thisArrearsAmount = 0
       purchaseStorageFormState.paymentAmount = Number(discountAmount.toFixed(2))
-      purchaseStorageFormState.paymentLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
-      purchaseStorageFormState.thisPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), {digits: 2})}`
+      purchaseStorageFormState.paymentLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
+      purchaseStorageFormState.thisPaymentAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), {digits: 2})}`
       if (discountLastAmount) {
         const discountRate = discountAmount / discountLastAmount * 100
         purchaseStorageFormState.paymentRate = Number(discountRate.toFixed(2))
@@ -1017,22 +1024,22 @@ export default defineComponent({
 
     function otherAmountChange() {
       const price = purchaseStorageFormState.paymentLastAmount;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const otherAmount = purchaseStorageFormState.otherAmount
       const lastAmount = Number((discountLastAmount + otherAmount));
 
       purchaseStorageFormState.thisArrearsAmount = 0
-      purchaseStorageFormState.thisPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
+      purchaseStorageFormState.thisPaymentAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
     }
 
     function thisPaymentAmountChange() {
       const price = purchaseStorageFormState.paymentLastAmount;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const otherAmount = purchaseStorageFormState.otherAmount
       const thisCollectAmount = purchaseStorageFormState.thisPaymentAmount
       const lastAmount = Number((discountLastAmount + otherAmount - thisCollectAmount));
 
-      purchaseStorageFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
+      purchaseStorageFormState.thisArrearsAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), {digits: 2})}`
 
     }
 

@@ -174,6 +174,7 @@ import OperatorModal from "@/views/basic/operator/components/OperatorModal.vue";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -248,7 +249,13 @@ export default defineComponent({
     });
     const financialPersonalList = ref<OperatorResp[]>([]);
     const accountList = ref<AccountResp[]>([]);
-
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -309,7 +316,7 @@ export default defineComponent({
         transferFormState.remark = data.remark
         transferFormState.paymentAccountId = data.paymentAccountId
         transferFormState.financialPersonId = data.financialPersonId
-        transferFormState.paymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.paymentAmount), { digits: 2 })}`
+        transferFormState.paymentAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.paymentAmount), { digits: 2 })}`
         // file
         fileList.value = data.files.map(item => ({
           id: item.id,
@@ -402,7 +409,7 @@ export default defineComponent({
         }
         dataArray.push(data)
       })
-      transferFormState.paymentAmount = transferFormState.paymentAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      transferFormState.paymentAmount = transferFormState.paymentAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdateTransferReq = {
         ...transferFormState,
         tableData: dataArray,

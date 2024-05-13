@@ -30,6 +30,7 @@ import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 export default defineComponent({
   name: 'ProductStock',
   components: {Tag, TableAction, BasicTable, StockFlowModal},
@@ -41,6 +42,13 @@ export default defineComponent({
     const printTotalInitStock = ref(0);
     const printTotalCurrentStock = ref(0);
     const printTotalStockAmount = ref(0);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: t('reports.productStock.title'),
       api: getProductStock,
@@ -75,7 +83,7 @@ export default defineComponent({
           _index: 'Total',
           initialStock: totalInitStock,
           currentStock: totalCurrentStock,
-          stockAmount: `￥${XEUtils.commafy(XEUtils.toNumber(totalStockAmount), { digits: 2 })}`
+          stockAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(totalStockAmount), { digits: 2 })}`
         },
       ];
     }
@@ -118,7 +126,7 @@ export default defineComponent({
       printTableData.value.push({
         initialStock: printTotalInitStock.value,
         currentStock: printTotalCurrentStock.value,
-        stockAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalStockAmount.value), { digits: 2 })}`,
+        stockAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printTotalStockAmount.value), { digits: 2 })}`,
         productBarcode: 'Total',
         // 将其他字段写成空字符串 为了打印的时候不显示
         warehouseName: '',

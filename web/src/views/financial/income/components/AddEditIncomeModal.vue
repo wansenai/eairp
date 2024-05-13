@@ -188,6 +188,7 @@ import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import incomeExpense from "@/views/basic/income-expense/index.vue";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -269,6 +270,13 @@ export default defineComponent({
     });
     const financialPersonalList = ref<OperatorResp[]>([]);
     const accountList = ref<AccountResp[]>([]);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
 
     function handleCancelModal() {
       clearData();
@@ -345,7 +353,7 @@ export default defineComponent({
         incomeFormState.relatedPersonId = data.relatedPersonId
         incomeFormState.incomeAccountId = data.incomeAccountId
         incomeFormState.financialPersonId = data.financialPersonId
-        incomeFormState.incomeAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.incomeAmount), { digits: 2 })}`
+        incomeFormState.incomeAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.incomeAmount), { digits: 2 })}`
         // file
         fileList.value = data.files.map(item => ({
           id: item.id,
@@ -444,7 +452,7 @@ export default defineComponent({
         }
         dataArray.push(data)
       })
-      incomeFormState.incomeAmount = incomeFormState.incomeAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      incomeFormState.incomeAmount = incomeFormState.incomeAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdateIncomeReq = {
         ...incomeFormState,
         tableData: dataArray,

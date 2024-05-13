@@ -3,8 +3,17 @@ import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
 import {useI18n} from "@/hooks/web/useI18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export const { t } = useI18n();
+
+const amountSymbol = ref<string>('')
+const localeStore = useLocaleStore().getLocale;
+if(localeStore === 'zh_CN') {
+    amountSymbol.value = '￥'
+} else if (localeStore === 'en') {
+    amountSymbol.value = '$'
+}
 
 interface FormState {
     id: number | string | undefined;
@@ -125,7 +134,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             field: 'retailPrice',
             title: t('retail.shipments.form.table.unitPrice'), width:105,
             formatter ({ cellValue }) {
-                return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
+                return cellValue ? amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入单价' } }
         },
@@ -133,7 +142,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             field: 'amount',
             title: t('retail.shipments.form.table.amount'), width:105,
             formatter ({ cellValue }) {
-                return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
+                return cellValue ? amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
             slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
@@ -153,10 +162,10 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
                         const price = item.amount / item.productNumber
                         item.retailPrice = XEUtils.toFixed(price, 2)
                     })
-                    receiptAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
-                    collectAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
-                    paymentAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
-                    return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    receiptAmount.value = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    collectAmount.value = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    paymentAmount.value = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    return amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
                 if (['productNumber', 'rate'].includes(column.field)) {
                     // 设置单价 = 金额 / 数量

@@ -39,7 +39,7 @@
               }"
             />
             <a-statistic :title="t('financial.advance.table.amountCollected')"
-                         prefix="￥"
+                         :prefix="amountSymbol"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="collectedAmount"/>
           </div>
@@ -65,6 +65,7 @@ import {advanceChargeTableColumns} from "@/views/financial/advance-charge/advanc
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'ViewIncomeModal',
@@ -87,6 +88,13 @@ export default defineComponent({
     const remark = ref('')
     const tableData = ref([]);
     const status = ref(-1);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable] = useTable({
       title: t('financial.advance.receiptDetail'),
       columns: advanceChargeTableColumns,
@@ -174,7 +182,8 @@ export default defineComponent({
       getTitle,
       handleSubmit,
       exportTable,
-      primaryPrint
+      primaryPrint,
+      amountSymbol
     };
   },
 });

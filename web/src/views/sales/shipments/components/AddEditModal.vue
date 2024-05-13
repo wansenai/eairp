@@ -281,6 +281,7 @@ import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -382,6 +383,13 @@ export default defineComponent({
       clearData();
       open.value = false;
       context.emit('cancel');
+    }
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
     }
 
     function openAddEditModal(id: string | undefined) {
@@ -528,7 +536,7 @@ export default defineComponent({
         saleShipmentsFormState.operatorIds = data.operatorIds
         saleShipmentsFormState.collectOfferRate = data.collectOfferRate
         saleShipmentsFormState.collectOfferAmount = data.collectOfferAmount
-        saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.collectOfferLastAmount), { digits: 2 })}`
+        saleShipmentsFormState.collectOfferLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.collectOfferLastAmount), { digits: 2 })}`
         saleShipmentsFormState.otherReceipt = data.otherReceipt
         saleShipmentsFormState.otherAmount = data.otherAmount
         saleShipmentsFormState.thisCollectAmount = data.thisCollectAmount
@@ -780,9 +788,9 @@ export default defineComponent({
         saleShipmentsFormState.multipleAccountAmounts = []
       }
 
-      saleShipmentsFormState.thisCollectAmount = saleShipmentsFormState.thisCollectAmount.toString().replace(/,/g, '').replace(/￥/g, '');
-      saleShipmentsFormState.collectOfferLastAmount = saleShipmentsFormState.collectOfferLastAmount.replace(/,/g, '').replace(/￥/g, '')
-      saleShipmentsFormState.thisArrearsAmount = saleShipmentsFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      saleShipmentsFormState.thisCollectAmount = saleShipmentsFormState.thisCollectAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '');
+      saleShipmentsFormState.collectOfferLastAmount = saleShipmentsFormState.collectOfferLastAmount.replace(/,/g, '').replace(amountSymbol.value, '')
+      saleShipmentsFormState.thisArrearsAmount = saleShipmentsFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdateReceiptReq = {
         ...saleShipmentsFormState,
         tableData: dataArray,
@@ -871,8 +879,8 @@ export default defineComponent({
         tableData.forEach(item => {
           total += item.taxTotalPrice
         })
-        saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
-        saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
+        saleShipmentsFormState.collectOfferLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
+        saleShipmentsFormState.thisCollectAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
       }
     }
 
@@ -984,7 +992,7 @@ export default defineComponent({
 
     function discountRateChange() {
       const price = getTaxTotalPrice.value;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const discountRate = saleShipmentsFormState.collectOfferRate
       const discountAmount = discountLastAmount * discountRate / 100
       const otherAmount = saleShipmentsFormState.otherAmount
@@ -993,21 +1001,21 @@ export default defineComponent({
 
       saleShipmentsFormState.thisArrearsAmount = 0
       saleShipmentsFormState.collectOfferAmount = Number(discountAmount.toFixed(2))
-      saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
-      saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
+      saleShipmentsFormState.collectOfferLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleShipmentsFormState.thisCollectAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
 
     }
 
     function discountAmountChange() {
       const price = getTaxTotalPrice.value;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const discountAmount = saleShipmentsFormState.collectOfferAmount
       const otherAmount = saleShipmentsFormState.otherAmount
       const lastAmount = Number((discountLastAmount - discountAmount));
       saleShipmentsFormState.thisArrearsAmount = 0
       saleShipmentsFormState.collectOfferAmount = Number(discountAmount.toFixed(2))
-      saleShipmentsFormState.collectOfferLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
-      saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
+      saleShipmentsFormState.collectOfferLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleShipmentsFormState.thisCollectAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
       if (discountLastAmount) {
         const discountRate = discountAmount / discountLastAmount * 100
         saleShipmentsFormState.collectOfferRate = Number(discountRate.toFixed(2))
@@ -1019,21 +1027,21 @@ export default defineComponent({
     function otherAmountChange() {
       // 计算本次收款(thisCollectAmount) = 优惠金额 + 其他费用
       const price = saleShipmentsFormState.collectOfferLastAmount;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const otherAmount = saleShipmentsFormState.otherAmount
       const lastAmount =  Number((discountLastAmount + otherAmount));
       saleShipmentsFormState.thisArrearsAmount = 0
-      saleShipmentsFormState.thisCollectAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleShipmentsFormState.thisCollectAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
     }
 
     function thisCollectAmountChange() {
       const price = saleShipmentsFormState.collectOfferLastAmount;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const otherAmount = saleShipmentsFormState.otherAmount
       const thisCollectAmount = saleShipmentsFormState.thisCollectAmount
       const lastAmount = Number((discountLastAmount + otherAmount - thisCollectAmount));
 
-      saleShipmentsFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleShipmentsFormState.thisArrearsAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
     }
 
     const selectAccountChange = (value: number) => {

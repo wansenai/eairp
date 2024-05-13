@@ -239,6 +239,7 @@ import {AddOrUpdateRefundReq} from "@/api/retail/model/refundModel";
 import {FileData, ShipmentsData} from "@/api/retail/model/shipmentsModel";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -310,7 +311,14 @@ export default defineComponent({
     const fileList = ref<FileData[]>([]);
     const payTypeList = ref<any>([]);
     const minWidth = ref(1100);
-    const backAmount = ref('￥0.00');
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
+    const backAmount = ref(amountSymbol.value + '0.00');
     const model = ref({});
     const disabledStatus = ref(false);
     const labelCol = ref({
@@ -472,19 +480,19 @@ export default defineComponent({
           })
         }
         formState.memberId.disabled = true
-        receiptAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.receiptAmount), { digits: 2 })}`
-        paymentAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.paymentAmount), { digits: 2 })}`
-        backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(data.backAmount), { digits: 2 })}`
+        receiptAmount.value = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.receiptAmount), { digits: 2 })}`
+        paymentAmount.value = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.paymentAmount), { digits: 2 })}`
+        backAmount.value = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.backAmount), { digits: 2 })}`
       }
     }
 
     function onChangePaymentAmount() {
       const sum = receiptAmount.value
       const collect = paymentAmount.value
-      const sumNumber = sum.replace(/,/g, '').replace(/￥/g, '')
-      const collectNumber = collect.replace(/,/g, '').replace(/￥/g, '')
+      const sumNumber = sum.replace(/,/g, '').replace(amountSymbol.value, '');
+      const collectNumber = collect.replace(/,/g, '').replace(amountSymbol.value, '');
       const numberAmount = Number(collectNumber) - Number(sumNumber)
-      backAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(numberAmount), { digits: 2 })}`
+      backAmount.value = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(numberAmount), { digits: 2 })}`
     }
 
     function scanPressEnter() {
@@ -620,8 +628,8 @@ export default defineComponent({
 
       const sum = receiptAmount.value
       const payment = paymentAmount.value
-      const sumNumber = sum.replace(/,/g, '').replace(/￥/g, '')
-      const paymentNumber = payment.replace(/,/g, '').replace(/￥/g, '')
+      const sumNumber = sum.replace(/,/g, '').replace(amountSymbol.value, '');
+      const paymentNumber = payment.replace(/,/g, '').replace(amountSymbol.value, '');
       const backAmount = Number(paymentNumber) - Number(sumNumber)
       formState.paymentAmount = Number(paymentNumber)
       formState.receiptAmount = Number(sumNumber)
@@ -650,7 +658,7 @@ export default defineComponent({
       formState.otherReceipt = ''
       receiptAmount.value = ''
       paymentAmount.value = ''
-      backAmount.value = '￥0.00'
+      backAmount.value = amountSymbol.value + '0.00'
       fileList.value = []
       const table = xGrid.value
       if(table) {

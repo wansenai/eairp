@@ -194,6 +194,7 @@ import localeData from "dayjs/plugin/localeData";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import {SupplierResp} from "@/api/basic/model/supplierModel";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -272,7 +273,13 @@ export default defineComponent({
     const financialPersonalList = ref<OperatorResp[]>([]);
     const accountList = ref<AccountResp[]>([]);
     const supplierList = ref<SupplierResp[]>([]);
-
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -348,8 +355,8 @@ export default defineComponent({
         paymentFormState.paymentAccountId = data.paymentAccountId
         paymentFormState.financialPersonId = data.financialPersonId
         paymentFormState.discountAmount = data.discountAmount
-        paymentFormState.totalPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.totalPaymentAmount), { digits: 2 })}`
-        paymentFormState.actualPaymentAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.actualPaymentAmount), { digits: 2 })}`
+        paymentFormState.totalPaymentAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.totalPaymentAmount), { digits: 2 })}`
+        paymentFormState.actualPaymentAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.actualPaymentAmount), { digits: 2 })}`
         // file
         fileList.value = data.files.map(item => ({
           id: item.id,
@@ -442,8 +449,8 @@ export default defineComponent({
         }
         dataArray.push(data)
       })
-      paymentFormState.totalPaymentAmount = paymentFormState.totalPaymentAmount.toString().replace(/,/g, '').replace(/￥/g, '')
-      paymentFormState.actualPaymentAmount = paymentFormState.actualPaymentAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      paymentFormState.totalPaymentAmount = paymentFormState.totalPaymentAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
+      paymentFormState.actualPaymentAmount = paymentFormState.actualPaymentAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdatePaymentReq = {
         ...paymentFormState,
         tableData: dataArray,
@@ -557,7 +564,7 @@ export default defineComponent({
     }
 
     watch(getThisPaymentAmount,(newValue, oldValue) => {
-      if(oldValue !== '￥0.00') {
+      if(oldValue !== amountSymbol.value + '0.00') {
         paymentFormState.totalPaymentAmount = newValue
         paymentFormState.actualPaymentAmount = newValue
         discountAmountChange()
@@ -565,10 +572,10 @@ export default defineComponent({
     });
 
     function discountAmountChange() {
-      const totalPaymentAmount = paymentFormState.totalPaymentAmount.toString().replace(/,/g, '').replace(/￥/g, '')
-      const discountAmount = paymentFormState.discountAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      const totalPaymentAmount = paymentFormState.totalPaymentAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
+      const discountAmount = paymentFormState.discountAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const actualPaymentAmount = XEUtils.toNumber(totalPaymentAmount) - XEUtils.toNumber(discountAmount)
-      paymentFormState.actualPaymentAmount = `￥${XEUtils.commafy(actualPaymentAmount, { digits: 2 })}`
+      paymentFormState.actualPaymentAmount = amountSymbol.value + `${XEUtils.commafy(actualPaymentAmount, { digits: 2 })}`
     }
 
     return {

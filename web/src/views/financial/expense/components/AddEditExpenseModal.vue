@@ -187,6 +187,7 @@ import OperatorModal from "@/views/basic/operator/components/OperatorModal.vue";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -263,7 +264,13 @@ export default defineComponent({
     });
     const financialPersonalList = ref<OperatorResp[]>([]);
     const accountList = ref<AccountResp[]>([]);
-
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -339,7 +346,7 @@ export default defineComponent({
         expenseFormState.relatedPersonId = data.relatedPersonId
         expenseFormState.expenseAccountId = data.expenseAccountId
         expenseFormState.financialPersonId = data.financialPersonId
-        expenseFormState.expenseAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.expenseAmount), { digits: 2 })}`
+        expenseFormState.expenseAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.expenseAmount), { digits: 2 })}`
         // file
         fileList.value = data.files.map(item => ({
           id: item.id,
@@ -438,7 +445,7 @@ export default defineComponent({
         }
         dataArray.push(data)
       })
-      expenseFormState.expenseAmount = expenseFormState.expenseAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      expenseFormState.expenseAmount = expenseFormState.expenseAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdateExpenseReq = {
         ...expenseFormState,
         tableData: dataArray,

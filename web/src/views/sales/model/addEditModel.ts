@@ -3,6 +3,15 @@ import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
 import {useI18n} from "@/hooks/web/useI18n";
+import {useLocaleStore} from "@/store/modules/locale";
+
+const amountSymbol = ref<string>('')
+const localeStore = useLocaleStore().getLocale;
+if(localeStore === 'zh_CN') {
+    amountSymbol.value = '￥'
+} else if (localeStore === 'en') {
+    amountSymbol.value = '$'
+}
 
 export const { t } = useI18n();
 
@@ -162,7 +171,7 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
             field: 'unitPrice',
             title: t('sales.shipments.form.table.unitPrice'), width:105,
             formatter ({ cellValue }) {
-                return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
+                return cellValue ? amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
             slots: { edit: 'price_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入单价' } }
@@ -171,7 +180,7 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
             field: 'amount',
             title: t('sales.shipments.form.table.amount'), width:105,
             formatter ({ cellValue }) {
-                return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
+                return cellValue ? amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
             slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
@@ -198,18 +207,18 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
                     return t('sales.shipments.form.table.total')
                 }
                 if (['amount', 'rate'].includes(column.field)) {
-                    return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    return amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
                 if (['productNumber', 'rate'].includes(column.field)) {
                     return sumNum(data, column.field)
                 }
                 if (['taxAmount', 'rate'].includes(column.field)) {
-                    return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    return amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
 
                 if (['taxTotalPrice', 'rate'].includes(column.field)) {
-                    getTaxTotalPrice.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
-                    return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    getTaxTotalPrice.value = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    return amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
                 return ''
             })
@@ -320,7 +329,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             field: 'unitPrice',
             title: t('sales.shipments.form.table.unitPrice'), width:105,
             formatter ({ cellValue }) {
-                return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
+                return cellValue ? amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
             slots: { edit: 'price_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入单价' } }
@@ -329,7 +338,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             field: 'amount',
             title: t('sales.shipments.form.table.amount'), width:105,
             formatter ({ cellValue }) {
-                return cellValue ? `￥${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
+                return cellValue ? amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(cellValue), { digits: 2 })}` : ''
             },
             slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
@@ -356,18 +365,18 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
                     return t('sales.shipments.form.table.total')
                 }
                 if (['amount', 'rate'].includes(column.field)) {
-                    return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    return amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
                 if (['productNumber', 'rate'].includes(column.field)) {
                     return sumNum(data, column.field)
                 }
                 if (['taxAmount', 'rate'].includes(column.field)) {
-                    return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    return amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
 
                 if (['taxTotalPrice', 'rate'].includes(column.field)) {
-                    getTaxTotalPrice.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
-                    return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    getTaxTotalPrice.value = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    return amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
                 return ''
             })

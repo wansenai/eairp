@@ -225,6 +225,7 @@ import {SupplierResp} from "@/api/basic/model/supplierModel";
 import {addSupplier, getSupplierList} from "@/api/basic/supplier";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -317,6 +318,13 @@ export default defineComponent({
     const [multipleAccountModal, {openModal: openManyAccountModal}] = useModal();
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -447,7 +455,7 @@ export default defineComponent({
         purchaseOrderFormState.remark = data.remark
         purchaseOrderFormState.discountRate = data.discountRate
         purchaseOrderFormState.discountAmount = data.discountAmount
-        purchaseOrderFormState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.discountLastAmount), { digits: 2 })}`
+        purchaseOrderFormState.discountLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.discountLastAmount), { digits: 2 })}`
         purchaseOrderFormState.deposit = data.deposit
         // 判断多账户渲染
         if(data.multipleAccountAmounts.length > 0 && data.multipleAccountIds.length > 0) {
@@ -664,7 +672,7 @@ export default defineComponent({
         purchaseOrderFormState.multipleAccountAmounts = []
       }
 
-      purchaseOrderFormState.discountLastAmount = purchaseOrderFormState.discountLastAmount.replace(/,/g, '').replace(/￥/g, '')
+      purchaseOrderFormState.discountLastAmount = purchaseOrderFormState.discountLastAmount.replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdateReceiptReq = {
         ...purchaseOrderFormState,
         tableData: dataArray,
@@ -751,7 +759,7 @@ export default defineComponent({
         tableData.forEach(item => {
           total += item.taxTotalPrice
         })
-        purchaseOrderFormState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
+        purchaseOrderFormState.discountLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
       }
     }
 
@@ -863,24 +871,24 @@ export default defineComponent({
 
     function discountRateChange() {
       const price = getTaxTotalPrice.value;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const discountRate = purchaseOrderFormState.discountRate
       const discountAmount = discountLastAmount * discountRate / 100
       purchaseOrderFormState.discountAmount = Number(discountAmount.toFixed(2))
-      purchaseOrderFormState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`
+      purchaseOrderFormState.discountLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`
     }
 
     function discountAmountChange() {
       const price = getTaxTotalPrice.value;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const discountAmount = purchaseOrderFormState.discountAmount
       if (discountLastAmount) {
         const discountRate = discountAmount / discountLastAmount * 100;
         purchaseOrderFormState.discountRate = Number(discountRate.toFixed(2));
-        purchaseOrderFormState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`;
+        purchaseOrderFormState.discountLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`;
       } else {
         purchaseOrderFormState.discountRate = 0;
-        purchaseOrderFormState.discountLastAmount = '￥0.00';
+        purchaseOrderFormState.discountLastAmount = amountSymbol.value + '0.00';
       }
     }
 

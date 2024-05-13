@@ -35,6 +35,7 @@ import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
 import printJS from "print-js";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'SupplierBillDetailModal',
@@ -49,6 +50,13 @@ export default defineComponent({
     const printTableData = ref<any[]>([]);
     const getTitle = ref(t('reports.other.supplierArrearsDetail'));
     const supplierId = ref('');
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [handlePurchaseStorageModal, {openModal: openPurchaseStorageModal}] = useModal();
     const [handlePurchaseRefundModal, {openModal: openPurchaseRefundModal}] = useModal();
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
@@ -84,9 +92,9 @@ export default defineComponent({
       return [
         {
           _index: t('reports.customerBill.table.total'),
-          thisReceiptArrears:`￥${XEUtils.commafy(XEUtils.toNumber(thisReceiptArrears), { digits: 2 })}`,
-          prepaidArrears:`￥${XEUtils.commafy(XEUtils.toNumber(prepaidArrears), { digits: 2 })}`,
-          paymentArrears:`￥${XEUtils.commafy(XEUtils.toNumber(paymentArrears), { digits: 2 })}`,
+          thisReceiptArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(thisReceiptArrears), { digits: 2 })}`,
+          prepaidArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(prepaidArrears), { digits: 2 })}`,
+          paymentArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(paymentArrears), { digits: 2 })}`,
         },
       ];
     }
@@ -139,9 +147,9 @@ export default defineComponent({
         productInfo: '',
         receiptDate: '',
         operator: '',
-        thisReceiptArrears:  `￥${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.thisReceiptArrears, 0)), { digits: 2 })}`,
-        prepaidArrears: `￥${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.prepaidArrears, 0)), { digits: 2 })}`,
-        paymentArrears: `￥${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.paymentArrears, 0)), { digits: 2 })}`,
+        thisReceiptArrears:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.thisReceiptArrears, 0)), { digits: 2 })}`,
+        prepaidArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.prepaidArrears, 0)), { digits: 2 })}`,
+        paymentArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.paymentArrears, 0)), { digits: 2 })}`,
       });
       printJS({
         documentTitle: "EAIRP " + t('reports.other.supplierArrearsDetail'),

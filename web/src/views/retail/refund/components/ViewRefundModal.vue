@@ -43,7 +43,7 @@
               }"
             />
             <a-statistic :title="t('retail.refund.view.paymentAmount')"
-                         prefix="￥"
+                         :prefix="amountSymbol"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="receiptAmount"/>
           </div>
@@ -71,6 +71,7 @@ import ViewShipmentModal from "@/views/retail/shipments/components/ViewShipmentM
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'ViewRefundModal',
@@ -99,6 +100,13 @@ export default defineComponent({
     const otherReceipt = ref('');
     const [viewShipmentReceiptModal, {openModal: openShipmentViewModal}] = useModal();
     const tableData = ref([]);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable] = useTable({
       title: t('retail.refund.detail'),
       columns: retailShipmentsTableColumns,
@@ -207,7 +215,8 @@ export default defineComponent({
       viewShipmentReceipt,
       viewShipmentReceiptModal,
       exportTable,
-      primaryPrint
+      primaryPrint,
+      amountSymbol
     };
   },
 });
