@@ -1,7 +1,7 @@
-<h1 align="center">WanSen ERP</h1>
+<h1 align="center"><a href="#" target="_blank">企业资源计划系统</a></h1>
 <div align="center">
  <strong>
-  下一代人工智能 ERP 系统
+  下一代智能ERP系统
  </strong>
 </div>
 <br />
@@ -11,75 +11,81 @@
   <a href="https://spring.io/projects/spring-boot#learn">
     <img alt="Static Badge" src="https://img.shields.io/badge/spring-boot?label=Spring%20Boot%203.1.3">
   </a>
+ <a href="https://codecov.io/gh/wansenai/eairp" > 
+    <img src="https://codecov.io/gh/wansenai/eairp/graph/badge.svg?token=6OO8JX0ZVV"/> 
+ </a>
   <a href="#">
     <img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/wansenai/wansenerp/maven.yml">
   </a>
-  <!-- Contributors -->
-  <a href="https://github.com/wansenai/wansenerp/graphs/contributors">
-    <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/wansenai/wansenerp">
-  </a>
-  <!-- bors -->
+  <!-- commits -->
   <a href="#">
     <img alt="GitHub last commit (branch)" src="https://img.shields.io/github/last-commit/wansenai/wansenerp/master">
+  </a>
+   <a href="">
+    <img src="https://img.shields.io/github/repo-size/wansenai/eairp"/>
   </a>
 </div>
 <br />
 
-在 ERP 业务的基础上，我们扩展了 GPT-3.5，个人或公司可以通过我们的系统配置您的模型，并通过 Docker 或其他方法进行部署。
+在ERP业务的基础上，我们扩展了GPT-3.5。个人或公司可以通过我们的系统对您的模型进行微调。
+您可以通过简单的描述提供完全自动化的业务表单提交操作，还可以与GPT聊天、交互和查阅信息。
+您可以通过Docker进行部署，以快速启动和使用。
 
-您可以通过您的简单描述提供完全自动化的业务表单提交操作，并且可以与 GPT 聊天、互动、咨询信息。
+它是完全免费的，如果这个项目对你有帮助，请点击Star。非常感谢。
 
-**注意：这是一个前仓库收拾的项目。该仓库仓库代码，仓库仓库请浏览[这里](https://github.com/wansenai/wansenerpui)。**
+## Project
+[Enginsh](https://github.com/wansenai/eairp/blob/master/README.md) / [简体中文](https://github.com/wansenai/eairp/blob/master/README_ZH.md)
 
-## 在线预览
+## Online preview
+- [eairp preview / 在线预览](https://erp.wansen.cloud/)
+- 测试账号: wansen
+- 测试密码: 123456
 
-我们已将程序部署在Amazon Cloud上，请您在使用前先体验一下。 
-如果您有任何疑问或建议，请提交[issue](https://github.com/wansenai/WansenERP/issues/new)，我们将会及时处理。
+一些功能模块正在开发和改进中，请参阅我们的待办事项列表[开发清单](https://github.com/wansenai/eairp/issues/124)。
 
-预览地址：http://erp.wansen.cloud/
+## 快速开始
+```shell
+docker pull wansenai/eairp:2.1.1
 
-## 模块说明
+docker pull wansenai/eairp-web:2.1.1
+```
+## 运行服务
+您可以自定义和修改端口8080，请确保您的前端监控的服务端口一致。
+如果要部署到您的域名，则需要将本地主机修改为您的域名。
 
-1. **Domain Module:**
+我们将使用Docker Compose方法进行集成和部署，下一步它很快就会到来：）
 
-业务操作数据对象。
-```xml
-<dependency>
-    <groupId>com.wansensoft</groupId>
-    <artifactId>domain</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
+```shell
+docker run --name eairp -d -p 8080:8088 wansenai/eairp:2.1.1
+
+docker run --name eairp-web -d -p 3000:80 -e API_BASE_URL=http://localhost:8080/erp-api wansenai/eairp-web:2.1.1
 ```
 
-2. **Dao Module:**
+## 系统展示图
+![](images/login-page-zh.png)
+![](images/home-page-zh.png)
+![](images/retail-shipment.png)
+![](images/product-add-one.png)
+![](images/product-add-two.png)
+![](images/add-menu-zh.png)
+![](images/role-permission-zh.png)
 
-数据访问对象将数据访问逻辑与业务逻辑分开，以提供对数据持久存储的访问和操作。
-```xml
-<dependency>
-    <groupId>com.wansensoft</groupId>
-    <artifactId>dao</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
-```
+## 其他项目
+- [eairp-app](https://github.com/wansenai/eairp-app)  **注意:** (该应用程序当前需要等待web端完全开发后才能继续)
 
-3. **Service Module:**
+## License
 
-业务逻辑层，将具体的业务逻辑处理委托给服务层。
-```xml
-<dependency>
-    <groupId>com.wansensoft</groupId>
-    <artifactId>service</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
-```
+根据以下任一许可证之一，对本项目中的代码和文档进行许可：
 
-4. **Utils Module:**
+- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or https://opensource.wansenai.com/)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or https://opensource.wansenai.com/mit)
 
-封装了一些具体操作的工具类代码。
-```xml
-<dependency>
-    <groupId>com.wansensoft</groupId>
-    <artifactId>utils</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
-```
+根据您的选择。
+
+## 社区
+微信群: 请添加微信`wansenai`备注ERP开源.
+
+## 贡献
+我们欢迎每一位贡献者，无论是在代码还是文档方面。
+
+除非您另有明确说明，否则有意提交以纳入 根据Apache-2.0许可证的定义，您的作品应具有上述双重许可，没有任何附加条款或条件。
