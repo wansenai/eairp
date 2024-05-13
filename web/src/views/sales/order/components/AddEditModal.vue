@@ -239,6 +239,7 @@ import MultipleAccountsModal from "@/views/basic/settlement-account/components/M
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {getWarehouseList} from "@/api/basic/warehouse";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -332,6 +333,13 @@ export default defineComponent({
     const [multipleAccountModal, {openModal: openManyAccountModal}] = useModal();
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -470,7 +478,7 @@ export default defineComponent({
         formState.operatorIds = data.operatorIds
         formState.discountRate = data.discountRate
         formState.discountAmount = data.discountAmount
-        formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.discountLastAmount), { digits: 2 })}`
+        formState.discountLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.discountLastAmount), { digits: 2 })}`
         formState.deposit = data.deposit
         // 判断多账户渲染
         if(data.multipleAccountAmounts.length > 0 && data.multipleAccountIds.length > 0) {
@@ -688,7 +696,7 @@ export default defineComponent({
         formState.multipleAccountAmounts = []
       }
 
-      formState.discountLastAmount = formState.discountLastAmount.replace(/,/g, '').replace(/￥/g, '')
+      formState.discountLastAmount = formState.discountLastAmount.replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdateReceiptReq = {
         ...formState,
         tableData: dataArray,
@@ -774,7 +782,7 @@ export default defineComponent({
         tableData.forEach(item => {
           total += item.taxTotalPrice
         })
-        formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
+        formState.discountLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
       }
     }
 
@@ -886,18 +894,18 @@ export default defineComponent({
 
     function discountRateChange() {
       const price = getTaxTotalPrice.value;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const discountRate = formState.discountRate
       const discountAmount = discountLastAmount * discountRate / 100
       formState.discountAmount = Number(discountAmount.toFixed(2))
-      formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`
+      formState.discountLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`
     }
 
     function discountAmountChange() {
       const price = getTaxTotalPrice.value;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const discountAmount = formState.discountAmount
-      formState.discountLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`
+      formState.discountLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(Number((discountLastAmount - discountAmount))), { digits: 2 })}`
       if (discountLastAmount) {
         const discountRate = discountAmount / discountLastAmount * 100
         formState.discountRate = Number(discountRate.toFixed(2))

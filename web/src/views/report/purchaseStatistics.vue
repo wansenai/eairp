@@ -22,6 +22,7 @@ import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useMessage} from "@/hooks/web/useMessage";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'PurchaseStatistics',
@@ -35,6 +36,13 @@ export default defineComponent({
     const printPurchaseRefundNumber = ref(0);
     const printPurchaseRefundAmount = ref(0);
     const printPurchaseLastAmount = ref(0);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: t('reports.purchase.title'),
       api: getPurchaseStatistics,
@@ -70,10 +78,10 @@ export default defineComponent({
         {
           _index: t('reports.purchase.table.total'),
           purchaseNumber: purchaseNumber,
-          purchaseAmount: `￥${XEUtils.commafy(XEUtils.toNumber(purchaseAmount), { digits: 2 })}`,
+          purchaseAmount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(purchaseAmount), { digits: 2 })}`,
           purchaseRefundNumber: purchaseRefundNumber,
-          purchaseRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(purchaseRefundAmount), { digits: 2 })}`,
-          purchaseLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(purchaseLastAmount), { digits: 2 })}`
+          purchaseRefundAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(purchaseRefundAmount), { digits: 2 })}`,
+          purchaseLastAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(purchaseLastAmount), { digits: 2 })}`
         },
       ];
     }
@@ -108,10 +116,10 @@ export default defineComponent({
     function primaryPrint() {
       printTableData.value.push({
         purchaseNumber: printPurchaseNumber.value,
-        purchaseAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printPurchaseAmount.value), { digits: 2 })}`,
+        purchaseAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printPurchaseAmount.value), { digits: 2 })}`,
         purchaseRefundNumber: printPurchaseRefundNumber.value,
-        purchaseRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printPurchaseRefundAmount.value), { digits: 2 })}`,
-        purchaseLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printPurchaseLastAmount.value), { digits: 2 })}`,
+        purchaseRefundAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printPurchaseRefundAmount.value), { digits: 2 })}`,
+        purchaseLastAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printPurchaseLastAmount.value), { digits: 2 })}`,
         productBarcode: t('reports.purchase.table.total'),
         warehouseName: '',
         productName: '',

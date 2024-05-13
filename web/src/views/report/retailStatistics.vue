@@ -22,6 +22,7 @@ import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useMessage} from "@/hooks/web/useMessage";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'RetailStatistics',
@@ -35,6 +36,13 @@ export default defineComponent({
     const printRetailRefundNumber = ref(0);
     const printRetailRefundAmount = ref(0);
     const printRetailLastAmount = ref(0);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: t('reports.retail.title'),
       api: getRetailStatistics,
@@ -70,10 +78,10 @@ export default defineComponent({
         {
           _index: t('reports.retail.table.total'),
           retailNumber: retailNumber,
-          retailAmount: `￥${XEUtils.commafy(XEUtils.toNumber(retailAmount), { digits: 2 })}`,
+          retailAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(retailAmount), { digits: 2 })}`,
           retailRefundNumber: retailRefundNumber,
-          retailRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(retailRefundAmount), { digits: 2 })}`,
-          retailLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(retailLastAmount), { digits: 2 })}`
+          retailRefundAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(retailRefundAmount), { digits: 2 })}`,
+          retailLastAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(retailLastAmount), { digits: 2 })}`
         },
       ];
     }
@@ -108,10 +116,10 @@ export default defineComponent({
     function primaryPrint() {
       printTableData.value.push({
         retailNumber: printRetailNumber.value,
-        retailAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printRetailAmount.value), { digits: 2 })}`,
+        retailAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printRetailAmount.value), { digits: 2 })}`,
         retailRefundNumber: printRetailRefundNumber.value,
-        retailRefundAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printRetailRefundAmount.value), { digits: 2 })}`,
-        retailLastAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printRetailLastAmount.value), { digits: 2 })}`,
+        retailRefundAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printRetailRefundAmount.value), { digits: 2 })}`,
+        retailLastAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printRetailLastAmount.value), { digits: 2 })}`,
         productBarcode: t('reports.retail.table.total'),
         warehouseName: '',
         productName: '',

@@ -31,6 +31,7 @@ import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useMessage} from "@/hooks/web/useMessage";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'AccountStatistics',
@@ -43,6 +44,13 @@ export default defineComponent({
     const printInitialAmount = ref(0);
     const printThisMonthChangeAmount = ref(0);
     const printCurrentAmount = ref(0);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: t('reports.account.title'),
       api: getAccountStatistics,
@@ -74,9 +82,9 @@ export default defineComponent({
       return [
         {
           _index: 'Total',
-          initialAmount: `￥${XEUtils.commafy(XEUtils.toNumber(initialAmount), { digits: 2 })}`,
-          thisMonthChangeAmount: `￥${XEUtils.commafy(XEUtils.toNumber(thisMonthChangeAmount), { digits: 2 })}`,
-          currentAmount: `￥${XEUtils.commafy(XEUtils.toNumber(currentAmount), { digits: 2 })}`
+          initialAmount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(initialAmount), { digits: 2 })}`,
+          thisMonthChangeAmount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(thisMonthChangeAmount), { digits: 2 })}`,
+          currentAmount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(currentAmount), { digits: 2 })}`
         },
       ];
     }
@@ -118,9 +126,9 @@ export default defineComponent({
       printTableData.value.push({
         accountName: t('reports.account.table.total'),
         accountNumber: '',
-        initialAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printInitialAmount.value), { digits: 2 })}`,
-        thisMonthChangeAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printThisMonthChangeAmount.value), { digits: 2 })}`,
-        currentAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printCurrentAmount.value), { digits: 2 })}`
+        initialAmount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printInitialAmount.value), { digits: 2 })}`,
+        thisMonthChangeAmount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printThisMonthChangeAmount.value), { digits: 2 })}`,
+        currentAmount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printCurrentAmount.value), { digits: 2 })}`
       });
       printJS({
         documentTitle: "EAIRP " + t('reports.account.detail'),

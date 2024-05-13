@@ -33,6 +33,7 @@ import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'CustomerBill',
@@ -51,6 +52,13 @@ export default defineComponent({
     const printTotalQuarterArrears = ref(0);
     const printTotalQuarterReceivable = ref(0);
     const printRemainingReceivableArrears = ref(0);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable, {reload, getForm, getDataSource}] = useTable({
       title: t('reports.customerBill.title'),
       api: getCustomerBill,
@@ -89,13 +97,13 @@ export default defineComponent({
       return [
         {
           _index: t('reports.customerBill.table.total'),
-          firstQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterReceivable), {digits: 2})}`,
-          secondQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterReceivable), {digits: 2})}`,
-          thirdQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterReceivable), {digits: 2})}`,
-          fourthQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(fourthQuarterReceivable), {digits: 2})}`,
-          totalQuarterArrears: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterArrears), {digits: 2})}`,
-          totalQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(totalQuarterReceivable), {digits: 2})}`,
-          remainingReceivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(remainingReceivableArrears), {digits: 2})}`
+          firstQuarterReceivable: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(firstQuarterReceivable), {digits: 2})}`,
+          secondQuarterReceivable: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(secondQuarterReceivable), {digits: 2})}`,
+          thirdQuarterReceivable: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(thirdQuarterReceivable), {digits: 2})}`,
+          fourthQuarterReceivable: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(fourthQuarterReceivable), {digits: 2})}`,
+          totalQuarterArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(totalQuarterArrears), {digits: 2})}`,
+          totalQuarterReceivable: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(totalQuarterReceivable), {digits: 2})}`,
+          remainingReceivableArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(remainingReceivableArrears), {digits: 2})}`
         },
       ];
     }
@@ -137,13 +145,13 @@ export default defineComponent({
     function primaryPrint() {
       const printColumns = customerBillColumns.filter(item => item.dataIndex !== 'customerId');
       printTableData.value.push({
-        firstQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printFirstQuarterReceivable.value), {digits: 2})}`,
-        secondQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printSecondQuarterReceivable.value), {digits: 2})}`,
-        thirdQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printThirdQuarterReceivable.value), {digits: 2})}`,
-        fourthQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printFourthQuarterReceivable.value), {digits: 2})}`,
-        totalQuarterArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalQuarterArrears.value), {digits: 2})}`,
-        totalQuarterReceivable: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalQuarterReceivable.value), {digits: 2})}`,
-        remainingReceivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printRemainingReceivableArrears.value), {digits: 2})}`,
+        firstQuarterReceivable: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printFirstQuarterReceivable.value), {digits: 2})}`,
+        secondQuarterReceivable: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printSecondQuarterReceivable.value), {digits: 2})}`,
+        thirdQuarterReceivable: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printThirdQuarterReceivable.value), {digits: 2})}`,
+        fourthQuarterReceivable: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printFourthQuarterReceivable.value), {digits: 2})}`,
+        totalQuarterArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printTotalQuarterArrears.value), {digits: 2})}`,
+        totalQuarterReceivable: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printTotalQuarterReceivable.value), {digits: 2})}`,
+        remainingReceivableArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printRemainingReceivableArrears.value), {digits: 2})}`,
         customerName: t('reports.customerBill.table.total'),
         contactName: '',
         contactPhone: '',

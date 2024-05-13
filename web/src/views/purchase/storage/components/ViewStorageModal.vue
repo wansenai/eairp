@@ -46,7 +46,7 @@
               }"
             />
             <a-statistic :title="t('purchase.storage.view.receiptAmount')"
-                         prefix="￥"
+                         :prefix="amountSymbol"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="paymentLastAmount"/>
           </div>
@@ -74,6 +74,7 @@ import {
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'ViewPurchaseStorageModal',
@@ -103,6 +104,13 @@ export default defineComponent({
     const status = ref();
     const [viewOrderReceiptModal, {openModal: openViewOrderModal}] = useModal();
     const tableData = ref([]);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable] = useTable({
       title: t('purchase.storage.view.title'),
       columns: purchaseOrderTableColumns,
@@ -216,7 +224,8 @@ export default defineComponent({
       viewOrderReceiptModal,
       viewOrderReceipt,
       exportTable,
-      primaryPrint
+      primaryPrint,
+      amountSymbol
     };
   },
 });

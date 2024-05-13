@@ -25,6 +25,7 @@ import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'StorageSummaryStatistics',
@@ -35,6 +36,13 @@ export default defineComponent({
     const {createMessage} = useMessage();
     const printStorageNumber = ref(0);
     const printStorageAmount = ref(0);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable, {reload, getForm, getDataSource}] = useTable({
       title: t('reports.storageSummary.title'),
       api: getStorageSummary,
@@ -64,7 +72,7 @@ export default defineComponent({
         {
           _index: t('reports.storageSummary.table.total'),
           storageNumber: storageNumber,
-          storageAmount: `￥${XEUtils.commafy(XEUtils.toNumber(storageAmount), {digits: 2})}`,
+          storageAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(storageAmount), {digits: 2})}`,
         },
       ];
     }
@@ -100,7 +108,7 @@ export default defineComponent({
     function primaryPrint() {
       printTableData.value.push({
         storageNumber: printStorageNumber.value,
-        storageAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printStorageAmount.value), {digits: 2})}`,
+        storageAmount: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printStorageAmount.value), {digits: 2})}`,
         productBarcode: t('reports.storageSummary.table.total'),
         warehouseName: '',
         productName: '',

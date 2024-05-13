@@ -194,6 +194,7 @@ import localeData from "dayjs/plugin/localeData";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import {CustomerResp} from "@/api/basic/model/customerModel";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -272,7 +273,13 @@ export default defineComponent({
     const financialPersonalList = ref<OperatorResp[]>([]);
     const accountList = ref<AccountResp[]>([]);
     const customerList = ref<CustomerResp[]>([]);
-
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -348,8 +355,8 @@ export default defineComponent({
         collectionFormState.collectionAccountId = data.collectionAccountId
         collectionFormState.financialPersonId = data.financialPersonId
         collectionFormState.discountAmount = data.discountAmount
-        collectionFormState.totalCollectionAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.totalCollectionAmount), { digits: 2 })}`
-        collectionFormState.actualCollectionAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.actualCollectionAmount), { digits: 2 })}`
+        collectionFormState.totalCollectionAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.totalCollectionAmount), { digits: 2 })}`
+        collectionFormState.actualCollectionAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.actualCollectionAmount), { digits: 2 })}`
         // file
         fileList.value = data.files.map(item => ({
           id: item.id,
@@ -442,8 +449,8 @@ export default defineComponent({
         }
         dataArray.push(data)
       })
-      collectionFormState.totalCollectionAmount = collectionFormState.totalCollectionAmount.toString().replace(/,/g, '').replace(/￥/g, '')
-      collectionFormState.actualCollectionAmount = collectionFormState.actualCollectionAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      collectionFormState.totalCollectionAmount = collectionFormState.totalCollectionAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
+      collectionFormState.actualCollectionAmount = collectionFormState.actualCollectionAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdateCollectionReq = {
         ...collectionFormState,
         tableData: dataArray,
@@ -558,7 +565,7 @@ export default defineComponent({
     }
 
     watch(getThisCollectionAmount,(newValue, oldValue) => {
-      if(oldValue !== '￥0.00') {
+      if(oldValue !== amountSymbol.value + '0.00') {
         collectionFormState.totalCollectionAmount = newValue
         collectionFormState.actualCollectionAmount = newValue
         discountAmountChange()
@@ -568,10 +575,10 @@ export default defineComponent({
     function discountAmountChange() {
       // 获取合计收款金额 和优惠金额 计算实际收款金额
       // 实际收款金额 = 合计收款金额 - 优惠金额
-      const totalCollectionAmount = collectionFormState.totalCollectionAmount.toString().replace(/,/g, '').replace(/￥/g, '')
-      const discountAmount = collectionFormState.discountAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      const totalCollectionAmount = collectionFormState.totalCollectionAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
+      const discountAmount = collectionFormState.discountAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const actualCollectionAmount = XEUtils.toNumber(totalCollectionAmount) - XEUtils.toNumber(discountAmount)
-      collectionFormState.actualCollectionAmount = `￥${XEUtils.commafy(actualCollectionAmount, { digits: 2 })}`
+      collectionFormState.actualCollectionAmount = amountSymbol.value + `${XEUtils.commafy(actualCollectionAmount, { digits: 2 })}`
     }
 
     return {

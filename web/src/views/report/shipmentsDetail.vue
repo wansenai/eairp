@@ -37,6 +37,7 @@ import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'ShipmentsDetailStatistics',
@@ -51,6 +52,13 @@ export default defineComponent({
     const printProductNumber = ref(0);
     const printAmount = ref(0);
     const printTaxAmount = ref(0);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: t('reports.shipmentsDetail.title'),
       api: getShipmentsDetail,
@@ -82,8 +90,8 @@ export default defineComponent({
         {
           _index: t('reports.shipmentsDetail.table.total'),
           productNumber: productNumber,
-          amount: `￥${XEUtils.commafy(XEUtils.toNumber(amount), { digits: 2 })}`,
-          taxAmount: `￥${XEUtils.commafy(XEUtils.toNumber(taxAmount), { digits: 2 })}`
+          amount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(amount), { digits: 2 })}`,
+          taxAmount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(taxAmount), { digits: 2 })}`
         },
       ];
     }
@@ -134,8 +142,8 @@ export default defineComponent({
     function primaryPrint() {
       printTableData.value.push({
         productNumber: printProductNumber.value,
-        amount: `￥${XEUtils.commafy(XEUtils.toNumber(printAmount.value), { digits: 2 })}`,
-        taxAmount: `￥${XEUtils.commafy(XEUtils.toNumber(printTaxAmount.value), { digits: 2 })}`,
+        amount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printAmount.value), { digits: 2 })}`,
+        taxAmount:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printTaxAmount.value), { digits: 2 })}`,
         receiptNumber: t('reports.shipmentsDetail.table.total'),
         type: '',
         name: '',

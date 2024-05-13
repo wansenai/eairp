@@ -41,7 +41,7 @@
               }"
             />
             <a-statistic :title="t('financial.payment.table.totalPayment')"
-                         prefix="￥"
+                         :prefix="amountSymbol"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="totalPaymentAmount"/>
           </div>
@@ -67,6 +67,7 @@ import {paymentReceiptTableColumns} from "@/views/financial/payment/payment.data
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 export default defineComponent({
   name: 'ViewExpenseModal',
   components: {
@@ -90,6 +91,13 @@ export default defineComponent({
     const remark = ref('')
     const tableData = ref([]);
     const status = ref(-1);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable] = useTable({
       title: t('financial.payment.receiptDetail'),
       columns: paymentReceiptTableColumns,
@@ -186,7 +194,8 @@ export default defineComponent({
       getTitle,
       handleSubmit,
       exportTable,
-      primaryPrint
+      primaryPrint,
+      amountSymbol
     };
   },
 });

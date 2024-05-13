@@ -3,6 +3,15 @@ import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
 import {useI18n} from "@/hooks/web/useI18n";
+import {useLocaleStore} from "@/store/modules/locale";
+
+const amountSymbol = ref<string>('')
+const localeStore = useLocaleStore().getLocale;
+if(localeStore === 'zh_CN') {
+    amountSymbol.value = '￥'
+} else if (localeStore === 'en') {
+    amountSymbol.value = '$'
+}
 
 export const { t } = useI18n();
 
@@ -88,8 +97,8 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
                     return t('financial.income.view.total')
                 }
                 if (['incomeExpenseAmount', 'rate'].includes(column.field)) {
-                    incomeFormState.incomeAmount = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
-                    return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    incomeFormState.incomeAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    return amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
                 return ''
             })

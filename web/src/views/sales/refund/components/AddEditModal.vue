@@ -279,6 +279,7 @@ import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -376,6 +377,13 @@ export default defineComponent({
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
     const warehouseLabelList =  ref<any[]>([]);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     function handleCancelModal() {
       clearData();
       open.value = false;
@@ -517,7 +525,7 @@ export default defineComponent({
         saleRefundFormState.operatorIds = data.operatorIds
         saleRefundFormState.refundOfferRate = data.refundOfferRate
         saleRefundFormState.refundOfferAmount = data.refundOfferAmount
-        saleRefundFormState.refundLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(data.refundLastAmount), { digits: 2 })}`
+        saleRefundFormState.refundLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.refundLastAmount), { digits: 2 })}`
         saleRefundFormState.otherReceipt = data.otherReceipt
         saleRefundFormState.otherAmount = data.otherAmount
         saleRefundFormState.thisRefundAmount = data.thisRefundAmount
@@ -764,9 +772,9 @@ export default defineComponent({
         saleRefundFormState.multipleAccountAmounts = []
       }
 
-      saleRefundFormState.thisRefundAmount = saleRefundFormState.thisRefundAmount.toString().replace(/,/g, '').replace(/￥/g, '');
-      saleRefundFormState.refundLastAmount = saleRefundFormState.refundLastAmount.replace(/,/g, '').replace(/￥/g, '')
-      saleRefundFormState.thisArrearsAmount = saleRefundFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(/￥/g, '')
+      saleRefundFormState.thisRefundAmount = saleRefundFormState.thisRefundAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '');
+      saleRefundFormState.refundLastAmount = saleRefundFormState.refundLastAmount.replace(/,/g, '').replace(amountSymbol.value, '')
+      saleRefundFormState.thisArrearsAmount = saleRefundFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
 
       const params: AddOrUpdateReceiptSaleRefundReq = {
         ...saleRefundFormState,
@@ -856,8 +864,8 @@ export default defineComponent({
         tableData.forEach(item => {
           total += item.taxTotalPrice
         })
-        saleRefundFormState.refundLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
-        saleRefundFormState.thisRefundAmount = `￥${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
+        saleRefundFormState.refundLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
+        saleRefundFormState.thisRefundAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(total), { digits: 2 })}`
       }
     }
 
@@ -970,7 +978,7 @@ export default defineComponent({
 
     function discountRateChange() {
       const price = getTaxTotalPrice.value;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const discountRate = saleRefundFormState.refundOfferRate
       const discountAmount = discountLastAmount * discountRate / 100
       const otherAmount = saleRefundFormState.otherAmount
@@ -979,21 +987,21 @@ export default defineComponent({
 
       saleRefundFormState.thisArrearsAmount = 0
       saleRefundFormState.refundOfferAmount = Number(discountAmount.toFixed(2))
-      saleRefundFormState.refundLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
-      saleRefundFormState.thisRefundAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
+      saleRefundFormState.refundLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleRefundFormState.thisRefundAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
 
     }
 
     function discountAmountChange() {
       const price = getTaxTotalPrice.value;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const discountAmount = saleRefundFormState.refundOfferAmount
       const otherAmount = saleRefundFormState.otherAmount
       const lastAmount = Number((discountLastAmount - discountAmount));
       saleRefundFormState.thisArrearsAmount = 0
       saleRefundFormState.refundOfferAmount = Number(discountAmount.toFixed(2))
-      saleRefundFormState.refundLastAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
-      saleRefundFormState.thisRefundAmount = `￥${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
+      saleRefundFormState.refundLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleRefundFormState.thisRefundAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(Number((lastAmount + otherAmount))), { digits: 2 })}`
       if (discountLastAmount) {
         const discountRate = discountAmount / discountLastAmount * 100
         saleRefundFormState.refundOfferRate = Number(discountRate.toFixed(2))
@@ -1005,21 +1013,21 @@ export default defineComponent({
     function otherAmountChange() {
       // 计算本次收款(thisRefundAmount) = 优惠金额 + 其他费用
       const price = saleRefundFormState.refundLastAmount;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const otherAmount = saleRefundFormState.otherAmount
       const lastAmount =  Number((discountLastAmount + otherAmount));
       saleRefundFormState.thisArrearsAmount = 0
-      saleRefundFormState.thisRefundAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleRefundFormState.thisRefundAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
     }
 
     function thisRefundAmountChange() {
       const price = saleRefundFormState.refundLastAmount;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(/￥/g, ''))
+      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
       const otherAmount = saleRefundFormState.otherAmount
       const thisRefundAmount = saleRefundFormState.thisRefundAmount
       const lastAmount = Number((discountLastAmount + otherAmount - thisRefundAmount));
 
-      saleRefundFormState.thisArrearsAmount = `￥${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
+      saleRefundFormState.thisArrearsAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(lastAmount), { digits: 2 })}`
     }
 
     const selectAccountChange = (value: number) => {

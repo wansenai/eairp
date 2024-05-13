@@ -39,7 +39,7 @@
               }"
             />
             <a-statistic :title="t('financial.income.table.incomeAmount')"
-                         prefix="￥"
+                         :prefix="amountSymbol"
                          :value-style="status === 1 ? { color: '#3f8600' } : { color: '#cf1322' }"
                          :value="incomeAmount"/>
           </div>
@@ -65,6 +65,7 @@ import {incomeReceiptTableColumns} from "@/views/financial/income/income.data";
 import printJS from "print-js";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'ViewIncomeModal',
@@ -97,6 +98,13 @@ export default defineComponent({
       canResize: false,
     });
     const getTitle = ref('单据详情');
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1000, showOkBtn: false});
       const res = await getIncomeDetailById(data.id);
@@ -174,7 +182,8 @@ export default defineComponent({
       getTitle,
       handleSubmit,
       exportTable,
-      primaryPrint
+      primaryPrint,
+      amountSymbol
     };
   },
 });

@@ -30,6 +30,7 @@ import printJS from "print-js";
 import {useMessage} from "@/hooks/web/useMessage";
 import {getTimestamp} from "@/utils/dateUtil";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'SupplierBill',
@@ -47,6 +48,13 @@ export default defineComponent({
     const printTotalArrears = ref(0);
     const printRemainingPaymentArrears = ref(0);
     const [handleRegister, {openModal}] = useModal();
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
       title: t('reports.supplierBill.title'),
       api: getSupplierBill,
@@ -85,13 +93,13 @@ export default defineComponent({
       return [
         {
           _index: t('reports.supplierBill.table.total'),
-          firstQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(firstQuarterPayment), { digits: 2 })}`,
-          secondQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(secondQuarterPayment), { digits: 2 })}`,
-          thirdQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(thirdQuarterPayment), { digits: 2 })}`,
-          fourthQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(fourthQuarterPayment), { digits: 2 })}`,
-          totalPayment:`￥${XEUtils.commafy(XEUtils.toNumber(totalPayment), { digits: 2 })}`,
-          totalArrears: `￥${XEUtils.commafy(XEUtils.toNumber(totalArrears), { digits: 2 })}`,
-          remainingPaymentArrears: `￥${XEUtils.commafy(XEUtils.toNumber(remainingPaymentArrears), { digits: 2 })}`
+          firstQuarterPayment: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(firstQuarterPayment), { digits: 2 })}`,
+          secondQuarterPayment: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(secondQuarterPayment), { digits: 2 })}`,
+          thirdQuarterPayment: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(thirdQuarterPayment), { digits: 2 })}`,
+          fourthQuarterPayment: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(fourthQuarterPayment), { digits: 2 })}`,
+          totalPayment: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(totalPayment), { digits: 2 })}`,
+          totalArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(totalArrears), { digits: 2 })}`,
+          remainingPaymentArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(remainingPaymentArrears), { digits: 2 })}`
         },
       ];
     }
@@ -131,13 +139,13 @@ export default defineComponent({
 
     function primaryPrint() {
       printTableData.value.push({
-        firstQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printFirstQuarterPayment.value), { digits: 2 })}`,
-        secondQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printSecondQuarterPayment.value), { digits: 2 })}`,
-        thirdQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printThirdQuarterPayment.value), { digits: 2 })}`,
-        fourthQuarterPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printFourthQuarterPayment.value), { digits: 2 })}`,
-        totalPayment:`￥${XEUtils.commafy(XEUtils.toNumber(printTotalPayment.value), { digits: 2 })}`,
-        totalArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printTotalArrears.value), { digits: 2 })}`,
-        remainingPaymentArrears: `￥${XEUtils.commafy(XEUtils.toNumber(printRemainingPaymentArrears.value), { digits: 2 })}`,
+        firstQuarterPayment: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printFirstQuarterPayment.value), { digits: 2 })}`,
+        secondQuarterPayment: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printSecondQuarterPayment.value), { digits: 2 })}`,
+        thirdQuarterPayment: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printThirdQuarterPayment.value), { digits: 2 })}`,
+        fourthQuarterPayment: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printFourthQuarterPayment.value), { digits: 2 })}`,
+        totalPayment: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printTotalPayment.value), { digits: 2 })}`,
+        totalArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printTotalArrears.value), { digits: 2 })}`,
+        remainingPaymentArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(printRemainingPaymentArrears.value), { digits: 2 })}`,
         supplierName: t('reports.supplierBill.table.total'),
         contactName: '',
         contactPhone: '',

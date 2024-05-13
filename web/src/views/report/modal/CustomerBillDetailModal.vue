@@ -35,6 +35,7 @@ import {getTimestamp} from "@/utils/dateUtil";
 import {useMessage} from "@/hooks/web/useMessage";
 import printJS from "print-js";
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export default defineComponent({
   name: 'CustomerBillDetailModal',
@@ -48,6 +49,13 @@ export default defineComponent({
     const getTitle = ref(t('reports.other.customerArrearsDetail'));
     const customerId = ref('');
     const printTableData = ref<any[]>([]);
+    const amountSymbol = ref<string>('')
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      amountSymbol.value = '￥'
+    } else if (localeStore === 'en') {
+      amountSymbol.value = '$'
+    }
     const [handleSaleShipmentsModal, {openModal: openSaleShipmentsModal}] = useModal();
     const [handleSaleRefundModal, {openModal: openSaleRefundModal}] = useModal();
     const [registerTable, { reload, getForm, getDataSource }] = useTable({
@@ -83,9 +91,9 @@ export default defineComponent({
       return [
         {
           _index: t('reports.customerBill.table.total'),
-          thisReceiptArrears:`￥${XEUtils.commafy(XEUtils.toNumber(thisReceiptArrears), { digits: 2 })}`,
-          receivableArrears:`￥${XEUtils.commafy(XEUtils.toNumber(receivableArrears), { digits: 2 })}`,
-          receivedArrears:`￥${XEUtils.commafy(XEUtils.toNumber(receivedArrears), { digits: 2 })}`,
+          thisReceiptArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(thisReceiptArrears), { digits: 2 })}`,
+          receivableArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(receivableArrears), { digits: 2 })}`,
+          receivedArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(receivedArrears), { digits: 2 })}`,
         },
       ];
     }
@@ -138,9 +146,9 @@ export default defineComponent({
         productInfo: '',
         receiptDate: '',
         operator: '',
-        thisReceiptArrears:  `￥${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.thisReceiptArrears, 0)), { digits: 2 })}`,
-        receivableArrears: `￥${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.receivableArrears, 0)), { digits: 2 })}`,
-        receivedArrears: `￥${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.receivedArrears, 0)), { digits: 2 })}`,
+        thisReceiptArrears:  amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.thisReceiptArrears, 0)), { digits: 2 })}`,
+        receivableArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.receivableArrears, 0)), { digits: 2 })}`,
+        receivedArrears: amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(getDataSource().reduce((prev, next) => prev + next.receivedArrears, 0)), { digits: 2 })}`,
       });
       printJS({
         documentTitle: "EAIRP " + t('reports.other.customerArrearsDetail'),

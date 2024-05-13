@@ -3,8 +3,16 @@ import XEUtils from "xe-utils";
 import {VxeGridInstance, VxeGridProps} from "vxe-table";
 import {Dayjs} from "dayjs";
 import {useI18n} from "@/hooks/web/useI18n";
+import {useLocaleStore} from "@/store/modules/locale";
 
 export const { t } = useI18n();
+const amountSymbol = ref<string>('')
+const localeStore = useLocaleStore().getLocale;
+if(localeStore === 'zh_CN') {
+    amountSymbol.value = '￥'
+} else if (localeStore === 'en') {
+    amountSymbol.value = '$'
+}
 
 export interface RowVO {
     [key: string]: any,
@@ -97,10 +105,10 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
                     return t('financial.collection.form.total')
                 }
                 if (['thisCollectionAmount', 'rate'].includes(column.field)) {
-                    collectionFormState.actualCollectionAmount = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
-                    collectionFormState.totalCollectionAmount = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
-                    getThisCollectionAmount.value = `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
-                    return `￥${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    collectionFormState.actualCollectionAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    collectionFormState.totalCollectionAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    getThisCollectionAmount.value = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
+                    return amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(sumNum(data, column.field)), { digits: 2 })}`
                 }
                 return ''
             })
