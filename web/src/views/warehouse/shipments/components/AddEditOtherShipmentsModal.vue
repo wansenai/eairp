@@ -1,5 +1,5 @@
 <template>
-  <a-modal
+  <BasicModal
       :title="title"
       :width="width"
       :confirm-loading="confirmLoading"
@@ -7,9 +7,11 @@
       :keyboard="true"
       switchHelp
       switchFullscreen
+      :height="630"
+      :maxHeight="660"
       @cancel="handleCancelModal"
       v-model:open="open"
-      style="left: 5%; height: 95%;">
+      style="top: 30px; left: 20px">
     <template #footer>
       <a-button @click="handleCancelModal">{{ t('warehouse.otherShipments.form.cancel') }}</a-button>
       <a-button v-if="checkFlag" :loading="confirmLoading" @click="handleOk(1)">{{ t('warehouse.otherShipments.form.saveApprove') }}</a-button>
@@ -120,7 +122,7 @@
         </a-row>
       </a-form>
     </a-spin>
-  </a-modal>
+  </BasicModal>
   <CustomerModal @register="supplierModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
 </template>
@@ -175,6 +177,7 @@ import SelectProductModal from "@/views/product/info/components/SelectProductMod
 import CustomerModal from "@/views/basic/customer/components/CustomerModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {useI18n} from "vue-i18n";
+import BasicModal from "@/components/Modal/src/BasicModal.vue";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -193,6 +196,7 @@ export default defineComponent({
   name: 'AddEditPaymentModal',
   emits: ['success', 'cancel', 'error'],
   components: {
+    BasicModal,
     CustomerModal,
     SelectProductModal,
     'a-modal': Modal,

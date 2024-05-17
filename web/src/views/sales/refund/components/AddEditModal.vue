@@ -1,5 +1,5 @@
 <template>
-  <a-modal
+  <BasicModal
       :title="title"
       :width="width"
       :confirm-loading="confirmLoading"
@@ -9,9 +9,11 @@
       :keyboard="true"
       switchHelp
       switchFullscreen
+      :height="690"
+      :maxHeight="760"
       @cancel="handleCancelModal"
       v-model:open="open"
-      style="left: 5%; height: 95%;">
+      style="top: 20px; left: 20px">
     <template #footer>
       <a-button @click="handleCancelModal" v-text="t('sales.refund.form.cancel')"/>
       <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)" v-text="t('sales.refund.form.saveApprove')"/>
@@ -177,8 +179,6 @@
                   <a-input placeholder="请输入本次欠款金额" :readOnly="true" v-model:value="saleRefundFormState.thisArrearsAmount"/>
                 </a-form-item>
               </a-col>
-            </a-row>
-            <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.view.salesPerson')" data-step="3"
                              data-title="销售人员"
@@ -212,7 +212,7 @@
         </a-row>
       </a-form>
     </a-spin>
-  </a-modal>
+  </BasicModal>
   <CustomerModal @register="customerModal" @success="handleCustomerModalSuccess"/>
   <FinancialAccountModal @register="accountModal" @success="handleAccountModalSuccess"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
@@ -280,6 +280,7 @@ import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
+import BasicModal from "@/components/Modal/src/BasicModal.vue";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -298,6 +299,7 @@ export default defineComponent({
   name: 'SaleRefundAddEditModal',
   emits: ['success', 'cancel', 'error'],
   components: {
+    BasicModal,
     MultipleAccountsModal,
     FinancialAccountModal,
     LinkReceiptModal,

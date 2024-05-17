@@ -1,5 +1,5 @@
 <template>
-  <a-modal
+  <BasicModal
       :title="title"
       :width="width"
       :confirm-loading="confirmLoading"
@@ -7,9 +7,12 @@
       :keyboard="true"
       switchHelp
       switchFullscreen
+      :height="650"
+      :maxHeight="750"
       @cancel="handleCancelModal"
       v-model:open="open"
-      style="left: 5%; height: 95%;">
+      width="70%"
+      style="top: 20px;">
     <template #footer>
       <a-button @click="handleCancelModal" v-text="t('purchase.order.form.cancel')" />
       <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)" v-text="t('purchase.order.form.saveApprove')" />
@@ -116,6 +119,12 @@
                   <a-input v-model:value="purchaseOrderFormState.discountLastAmount" :readOnly="true"/>
                 </a-form-item>
               </a-col>
+              <a-col :lg="6" :md="12" :sm="24" >
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.order.form.paymentDeposit')" data-step="2"
+                             data-title="支付定金">
+                  <a-input-number v-model:value="purchaseOrderFormState.deposit" />
+                </a-form-item>
+              </a-col>
             </a-row>
             <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
@@ -132,14 +141,6 @@
                   <a-button type="default" :icon="h(AccountBookTwoTone)" style="font-size: small; margin-left: 5px" v-show="manyAccountBtnStatus" @click="handleManyAccount"/>
                 </a-tooltip>
               </a-col>
-              <a-col :lg="6" :md="12" :sm="24" >
-                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.order.form.paymentDeposit')" data-step="2"
-                             data-title="支付定金">
-                  <a-input-number v-model:value="purchaseOrderFormState.deposit" />
-                </a-form-item>
-              </a-col>
-            </a-row>
-            <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.order.form.table.annex')" data-step="9"
                              data-title="附件"
@@ -161,7 +162,7 @@
         </a-row>
       </a-form>
     </a-spin>
-  </a-modal>
+  </BasicModal>
   <SupplierModal @register="supplierModal" @success="handleSupplierModalSuccess"/>
   <FinancialAccountModal @register="accountModal"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
@@ -216,7 +217,7 @@ import SelectProductModal from "@/views/product/info/components/SelectProductMod
 import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
 import {getWarehouseList} from "@/api/basic/warehouse";
 import {AddOrUpdateReceiptReq, PurchaseData} from "@/api/purchase/model/orderModel";
-import {FileData} from '/@/api/retail/model/shipmentsModel';
+import {FileData} from '@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
@@ -226,6 +227,7 @@ import {addSupplier, getSupplierList} from "@/api/basic/supplier";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
+import BasicModal from "@/components/Modal/src/BasicModal.vue";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -245,6 +247,7 @@ export default defineComponent({
   methods: {addSupplier},
   emits: ['success', 'cancel', 'error'],
   components: {
+    BasicModal,
     MultipleAccountsModal,
     FinancialAccountModal,
     SupplierModal,

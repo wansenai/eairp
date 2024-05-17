@@ -1,5 +1,5 @@
 <template>
-  <a-modal
+  <BasicModal
       :title="title"
       :width="width"
       :confirm-loading="confirmLoading"
@@ -7,9 +7,11 @@
       :keyboard="true"
       switchHelp
       switchFullscreen
+      :height="690"
+      :maxHeight="760"
       @cancel="handleCancelModal"
       v-model:open="open"
-      style="left: 5%; height: 95%;">
+      style="top: 30px; left: 20px">
     <template #footer>
       <a-button @click="handleCancelModal" v-text="t('financial.collection.form.cancel')"/>
       <a-button v-if="checkFlag" :loading="confirmLoading" @click="handleOk(1)" v-text="t('financial.collection.form.saveApprove')"/>
@@ -134,7 +136,7 @@
         </a-row>
       </a-form>
     </a-spin>
-  </a-modal>
+  </BasicModal>
   <OperatorModal @register="operatorModal"/>
   <SaleArrearsModal @register="saleArrearsModal" @handleReceiptSuccess="handleReceiptSuccess"/>
 </template>
@@ -195,6 +197,7 @@ import {AccountResp} from "@/api/financial/model/accountModel";
 import {CustomerResp} from "@/api/basic/model/customerModel";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
+import BasicModal from "@/components/Modal/src/BasicModal.vue";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -213,6 +216,7 @@ export default defineComponent({
   name: 'AddEditCollectionModal',
   emits: ['success', 'cancel', 'error'],
   components: {
+    BasicModal,
     OperatorModal,
     FinancialAccountModal,
     SaleArrearsModal,

@@ -1,5 +1,5 @@
 <template>
-  <a-modal
+  <BasicModal
       :title="title"
       :width="width"
       :confirm-loading="confirmLoading"
@@ -9,9 +9,11 @@
       :forceRender="true"
       switchHelp
       switchFullscreen
+      :height="600"
+      :maxHeight="660"
       v-model:open="open"
       @cancel="handleCancelModal"
-      style="left: 5%; height: 75%;">
+      style="top: 30px; left: 20px">
     <template #footer >
       <a-button @click="handleCancelModal" v-text="t('financial.advance.form.cancel')"/>
       <a-button :loading="confirmLoading" @click="handleOk(1)" v-text="t('financial.advance.form.saveApprove')"/>
@@ -115,8 +117,6 @@
               <a-input placeholder="请输入收款金额" v-model:value="formState.collectedAmount" :readOnly="true"/>
             </a-form-item>
           </a-col>
-        </a-row>
-        <a-row class="form-row" :gutter="24">
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.advance.form.annex')" data-step="9"
                          data-title="附件"
@@ -136,7 +136,7 @@
         </a-row>
       </a-form>
     </a-spin>
-  </a-modal>
+  </BasicModal>
 </template>
 
 <script lang="ts">
@@ -180,6 +180,7 @@ import {AddOrUpdateAdvanceReq, AdvanceChargeData} from "@/api/financial/model/ad
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import {useI18n} from "vue-i18n";
+import BasicModal from "@/components/Modal/src/BasicModal.vue";
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('zh-cn');
@@ -187,6 +188,7 @@ export default defineComponent({
   name: 'AdvanceChargeModal',
   emits: ['success', 'cancel', 'error'],
   components: {
+    BasicModal,
     'a-modal': Modal,
     'a-upload': Upload,
     'a-button': Button,
