@@ -1,5 +1,5 @@
 <template>
-  <a-modal
+  <BasicModal
       :title="title"
       :width="width"
       :confirm-loading="confirmLoading"
@@ -7,9 +7,11 @@
       :keyboard="true"
       switchHelp
       switchFullscreen
+      :height="650"
+      :maxHeight="750"
       @cancel="handleCancelModal"
       v-model:open="open"
-      style="left: 5%; height: 95%;">
+      style="top: 20px;">
     <template #footer>
       <a-button @click="handleCancelModal" v-text="t('purchase.refund.form.cancel')" />
       <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)" v-text="t('purchase.refund.form.saveApprove')" />
@@ -175,8 +177,6 @@
                   <a-input :readOnly="true" v-model:value="purchaseRefundFormState.thisArrearsAmount"/>
                 </a-form-item>
               </a-col>
-            </a-row>
-            <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.refund.form.table.annex')" data-step="9"
                              data-title="附件"
@@ -198,7 +198,7 @@
         </a-row>
       </a-form>
     </a-spin>
-  </a-modal>
+  </BasicModal>
   <SupplierModal @register="supplierModal" @success="handleSupplierModalSuccess"/>
   <FinancialAccountModal @register="accountModal" @success="handleAccountModalSuccess"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
@@ -266,6 +266,7 @@ import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
+import BasicModal from "@/components/Modal/src/BasicModal.vue";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -285,6 +286,7 @@ export default defineComponent({
   methods: {addSupplier},
   emits: ['success', 'cancel', 'error'],
   components: {
+    BasicModal,
     LinkReceiptModal,
     MultipleAccountsModal,
     FinancialAccountModal,

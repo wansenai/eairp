@@ -1,5 +1,5 @@
 <template>
-  <a-modal
+  <BasicModal
       :title="title"
       :width="width"
       :confirm-loading="confirmLoading"
@@ -7,9 +7,11 @@
       :keyboard="true"
       switchHelp
       switchFullscreen
+      :height="630"
+      :maxHeight="660"
       @cancel="handleCancelModal"
       v-model:open="open"
-      style="left: 5%; height: 95%;">
+      style="top: 30px; left: 20px">
     <template #footer>
       <a-button @click="handleCancelModal">{{ t('warehouse.assemble.form.cancel') }}</a-button>
       <a-button v-if="checkFlag" :loading="confirmLoading" @click="handleOk(1)">{{ t('warehouse.assemble.form.saveApprove') }}</a-button>
@@ -100,7 +102,7 @@
         </a-row>
       </a-form>
     </a-spin>
-  </a-modal>
+  </BasicModal>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
 </template>
 
@@ -150,6 +152,7 @@ import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue";
 import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {useI18n} from "vue-i18n";
+import BasicModal from "@/components/Modal/src/BasicModal.vue";
 const VNodes = {
   props: {
     vnodes: {
@@ -168,6 +171,7 @@ export default defineComponent({
   name: 'AddEditAssembleModal',
   emits: ['success', 'cancel', 'error'],
   components: {
+    BasicModal,
     SelectProductModal,
     'a-modal': Modal,
     'a-upload': Upload,

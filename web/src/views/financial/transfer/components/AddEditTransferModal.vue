@@ -1,5 +1,5 @@
 <template>
-  <a-modal
+  <BasicModal
       :title="title"
       :width="width"
       :confirm-loading="confirmLoading"
@@ -7,9 +7,11 @@
       :keyboard="true"
       switchHelp
       switchFullscreen
+      :height="600"
+      :maxHeight="660"
       @cancel="handleCancelModal"
       v-model:open="open"
-      style="left: 5%; height: 95%;">
+      style="top: 30px; left: 20px">
     <template #footer>
       <a-button @click="handleCancelModal" v-text="t('financial.transfer.form.cancel')"/>
       <a-button v-if="checkFlag" :loading="confirmLoading" @click="handleOk(1)" v-text="t('financial.transfer.form.saveApprove')"/>
@@ -96,8 +98,6 @@
                   <a-input-number :placeholder="t('financial.transfer.form.inputPaymentAmount')" v-model:value="transferFormState.paymentAmount" readonly/>
                 </a-form-item>
               </a-col>
-            </a-row>
-            <a-row class="form-row" :gutter="24">
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.transfer.form.annex')" data-step="9"
                              data-title="附件"
@@ -119,7 +119,7 @@
         </a-row>
       </a-form>
     </a-spin>
-  </a-modal>
+  </BasicModal>
   <OperatorModal @register="operatorModal"/>
 </template>
 
@@ -175,6 +175,7 @@ import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
+import BasicModal from "@/components/Modal/src/BasicModal.vue";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -193,6 +194,7 @@ export default defineComponent({
   name: 'AddEditTransferModal',
   emits: ['success', 'cancel', 'error'],
   components: {
+    BasicModal,
     OperatorModal,
     FinancialAccountModal,
     'a-modal': Modal,

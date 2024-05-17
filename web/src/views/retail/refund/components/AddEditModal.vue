@@ -1,5 +1,5 @@
 <template>
-  <a-modal
+  <BasicModal
       :title="title"
       :width="width"
       :confirm-loading="confirmLoading"
@@ -9,9 +9,11 @@
       :keyboard="true"
       switchHelp
       switchFullscreen
+      :height="560"
+      :maxHeight="560"
       @cancel="handleCancelModal"
       v-model:open="open"
-      style="left: 5%; height: 95%;">
+      style="top: 20px; left: 20px">
     <template #footer>
       <a-button @click="handleCancelModal" v-text="t('retail.refund.form.cancel')" />
       <a-button v-if="checkFlag && isCanCheck" :loading="confirmLoading" @click="handleOk(1)" v-text="t('retail.refund.form.cancel')" />
@@ -175,7 +177,7 @@
         </a-row>
       </a-form>
     </a-spin>
-  </a-modal>
+  </BasicModal>
   <MemberModal @register="memberModal" @success="handleMemberModalSuccess"/>
   <FinancialAccountModal @register="accountModal" @success="handleAccountModalSuccess"/>
   <SelectProductModal @register="selectProductModal" @handleCheckSuccess="handleCheckSuccess"/>
@@ -240,6 +242,7 @@ import {FileData, ShipmentsData} from "@/api/retail/model/shipmentsModel";
 import LinkReceiptModal from "@/views/receipt/LinkReceiptModal.vue";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
+import BasicModal from "@/components/Modal/src/BasicModal.vue";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -258,6 +261,7 @@ export default defineComponent({
   name: 'AddEditModal',
   emits: ['success', 'cancel', 'error'],
   components: {
+    BasicModal,
     LinkReceiptModal,
     FinancialAccountModal,
     MemberModal,
