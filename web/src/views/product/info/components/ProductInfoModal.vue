@@ -1,5 +1,5 @@
 <template>
-  <a-modal
+  <BasicModal
       :title="title"
       :width="1300"
       :confirm-loading="confirmLoading"
@@ -7,10 +7,12 @@
       :id="prefixNo"
       switchHelp
       switchFullscreen
+      :height="690"
+      :maxHeight="760"
       v-model:open="open"
       @cancel="handleCancel"
       @ok="handleOk"
-      style="top:10%;height: 95%;">
+      style="top: 20px; left: 20px">
     <a-spin :spinning="confirmLoading">
       <a-form ref="productFormRef" :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol"
               style="margin-top: 20px; margin-right: 20px; margin-left: 20px">
@@ -336,7 +338,7 @@
         </a-tabs>
       </a-form>
     </a-spin>
-  </a-modal>
+  </BasicModal>
   <UnitModal @register="registerModal" @success="handleUnitSuccess"/>
 </template>
 
@@ -388,6 +390,7 @@ import {ProductAttributeListReq} from "@/api/product/model/productAttributeModel
 import {ProductAttributeModel, ProductStockModel, Unit} from "@/views/product/info/model/productInfoModel";
 import {meTable, stock, productInfo, formState} from "@/views/product/info/info.data";
 import {useI18n} from "vue-i18n";
+import BasicModal from "@/components/Modal/src/BasicModal.vue";
 
 const VNodes = defineComponent({
   props: {
@@ -405,6 +408,7 @@ export default defineComponent({
   name: 'ProductInfoModal',
   emits: ['success', 'cancel', 'error'],
   components: {
+    BasicModal,
     'a-modal': Modal,
     'a-upload': Upload,
     'a-button': Button,
