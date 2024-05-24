@@ -53,8 +53,8 @@
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.shipments.form.receiptNumber')" data-step="2"
                          data-title="单据编号"
-                         data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input v-model:value="saleShipmentsFormState.receiptNumber" :readOnly="true"/>
+                         data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号" :rules="[{ required: true}]">
+              <a-input v-model:value="saleShipmentsFormState.receiptNumber"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
@@ -255,7 +255,7 @@ import {
   RowVO,
   xGrid,
   tableData,
-  gridOptions, getTaxTotalPrice, formState,
+  gridOptions, getTaxTotalPrice,
 } from '/src/views/sales/model/addEditModel';
 import {getCustomerList} from "@/api/basic/customer";
 import {CustomerResp} from "@/api/basic/model/customerModel";
@@ -673,6 +673,10 @@ export default defineComponent({
       const table = xGrid.value
       if (!saleShipmentsFormState.customerId) {
         createMessage.warn(t('sales.shipments.form.inputCustomer'));
+        return;
+      }
+      if (!saleShipmentsFormState.receiptNumber) {
+        createMessage.warn(t('sales.order.form.inputReceiptNumber'));
         return;
       }
       if (saleShipmentsFormState.accountId === 0) {

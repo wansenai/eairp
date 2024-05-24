@@ -50,8 +50,8 @@
           <a-col :lg="7" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('warehouse.otherShipments.form.receiptNumber')" data-step="2"
                          data-title="单据编号"
-                         data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input :placeholder="t('warehouse.otherShipments.form.inputReceiptNumber')" v-model:value="otherShipmentFormState.receiptNumber" :readOnly="true"/>
+                         data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号" :rules="[{ required: true}]">
+              <a-input :placeholder="t('warehouse.otherShipments.form.inputReceiptNumber')" v-model:value="otherShipmentFormState.receiptNumber"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -408,6 +408,10 @@ export default defineComponent({
       }
       if (!otherShipmentFormState.receiptDate) {
         createMessage.warn(t('warehouse.otherShipments.form.inputReceiptDate'));
+        return;
+      }
+      if (!otherShipmentFormState.receiptNumber) {
+        createMessage.warn(t('sales.order.form.inputReceiptNumber'));
         return;
       }
       const table = xGrid.value

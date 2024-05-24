@@ -33,6 +33,7 @@ export default {
             receiptDate: '单据日期',
             inputReceiptDate: '请选择单据日期',
             receiptNumber: '单据编号',
+            inputReceiptNumber: '请输入单据编号',
             salesPerson: '销售人员',
             inputSalesPerson: '请选择销售人员',
             scanCodeData: '扫码录入数据',

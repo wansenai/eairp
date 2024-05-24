@@ -33,6 +33,7 @@ export default {
             receiptDate: 'Receipt date',
             inputReceiptDate: 'Please select receipt date',
             receiptNumber: 'Receipt number',
+            inputReceiptNumber: 'Please enter the receipt number',
             salesPerson: 'Sales Person',
             inputSalesPerson: 'Please select sales person',
             scanCodeData: 'Scan code to enter data',

@@ -38,6 +38,7 @@ export default {
             receiptDate: '单据日期',
             inputReceiptDate: '请选择单据日期',
             receiptNumber: '单据编号',
+            inputReceiptNumber: '请输入单据编号',
             collectionType: '收款方式',
             inputCollectionType: '请选择收款方式',
             scanCodeData: '扫码录入数据',

@@ -41,8 +41,8 @@
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.expense.form.receiptNumber')" data-step="2"
                          data-title="单据编号"
-                         data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号">
-              <a-input :placeholder="t('financial.expense.form.inputReceiptNumber')" v-model:value="expenseFormState.receiptNumber" :readOnly="true"/>
+                         data-intro="单据编号自动生成、自动累加、开头是单据类型的首字母缩写，累加的规则是每次打开页面会自动占用一个新的编号" :rules="[{ required: true}]">
+              <a-input :placeholder="t('financial.expense.form.inputReceiptNumber')" v-model:value="expenseFormState.receiptNumber"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
@@ -382,6 +382,10 @@ export default defineComponent({
       }
       if (!expenseFormState.receiptDate) {
         createMessage.warn(t('financial.expense.form.inputReceiptDate'));
+        return;
+      }
+      if (!expenseFormState.receiptNumber) {
+        createMessage.warn(t('sales.order.form.inputReceiptNumber'));
         return;
       }
       if (!expenseFormState.expenseAccountId) {
