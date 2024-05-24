@@ -40,8 +40,8 @@
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('financial.advance.form.receiptNumber')" data-step="2"
-                         data-title="单据编号">
-              <a-input :placeholder="t('financial.advance.form.inputReceiptNumber')" v-model:value="formState.receiptNumber" readOnly/>
+                         data-title="单据编号" :rules="[{ required: true}]">
+              <a-input :placeholder="t('financial.advance.form.inputReceiptNumber')" v-model:value="formState.receiptNumber"/>
             </a-form-item>
           </a-col>
           <a-col :lg="6" :md="12" :sm="24">
@@ -352,6 +352,10 @@ export default defineComponent({
       }
       if (!formState.receiptDate) {
         createMessage.warn(t('financial.advance.form.inputReceiptDate'));
+        return;
+      }
+      if (!formState.receiptNumber) {
+        createMessage.warn(t('sales.order.form.inputReceiptNumber'));
         return;
       }
       if (tableData.value.length === 0) {
