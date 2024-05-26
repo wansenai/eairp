@@ -143,12 +143,12 @@ export const TableColumns: BasicColumn[] = [
     {
         title: t('sales.order.form.table.barCode'),
         dataIndex: 'barCode',
-        width: 100,
+        width: 150,
     },
     {
         title: t('sales.order.form.table.name'),
         dataIndex: 'productName',
-        width: 120,
+        width: 150,
     },
     {
         title: t('sales.order.form.table.standard'),
@@ -156,7 +156,7 @@ export const TableColumns: BasicColumn[] = [
         width: 120,
     },
     {
-        title: t('sales.order.form.table.standard'),
+        title: t('sales.order.form.table.model'),
         dataIndex: 'productModel',
         width: 120,
     },
