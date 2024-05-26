@@ -83,7 +83,7 @@ Licensed under either of
 at your option.
 
 ## Community
-微信群: 请添加微信`wansensoft`备注ERP开源.
+微信群: 请添加微信`wansenai`备注ERP开源.
 
 ## Contribution
 We welcome every contributor, both in terms of code and documentation.
