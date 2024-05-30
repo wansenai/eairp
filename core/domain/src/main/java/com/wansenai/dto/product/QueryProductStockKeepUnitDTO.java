@@ -30,4 +30,6 @@ public class QueryProductStockKeepUnitDTO {
     private Long page;
 
     private Long pageSize;
+
+    private String keywords;
 }
