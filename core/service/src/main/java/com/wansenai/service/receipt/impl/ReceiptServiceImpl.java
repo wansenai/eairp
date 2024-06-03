@@ -1117,6 +1117,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     purchaseVo.setProductUnit(product.getProductUnit());
                     purchaseVo.setProductExtendInfo(productExtendInfo);
                 }
+                purchaseVo.setCreateTime(receiptPurchaseSub.getCreateTime());
                 if (purchaseVos.stream().noneMatch(matchPurchaseVo -> purchaseVo.getProductBarcode().equals(matchPurchaseVo.getProductBarcode())
                         && purchaseVo.getWarehouseName().equals(matchPurchaseVo.getWarehouseName()))) {
                     purchaseVos.add(purchaseVo);

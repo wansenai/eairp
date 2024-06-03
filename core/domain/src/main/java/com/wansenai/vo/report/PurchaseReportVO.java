@@ -20,6 +20,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -63,4 +64,8 @@ public class PurchaseReportVO {
     @JsonSerialize(using = BigDecimalSerializerBO.class)
     @ExcelExport(value = "实际采购金额")
     private BigDecimal purchaseLastAmount;
+
+    @ExcelExport(value = "采购时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime createTime;
 }
