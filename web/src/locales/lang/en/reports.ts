@@ -111,6 +111,7 @@ export default {
             refundQuantity: 'Refund Quantity',
             refundAmount: 'Refund Amount',
             actualAmount: 'Actual Amount',
+            purchaseDate: 'Purchase Date',
             total: 'Total',
         }
     },

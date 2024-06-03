@@ -111,6 +111,7 @@ export default {
             refundQuantity: '采购退货数量',
             refundAmount: '采购退货金额',
             actualAmount: '实际采购金额',
+            purchaseDate: '采购时间',
             total: '合计',
         }
     },

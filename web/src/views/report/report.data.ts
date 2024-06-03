@@ -41,7 +41,7 @@ export const productStockColumns: BasicColumn[] = [
     {
         title: t('reports.productStock.table.productName'),
         dataIndex: 'productName',
-        width: 120,
+        width: 350,
     },
     {
         title: t('reports.productStock.table.productCategory'),
@@ -52,26 +52,6 @@ export const productStockColumns: BasicColumn[] = [
         title: t('reports.productStock.table.standard'),
         dataIndex: 'productStandard',
         width: 120,
-    },
-    {
-        title: t('reports.productStock.table.model'),
-        dataIndex: 'productModel',
-        width: 120,
-    },
-    {
-        title: t('reports.productStock.table.weight'),
-        dataIndex: 'productWeight',
-        width: 80,
-    },
-    {
-        title: t('reports.productStock.table.color'),
-        dataIndex: 'productColor',
-        width: 80,
-    },
-    {
-        title: t('reports.productStock.table.unit'),
-        dataIndex: 'productUnit',
-        width: 80,
     },
     {
         title: t('reports.productStock.table.warehouseShelves'),
@@ -430,19 +410,9 @@ export const purchaseStatisticsColumns: BasicColumn[] = [
         width: 120,
     },
     {
-        title: t('reports.purchase.table.model'),
-        dataIndex: 'productModel',
-        width: 90,
-    },
-    {
-        title: t('reports.purchase.table.extendInfo'),
-        dataIndex: 'productExtendInfo',
-        width: 120,
-    },
-    {
-        title: t('reports.purchase.table.unit'),
-        dataIndex: 'productUnit',
-        width: 80,
+        title: t('reports.purchase.table.purchaseDate'),
+        dataIndex: 'createTime',
+        width: 110,
     },
     {
         title: t('reports.purchase.table.quantity'),

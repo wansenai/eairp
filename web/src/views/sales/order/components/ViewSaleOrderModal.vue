@@ -107,6 +107,7 @@ export default defineComponent({
       pagination: false,
       showIndexColumn: false,
       bordered: true,
+      showTableSetting: true,
     });
     const getTitle = ref(t('sales.order.receipt'));
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {

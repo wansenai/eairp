@@ -36,7 +36,11 @@ import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.utils.constants.SecurityConstants;
 import com.wansenai.utils.constants.SmsConstants;
 import com.wansenai.utils.email.EmailUtils;
-import com.wansenai.utils.enums.*;
+import com.wansenai.utils.enums.BaseCodeEnum;
+import com.wansenai.utils.enums.SupplierCodeEnum;
+import com.wansenai.utils.enums.MemberCodeEnum;
+import com.wansenai.utils.enums.ProdcutCodeEnum;
+import com.wansenai.utils.enums.CustomerCodeEnum;
 import com.wansenai.utils.redis.RedisUtil;
 import com.wansenai.utils.response.Response;
 import com.wansenai.bo.SmsInfoBO;
@@ -61,10 +65,16 @@ import com.wansenai.vo.basic.CustomerVO;
 import com.wansenai.vo.basic.MemberVO;
 import com.wansenai.vo.basic.SupplierVO;
 import com.wansenai.vo.product.ExportProductVO;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FastByteArrayOutputStream;
@@ -75,9 +85,21 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Base64;
+import java.util.Random;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -231,11 +253,11 @@ public class CommonServiceImpl implements CommonService{
     public static String getForgetCode() {
         Random random = new Random();
         //把随机生成的数字转成字符串
-        String str = String.valueOf(random.nextInt(9));
+        StringBuilder str = new StringBuilder(String.valueOf(random.nextInt(9)));
         for (int i = 0; i < 5; i++) {
-            str += random.nextInt(9);
+            str.append(random.nextInt(9));
         }
-        return str;
+        return str.toString();
     }
 
     @Override
@@ -319,12 +341,13 @@ public class CommonServiceImpl implements CommonService{
                          return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_ERROR);
                      }
                      return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_SUCCESS);
-                 } else if (filename.contains("商品") || filename.contains("product") || filename.contains("Product")) {
+                 } else if (filename.contains("商品") || filename.contains("product") || filename.contains("Product")
+                 || filename.contains("Commodity")) {
                      var message = checkProductBarCodeExist(file);
                      if (StringUtils.hasLength(message)) {
                          return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR.getCode(), message);
                      }
-                     var result = readProductFromExcel(file, null);
+                     var result = readProductFromExcel(file, 0);
                      if(!result){
                          return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
                      }
@@ -357,7 +380,8 @@ public class CommonServiceImpl implements CommonService{
 
     private boolean readSuppliersFromExcel(MultipartFile file) throws IOException {
         List<Supplier> suppliers = new ArrayList<>();
-        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        InputStream inputStream = file.getInputStream();
+        Workbook workbook = WorkbookFactory.create(inputStream);
         Sheet sheet = workbook.getSheetAt(0);
         DataFormatter dataFormatter = new DataFormatter();
 
@@ -389,7 +413,8 @@ public class CommonServiceImpl implements CommonService{
 
     private boolean readCustomerFromExcel(MultipartFile file) throws IOException {
         List<Customer> customers = new ArrayList<>();
-        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        InputStream inputStream = file.getInputStream();
+        Workbook workbook = WorkbookFactory.create(inputStream);
         Sheet sheet = workbook.getSheetAt(0);
         DataFormatter dataFormatter = new DataFormatter();
 
@@ -419,7 +444,8 @@ public class CommonServiceImpl implements CommonService{
 
     private boolean readMemberFromExcel(MultipartFile file) throws IOException {
         List<Member> members = new ArrayList<>();
-        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        InputStream inputStream = file.getInputStream();
+        Workbook workbook = WorkbookFactory.create(inputStream);
         Sheet sheet = workbook.getSheetAt(0);
         DataFormatter dataFormatter = new DataFormatter();
 
@@ -440,7 +466,8 @@ public class CommonServiceImpl implements CommonService{
     }
 
     private String checkProductBarCodeExist(MultipartFile file) throws IOException {
-        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        InputStream inputStream = file.getInputStream();
+        Workbook workbook = WorkbookFactory.create(inputStream);
         Sheet sheet = workbook.getSheetAt(0);
         DataFormatter dataFormatter = new DataFormatter();
         var codeListMap = new ArrayList<Map<String, String>>();
@@ -455,7 +482,7 @@ public class CommonServiceImpl implements CommonService{
                 codeListMap.add(codeMap);
             }
         }
-        var codeList = codeListMap.stream().map(item -> item.get("productBarcode")).collect(Collectors.toList());
+        var codeList = codeListMap.stream().map(item -> item.get("productBarcode")).toList();
         var codeMap = new HashMap<String, Integer>();
         for (var code : codeList) {
             if (codeMap.containsKey(code)) {
@@ -493,49 +520,112 @@ public class CommonServiceImpl implements CommonService{
         return message;
     }
 
-    private boolean readProductFromExcel(MultipartFile file, Integer type) throws IOException {
+    private boolean readProductFromExcel(MultipartFile file, int type) throws IOException, InvalidFormatException {
         List<Product> products = new ArrayList<>();
         List<ProductStockKeepUnit> productStockKeepUnits = new ArrayList<>();
         List<ProductStock> productStocks = new ArrayList<>();
 
-        Workbook workbook = new HSSFWorkbook(file.getInputStream());
+        InputStream inputStream = file.getInputStream();
+        Workbook workbook = WorkbookFactory.create(inputStream);
         Sheet sheet = workbook.getSheetAt(0);
         DataFormatter dataFormatter = new DataFormatter();
 
-        var warehouseId =  warehouseService.getDefaultWarehouse().getData().getId();
+        var warehouseId = warehouseService.getDefaultWarehouse().getData().getId();
         var userId = baseService.getCurrentUserId();
+
+        // Read header row to create the mapping
+        Row headerRow = sheet.getRow(1);
+        Map<String, Integer> headerMap = new HashMap<>();
+        for (Cell cell : headerRow) {
+            String cellValue = dataFormatter.formatCellValue(cell);
+            if (cellValue != null) {
+                headerMap.put(cellValue, cell.getColumnIndex());
+            }
+        }
+
+        // Helper method to get cell value by column name and row index
+        BiFunction<String, Integer, String> getCellValueByName = (columnName, rowIndex) -> {
+            Integer columnIndex = headerMap.get(columnName);
+            if (columnIndex != null) {
+                return getCellValue(sheet.getRow(rowIndex).getCell(columnIndex), dataFormatter);
+            }
+            return null;
+        };
+
+        Map<String, String[]> fieldMappings = new HashMap<>();
+        fieldMappings.put("barCode", new String[]{"Bar code", "产品条码"});
+        fieldMappings.put("productName", new String[]{"Name of commodity", "产品名称"});
+        fieldMappings.put("productCategory", new String[]{"Category", "产品分类"});
+        fieldMappings.put("productStandard", new String[]{"Specifications", "产品规格"});
+        fieldMappings.put("productModel", new String[]{"Model", "产品型号"});
+        fieldMappings.put("productColor", new String[]{"Color", "产品颜色"});
+        fieldMappings.put("productWeight", new String[]{"Base weight", "产品重量"});
+        fieldMappings.put("guaranteePeriod", new String[]{"Guarantee period", "产品保质期"});
+        fieldMappings.put("productUnit", new String[]{"Commodity measurement unit", "产品单位"});
+        fieldMappings.put("serialNumber", new String[]{"Serial number", "启用序列号"});
+        fieldMappings.put("batchNumber", new String[]{"Batch number", "启用批号"});
+        fieldMappings.put("warehouseShelves", new String[]{"Position shelf", "仓库货架"});
+        fieldMappings.put("productManufacturer", new String[]{"Manufacturer", "产品制造商"});
+        fieldMappings.put("otherFieldOne", new String[]{"Extended field 1", "其他字段一"});
+        fieldMappings.put("otherFieldTwo", new String[]{"Extended field 2", "其他字段二"});
+        fieldMappings.put("otherFieldThree", new String[]{"Extended field 3", "其他字段三"});
+        fieldMappings.put("remark", new String[]{"Remark", "备注"});
+        fieldMappings.put("multiAttribute", new String[]{"Multiple attributes", "多属性"});
+        fieldMappings.put("retailPrice", new String[]{"Retail price", "零售价格"});
+        fieldMappings.put("purchasePrice", new String[]{"Purchase price", "采购价格"});
+        fieldMappings.put("salePrice", new String[]{"Market price", "销售价格"});
+        fieldMappings.put("lowPrice", new String[]{"Minimum selling price", "最低价格"});
+        fieldMappings.put("initStockQuantity", new String[]{"Initial inventory quantity", "初始库存数量"});
+        fieldMappings.put("currentStockQuantity", new String[]{"Current inventory quantity", "当前库存数量"});
+
+        // Helper method to get the cell value for a field name (supports both English and Chinese)
+        BiFunction<String, Integer, String> getFieldCellValue = (fieldName, rowIndex) -> {
+            String[] possibleNames = fieldMappings.get(fieldName);
+            if (possibleNames != null) {
+                for (String name : possibleNames) {
+                    String value = getCellValueByName.apply(name, rowIndex);
+                    if (value != null) {
+                        return value;
+                    }
+                }
+            }
+            return null;
+        };
 
         for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
             Row row = sheet.getRow(i);
-            var productCode = getCellValue(row.getCell(1), dataFormatter);
+            if (row == null || isRowEmpty(row)) {
+                continue;
+            }
 
+            var productCode = getFieldCellValue.apply("barCode", i);
             var productId = SnowflakeIdUtil.nextId();
             Long productCategoryId = null;
 
-            if(getCellValue(row.getCell(4), dataFormatter) != null) {
-                var productCategory = productCategoryService.getProductCategoryByName(getCellValue(row.getCell(4), dataFormatter));
+            if (getFieldCellValue.apply("productCategory", i) != null) {
+                var productCategory = productCategoryService.getProductCategoryByName(getFieldCellValue.apply("productCategory", i));
                 productCategoryId = productCategory.getId();
             }
 
             var product = Product.builder()
                     .id(productId)
-                    .productName(getCellValue(row.getCell(0), dataFormatter))
-                    .productStandard(getCellValue(row.getCell(9), dataFormatter))
-                    .productModel(getCellValue(row.getCell(2), dataFormatter))
-                    .productColor(getCellValue(row.getCell(3), dataFormatter))
+                    .productName(getFieldCellValue.apply("productName", i))
+                    .productStandard(getFieldCellValue.apply("productStandard", i))
+                    .productModel(getFieldCellValue.apply("productModel", i))
+                    .productColor(getFieldCellValue.apply("productColor", i))
                     .productCategoryId(productCategoryId)
-                    .productWeight(getNumericCellValue(row.getCell(5)))
-                    .productExpiryNum(getIntegerCellValue(row.getCell(6)))
-                    .productUnit(getCellValue(row.getCell(7), dataFormatter))
-                    .enableSerialNumber(getIntegerCellValue(row.getCell(15)))
-                    .enableBatchNumber(getIntegerCellValue(row.getCell(16)))
-                    .warehouseShelves(getCellValue(row.getCell(17), dataFormatter))
-                    .productManufacturer(getCellValue(row.getCell(18), dataFormatter))
-                    .otherFieldOne(getCellValue(row.getCell(19), dataFormatter))
-                    .otherFieldTwo(getCellValue(row.getCell(20), dataFormatter))
-                    .otherFieldThree(getCellValue(row.getCell(21), dataFormatter))
+                    .productWeight(getNumericCellValue(getFieldCellValue.apply("productWeight",i)))
+                    .productExpiryNum(getIntegerCellValue(getFieldCellValue.apply("guaranteePeriod",i)))
+                    .productUnit(getFieldCellValue.apply("productUnit", i))
+                    .enableSerialNumber(getIntegerCellValue(getFieldCellValue.apply("serialNumber", i)))
+                    .enableBatchNumber(getIntegerCellValue(getFieldCellValue.apply("batchNumber", i)))
+                    .warehouseShelves(getFieldCellValue.apply("warehouseShelves", i))
+                    .productManufacturer(getFieldCellValue.apply("productManufacturer", i))
+                    .otherFieldOne(getFieldCellValue.apply("otherFieldOne", i))
+                    .otherFieldTwo(getFieldCellValue.apply("otherFieldTwo", i))
+                    .otherFieldThree(getFieldCellValue.apply("otherFieldThree", i))
                     .status(0)
-                    .remark(getCellValue(row.getCell(22), dataFormatter))
+                    .remark(getFieldCellValue.apply("remark", i))
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();
@@ -545,11 +635,11 @@ public class CommonServiceImpl implements CommonService{
                     .id(SnowflakeIdUtil.nextId())
                     .productId(productId)
                     .productBarCode(productCode)
-                    .multiAttribute(getCellValue(row.getCell(10), dataFormatter))
-                    .purchasePrice(getNumericCellValue(row.getCell(11)))
-                    .retailPrice(getNumericCellValue(row.getCell(12)))
-                    .salePrice(getNumericCellValue(row.getCell(13)))
-                    .lowPrice(getNumericCellValue(row.getCell(14)))
+                    .multiAttribute(getFieldCellValue.apply("multiAttribute", i))
+                    .purchasePrice(getNumericCellValue(getFieldCellValue.apply("purchasePrice", i)))
+                    .retailPrice(getNumericCellValue(getFieldCellValue.apply("retailPrice", i)))
+                    .salePrice(getNumericCellValue(getFieldCellValue.apply("salePrice", i)))
+                    .lowPrice(getNumericCellValue(getFieldCellValue.apply("lowPrice", i)))
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();
@@ -559,14 +649,15 @@ public class CommonServiceImpl implements CommonService{
                     .id(SnowflakeIdUtil.nextId())
                     .productSkuId(productPrice.getId())
                     .warehouseId(warehouseId)
-                    .initStockQuantity(getNumericCellValue(row.getCell(23)))
-                    .currentStockQuantity(getNumericCellValue(row.getCell(23)))
+                    .initStockQuantity(getNumericCellValue(getFieldCellValue.apply("initStockQuantity", i)))
+                    .currentStockQuantity(getNumericCellValue(getFieldCellValue.apply("currentStockQuantity", i)))
                     .createBy(userId)
                     .createTime(LocalDateTime.now())
                     .build();
             productStocks.add(productStock);
-            workbook.close();
         }
+        workbook.close();
+
         if (type == 1) {
             Set<String> existingBarcodes = new HashSet<>();
             Iterator<ProductStockKeepUnit> iterator = productStockKeepUnits.iterator();
@@ -621,13 +712,13 @@ public class CommonServiceImpl implements CommonService{
             productStockKeepUnits = updatedProductStockKeepUnits;
         }
 
-
         boolean addProductResult = productService.batchAddProduct(products);
         boolean addProductPriceResult = productStockKeepUnitService.saveBatch(productStockKeepUnits);
         boolean addProductStockResult = productStockService.saveBatch(productStocks);
 
         return addProductResult && addProductPriceResult && addProductStockResult;
     }
+
 
     public File exportExcel(String type) {
         if (!StringUtils.hasLength(type)) {
@@ -801,7 +892,7 @@ public class CommonServiceImpl implements CommonService{
                     productData[5] = item.getProductWeight() != null ? item.getProductWeight().toString() : "";
                     productData[6] = item.getProductExpiryNum() != null ? item.getProductExpiryNum().toString() : "";
                     productData[7] = StringUtils.hasText(item.getProductUnit()) ? item.getProductUnit() : "";
-                    productData[8] = item.getProductBarcode() != null ? item.getProductBarcode().toString() : "";
+                    productData[8] = item.getProductBarcode() != null ? item.getProductBarcode() : "";
                     productData[9] = StringUtils.hasText(item.getMultiAttribute()) ? item.getMultiAttribute() : "";
                     productData[10] = item.getPurchasePrice() != null ? item.getPurchasePrice().toString() : "";
                     productData[11] = item.getRetailPrice() != null ? item.getRetailPrice().toString() : "";
@@ -1016,23 +1107,49 @@ public class CommonServiceImpl implements CommonService{
     }
 
     private BigDecimal getNumericCellValue(Cell cell) {
-        if (cell != null && cell.getCellType() == CellType.NUMERIC) {
-            return BigDecimal.valueOf(cell.getNumericCellValue());
+        if (cell != null) {
+            if (cell.getCellType() == CellType.NUMERIC) {
+                return BigDecimal.valueOf(cell.getNumericCellValue());
+            } else if (cell.getCellType() == CellType.STRING) {
+                try {
+                    return new BigDecimal(cell.getStringCellValue());
+                } catch (NumberFormatException e) {
+                    // Log and handle the number format exception if necessary
+                }
+            }
         }
-        return null;
+        return BigDecimal.ZERO;
     }
 
-    private Long getLongCellValue(Cell cell) {
-        if (cell != null && cell.getCellType() == CellType.NUMERIC) {
-            return (long) cell.getNumericCellValue();
+    private BigDecimal getNumericCellValue(String cellValue) {
+        if (cellValue != null) {
+            try {
+                return new BigDecimal(cellValue);
+            } catch (NumberFormatException e) {
+                // Log and handle the number format exception if necessary
+            }
         }
-        return null;
+        return BigDecimal.ZERO;
     }
 
-    private Integer getIntegerCellValue(Cell cell) {
-        if (cell != null && cell.getCellType() == CellType.STRING) {
-            return Integer.parseInt(cell.getStringCellValue());
+    private Integer getIntegerCellValue(String cellValue) {
+        if (cellValue != null) {
+            try {
+                return Integer.valueOf(cellValue);
+            } catch (NumberFormatException e) {
+                // Log and handle the number format exception if necessary
+            }
         }
-        return null;
+        return 0;
+    }
+
+    private boolean isRowEmpty(Row row) {
+        for (int cellNum = row.getFirstCellNum(); cellNum < row.getLastCellNum(); cellNum++) {
+            Cell cell = row.getCell(cellNum);
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                return false;
+            }
+        }
+        return true;
     }
 }
