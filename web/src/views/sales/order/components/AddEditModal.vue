@@ -81,6 +81,12 @@
                   <a-button @click="addRowData" style="margin-right: 10px" v-text="t('sales.order.form.insertRow')"/>
                   <a-button @click="deleteRowData" style="margin-right: 10px" v-text="t('sales.order.form.deleteRow')"/>
                 </template>
+                <template #warehouse_default="{ row }">
+                  <span>{{ formatWarehouseId(row.warehouseId) }}</span>
+                </template>
+                <template #warehouse_edit="{ row }">
+                  <vxe-select v-model="row.warehouseId" :placeholder="t('sales.shipments.form.noticeEight')" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
+                </template>
                 <template #barCode_edit="{ row }">
                   <vxe-select v-model="row.barCode" :placeholder="t('sales.order.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
@@ -218,8 +224,8 @@ import {
   xGrid,
   tableData,
   orderGridOptions,
-  getTaxTotalPrice,
-} from '/src/views/sales/model/addEditModel';
+  getTaxTotalPrice, gridOptions,
+} from '@/views/sales/model/addEditModel';
 import {getCustomerList} from "@/api/basic/customer";
 import {CustomerResp} from "@/api/basic/model/customerModel";
 import {getOperatorList} from "@/api/basic/operator";
@@ -234,7 +240,7 @@ import { addOrUpdateSaleOrder, getSaleOrderDetail} from "@/api/sale/order"
 import SelectProductModal from "@/views/product/info/components/SelectProductModal.vue"
 import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
 import {AddOrUpdateReceiptReq, SalesData} from "@/api/sale/model/orderModel";
-import {FileData} from '/@/api/retail/model/shipmentsModel';
+import {FileData} from '@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
@@ -244,6 +250,7 @@ import {getWarehouseList} from "@/api/basic/warehouse";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
 import BasicModal from "@/components/Modal/src/BasicModal.vue";
+import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -331,6 +338,8 @@ export default defineComponent({
     const customerList = ref<CustomerResp[]>([])
     const salePersonalList = ref<OperatorResp[]>([]);
     const accountList = ref<AccountResp[]>([]);
+    const warehouseList = ref<WarehouseResp[]>([]);
+
     const multipleAccounts = ref();
     const [customerModal, {openModal}] = useModal();
     const [accountModal, {openModal: openAccountModal}] = useModal();
@@ -338,6 +347,7 @@ export default defineComponent({
     const [multipleAccountModal, {openModal: openManyAccountModal}] = useModal();
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
+    const warehouseLabelList =  ref<any[]>([]);
     const amountSymbol = ref<string>('')
     const localeStore = useLocaleStore().getLocale;
     if(localeStore === 'zh_CN') {
@@ -346,8 +356,8 @@ export default defineComponent({
       amountSymbol.value = '$'
     }
     function handleCancelModal() {
-      clearData();
       open.value = false;
+      clearData();
       context.emit('cancel');
     }
 
@@ -365,7 +375,6 @@ export default defineComponent({
         title.value = t('sales.order.addOrder')
         loadGenerateId();
         formState.receiptDate = dayjs(new Date());
-        addRowData()
       }
     }
 
@@ -415,14 +424,21 @@ export default defineComponent({
 
     function loadWarehouseList() {
       getWarehouseList().then(res => {
-        const data = res.data
-        if(data) {
-          const defaultWarehouse = res.data.find(item => item.isDefault === 1)
-          if(defaultWarehouse) {
-            formState.warehouseId = defaultWarehouse.id
-          } else {
-            formState.warehouseId = res.data[0].id
+        const {columns} = gridOptions
+        if (columns) {
+          const warehouseColumn = columns[1]
+          warehouseColumn.editRender.options = [];
+          if (warehouseColumn && warehouseColumn.editRender) {
+            warehouseColumn.editRender.options?.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
           }
+          warehouseList.value = res.data
+          warehouseLabelList.value.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
+        }
+        const defaultWarehouse = res.data.find(item => item.isDefault === 1)
+        if(defaultWarehouse) {
+          formState.warehouseId = defaultWarehouse.id
+        } else {
+          formState.warehouseId = res.data[0].id
         }
       })
     }
@@ -444,14 +460,13 @@ export default defineComponent({
         const {columns} = orderGridOptions
         if (columns) {
           const barCodeColumn = selectRow.row.barCode
+          const warehouseColumn = selectRow.row.warehouseId
           if(barCodeColumn) {
             const product = productList.value.find(item => {
-              return item.productBarcode === barCodeColumn;
+              return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
             });
             if (product) {
               selectRow.row.productId = product.productId
-              // 这里默认加载默认仓库
-              selectRow.row.warehouseId = formState.warehouseId
               selectRow.row.productName = product.productName
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
@@ -461,9 +476,21 @@ export default defineComponent({
               selectRow.row.amount = product.salePrice
               selectRow.row.productNumber = 1
               selectRow.row.taxRate = 0
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
               createMessage.warn(t('sales.order.form.noticeFour'))
+              // 清空数据
+              selectRow.row.barCode = '';
+              selectRow.row.warhouse = undefined;
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.unitPrice = 0
+              selectRow.row.taxTotalPrice = 0
+              selectRow.row.amount = 0
+              selectRow.row.productNumber = 0
+              selectRow.row.taxRate = 0
             }
           }
         }
@@ -731,10 +758,13 @@ export default defineComponent({
       barCode.value = ''
       formState.remark = ''
       fileList.value = []
+      warehouseList.value = []
+      warehouseLabelList.value = []
       multipleAccounts.value = {}
       const table = xGrid.value
-      if(table) {
-        table.remove()
+      if (table) {
+        // 清空表格数据
+        table.reloadData()
       }
       formState.receiptDate = undefined
     }
@@ -797,8 +827,10 @@ export default defineComponent({
 
     function addRowData() {
       const table = xGrid.value
+      const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
+      const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
       if(table) {
-        table.insert({productNumber: 0})
+        table.insert({warehouseId: warehouseId})
       }
     }
 
@@ -945,6 +977,13 @@ export default defineComponent({
       multipleAccounts.value = data;
     }
 
+    const formatWarehouseId = (value: string) => {
+      const item = warehouseList.value.find(item => item.id === value)
+      if(item) {
+        return item.warehouseName
+      }
+    }
+
     return {
       t,
       h,
@@ -1010,6 +1049,8 @@ export default defineComponent({
       multipleAccountModal,
       handleAccountSuccess,
       productList,
+      warehouseLabelList,
+      formatWarehouseId,
       productLabelList,
       selectBarCode,
       handleCustomerModalSuccess

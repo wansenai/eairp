@@ -77,11 +77,17 @@
                   <a-button @click="addRowData" style="margin-right: 10px" v-text="t('retail.refund.form.insertRow')"/>
                   <a-button @click="deleteRowData" style="margin-right: 10px" v-text="t('retail.refund.form.deleteRow')"/>
                 </template>
+                <template #warehouse_default="{ row }">
+                  <span>{{ formatWarehouseId(row.warehouseId) }}</span>
+                </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber"></vxe-input>
                 </template>
                 <template #amount_edit="{ row }">
                   <vxe-input v-model="row.amount"></vxe-input>
+                </template>
+                <template #warehouse_edit="{ row }">
+                  <vxe-select v-model="row.warehouseId" :placeholder="t('sales.shipments.form.noticeEight')" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
                   <vxe-select v-model="row.barCode" :placeholder="t('retail.refund.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
@@ -219,7 +225,7 @@ import {
   xGrid,
   receiptAmount,
   paymentAmount, RowVO,
-} from '/@/views/retail/shipments/model/addEditModel';
+} from '@/views/retail/shipments/model/addEditModel';
 import {getMemberList} from "@/api/basic/member";
 import {MemberResp} from "@/api/basic/model/memberModel";
 import {getAccountList} from "@/api/financial/account";
@@ -344,6 +350,7 @@ export default defineComponent({
     const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
+    const warehouseLabelList =  ref<any[]>([]);
 
     function handleCancelModal() {
       close();
@@ -398,6 +405,13 @@ export default defineComponent({
             warehouseColumn.editRender.options?.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
           }
           warehouseList.value = res.data
+          warehouseLabelList.value.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
+        }
+        const defaultWarehouse = res.data.find(item => item.isDefault === 1)
+        if(defaultWarehouse) {
+          formState.warehouseId = defaultWarehouse.id
+        } else {
+          formState.warehouseId = res.data[0].id
         }
       })
     }
@@ -433,9 +447,17 @@ export default defineComponent({
               selectRow.row.retailPrice = product.retailPrice
               selectRow.row.amount = product.retailPrice
               selectRow.row.productNumber = 1
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
               createMessage.warn(t('retail.refund.form.noticeSix'))
+              selectRow.row.barCode = '';
+              selectRow.row.productId = ''
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.retailPrice = 0
+              selectRow.row.amount = 0
+              selectRow.row.productNumber = 1
             }
           }
         }
@@ -668,6 +690,8 @@ export default defineComponent({
       paymentAmount.value = ''
       backAmount.value = amountSymbol.value + '0.00'
       fileList.value = []
+      warehouseList.value = []
+      warehouseLabelList.value = []
       const table = xGrid.value
       if(table) {
         // 清空表格数据
@@ -773,6 +797,13 @@ export default defineComponent({
       });
     }
 
+    const formatWarehouseId = (value: string) => {
+      const item = warehouseList.value.find(item => item.id === value)
+      if(item) {
+        return item.warehouseName
+      }
+    }
+
     return {
       t,
       open,
@@ -830,9 +861,11 @@ export default defineComponent({
       linkReceiptModal,
       productList,
       productLabelList,
+      warehouseLabelList,
       selectBarCode,
       handleMemberModalSuccess,
-      handleAccountModalSuccess
+      handleAccountModalSuccess,
+      formatWarehouseId
     };
   },
 });

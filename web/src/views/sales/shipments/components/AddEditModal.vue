@@ -408,10 +408,6 @@ export default defineComponent({
         title.value = t('sales.shipments.addShipments')
         loadGenerateId();
         saleShipmentsFormState.receiptDate = dayjs(new Date());
-        const table = xGrid.value
-        if (table) {
-          table.insert({productNumber: 0})
-        }
       }
     }
 
@@ -453,9 +449,10 @@ export default defineComponent({
         const {columns} = gridOptions
         if (columns) {
           const barCodeColumn = selectRow.row.barCode
+          const warehouseColumn = selectRow.row.warehouseId
           if(barCodeColumn) {
             const product = productList.value.find(item => {
-              return item.productBarcode === barCodeColumn;
+              return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
             });
             if (product) {
               selectRow.row.productId = product.productId
@@ -468,9 +465,21 @@ export default defineComponent({
               selectRow.row.amount = product.salePrice
               selectRow.row.taxRate = 0
               selectRow.row.productNumber = 1
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
               createMessage.warn(t('sales.shipments.form.noticeFour'))
+              // 清空数据
+              selectRow.row.barCode = '';
+              selectRow.row.warhouse = undefined;
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.unitPrice = 0
+              selectRow.row.taxTotalPrice = 0
+              selectRow.row.amount = 0
+              selectRow.row.productNumber = 0
+              selectRow.row.taxRate = 0
             }
           }
         }
@@ -795,7 +804,7 @@ export default defineComponent({
       }
 
       saleShipmentsFormState.thisCollectAmount = saleShipmentsFormState.thisCollectAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '');
-      saleShipmentsFormState.collectOfferLastAmount = saleShipmentsFormState.collectOfferLastAmount.replace(/,/g, '').replace(amountSymbol.value, '')
+      saleShipmentsFormState.collectOfferLastAmount = saleShipmentsFormState.collectOfferLastAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       saleShipmentsFormState.thisArrearsAmount = saleShipmentsFormState.thisArrearsAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdateReceiptReq = {
         ...saleShipmentsFormState,
@@ -826,10 +835,13 @@ export default defineComponent({
       barCode.value = ''
       saleShipmentsFormState.remark = ''
       fileList.value = []
+      warehouseList.value = []
+      warehouseLabelList.value = []
       multipleAccounts.value = {}
       const table = xGrid.value
-      if(table) {
-        table.remove()
+      if (table) {
+        // 清空表格数据
+        table.reloadData()
       }
       saleShipmentsFormState.receiptDate = undefined
     }

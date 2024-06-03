@@ -17,6 +17,7 @@ if(localeStore === 'zh_CN') {
 
 interface FormState {
     id: number | string | undefined;
+    warehouseId: number | string;
     memberId: string;
     receiptNumber: string;
     paymentType: string;
@@ -110,6 +111,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             field: 'warehouseId',
             title: t('retail.shipments.form.table.warehouse'),
             width: 130,
+            slots: { edit: 'warehouse_edit' },
             editRender: { name: '$select', options: [], props: { placeholder: t('retail.shipments.form.table.inputWarehouse') } }
         },
         {   field: 'barCode',
@@ -195,6 +197,9 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     editRules: {
         warehouseId: [
             { required: true, message: t('retail.shipments.form.noticeOne') }
+        ],
+        barCode: [
+            { required: true, message: t('sales.shipments.form.table.inputBarCode') }
         ]
     },
     editConfig: {
@@ -217,6 +222,7 @@ const sumNum = (list: RowVO[], field: string) => {
 
 const formState = reactive<FormState>({
     id: undefined,
+    warehouseId: '',
     memberId: '',
     receiptNumber: '',
     paymentType: '',
