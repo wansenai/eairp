@@ -74,12 +74,12 @@
                   <span>{{ formatWarehouseId(row.warehouseId) }}</span>
                 </template>
                 <template #warehouse_edit="{ row }">
-                  <vxe-select :placeholder="t('warehouse.otherShipments.form.table.inputWarehouse')" v-model="row.warehouseId" @change="selectBarCode" clearable filterable>
+                  <vxe-select :placeholder="t('warehouse.otherStorage.form.table.inputWarehouse')" v-model="row.warehouseId" @change="selectBarCode" clearable filterable>
                     <vxe-option v-for="item in warehouseList" :key="item.id" :value="item.id" :label="item.warehouseName"></vxe-option>
                   </vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-select v-model="row.barCode" :placeholder="t('warehouse.otherShipments.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
+                  <vxe-select v-model="row.barCode" :placeholder="t('warehouse.otherStorage.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
@@ -342,9 +342,17 @@ export default defineComponent({
               selectRow.row.unitPrice = product.unitPrice
               selectRow.row.amount = product.unitPrice
               selectRow.row.productNumber = 1
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
-              createMessage.warn("该条码查询不到商品信息")
+              createMessage.warn(t('sales.shipments.form.noticeFour'))
+              selectRow.row.barCode = ''
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard =''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.unitPrice = 0
+              selectRow.row.amount = 0
+              selectRow.row.productNumber = 0
             }
           }
         }
@@ -504,6 +512,7 @@ export default defineComponent({
       otherShipmentFormState.remark = ''
       otherShipmentFormState.receiptDate = undefined
       fileList.value = []
+      warehouseList.value = []
       const table = xGrid.value
       if(table) {
         table.remove()

@@ -308,9 +308,15 @@ export default defineComponent({
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
               selectRow.row.productNumber = 1
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
-              createMessage.warn("该条码查询不到商品信息")
+              createMessage.warn(t('sales.shipments.form.noticeFour'))
+              selectRow.row.barCode = ''
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.productNumber = 0
             }
           }
         }
@@ -467,6 +473,7 @@ export default defineComponent({
       allotShipmentsFormState.remark = ''
       allotShipmentsFormState.receiptDate = undefined
       fileList.value = []
+      warehouseList.value = []
       const table = xGrid.value
       if(table) {
         table.remove()

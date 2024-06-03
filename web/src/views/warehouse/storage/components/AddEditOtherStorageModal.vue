@@ -278,10 +278,6 @@ export default defineComponent({
         title.value = t('warehouse.otherStorage.addOtherStorage')
         loadGenerateId();
         otherStorageFormState.receiptDate = dayjs(new Date());
-        const table = xGrid.value
-        if (table) {
-          table.insert({productNumber: 0})
-        }
       }
     }
 
@@ -329,9 +325,6 @@ export default defineComponent({
         if (columns) {
           const barCodeColumn = selectRow.row.barCode
           const warehouseColumn = selectRow.row.warehouseId
-
-          console.info(warehouseColumn)
-
           if(barCodeColumn && warehouseColumn) {
             const product = productList.value.find(item => {
               console.info(item.warehouseId)
@@ -346,9 +339,17 @@ export default defineComponent({
               selectRow.row.unitPrice = product.unitPrice
               selectRow.row.amount = product.unitPrice
               selectRow.row.productNumber = 1
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
-              createMessage.warn("该条码查询不到商品信息")
+              createMessage.warn(t('sales.shipments.form.noticeFour'))
+              selectRow.row.barCode = ''
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.unitPrice = 0
+              selectRow.row.amount = 0
+              selectRow.row.productNumber = 0
             }
           }
         }
@@ -498,6 +499,7 @@ export default defineComponent({
       otherStorageFormState.remark = ''
       otherStorageFormState.receiptDate = undefined
       fileList.value = []
+      warehouseList.value = []
       const table = xGrid.value
       if(table) {
         table.remove()
