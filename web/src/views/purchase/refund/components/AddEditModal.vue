@@ -490,9 +490,19 @@ export default defineComponent({
               selectRow.row.amount = product.purchasePrice
               selectRow.row.productNumber = 1
               selectRow.row.taxRate = 0
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
               createMessage.warn(t('purchase.refund.form.noticeFour'))
+              selectRow.row.barCode = '';
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.unitPrice = 0
+              selectRow.row.taxTotalPrice = 0
+              selectRow.row.amount = 0
+              selectRow.row.productNumber = 0
+              selectRow.row.taxRate = 0
             }
           }
         }
@@ -812,6 +822,8 @@ export default defineComponent({
       barCode.value = ''
       purchaseRefundFormState.remark = ''
       fileList.value = []
+      warehouseList.value = []
+      warehouseLabelList.value = []
       multipleAccounts.value = {}
       purchaseRefundFormState.receiptDate = undefined
       clearTable()

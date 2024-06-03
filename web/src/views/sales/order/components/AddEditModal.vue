@@ -480,7 +480,6 @@ export default defineComponent({
               createMessage.warn(t('sales.order.form.noticeFour'))
               // 清空数据
               selectRow.row.barCode = '';
-              selectRow.row.warhouse = undefined;
               selectRow.row.productId = undefined
               selectRow.row.productName = ''
               selectRow.row.productStandard = ''

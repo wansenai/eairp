@@ -256,7 +256,7 @@ import {
   tableData,
   gridOptions,
   getTaxTotalPrice,
-} from '/src/views/purchase/model/addEditModel';
+} from '@/views/purchase/model/addEditModel';
 import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
 import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
@@ -468,9 +468,19 @@ export default defineComponent({
               selectRow.row.amount = product.purchasePrice
               selectRow.row.productNumber = 1
               selectRow.row.taxRate = 0
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
               createMessage.warn(t('purchase.storage.form.noticeFour'))
+              selectRow.row.barCode = '';
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.unitPrice = 0
+              selectRow.row.taxTotalPrice = 0
+              selectRow.row.amount = 0
+              selectRow.row.productNumber = 0
+              selectRow.row.taxRate = 0
             }
           }
         }
@@ -816,6 +826,8 @@ export default defineComponent({
       barCode.value = ''
       purchaseStorageFormState.remark = ''
       fileList.value = []
+      warehouseList.value = []
+      warehouseLabelList.value = []
       multipleAccounts.value = {}
       purchaseStorageFormState.receiptDate = undefined
       clearTable()
@@ -1029,7 +1041,7 @@ export default defineComponent({
 
     function otherAmountChange() {
       const price = purchaseStorageFormState.paymentLastAmount;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
+      const discountLastAmount = Number(price.toString().replace(/,/g, '').replace(amountSymbol.value, ''))
       const otherAmount = purchaseStorageFormState.otherAmount
       const lastAmount = Number((discountLastAmount + otherAmount));
 
@@ -1039,7 +1051,7 @@ export default defineComponent({
 
     function thisPaymentAmountChange() {
       const price = purchaseStorageFormState.paymentLastAmount;
-      const discountLastAmount = Number(price.replace(/,/g, '').replace(amountSymbol.value, ''))
+      const discountLastAmount = Number(price.toString().replace(/,/g, '').replace(amountSymbol.value, ''))
       const otherAmount = purchaseStorageFormState.otherAmount
       const thisCollectAmount = purchaseStorageFormState.thisPaymentAmount
       const lastAmount = Number((discountLastAmount + otherAmount - thisCollectAmount));
