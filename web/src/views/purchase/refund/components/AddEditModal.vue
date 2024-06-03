@@ -29,7 +29,7 @@
               <a-select v-model:value="purchaseRefundFormState.supplierId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
                         :placeholder="t('purchase.refund.form.inputSupplier')"
-                        :options="Array.isArray(supplierList) ? supplierList.map(item => ({ value: item.id, label: item.supplierName })) : []">
+                        :options="supplierList.map(item => ({ value: item.id, label: item.supplierName }))">
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
@@ -490,9 +490,19 @@ export default defineComponent({
               selectRow.row.amount = product.purchasePrice
               selectRow.row.productNumber = 1
               selectRow.row.taxRate = 0
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
               createMessage.warn(t('purchase.refund.form.noticeFour'))
+              selectRow.row.barCode = '';
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.unitPrice = 0
+              selectRow.row.taxTotalPrice = 0
+              selectRow.row.amount = 0
+              selectRow.row.productNumber = 0
+              selectRow.row.taxRate = 0
             }
           }
         }
@@ -812,6 +822,8 @@ export default defineComponent({
       barCode.value = ''
       purchaseRefundFormState.remark = ''
       fileList.value = []
+      warehouseList.value = []
+      warehouseLabelList.value = []
       multipleAccounts.value = {}
       purchaseRefundFormState.receiptDate = undefined
       clearTable()
@@ -1070,6 +1082,7 @@ export default defineComponent({
       const table = xGrid.value
       if(data && table) {
         purchaseRefundFormState.otherReceipt = data.receiptNumber;
+        purchaseRefundFormState.supplierId = data.uid;
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {

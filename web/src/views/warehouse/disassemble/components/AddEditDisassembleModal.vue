@@ -54,7 +54,7 @@
                   <span>{{ formatWarehouseId(row.warehouseId) }}</span>
                 </template>
                 <template #warehouseId_edit="{ row }">
-                  <vxe-select :placeholder="t('warehouse.disassemble.form.table.inputWarehouse')" v-model="row.warehouseId">
+                  <vxe-select :placeholder="t('warehouse.disassemble.form.table.inputWarehouse')" v-model="row.warehouseId" @change="selectBarCode">
                     <vxe-option v-for="item in warehouseList" :key="item.id" :value="item.id" :label="item.warehouseName"></vxe-option>
                   </vxe-select>
                 </template>
@@ -305,9 +305,17 @@ export default defineComponent({
               selectRow.row.unitPrice = product.purchasePrice
               selectRow.row.amount = product.purchasePrice
               selectRow.row.productNumber = 1
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
-              createMessage.warn("该条码查询不到商品信息")
+              createMessage.warn(t('sales.shipments.form.noticeFour'))
+              selectRow.row.barCode = ''
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.unitPrice =0
+              selectRow.row.amount = 0
+              selectRow.row.productNumber = 0
             }
           }
         }
@@ -480,6 +488,7 @@ export default defineComponent({
       disAssembleFormState.remark = ''
       disAssembleFormState.receiptDate = undefined
       fileList.value = []
+      warehouseList.value = []
       const table = xGrid.value
       if(table) {
         table.remove()

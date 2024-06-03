@@ -406,10 +406,6 @@ export default defineComponent({
         title.value = t('sales.refund.addRefund')
         loadGenerateId();
         saleRefundFormState.receiptDate = dayjs(new Date());
-        const table = xGrid.value
-        if (table) {
-          table.insert({productNumber: 0})
-        }
       }
     }
 
@@ -441,9 +437,10 @@ export default defineComponent({
         const {columns} = gridOptions
         if (columns) {
           const barCodeColumn = selectRow.row.barCode
+          const warehouseColumn = selectRow.row.warehouseId
           if(barCodeColumn) {
             const product = productList.value.find(item => {
-              return item.productBarcode === barCodeColumn;
+              return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
             });
             if (product) {
               selectRow.row.productId = product.productId
@@ -458,7 +455,20 @@ export default defineComponent({
               selectRow.row.productNumber = 1
               table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
-              createMessage.warn(t('sales.refund.form.noticeFour'))
+              createMessage.warn(t('sales.shipments.form.noticeFour'))
+              // 清空数据
+              selectRow.row.barCode = '';
+              selectRow.row.warhouse = undefined;
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.unitPrice = 0
+              selectRow.row.taxTotalPrice = 0
+              selectRow.row.amount = 0
+              selectRow.row.productNumber = 0
+              selectRow.row.taxRate = 0
             }
           }
         }
@@ -812,6 +822,8 @@ export default defineComponent({
       barCode.value = ''
       saleRefundFormState.remark = ''
       fileList.value = []
+      warehouseList.value = []
+      warehouseLabelList.value = []
       multipleAccounts.value = {}
       const table = xGrid.value
       if(table) {
@@ -1071,6 +1083,7 @@ export default defineComponent({
       const table = xGrid.value
       if(data && table) {
         saleRefundFormState.otherReceipt = data.receiptNumber;
+        saleRefundFormState.customerId = data.uid;
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {
@@ -1092,7 +1105,6 @@ export default defineComponent({
           };
           table.insert(tableData)
         })
-        saleRefundFormState.customerId = data.receiptDetailData[0].customerId
       }
     }
 

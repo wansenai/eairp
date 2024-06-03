@@ -145,6 +145,13 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
     },
     columns: [
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
+        {
+            field: 'warehouseId',
+            title: t('sales.shipments.form.table.warehouse'),
+            width: 130,
+            slots: { edit: 'warehouse_edit', default: 'warehouse_default' },
+            editRender: { name: 'input', attrs: { placeholder:  t('sales.shipments.form.noticeEight') } }
+        },
         {   field: 'barCode',
             width:160,
             title: t('purchase.order.form.table.barCode'),

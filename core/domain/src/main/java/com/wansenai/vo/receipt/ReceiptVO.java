@@ -37,6 +37,10 @@ public class ReceiptVO {
     // 供应商名称 客户名称 会员名称 三者公用字段
     private String name;
 
+    // 供应商id 客户id 会员id 三者公用字段
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long uid;
+
     private String receiptNumber;
 
     private String productInfo;

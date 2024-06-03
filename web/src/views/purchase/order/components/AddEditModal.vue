@@ -69,6 +69,12 @@
                   <a-button @click="addRowData" style="margin-right: 10px" v-text="t('purchase.order.form.insertRow')"/>
                   <a-button @click="deleteRowData" style="margin-right: 10px" v-text="t('purchase.order.form.deleteRow')"/>
                 </template>
+                <template #warehouse_default="{ row }">
+                  <span>{{ formatWarehouseId(row.warehouseId) }}</span>
+                </template>
+                <template #warehouse_edit="{ row }">
+                  <vxe-select v-model="row.warehouseId" :placeholder="t('sales.shipments.form.noticeEight')" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
+                </template>
                 <template #barCode_edit="{ row }">
                   <vxe-select v-model="row.barCode" :placeholder="t('purchase.order.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
                 </template>
@@ -205,7 +211,7 @@ import {
   tableData,
   orderGridOptions,
   getTaxTotalPrice,
-} from '/src/views/purchase/model/addEditModel';
+} from '@/views/purchase/model/addEditModel';
 import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
 import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
@@ -314,6 +320,7 @@ export default defineComponent({
     const activeKey = ref('productDataTable');
     const supplierList = ref<SupplierResp[]>([])
     const accountList = ref<AccountResp[]>([]);
+    const warehouseList = ref<WarehouseResp[]>([]);
     const multipleAccounts = ref();
     const [supplierModal, {openModal}] = useModal();
     const [accountModal, {openModal: openAccountModal}] = useModal();
@@ -321,6 +328,7 @@ export default defineComponent({
     const [multipleAccountModal, {openModal: openManyAccountModal}] = useModal();
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
+    const warehouseLabelList = ref<any[]>([]);
     const amountSymbol = ref<string>('')
     const localeStore = useLocaleStore().getLocale;
     if(localeStore === 'zh_CN') {
@@ -347,20 +355,26 @@ export default defineComponent({
         title.value = t('purchase.order.addOrder')
         loadGenerateId();
         purchaseOrderFormState.receiptDate = dayjs(new Date());
-        addRowData();
       }
     }
 
     function loadWarehouseList() {
       getWarehouseList().then(res => {
-        const data = res.data
-        if(data) {
-          const defaultWarehouse = res.data.find(item => item.isDefault === 1)
-          if(defaultWarehouse) {
-            purchaseOrderFormState.warehouseId = defaultWarehouse.id
-          } else {
-            purchaseOrderFormState.warehouseId = res.data[0].id
+        const {columns} = orderGridOptions
+        if (columns) {
+          const warehouseColumn = columns[1]
+          warehouseColumn.editRender.options = [];
+          if (warehouseColumn && warehouseColumn.editRender) {
+            warehouseColumn.editRender.options?.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
           }
+          warehouseList.value = res.data
+          warehouseLabelList.value.push(...res.data.map(item => ({value: item.id, label: item.warehouseName})))
+        }
+        const defaultWarehouse = res.data.find(item => item.isDefault === 1)
+        if(defaultWarehouse) {
+          purchaseOrderFormState.warehouseId = defaultWarehouse.id
+        } else {
+          purchaseOrderFormState.warehouseId = res.data[0].id
         }
       })
     }
@@ -420,14 +434,13 @@ export default defineComponent({
         const {columns} = orderGridOptions
         if (columns) {
           const barCodeColumn = selectRow.row.barCode
+          const warehouseColumn = selectRow.row.warehouseId
           if(barCodeColumn) {
             const product = productList.value.find(item => {
-              return item.productBarcode === barCodeColumn;
+              return item.productBarcode === barCodeColumn && item.warehouseId === warehouseColumn;
             });
             if (product) {
               selectRow.row.productId = product.productId
-              // 这里默认加载默认仓库
-              selectRow.row.warehouseId = purchaseOrderFormState.warehouseId
               selectRow.row.productName = product.productName
               selectRow.row.productStandard = product.productStandard
               selectRow.row.productUnit = product.productUnit
@@ -437,9 +450,20 @@ export default defineComponent({
               selectRow.row.amount = product.purchasePrice
               selectRow.row.taxRate = 0
               selectRow.row.productNumber = 1
-              table.updateData(selectRow.rowIndex, selectRow.row)
             } else {
               createMessage.warn(t('purchase.order.form.noticeFour'))
+              // 清空数据
+              selectRow.row.barCode = '';
+              selectRow.row.productId = undefined
+              selectRow.row.productName = ''
+              selectRow.row.productStandard = ''
+              selectRow.row.productUnit = ''
+              selectRow.row.stock = 0
+              selectRow.row.unitPrice = 0
+              selectRow.row.taxTotalPrice = 0
+              selectRow.row.amount = 0
+              selectRow.row.taxRate = 0
+              selectRow.row.productNumber = 0
             }
           }
         }
@@ -679,7 +703,7 @@ export default defineComponent({
         purchaseOrderFormState.multipleAccountAmounts = []
       }
 
-      purchaseOrderFormState.discountLastAmount = purchaseOrderFormState.discountLastAmount.replace(/,/g, '').replace(amountSymbol.value, '')
+      purchaseOrderFormState.discountLastAmount = purchaseOrderFormState.discountLastAmount.toString().replace(/,/g, '').replace(amountSymbol.value, '')
       const params: AddOrUpdateReceiptReq = {
         ...purchaseOrderFormState,
         tableData: dataArray,
@@ -707,6 +731,8 @@ export default defineComponent({
       barCode.value = ''
       purchaseOrderFormState.remark = ''
       fileList.value = []
+      warehouseList.value = []
+      warehouseLabelList.value = []
       multipleAccounts.value = {}
       const table = xGrid.value
       if(table) {
@@ -772,8 +798,10 @@ export default defineComponent({
 
     function addRowData() {
       const table = xGrid.value
+      const defaultWarehouse = warehouseList.value.find(item => item.isDefault === 1)
+      const warehouseId = defaultWarehouse ? defaultWarehouse.id : warehouseList.value[0].id
       if(table) {
-        table.insert({productNumber: 0})
+        table.insert({warehouseId: warehouseId})
       }
     }
 
@@ -921,6 +949,13 @@ export default defineComponent({
       multipleAccounts.value = data;
     }
 
+    const formatWarehouseId = (value: string) => {
+      const item = warehouseList.value.find(item => item.id === value)
+      if(item) {
+        return item.warehouseName
+      }
+    }
+
     return {
       t,
       h,
@@ -984,6 +1019,8 @@ export default defineComponent({
       multipleAccountModal,
       handleAccountSuccess,
       productList,
+      warehouseLabelList,
+      formatWarehouseId,
       productLabelList,
       selectBarCode,
       handleSupplierModalSuccess

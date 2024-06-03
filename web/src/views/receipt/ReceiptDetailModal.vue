@@ -20,6 +20,7 @@ export default defineComponent({
     const getTitle = ref('选择单据明细');
     const { createMessage } = useMessage();
     const receiptNumber = ref('');
+    const uid = ref('');
     const [registerTable, { getSelectRows, reload}] = useTable({
       rowKey: 'id',
       columns: ReceiptDetailColumn,
@@ -40,6 +41,7 @@ export default defineComponent({
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200});
       receiptNumber.value = data.receiptNumber
+      uid.value = data.uid
       reload({
         searchInfo: {
           "id": data.id,
@@ -57,6 +59,7 @@ export default defineComponent({
       const dataObject = {
         receiptNumber: receiptNumber.value,
         receiptDetailData: rows,
+        uid: uid.value,
       }
       context.emit('handleReceiptSuccess', dataObject);
       closeModal();

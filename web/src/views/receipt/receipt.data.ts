@@ -76,7 +76,13 @@ export const ReceiptColumn: BasicColumn[] = [
     {
         title: 'id',
         dataIndex: 'id',
-        width: 60,
+        width: 0,
+        ifShow: false,
+    },
+    {
+        title: 'uid',
+        dataIndex: 'uid',
+        width: 0,
         ifShow: false,
     },
     {
