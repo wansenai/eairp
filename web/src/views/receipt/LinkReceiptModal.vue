@@ -85,6 +85,7 @@ export default defineComponent({
         id: rows[0].id,
         receiptNumber: rows[0].receiptNumber,
         type: type.value,
+        uid: rows[0].uid,
       });
       closeModal();
     }

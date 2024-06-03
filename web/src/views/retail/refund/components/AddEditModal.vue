@@ -723,6 +723,7 @@ export default defineComponent({
       const table = xGrid.value
       if(data && table) {
         formState.otherReceipt = data.receiptNumber;
+        formState.memberId = data.uid
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {
@@ -739,7 +740,6 @@ export default defineComponent({
           };
           table.insert(tableData)
         })
-        formState.memberId = data.receiptDetailData[0].memberId
       }
     }
 

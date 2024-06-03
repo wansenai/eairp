@@ -256,7 +256,7 @@ import {
   xGrid,
   tableData,
   gridOptions, getTaxTotalPrice,
-} from '/src/views/sales/model/addEditModel';
+} from '@/views/sales/model/addEditModel';
 import {getCustomerList} from "@/api/basic/customer";
 import {CustomerResp} from "@/api/basic/model/customerModel";
 import {getOperatorList} from "@/api/basic/operator";
@@ -272,7 +272,7 @@ import SelectProductModal from "@/views/product/info/components/SelectProductMod
 import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
 import {getWarehouseList} from "@/api/basic/warehouse";
 import {AddOrUpdateReceiptReq, SalesData} from "@/api/sale/model/orderModel";
-import {FileData} from '/@/api/retail/model/shipmentsModel';
+import {FileData} from '@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";
@@ -1081,10 +1081,10 @@ export default defineComponent({
     }
 
     function handleReceiptSuccess(data) {
-      console.info(data)
       const table = xGrid.value
       if(data && table) {
         saleShipmentsFormState.otherReceipt = data.receiptNumber;
+        saleShipmentsFormState.customerId = data.uid;
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {
@@ -1106,7 +1106,6 @@ export default defineComponent({
           };
           table.insert(tableData)
         })
-        saleShipmentsFormState.customerId = data.receiptDetailData[0].memberId
       }
     }
 

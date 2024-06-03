@@ -18,6 +18,7 @@ export interface ReceiptDetailResp {
 export interface ReceiptResp {
     id: string;
     name : string;
+    uid: string;
     receiptNumber : string;
     productInfo : string;
     receiptDate : string;

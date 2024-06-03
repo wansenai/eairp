@@ -29,7 +29,7 @@
               <a-select v-model:value="purchaseRefundFormState.supplierId"
                         :dropdownMatchSelectWidth="false" showSearch optionFilterProp="children"
                         :placeholder="t('purchase.refund.form.inputSupplier')"
-                        :options="Array.isArray(supplierList) ? supplierList.map(item => ({ value: item.id, label: item.supplierName })) : []">
+                        :options="supplierList.map(item => ({ value: item.id, label: item.supplierName }))">
                 <template #dropdownRender="{ menuNode: menu }">
                   <v-nodes :vnodes="menu"/>
                   <a-divider style="margin: 4px 0"/>
@@ -1070,6 +1070,7 @@ export default defineComponent({
       const table = xGrid.value
       if(data && table) {
         purchaseRefundFormState.otherReceipt = data.receiptNumber;
+        purchaseRefundFormState.supplierId = data.uid;
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {
