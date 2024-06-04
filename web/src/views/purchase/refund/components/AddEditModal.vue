@@ -242,7 +242,7 @@ import {
   tableData,
   gridOptions,
   getTaxTotalPrice,
-} from '/src/views/purchase/model/addEditModel';
+} from '@/views/purchase/model/addEditModel';
 import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
 import FinancialAccountModal from "@/views/basic/settlement-account/components/FinancialAccountModal.vue";
@@ -254,7 +254,7 @@ import SelectProductModal from "@/views/product/info/components/SelectProductMod
 import {getProductSkuByBarCode, getProductStockSku} from "@/api/product/product";
 import {getWarehouseList} from "@/api/basic/warehouse";
 import {AddOrUpdatePurchaseRefundReq, PurchaseRefundData} from "@/api/purchase/model/refundModel";
-import {FileData} from '/@/api/retail/model/shipmentsModel';
+import {FileData} from '@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
 import {AccountResp} from "@/api/financial/model/accountModel";
 import XEUtils from "xe-utils";

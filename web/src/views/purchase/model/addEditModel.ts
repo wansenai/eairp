@@ -123,11 +123,6 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
     filterConfig: {
         remote: true
     },
-    pagerConfig: {
-        enabled: true,
-        pageSize: 10,
-        pageSizes: [5, 10, 15, 20, 50, 100, 200, 500, 1000]
-    },
     formConfig: {
         titleWidth: 100,
         titleAlign: 'right',
@@ -164,9 +159,9 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
             title: t('purchase.order.form.table.name'),
             width:160,
         },
-        { field: 'productStandard', title: t('purchase.order.form.table.standard'), width: 120,  },
+        { field: 'productStandard', title: t('purchase.order.form.table.standard'), width: 90,  },
         { field: 'stock', title: t('purchase.order.form.table.stock'),  width: 70},
-        { field: 'productUnit', title: t('purchase.order.form.table.unit'),  width: 70},
+        { field: 'productUnit', title: t('purchase.order.form.table.unit'),  width: 60},
         { field: 'productNumber', title: t('purchase.order.form.table.quantity'),  sortable: true, width:100,
             slots: { edit: 'product_number_edit' },
             editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } },
@@ -189,20 +184,18 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
             slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
         },
-        { field: 'taxRate', title: t('purchase.order.form.table.taxRate'), width: 105,
+        { field: 'taxRate', title: t('purchase.order.form.table.taxRate'), width: 120,
             slots: { edit: 'tax_rate_edit' },
             editRender: { name: '$input', attrs: { type: 'float', digits: 2, placeholder: '请输入税率' } }
         },
-        { field: 'taxAmount', title: t('purchase.order.form.table.taxAmount'),  width: 105,
+        { field: 'taxAmount', title: t('purchase.order.form.table.taxAmount'),  width: 125,
             editRender:{attrs: {type: 'float', digits: 2}},
             slots: { edit: 'tax_amount_edit' },
         },
-        { field: 'taxTotalPrice', title: t('purchase.order.form.table.totalIncludingTax'),  width: 105,
+        { field: 'taxTotalPrice', title: t('purchase.order.form.table.totalIncludingTax'),  width: 125,
             slots: { edit: 'tax_total_price_edit' },
             editRender: { name: '$input', attrs: {type: 'float', digits: 2, placeholder: '请输入价税合计' } }
         },
-        { field: 'remark', title: t('purchase.order.form.table.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
-
     ],
     footerMethod ({ columns, data }) {
         return [
@@ -235,6 +228,9 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
         range: true
     },
     editRules: {
+        warehouseId: [
+            { required: true, message: t('purchase.order.form.noticeEight') }
+        ],
         barCode: [
             { required: true, message: t('purchase.order.form.noticeFive') }
         ]
@@ -281,11 +277,6 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     filterConfig: {
         remote: true
     },
-    pagerConfig: {
-        enabled: true,
-        pageSize: 10,
-        pageSizes: [5, 10, 15, 20, 50, 100, 200, 500, 1000]
-    },
     formConfig: {
         titleWidth: 100,
         titleAlign: 'right',
@@ -305,7 +296,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         { type: 'checkbox', field:'productId', title: 'ID', width: 80},
         {
             field: 'warehouseId',
-            title: t('purchase.storage.form.table.barCode'),
+            title: t('purchase.storage.form.table.warehouse'),
             width: 130,
             slots: { edit: 'warehouse_edit', default: 'warehouse_default'},
             editRender: { name: 'input', attrs: { placeholder: t('purchase.storage.form.table.inputWarehouse') } }
@@ -322,9 +313,9 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             title: t('purchase.storage.form.table.name'),
             width:160,
         },
-        { field: 'productStandard', title: t('purchase.storage.form.table.standard'), width: 120,  },
+        { field: 'productStandard', title: t('purchase.storage.form.table.standard'), width: 90,  },
         { field: 'stock', title: t('purchase.storage.form.table.stock'),  width: 70},
-        { field: 'productUnit', title: t('purchase.storage.form.table.unit'),  width: 70},
+        { field: 'productUnit', title: t('purchase.storage.form.table.unit'),  width: 60},
         { field: 'productNumber', title: t('purchase.storage.form.table.quantity'),  sortable: true, width:100,
             slots: { edit: 'product_number_edit' },
             editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } },
@@ -347,20 +338,18 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
         },
-        { field: 'taxRate', title: t('purchase.storage.form.table.taxRate'), width: 105,
+        { field: 'taxRate', title: t('purchase.storage.form.table.taxRate'), width: 120,
             slots: { edit: 'tax_rate_edit' },
             editRender: { name: '$input', attrs: { type: 'float', digits: 2, placeholder: '请输入税率' } }
         },
-        { field: 'taxAmount', title: t('purchase.storage.form.table.taxAmount'),  width: 105,
+        { field: 'taxAmount', title: t('purchase.storage.form.table.taxAmount'),  width: 125,
             editRender:{attrs: {type: 'float', digits: 2}},
             slots: { edit: 'tax_amount_edit' },
         },
-        { field: 'taxTotalPrice', title: t('purchase.storage.form.table.totalIncludingTax'),  width: 105,
+        { field: 'taxTotalPrice', title: t('purchase.storage.form.table.totalIncludingTax'),  width: 125,
             slots: { edit: 'tax_total_price_edit' },
             editRender: { name: '$input', attrs: {type: 'float', digits: 2, placeholder: '请输入价税合计' } }
         },
-        { field: 'remark', title: t('purchase.storage.form.table.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
-
     ],
     footerMethod ({ columns, data }) {
         return [

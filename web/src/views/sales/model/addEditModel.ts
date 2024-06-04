@@ -126,11 +126,6 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
     filterConfig: {
         remote: true
     },
-    pagerConfig: {
-        enabled: true,
-        pageSize: 10,
-        pageSizes: [5, 10, 15, 20, 50, 100, 200, 500, 1000]
-    },
     formConfig: {
         titleWidth: 100,
         titleAlign: 'right',
@@ -167,8 +162,8 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
             title: t('sales.shipments.form.table.name'),
             width:160,
         },
-        { field: 'productStandard', title: t('sales.shipments.form.table.standard'), width: 120,  },
-        { field: 'stock', title: t('sales.shipments.form.table.stock'),  width: 70},
+        { field: 'productStandard', title: t('sales.shipments.form.table.standard'), width: 90,  },
+        { field: 'stock', title: t('sales.shipments.form.table.stock'),  width: 60},
         { field: 'productUnit', title: t('sales.shipments.form.table.unit'),  width: 70},
         { field: 'productNumber', title: t('sales.shipments.form.table.quantity'),  sortable: true, width:100,
             slots: { edit: 'product_number_edit' },
@@ -192,20 +187,18 @@ const orderGridOptions = reactive<VxeGridProps<RowVO>>({
             slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
         },
-        { field: 'taxRate', title: t('sales.shipments.form.table.taxRate'), width: 105,
+        { field: 'taxRate', title: t('sales.shipments.form.table.taxRate'), width: 120,
             slots: { edit: 'tax_rate_edit' },
             editRender: { name: '$input', attrs: { type: 'float', digits: 2, placeholder: '请输入税率' } }
         },
-        { field: 'taxAmount', title: t('sales.shipments.form.table.taxAmount'),  width: 105,
+        { field: 'taxAmount', title: t('sales.shipments.form.table.taxAmount'),  width: 125,
             editRender:{attrs: {type: 'float', digits: 2}},
             slots: { edit: 'tax_amount_edit' },
         },
-        { field: 'taxTotalPrice', title: t('sales.shipments.form.table.totalPriceAndTax'),  width: 105,
+        { field: 'taxTotalPrice', title: t('sales.shipments.form.table.totalPriceAndTax'),  width: 125,
             slots: { edit: 'tax_total_price_edit' },
             editRender: { name: '$input', attrs: {type: 'float', digits: 2, placeholder: '请输入价税合计' } }
         },
-        { field: 'remark', title: t('sales.shipments.form.table.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
-
     ],
     footerMethod ({ columns, data }) {
         return [
@@ -287,11 +280,6 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     filterConfig: {
         remote: true
     },
-    pagerConfig: {
-        enabled: true,
-        pageSize: 10,
-        pageSizes: [5, 10, 15, 20, 50, 100, 200, 500, 1000]
-    },
     formConfig: {
         titleWidth: 100,
         titleAlign: 'right',
@@ -328,8 +316,8 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             title: t('sales.shipments.form.table.name'),
             width:160,
         },
-        { field: 'productStandard', title: t('sales.shipments.form.table.standard'), width: 120,  },
-        { field: 'stock', title: t('sales.shipments.form.table.stock'),  width: 70},
+        { field: 'productStandard', title: t('sales.shipments.form.table.standard'), width: 90,  },
+        { field: 'stock', title: t('sales.shipments.form.table.stock'),  width: 60},
         { field: 'productUnit', title: t('sales.shipments.form.table.unit'),  width: 70},
         { field: 'productNumber', title: t('sales.shipments.form.table.quantity'),  sortable: true, width:100,
             slots: { edit: 'product_number_edit' },
@@ -353,20 +341,18 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
         },
-        { field: 'taxRate', title: t('sales.shipments.form.table.taxRate'), width: 105,
+        { field: 'taxRate', title: t('sales.shipments.form.table.taxRate'), width: 120,
             slots: { edit: 'tax_rate_edit' },
             editRender: { name: '$input', attrs: { type: 'float', digits: 2, placeholder: '请输入税率' } }
         },
-        { field: 'taxAmount', title: t('sales.shipments.form.table.taxAmount'),  width: 105,
+        { field: 'taxAmount', title: t('sales.shipments.form.table.taxAmount'),  width: 125,
             editRender:{attrs: {type: 'float', digits: 2}},
             slots: { edit: 'tax_amount_edit' },
         },
-        { field: 'taxTotalPrice', title: t('sales.shipments.form.table.totalPriceAndTax'),  width: 105,
+        { field: 'taxTotalPrice', title: t('sales.shipments.form.table.totalPriceAndTax'),  width: 125,
             slots: { edit: 'tax_total_price_edit' },
             editRender: { name: '$input', attrs: {type: 'float', digits: 2, placeholder: '请输入价税合计' } }
         },
-        { field: 'remark', title: t('sales.shipments.form.table.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
-
     ],
     footerMethod ({ columns, data }) {
         return [
