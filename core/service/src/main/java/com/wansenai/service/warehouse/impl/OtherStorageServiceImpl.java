@@ -154,6 +154,7 @@ public class OtherStorageServiceImpl extends ServiceImpl<WarehouseReceiptMainMap
                 .le(StringUtils.hasLength(queryOtherStorageDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryOtherStorageDTO.getEndDate())
                 .eq(WarehouseReceiptMain::getType, "其他入库")
                 .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .orderByDesc(WarehouseReceiptMain::getCreateTime)
                 .page(page);
 
         var otherStorageVOList = new ArrayList<OtherStorageVO>(wrapperMainMapper.getRecords().size() + 1);

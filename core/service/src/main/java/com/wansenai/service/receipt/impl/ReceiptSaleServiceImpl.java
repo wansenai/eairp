@@ -285,7 +285,8 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 .eq(querySaleOrderDTO.getStatus() != null, ReceiptSaleMain::getStatus, querySaleOrderDTO.getStatus())
                 .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .ge(StringUtils.hasText(querySaleOrderDTO.getStartDate()), ReceiptSaleMain::getCreateTime, querySaleOrderDTO.getStartDate())
-                .le(StringUtils.hasText(querySaleOrderDTO.getEndDate()), ReceiptSaleMain::getCreateTime, querySaleOrderDTO.getEndDate());
+                .le(StringUtils.hasText(querySaleOrderDTO.getEndDate()), ReceiptSaleMain::getCreateTime, querySaleOrderDTO.getEndDate())
+                .orderByDesc(ReceiptSaleMain::getCreateTime);
 
         var queryResult = receiptSaleMainMapper.selectPage(page, queryWrapper);
 
@@ -336,6 +337,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .ge(StringUtils.hasText(querySaleOrderDTO.getStartDate()), ReceiptSaleMain::getCreateTime, querySaleOrderDTO.getStartDate())
                 .le(StringUtils.hasText(querySaleOrderDTO.getEndDate()), ReceiptSaleMain::getCreateTime, querySaleOrderDTO.getEndDate())
+                .orderByDesc(ReceiptSaleMain::getCreateTime)
                 .list();
 
         saleMains.forEach(item -> {
@@ -586,7 +588,8 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 .eq(shipmentsDTO.getStatus() != null, ReceiptSaleMain::getStatus, shipmentsDTO.getStatus())
                 .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .ge(StringUtils.hasText(shipmentsDTO.getStartDate()), ReceiptSaleMain::getCreateTime, shipmentsDTO.getStartDate())
-                .le(StringUtils.hasText(shipmentsDTO.getEndDate()), ReceiptSaleMain::getCreateTime, shipmentsDTO.getEndDate());
+                .le(StringUtils.hasText(shipmentsDTO.getEndDate()), ReceiptSaleMain::getCreateTime, shipmentsDTO.getEndDate())
+                .orderByDesc(ReceiptSaleMain::getCreateTime);
 
         var queryResult = receiptSaleMainMapper.selectPage(page, queryWrapper);
 
@@ -937,7 +940,8 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 .eq(refundDTO.getStatus() != null, ReceiptSaleMain::getStatus, refundDTO.getStatus())
                 .eq(ReceiptSaleMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .ge(StringUtils.hasText(refundDTO.getStartDate()), ReceiptSaleMain::getCreateTime, refundDTO.getStartDate())
-                .le(StringUtils.hasText(refundDTO.getEndDate()), ReceiptSaleMain::getCreateTime, refundDTO.getEndDate());
+                .le(StringUtils.hasText(refundDTO.getEndDate()), ReceiptSaleMain::getCreateTime, refundDTO.getEndDate())
+                .orderByDesc(ReceiptSaleMain::getCreateTime);
 
         var queryResult = receiptSaleMainMapper.selectPage(page, queryWrapper);
 

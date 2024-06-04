@@ -15,22 +15,22 @@ const columns: BasicColumn[] = [
     {
         title: t('product.info.table.barCode'),
         dataIndex: 'productBarcode',
-        width: 80,
+        width: 110,
     },
     {
         title: t('product.info.table.productName'),
         dataIndex: 'productName',
-        width: 100,
+        width: 250,
     },
     {
         title: t('product.info.table.productStandard'),
         dataIndex: 'productStandard',
-        width: 80,
+        width: 100,
     },
     {
         title: t('product.info.table.productModel'),
         dataIndex: 'productModel',
-        width: 100,
+        width: 80,
     },
     {
         title: t('product.info.table.productColor'),
@@ -40,7 +40,7 @@ const columns: BasicColumn[] = [
     {
         title: t('product.info.table.productCategory'),
         dataIndex: 'productCategoryName',
-        width: 80,
+        width: 70,
     },
     {
         title: t('product.info.table.productUnit'),
@@ -70,7 +70,7 @@ const columns: BasicColumn[] = [
     {
         title: t('product.info.table.lowestSellPrice'),
         dataIndex: 'lowPrice',
-        width: 60,
+        width: 90,
     },
     {
         title: t('product.info.table.status'),
@@ -107,7 +107,7 @@ const columns: BasicColumn[] = [
     {
         title: t('product.info.table.createTime'),
         dataIndex: 'createTime',
-        width: 80,
+        width: 130,
     }
 ]
 

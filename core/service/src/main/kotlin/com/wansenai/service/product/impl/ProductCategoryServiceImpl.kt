@@ -31,7 +31,6 @@ import java.time.LocalDateTime
 
 @Service
 open class ProductCategoryServiceImpl(
-    private val productCategoryMapper: ProductCategoryMapper,
     private val userService: ISysUserService
 ) : ServiceImpl<ProductCategoryMapper, ProductCategory>(), ProductCategoryService {
 
@@ -39,7 +38,7 @@ open class ProductCategoryServiceImpl(
         val productCategoryVOs = mutableListOf<ProductCategoryVO>()
         val productCategories = lambdaQuery()
             .eq(ProductCategory::getDeleteFlag, CommonConstants.NOT_DELETED)
-            .orderByAsc(ProductCategory::getSort)
+            .orderByDesc(ProductCategory::getCreateTime)
             .list()
         productCategories.forEach {
             val productCategoryVO = ProductCategoryVO()

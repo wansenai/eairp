@@ -120,6 +120,7 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 .ge(StringUtils.hasLength(queryExpenseDTO.getStartDate()), FinancialMain::getReceiptDate, queryExpenseDTO.getStartDate())
                 .le(StringUtils.hasLength(queryExpenseDTO.getEndDate()), FinancialMain::getReceiptDate, queryExpenseDTO.getEndDate())
                 .eq(FinancialMain::getType, "支出")
+                .orderByDesc(FinancialMain::getCreateTime)
                 .page(page);
 
         var expenseVOList = new ArrayList<ExpenseVO>(financialMainPage.getRecords().size() + 1);

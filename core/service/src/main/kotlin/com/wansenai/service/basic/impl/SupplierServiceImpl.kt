@@ -52,6 +52,7 @@ open class SupplierServiceImpl(
             supplier?.startDate?.let { ge(Supplier::getCreateTime, it) }
             supplier?.endDate?.let { le(Supplier::getCreateTime, it) }
             eq(Supplier::getDeleteFlag, CommonConstants.NOT_DELETED)
+            orderByDesc(Supplier::getCreateTime)
         }
 
         val result = page?.run {

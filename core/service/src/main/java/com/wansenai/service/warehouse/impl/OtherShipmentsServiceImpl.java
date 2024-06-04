@@ -152,6 +152,7 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 .le(StringUtils.hasLength(queryOtherShipmentDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryOtherShipmentDTO.getEndDate())
                 .eq(WarehouseReceiptMain::getType, "其他出库")
                 .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .orderByDesc(WarehouseReceiptMain::getCreateTime)
                 .page(page);
 
         var otherShipmentVOList = new ArrayList<OtherShipmentVO>(wrapperMainMapper.getRecords().size() + 1);

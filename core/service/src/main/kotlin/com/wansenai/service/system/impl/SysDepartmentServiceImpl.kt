@@ -154,6 +154,7 @@ open class SysDepartmentServiceImpl(
             .eq(StringUtils.hasText(deptName), SysDepartment::getName, deptName)
             .`in`(SysDepartment::getTenantId, tenantId)
             .eq(SysDepartment::getDeleteFlag, CommonConstants.NOT_DELETED)
+            .orderByDesc(SysDepartment::getCreateTime)
             .list()
 
         return assemblePcNodesList(results, departments, deptName)

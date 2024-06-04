@@ -280,7 +280,8 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .eq(queryPurchaseOrderDTO.getStatus() != null, ReceiptPurchaseMain::getStatus, queryPurchaseOrderDTO.getStatus())
                 .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .ge(StringUtils.hasText(queryPurchaseOrderDTO.getStartDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseOrderDTO.getStartDate())
-                .le(StringUtils.hasText(queryPurchaseOrderDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseOrderDTO.getEndDate());
+                .le(StringUtils.hasText(queryPurchaseOrderDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseOrderDTO.getEndDate())
+                .orderByDesc(ReceiptPurchaseMain::getCreateTime);
 
         var queryResult = receiptPurchaseMainMapper.selectPage(page, queryWrapper);
 
@@ -576,7 +577,8 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .eq(queryPurchaseStorageDTO.getStatus() != null, ReceiptPurchaseMain::getStatus, queryPurchaseStorageDTO.getStatus())
                 .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .ge(StringUtils.hasText(queryPurchaseStorageDTO.getStartDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseStorageDTO.getStartDate())
-                .le(StringUtils.hasText(queryPurchaseStorageDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseStorageDTO.getEndDate());
+                .le(StringUtils.hasText(queryPurchaseStorageDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseStorageDTO.getEndDate())
+                .orderByDesc(ReceiptPurchaseMain::getCreateTime);
 
         var queryResult = receiptPurchaseMainMapper.selectPage(page, queryWrapper);
 
@@ -930,7 +932,8 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .eq(queryPurchaseRefundDTO.getStatus() != null, ReceiptPurchaseMain::getStatus, queryPurchaseRefundDTO.getStatus())
                 .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .ge(StringUtils.hasText(queryPurchaseRefundDTO.getStartDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseRefundDTO.getStartDate())
-                .le(StringUtils.hasText(queryPurchaseRefundDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseRefundDTO.getEndDate());
+                .le(StringUtils.hasText(queryPurchaseRefundDTO.getEndDate()), ReceiptPurchaseMain::getCreateTime, queryPurchaseRefundDTO.getEndDate())
+                .orderByDesc(ReceiptPurchaseMain::getCreateTime);
 
         var queryResult = receiptPurchaseMainMapper.selectPage(page, queryWrapper);
 

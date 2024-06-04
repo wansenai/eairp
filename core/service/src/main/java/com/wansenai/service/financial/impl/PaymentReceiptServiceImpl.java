@@ -119,6 +119,7 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 .le(StringUtils.hasLength(queryPaymentDTO.getEndDate()), FinancialMain::getReceiptDate, queryPaymentDTO.getEndDate())
                 .eq(FinancialMain::getType, "付款")
                 .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .orderByDesc(FinancialMain::getCreateTime)
                 .page(page);
 
         var paymentVOList = new ArrayList<PaymentVO>(financialMainPage.getRecords().size() + 1);

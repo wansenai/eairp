@@ -119,6 +119,7 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
                 .le(StringUtils.hasLength(queryCollectionDTO.getEndDate()), FinancialMain::getReceiptDate, queryCollectionDTO.getEndDate())
                 .eq(FinancialMain::getType, "收款")
                 .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .orderByDesc(FinancialMain::getCreateTime)
                 .page(page);
 
         var collectionVOList = new ArrayList<CollectionVO>(financialMainPage.getRecords().size() + 1);

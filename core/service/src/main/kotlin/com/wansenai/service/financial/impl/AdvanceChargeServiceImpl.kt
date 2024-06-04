@@ -175,6 +175,7 @@ open class AdvanceChargeServiceImpl(
             advanceChargeDTO?.endDate?.let { le(FinancialMain::getCreateTime, it) }
             eq(FinancialMain::getType, "收预付款")
             eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+            orderByDesc(FinancialMain::getCreateTime)
         }
 
         val result = page?.run {

@@ -69,6 +69,7 @@ open class SysRoleServiceImpl(
             roleListDTO?.roleName?.let { eq(SysRole::getRoleName, it) }
             roleListDTO?.status?.let { eq(SysRole::getStatus, it) }
             eq(SysRole::getDeleteFlag, CommonConstants.NOT_DELETED)
+            orderByDesc(SysRole::getCreateTime)
         }
 
         val result = rolePage?.run {

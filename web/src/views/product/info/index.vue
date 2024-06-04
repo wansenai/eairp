@@ -80,6 +80,7 @@ export default defineComponent({
       useSearchForm: true,
       clickToRowSelect: false,
       showTableSetting: true,
+      showIndexColumn: false,
       actionColumn: {
         width: 80,
         title: t('common.operating'),

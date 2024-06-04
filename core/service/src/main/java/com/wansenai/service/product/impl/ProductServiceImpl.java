@@ -291,7 +291,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .eq(queryProductDTO.getStatus() != null, Product::getStatus, queryProductDTO.getStatus())
                 .eq(queryProductDTO.getEnableSerialNumber() != null, Product::getEnableSerialNumber, queryProductDTO.getEnableSerialNumber())
                 .eq(queryProductDTO.getEnableBatchNumber() != null, Product::getEnableBatchNumber, queryProductDTO.getEnableBatchNumber())
-                .eq(Product::getDeleteFlag, CommonConstants.NOT_DELETED);
+                .eq(Product::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .orderByDesc(Product::getCreateTime);
 
         productMapper.selectPage(productPage, wrapper);
         productPage.getRecords().forEach(item -> {

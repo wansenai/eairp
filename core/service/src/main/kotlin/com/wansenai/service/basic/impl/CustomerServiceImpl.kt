@@ -52,6 +52,7 @@ open class CustomerServiceImpl(
             queryCustomerDTO?.startDate?.let { ge(Customer::getCreateTime, it) }
             queryCustomerDTO?.endDate?.let { le(Customer::getCreateTime, it) }
             eq(Customer::getDeleteFlag, CommonConstants.NOT_DELETED)
+            orderByDesc(Customer::getCreateTime)
         }
 
         val result = page?.run {

@@ -151,6 +151,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                 .le(StringUtils.hasLength(queryAssembleReceiptDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryAssembleReceiptDTO.getEndDate())
                 .eq(WarehouseReceiptMain::getType, "组装单")
                 .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .orderByDesc(WarehouseReceiptMain::getCreateTime)
                 .page(page);
 
         var assembleReceiptVOList = new ArrayList<AssembleReceiptVO>(wrapperMainMapper.getRecords().size() + 1);
