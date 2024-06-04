@@ -84,11 +84,6 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
     filterConfig: {
         remote: true
     },
-    pagerConfig: {
-        enabled: true,
-        pageSize: 10,
-        pageSizes: [5, 10, 15, 20, 50, 100, 200, 500, 1000]
-    },
     formConfig: {
         titleWidth: 100,
         titleAlign: 'right',
@@ -99,7 +94,7 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
         slots: {
             buttons: 'toolbar_buttons'
         },
-        refresh: true, // 显示刷新按钮
+        refresh: false, // 显示刷新按钮
         export: true, // 显示导出按钮
         print: true, // 显示打印按钮
         zoom: true, // 显示全屏按钮
@@ -149,8 +144,6 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             slots: { edit: 'amount_edit' },
             editRender: { name: '$input', props: { type: 'float', digits: 2, placeholder: '输入金额' } }
         },
-        // { field: 'remark', title: '备注', editRender: { name: 'input', attrs: { placeholder: '请输入备注' } } },
-
     ],
     footerMethod ({ columns, data }) {
         return [
