@@ -50,6 +50,7 @@ open class MemberServiceImpl(
             memberDTO?.startDate?.let { ge(Member::getCreateTime, it) }
             memberDTO?.endDate?.let { le(Member::getCreateTime, it) }
             eq(Member::getDeleteFlag, CommonConstants.NOT_DELETED)
+            orderByDesc(Member::getCreateTime)
         }
 
         val result = page?.run {

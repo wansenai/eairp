@@ -35,6 +35,7 @@ open class WarehouseServiceImpl (
                 warehouseDTO?.warehouseName?.let { like(Warehouse::getWarehouseName, it) }
                 warehouseDTO?.remark?.let { like(Warehouse::getRemark, it) }
                 eq(Warehouse::getDeleteFlag, CommonConstants.NOT_DELETED)
+                orderByDesc(Warehouse::getCreateTime)
         }
 
         val result = page?.run {

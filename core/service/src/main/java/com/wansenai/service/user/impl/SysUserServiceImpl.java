@@ -629,6 +629,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         query.eq(StringUtils.hasText(userListDto.getName()), SysUser::getName, userListDto.getName());
         query.eq(StringUtils.hasText(userListDto.getPhoneNumber()), SysUser::getPhoneNumber, userListDto.getPhoneNumber());
         query.eq(SysUser::getDeleteFlag, CommonConstants.NOT_DELETED);
+        query.orderByDesc(SysUser::getCreateTime);
         userMapper.selectPage(page, query);
 
         var resultIds = page.getRecords().stream().map(SysUser::getId).toList();

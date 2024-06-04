@@ -43,6 +43,7 @@ open class ProductAttributeServiceImpl(
         val wrapper = LambdaQueryWrapper<ProductAttribute>().apply() {
             productAttributeQuery?.attributeName?.let { like(ProductAttribute::getAttributeName, it) }
             eq(ProductAttribute::getDeleteFlag, CommonConstants.NOT_DELETED)
+            orderByDesc(ProductAttribute::getCreateTime)
         }
 
         val result = page?.run {

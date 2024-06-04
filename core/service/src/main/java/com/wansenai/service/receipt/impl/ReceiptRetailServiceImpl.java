@@ -266,7 +266,8 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .eq(shipmentsDTO.getStatus() != null, ReceiptRetailMain::getStatus, shipmentsDTO.getStatus())
                 .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .ge(StringUtils.hasText(shipmentsDTO.getStartDate()), ReceiptRetailMain::getCreateTime, shipmentsDTO.getStartDate())
-                .le(StringUtils.hasText(shipmentsDTO.getEndDate()), ReceiptRetailMain::getCreateTime, shipmentsDTO.getEndDate());
+                .le(StringUtils.hasText(shipmentsDTO.getEndDate()), ReceiptRetailMain::getCreateTime, shipmentsDTO.getEndDate())
+                .orderByDesc(ReceiptRetailMain::getCreateTime);
 
         var queryResult = receiptRetailMainMapper.selectPage(page, queryWrapper);
 
@@ -294,6 +295,8 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                     .build();
             retailShipmentsVOList.add(retailShipmentsVO);
         });
+
+
         result.setRecords(retailShipmentsVOList);
         result.setTotal(queryResult.getTotal());
         result.setCurrent(queryResult.getCurrent());
@@ -569,7 +572,8 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 .eq(refundDTO.getStatus() != null, ReceiptRetailMain::getStatus, refundDTO.getStatus())
                 .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .ge(StringUtils.hasText(refundDTO.getStartDate()), ReceiptRetailMain::getCreateTime, refundDTO.getStartDate())
-                .le(StringUtils.hasText(refundDTO.getEndDate()), ReceiptRetailMain::getCreateTime, refundDTO.getEndDate());
+                .le(StringUtils.hasText(refundDTO.getEndDate()), ReceiptRetailMain::getCreateTime, refundDTO.getEndDate())
+                .orderByDesc(ReceiptRetailMain::getCreateTime);
 
         var queryResult = receiptRetailMainMapper.selectPage(page, queryWrapper);
 

@@ -121,6 +121,7 @@ public class IncomeReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, F
                 .le(StringUtils.hasLength(queryIncomeDTO.getEndDate()), FinancialMain::getReceiptDate, queryIncomeDTO.getEndDate())
                 .eq(FinancialMain::getType, "收入")
                 .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .orderByDesc(FinancialMain::getCreateTime)
                 .page(page);
 
         var incomeVOList = new ArrayList<IncomeVO>(financialMainPage.getRecords().size() + 1);

@@ -116,6 +116,7 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
                 .ge(StringUtils.hasLength(queryTransferDTO.getStartDate()), FinancialMain::getReceiptDate, queryTransferDTO.getStartDate())
                 .le(StringUtils.hasLength(queryTransferDTO.getEndDate()), FinancialMain::getReceiptDate, queryTransferDTO.getEndDate())
                 .eq(FinancialMain::getType, "转账")
+                .orderByDesc(FinancialMain::getCreateTime)
                 .page(page);
 
         var transferVOList = new ArrayList<TransferVO>(financialMainPage.getRecords().size() + 1);

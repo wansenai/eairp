@@ -154,6 +154,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 .le(StringUtils.hasLength(queryAllotReceiptDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryAllotReceiptDTO.getEndDate())
                 .eq(WarehouseReceiptMain::getType, "调拨出库")
                 .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .orderByDesc(WarehouseReceiptMain::getCreateTime)
                 .page(page);
 
         var allotReceiptVOList = new ArrayList<AllotReceiptVO>(wrapperMainMapper.getRecords().size() + 1);

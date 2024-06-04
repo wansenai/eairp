@@ -155,6 +155,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                 .le(StringUtils.hasLength(queryDisassembleReceiptDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryDisassembleReceiptDTO.getEndDate())
                 .eq(WarehouseReceiptMain::getType, "拆卸单")
                 .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .orderByDesc(WarehouseReceiptMain::getCreateTime)
                 .page(page);
 
         var disAssembleReceiptVOList = new ArrayList<DisassembleReceiptVO>(wrapperMainMapper.getRecords().size() + 1);

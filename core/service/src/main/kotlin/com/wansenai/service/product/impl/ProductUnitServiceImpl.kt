@@ -44,6 +44,7 @@ open class ProductUnitServiceImpl(
         val wrapper = LambdaQueryWrapper<ProductUnit>().apply {
             productUnitQuery?.computeUnit?.let { like(ProductUnit::getComputeUnit, it) }
             eq(ProductUnit::getDeleteFlag, CommonConstants.NOT_DELETED)
+            orderByDesc(ProductUnit::getCreateTime)
         }
 
         val result = page?.run {
