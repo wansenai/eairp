@@ -43,6 +43,9 @@ public class RetailReportVO {
     @ExcelExport(value = "扩展信息")
     private String productExtendInfo;
 
+    @ExcelExport(value = "会员")
+    private String member;
+
     @ExcelExport(value = "单位")
     private String productUnit;
 

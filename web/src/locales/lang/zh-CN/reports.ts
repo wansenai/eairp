@@ -97,6 +97,7 @@ export default {
             startDate: '开始日期',
             endDate: '结束日期',
             supplier: '供应商',
+            warehouse: '仓库'
         },
         table: {
             barCode: '条码',

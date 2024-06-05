@@ -43,6 +43,9 @@ public class SalesReportVO {
     @ExcelExport(value = "扩展信息")
     private String productExtendInfo;
 
+    @ExcelExport(value = "客户")
+    private String customer;
+
     @ExcelExport(value = "单位")
     private String productUnit;
 
