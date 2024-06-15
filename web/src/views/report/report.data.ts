@@ -267,17 +267,19 @@ export const searchRetailSchema: FormSchema[] = [
         label: t('reports.retail.header.productInfo'),
         field: 'productExtendInfo',
         component: 'Input',
-        colProps: { span: 7 },
+        colProps: { span: 6 },
     },
     {
-        field: '[startDate, endDate]',
-        label: t('reports.retail.header.receiptDate'),
-        component: 'RangePicker',
+        label: t('reports.purchase.header.warehouse'),
+        field: 'warehouseId',
+        component: 'ApiSelect',
         componentProps: {
-            format: 'YYYY/MM/DD',
-            placeholder: [t('reports.retail.header.startDate'), t('reports.retail.header.endDate')],
+            api: getWarehouseList,
+            resultField: 'data',
+            labelField: 'warehouseName',
+            valueField: 'id',
         },
-        colProps: { span: 7 },
+        colProps: { span: 6 },
     },
     {
         label: t('reports.retail.header.member'),
@@ -289,7 +291,17 @@ export const searchRetailSchema: FormSchema[] = [
             labelField: 'memberName',
             valueField: 'id',
         },
-        colProps: { span: 7 },
+        colProps: { span: 6 },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: t('reports.retail.header.receiptDate'),
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: [t('reports.retail.header.startDate'), t('reports.retail.header.endDate')],
+        },
+        colProps: { span: 6 },
     },
 ]
 
@@ -325,8 +337,8 @@ export const retailStatisticsColumns: BasicColumn[] = [
         width: 120,
     },
     {
-        title: t('reports.retail.table.unit'),
-        dataIndex: 'productUnit',
+        title: t('reports.retail.header.member'),
+        dataIndex: 'member',
         width: 80,
     },
     {
@@ -362,17 +374,19 @@ export const searchPurchaseSchema: FormSchema[] = [
         label: t('reports.purchase.header.productInfo'),
         field: 'productExtendInfo',
         component: 'Input',
-        colProps: { span: 7 },
+        colProps: { span: 6 },
     },
     {
-        field: '[startDate, endDate]',
-        label: t('reports.purchase.header.receiptDate'),
-        component: 'RangePicker',
+        label: t('reports.purchase.header.warehouse'),
+        field: 'warehouseId',
+        component: 'ApiSelect',
         componentProps: {
-            format: 'YYYY/MM/DD',
-            placeholder: [t('reports.purchase.header.startDate'), t('reports.purchase.header.endDate')],
+            api: getWarehouseList,
+            resultField: 'data',
+            labelField: 'warehouseName',
+            valueField: 'id',
         },
-        colProps: { span: 7 },
+        colProps: { span: 6 },
     },
     {
         label: t('reports.purchase.header.supplier'),
@@ -384,7 +398,17 @@ export const searchPurchaseSchema: FormSchema[] = [
             labelField: 'supplierName',
             valueField: 'id',
         },
-        colProps: { span: 7 },
+        colProps: { span: 6 },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: t('reports.purchase.header.receiptDate'),
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: [t('reports.purchase.header.startDate'), t('reports.purchase.header.endDate')],
+        },
+        colProps: { span: 6 },
     },
 ]
 
@@ -405,8 +429,8 @@ export const purchaseStatisticsColumns: BasicColumn[] = [
         width: 120,
     },
     {
-        title: t('reports.purchase.table.standard'),
-        dataIndex: 'productStandard',
+        title: t('reports.purchase.header.supplier'),
+        dataIndex: 'supplier',
         width: 120,
     },
     {
@@ -446,17 +470,19 @@ export const searchSalesSchema: FormSchema[] = [
         label: t('reports.sales.header.productInfo'),
         field: 'productExtendInfo',
         component: 'Input',
-        colProps: { span: 7 },
+        colProps: { span: 6 },
     },
     {
-        field: '[startDate, endDate]',
-        label: t('reports.sales.header.receiptDate'),
-        component: 'RangePicker',
+        label: t('reports.purchase.header.warehouse'),
+        field: 'warehouseId',
+        component: 'ApiSelect',
         componentProps: {
-            format: 'YYYY/MM/DD',
-            placeholder: [t('reports.sales.header.startDate'), t('reports.sales.header.endDate')],
+            api: getWarehouseList,
+            resultField: 'data',
+            labelField: 'warehouseName',
+            valueField: 'id',
         },
-        colProps: { span: 7 },
+        colProps: { span: 6 },
     },
     {
         label: t('reports.sales.header.customer'),
@@ -468,7 +494,17 @@ export const searchSalesSchema: FormSchema[] = [
             labelField: 'customerName',
             valueField: 'id',
         },
-        colProps: { span: 7 },
+        colProps: { span: 6 },
+    },
+    {
+        field: '[startDate, endDate]',
+        label: t('reports.sales.header.receiptDate'),
+        component: 'RangePicker',
+        componentProps: {
+            format: 'YYYY/MM/DD',
+            placeholder: [t('reports.sales.header.startDate'), t('reports.sales.header.endDate')],
+        },
+        colProps: { span: 6 },
     },
 ]
 
@@ -504,8 +540,8 @@ export const salesStatisticsColumns: BasicColumn[] = [
         width: 120,
     },
     {
-        title: t('reports.sales.table.unit'),
-        dataIndex: 'productUnit',
+        title: t('reports.sales.header.customer'),
+        dataIndex: 'customer',
         width: 80,
     },
     {

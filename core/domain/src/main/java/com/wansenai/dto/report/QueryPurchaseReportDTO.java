@@ -21,7 +21,8 @@ public class QueryPurchaseReportDTO {
 
     private Long supplierId;
 
-    private Long warehouseId;
+    private Long warehouseId
+            ;
 
     private String startDate;
 

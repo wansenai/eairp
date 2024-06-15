@@ -44,6 +44,9 @@ public class PurchaseReportVO {
     @ExcelExport(value = "扩展信息")
     private String productExtendInfo;
 
+    @ExcelExport(value = "供应商")
+    private String supplier;
+
     @ExcelExport(value = "单位")
     private String productUnit;
 

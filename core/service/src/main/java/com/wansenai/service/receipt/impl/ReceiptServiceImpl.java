@@ -1006,6 +1006,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         retailPage.getRecords().forEach(item -> {
             var retailSubs = receiptRetailSubService.lambdaQuery()
                     .eq(ReceiptRetailSub::getReceiptMainId, item.getId())
+                    .eq(queryRetailReportDTO.getWarehouseId() != null, ReceiptRetailSub::getWarehouseId, queryRetailReportDTO.getWarehouseId())
                     .eq(ReceiptRetailSub::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .list();
 
@@ -1030,7 +1031,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                     retailVo.setProductUnit(product.getProductUnit());
                     retailVo.setProductExtendInfo(productExtendInfo);
                 }
-                // 如果是相同的商品条码和仓库名称 则不进行重复添加
+                retailVo.setMember(commonService.getMemberName(item.getMemberId()));
+                // 如果是相同的商品条码和仓库名称和会员 则不进行重复添加
                 if (retailVos.stream().noneMatch(matchRetailVo -> retailVo.getProductBarcode().equals(matchRetailVo.getProductBarcode())
                         && retailVo.getWarehouseName().equals(matchRetailVo.getWarehouseName()))) {
                     retailVos.add(retailVo);
@@ -1096,6 +1098,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         purchasePage.getRecords().forEach(item -> {
             var purchaseSub = receiptPurchaseSubService.lambdaQuery()
                     .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
+                    .eq(queryPurchaseReportDTO.getWarehouseId() != null, ReceiptPurchaseSub::getWarehouseId, queryPurchaseReportDTO.getWarehouseId())
                     .eq(ReceiptPurchaseSub::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .list();
 
@@ -1120,6 +1123,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     purchaseVo.setProductUnit(product.getProductUnit());
                     purchaseVo.setProductExtendInfo(productExtendInfo);
                 }
+                purchaseVo.setSupplier(commonService.getSupplierName(item.getSupplierId()));
                 purchaseVo.setCreateTime(receiptPurchaseSub.getCreateTime());
                 if (purchaseVos.stream().noneMatch(matchPurchaseVo -> purchaseVo.getProductBarcode().equals(matchPurchaseVo.getProductBarcode())
                         && purchaseVo.getWarehouseName().equals(matchPurchaseVo.getWarehouseName()))) {
@@ -1185,6 +1189,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         salePage.getRecords().forEach(item -> {
             var saleSubs = receiptSaleSubService.lambdaQuery()
                     .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
+                    .eq(querySalesReportDTO.getWarehouseId() != null, ReceiptSaleSub::getWarehouseId, querySalesReportDTO.getWarehouseId())
                     .eq(ReceiptSaleSub::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .list();
 
@@ -1209,7 +1214,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     saleVo.setProductUnit(product.getProductUnit());
                     saleVo.setProductExtendInfo(productExtendInfo);
                 }
-
+                saleVo.setCustomer(commonService.getCustomerName(item.getCustomerId()));
 
                 if (saleVos.stream().noneMatch(matchSaleVo -> saleVo.getProductBarcode().equals(matchSaleVo.getProductBarcode())
                         && saleVo.getWarehouseName().equals(matchSaleVo.getWarehouseName()))) {

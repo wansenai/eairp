@@ -97,6 +97,7 @@ export default {
             startDate: 'Start Date',
             endDate: 'End Date',
             supplier: 'Supplier',
+            warehouse: 'Warehouse'
         },
         table: {
             barCode: 'BarCode',
