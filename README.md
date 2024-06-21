@@ -38,28 +38,13 @@ It's completely free, if this project is helpful to you, please click on Star. T
 
 ## Online preview
 - [eairp preview / 在线预览](https://eairp.cn/)
-- test account (测试账号): wansen
+- test account (测试账号): eairp
 - test password (测试密码): 123456
 
 Some functional modules are being developed and improved, please refer to our [to-do list](https://github.com/wansenai/eairp/issues/118) / [开发清单](https://github.com/wansenai/eairp/issues/124). It's not easy to generate electricity with love.
 
 ## Quick Start
-```shell
-docker pull wansenai/eairp:2.1.1
-
-docker pull wansenai/eairp-web:2.1.1
-```
-## Run Server
-You can customize and modify port 8080, please ensure that the service ports monitored by your front-end are consistent.
-If you want to deploy to your domain name, the local host needs to be modified to your domain name.
-
-We will use the Docker Compose method for integration and deployment next it is coming soon :)
-
-```shell
-docker run --name eairp -d -p 8080:8088 wansenai/eairp:2.1.1
-
-docker run --name eairp-web -d -p 3000:80 -e API_BASE_URL=http://localhost:8080/erp-api wansenai/eairp-web:2.1.1
-```
+We provide a more comprehensive Docker deployment method, which can be found in [eairp-docker repository](https://github.com/wansenai/eairp-docker/)
 
 ## System screenshot (only part)
 ![](images/login-page-en.png)
