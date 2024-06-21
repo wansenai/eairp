@@ -150,6 +150,10 @@
         <logger name="erp-api-logger" level="debug"/>
     </springProfile>
 
+    <springProfile name="docker">
+        <logger name="erp-api-logger" level="debug"/>
+    </springProfile>
+
     <root level="info">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="DEBUG_FILE"/>
@@ -168,4 +172,13 @@
     <!--        <appender-ref ref="WARN_FILE" />-->
     <!--        </root>-->
     <!--    </springProfile>-->
+    <springProfile name="docker">
+        <root level="info">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="DEBUG_FILE" />
+        <appender-ref ref="INFO_FILE" />
+        <appender-ref ref="ERROR_FILE" />
+        <appender-ref ref="WARN_FILE" />
+        </root>
+    </springProfile>
 </configuration>
