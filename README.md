@@ -38,7 +38,7 @@ It's completely free, if this project is helpful to you, please click on Star. T
 
 ## Online preview
 - [eairp preview / 在线预览](https://eairp.cn/)
-- test account (测试账号): eairp
+- test account (测试账号): admin
 - test password (测试密码): 123456
 
 Some functional modules are being developed and improved, please refer to our [to-do list](https://github.com/wansenai/eairp/issues/118) / [开发清单](https://github.com/wansenai/eairp/issues/124). It's not easy to generate electricity with love.
