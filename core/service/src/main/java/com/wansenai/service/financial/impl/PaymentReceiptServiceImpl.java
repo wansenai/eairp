@@ -279,20 +279,20 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                     .set(FinancialMain::getUpdateTime, LocalDateTime.now())
                     .update();
 
-            var account = accountService.getById(addOrUpdatePaymentDTO.getPaymentAccountId());
-            if (account != null) {
-                var accountBalance = account.getCurrentAmount();
-                var changeAmount = addOrUpdatePaymentDTO.getActualPaymentAmount();
-                var beforeChangeAmount = beforeReceipt.stream()
-                        .map(FinancialSub::getSingleAmount)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-                accountBalance = accountBalance.add(beforeChangeAmount);
-                if (changeAmount != null) {
-                    accountBalance = accountBalance.subtract(changeAmount);
-                }
-                account.setCurrentAmount(accountBalance);
-                accountService.updateById(account);
-            }
+//            var account = accountService.getById(addOrUpdatePaymentDTO.getPaymentAccountId());
+//            if (account != null) {
+//                var accountBalance = account.getCurrentAmount();
+//                var changeAmount = addOrUpdatePaymentDTO.getActualPaymentAmount();
+//                var beforeChangeAmount = beforeReceipt.stream()
+//                        .map(FinancialSub::getSingleAmount)
+//                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+//                accountBalance = accountBalance.add(beforeChangeAmount);
+//                if (changeAmount != null) {
+//                    accountBalance = accountBalance.subtract(changeAmount);
+//                }
+//                account.setCurrentAmount(accountBalance);
+//                accountService.updateById(account);
+//            }
 
             if (!updateSubResult || !updateFinancialMain) {
                 return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_ERROR);
@@ -338,18 +338,18 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                     .collect(Collectors.toList());
             var saveSubResult = financialSubService.saveBatch(financialSub);
 
-            var account = accountService.getById(addOrUpdatePaymentDTO.getPaymentAccountId());
-            if (account != null) {
-                // 更新余额 采购划扣金额
-                var accountBalance = account.getCurrentAmount();
-                var changeAmount = addOrUpdatePaymentDTO.getActualPaymentAmount();
-                if (changeAmount != null) {
-                    accountBalance = accountBalance.subtract(changeAmount);
-                    account.setId(addOrUpdatePaymentDTO.getPaymentAccountId());
-                    account.setCurrentAmount(accountBalance);
-                    accountService.updateById(account);
-                }
-            }
+//            var account = accountService.getById(addOrUpdatePaymentDTO.getPaymentAccountId());
+//            if (account != null) {
+//                // 更新余额 采购划扣金额
+//                var accountBalance = account.getCurrentAmount();
+//                var changeAmount = addOrUpdatePaymentDTO.getActualPaymentAmount();
+//                if (changeAmount != null) {
+//                    accountBalance = accountBalance.subtract(changeAmount);
+//                    account.setId(addOrUpdatePaymentDTO.getPaymentAccountId());
+//                    account.setCurrentAmount(accountBalance);
+//                    accountService.updateById(account);
+//                }
+//            }
 
             if (!saveResult || !saveSubResult) {
                 return Response.responseMsg(CollectionPaymentCodeEnum.ADD_PAYMENT_RECEIPT_ERROR);

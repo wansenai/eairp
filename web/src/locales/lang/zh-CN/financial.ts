@@ -345,6 +345,7 @@ export default {
             noticeTwo: '请选择付款账户',
             noticeThree: '该文件超过2MB大小限制',
             noticeFour: '确定要删除选中的数据?',
+            noticeFive: '为避免重复添加相同的采购欠款单据号，请修改已有的单据',
             total: '合计',
             inputRemark: '请输入备注',
             annex: '附件',
