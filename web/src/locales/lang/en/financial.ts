@@ -345,6 +345,7 @@ export default {
             noticeTwo: 'Please select the payment account',
             noticeThree: 'The file exceeds the 2MB size limit',
             noticeFour: 'Are you sure you want to delete the selected data?',
+            noticeFive: 'To avoid duplicate addition of the same purchase debt document number, please modify the existing document',
             total: 'Total',
             inputRemark: 'Please enter the remark',
             annex: 'Attachment',

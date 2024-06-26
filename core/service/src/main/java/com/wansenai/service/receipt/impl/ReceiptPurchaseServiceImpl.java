@@ -732,7 +732,10 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         if (id == null) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
-        var purchaseMain = getById(id);
+        var purchaseMain = lambdaQuery()
+                .eq(ReceiptPurchaseMain::getId, id)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .one();
         var purchasesStorageDetailVO = createPurchaseStorageDetail(purchaseMain);
         return Response.responseData(purchasesStorageDetailVO);
     }
@@ -1289,7 +1292,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             var operatorName = getUserName(item.getCreateBy());
             var financeMainList = paymentReceiptService.lambdaQuery()
                     .eq(FinancialMain::getRelatedPersonId, item.getSupplierId())
-                    .eq(FinancialMain::getStatus, CommonConstants.NOT_DELETED)
+                    .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .list();
             var purchaseArrearsVO = PurchaseArrearsVO.builder()
                     .id(item.getId())
@@ -1300,6 +1303,10 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .operatorName(operatorName)
                     .thisReceiptArrears(item.getArrearsAmount())
                     .build();
+
+
+            BigDecimal prepaidArrears = BigDecimal.ZERO;
+
             if(!financeMainList.isEmpty()) {
                 for (FinancialMain financialMain : financeMainList) {
                     var financeSubList = financialSubService.lambdaQuery()
@@ -1307,12 +1314,16 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                             .eq(FinancialSub::getOtherReceipt, item.getReceiptNumber())
                             .eq(FinancialSub::getDeleteFlag, CommonConstants.NOT_DELETED)
                             .list();
-                    var receivedArrears = calculateArrearsAmount(financeSubList, FinancialSub::getReceivedPrepaidArrears);
-                    purchaseArrearsVO.setPrepaidArrears(receivedArrears);
-                    purchaseArrearsVO.setPaymentArrears(item.getArrearsAmount().subtract(receivedArrears));
+                    prepaidArrears = prepaidArrears.add(calculateArrearsAmount(financeSubList, FinancialSub::getReceivedPrepaidArrears));
                 }
             }
-            purchaseArrearsVOList.add(purchaseArrearsVO);
+            BigDecimal paymentArrears = item.getArrearsAmount().subtract(prepaidArrears);
+            // Only add the PurchaseArrearsVO to the list if there are remaining arrears
+            if (paymentArrears.compareTo(BigDecimal.ZERO) > 0) {
+                purchaseArrearsVO.setPrepaidArrears(prepaidArrears);
+                purchaseArrearsVO.setPaymentArrears(paymentArrears);
+                purchaseArrearsVOList.add(purchaseArrearsVO);
+            }
         });
         result.setRecords(purchaseArrearsVOList);
         result.setTotal(queryResult.getTotal());

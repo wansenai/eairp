@@ -175,7 +175,7 @@ import {
   tableData,
   gridOptions,
   getThisPaymentAmount
-} from '/@/views/financial/payment/addEditPayment.data';
+} from '@/views/financial/payment/addEditPayment.data';
 import {getOperatorList} from "@/api/basic/operator";
 import {OperatorResp} from "@/api/basic/model/operatorModel";
 import {useModal} from "@/components/Modal";
@@ -184,7 +184,7 @@ import FinancialAccountModal from "@/views/basic/settlement-account/components/F
 import {VXETable, VxeGrid, VxeInput, VxeButton, VxeSelect, VxeOption} from 'vxe-table'
 import {useMessage} from "@/hooks/web/useMessage";
 import { addOrUpdatePayment, getPaymentDetailById} from "@/api/financial/payment"
-import {FileData} from '/@/api/retail/model/shipmentsModel';
+import {FileData} from '@/api/retail/model/shipmentsModel';
 import {getAccountList} from "@/api/financial/account";
 import {getSupplierList} from "@/api/basic/supplier";
 import XEUtils from "xe-utils";
@@ -411,6 +411,7 @@ export default defineComponent({
         createMessage.warn(t('financial.payment.form.inputDiscountAmount'));
         return;
       }
+
       const table = xGrid.value
       if(table) {
         const insertRecords = table.getInsertRecords()
