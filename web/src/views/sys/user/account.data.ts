@@ -1,8 +1,8 @@
-import { BasicColumn, FormSchema } from '/@/components/Table';
-import { useI18n } from '/@/hooks/web/useI18n';
+import { BasicColumn, FormSchema } from '@/components/Table';
+import { useI18n } from '@/hooks/web/useI18n';
 import { h } from 'vue';
 import { Switch } from 'ant-design-vue';
-import { useMessage } from '/@/hooks/web/useMessage';
+import { useMessage } from '@/hooks/web/useMessage';
 import { updateStatus } from "@/api/sys/user";
 import {getDeptList} from "@/api/sys/dept";
 import { getRoleList } from "@/api/sys/role";
@@ -104,8 +104,7 @@ export const accountFormSchema: FormSchema[] = [
     field: 'username',
     label: t('sys.login.userName'),
     component: 'Input',
-    // 注意最好使用异步验证
-    helpMessage: ['不能输入带有admin的用户名'],
+    helpMessage: [t('sys.tenant.form.noticeThree')],
     rules: [
       {
         required: true,
@@ -119,7 +118,7 @@ export const accountFormSchema: FormSchema[] = [
     label: t('sys.login.password'),
     component: 'InputPassword',
     required: false,
-    helpMessage: ['如果不填写，则默认密码为123456'],
+    helpMessage: [t('sys.tenant.form.noticeTwo')],
     ifShow: isNotExist
   },
   {

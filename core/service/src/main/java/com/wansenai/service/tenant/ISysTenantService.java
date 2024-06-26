@@ -12,8 +12,13 @@
  */
 package com.wansenai.service.tenant;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.tenant.AddOrUpdateTenantDTO;
+import com.wansenai.dto.tenant.TenantListDTO;
 import com.wansenai.entities.tenant.SysTenant;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.TenantInfoVO;
 
 /**
  * <p>
@@ -22,4 +27,15 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ISysTenantService extends IService<SysTenant> {
 
+    Response<Page<TenantInfoVO>> tenantList(TenantListDTO tenantListDTO);
+
+    Response<String> addOrUpdate(AddOrUpdateTenantDTO addOrUpdateTenantDTO);
+
+    Response<String> checkAddUser();
+
+    Boolean checkTenantExpire(Long tenantId);
+
+    Response<String> update(AddOrUpdateTenantDTO updateDTO);
+
+    Response<String> delete(String tenantId);
 }

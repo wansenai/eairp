@@ -121,13 +121,33 @@ export default {
     remake: 'Remark',
     addAccount: 'Add Account',
     editAccount: 'Edit Account',
-
+    notAllowAddUser: 'The current tenant has reached the maximum number of users that can be added',
     // user table list action
     viewUserDetails: 'View User Details',
     editUserProfile: 'Edit User Profile',
     resetUserPassword: 'Reset User Password',
     confirmPasswordReset: 'Are you sure to reset the password to 123456',
     deleteUserAccount: 'Delete User Account'
+  },
+  tenant: {
+    tenantList: 'Tenant List',
+    addTenant: 'Add Tenant',
+    editTenant: 'Edit Tenant',
+    deleteTenant: 'Delete Tenant',
+    form: {
+      name: 'Tenant Name',
+      status: 'Status',
+      free: 'Free Tenant',
+      pay: 'Pay Tenant',
+      type: 'Type',
+      remark: 'Remark',
+      userNumLimit: 'User Number Limit',
+      expireTime: 'Expire Time',
+      noticeOne: 'Please default to select the tenant administrator role',
+      noticeTwo: 'If not filled in, the default password is 123456',
+      noticeThree: 'Cannot enter a username with admin',
+      noticeFour: 'After expiration, all users under the tenant are unable to login and use the system',
+    }
   },
   table: {
     add: 'Add Data',

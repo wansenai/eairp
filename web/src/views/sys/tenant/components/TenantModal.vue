@@ -7,15 +7,14 @@
 import {defineComponent, ref, computed, unref} from 'vue';
 import {BasicModal, useModalInner} from '@/components/Modal';
 import {BasicForm, useForm} from '@/components/Form/index';
-import {accountFormSchema} from '@/views/sys/user/account.data';
 import {getUserBindDept} from '@/api/sys/dept';
-import {addOrUpdateUser} from '@/api/sys/user';
-import {addOrUpdateUserReq} from '@/api/sys/model/userModel'
+import {addOrUpdateTenant} from '@/api/sys/tenant';
+import {tenantFormSchema} from "@/views/sys/tenant/tenant.data";
 import {useI18n} from "vue-i18n";
-import {getRoleList} from "@/api/sys/role";
+import {addOrUpdateTenantReq} from "@/api/sys/model/tenantModel";
 
 export default defineComponent({
-  name: 'AccountModal',
+  name: 'TenantModal',
   components: {BasicModal, BasicForm},
   emits: ['success', 'register'],
   setup(_, {emit}) {
@@ -26,7 +25,7 @@ export default defineComponent({
     const [registerForm, {setFieldsValue, updateSchema, resetFields, validate}] = useForm({
       labelWidth: 100,
       baseColProps: {span: 24},
-      schemas: accountFormSchema,
+      schemas: tenantFormSchema,
       showActionButtonGroup: false,
       actionColOptions: {
         span: 23,
@@ -54,7 +53,7 @@ export default defineComponent({
       }
     });
 
-    const getTitle = computed(() => (!unref(isUpdate) ? t('sys.user.addAccount') : t('sys.user.editAccount')));
+    const getTitle = computed(() => (!unref(isUpdate) ? t('sys.tenant.addTenant') : t('sys.tenant.editTenant')));
     const showPassword = getTitle.value;
 
     async function handleSubmit() {
@@ -62,19 +61,23 @@ export default defineComponent({
         const values = await validate();
         setModalProps({confirmLoading: true});
 
-        const userObject: addOrUpdateUserReq = {
+        const userObject: addOrUpdateTenantReq = {
           id: values.id !== null ? values.id : '',
           username: values.username,
           password: values.password,
-          name: values.name,
+          tenantName: values.tenantName,
+          type: values.type,
+          status: values.status,
+          userNumLimit: values.userNumLimit,
+          expireTime: values.expireTime,
           email: values.email,
           phoneNumber: values.phoneNumber,
           roleId: values.roleId,
           deptId: values.deptId,
-          remake: values.remake,
+          remark: values.remark,
         }
-        const result = await addOrUpdateUser(userObject)
-        if(result.code === 'A0002' || result.code === 'A0014') {
+        const result = await addOrUpdateTenant(userObject)
+        if(result.code === 'A0300' || result.code === 'A0301') {
           closeModal();
           emit('success', {isUpdate: unref(isUpdate), values: {...values, id: rowId.value}});
         }

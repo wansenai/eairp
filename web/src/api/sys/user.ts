@@ -1,4 +1,4 @@
-import {defHttp} from '/@/utils/http/axios';
+import {defHttp} from '@/utils/http/axios';
 import {
     addOrUpdateUserReq, emailLoginReq,
     GetUserInfoModel,
@@ -10,7 +10,7 @@ import {
     updateUserInfoReq,
 } from './model/userModel';
 
-import {ErrorMessageMode, SuccessMessageMode, UploadFileParams} from '/#/axios';
+import {ErrorMessageMode, SuccessMessageMode, UploadFileParams} from '#/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {ContentTypeEnum} from "@/enums/httpEnum";
 

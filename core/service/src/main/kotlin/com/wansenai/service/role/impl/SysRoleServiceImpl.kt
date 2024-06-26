@@ -47,6 +47,8 @@ open class SysRoleServiceImpl(
         val sysRoles = lambdaQuery()
             .eq(SysRole::getDeleteFlag, CommonConstants.NOT_DELETED)
             .list()
+            // not return platform admin role
+            .filter { it.id != 0L }
         sysRoles.forEach { item ->
             val roleVo = RoleVO()
             BeanUtils.copyProperties(item, roleVo)

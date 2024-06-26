@@ -48,16 +48,17 @@
 </template>
 <script lang="ts">
   import { defineComponent, reactive } from 'vue';
-  import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getUserList, deleteUser, resetPassword } from '/@/api/sys/user';
-  import { PageWrapper } from '/@/components/Page';
-  import { useModal } from '/@/components/Modal';
+  import { BasicTable, useTable, TableAction } from '@/components/Table';
+  import { getUserList, deleteUser, resetPassword } from '@/api/sys/user';
+  import { PageWrapper } from '@/components/Page';
+  import { useModal } from '@/components/Modal';
   import { columns, searchFormSchema } from '@/views/sys/user/account.data';
   import { useI18n } from 'vue-i18n';
   import { useMessage } from "@/hooks/web/useMessage";
 
   import AccountModal from '@/views/sys/user/components/AccountModal.vue';
   import DeptTree from '@/views/sys/user/components/DeptTree.vue';
+  import {checkAddUser} from "@/api/sys/tenant";
 
   export default defineComponent({
     name: 'AccountManagement',
@@ -90,10 +91,16 @@
         },
       });
 
-      function handleCreate() {
-        openModal(true, {
-          isUpdate: false,
-        });
+      async function handleCreate() {
+        const result = await checkAddUser();
+        if(result.code === 'A0304') {
+          createMessage.info(t('sys.user.notAllowAddUser'));
+          return;
+        } else {
+          openModal(true, {
+            isUpdate: false,
+          });
+        }
       }
 
       function handleSelect(deptId) {

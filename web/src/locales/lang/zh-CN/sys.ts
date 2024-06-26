@@ -114,13 +114,33 @@ export default {
     remake: '备注',
     addAccount: '新增账户',
     editAccount: '编辑账户',
-
+    notAllowAddUser: '当前租户可添加的用户数量已达上限',
     // 用户数据表格操作
     viewUserDetails: '查看用户详情',
     editUserProfile: '编辑用户资料',
     resetUserPassword: '重置密码',
     confirmPasswordReset: '确定重置密码为123456吗',
     deleteUserAccount: '删除账号'
+  },
+  tenant: {
+    tenantList: '租户列表',
+    addTenant: '新增租户',
+    editTenant: '编辑租户',
+    deleteTenant: '删除租户',
+    form: {
+      name: '租户名称',
+      status: '租户状态',
+      free: '免费租户',
+      pay: '付费租户',
+      type: '租户类型',
+      remark: '备注',
+      userNumLimit: '用户数量限制',
+      expireTime: '到期时间',
+      noticeOne: '请默认选择租户管理员角色',
+      noticeTwo: '如果不填写，则默认密码为123456',
+      noticeThree: '不能输入带有admin的用户名',
+      noticeFour: '到期后租户下的所有用户无法登录使用系统',
+    }
   },
   table: {
     add: '新增',

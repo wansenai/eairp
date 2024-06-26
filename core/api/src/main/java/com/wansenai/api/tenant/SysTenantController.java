@@ -12,20 +12,49 @@
  */
 package com.wansenai.api.tenant;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.tenant.AddOrUpdateTenantDTO;
+import com.wansenai.dto.tenant.TenantListDTO;
+import com.wansenai.service.tenant.ISysTenantService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.TenantInfoVO;
+import org.springframework.web.bind.annotation.*;
 
 /**
- * <p>
  * 租户 前端控制器
- * </p>
- *
- * @author James Zow
- * @since 2023-09-05
  */
 @RestController
-@RequestMapping("/sysTenant")
+@RequestMapping("/tenant")
 public class SysTenantController {
 
+    private final ISysTenantService tenantService;
+
+    public SysTenantController(ISysTenantService tenantService) {
+        this.tenantService = tenantService;
+    }
+
+    @PostMapping(value = "list")
+    public Response<Page<TenantInfoVO>> tenantList(@RequestBody TenantListDTO tenantListDTO) {
+        return tenantService.tenantList(tenantListDTO);
+    }
+
+    @PostMapping(value = "addOrUpdate")
+    public Response<String> addOrUpdate(@RequestBody AddOrUpdateTenantDTO addOrUpdateTenantDTO) {
+        return tenantService.addOrUpdate(addOrUpdateTenantDTO);
+    }
+
+    @GetMapping(value = "checkAddUser")
+    public Response<String> checkAddUser() {
+        return tenantService.checkAddUser();
+    }
+
+    @PostMapping(value= "update")
+    public Response<String> update(@RequestBody AddOrUpdateTenantDTO updateDTO) {
+        return tenantService.update(updateDTO);
+    }
+
+    @PostMapping(value = "delete")
+    public Response<String> delete(@RequestParam(value = "tenantId") String tenantId) {
+        return tenantService.delete(tenantId);
+    }
 }
