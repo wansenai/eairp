@@ -46,6 +46,11 @@ public class SysTenant implements Serializable {
     private Long tenantId;
 
     /**
+     * 关联的用户id
+     */
+    private Long userId;
+
+    /**
      * 租户名称
      */
     private String name;
@@ -58,12 +63,12 @@ public class SysTenant implements Serializable {
     /**
      * 租户类型，0免费租户，1付费租户
      */
-    private Boolean type;
+    private Integer type;
 
     /**
      * 启用 0-禁用  1-启用
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 备注
