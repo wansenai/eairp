@@ -5,13 +5,14 @@
 </template>
 <script lang="ts">
 import {defineComponent, ref, computed, unref} from 'vue';
-import {BasicModal, useModalInner} from '/@/components/Modal';
-import {BasicForm, useForm} from '/@/components/Form/index';
+import {BasicModal, useModalInner} from '@/components/Modal';
+import {BasicForm, useForm} from '@/components/Form/index';
 import {accountFormSchema} from '@/views/sys/user/account.data';
-import {getUserBindDept} from '/@/api/sys/dept';
-import {addOrUpdateUser} from '/@/api/sys/user';
+import {getUserBindDept} from '@/api/sys/dept';
+import {addOrUpdateUser} from '@/api/sys/user';
 import {addOrUpdateUserReq} from '@/api/sys/model/userModel'
 import {useI18n} from "vue-i18n";
+import {getRoleList} from "@/api/sys/role";
 
 export default defineComponent({
   name: 'AccountModal',
@@ -72,7 +73,6 @@ export default defineComponent({
           deptId: values.deptId,
           remake: values.remake,
         }
-        console.info(userObject)
         const result = await addOrUpdateUser(userObject)
         if(result.code === 'A0002' || result.code === 'A0014') {
           closeModal();

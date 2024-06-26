@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wansenai.entities.system.SysPlatformConfig;
 import com.wansenai.entities.warehouse.Warehouse;
+import com.wansenai.mappers.tenant.SysTenantMapper;
 import com.wansenai.mappers.warehouse.WarehouseMapper;
 import com.wansenai.middleware.oss.TencentOSS;
 import com.wansenai.service.system.ISysPlatformConfigService;
@@ -26,6 +27,7 @@ import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.dto.user.*;
 import com.wansenai.utils.constants.*;
 import com.wansenai.utils.enums.BaseCodeEnum;
+import com.wansenai.utils.enums.TenantCodeEnum;
 import com.wansenai.utils.enums.UserCodeEnum;
 import com.wansenai.utils.redis.RedisUtil;
 import com.wansenai.utils.response.Response;
@@ -97,8 +99,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private final ISysPlatformConfigService platformConfigService;
 
+    private final SysTenantMapper tenantMapper;
+
     public SysUserServiceImpl(SysUserMapper userMapper, RedisUtil redisUtil, JWTUtil jwtUtil, ISysUserRoleRelService userRoleRelService,
-                              ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper, SysMenuMapper menuMapper, SysRoleMenuRelService roleMenuRelService, WarehouseMapper warehouseMapper, ISysPlatformConfigService platformConfigService) {
+                              ISysUserDeptRelService userDeptRelService, SysRoleMapper roleMapper, SysDepartmentMapper departmentMapper, SysMenuMapper menuMapper, SysRoleMenuRelService roleMenuRelService, WarehouseMapper warehouseMapper, ISysPlatformConfigService platformConfigService, SysTenantMapper tenantMapper) {
         this.userMapper = userMapper;
         this.redisUtil = redisUtil;
         this.jwtUtil = jwtUtil;
@@ -110,6 +114,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         this.roleMenuRelService = roleMenuRelService;
         this.warehouseMapper = warehouseMapper;
         this.platformConfigService = platformConfigService;
+        this.tenantMapper = tenantMapper;
     }
 
 
@@ -278,6 +283,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (user.getDeleteFlag() == CommonConstants.DELETED) {
             return Response.responseMsg(UserCodeEnum.USER_ACCOUNT_INVALID);
         }
+        // Check user tenant expiration skip admin
+        var tenant = tenantMapper.selectById(user.getTenantId());
+        if (!"admin".equals(accountLoginDto.getUsername()) && tenant.getExpireTime().isBefore(LocalDateTime.now())) {
+            return Response.responseMsg(TenantCodeEnum.TENANT_EXPIRED);
+        }
 
         var token = "";
         if (redisUtil.hasKey(user.getUserName() + ":token")) {
@@ -325,6 +335,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
         if (user.getDeleteFlag() == CommonConstants.DELETED) {
             return Response.responseMsg(UserCodeEnum.USER_ACCOUNT_INVALID);
+        }
+
+        // Check user tenant expiration skip admin
+        var tenant = tenantMapper.selectById(user.getTenantId());
+        if (!"admin".equals(user.getUserName()) && tenant.getExpireTime().isBefore(LocalDateTime.now())) {
+            return Response.responseMsg(TenantCodeEnum.TENANT_EXPIRED);
         }
 
         var token = "";
@@ -376,6 +392,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
         if (user.getDeleteFlag() == CommonConstants.DELETED) {
             return Response.responseMsg(UserCodeEnum.USER_ACCOUNT_INVALID);
+        }
+
+        // Check user tenant expiration skip admin
+        var tenant = tenantMapper.selectById(user.getTenantId());
+        if (!"admin".equals(user.getUserName()) && tenant.getExpireTime().isBefore(LocalDateTime.now())) {
+            return Response.responseMsg(TenantCodeEnum.TENANT_EXPIRED);
         }
 
         var token = "";
@@ -786,25 +808,25 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
     }
 
-    private Boolean checkUserNameExist(String userName) {
+    public Boolean checkUserNameExist(String userName) {
         return lambdaQuery()
                 .eq(SysUser::getUserName, userName)
                 .exists();
     }
 
-    private Boolean checkPhoneNumberExist(String phoneNumber) {
+    public Boolean checkPhoneNumberExist(String phoneNumber) {
         return lambdaQuery()
                 .eq(SysUser::getPhoneNumber, phoneNumber)
                 .exists();
     }
 
-    private Boolean checkEmailExist(String email) {
+    public Boolean checkEmailExist(String email) {
         return lambdaQuery()
                 .eq(SysUser::getEmail, email)
                 .exists();
     }
 
-    private boolean addUserRoleRelations(Long userId, List<Long> roleIds) {
+    public boolean addUserRoleRelations(Long userId, List<Long> roleIds) {
         List<SysUserRoleRel> userRoleReals = new ArrayList<>(roleIds.size());
         roleIds.forEach(roleId -> {
             var userRoleRel = SysUserRoleRel.builder()
@@ -820,7 +842,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         return userRoleRelService.saveBatch(userRoleReals);
     }
 
-    private boolean addUserDeptRelations(Long userId, List<Long> deptIds) {
+    public boolean addUserDeptRelations(Long userId, List<Long> deptIds) {
         List<SysUserDeptRel> userDeptReals = new ArrayList<>(deptIds.size());
         deptIds.forEach(deptId -> {
             var userDeptRel = SysUserDeptRel.builder()
