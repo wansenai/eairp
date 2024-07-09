@@ -16,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.entities.user.SysUser;
+import com.wansenai.vo.basic.OperatorVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +25,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -48,7 +51,12 @@ public class ReceiptVO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime receiptDate;
 
+    private String operatorId;
+
     private String operator;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long accountId;
 
     private Integer productNumber;
 
@@ -59,4 +67,7 @@ public class ReceiptVO {
     private BigDecimal taxRateTotalAmount;
 
     private Integer status;
+
+    // Sale Business Type 2024-07-09 fix
+    private List<OperatorVO> operatorIds;
 }
