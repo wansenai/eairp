@@ -42,6 +42,7 @@ interface PurchaseOrderFormState {
     receiptDate: string | undefined | Dayjs;
     warehouseId: number | string;
     accountId: string | undefined;
+    operatorIds: number[],
     multipleAccountIds: number[] | undefined;
     multipleAccountAmounts: number[] | undefined;
 }
@@ -50,6 +51,7 @@ interface PurchaseStorageFormState {
     id: number | string | undefined;
     supplierId: string;
     accountId: number | string | undefined;
+    operatorIds: number[],
     receiptNumber: string;
     receiptDate: string | undefined | Dayjs;
     otherReceipt: string;
@@ -81,6 +83,7 @@ interface PurchaseRefundFormState {
     thisArrearsAmount: number;
     remark: string;
     status: number | undefined;
+    operatorIds: number[],
     warehouseId: number | string;
     multipleAccountIds: number[] | undefined;
     multipleAccountAmounts: number[] | undefined;
@@ -418,6 +421,7 @@ const purchaseOrderFormState = reactive<PurchaseOrderFormState>({
     accountId: undefined,
     receiptDate: '',
     warehouseId: '',
+    operatorIds: [],
     multipleAccountIds: undefined,
     multipleAccountAmounts: undefined,
 });
@@ -438,6 +442,7 @@ const purchaseStorageFormState = reactive<PurchaseStorageFormState>({
     accountId: undefined,
     receiptDate: '',
     warehouseId: '',
+    operatorIds: [],
     multipleAccountIds: undefined,
     multipleAccountAmounts: undefined,
 });

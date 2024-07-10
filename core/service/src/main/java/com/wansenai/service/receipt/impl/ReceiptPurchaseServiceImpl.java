@@ -25,6 +25,7 @@ import com.wansenai.entities.financial.FinancialSub;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.receipt.ReceiptPurchaseMain;
 import com.wansenai.entities.receipt.ReceiptPurchaseSub;
+import com.wansenai.entities.receipt.ReceiptSaleMain;
 import com.wansenai.entities.system.SysFile;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.mappers.receipt.ReceiptPurchaseMainMapper;
@@ -373,6 +374,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .map(this::createPurchaseDataFromReceiptSub)
                 .collect(Collectors.toCollection(ArrayList::new));
 
+        var operatorIds = parseAndCollectLongList(purchaseMain.getOperatorId());
         var multipleAccountIds = parseAndCollectLongList(purchaseMain.getMultipleAccount());
         var multipleAccountAmounts = parseAndCollectLongList(purchaseMain.getMultipleAccountAmount());
 
@@ -399,6 +401,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .supplierName(commonService.getSupplierName(purchaseMain.getSupplierId()))
                 .accountId(purchaseMain.getAccountId())
                 .accountName(accountName)
+                .operatorIds(operatorIds)
                 .discountRate(purchaseMain.getDiscountRate())
                 .discountAmount(purchaseMain.getDiscountAmount())
                 .discountLastAmount(purchaseMain.getDiscountLastAmount())
@@ -442,6 +445,8 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var userId = userService.getCurrentUserId();
         var isUpdate = purchaseOrderDTO.getId() != null;
 
+        var operatorIds = parseIdsToString(purchaseOrderDTO.getOperatorIds());
+
         var multipleAccountIds = parseIdsToString(purchaseOrderDTO.getMultipleAccountIds());
         var multipleAccountAmounts = parseIdsToString(purchaseOrderDTO.getMultipleAccountAmounts());
         var accountId = (purchaseOrderDTO.getAccountId() != null) ? String.valueOf(purchaseOrderDTO.getAccountId()) : null;
@@ -462,6 +467,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .set(ReceiptPurchaseMain::getFileId, fileIds)
                     .set(ReceiptPurchaseMain::getMultipleAccount, String.valueOf(multipleAccountIds))
                     .set(ReceiptPurchaseMain::getMultipleAccountAmount, String.valueOf(multipleAccountAmounts))
+                    .set(!operatorIds.isEmpty(), ReceiptPurchaseMain::getOperatorId, operatorIds)
                     .set(ReceiptPurchaseMain::getUpdateBy, userId)
                     .set(ReceiptPurchaseMain::getUpdateTime, LocalDateTime.now())
                     .update();
@@ -510,6 +516,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .supplierId(purchaseOrderDTO.getSupplierId())
                     .discountRate(purchaseOrderDTO.getDiscountRate())
                     .accountId(purchaseOrderDTO.getAccountId())
+                    .operatorId(operatorIds)
                     .discountAmount(purchaseOrderDTO.getDiscountAmount())
                     .discountLastAmount(purchaseOrderDTO.getDiscountLastAmount())
                     .deposit(purchaseOrderDTO.getDeposit())
@@ -679,7 +686,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var tableData = receiptSubList.stream()
                 .map(this::createPurchaseDataFromReceiptSub)
                 .collect(Collectors.toCollection(ArrayList::new));
-
+        var operatorIds = parseAndCollectLongList(purchaseMain.getOperatorId());
         var multipleAccountIds = parseAndCollectLongList(purchaseMain.getMultipleAccount());
         var multipleAccountAmounts = parseAndCollectLongList(purchaseMain.getMultipleAccountAmount());
 
@@ -697,6 +704,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .supplierId(purchaseMain.getSupplierId())
                 .supplierName(commonService.getSupplierName(purchaseMain.getSupplierId()))
                 .accountId(purchaseMain.getAccountId())
+                .operatorIds(operatorIds)
                 .paymentRate(purchaseMain.getDiscountRate())
                 .paymentAmount(purchaseMain.getDiscountAmount())
                 .paymentLastAmount(purchaseMain.getDiscountLastAmount())
@@ -758,6 +766,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var userId = userService.getCurrentUserId();
         var isUpdate = purchaseStorageDTO.getId() != null;
 
+        var operatorIds = parseIdsToString(purchaseStorageDTO.getOperatorIds());
         var multipleAccountIds = parseIdsToString(purchaseStorageDTO.getMultipleAccountIds());
         var multipleAccountAmounts = parseIdsToString(purchaseStorageDTO.getMultipleAccountAmounts());
         String accountId = (purchaseStorageDTO.getAccountId() != null) ? String.valueOf(purchaseStorageDTO.getAccountId()) : null;
@@ -790,6 +799,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .set(ReceiptPurchaseMain::getFileId, fileIds)
                     .set(ReceiptPurchaseMain::getMultipleAccount, multipleAccountIds)
                     .set(ReceiptPurchaseMain::getMultipleAccountAmount, multipleAccountAmounts)
+                    .set(!operatorIds.isEmpty(), ReceiptPurchaseMain::getOperatorId, operatorIds)
                     .set(ReceiptPurchaseMain::getUpdateBy, userId)
                     .set(ReceiptPurchaseMain::getUpdateTime, LocalDateTime.now())
                     .update();
@@ -853,6 +863,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .supplierId(purchaseStorageDTO.getSupplierId())
                     .discountRate(purchaseStorageDTO.getPaymentRate())
                     .accountId(purchaseStorageDTO.getAccountId())
+                    .operatorId(operatorIds)
                     .discountAmount(purchaseStorageDTO.getPaymentAmount())
                     .discountLastAmount(purchaseStorageDTO.getPaymentLastAmount())
                     .otherAmount(purchaseStorageDTO.getOtherAmount())
@@ -1061,7 +1072,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var tableData = receiptSubList.stream()
                 .map(this::createPurchaseDataFromReceiptSub)
                 .collect(Collectors.toCollection(ArrayList::new));
-
+        var operatorIds = parseAndCollectLongList(purchaseMain.getOperatorId());
         var multipleAccountIds = parseAndCollectLongList(purchaseMain.getMultipleAccount());
         var multipleAccountAmounts = parseAndCollectLongList(purchaseMain.getMultipleAccountAmount());
 
@@ -1089,6 +1100,8 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 .multipleAccountIds(multipleAccountIds)
                 .multipleAccountAmounts(multipleAccountAmounts)
                 .accountName(accountName)
+                .accountId(purchaseMain.getAccountId())
+                .operatorIds(operatorIds)
                 .remark(purchaseMain.getRemark())
                 .status(purchaseMain.getStatus())
                 .tableData(tableData)
@@ -1110,6 +1123,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         var userId = userService.getCurrentUserId();
         var isUpdate = purchaseRefundDTO.getId() != null;
 
+        var operatorIds = parseIdsToString(purchaseRefundDTO.getOperatorIds());
         var multipleAccountIds = parseIdsToString(purchaseRefundDTO.getMultipleAccountIds());
         var multipleAccountAmounts = parseIdsToString(purchaseRefundDTO.getMultipleAccountAmounts());
         String accountId = (purchaseRefundDTO.getAccountId() != null) ? String.valueOf(purchaseRefundDTO.getAccountId()) : null;
@@ -1141,6 +1155,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .set(ReceiptPurchaseMain::getFileId, fileIds)
                     .set(ReceiptPurchaseMain::getMultipleAccount, multipleAccountIds)
                     .set(ReceiptPurchaseMain::getMultipleAccountAmount, multipleAccountAmounts)
+                    .set(!operatorIds.isEmpty(), ReceiptPurchaseMain::getOperatorId, operatorIds)
                     .set(ReceiptPurchaseMain::getUpdateBy, userId)
                     .set(ReceiptPurchaseMain::getUpdateTime, LocalDateTime.now())
                     .update();
@@ -1205,6 +1220,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .supplierId(purchaseRefundDTO.getSupplierId())
                     .discountRate(purchaseRefundDTO.getRefundOfferRate())
                     .accountId(purchaseRefundDTO.getAccountId())
+                    .operatorId(operatorIds)
                     .discountAmount(purchaseRefundDTO.getRefundOfferAmount())
                     .discountLastAmount(purchaseRefundDTO.getRefundLastAmount())
                     .otherAmount(purchaseRefundDTO.getOtherAmount())

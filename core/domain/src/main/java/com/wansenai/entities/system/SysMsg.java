@@ -14,6 +14,8 @@ package com.wansenai.entities.system;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.io.Serial;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -32,7 +34,8 @@ import lombok.experimental.Accessors;
 @TableName("sys_msg")
 public class SysMsg implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 191561676156165L;
 
     /**
      * 主键
@@ -68,7 +71,7 @@ public class SysMsg implements Serializable {
     /**
      * 状态，1未读 2已读
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 租户id
@@ -78,7 +81,7 @@ public class SysMsg implements Serializable {
     /**
      * 删除标记，0未删除，1删除
      */
-    private Boolean deleteFlag;
+    private Integer deleteFlag;
 
 
 }

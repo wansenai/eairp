@@ -46,6 +46,8 @@ export default {
             discountAmount: 'Discount Amount',
             settlementAccount: 'Payment Account',
             paymentDeposit: 'Deposit',
+            purchasePerson: 'Purchase Person',
+            inputPurchasePerson: 'Please select purchase person',
             noticeOne: 'Please enter barcode or select product',
             noticeTwo: 'Are you sure you want to delete the selected data?',
             noticeThree: 'The file exceeds the 2MB size limit',

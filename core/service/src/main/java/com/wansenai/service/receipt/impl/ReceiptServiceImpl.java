@@ -516,8 +516,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .eq(Supplier::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .one();
 
-            var operator = userService.getById(item.getCreateBy());
-
             var productNumber = receiptPurchaseSubService.lambdaQuery()
                     .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
                     .list()
@@ -531,13 +529,28 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .uid(item.getSupplierId())
                     .receiptNumber(item.getReceiptNumber())
                     .receiptDate(item.getReceiptDate())
-                    .operator(Optional.ofNullable(operator.getName()).orElse(""))
                     .accountId(item.getAccountId())
                     .productNumber(productNumber)
                     .totalAmount(item.getTotalAmount())
                     .taxRateTotalAmount(item.getDiscountLastAmount())
                     .status(item.getStatus())
                     .build();
+
+            // 查询操作员
+            var operatorIds = item.getOperatorId();
+            if (StringUtils.hasLength(operatorIds)) {
+                var operatorIdList = Arrays.asList(operatorIds.split(","));
+                var operatorList = userService.lambdaQuery()
+                        .in(SysUser::getId, operatorIdList)
+                        .list();
+                var operatorVOList = operatorList.stream()
+                        .map(operator -> OperatorVO.builder()
+                                .id(operator.getId())
+                                .name(operator.getName())
+                                .build())
+                        .toList();
+                receiptVO.setOperatorIds(operatorVOList);
+            }
             receiptVos.add(receiptVO);
         });
 

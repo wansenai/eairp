@@ -46,6 +46,8 @@ export default {
             discountAmount: '优惠后金额',
             settlementAccount: '付款账户',
             paymentDeposit: '支付定金',
+            purchasePerson: '采购人员',
+            inputPurchasePerson: '请选择采购人员',
             noticeOne: '请录入条码或者选择产品',
             noticeTwo: '确定要删除选中的数据?',
             noticeThree: '该文件超过2MB大小限制',

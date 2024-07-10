@@ -192,6 +192,19 @@
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.order.form.purchasePerson')" data-step="3"
+                             data-title="采购人员"
+                             :rules="[{ required: true}]"
+                             data-intro="">
+                  <a-select v-model:value="purchaseStorageFormState.operatorIds"
+                            mode="multiple"
+                            :placeholder="t('purchase.order.form.inputPurchasePerson')"
+                            :options="purchasePersonalList.map(item => ({ value: item.id, label: item.name }))"/>
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row>
+              <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.storage.form.table.annex')" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
@@ -281,6 +294,8 @@ import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
 import BasicModal from "@/components/Modal/src/BasicModal.vue";
+import {OperatorResp} from "@/api/basic/model/operatorModel";
+import {getTenantUserList} from "@/api/sys/user";
 
 const VNodes = defineComponent({
   props: {
@@ -380,6 +395,7 @@ export default defineComponent({
     const productList = ref<ProductStockSkuResp[]>([]);
     const productLabelList = ref<any[]>([]);
     const warehouseLabelList =  ref<any[]>([]);
+    const purchasePersonalList = ref<OperatorResp[]>([]);
     const amountSymbol = ref<string>('')
     const localeStore = useLocaleStore().getLocale;
     if(localeStore === 'zh_CN') {
@@ -400,6 +416,7 @@ export default defineComponent({
       loadWarehouseList();
       loadAccountList();
       loadProductSku();
+      loadPurchasePersonalList();
       if (id) {
         title.value = t('purchase.storage.editStorage')
         loadStorageDetail(id);
@@ -412,6 +429,12 @@ export default defineComponent({
           table.insert({productNumber: 0})
         }
       }
+    }
+
+    function loadPurchasePersonalList() {
+      getTenantUserList().then(res => {
+        purchasePersonalList.value = res.data
+      })
     }
 
     function loadWarehouseList() {
@@ -535,6 +558,8 @@ export default defineComponent({
         const data = result.data
         purchaseStorageFormState.id = id
         purchaseStorageFormState.supplierId = data.supplierId
+        purchaseStorageFormState.accountId = data.accountId
+        purchaseStorageFormState.operatorIds = data.operatorIds
         purchaseStorageFormState.receiptDate = dayjs(data.receiptDate);
         purchaseStorageFormState.receiptNumber = data.receiptNumber
         purchaseStorageFormState.remark = data.remark
@@ -681,6 +706,10 @@ export default defineComponent({
         createMessage.warn(t('sales.order.form.inputReceiptNumber'));
         return;
       }
+      if (purchaseStorageFormState.operatorIds.length === 0) {
+        createMessage.warn(t('purchase.order.form.inputPurchasePerson'));
+        return;
+      }
       if (purchaseStorageFormState.accountId === 0) {
         if (!multipleAccounts.value.accountOne && !multipleAccounts.value.accountTwo) {
           createMessage.warn(t('purchase.storage.form.noticeSeven'));
@@ -823,6 +852,7 @@ export default defineComponent({
       purchaseStorageFormState.thisArrearsAmount = 0
       purchaseStorageFormState.otherReceipt = ''
       purchaseStorageFormState.accountId = undefined
+      purchaseStorageFormState.operatorIds = []
       barCode.value = ''
       purchaseStorageFormState.remark = ''
       fileList.value = []
@@ -1084,6 +1114,8 @@ export default defineComponent({
       if (data && table) {
         purchaseStorageFormState.otherReceipt = data.receiptNumber;
         purchaseStorageFormState.supplierId = data.uid;
+        purchaseStorageFormState.operatorIds = data.operatorIds.map(item => (item.id))
+        purchaseStorageFormState.accountId = data.accountId;
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData: RowVO = {
@@ -1190,7 +1222,8 @@ export default defineComponent({
       handleSupplierModalSuccess,
       handleAccountModalSuccess,
       formatWarehouseId,
-      warehouseLabelList
+      warehouseLabelList,
+      purchasePersonalList
     };
   },
 });

@@ -148,6 +148,17 @@
                 </a-tooltip>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.order.form.purchasePerson')" data-step="3"
+                             data-title="采购人员"
+                             :rules="[{ required: true}]"
+                             data-intro="">
+                  <a-select v-model:value="purchaseOrderFormState.operatorIds"
+                            mode="multiple"
+                            :placeholder="t('purchase.order.form.inputPurchasePerson')"
+                            :options="purchasePersonalList.map(item => ({ value: item.id, label: item.name }))"/>
+                </a-form-item>
+              </a-col>
+              <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.order.form.table.annex')" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
@@ -234,6 +245,9 @@ import {ProductStockSkuResp} from "@/api/product/model/productModel";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
 import BasicModal from "@/components/Modal/src/BasicModal.vue";
+import {OperatorResp} from "@/api/basic/model/operatorModel";
+import {WarehouseResp} from "@/api/basic/model/warehouseModel";
+import {getTenantUserList} from "@/api/sys/user";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -306,6 +320,7 @@ export default defineComponent({
     const fileList = ref<FileData[]>([]);
     const payTypeList = ref<any>([]);
     const minWidth = ref(1100);
+    const purchasePersonalList = ref<OperatorResp[]>([]);
     const model = ref({});
     const barCode = ref('');
     const labelCol = ref({
@@ -348,6 +363,7 @@ export default defineComponent({
       loadWarehouseList();
       loadAccountList();
       loadProductSku();
+      loadPurchasePersonalList();
       if (id) {
         title.value = t('purchase.order.editOrder')
         loadRefundDetail(id);
@@ -356,6 +372,12 @@ export default defineComponent({
         loadGenerateId();
         purchaseOrderFormState.receiptDate = dayjs(new Date());
       }
+    }
+
+    function loadPurchasePersonalList() {
+      getTenantUserList().then(res => {
+        purchasePersonalList.value = res.data
+      })
     }
 
     function loadWarehouseList() {
@@ -480,6 +502,7 @@ export default defineComponent({
         purchaseOrderFormState.receiptDate = dayjs(data.receiptDate);
         purchaseOrderFormState.receiptNumber = data.receiptNumber
         purchaseOrderFormState.remark = data.remark
+        purchaseOrderFormState.operatorIds = data.operatorIds
         purchaseOrderFormState.discountRate = data.discountRate
         purchaseOrderFormState.discountAmount = data.discountAmount
         purchaseOrderFormState.discountLastAmount = amountSymbol.value + `${XEUtils.commafy(XEUtils.toNumber(data.discountLastAmount), { digits: 2 })}`
@@ -620,6 +643,10 @@ export default defineComponent({
         createMessage.warn(t('sales.order.form.inputReceiptNumber'));
         return;
       }
+      if (purchaseOrderFormState.operatorIds.length === 0) {
+        createMessage.warn(t('purchase.order.form.inputPurchasePerson'));
+        return;
+      }
       if(table) {
         const insertRecords = table.getInsertRecords()
         if(insertRecords.length === 0) {
@@ -728,6 +755,7 @@ export default defineComponent({
       purchaseOrderFormState.discountLastAmount = 0
       purchaseOrderFormState.deposit = 0
       purchaseOrderFormState.accountId = undefined
+      purchaseOrderFormState.operatorIds = []
       barCode.value = ''
       purchaseOrderFormState.remark = ''
       fileList.value = []
@@ -1023,7 +1051,8 @@ export default defineComponent({
       formatWarehouseId,
       productLabelList,
       selectBarCode,
-      handleSupplierModalSuccess
+      handleSupplierModalSuccess,
+      purchasePersonalList
     };
   },
 });

@@ -46,6 +46,8 @@ public class PurchaseStorageDTO {
 
     private Long accountId;
 
+    private List<Long> operatorIds;
+
     private List<Long> multipleAccountAmounts;
 
     private List<Long> multipleAccountIds;
