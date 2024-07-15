@@ -74,6 +74,7 @@ export interface updateUserInfoReq {
   phoneNumber: string;
   position: string;
   leaderFlag: number;
+  systemLanguage: string;
 }
 
 export interface addOrUpdateUserReq {
