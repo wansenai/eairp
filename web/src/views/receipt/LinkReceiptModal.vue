@@ -86,6 +86,8 @@ export default defineComponent({
         receiptNumber: rows[0].receiptNumber,
         type: type.value,
         uid: rows[0].uid,
+        operatorIds: rows[0].operatorIds,
+        accountId: rows[0].accountId,
       });
       closeModal();
     }

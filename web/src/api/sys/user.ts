@@ -160,13 +160,9 @@ export function getUserList(params: queryUserListReq) {
     );
 }
 
-export function getTenantUserList(mode: ErrorMessageMode = 'notice') {
+export function getTenantUserList() {
     return defHttp.get<BaseDataResp<GetUserInfoModel>>(
         {url: Api.ListAll},
-        {
-            errorMessageMode: mode,
-            successMessageMode: mode,
-        },
     );
 }
 

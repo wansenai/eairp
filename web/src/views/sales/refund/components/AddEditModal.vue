@@ -182,6 +182,7 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.refund.view.salesPerson')" data-step="3"
                              data-title="销售人员"
+                             :rules="[{ required: true}]"
                              data-intro="">
                   <a-select v-model:value="saleRefundFormState.operatorIds"
                             :placeholder="t('sales.refund.form.inputSalesPerson')"
@@ -258,7 +259,6 @@ import {
 } from '/src/views/sales/model/addEditModel';
 import {getCustomerList} from "@/api/basic/customer";
 import {CustomerResp} from "@/api/basic/model/customerModel";
-import {getOperatorList} from "@/api/basic/operator";
 import {OperatorResp} from "@/api/basic/model/operatorModel";
 import CustomerModal from "@/views/basic/customer/components/CustomerModal.vue";
 import {useModal} from "@/components/Modal";
@@ -281,6 +281,7 @@ import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
 import BasicModal from "@/components/Modal/src/BasicModal.vue";
+import {getTenantUserList} from "@/api/sys/user";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -513,7 +514,7 @@ export default defineComponent({
     }
 
     function loadSalePersonalList() {
-      getOperatorList("销售员").then(res => {
+      getTenantUserList().then(res => {
         salePersonalList.value = res.data
       })
     }
@@ -685,6 +686,10 @@ export default defineComponent({
       }
       if (!saleRefundFormState.receiptNumber) {
         createMessage.warn(t('sales.order.form.inputReceiptNumber'));
+        return;
+      }
+      if (saleRefundFormState.operatorIds.length === 0) {
+        createMessage.warn(t('sales.order.form.inputSalesPerson'));
         return;
       }
       if (saleRefundFormState.accountId === 0) {
@@ -1079,11 +1084,12 @@ export default defineComponent({
     }
 
     function handleReceiptSuccess(data) {
-      console.info(data)
       const table = xGrid.value
       if(data && table) {
         saleRefundFormState.otherReceipt = data.receiptNumber;
         saleRefundFormState.customerId = data.uid;
+        saleRefundFormState.operatorIds = data.operatorIds.map(item => (item.id))
+        saleRefundFormState.accountId = data.accountId
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {

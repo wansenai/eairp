@@ -26,6 +26,7 @@ import com.wansenai.entities.financial.FinancialMain;
 import com.wansenai.entities.financial.FinancialSub;
 import com.wansenai.entities.product.Product;
 import com.wansenai.entities.receipt.*;
+import com.wansenai.entities.user.SysUser;
 import com.wansenai.mappers.financial.FinancialMainMapper;
 import com.wansenai.mappers.financial.FinancialSubMapper;
 import com.wansenai.mappers.product.ProductStockMapper;
@@ -42,11 +43,13 @@ import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
+import com.wansenai.vo.basic.OperatorVO;
 import com.wansenai.vo.receipt.ReceiptDetailVO;
 import com.wansenai.vo.receipt.ReceiptVO;
 import com.wansenai.vo.receipt.retail.StatisticalDataVO;
 import com.wansenai.vo.report.*;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -446,8 +449,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .eq(Customer::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .one();
 
-            var operator = userService.getById(item.getCreateBy());
-
             var productNumber = receiptSaleSubService.lambdaQuery()
                     .eq(ReceiptSaleSub::getReceiptSaleMainId, item.getId())
                     .list()
@@ -455,19 +456,36 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .mapToInt(ReceiptSaleSub::getProductNumber)
                     .sum();
 
-            ReceiptVO receiptVO = ReceiptVO.builder()
+            ReceiptVO receiptSaleVO = ReceiptVO.builder()
                     .id(item.getId())
                     .name(Optional.ofNullable(customer.getCustomerName()).orElse(""))
                     .uid(item.getCustomerId())
                     .receiptNumber(item.getReceiptNumber())
                     .receiptDate(item.getReceiptDate())
-                    .operator(Optional.ofNullable(operator.getName()).orElse(""))
+                    .accountId(item.getAccountId())
                     .productNumber(productNumber)
                     .totalAmount(item.getTotalAmount())
                     .taxRateTotalAmount(item.getDiscountLastAmount())
                     .status(item.getStatus())
                     .build();
-            receiptVos.add(receiptVO);
+
+            // 查询操作员
+            var operatorIds = item.getOperatorId();
+            if (StringUtils.hasLength(operatorIds)) {
+                var operatorIdList = Arrays.asList(operatorIds.split(","));
+                var operatorList = userService.lambdaQuery()
+                        .in(SysUser::getId, operatorIdList)
+                        .list();
+                var operatorVOList = operatorList.stream()
+                        .map(operator -> OperatorVO.builder()
+                                .id(operator.getId())
+                                .name(operator.getName())
+                                .build())
+                        .toList();
+                receiptSaleVO.setOperatorIds(operatorVOList);
+            }
+
+            receiptVos.add(receiptSaleVO);
         });
         result.setRecords(receiptVos);
         result.setPages(receiptSaleVOList.getPages());
@@ -498,8 +516,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .eq(Supplier::getDeleteFlag, CommonConstants.NOT_DELETED)
                     .one();
 
-            var operator = userService.getById(item.getCreateBy());
-
             var productNumber = receiptPurchaseSubService.lambdaQuery()
                     .eq(ReceiptPurchaseSub::getReceiptPurchaseMainId, item.getId())
                     .list()
@@ -513,12 +529,28 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .uid(item.getSupplierId())
                     .receiptNumber(item.getReceiptNumber())
                     .receiptDate(item.getReceiptDate())
-                    .operator(Optional.ofNullable(operator.getName()).orElse(""))
+                    .accountId(item.getAccountId())
                     .productNumber(productNumber)
                     .totalAmount(item.getTotalAmount())
                     .taxRateTotalAmount(item.getDiscountLastAmount())
                     .status(item.getStatus())
                     .build();
+
+            // 查询操作员
+            var operatorIds = item.getOperatorId();
+            if (StringUtils.hasLength(operatorIds)) {
+                var operatorIdList = Arrays.asList(operatorIds.split(","));
+                var operatorList = userService.lambdaQuery()
+                        .in(SysUser::getId, operatorIdList)
+                        .list();
+                var operatorVOList = operatorList.stream()
+                        .map(operator -> OperatorVO.builder()
+                                .id(operator.getId())
+                                .name(operator.getName())
+                                .build())
+                        .toList();
+                receiptVO.setOperatorIds(operatorVOList);
+            }
             receiptVos.add(receiptVO);
         });
 

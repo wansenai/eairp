@@ -60,10 +60,11 @@
           <a-col :lg="6" :md="12" :sm="24">
             <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.order.form.salesPerson')" data-step="3"
                          data-title="销售人员"
+                         :rules="[{ required: true}]"
                          data-intro="">
               <a-select v-model:value="formState.operatorIds"
-                        :placeholder="t('sales.order.form.inputSalesPerson')"
                         mode="multiple"
+                        :placeholder="t('sales.order.form.inputSalesPerson')"
                         :options="salePersonalList.map(item => ({ value: item.id, label: item.name }))"/>
             </a-form-item>
           </a-col>
@@ -228,7 +229,6 @@ import {
 } from '@/views/sales/model/addEditModel';
 import {getCustomerList} from "@/api/basic/customer";
 import {CustomerResp} from "@/api/basic/model/customerModel";
-import {getOperatorList} from "@/api/basic/operator";
 import {OperatorResp} from "@/api/basic/model/operatorModel";
 import CustomerModal from "@/views/basic/customer/components/CustomerModal.vue";
 import {useModal} from "@/components/Modal";
@@ -251,6 +251,7 @@ import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
 import BasicModal from "@/components/Modal/src/BasicModal.vue";
 import {WarehouseResp} from "@/api/basic/model/warehouseModel";
+import {getTenantUserList} from "@/api/sys/user";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -411,7 +412,7 @@ export default defineComponent({
     }
 
     function loadSalePersonalList() {
-      getOperatorList("销售员").then(res => {
+      getTenantUserList().then(res => {
         salePersonalList.value = res.data
       })
     }
@@ -642,6 +643,10 @@ export default defineComponent({
       const table = xGrid.value
       if (!formState.customerId) {
         createMessage.warn(t('sales.order.form.inputCustomer'));
+        return;
+      }
+      if (formState.operatorIds.length === 0) {
+        createMessage.warn(t('sales.order.form.inputSalesPerson'));
         return;
       }
       if (!formState.receiptNumber) {

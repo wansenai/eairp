@@ -21,6 +21,8 @@ export default defineComponent({
     const { createMessage } = useMessage();
     const receiptNumber = ref('');
     const uid = ref('');
+    const operatorIds = ref('');
+    const accountId = ref('');
     const [registerTable, { getSelectRows, reload}] = useTable({
       rowKey: 'id',
       columns: ReceiptDetailColumn,
@@ -42,6 +44,8 @@ export default defineComponent({
       setModalProps({confirmLoading: false, destroyOnClose: true, width: 1200});
       receiptNumber.value = data.receiptNumber
       uid.value = data.uid
+      operatorIds.value = data.operatorIds
+      accountId.value = data.accountId
       reload({
         searchInfo: {
           "id": data.id,
@@ -60,6 +64,8 @@ export default defineComponent({
         receiptNumber: receiptNumber.value,
         receiptDetailData: rows,
         uid: uid.value,
+        operatorIds: operatorIds.value,
+        accountId: accountId.value,
       }
       context.emit('handleReceiptSuccess', dataObject);
       closeModal();

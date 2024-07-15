@@ -178,6 +178,19 @@
                 </a-form-item>
               </a-col>
               <a-col :lg="6" :md="12" :sm="24">
+                <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.order.form.purchasePerson')" data-step="3"
+                             data-title="采购人员"
+                             :rules="[{ required: true}]"
+                             data-intro="">
+                  <a-select v-model:value="purchaseRefundFormState.operatorIds"
+                            mode="multiple"
+                            :placeholder="t('purchase.order.form.inputPurchasePerson')"
+                            :options="purchasePersonalList.map(item => ({ value: item.id, label: item.name }))"/>
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row class="form-row" :gutter="24">
+              <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('purchase.refund.form.table.annex')" data-step="9"
                              data-title="附件"
                              data-intro="可以上传与单据相关的图片、文档，支持多个文件">
@@ -267,6 +280,8 @@ import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
 import BasicModal from "@/components/Modal/src/BasicModal.vue";
+import {OperatorResp} from "@/api/basic/model/operatorModel";
+import {getTenantUserList} from "@/api/sys/user";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -363,6 +378,7 @@ export default defineComponent({
     const [multipleAccountModal, {openModal: openManyAccountModal}] = useModal();
     const [linkReceiptModal, {openModal: openLinkReceiptModal}] = useModal();
     const productList = ref<ProductStockSkuResp[]>([]);
+    const purchasePersonalList = ref<OperatorResp[]>([]);
     const productLabelList = ref<any[]>([]);
     const warehouseLabelList =  ref<any[]>([]);
     const amountSymbol = ref<string>('')
@@ -385,6 +401,7 @@ export default defineComponent({
       loadWarehouseList();
       loadAccountList();
       loadProductSku();
+      loadPurchasePersonalList();
       if (id) {
         title.value = t('purchase.refund.editRefund')
         loadRefundDetail(id);
@@ -397,6 +414,12 @@ export default defineComponent({
           table.insert({productNumber: 0})
         }
       }
+    }
+
+    function loadPurchasePersonalList() {
+      getTenantUserList().then(res => {
+        purchasePersonalList.value = res.data
+      })
     }
 
     function loadWarehouseList() {
@@ -521,6 +544,8 @@ export default defineComponent({
         const data = result.data
         purchaseRefundFormState.id = id
         purchaseRefundFormState.supplierId = data.supplierId
+        purchaseRefundFormState.accountId = data.accountId
+        purchaseRefundFormState.operatorIds = data.operatorIds
         purchaseRefundFormState.receiptDate = dayjs(data.receiptDate);
         purchaseRefundFormState.receiptNumber = data.receiptNumber
         purchaseRefundFormState.remark = data.remark
@@ -665,6 +690,10 @@ export default defineComponent({
       }
       if (!purchaseRefundFormState.receiptNumber) {
         createMessage.warn(t('sales.order.form.inputReceiptNumber'));
+        return;
+      }
+      if (purchaseRefundFormState.operatorIds.length === 0) {
+        createMessage.warn(t('purchase.order.form.inputPurchasePerson'));
         return;
       }
       if (purchaseRefundFormState.accountId === 0) {
@@ -819,6 +848,7 @@ export default defineComponent({
       purchaseRefundFormState.thisArrearsAmount = 0
       purchaseRefundFormState.otherReceipt = ''
       purchaseRefundFormState.accountId = undefined
+      purchaseRefundFormState.operatorIds = []
       barCode.value = ''
       purchaseRefundFormState.remark = ''
       fileList.value = []
@@ -1083,6 +1113,8 @@ export default defineComponent({
       if(data && table) {
         purchaseRefundFormState.otherReceipt = data.receiptNumber;
         purchaseRefundFormState.supplierId = data.uid;
+        purchaseRefundFormState.operatorIds = data.operatorIds.map(item => (item.id))
+        purchaseRefundFormState.accountId = data.accountId;
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {
@@ -1190,6 +1222,7 @@ export default defineComponent({
       handleAccountModalSuccess,
       handleSupplierModalSuccess,
       formatWarehouseId,
+      purchasePersonalList
     };
   },
 });

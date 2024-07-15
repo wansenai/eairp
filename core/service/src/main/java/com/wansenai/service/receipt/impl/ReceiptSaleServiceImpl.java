@@ -297,6 +297,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             var productNumber = calculateProductNumber(receiptSubList);
 
             var customerName = getCustomerName(item.getCustomerId());
+
             var crateBy = getUserName(item.getCreateBy());
             var totalAmount = calculateTotalAmount(receiptSubList, ReceiptSaleSub::getTotalAmount);
             var taxRateTotalPrice = calculateTotalAmount(receiptSubList, ReceiptSaleSub::getTaxIncludedAmount);

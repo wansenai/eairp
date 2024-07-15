@@ -66,6 +66,9 @@ public class PurchaseRefundDetailVO {
     private Long accountId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private List<Long> operatorIds;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private List<Long> multipleAccountAmounts;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)

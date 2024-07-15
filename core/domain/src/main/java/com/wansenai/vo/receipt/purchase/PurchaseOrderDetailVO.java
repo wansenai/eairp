@@ -46,6 +46,9 @@ public class PurchaseOrderDetailVO {
     private String receiptNumber;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private List<Long> operatorIds;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private List<Long> multipleAccountAmounts;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)

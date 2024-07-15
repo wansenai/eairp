@@ -183,10 +183,11 @@
               <a-col :lg="6" :md="12" :sm="24">
                 <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol" :label="t('sales.shipments.view.salesPerson')" data-step="3"
                              data-title="销售人员"
+                             :rules="[{ required: true}]"
                              data-intro="">
                   <a-select v-model:value="saleShipmentsFormState.operatorIds"
-                            :placeholder="t('sales.shipments.form.inputSalesPerson')"
                             mode="multiple"
+                            :placeholder="t('sales.shipments.form.inputSalesPerson')"
                             :options="salePersonalList.map(item => ({ value: item.id, label: item.name }))"/>
                 </a-form-item>
               </a-col>
@@ -259,7 +260,6 @@ import {
 } from '@/views/sales/model/addEditModel';
 import {getCustomerList} from "@/api/basic/customer";
 import {CustomerResp} from "@/api/basic/model/customerModel";
-import {getOperatorList} from "@/api/basic/operator";
 import {OperatorResp} from "@/api/basic/model/operatorModel";
 import CustomerModal from "@/views/basic/customer/components/CustomerModal.vue";
 import {useModal} from "@/components/Modal";
@@ -283,6 +283,7 @@ import {WarehouseResp} from "@/api/basic/model/warehouseModel";
 import {useI18n} from "vue-i18n";
 import {useLocaleStore} from "@/store/modules/locale";
 import BasicModal from "@/components/Modal/src/BasicModal.vue";
+import {getTenantUserList} from "@/api/sys/user";
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -523,7 +524,7 @@ export default defineComponent({
     }
 
     function loadSalePersonalList() {
-      getOperatorList("销售员").then(res => {
+      getTenantUserList().then(res => {
         salePersonalList.value = res.data
       })
     }
@@ -688,6 +689,10 @@ export default defineComponent({
         createMessage.warn(t('sales.order.form.inputReceiptNumber'));
         return;
       }
+      if (saleShipmentsFormState.operatorIds.length === 0) {
+        createMessage.warn(t('sales.order.form.inputSalesPerson'));
+        return;
+      }
       if (saleShipmentsFormState.accountId === 0) {
         if(!multipleAccounts.value.accountOne && !multipleAccounts.value.accountTwo) {
           createMessage.warn(t('sales.shipments.form.noticeFive'));
@@ -774,7 +779,6 @@ export default defineComponent({
         }
         dataArray.push(data)
       })
-
       // 判断是否是多账户 0是多账户 如果是多账户需要把accountIds置空 如果不是需要把multipleAccountIds 和 multipleAccountAmounts 置空
       if (saleShipmentsFormState.accountId === 0) {
         saleShipmentsFormState.accountId = undefined
@@ -1097,6 +1101,9 @@ export default defineComponent({
       if(data && table) {
         saleShipmentsFormState.otherReceipt = data.receiptNumber;
         saleShipmentsFormState.customerId = data.uid;
+        // 这里要对应value 值 绑定 以便下拉框可以显示
+        saleShipmentsFormState.operatorIds = data.operatorIds.map(item => (item.id))
+        saleShipmentsFormState.accountId = data.accountId;
         table.remove()
         data.receiptDetailData.forEach(item => {
           const tableData : RowVO = {

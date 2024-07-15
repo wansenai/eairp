@@ -39,7 +39,7 @@ interface SaleOrderFormState {
     discountLastAmount: number | string;
     deposit: number;
     remark: string;
-    operatorIds: number[] | undefined;
+    operatorIds: number[];
     receiptDate: string | undefined | Dayjs;
     warehouseId: number | string;
     accountId: string | undefined;
@@ -62,7 +62,7 @@ interface SaleShipmentsFormState {
     thisArrearsAmount: number;
     remark: string;
     status: number | undefined;
-    operatorIds: number[] | undefined;
+    operatorIds: number[];
     warehouseId: number | string;
     multipleAccountIds: number[] | undefined;
     multipleAccountAmounts: number[] | undefined;
@@ -83,7 +83,7 @@ interface SaleRefundFormState {
     thisArrearsAmount: number;
     remark: string;
     status: number | undefined;
-    operatorIds: number[] | undefined;
+    operatorIds: number[];
     warehouseId: number | string;
     multipleAccountIds: number[] | undefined;
     multipleAccountAmounts: number[] | undefined;
@@ -419,7 +419,7 @@ const formState = reactive<SaleOrderFormState>({
     discountLastAmount: 0,
     deposit: 0,
     accountId: undefined,
-    operatorIds: undefined,
+    operatorIds: [],
     receiptDate: '',
     warehouseId: '',
     multipleAccountIds: undefined,
@@ -440,7 +440,7 @@ const saleShipmentsFormState = reactive<SaleShipmentsFormState>({
     thisArrearsAmount: 0,
     status: undefined,
     accountId: undefined,
-    operatorIds: undefined,
+    operatorIds: [],
     receiptDate: '',
     warehouseId: '',
     multipleAccountIds: undefined,
@@ -461,7 +461,7 @@ const saleRefundFormState = reactive<SaleRefundFormState>({
     thisArrearsAmount: 0,
     status: undefined,
     accountId: undefined,
-    operatorIds: undefined,
+    operatorIds: [],
     receiptDate: '',
     warehouseId: '',
     multipleAccountIds: undefined,
