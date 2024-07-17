@@ -55,6 +55,8 @@ public interface ISysUserService extends IService<SysUser> {
 
     String getCurrentUserName();
 
+    String getUserSystemLanguage(Long userId);
+
     Response<List<UserRoleVO>> userRole();
 
     Response<String> userLogout();

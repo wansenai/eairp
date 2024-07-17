@@ -12,9 +12,14 @@
  */
 package com.wansenai.api.system;
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wansenai.dto.system.UpdateSystemMessageDTO;
+import com.wansenai.service.system.ISysMsgService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.SystemMessageVO;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 /**
  * <p>
@@ -25,7 +30,22 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2023-09-05
  */
 @RestController
-@RequestMapping("/sys-msg")
+@RequestMapping("/sys/message")
 public class SysMsgController {
 
+    private final ISysMsgService sysMsgService;
+
+    public SysMsgController(ISysMsgService sysMsgService) {
+        this.sysMsgService = sysMsgService;
+    }
+
+    @GetMapping("list")
+    public Response<List<SystemMessageVO>> messagePageList() {
+        return sysMsgService.getMessagePageList();
+    }
+
+    @PostMapping("read")
+    public Response<String> readMessage(@RequestBody UpdateSystemMessageDTO updateSystemMessageDTO) {
+        return sysMsgService.updateMessageStatus(updateSystemMessageDTO);
+    }
 }

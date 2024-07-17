@@ -1,29 +1,27 @@
 import type { ErrorMessageMode } from '/#/axios';
 import { defineStore } from 'pinia';
-import { store } from '/@/store';
-import { RoleEnum } from '/@/enums/roleEnum';
-import { PageEnum } from '/@/enums/pageEnum';
-import { ROLES_KEY, ROLES_NAME_KEY, TOKEN_KEY, USER_INFO_KEY } from '/@/enums/cacheEnum';
-import { getAuthCache, setAuthCache } from '/@/utils/auth';
+import { store } from '@/store';
+import { PageEnum } from '@/enums/pageEnum';
+import { ROLES_NAME_KEY, TOKEN_KEY, USER_INFO_KEY } from '@/enums/cacheEnum';
+import { getAuthCache, setAuthCache } from '@/utils/auth';
 import {
   emailLoginReq,
   GetUserInfoModel,
-  LoginReq, mobileLoginReq, updatePasswordReq,
-} from '/@/api/sys/model/userModel';
-import {doLogout, emailLogin, getUserInfo, login, mobileLogin} from '/@/api/sys/user';
-import { useI18n } from '/@/hooks/web/useI18n';
-import { useMessage } from '/@/hooks/web/useMessage';
-import { router } from '/@/router';
-import { usePermissionStore } from '/@/store/modules/permission';
+  LoginReq, mobileLoginReq,
+} from '@/api/sys/model/userModel';
+import {doLogout, emailLogin, getUserInfo, login, mobileLogin} from '@/api/sys/user';
+import { useI18n } from '@/hooks/web/useI18n';
+import { useMessage } from '@/hooks/web/useMessage';
+import { router } from '@/router';
+import { usePermissionStore } from '@/store/modules/permission';
 import { RouteRecordRaw } from 'vue-router';
-import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
-import { isArray } from '/@/utils/is';
+import { PAGE_NOT_FOUND_ROUTE } from '@/router/routes/basic';
+import { isArray } from '@/utils/is';
 import { h } from 'vue';
 
 interface UserState {
   userInfo: Nullable<GetUserInfoModel>;
   token?: string;
-  roleList: RoleEnum[];
   roleName: string[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
@@ -52,9 +50,6 @@ export const useUserStore = defineStore({
     getToken(): string {
       return this.token || getAuthCache<string>(TOKEN_KEY);
     },
-    getRoleList(): RoleEnum[] {
-      return this.roleList.length > 0 ? this.roleList : getAuthCache<RoleEnum[]>(ROLES_KEY);
-    },
     getRoleName(): string[] {
       return this.roleName.length > 0 ? this.roleName : getAuthCache<string[]>(ROLES_NAME_KEY);
     },
@@ -69,10 +64,6 @@ export const useUserStore = defineStore({
     setToken(info: string | undefined) {
       this.token = info ? info : ''; // for null or undefined value
       setAuthCache(TOKEN_KEY, info);
-    },
-    setRoleList(roleList: RoleEnum[]) {
-      this.roleList = roleList;
-      setAuthCache(ROLES_KEY, roleList);
     },
     setRoleName(roleName: string[]) {
       this.roleName = roleName;
@@ -89,7 +80,6 @@ export const useUserStore = defineStore({
     resetState() {
       this.userInfo = null;
       this.token = '';
-      this.roleList = [];
       this.roleName = [];
       this.sessionTimeout = false;
     },
@@ -193,10 +183,8 @@ export const useUserStore = defineStore({
       const { roles = [], roleName = [] } = userInfo.data;
       if (isArray(roles)) {
         const roleList = roles.map((item) => item.valueOf) as unknown as RoleEnum[];
-        this.setRoleList(roleList);
       } else {
         userInfo.data.roles = [];
-        this.setRoleList([]);
       }
       this.setRoleName(roleName);
       this.setUserInfo(userInfo.data);

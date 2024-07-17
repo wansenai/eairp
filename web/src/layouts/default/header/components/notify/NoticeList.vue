@@ -1,5 +1,5 @@
 <template>
-  <List :class="prefixCls" bordered :pagination="getPagination">
+  <List :class="prefixCls" bordered :pagination="getPagination" style="width: 250px">
     <template v-for="item in getData" :key="item.id">
       <List.Item class="list-item">
         <List.Item.Meta>
@@ -144,6 +144,7 @@ function handleTitleClick(item: ListItem) {
     .title {
       margin-bottom: 8px;
       font-weight: normal;
+      width: 250px;
 
       .extra {
         margin-top: -1.5px;

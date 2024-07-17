@@ -23,31 +23,53 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import {computed, ref, watch} from 'vue';
 import { Popover, Tabs, Badge } from 'ant-design-vue';
 import { BellOutlined } from '@ant-design/icons-vue';
-import { tabListData, ListItem } from './data';
+import { ListItem } from './data';
 import NoticeList from './NoticeList.vue';
 import { useDesign } from '@/hooks/web/useDesign';
 import { useMessage } from '@/hooks/web/useMessage';
+import { getMessageList, readMessage } from "@/api/sys/message";
+import {ReadMessageReq} from "@/api/sys/model/MessageModel";
+import {useUserStore} from "@/store/modules/user";
 
 const { prefixCls } = useDesign('header-notify');
 const { createMessage } = useMessage();
-const listData = ref(tabListData);
+const listData = ref([]);
+const messageCount = ref(0);
 const numberStyle = {};
 
-const count = computed(() => {
-  let count = 0;
-  for (let i = 0; i < tabListData.length; i++) {
-    count += tabListData[i].list.length;
-  }
-  return count;
+const fetchMessages = () => {
+  getMessageList().then((res) => {
+    listData.value = res.data;
+    console.info(listData.value);
+  });
+};
+
+// Watch for changes in listData and update messageCount
+watch(listData, (newList) => {
+  messageCount.value = newList.length;
 });
 
+// Fetch messages initially
+fetchMessages();
+
+// Computed property for the message count
+const count = computed(() => {
+  return messageCount.value;
+});
+
+
 function onNoticeClick(record: ListItem) {
-  createMessage.success('你点击了通知，ID=' + record.id);
-  // 可以直接将其标记为已读（为标题添加删除线）,此处演示的代码会切换删除线状态
   record.titleDelete = !record.titleDelete;
+  const userStore = useUserStore();
+  const readMessageReq: ReadMessageReq = {
+    id: record.id,
+    userId: userStore.getUserInfo?.id,
+    status: 1
+  }
+  readMessage(readMessageReq);
 }
 </script>
 <style lang="less">

@@ -583,6 +583,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    public String getUserSystemLanguage(Long userId) {
+        var user = userMapper.selectById(userId);
+        return user.getSystemLanguage();
+    }
+
+    @Override
     public Response<List<UserRoleVO>> userRole() {
         var userRoleVos = new ArrayList<UserRoleVO>();
 

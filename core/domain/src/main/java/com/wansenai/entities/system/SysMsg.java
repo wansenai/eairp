@@ -54,6 +54,11 @@ public class SysMsg implements Serializable {
     private String msgContent;
 
     /**
+     * 描述（简约内容）
+     */
+    private String description;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;

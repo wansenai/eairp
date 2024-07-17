@@ -12,6 +12,7 @@
  */
 package com.wansenai.service.receipt.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -20,13 +21,14 @@ import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.PurchaseDataBO;
 import com.wansenai.bo.PurchaseDataExportBO;
 import com.wansenai.dto.receipt.purchase.*;
+import com.wansenai.dto.system.SystemMessageDTO;
 import com.wansenai.entities.financial.FinancialMain;
 import com.wansenai.entities.financial.FinancialSub;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.receipt.ReceiptPurchaseMain;
 import com.wansenai.entities.receipt.ReceiptPurchaseSub;
-import com.wansenai.entities.receipt.ReceiptSaleMain;
 import com.wansenai.entities.system.SysFile;
+import com.wansenai.entities.system.SysMsg;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.mappers.receipt.ReceiptPurchaseMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
@@ -37,19 +39,24 @@ import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.financial.PaymentReceiptService;
 import com.wansenai.service.receipt.ReceiptPurchaseService;
 import com.wansenai.service.receipt.ReceiptPurchaseSubService;
+import com.wansenai.service.system.ISysMsgService;
 import com.wansenai.service.user.ISysUserService;
+import com.wansenai.utils.MessageUtil;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.utils.TimeUtil;
 import com.wansenai.utils.constants.CommonConstants;
+import com.wansenai.utils.constants.MessageConstants;
 import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.PurchaseCodeEnum;
 import com.wansenai.utils.excel.ExcelUtils;
+import com.wansenai.utils.redis.RedisUtil;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.purchase.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.stylesheets.LinkStyle;
 
@@ -67,25 +74,27 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     private final SysFileMapper fileMapper;
     private final CommonService commonService;
     private final ISysUserService userService;
-    private final SupplierService supplierService;
     private final ReceiptPurchaseMainMapper receiptPurchaseMainMapper;
     private final ReceiptPurchaseSubService receiptPurchaseSubService;
     private final ProductStockMapper productStockMapper;
     private final IFinancialAccountService accountService;
     private final PaymentReceiptService paymentReceiptService;
     private final FinancialSubService financialSubService;
+    private final ISysMsgService messageService;
+    private final RedisUtil redisUtil;
 
-    public ReceiptPurchaseServiceImpl(SysFileMapper fileMapper , CommonService commonService, ISysUserService userService, SupplierService supplierService, ReceiptPurchaseMainMapper receiptPurchaseMainMapper, ReceiptPurchaseSubService receiptPurchaseSubService, ProductStockMapper productStockMapper, IFinancialAccountService accountService, PaymentReceiptService paymentReceiptService, FinancialSubService financialSubService) {
+    public ReceiptPurchaseServiceImpl(SysFileMapper fileMapper , CommonService commonService, ISysUserService userService, ReceiptPurchaseMainMapper receiptPurchaseMainMapper, ReceiptPurchaseSubService receiptPurchaseSubService, ProductStockMapper productStockMapper, IFinancialAccountService accountService, PaymentReceiptService paymentReceiptService, FinancialSubService financialSubService, ISysMsgService messageService, RedisUtil redisUtil) {
         this.fileMapper = fileMapper;
         this.commonService = commonService;
         this.userService = userService;
-        this.supplierService = supplierService;
         this.receiptPurchaseMainMapper = receiptPurchaseMainMapper;
         this.receiptPurchaseSubService = receiptPurchaseSubService;
         this.productStockMapper = productStockMapper;
         this.accountService = accountService;
         this.paymentReceiptService = paymentReceiptService;
         this.financialSubService = financialSubService;
+        this.messageService = messageService;
+        this.redisUtil = redisUtil;
     }
     private final Map<Long, List<ReceiptPurchaseSub>> receiptSubListCache = new ConcurrentHashMap<>();
 
@@ -441,6 +450,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     }
 
     @Override
+    @Transactional
     public Response<String> addOrUpdatePurchaseOrder(PurchaseOrderDTO purchaseOrderDTO) {
         var userId = userService.getCurrentUserId();
         var isUpdate = purchaseOrderDTO.getId() != null;
@@ -551,6 +561,36 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
 
             var saveSubResult = receiptPurchaseSubService.saveBatch(receiptList);
 
+            // send System Message
+            var systemLanguage = userService.getUserSystemLanguage(userId);
+            String title, message, description;
+            if ("zh_CN".equals(systemLanguage)) {
+                title = MessageUtil.PurchaseOrderZhCnSubject();
+                message = MessageUtil.PurchaseOrderZhCnTemplate(receiptMain.getReceiptNumber());
+                description = MessageUtil.PurchaseOrderZhCnDescription(receiptMain.getReceiptNumber());
+            } else if ("en_US".equals(systemLanguage)) {
+                title = MessageUtil.PurchaseOrderEnUsSubject();
+                message = MessageUtil.PurchaseOrderEnUsTemplate(receiptMain.getReceiptNumber());
+                description = MessageUtil.PurchaseOrderEnUsDescription(receiptMain.getReceiptNumber());
+            } else {
+                description = "";
+                message = "";
+                title = "";
+            }
+            List<SystemMessageDTO> messageDTO = new ArrayList<>();
+            for (Long operatorId : purchaseOrderDTO.getOperatorIds()) {
+                var msg = SystemMessageDTO.builder()
+                        .userId(operatorId)
+                        .type("todo")
+                        .msgTitle(title)
+                        .msgContent(message)
+                        .description(description)
+                        .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                        .build();
+                messageDTO.add(msg);
+            }
+            messageService.insertBatchMessage(messageDTO);
+
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_ORDER_SUCCESS);
             } else {
@@ -564,8 +604,95 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
         return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_ORDER_SUCCESS, PurchaseCodeEnum.DELETE_PURCHASE_ORDER_ERROR);
     }
 
+    private List<Long> parseStringToIds(String idsString) {
+        if (idsString == null || idsString.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return Arrays.stream(idsString.split(","))
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public Response<String> updatePurchaseOrderStatus(List<Long> ids, Integer status) {
+        if (ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        var receiptList = lambdaQuery()
+                .in(ReceiptPurchaseMain::getId, ids)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        List<SystemMessageDTO> messageDTO = new ArrayList<>();
+        if (status == CommonConstants.REVIEWED) {
+            for (ReceiptPurchaseMain receiptPurchaseMain : receiptList) {
+                var operatorIds = parseStringToIds(receiptPurchaseMain.getOperatorId());
+                // send notice to purchase personal
+                for (Long operatorId : operatorIds) {
+                    var dataList = redisUtil.lGet(MessageConstants.SYSTEM_MESSAGE_PREFIX + operatorId, 0, -1);
+                    if (!dataList.isEmpty()) {
+                        var deleteMessageIds = new ArrayList<Long>();
+                        dataList.forEach(item -> {
+                            var msg = JSONObject.parseObject(item.toString(), SysMsg.class);
+                            if(Objects.nonNull(msg) && msg.getDescription().contains(receiptPurchaseMain.getReceiptNumber())) {
+                                redisUtil.lRemove(MessageConstants.SYSTEM_MESSAGE_PREFIX + operatorId, 1, item);
+                                deleteMessageIds.add(msg.getId());
+                            }
+                        });
+                        if (!deleteMessageIds.isEmpty()) {
+                            messageService.removeByIds(deleteMessageIds);
+                        }
+                        var systemLanguage = userService.getUserSystemLanguage(operatorId);
+                        var title = "";
+                        var message = "";
+                        var description = "";
+                        if ("zh_CN".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseOrderAuditedZhCnSubject();
+                            message = MessageUtil.PurchaseOrderAuditedZhCnTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseOrderZhCnDescription(receiptPurchaseMain.getReceiptNumber());
+                        } else if ("en_US".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseOrderAuditedEnUsSubject();
+                            message = MessageUtil.PurchaseOrderAuditedEnUsTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseOrderEnUsDescription(receiptPurchaseMain.getReceiptNumber());
+                        }
+                        var msgDTO = SystemMessageDTO.builder()
+                                .userId(operatorId)
+                                .type("notice")
+                                .msgTitle(title)
+                                .msgContent(message)
+                                .description(description)
+                                .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                                .build();
+                        messageDTO.add(msgDTO);
+                    } else {
+                        var systemLanguage = userService.getUserSystemLanguage(operatorId);
+                        var title = "";
+                        var message = "";
+                        var description = "";
+                        if ("zh_CN".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseOrderAuditedZhCnSubject();
+                            message = MessageUtil.PurchaseOrderAuditedZhCnTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseOrderZhCnDescription(receiptPurchaseMain.getReceiptNumber());
+                        } else if ("en_US".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseOrderAuditedEnUsSubject();
+                            message = MessageUtil.PurchaseOrderAuditedEnUsTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseOrderEnUsDescription(receiptPurchaseMain.getReceiptNumber());
+                        }
+                        var msgDTO = SystemMessageDTO.builder()
+                                .userId(operatorId)
+                                .type("notice")
+                                .msgTitle(title)
+                                .msgContent(message)
+                                .description(description)
+                                .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                                .build();
+                        messageDTO.add(msgDTO);
+                    }
+                }
+            }
+            messageService.insertBatchMessage(messageDTO);
+        }
         return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_ERROR);
     }
 
@@ -762,6 +889,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     }
 
     @Override
+    @Transactional
     public Response<String> addOrUpdatePurchaseStorage(PurchaseStorageDTO purchaseStorageDTO) {
         var userId = userService.getCurrentUserId();
         var isUpdate = purchaseStorageDTO.getId() != null;
@@ -913,6 +1041,36 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 }
             }
 
+            // send System Message
+            var systemLanguage = userService.getUserSystemLanguage(userId);
+            String title, message, description;
+            if ("zh_CN".equals(systemLanguage)) {
+                title = MessageUtil.PurchaseReceiptZhCnSubject();
+                message = MessageUtil.PurchaseReceiptZhCnTemplate(receiptMain.getReceiptNumber());
+                description = MessageUtil.PurchaseReceiptZhCnDescription(receiptMain.getReceiptNumber());
+            } else if ("en_US".equals(systemLanguage)) {
+                title = MessageUtil.PurchaseReceiptEnUsSubject();
+                message = MessageUtil.PurchaseReceiptEnUsTemplate(receiptMain.getReceiptNumber());
+                description = MessageUtil.PurchaseReceiptEnUsDescription(receiptMain.getReceiptNumber());
+            } else {
+                description = "";
+                message = "";
+                title = "";
+            }
+            List<SystemMessageDTO> messageDTO = new ArrayList<>();
+            for (Long operatorId : purchaseStorageDTO.getOperatorIds()) {
+                var msg = SystemMessageDTO.builder()
+                        .userId(operatorId)
+                        .type("todo")
+                        .msgTitle(title)
+                        .msgContent(message)
+                        .description(description)
+                        .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                        .build();
+                messageDTO.add(msg);
+            }
+            messageService.insertBatchMessage(messageDTO);
+
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_RECEIPT_SUCCESS);
             } else {
@@ -928,6 +1086,84 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
 
     @Override
     public Response<String> updatePurchaseStorageStatus(List<Long> ids, Integer status) {
+        if (ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        var receiptList = lambdaQuery()
+                .in(ReceiptPurchaseMain::getId, ids)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        List<SystemMessageDTO> messageDTO = new ArrayList<>();
+        if (status == CommonConstants.REVIEWED) {
+            for (ReceiptPurchaseMain receiptPurchaseMain : receiptList) {
+                var operatorIds = parseStringToIds(receiptPurchaseMain.getOperatorId());
+                // send notice to purchase personal
+                for (Long operatorId : operatorIds) {
+                    var dataList = redisUtil.lGet(MessageConstants.SYSTEM_MESSAGE_PREFIX + operatorId, 0, -1);
+                    if (!dataList.isEmpty()) {
+                        var deleteMessageIds = new ArrayList<Long>();
+                        dataList.forEach(item -> {
+                            var msg = JSONObject.parseObject(item.toString(), SysMsg.class);
+                            if(Objects.nonNull(msg) && msg.getDescription().contains(receiptPurchaseMain.getReceiptNumber())) {
+                                redisUtil.lRemove(MessageConstants.SYSTEM_MESSAGE_PREFIX + operatorId, 1, item);
+                                deleteMessageIds.add(msg.getId());
+                            }
+                        });
+                        if (!deleteMessageIds.isEmpty()) {
+                            messageService.removeByIds(deleteMessageIds);
+                        }
+                        var systemLanguage = userService.getUserSystemLanguage(operatorId);
+                        var title = "";
+                        var message = "";
+                        var description = "";
+                        if ("zh_CN".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseInboundAuditedZhCnSubject();
+                            message = MessageUtil.PurchaseInboundAuditedZhCnTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseReceiptZhCnDescription(receiptPurchaseMain.getReceiptNumber());
+                        } else if ("en_US".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseInboundAuditedEnUsSubject();
+                            message = MessageUtil.PurchaseInboundAuditedEnUsTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseReceiptEnUsDescription(receiptPurchaseMain.getReceiptNumber());
+                        }
+                        var msgDTO = SystemMessageDTO.builder()
+                                .userId(operatorId)
+                                .type("notice")
+                                .msgTitle(title)
+                                .msgContent(message)
+                                .description(description)
+                                .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                                .build();
+                        messageDTO.add(msgDTO);
+                    } else {
+                        var systemLanguage = userService.getUserSystemLanguage(operatorId);
+                        var title = "";
+                        var message = "";
+                        var description = "";
+                        if ("zh_CN".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseInboundAuditedZhCnSubject();
+                            message = MessageUtil.PurchaseInboundAuditedZhCnTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseReceiptZhCnDescription(receiptPurchaseMain.getReceiptNumber());
+                        } else if ("en_US".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseInboundAuditedEnUsSubject();
+                            message = MessageUtil.PurchaseInboundAuditedEnUsTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseReceiptEnUsDescription(receiptPurchaseMain.getReceiptNumber());
+                        }
+                        var msgDTO = SystemMessageDTO.builder()
+                                .userId(operatorId)
+                                .type("notice")
+                                .msgTitle(title)
+                                .msgContent(message)
+                                .description(description)
+                                .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                                .build();
+                        messageDTO.add(msgDTO);
+                    }
+                }
+            }
+            messageService.insertBatchMessage(messageDTO);
+        }
         return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_ERROR);
     }
 
@@ -1119,6 +1355,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     }
 
     @Override
+    @Transactional
     public Response<String> addOrUpdatePurchaseRefund(PurchaseRefundDTO purchaseRefundDTO) {
         var userId = userService.getCurrentUserId();
         var isUpdate = purchaseRefundDTO.getId() != null;
@@ -1270,6 +1507,36 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 }
             }
 
+            // send System Message
+            var systemLanguage = userService.getUserSystemLanguage(userId);
+            String title, message, description;
+            if ("zh_CN".equals(systemLanguage)) {
+                title = MessageUtil.PurchaseRefundZhCnSubject();
+                message = MessageUtil.PurchaseRefundZhCnTemplate(receiptMain.getReceiptNumber());
+                description = MessageUtil.PurchaseRefundZhCnDescription(receiptMain.getReceiptNumber());
+            } else if ("en_US".equals(systemLanguage)) {
+                title = MessageUtil.PurchaseRefundEnUsSubject();
+                message = MessageUtil.PurchaseRefundEnUsTemplate(receiptMain.getReceiptNumber());
+                description = MessageUtil.PurchaseRefundEnUsDescription(receiptMain.getReceiptNumber());
+            } else {
+                description = "";
+                message = "";
+                title = "";
+            }
+            List<SystemMessageDTO> messageDTO = new ArrayList<>();
+            for (Long operatorId : purchaseRefundDTO.getOperatorIds()) {
+                var msg = SystemMessageDTO.builder()
+                        .userId(operatorId)
+                        .type("todo")
+                        .msgTitle(title)
+                        .msgContent(message)
+                        .description(description)
+                        .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                        .build();
+                messageDTO.add(msg);
+            }
+            messageService.insertBatchMessage(messageDTO);
+
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_SUCCESS);
             } else {
@@ -1285,6 +1552,83 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
 
     @Override
     public Response<String> updatePurchaseRefundStatus(List<Long> ids, Integer status) {
+        if (ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        var receiptList = lambdaQuery()
+                .in(ReceiptPurchaseMain::getId, ids)
+                .eq(ReceiptPurchaseMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        List<SystemMessageDTO> messageDTO = new ArrayList<>();
+        if (status == CommonConstants.REVIEWED) {
+            for (ReceiptPurchaseMain receiptPurchaseMain : receiptList) {
+                var operatorIds = parseStringToIds(receiptPurchaseMain.getOperatorId());
+                // send notice to purchase personal
+                for (Long operatorId : operatorIds) {
+                    var dataList = redisUtil.lGet(MessageConstants.SYSTEM_MESSAGE_PREFIX + operatorId, 0, -1);
+                    if (!dataList.isEmpty()) {
+                        var deleteMessageIds = new ArrayList<Long>();
+                        dataList.forEach(item -> {
+                            var msg = JSONObject.parseObject(item.toString(), SysMsg.class);
+                            if (Objects.nonNull(msg) && msg.getDescription().contains(receiptPurchaseMain.getReceiptNumber())) {
+                                redisUtil.lRemove(MessageConstants.SYSTEM_MESSAGE_PREFIX + operatorId, 1, item);
+                                deleteMessageIds.add(msg.getId());
+                            }
+                        });
+                        if (!deleteMessageIds.isEmpty()) {
+                            messageService.removeByIds(deleteMessageIds);
+                        }
+                        var systemLanguage = userService.getUserSystemLanguage(operatorId);
+                        var title = "";
+                        var message = "";
+                        var description = "";
+                        if ("zh_CN".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseRefundAuditedZhCnSubject();
+                            message = MessageUtil.PurchaseRefundAuditedZhCnTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseRefundZhCnDescription(receiptPurchaseMain.getReceiptNumber());
+                        } else if ("en_US".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseRefundAuditedEnUsSubject();
+                            message = MessageUtil.PurchaseRefundAuditedEnUsTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseRefundEnUsDescription(receiptPurchaseMain.getReceiptNumber());
+                        }
+                        var msgDTO = SystemMessageDTO.builder()
+                                .userId(operatorId)
+                                .type("notice")
+                                .msgTitle(title)
+                                .msgContent(message)
+                                .description(description)
+                                .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                                .build();
+                        messageDTO.add(msgDTO);
+                    } else {
+                        var systemLanguage = userService.getUserSystemLanguage(operatorId);
+                        var title = "";
+                        var message = "";
+                        var description = "";
+                        if ("zh_CN".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseRefundAuditedZhCnSubject();
+                            message = MessageUtil.PurchaseRefundAuditedZhCnTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseRefundZhCnDescription(receiptPurchaseMain.getReceiptNumber());
+                        } else if ("en_US".equals(systemLanguage)) {
+                            title = MessageUtil.PurchaseRefundAuditedEnUsSubject();
+                            message = MessageUtil.PurchaseRefundAuditedEnUsTemplate(receiptPurchaseMain.getReceiptNumber());
+                            description = MessageUtil.PurchaseRefundEnUsDescription(receiptPurchaseMain.getReceiptNumber());
+                        }
+                        var msgDTO = SystemMessageDTO.builder()
+                                .userId(operatorId)
+                                .type("notice")
+                                .msgTitle(title)
+                                .msgContent(message)
+                                .description(description)
+                                .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                                .build();
+                        messageDTO.add(msgDTO);
+                    }
+                }
+            }
+        }
         return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_ERROR);
     }
 
