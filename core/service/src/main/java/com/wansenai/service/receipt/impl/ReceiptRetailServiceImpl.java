@@ -12,6 +12,7 @@
  */
 package com.wansenai.service.receipt.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -23,12 +24,14 @@ import com.wansenai.dto.receipt.retail.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.retail.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.retail.RetailRefundDTO;
 import com.wansenai.dto.receipt.retail.RetailShipmentsDTO;
+import com.wansenai.dto.system.SystemMessageDTO;
 import com.wansenai.entities.financial.FinancialAccount;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.wansenai.entities.receipt.ReceiptRetailMain;
 import com.wansenai.entities.receipt.ReceiptRetailSub;
 import com.wansenai.entities.system.SysFile;
+import com.wansenai.entities.system.SysMsg;
 import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.mappers.receipt.ReceiptRetailMainMapper;
@@ -39,13 +42,17 @@ import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.product.ProductService;
 import com.wansenai.service.receipt.ReceiptRetailService;
 import com.wansenai.service.receipt.ReceiptRetailSubService;
+import com.wansenai.service.system.ISysMsgService;
 import com.wansenai.service.user.ISysUserService;
+import com.wansenai.utils.MessageUtil;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.utils.constants.CommonConstants;
+import com.wansenai.utils.constants.MessageConstants;
 import com.wansenai.utils.constants.ReceiptConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.RetailCodeEnum;
 import com.wansenai.utils.excel.ExcelUtils;
+import com.wansenai.utils.redis.RedisUtil;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.receipt.ReceiptRetailDetailVO;
 import com.wansenai.vo.receipt.retail.*;
@@ -86,8 +93,11 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
     private final CommonService commonService;
 
+    private final ISysMsgService messageService;
 
-    public ReceiptRetailServiceImpl(ReceiptRetailMainMapper receiptRetailMainMapper, ReceiptRetailSubService receiptRetailSubService, IFinancialAccountService accountService, ISysUserService userService, SysFileMapper fileMapper, ProductStockMapper productStockMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductService productService, CommonService commonService) {
+    private final RedisUtil redisUtil;
+
+    public ReceiptRetailServiceImpl(ReceiptRetailMainMapper receiptRetailMainMapper, ReceiptRetailSubService receiptRetailSubService, IFinancialAccountService accountService, ISysUserService userService, SysFileMapper fileMapper, ProductStockMapper productStockMapper, ProductStockKeepUnitMapper productStockKeepUnitMapper, ProductService productService, CommonService commonService, ISysMsgService messageService, RedisUtil redisUtil) {
         this.receiptRetailMainMapper = receiptRetailMainMapper;
         this.receiptRetailSubService = receiptRetailSubService;
         this.accountService = accountService;
@@ -97,6 +107,8 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         this.productStockKeepUnitMapper = productStockKeepUnitMapper;
         this.productService = productService;
         this.commonService = commonService;
+        this.messageService = messageService;
+        this.redisUtil = redisUtil;
     }
 
     private String getAccountName(Long accountId) {
@@ -486,6 +498,28 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                     accountService.updateById(account);
                 }
             }
+            // send System Message
+            var systemLanguage = userService.getUserSystemLanguage(userId);
+            var title = "";
+            var message = "";
+            var description = "";
+            if ("zh_CN".equals(systemLanguage)) {
+                title = MessageUtil.RetailShipmentsZhCnSubject();
+                message = MessageUtil.RetailShipmentsZhCnTemplate(receiptMain.getReceiptNumber());
+                description = MessageUtil.RetailShipmentsZhCnDescription(receiptMain.getReceiptNumber());
+            } else if ("en_US".equals(systemLanguage)) {
+                title = MessageUtil.RetailShipmentsEnUsSubject();
+                message = MessageUtil.RetailShipmentsEnUsTemplate(receiptMain.getReceiptNumber());
+                description = MessageUtil.RetailShipmentsEnUsDescription(receiptMain.getReceiptNumber());
+            }
+            var messageDTO = SystemMessageDTO.builder()
+                    .userId(userId)
+                    .type("todo")
+                    .msgTitle(title)
+                    .msgContent(message)
+                    .description(description)
+                    .build();
+            messageService.insertMessage(messageDTO);
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_SUCCESS);
@@ -553,6 +587,83 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
     @Override
     public Response<String> updateRetailShipmentsStatus(List<Long> ids, Integer status) {
+        if (ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        var receiptList = lambdaQuery()
+                .in(ReceiptRetailMain::getId, ids)
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        List<SystemMessageDTO> messageDTO = new ArrayList<>();
+        if (status == CommonConstants.REVIEWED) {
+            for (ReceiptRetailMain receiptRetailMain : receiptList) {
+                // send System Message
+                var userId = receiptRetailMain.getCreateBy();
+                // 检查是否存在该id的消息
+                var dataList = redisUtil.lGet(MessageConstants.SYSTEM_MESSAGE_PREFIX + userId, 0, -1);
+                if (!dataList.isEmpty()) {
+                    var deleteMessageIds = new ArrayList<Long>();
+                    dataList.forEach(item -> {
+                        var msg = JSONObject.parseObject(item.toString(), SysMsg.class);
+                        if(Objects.nonNull(msg) && msg.getDescription().contains(receiptRetailMain.getReceiptNumber())) {
+                            redisUtil.lRemove(MessageConstants.SYSTEM_MESSAGE_PREFIX + userId, 1, item);
+                            deleteMessageIds.add(msg.getId());
+                        }
+                    });
+                    if (!deleteMessageIds.isEmpty()) {
+                        messageService.removeByIds(deleteMessageIds);
+                    }
+                    var systemLanguage = userService.getUserSystemLanguage(userId);
+                    var title = "";
+                    var message = "";
+                    var description = "";
+                    if ("zh_CN".equals(systemLanguage)) {
+                        title = MessageUtil.RetailShipmentsAuditedZhCnSubject();
+                        message = MessageUtil.RetailShipmentsAuditedZhCnTemplate(receiptRetailMain.getReceiptNumber());
+                        description = MessageUtil.RetailShipmentsZhCnDescription(receiptRetailMain.getReceiptNumber());
+                    } else if ("en_US".equals(systemLanguage)) {
+                        title = MessageUtil.RetailShipmentsAuditedEnUsSubject();
+                        message = MessageUtil.RetailShipmentsAuditedEnUsTemplate(receiptRetailMain.getReceiptNumber());
+                        description = MessageUtil.RetailShipmentsEnUsDescription(receiptRetailMain.getReceiptNumber());
+                    }
+                    var msgDTO = SystemMessageDTO.builder()
+                            .userId(userId)
+                            .type("notice")
+                            .msgTitle(title)
+                            .msgContent(message)
+                            .description(description)
+                            .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                            .build();
+                    messageDTO.add(msgDTO);
+                } else {
+                    var systemLanguage = userService.getUserSystemLanguage(userId);
+                    var title = "";
+                    var message = "";
+                    var description = "";
+                    if ("zh_CN".equals(systemLanguage)) {
+                        title = MessageUtil.RetailShipmentsAuditedZhCnSubject();
+                        message = MessageUtil.RetailShipmentsAuditedZhCnTemplate(receiptRetailMain.getReceiptNumber());
+                        description = MessageUtil.RetailShipmentsZhCnDescription(receiptRetailMain.getReceiptNumber());
+                    } else if ("en_US".equals(systemLanguage)) {
+                        title = MessageUtil.RetailShipmentsAuditedEnUsSubject();
+                        message = MessageUtil.RetailShipmentsAuditedEnUsTemplate(receiptRetailMain.getReceiptNumber());
+                        description = MessageUtil.RetailShipmentsEnUsDescription(receiptRetailMain.getReceiptNumber());
+                    }
+                    var msgDTO = SystemMessageDTO.builder()
+                            .userId(userId)
+                            .type("notice")
+                            .msgTitle(title)
+                            .msgContent(message)
+                            .description(description)
+                            .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                            .build();
+                    messageDTO.add(msgDTO);
+                }
+            }
+            messageService.insertBatchMessage(messageDTO);
+        }
         return updateRetailStatus(ids, status, RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS, RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR);
     }
 
@@ -788,6 +899,28 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                     accountService.updateById(account);
                 }
             }
+            // send System Message
+            var systemLanguage = userService.getUserSystemLanguage(userId);
+            var title = "";
+            var message = "";
+            var description = "";
+            if ("zh_CN".equals(systemLanguage)) {
+                title = MessageUtil.RetailRefundZhCnSubject();
+                message = MessageUtil.RetailRefundZhCnTemplate(receiptMain.getReceiptNumber());
+                description = MessageUtil.RetailRefundZhCnDescription(receiptMain.getReceiptNumber());
+            } else if ("en_US".equals(systemLanguage)) {
+                title = MessageUtil.RetailRefundEnUsSubject();
+                message = MessageUtil.RetailRefundEnUsTemplate(receiptMain.getReceiptNumber());
+                description = MessageUtil.RetailRefundEnUsDescription(receiptMain.getReceiptNumber());
+            }
+            var messageDTO = SystemMessageDTO.builder()
+                    .userId(userId)
+                    .type("todo")
+                    .msgTitle(title)
+                    .msgContent(message)
+                    .description(description)
+                    .build();
+            messageService.insertMessage(messageDTO);
 
             if (saveMainResult && saveSubResult) {
                 return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_REFUND_SUCCESS);
@@ -898,6 +1031,83 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
     @Override
     public Response<String> updateRetailRefundStatus(List<Long> ids, Integer status) {
+        if (ids.isEmpty()) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+
+        var receiptList = lambdaQuery()
+                .in(ReceiptRetailMain::getId, ids)
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        List<SystemMessageDTO> messageDTO = new ArrayList<>();
+        if (status == CommonConstants.REVIEWED) {
+            for (ReceiptRetailMain receiptRetailMain : receiptList) {
+                // send System Message
+                var userId = receiptRetailMain.getCreateBy();
+                // 检查是否存在该id的消息
+                var dataList = redisUtil.lGet(MessageConstants.SYSTEM_MESSAGE_PREFIX + userId, 0, -1);
+                if (!dataList.isEmpty()) {
+                    var deleteMessageIds = new ArrayList<Long>();
+                    dataList.forEach(item -> {
+                        var msg = JSONObject.parseObject(item.toString(), SysMsg.class);
+                        if(Objects.nonNull(msg) && msg.getDescription().contains(receiptRetailMain.getReceiptNumber())) {
+                            redisUtil.lRemove(MessageConstants.SYSTEM_MESSAGE_PREFIX + userId, 1, item);
+                            deleteMessageIds.add(msg.getId());
+                        }
+                    });
+                    if (!deleteMessageIds.isEmpty()) {
+                        messageService.removeByIds(deleteMessageIds);
+                    }
+                    var systemLanguage = userService.getUserSystemLanguage(userId);
+                    var title = "";
+                    var message = "";
+                    var description = "";
+                    if ("zh_CN".equals(systemLanguage)) {
+                        title = MessageUtil.RetailRefundAuditedZhCnSubject();
+                        message = MessageUtil.RetailRefundAuditedZhCnTemplate(receiptRetailMain.getReceiptNumber());
+                        description = MessageUtil.RetailRefundZhCnDescription(receiptRetailMain.getReceiptNumber());
+                    } else if ("en_US".equals(systemLanguage)) {
+                        title = MessageUtil.RetailRefundAuditedEnUsSubject();
+                        message = MessageUtil.RetailRefundAuditedEnUsTemplate(receiptRetailMain.getReceiptNumber());
+                        description = MessageUtil.RetailRefundEnUsDescription(receiptRetailMain.getReceiptNumber());
+                    }
+                    var msgDTO = SystemMessageDTO.builder()
+                            .userId(userId)
+                            .type("notice")
+                            .msgTitle(title)
+                            .msgContent(message)
+                            .description(description)
+                            .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                            .build();
+                    messageDTO.add(msgDTO);
+                } else {
+                    var systemLanguage = userService.getUserSystemLanguage(userId);
+                    var title = "";
+                    var message = "";
+                    var description = "";
+                    if ("zh_CN".equals(systemLanguage)) {
+                        title = MessageUtil.RetailRefundAuditedZhCnSubject();
+                        message = MessageUtil.RetailRefundAuditedZhCnTemplate(receiptRetailMain.getReceiptNumber());
+                        description = MessageUtil.RetailRefundZhCnDescription(receiptRetailMain.getReceiptNumber());
+                    } else if ("en_US".equals(systemLanguage)) {
+                        title = MessageUtil.RetailRefundAuditedEnUsSubject();
+                        message = MessageUtil.RetailRefundAuditedEnUsTemplate(receiptRetailMain.getReceiptNumber());
+                        description = MessageUtil.RetailRefundEnUsDescription(receiptRetailMain.getReceiptNumber());
+                    }
+                    var msgDTO = SystemMessageDTO.builder()
+                            .userId(userId)
+                            .type("notice")
+                            .msgTitle(title)
+                            .msgContent(message)
+                            .description(description)
+                            .status(MessageConstants.SYSTEM_MESSAGE_UNREAD)
+                            .build();
+                    messageDTO.add(msgDTO);
+                }
+            }
+            messageService.insertBatchMessage(messageDTO);
+        }
        return updateRetailStatus(ids, status, RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS, RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR);
     }
 

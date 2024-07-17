@@ -12,8 +12,14 @@
  */
 package com.wansenai.service.system;
 
+import com.wansenai.dto.system.SystemMessageDTO;
+import com.wansenai.dto.system.UpdateSystemMessageDTO;
 import com.wansenai.entities.system.SysMsg;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wansenai.utils.response.Response;
+import com.wansenai.vo.SystemMessageVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -22,4 +28,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ISysMsgService extends IService<SysMsg> {
 
+    void insertMessage(SystemMessageDTO systemMessageDTO);
+
+    void insertBatchMessage(List<SystemMessageDTO> systemMessageDTOList);
+
+    void deleteBatchMessage(List<Long> ids);
+
+    Response<List<SystemMessageVO>> getMessagePageList();
+
+    Response<String> updateMessageStatus(UpdateSystemMessageDTO updateSystemMessageDTO);
 }
