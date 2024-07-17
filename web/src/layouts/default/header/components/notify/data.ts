@@ -32,7 +32,7 @@ export const tabListData: TabItem[] = [
         title: '物品XXXXX的采购订单已完成',
         description: '采购订单单据:79165111336',
         datetime: '2024-07-04',
-        type: '1',
+        type: '系统通知',
       },
       {
         id: '000000002',
@@ -94,6 +94,14 @@ export const tabListData: TabItem[] = [
       },
       {
         id: '000000009',
+        avatar: 'https://gw.alipayobjects.com/zos/rmsportal/GvqBnKhFgObvnSGkDsje.png',
+        title: '左侧图标用于区分不同的类型',
+        description: '',
+        datetime: '2017-08-07',
+        type: '1',
+      },
+      {
+        id: '000000010',
         avatar: 'https://gw.alipayobjects.com/zos/rmsportal/GvqBnKhFgObvnSGkDsje.png',
         title: '左侧图标用于区分不同的类型',
         description: '',
