@@ -453,6 +453,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     @Transactional
     public Response<String> addOrUpdatePurchaseOrder(PurchaseOrderDTO purchaseOrderDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var isUpdate = purchaseOrderDTO.getId() != null;
 
         var operatorIds = parseIdsToString(purchaseOrderDTO.getOperatorIds());
@@ -507,11 +508,16 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                     .collect(Collectors.toList());
 
             var updateSubResult = receiptPurchaseSubService.saveBatch(receiptList);
-
             if (updateMainResult && updateSubResult) {
-                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_SUCCESS);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_SUCCESS_EN);
             } else {
-                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_ERROR);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_ERROR_EN);
             }
         } else {
             var id = SnowflakeIdUtil.nextId();
@@ -562,23 +568,23 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             var saveSubResult = receiptPurchaseSubService.saveBatch(receiptList);
 
             // send System Message
-            var systemLanguage = userService.getUserSystemLanguage(userId);
-            String title, message, description;
-            if ("zh_CN".equals(systemLanguage)) {
-                title = MessageUtil.PurchaseOrderZhCnSubject();
-                message = MessageUtil.PurchaseOrderZhCnTemplate(receiptMain.getReceiptNumber());
-                description = MessageUtil.PurchaseOrderZhCnDescription(receiptMain.getReceiptNumber());
-            } else if ("en_US".equals(systemLanguage)) {
-                title = MessageUtil.PurchaseOrderEnUsSubject();
-                message = MessageUtil.PurchaseOrderEnUsTemplate(receiptMain.getReceiptNumber());
-                description = MessageUtil.PurchaseOrderEnUsDescription(receiptMain.getReceiptNumber());
-            } else {
-                description = "";
-                message = "";
-                title = "";
-            }
             List<SystemMessageDTO> messageDTO = new ArrayList<>();
             for (Long operatorId : purchaseOrderDTO.getOperatorIds()) {
+                var operatorLanguage = userService.getUserSystemLanguage(operatorId);
+                String title, message, description;
+                if ("zh_CN".equals(operatorLanguage)) {
+                    title = MessageUtil.PurchaseOrderZhCnSubject();
+                    message = MessageUtil.PurchaseOrderZhCnTemplate(receiptMain.getReceiptNumber());
+                    description = MessageUtil.PurchaseOrderZhCnDescription(receiptMain.getReceiptNumber());
+                } else if ("en_US".equals(operatorLanguage)) {
+                    title = MessageUtil.PurchaseOrderEnUsSubject();
+                    message = MessageUtil.PurchaseOrderEnUsTemplate(receiptMain.getReceiptNumber());
+                    description = MessageUtil.PurchaseOrderEnUsDescription(receiptMain.getReceiptNumber());
+                } else {
+                    description = "";
+                    message = "";
+                    title = "";
+                }
                 var msg = SystemMessageDTO.builder()
                         .userId(operatorId)
                         .type("todo")
@@ -592,16 +598,26 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             messageService.insertBatchMessage(messageDTO);
 
             if (saveMainResult && saveSubResult) {
-                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_ORDER_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_ORDER_SUCCESS);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_ORDER_SUCCESS_EN);
             } else {
-                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_ORDER_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_ORDER_ERROR);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_ORDER_ERROR_EN);
             }
         }
     }
 
     @Override
     public Response<String> deletePurchaseOrder(List<Long> ids) {
-        return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_ORDER_SUCCESS, PurchaseCodeEnum.DELETE_PURCHASE_ORDER_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_ORDER_SUCCESS, PurchaseCodeEnum.DELETE_PURCHASE_ORDER_ERROR);
+        }
+        return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_ORDER_SUCCESS_EN, PurchaseCodeEnum.DELETE_PURCHASE_ORDER_ERROR_EN);
     }
 
     private List<Long> parseStringToIds(String idsString) {
@@ -693,7 +709,11 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             }
             messageService.insertBatchMessage(messageDTO);
         }
-        return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_ERROR);
+        }
+        return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_SUCCESS_EN, PurchaseCodeEnum.UPDATE_PURCHASE_ORDER_ERROR_EN);
     }
 
     @Override
@@ -892,6 +912,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     @Transactional
     public Response<String> addOrUpdatePurchaseStorage(PurchaseStorageDTO purchaseStorageDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var isUpdate = purchaseStorageDTO.getId() != null;
 
         var operatorIds = parseIdsToString(purchaseStorageDTO.getOperatorIds());
@@ -974,9 +995,15 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             }
 
             if (updateMainResult && updateSubResult) {
-                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS_EN);
             } else {
-                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_ERROR_EN);
             }
         } else {
             var id = SnowflakeIdUtil.nextId();
@@ -1042,23 +1069,23 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             }
 
             // send System Message
-            var systemLanguage = userService.getUserSystemLanguage(userId);
-            String title, message, description;
-            if ("zh_CN".equals(systemLanguage)) {
-                title = MessageUtil.PurchaseReceiptZhCnSubject();
-                message = MessageUtil.PurchaseReceiptZhCnTemplate(receiptMain.getReceiptNumber());
-                description = MessageUtil.PurchaseReceiptZhCnDescription(receiptMain.getReceiptNumber());
-            } else if ("en_US".equals(systemLanguage)) {
-                title = MessageUtil.PurchaseReceiptEnUsSubject();
-                message = MessageUtil.PurchaseReceiptEnUsTemplate(receiptMain.getReceiptNumber());
-                description = MessageUtil.PurchaseReceiptEnUsDescription(receiptMain.getReceiptNumber());
-            } else {
-                description = "";
-                message = "";
-                title = "";
-            }
             List<SystemMessageDTO> messageDTO = new ArrayList<>();
             for (Long operatorId : purchaseStorageDTO.getOperatorIds()) {
+                var operatorLanguage = userService.getUserSystemLanguage(operatorId);
+                String title, message, description;
+                if ("zh_CN".equals(operatorLanguage)) {
+                    title = MessageUtil.PurchaseReceiptZhCnSubject();
+                    message = MessageUtil.PurchaseReceiptZhCnTemplate(receiptMain.getReceiptNumber());
+                    description = MessageUtil.PurchaseReceiptZhCnDescription(receiptMain.getReceiptNumber());
+                } else if ("en_US".equals(operatorLanguage)) {
+                    title = MessageUtil.PurchaseReceiptEnUsSubject();
+                    message = MessageUtil.PurchaseReceiptEnUsTemplate(receiptMain.getReceiptNumber());
+                    description = MessageUtil.PurchaseReceiptEnUsDescription(receiptMain.getReceiptNumber());
+                } else {
+                    description = "";
+                    message = "";
+                    title = "";
+                }
                 var msg = SystemMessageDTO.builder()
                         .userId(operatorId)
                         .type("todo")
@@ -1072,16 +1099,26 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             messageService.insertBatchMessage(messageDTO);
 
             if (saveMainResult && saveSubResult) {
-                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_RECEIPT_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_RECEIPT_SUCCESS_EN);
             } else {
-                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_RECEIPT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_RECEIPT_ERROR_EN);
             }
         }
     }
 
     @Override
     public Response<String> deletePurchaseStorage(List<Long> ids) {
-        return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_RECEIPT_SUCCESS, PurchaseCodeEnum.DELETE_PURCHASE_RECEIPT_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_RECEIPT_SUCCESS, PurchaseCodeEnum.DELETE_PURCHASE_RECEIPT_ERROR);
+        }
+        return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_RECEIPT_SUCCESS_EN, PurchaseCodeEnum.DELETE_PURCHASE_RECEIPT_ERRORS_EN);
     }
 
     @Override
@@ -1164,7 +1201,11 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             }
             messageService.insertBatchMessage(messageDTO);
         }
-        return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_ERROR);
+        }
+        return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_SUCCESS_EN, PurchaseCodeEnum.UPDATE_PURCHASE_RECEIPT_ERROR_EN);
     }
 
     @Override
@@ -1358,6 +1399,7 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
     @Transactional
     public Response<String> addOrUpdatePurchaseRefund(PurchaseRefundDTO purchaseRefundDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var isUpdate = purchaseRefundDTO.getId() != null;
 
         var operatorIds = parseIdsToString(purchaseRefundDTO.getOperatorIds());
@@ -1440,9 +1482,15 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
 
 
             if (updateMainResult && updateSubResult) {
-                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS_EN);
             } else {
-                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_ERROR);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_ERROR_EN);
             }
         } else {
             var id = SnowflakeIdUtil.nextId();
@@ -1508,23 +1556,23 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             }
 
             // send System Message
-            var systemLanguage = userService.getUserSystemLanguage(userId);
-            String title, message, description;
-            if ("zh_CN".equals(systemLanguage)) {
-                title = MessageUtil.PurchaseRefundZhCnSubject();
-                message = MessageUtil.PurchaseRefundZhCnTemplate(receiptMain.getReceiptNumber());
-                description = MessageUtil.PurchaseRefundZhCnDescription(receiptMain.getReceiptNumber());
-            } else if ("en_US".equals(systemLanguage)) {
-                title = MessageUtil.PurchaseRefundEnUsSubject();
-                message = MessageUtil.PurchaseRefundEnUsTemplate(receiptMain.getReceiptNumber());
-                description = MessageUtil.PurchaseRefundEnUsDescription(receiptMain.getReceiptNumber());
-            } else {
-                description = "";
-                message = "";
-                title = "";
-            }
             List<SystemMessageDTO> messageDTO = new ArrayList<>();
             for (Long operatorId : purchaseRefundDTO.getOperatorIds()) {
+                var operatorLanguage = userService.getUserSystemLanguage(operatorId);
+                String title, message, description;
+                if ("zh_CN".equals(operatorLanguage)) {
+                    title = MessageUtil.PurchaseRefundZhCnSubject();
+                    message = MessageUtil.PurchaseRefundZhCnTemplate(receiptMain.getReceiptNumber());
+                    description = MessageUtil.PurchaseRefundZhCnDescription(receiptMain.getReceiptNumber());
+                } else if ("en_US".equals(operatorLanguage)) {
+                    title = MessageUtil.PurchaseRefundEnUsSubject();
+                    message = MessageUtil.PurchaseRefundEnUsTemplate(receiptMain.getReceiptNumber());
+                    description = MessageUtil.PurchaseRefundEnUsDescription(receiptMain.getReceiptNumber());
+                } else {
+                    description = "";
+                    message = "";
+                    title = "";
+                }
                 var msg = SystemMessageDTO.builder()
                         .userId(operatorId)
                         .type("todo")
@@ -1538,16 +1586,26 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
             messageService.insertBatchMessage(messageDTO);
 
             if (saveMainResult && saveSubResult) {
-                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_SUCCESS);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_SUCCESS_EN);
             } else {
-                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_ERROR);
+                }
+                return Response.responseMsg(PurchaseCodeEnum.ADD_PURCHASE_REFUND_ERROR_EN);
             }
         }
     }
 
     @Override
     public Response<String> deletePurchaseRefund(List<Long> ids) {
-        return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_REFUND_SUCCESS, PurchaseCodeEnum.DELETE_PURCHASE_REFUND_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_REFUND_SUCCESS, PurchaseCodeEnum.DELETE_PURCHASE_REFUND_ERROR);
+        }
+        return deletePurchase(ids, PurchaseCodeEnum.DELETE_PURCHASE_REFUND_SUCCESS_EN, PurchaseCodeEnum.DELETE_PURCHASE_REFUND_ERROR_EN);
     }
 
     @Override
@@ -1629,7 +1687,11 @@ public class ReceiptPurchaseServiceImpl extends ServiceImpl<ReceiptPurchaseMainM
                 }
             }
         }
-        return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_ERROR);
+        }
+        return updatePurchaseStatus(ids, status, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_SUCCESS_EN, PurchaseCodeEnum.UPDATE_PURCHASE_REFUND_ERROR_EN);
     }
 
     @Override
