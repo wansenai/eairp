@@ -431,11 +431,18 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 account.setCurrentAmount(accountBalance);
                 accountService.updateById(account);
             }
+            var systemLanguage = userService.getUserSystemLanguage(userId);
 
             if (updateMainResult && updateSubResult) {
-                return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS);
+                }
+                return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS_EN);
             } else {
-                return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR);
+                }
+                return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR_EN);
             }
         } else {
 
@@ -522,16 +529,26 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
             messageService.insertMessage(messageDTO);
 
             if (saveMainResult && saveSubResult) {
-                return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_SUCCESS);
+                }
+                return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_SUCCESS_EN);
             } else {
-                return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_ERROR);
+                }
+                return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_SHIPMENTS_ERROR_EN);
             }
         }
     }
 
     @Override
     public Response<String> deleteRetailShipments(List<Long> ids) {
-        return deleteRetail(ids, RetailCodeEnum.DELETE_RETAIL_SHIPMENTS_SUCCESS, RetailCodeEnum.DELETE_RETAIL_SHIPMENTS_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return deleteRetail(ids, RetailCodeEnum.DELETE_RETAIL_SHIPMENTS_SUCCESS, RetailCodeEnum.DELETE_RETAIL_SHIPMENTS_ERROR);
+        }
+        return deleteRetail(ids, RetailCodeEnum.DELETE_RETAIL_SHIPMENTS_SUCCESS_EN, RetailCodeEnum.DELETE_RETAIL_SHIPMENTS_ERROR_EN);
     }
 
     private RetailShipmentsDetailVO createRetailShipmentsDetail(ReceiptRetailMain shipment) {
@@ -664,7 +681,12 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
             }
             messageService.insertBatchMessage(messageDTO);
         }
-        return updateRetailStatus(ids, status, RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS, RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR);
+
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return updateRetailStatus(ids, status, RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS, RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR);
+        }
+        return updateRetailStatus(ids, status, RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_SUCCESS_EN, RetailCodeEnum.UPDATE_RETAIL_SHIPMENTS_ERROR_EN);
     }
 
     @Override
@@ -833,10 +855,17 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                 accountService.updateById(account);
             }
 
+            var systemLanguage = userService.getUserSystemLanguage(userId);
             if (updateMainResult && updateSubResult) {
-                return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS);
+                }
+                return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS_EN);
             } else {
-                return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR);
+                }
+                return Response.responseMsg(RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR_EN);
             }
         } else {
             for (ShipmentsDataBO check : refundDTO.getTableData()) {
@@ -923,9 +952,15 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
             messageService.insertMessage(messageDTO);
 
             if (saveMainResult && saveSubResult) {
-                return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_REFUND_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_REFUND_SUCCESS);
+                }
+                return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_REFUND_SUCCESS_EN);
             } else {
-                return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_REFUND_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_REFUND_ERROR);
+                }
+                return Response.responseMsg(RetailCodeEnum.ADD_RETAIL_REFUND_ERROR_EN);
             }
         }
     }
@@ -1026,7 +1061,11 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
 
     @Override
     public Response<String> deleteRetailRefund(List<Long> ids) {
-        return deleteRetail(ids, RetailCodeEnum.DELETE_RETAIL_REFUND_SUCCESS, RetailCodeEnum.DELETE_RETAIL_REFUND_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return deleteRetail(ids, RetailCodeEnum.DELETE_RETAIL_REFUND_SUCCESS, RetailCodeEnum.DELETE_RETAIL_REFUND_ERROR);
+        }
+        return deleteRetail(ids, RetailCodeEnum.DELETE_RETAIL_REFUND_SUCCESS_EN, RetailCodeEnum.DELETE_RETAIL_REFUND_ERROR_EN);
     }
 
     @Override
@@ -1108,7 +1147,11 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
             }
             messageService.insertBatchMessage(messageDTO);
         }
-       return updateRetailStatus(ids, status, RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS, RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return updateRetailStatus(ids, status, RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS, RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR);
+        }
+       return updateRetailStatus(ids, status, RetailCodeEnum.UPDATE_RETAIL_REFUND_SUCCESS_EN, RetailCodeEnum.UPDATE_RETAIL_REFUND_ERROR_EN);
     }
 
     @Override

@@ -524,10 +524,17 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
 
             var updateSubResult = receiptSaleSubService.saveBatch(receiptList);
 
+            var systemLanguage = userService.getUserSystemLanguage(userId);
             if (updateMainResult && updateSubResult) {
-                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_SUCCESS);
+                }
+                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_SUCCESS_EN);
             } else {
-                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_ERROR);
+                }
+                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_ORDER_ERROR_EN);
             }
         } else {
             var id = SnowflakeIdUtil.nextId();
@@ -577,23 +584,23 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             var saveSubResult = receiptSaleSubService.saveBatch(receiptList);
 
             // send System Message
-            var systemLanguage = userService.getUserSystemLanguage(userId);
-            String title, message, description;
-            if ("zh_CN".equals(systemLanguage)) {
-                title = MessageUtil.SaleOrderZhCnSubject();
-                message = MessageUtil.SaleOrderZhCnTemplate(receiptMain.getReceiptNumber());
-                description = MessageUtil.SaleOrderZhCnDescription(receiptMain.getReceiptNumber());
-            } else if ("en_US".equals(systemLanguage)) {
-                title = MessageUtil.SaleOrderEnUsSubject();
-                message = MessageUtil.SaleOrderEnUsTemplate(receiptMain.getReceiptNumber());
-                description = MessageUtil.SaleOrderEnUsDescription(receiptMain.getReceiptNumber());
-            } else {
-                description = "";
-                message = "";
-                title = "";
-            }
             List<SystemMessageDTO> messageDTO = new ArrayList<>();
             for (Long operatorId : saleOrderDTO.getOperatorIds()) {
+                var operatorLanguage = userService.getUserSystemLanguage(operatorId);
+                String title, message, description;
+                if ("zh_CN".equals(operatorLanguage)) {
+                    title = MessageUtil.SaleOrderZhCnSubject();
+                    message = MessageUtil.SaleOrderZhCnTemplate(receiptMain.getReceiptNumber());
+                    description = MessageUtil.SaleOrderZhCnDescription(receiptMain.getReceiptNumber());
+                } else if ("en_US".equals(operatorLanguage)) {
+                    title = MessageUtil.SaleOrderEnUsSubject();
+                    message = MessageUtil.SaleOrderEnUsTemplate(receiptMain.getReceiptNumber());
+                    description = MessageUtil.SaleOrderEnUsDescription(receiptMain.getReceiptNumber());
+                } else {
+                    description = "";
+                    message = "";
+                    title = "";
+                }
                 var msg = SystemMessageDTO.builder()
                         .userId(operatorId)
                         .type("todo")
@@ -606,18 +613,28 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             }
             messageService.insertBatchMessage(messageDTO);
 
+            var systemLanguage = userService.getUserSystemLanguage(userId);
             if (saveMainResult && saveSubResult) {
-                return Response.responseMsg(SaleCodeEnum.ADD_SALE_ORDER_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.ADD_SALE_ORDER_SUCCESS);
+                }
+                return Response.responseMsg(SaleCodeEnum.ADD_SALE_ORDER_SUCCESS_EN);
             } else {
-                return Response.responseMsg(SaleCodeEnum.ADD_SALE_ORDER_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.ADD_SALE_ORDER_ERROR);
+                }
+                return Response.responseMsg(SaleCodeEnum.ADD_SALE_ORDER_ERROR_EN);
             }
         }
     }
 
     @Override
     public Response<String> deleteSaleOrder(List<Long> ids) {
-        return deleteSale(ids, SaleCodeEnum.DELETE_SALE_ORDER_SUCCESS, SaleCodeEnum.DELETE_SALE_ORDER_ERROR);
-
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return deleteSale(ids, SaleCodeEnum.DELETE_SALE_ORDER_SUCCESS, SaleCodeEnum.DELETE_SALE_ORDER_ERROR);
+        }
+        return deleteSale(ids, SaleCodeEnum.DELETE_SALE_ORDER_SUCCESS_EN, SaleCodeEnum.DELETE_SALE_ORDER_ERROR_EN);
     }
 
     @Override
@@ -700,7 +717,12 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             }
             messageService.insertBatchMessage(messageDTO);
         }
-        return updateSaleStatus(ids, status, SaleCodeEnum.UPDATE_SALE_ORDER_SUCCESS, SaleCodeEnum.UPDATE_SALE_ORDER_ERROR);
+        // 这里是获取当前使用系统的用户系统语言，而不是操作员
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return updateSaleStatus(ids, status, SaleCodeEnum.UPDATE_SALE_ORDER_SUCCESS, SaleCodeEnum.UPDATE_SALE_ORDER_ERROR);
+        }
+        return updateSaleStatus(ids, status, SaleCodeEnum.UPDATE_SALE_ORDER_SUCCESS_EN, SaleCodeEnum.UPDATE_SALE_ORDER_ERROR_EN);
     }
 
     @Override
@@ -888,6 +910,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
     @Transactional
     public Response<String> addOrUpdateSaleShipments(SaleShipmentsDTO shipmentsDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var isUpdate = shipmentsDTO.getId() != null;
 
         var operatorIds = parseIdsToString(shipmentsDTO.getOperatorIds());
@@ -967,11 +990,16 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
                 account.setCurrentAmount(accountBalance);
                 accountService.updateById(account);
             }
-
             if (updateMainResult && updateSubResult) {
-                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_SHIPMENTS_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_SHIPMENTS_SUCCESS);
+                }
+                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_SHIPMENTS_SUCCESS_EN);
             } else {
-                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_SHIPMENTS_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_SHIPMENTS_ERROR);
+                }
+                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_SHIPMENTS_ERROR_EN);
             }
         } else {
             var id = SnowflakeIdUtil.nextId();
@@ -1037,23 +1065,23 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             }
 
             // send System Message
-            var systemLanguage = userService.getUserSystemLanguage(userId);
-            String title, message, description;
-            if ("zh_CN".equals(systemLanguage)) {
-                title = MessageUtil.SaleShipmentsZhCnSubject();
-                message = MessageUtil.SaleShipmentsZhCnTemplate(receiptSaleShipmentMain.getReceiptNumber());
-                description = MessageUtil.SaleShipmentsZhCnDescription(receiptSaleShipmentMain.getReceiptNumber());
-            } else if ("en_US".equals(systemLanguage)) {
-                title = MessageUtil.SaleShipmentsEnUsSubject();
-                message = MessageUtil.SaleShipmentsEnUsTemplate(receiptSaleShipmentMain.getReceiptNumber());
-                description = MessageUtil.SaleShipmentsEnUsDescription(receiptSaleShipmentMain.getReceiptNumber());
-            } else {
-                description = "";
-                message = "";
-                title = "";
-            }
             List<SystemMessageDTO> messageDTO = new ArrayList<>();
             for (Long operatorId : shipmentsDTO.getOperatorIds()) {
+                String title, message, description;
+                var operatorLanguage = userService.getUserSystemLanguage(userId);
+                if ("zh_CN".equals(operatorLanguage)) {
+                    title = MessageUtil.SaleShipmentsZhCnSubject();
+                    message = MessageUtil.SaleShipmentsZhCnTemplate(receiptSaleShipmentMain.getReceiptNumber());
+                    description = MessageUtil.SaleShipmentsZhCnDescription(receiptSaleShipmentMain.getReceiptNumber());
+                } else if ("en_US".equals(operatorLanguage)) {
+                    title = MessageUtil.SaleShipmentsEnUsSubject();
+                    message = MessageUtil.SaleShipmentsEnUsTemplate(receiptSaleShipmentMain.getReceiptNumber());
+                    description = MessageUtil.SaleShipmentsEnUsDescription(receiptSaleShipmentMain.getReceiptNumber());
+                } else {
+                    description = "";
+                    message = "";
+                    title = "";
+                }
                 var msg = SystemMessageDTO.builder()
                         .userId(operatorId)
                         .type("todo")
@@ -1067,9 +1095,15 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             messageService.insertBatchMessage(messageDTO);
 
             if (saveMainResult && saveSubResult) {
-                return Response.responseMsg(SaleCodeEnum.ADD_SALE_SHIPMENTS_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.ADD_SALE_SHIPMENTS_SUCCESS);
+                }
+                return Response.responseMsg(SaleCodeEnum.ADD_SALE_SHIPMENTS_SUCCESS_EN);
             } else {
-                return Response.responseMsg(SaleCodeEnum.ADD_SALE_SHIPMENTS_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.ADD_SALE_SHIPMENTS_ERROR);
+                }
+                return Response.responseMsg(SaleCodeEnum.ADD_SALE_SHIPMENTS_ERROR_EN);
             }
         }
     }
@@ -1154,13 +1188,21 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             }
             messageService.insertBatchMessage(messageDTO);
         }
-        return updateSaleStatus(ids, status, SaleCodeEnum.UPDATE_SALE_SHIPMENTS_SUCCESS, SaleCodeEnum.UPDATE_SALE_SHIPMENTS_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return updateSaleStatus(ids, status, SaleCodeEnum.UPDATE_SALE_SHIPMENTS_SUCCESS, SaleCodeEnum.UPDATE_SALE_SHIPMENTS_ERROR);
+        }
+        return updateSaleStatus(ids, status, SaleCodeEnum.UPDATE_SALE_SHIPMENTS_SUCCESS_EN, SaleCodeEnum.UPDATE_SALE_SHIPMENTS_ERROR_EN);
 
     }
 
     @Override
     public Response<String> deleteSaleShipments(List<Long> ids) {
-        return deleteSale(ids, SaleCodeEnum.DELETE_SALE_SHIPMENTS_SUCCESS, SaleCodeEnum.DELETE_SALE_SHIPMENTS_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return deleteSale(ids, SaleCodeEnum.DELETE_SALE_SHIPMENTS_SUCCESS, SaleCodeEnum.DELETE_SALE_SHIPMENTS_ERROR);
+        }
+        return deleteSale(ids, SaleCodeEnum.DELETE_SALE_SHIPMENTS_SUCCESS_EN, SaleCodeEnum.DELETE_SALE_SHIPMENTS_ERROR_EN);
     }
 
     @Override
@@ -1348,6 +1390,7 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
     @Transactional
     public Response<String> addOrUpdateSaleRefund(SaleRefundDTO refundDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var isUpdate = refundDTO.getId() != null;
 
         var operatorIds = parseIdsToString(refundDTO.getOperatorIds());
@@ -1429,9 +1472,15 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             }
 
             if (updateMainResult && updateSubResult) {
-                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS);
+                }
+                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS_EN);
             } else {
-                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_ERROR);
+                }
+                return Response.responseMsg(SaleCodeEnum.UPDATE_SALE_REFUND_ERROR_EN);
             }
         } else {
             var id = SnowflakeIdUtil.nextId();
@@ -1496,23 +1545,23 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             }
 
             // send System Message
-            var systemLanguage = userService.getUserSystemLanguage(userId);
-            String title, message, description;
-            if ("zh_CN".equals(systemLanguage)) {
-                title = MessageUtil.SaleRefundZhCnSubject();
-                message = MessageUtil.SaleRefundZhCnTemplate(receiptSaleShipmentMain.getReceiptNumber());
-                description = MessageUtil.SaleRefundZhCnDescription(receiptSaleShipmentMain.getReceiptNumber());
-            } else if ("en_US".equals(systemLanguage)) {
-                title = MessageUtil.SaleRefundEnUsSubject();
-                message = MessageUtil.SaleRefundEnUsTemplate(receiptSaleShipmentMain.getReceiptNumber());
-                description = MessageUtil.SaleRefundEnUsDescription(receiptSaleShipmentMain.getReceiptNumber());
-            } else {
-                description = "";
-                message = "";
-                title = "";
-            }
             List<SystemMessageDTO> messageDTO = new ArrayList<>();
             for (Long operatorId : refundDTO.getOperatorIds()) {
+                var operatorLanguage = userService.getUserSystemLanguage(operatorId);
+                String title, message, description;
+                if ("zh_CN".equals(operatorLanguage)) {
+                    title = MessageUtil.SaleRefundZhCnSubject();
+                    message = MessageUtil.SaleRefundZhCnTemplate(receiptSaleShipmentMain.getReceiptNumber());
+                    description = MessageUtil.SaleRefundZhCnDescription(receiptSaleShipmentMain.getReceiptNumber());
+                } else if ("en_US".equals(operatorLanguage)) {
+                    title = MessageUtil.SaleRefundEnUsSubject();
+                    message = MessageUtil.SaleRefundEnUsTemplate(receiptSaleShipmentMain.getReceiptNumber());
+                    description = MessageUtil.SaleRefundEnUsDescription(receiptSaleShipmentMain.getReceiptNumber());
+                } else {
+                    description = "";
+                    message = "";
+                    title = "";
+                }
                 var msg = SystemMessageDTO.builder()
                         .userId(operatorId)
                         .type("todo")
@@ -1526,16 +1575,26 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             messageService.insertBatchMessage(messageDTO);
 
             if (saveMainResult && saveSubResult) {
-                return Response.responseMsg(SaleCodeEnum.ADD_SALE_REFUND_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.ADD_SALE_REFUND_SUCCESS);
+                }
+                return Response.responseMsg(SaleCodeEnum.ADD_SALE_REFUND_SUCCESS_EN);
             } else {
-                return Response.responseMsg(SaleCodeEnum.ADD_SALE_REFUND_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(SaleCodeEnum.ADD_SALE_REFUND_ERROR);
+                }
+                return Response.responseMsg(SaleCodeEnum.ADD_SALE_REFUND_ERROR_EN);
             }
         }
     }
 
     @Override
     public Response<String> deleteSaleRefund(List<Long> ids) {
-        return deleteSale(ids, SaleCodeEnum.DELETE_SALE_REFUND_SUCCESS, SaleCodeEnum.DELETE_SALE_REFUND_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return deleteSale(ids, SaleCodeEnum.DELETE_SALE_REFUND_SUCCESS, SaleCodeEnum.DELETE_SALE_REFUND_ERROR);
+        }
+        return deleteSale(ids, SaleCodeEnum.DELETE_SALE_REFUND_SUCCESS_EN, SaleCodeEnum.DELETE_SALE_REFUND_ERROR_EN);
     }
 
     @Override
@@ -1618,7 +1677,11 @@ public class ReceiptSaleServiceImpl extends ServiceImpl<ReceiptSaleMainMapper, R
             }
             messageService.insertBatchMessage(messageDTO);
         }
-        return updateSaleStatus(ids, status, SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS, SaleCodeEnum.UPDATE_SALE_REFUND_ERROR);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            return updateSaleStatus(ids, status, SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS, SaleCodeEnum.UPDATE_SALE_REFUND_ERROR);
+        }
+        return updateSaleStatus(ids, status, SaleCodeEnum.UPDATE_SALE_REFUND_SUCCESS_EN, SaleCodeEnum.UPDATE_SALE_REFUND_ERROR_EN);
     }
 
     @Override
