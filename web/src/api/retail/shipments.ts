@@ -1,4 +1,4 @@
-import {defHttp} from '/@/utils/http/axios';
+import {defHttp} from '@/utils/http/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     AddOrUpdateShipmentsReq, AddOrUpdateShipmentsResp,
@@ -38,8 +38,8 @@ export function getShipmentsList(params: QueryShipmentsReq) {
 }
 
 export function addOrUpdateShipments(params: AddOrUpdateShipmentsReq,
-                                     successMode: SuccessMessageMode = 'message',
-                                     errorMode: ErrorMessageMode = 'message',) {
+                                     successMode: SuccessMessageMode = 'notice',
+                                     errorMode: ErrorMessageMode = 'notice',) {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdate,
@@ -52,7 +52,7 @@ export function addOrUpdateShipments(params: AddOrUpdateShipmentsReq,
     );
 }
 
-export function deleteShipments(ids: string[], successMode: SuccessMessageMode = 'message', errorMode: ErrorMessageMode = 'message') {
+export function deleteShipments(ids: string[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseResp>(
         {
             url: `${API.DeleteBatch}?ids=${ids}`,
@@ -64,7 +64,7 @@ export function deleteShipments(ids: string[], successMode: SuccessMessageMode =
     );
 }
 
-export function updateShipmentsStatus(ids: string[], status: number, successMode: SuccessMessageMode = 'message', errorMode: ErrorMessageMode = 'message') {
+export function updateShipmentsStatus(ids: string[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}?ids=${ids}&status=${status}`,
@@ -76,7 +76,7 @@ export function updateShipmentsStatus(ids: string[], status: number, successMode
     );
 }
 
-export function getShipmentsDetail(id: string | number, errorMode: ErrorMessageMode = 'message') {
+export function getShipmentsDetail(id: string | number, errorMode: ErrorMessageMode = 'notice') {
     return defHttp.get<BaseDataResp<AddOrUpdateShipmentsReq>>(
         {
             url: `${API.GetDetail}/${id}`,
@@ -87,7 +87,7 @@ export function getShipmentsDetail(id: string | number, errorMode: ErrorMessageM
     );
 }
 
-export function getLinkShipmentsDetail(otherReceipt: string, errorMode: ErrorMessageMode = 'message') {
+export function getLinkShipmentsDetail(otherReceipt: string, errorMode: ErrorMessageMode = 'notice') {
     return defHttp.get<BaseDataResp<AddOrUpdateShipmentsResp>>(
         {
             url: `${API.GetLinkShipmentDetail}/${otherReceipt}`,
