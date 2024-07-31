@@ -10,10 +10,9 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.bo;
+package com.wansenai.bo.purchase;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,46 +24,56 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseDataBO {
+public class PurchaseDataExportBO {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long warehouseId;
+    @ExcelExport(value = "供应商")
+    private String supplierName;
 
+    @ExcelExport(value = "单据编号")
+    private String receiptNumber;
+
+    @ExcelExport(value = "仓库名称")
     private String warehouseName;
 
+    @ExcelExport(value = "条码")
     private String barCode;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long productId;
-
+    @ExcelExport(value = "商品名称")
     private String productName;
 
+    @ExcelExport(value = "规格")
     private String productStandard;
 
+    @ExcelExport(value = "型号")
     private String productModel;
 
+    @ExcelExport(value = "颜色")
     private String productColor;
 
+    @ExcelExport(value = "库存")
     private Integer stock;
 
+    @ExcelExport(value = "单位")
     private String productUnit;
 
+    @ExcelExport(value = "数量")
     private Integer productNumber;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "单价")
     private BigDecimal unitPrice;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "金额")
     private BigDecimal amount;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "税率(%)")
     private BigDecimal taxRate;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "税额")
     private BigDecimal taxAmount;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "价税合计")
     private BigDecimal taxTotalPrice;
 
+    @ExcelExport(value = "备注")
     private String remark;
 }
