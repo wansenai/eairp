@@ -33,45 +33,33 @@ public class PurchaseStorageVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
-    @ExcelExport(value = "供应商")
     private String supplierName;
 
-    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @ExcelExport(value = "单据日期")
     private LocalDateTime receiptDate;
 
-    @ExcelExport(value = "商品信息")
     private String productInfo;
 
-    @ExcelExport(value = "操作员")
     private String operator;
 
-    @ExcelExport(value = "商品数量")
     private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "金额合计")
     private BigDecimal totalAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "含税合计")
     private BigDecimal taxIncludedAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "待付金额")
     private BigDecimal totalPaymentAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "本次付款")
     private BigDecimal thisPaymentAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "本次欠款")
     private BigDecimal thisArrearsAmount;
 
-    @ExcelExport(value = "状态", kv = "0-未审核;1-已审核;2-审核中;3-部分采购;4-完成采购;")
     private Integer status;
 }

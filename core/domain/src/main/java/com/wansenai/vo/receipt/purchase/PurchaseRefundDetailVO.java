@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
 import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.PurchaseDataBO;
+import com.wansenai.bo.purchase.PurchaseDataBO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

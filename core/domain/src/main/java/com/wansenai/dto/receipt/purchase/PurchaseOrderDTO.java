@@ -13,7 +13,7 @@
 package com.wansenai.dto.receipt.purchase;
 
 import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.PurchaseDataBO;
+import com.wansenai.bo.purchase.PurchaseDataBO;
 import lombok.Data;
 
 import java.math.BigDecimal;

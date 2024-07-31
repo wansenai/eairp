@@ -17,9 +17,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.ShipmentsDataBO;
-import com.wansenai.bo.ShipmentsDataExportBO;
+import com.wansenai.bo.*;
+import com.wansenai.bo.retail.RetailReturnExportBO;
+import com.wansenai.bo.retail.RetailReturnExportEnBO;
+import com.wansenai.bo.retail.RetailShipmentsExportBO;
+import com.wansenai.bo.retail.RetailShipmentsExportEnBO;
 import com.wansenai.dto.receipt.retail.QueryRetailRefundDTO;
 import com.wansenai.dto.receipt.retail.QueryShipmentsDTO;
 import com.wansenai.dto.receipt.retail.RetailRefundDTO;
@@ -36,7 +38,6 @@ import com.wansenai.mappers.product.ProductStockKeepUnitMapper;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.mappers.receipt.ReceiptRetailMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
-import com.wansenai.service.basic.MemberService;
 import com.wansenai.service.common.CommonService;
 import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.product.ProductService;
@@ -63,7 +64,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -358,6 +358,90 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
             result.add(retailShipmentsVO);
         }
         return Response.responseData(result);
+    }
+
+    private List<RetailShipmentsExportBO> getRetailShipmentsBOList(QueryShipmentsDTO shipmentsDTO) {
+        var query = lambdaQuery()
+                .eq(ReceiptRetailMain::getType, ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
+                .in(ReceiptRetailMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_RETAIL_SHIPMENTS)
+                .eq(StringUtils.hasText(shipmentsDTO.getReceiptNumber()), ReceiptRetailMain::getReceiptNumber, shipmentsDTO.getReceiptNumber())
+                .like(StringUtils.hasText(shipmentsDTO.getRemark()), ReceiptRetailMain::getRemark, shipmentsDTO.getRemark())
+                .eq(shipmentsDTO.getMemberId() != null, ReceiptRetailMain::getMemberId, shipmentsDTO.getMemberId())
+                .eq(shipmentsDTO.getAccountId() != null, ReceiptRetailMain::getAccountId, shipmentsDTO.getAccountId())
+                .eq(shipmentsDTO.getOperatorId() != null, ReceiptRetailMain::getCreateBy, shipmentsDTO.getOperatorId())
+                .eq(shipmentsDTO.getStatus() != null, ReceiptRetailMain::getStatus, shipmentsDTO.getStatus())
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(shipmentsDTO.getStartDate()), ReceiptRetailMain::getReceiptDate, shipmentsDTO.getStartDate())
+                .le(StringUtils.hasText(shipmentsDTO.getEndDate()), ReceiptRetailMain::getReceiptDate, shipmentsDTO.getEndDate())
+                .list();
+
+        var result = new ArrayList<RetailShipmentsExportBO>(query.size() + 2);
+        for (ReceiptRetailMain receiptRetailMain : query) {
+            var receiptSubList = receiptRetailSubService.lambdaQuery()
+                    .eq(ReceiptRetailSub::getReceiptMainId, receiptRetailMain.getId())
+                    .list();
+            var productNumber = calculateProductNumber(receiptSubList);
+            var memberName = commonService.getMemberName(receiptRetailMain.getMemberId());
+            var crateBy = getUserName(receiptRetailMain.getCreateBy());
+
+            var retailShipmentsExportBO = RetailShipmentsExportBO.builder()
+                    .id(receiptRetailMain.getId())
+                    .memberName(memberName)
+                    .receiptNumber(receiptRetailMain.getReceiptNumber())
+                    .receiptDate(receiptRetailMain.getReceiptDate())
+                    .productInfo(receiptRetailMain.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalPrice(receiptRetailMain.getTotalAmount())
+                    .collectionAmount(receiptRetailMain.getTotalAmount())
+                    .backAmount(receiptRetailMain.getBackAmount())
+                    .status(receiptRetailMain.getStatus())
+                    .build();
+            result.add(retailShipmentsExportBO);
+        }
+        return result;
+    }
+
+    private List<RetailShipmentsExportEnBO> getRetailShipmentsBOEnList(QueryShipmentsDTO shipmentsDTO) {
+        var query = lambdaQuery()
+                .eq(ReceiptRetailMain::getType, ReceiptConstants.RECEIPT_TYPE_SHIPMENT)
+                .in(ReceiptRetailMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_RETAIL_SHIPMENTS)
+                .eq(StringUtils.hasText(shipmentsDTO.getReceiptNumber()), ReceiptRetailMain::getReceiptNumber, shipmentsDTO.getReceiptNumber())
+                .like(StringUtils.hasText(shipmentsDTO.getRemark()), ReceiptRetailMain::getRemark, shipmentsDTO.getRemark())
+                .eq(shipmentsDTO.getMemberId() != null, ReceiptRetailMain::getMemberId, shipmentsDTO.getMemberId())
+                .eq(shipmentsDTO.getAccountId() != null, ReceiptRetailMain::getAccountId, shipmentsDTO.getAccountId())
+                .eq(shipmentsDTO.getOperatorId() != null, ReceiptRetailMain::getCreateBy, shipmentsDTO.getOperatorId())
+                .eq(shipmentsDTO.getStatus() != null, ReceiptRetailMain::getStatus, shipmentsDTO.getStatus())
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(shipmentsDTO.getStartDate()), ReceiptRetailMain::getReceiptDate, shipmentsDTO.getStartDate())
+                .le(StringUtils.hasText(shipmentsDTO.getEndDate()), ReceiptRetailMain::getReceiptDate, shipmentsDTO.getEndDate())
+                .list();
+
+        var result = new ArrayList<RetailShipmentsExportEnBO>(query.size() + 2);
+        for (ReceiptRetailMain receiptRetailMain : query) {
+            var receiptSubList = receiptRetailSubService.lambdaQuery()
+                    .eq(ReceiptRetailSub::getReceiptMainId, receiptRetailMain.getId())
+                    .list();
+            var productNumber = calculateProductNumber(receiptSubList);
+            var memberName = commonService.getMemberName(receiptRetailMain.getMemberId());
+            var crateBy = getUserName(receiptRetailMain.getCreateBy());
+
+            var retailShipmentsExportEnBO = RetailShipmentsExportEnBO.builder()
+                    .id(receiptRetailMain.getId())
+                    .memberName(memberName)
+                    .receiptNumber(receiptRetailMain.getReceiptNumber())
+                    .receiptDate(receiptRetailMain.getReceiptDate())
+                    .productInfo(receiptRetailMain.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalPrice(receiptRetailMain.getTotalAmount())
+                    .collectionAmount(receiptRetailMain.getTotalAmount())
+                    .backAmount(receiptRetailMain.getBackAmount())
+                    .status(receiptRetailMain.getStatus())
+                    .build();
+            result.add(retailShipmentsExportEnBO);
+        }
+        return result;
     }
 
     @Override
@@ -741,8 +825,8 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         return Response.responseData(result);
     }
 
-    private Response<List<RetailRefundVO>> getRetailRefundList(QueryRetailRefundDTO refundDTO) {
-        List<RetailRefundVO> result = new ArrayList<>();
+    private List<RetailReturnExportBO> getRetailRefundList(QueryRetailRefundDTO refundDTO) {
+        List<RetailReturnExportBO> result = new ArrayList<>();
         var retailRefundList = lambdaQuery()
                 .eq(ReceiptRetailMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
                 .in(ReceiptRetailMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_RETAIL_REFUND)
@@ -765,7 +849,7 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
             var memberName = commonService.getMemberName(item.getMemberId());
             var crateBy = getUserName(item.getCreateBy());
 
-            var retailRefundVO = RetailRefundVO.builder()
+            var retailReturnExportBO = RetailReturnExportBO.builder()
                     .id(item.getId())
                     .memberName(memberName)
                     .receiptNumber(item.getReceiptNumber())
@@ -778,10 +862,53 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
                     .backAmount(item.getBackAmount())
                     .status(item.getStatus())
                     .build();
-            result.add(retailRefundVO);
+            result.add(retailReturnExportBO);
         });
 
-        return Response.responseData(result);
+        return result;
+    }
+
+    private List<RetailReturnExportEnBO> getRetailRefundEnList(QueryRetailRefundDTO refundDTO) {
+        List<RetailReturnExportEnBO> result = new ArrayList<>();
+        var retailRefundList = lambdaQuery()
+                .eq(ReceiptRetailMain::getType, ReceiptConstants.RECEIPT_TYPE_STORAGE)
+                .in(ReceiptRetailMain::getSubType, ReceiptConstants.RECEIPT_SUB_TYPE_RETAIL_REFUND)
+                .eq(StringUtils.hasText(refundDTO.getReceiptNumber()), ReceiptRetailMain::getReceiptNumber, refundDTO.getReceiptNumber())
+                .like(StringUtils.hasText(refundDTO.getRemark()), ReceiptRetailMain::getRemark, refundDTO.getRemark())
+                .eq(refundDTO.getMemberId() != null, ReceiptRetailMain::getMemberId, refundDTO.getMemberId())
+                .eq(refundDTO.getAccountId() != null, ReceiptRetailMain::getAccountId, refundDTO.getAccountId())
+                .eq(refundDTO.getOperatorId() != null, ReceiptRetailMain::getCreateBy, refundDTO.getOperatorId())
+                .eq(refundDTO.getStatus() != null, ReceiptRetailMain::getStatus, refundDTO.getStatus())
+                .eq(ReceiptRetailMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .ge(StringUtils.hasText(refundDTO.getStartDate()), ReceiptRetailMain::getCreateTime, refundDTO.getStartDate())
+                .le(StringUtils.hasText(refundDTO.getEndDate()), ReceiptRetailMain::getCreateTime, refundDTO.getEndDate())
+                .list();
+
+        retailRefundList.forEach(item -> {
+            var receiptSubList = receiptRetailSubService.lambdaQuery()
+                    .eq(ReceiptRetailSub::getReceiptMainId, item.getId())
+                    .list();
+            var productNumber = calculateProductNumber(receiptSubList);
+            var memberName = commonService.getMemberName(item.getMemberId());
+            var crateBy = getUserName(item.getCreateBy());
+
+            var retailReturnExportEnBO = RetailReturnExportEnBO.builder()
+                    .id(item.getId())
+                    .memberName(memberName)
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .productInfo(item.getRemark())
+                    .operator(crateBy)
+                    .productNumber(productNumber)
+                    .totalPrice(item.getTotalAmount())
+                    .paymentAmount(item.getChangeAmount())
+                    .backAmount(item.getBackAmount())
+                    .status(item.getStatus())
+                    .build();
+            result.add(retailReturnExportEnBO);
+        });
+
+        return result;
     }
 
     @Override
@@ -1157,36 +1284,71 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
     @Override
     public void exportRetailShipmentsExcel(QueryShipmentsDTO queryShipmentsDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
-        var mainData = getRetailShipmentsList(queryShipmentsDTO).getData();
-        if (!mainData.isEmpty()) {
-            if (queryShipmentsDTO.getIsExportDetail()) {
-                var subData = new ArrayList<ShipmentsDataExportBO>();
-                for (RetailShipmentsVO retailShipmentsVO : mainData) {
-                   var detail = getRetailShipmentsDetail(retailShipmentsVO.getId()).getData().getTableData();
-                    detail.forEach(item -> {
-                        var shipmentBo = ShipmentsDataExportBO.builder()
-                                .memberName(retailShipmentsVO.getMemberName())
-                                .receiptNumber(retailShipmentsVO.getReceiptNumber())
-                                .warehouseName(item.getWarehouseName())
-                                .barCode(item.getBarCode())
-                                .productName(item.getProductName())
-                                .productStandard(item.getProductStandard())
-                                .productModel(item.getProductModel())
-                                .productColor(item.getProductColor())
-                                .productUnit(item.getProductUnit())
-                                .productNumber(item.getProductNumber())
-                                .unitPrice(item.getUnitPrice())
-                                .amount(item.getAmount())
-                                .stock(item.getStock())
-                                .remark(item.getRemark())
-                                .build();
-                        subData.add(shipmentBo);
-                    });
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            var mainData = getRetailShipmentsBOList(queryShipmentsDTO);
+            if (!mainData.isEmpty()) {
+                if (queryShipmentsDTO.getIsExportDetail()) {
+                    var subData = new ArrayList<ShipmentsDataExportBO>();
+                    for (RetailShipmentsExportBO shipmentsExportBO : mainData) {
+                        var detail = getRetailShipmentsDetail(shipmentsExportBO.getId()).getData().getTableData();
+                        detail.forEach(item -> {
+                            var shipmentBo = ShipmentsDataExportBO.builder()
+                                    .memberName(shipmentsExportBO.getMemberName())
+                                    .receiptNumber(shipmentsExportBO.getReceiptNumber())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productUnit(item.getProductUnit())
+                                    .productNumber(item.getProductNumber())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .stock(item.getStock())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(shipmentBo);
+                        });
+                    }
+                    exportMap.put("零售出库单明细", ExcelUtils.getSheetData(subData));
                 }
-                exportMap.put("零售出库单明细", ExcelUtils.getSheetData(subData));
+                exportMap.put("零售出库单", ExcelUtils.getSheetData(mainData));
+                ExcelUtils.exportManySheet(response, "零售出库单", exportMap);
             }
-            exportMap.put("零售出库单", ExcelUtils.getSheetData(mainData));
-            ExcelUtils.exportManySheet(response, "零售出库单", exportMap);
+        } else {
+            var mainEnData = getRetailShipmentsBOEnList(queryShipmentsDTO);
+            if (!mainEnData.isEmpty()) {
+                if (queryShipmentsDTO.getIsExportDetail()) {
+                    var subEnData = new ArrayList<ShipmentsDataExportEnBO>();
+                    for (RetailShipmentsExportEnBO shipmentsExportEnBO : mainEnData) {
+                        var detail = getRetailShipmentsDetail(shipmentsExportEnBO.getId()).getData().getTableData();
+                        detail.forEach(item -> {
+                            var shipmentBo = ShipmentsDataExportEnBO.builder()
+                                    .memberName(shipmentsExportEnBO.getMemberName())
+                                    .receiptNumber(shipmentsExportEnBO.getReceiptNumber())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productUnit(item.getProductUnit())
+                                    .productNumber(item.getProductNumber())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .stock(item.getStock())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subEnData.add(shipmentBo);
+                        });
+                    }
+                    exportMap.put("Retail Outbound Document Details", ExcelUtils.getSheetData(subEnData));
+                }
+                exportMap.put("Retail Outbound Document", ExcelUtils.getSheetData(mainEnData));
+                ExcelUtils.exportManySheet(response, "Retail Outbound Document", exportMap);
+            }
         }
     }
 
@@ -1201,52 +1363,102 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         if (detail != null) {
             var data = detail.getData();
             var tableData = data.getTableData();
-            var exportData = new ArrayList<ShipmentsDataExportBO>();
-            tableData.forEach(item -> {
-                var shipmentBo = new ShipmentsDataExportBO();
-                shipmentBo.setMemberName(data.getMemberName());
-                shipmentBo.setReceiptNumber(data.getReceiptNumber());
-                BeanUtils.copyProperties(item, shipmentBo);
-                exportData.add(shipmentBo);
-            });
-            var fileName = data.getReceiptNumber() + "-零售出库单明细";
-            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+            var fileName = "";
+            if ("zh_CN".equals(systemLanguage)) {
+                var exportData = new ArrayList<ShipmentsDataExportBO>();
+                tableData.forEach(item -> {
+                    var shipmentBo = new ShipmentsDataExportBO();
+                    shipmentBo.setMemberName(data.getMemberName());
+                    shipmentBo.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, shipmentBo);
+                    exportData.add(shipmentBo);
+                });
+                fileName = data.getReceiptNumber() + "-零售出库单明细";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            } else {
+                var exportData = new ArrayList<ShipmentsDataExportEnBO>();
+                tableData.forEach(item -> {
+                    var shipmentEnBo = new ShipmentsDataExportEnBO();
+                    shipmentEnBo.setMemberName(data.getMemberName());
+                    shipmentEnBo.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, shipmentEnBo);
+                    exportData.add(shipmentEnBo);
+                });
+                fileName = data.getReceiptNumber() + "- Retail Outbound Document Details";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            }
         }
     }
 
     @Override
     public void exportRetailRefundExcel(QueryRetailRefundDTO queryRetailRefundDTO, HttpServletResponse response) throws Exception {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
-        var mainData = getRetailRefundList(queryRetailRefundDTO).getData();
-        if (!mainData.isEmpty()) {
-            if (queryRetailRefundDTO.getIsExportDetail()) {
-                var subData = new ArrayList<ShipmentsDataExportBO>();
-                for (RetailRefundVO refundVO : mainData) {
-                    var detail = getRetailRefundDetail(refundVO.getId()).getData().getTableData();
-                    detail.forEach(item -> {
-                        var shipmentBo = ShipmentsDataExportBO.builder()
-                                .memberName(refundVO.getMemberName())
-                                .receiptNumber(refundVO.getReceiptNumber())
-                                .warehouseName(item.getWarehouseName())
-                                .barCode(item.getBarCode())
-                                .productName(item.getProductName())
-                                .productStandard(item.getProductStandard())
-                                .productModel(item.getProductModel())
-                                .productColor(item.getProductColor())
-                                .productUnit(item.getProductUnit())
-                                .productNumber(item.getProductNumber())
-                                .unitPrice(item.getUnitPrice())
-                                .amount(item.getAmount())
-                                .stock(item.getStock())
-                                .remark(item.getRemark())
-                                .build();
-                        subData.add(shipmentBo);
-                    });
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            var mainData = getRetailRefundList(queryRetailRefundDTO);
+            if (!mainData.isEmpty()) {
+                if (queryRetailRefundDTO.getIsExportDetail()) {
+                    var subData = new ArrayList<ShipmentsDataExportBO>();
+                    for (RetailReturnExportBO returnExportBO : mainData) {
+                        var detail = getRetailRefundDetail(returnExportBO.getId()).getData().getTableData();
+                        detail.forEach(item -> {
+                            var shipmentBo = ShipmentsDataExportBO.builder()
+                                    .memberName(returnExportBO.getMemberName())
+                                    .receiptNumber(returnExportBO.getReceiptNumber())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productUnit(item.getProductUnit())
+                                    .productNumber(item.getProductNumber())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .stock(item.getStock())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subData.add(shipmentBo);
+                        });
+                    }
+                    exportMap.put("零售退货单明细", ExcelUtils.getSheetData(subData));
                 }
-                exportMap.put("零售退货单明细", ExcelUtils.getSheetData(subData));
+                exportMap.put("零售退货单", ExcelUtils.getSheetData(mainData));
+                ExcelUtils.exportManySheet(response, "零售退货单", exportMap);
             }
-            exportMap.put("零售退货单", ExcelUtils.getSheetData(mainData));
-            ExcelUtils.exportManySheet(response, "零售退货单", exportMap);
+        } else {
+            var mainEnData = getRetailRefundEnList(queryRetailRefundDTO);
+            if (!mainEnData.isEmpty()) {
+                if (queryRetailRefundDTO.getIsExportDetail()) {
+                    var subEnData = new ArrayList<ShipmentsDataExportBO>();
+                    for (RetailReturnExportEnBO returnExportEnBO : mainEnData) {
+                        var detail = getRetailRefundDetail(returnExportEnBO.getId()).getData().getTableData();
+                        detail.forEach(item -> {
+                            var shipmentBo = ShipmentsDataExportBO.builder()
+                                    .memberName(returnExportEnBO.getMemberName())
+                                    .receiptNumber(returnExportEnBO.getReceiptNumber())
+                                    .warehouseName(item.getWarehouseName())
+                                    .barCode(item.getBarCode())
+                                    .productName(item.getProductName())
+                                    .productStandard(item.getProductStandard())
+                                    .productModel(item.getProductModel())
+                                    .productColor(item.getProductColor())
+                                    .productUnit(item.getProductUnit())
+                                    .productNumber(item.getProductNumber())
+                                    .unitPrice(item.getUnitPrice())
+                                    .amount(item.getAmount())
+                                    .stock(item.getStock())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subEnData.add(shipmentBo);
+                        });
+                    }
+                    exportMap.put("Retail Return Document Details", ExcelUtils.getSheetData(subEnData));
+                }
+                exportMap.put("Retail Return Document", ExcelUtils.getSheetData(mainEnData));
+                ExcelUtils.exportManySheet(response, "Retail Return Document", exportMap);
+            }
         }
     }
 
@@ -1261,16 +1473,30 @@ public class ReceiptRetailServiceImpl extends ServiceImpl<ReceiptRetailMainMappe
         if (detail != null) {
             var data = detail.getData();
             var tableData = data.getTableData();
-            var exportData = new ArrayList<ShipmentsDataExportBO>();
-            tableData.forEach(item -> {
-                var shipmentBo = new ShipmentsDataExportBO();
-                shipmentBo.setMemberName(data.getMemberName());
-                shipmentBo.setReceiptNumber(data.getReceiptNumber());
-                BeanUtils.copyProperties(item, shipmentBo);
-                exportData.add(shipmentBo);
-            });
-            var fileName = data.getReceiptNumber() + "-零售退货单明细";
-            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+            if ("zh_CN".equals(systemLanguage)) {
+                var exportData = new ArrayList<ShipmentsDataExportBO>();
+                tableData.forEach(item -> {
+                    var shipmentBo = new ShipmentsDataExportBO();
+                    shipmentBo.setMemberName(data.getMemberName());
+                    shipmentBo.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, shipmentBo);
+                    exportData.add(shipmentBo);
+                });
+                var fileName = data.getReceiptNumber() + "-零售退货单明细";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            } else {
+                var exportData = new ArrayList<ShipmentsDataExportEnBO>();
+                tableData.forEach(item -> {
+                    var shipmentEnBo = new ShipmentsDataExportEnBO();
+                    shipmentEnBo.setMemberName(data.getMemberName());
+                    shipmentEnBo.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, shipmentEnBo);
+                    exportData.add(shipmentEnBo);
+                });
+                var fileName = data.getReceiptNumber() + "- Retail Return Document Details";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            }
         }
     }
 
