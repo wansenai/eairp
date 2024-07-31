@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2033 WanSen AI Team, Inc. All Rights Reserved.
+ * Copyright 2024-2033 WanSen AI Team, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
  * with the License. A copy of the License is located at
@@ -12,8 +12,7 @@
  */
 package com.wansenai.bo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,46 +24,47 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseDataBO {
+public class ShipmentsDataExportEnBO {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long warehouseId;
+    @ExcelExport(value = "Member")
+    private String memberName;
 
+    @ExcelExport(value = "Receipt Number")
+    private String receiptNumber;
+
+    @ExcelExport(value = "Warehouse")
     private String warehouseName;
 
+    @ExcelExport(value = "BarCode")
     private String barCode;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long productId;
-
+    @ExcelExport(value = "Product Name")
     private String productName;
 
+    @ExcelExport(value = "Standard")
     private String productStandard;
 
+    @ExcelExport(value = "Model")
     private String productModel;
 
+    @ExcelExport(value = "Color")
     private String productColor;
 
+    @ExcelExport(value = "Stock")
     private Integer stock;
 
+    @ExcelExport(value = "Unit")
     private String productUnit;
 
+    @ExcelExport(value = "Quantity")
     private Integer productNumber;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "Unit Price")
     private BigDecimal unitPrice;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "Amount")
     private BigDecimal amount;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal taxRate;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal taxAmount;
-
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal taxTotalPrice;
-
+    @ExcelExport(value = "Remark")
     private String remark;
 }

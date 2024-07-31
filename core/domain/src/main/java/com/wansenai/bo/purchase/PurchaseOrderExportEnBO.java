@@ -10,11 +10,12 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.receipt.retail;
+package com.wansenai.bo.purchase;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,32 +28,37 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RetailShipmentsVO {
+public class PurchaseOrderExportEnBO {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
-    private String memberName;
+    @ExcelExport(value = "Supplier")
+    private String supplierName;
 
+    @ExcelExport(value = "Receipt Number")
     private String receiptNumber;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ExcelExport(value = "Receipt Date")
     private LocalDateTime receiptDate;
 
+    @ExcelExport(value = "Product Info")
     private String productInfo;
 
+    @ExcelExport(value = "Operator")
     private String operator;
 
+    @ExcelExport(value = "Quantity")
     private Integer productNumber;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal totalPrice;
+    @ExcelExport(value = "Total Amount")
+    private BigDecimal totalAmount;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal collectionAmount;
+    @ExcelExport(value = "Tax Rate Total Amount")
+    private BigDecimal taxRateTotalAmount;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal backAmount;
+    @ExcelExport(value = "Deposit")
+    private BigDecimal deposit;
 
+    @ExcelExport(value = "Status", kv = "0-Unaudited;1-Audited;2-In Review;3-Partial Purchase;4-Complete Purchase;")
     private Integer status;
 }

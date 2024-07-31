@@ -1,7 +1,7 @@
 package com.wansenai.dto.receipt.sale;
 
 import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.SalesDataBO;
+import com.wansenai.bo.sale.SalesDataBO;
 import lombok.Data;
 
 import java.math.BigDecimal;

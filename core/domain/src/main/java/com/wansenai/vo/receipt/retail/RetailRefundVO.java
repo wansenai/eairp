@@ -33,37 +33,27 @@ public class RetailRefundVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
-    @ExcelExport(value = "会员")
     private String memberName;
 
-    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @ExcelExport(value = "单据日期")
     private LocalDateTime receiptDate;
 
-    @ExcelExport(value = "商品信息")
     private String productInfo;
 
-    @ExcelExport(value = "操作人")
     private String operator;
 
-    @ExcelExport(value = "商品数量")
     private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "金额合计")
     private BigDecimal totalPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "付款金额")
     private BigDecimal paymentAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "找零金额")
     private BigDecimal backAmount;
 
-    @ExcelExport(value = "状态", kv = "0-未审核;1-已审核")
     private Integer status;
 }

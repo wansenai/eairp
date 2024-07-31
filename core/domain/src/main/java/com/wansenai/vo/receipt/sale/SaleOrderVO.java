@@ -33,37 +33,27 @@ public class SaleOrderVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
-    @ExcelExport(value = "客户")
     private String customerName;
 
-    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @ExcelExport(value = "单据日期")
     private LocalDateTime receiptDate;
 
-    @ExcelExport(value = "商品信息")
     private String productInfo;
 
-    @ExcelExport(value = "操作员")
     private String operator;
 
-    @ExcelExport(value = "商品数量")
     private Integer productNumber;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "金额合计")
     private BigDecimal totalPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "含税合计")
     private BigDecimal taxRateTotalPrice;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "收取定金")
     private BigDecimal deposit;
 
-    @ExcelExport(value = "状态", kv = "0-未审核;1-已审核;2-审核中;3-部分销售;4-完成销售;")
     private Integer status;
 }

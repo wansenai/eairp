@@ -10,11 +10,9 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.vo.receipt.retail;
+package com.wansenai.bo.sale;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.wansenai.bo.BigDecimalSerializerBO;
+import com.wansenai.utils.excel.ExcelExport;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,32 +25,37 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RetailShipmentsVO {
+public class SaleOrderExportBO {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
-    private String memberName;
+    @ExcelExport(value = "客户")
+    private String customerName;
 
+    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ExcelExport(value = "单据日期")
     private LocalDateTime receiptDate;
 
+    @ExcelExport(value = "商品信息")
     private String productInfo;
 
+    @ExcelExport(value = "操作员")
     private String operator;
 
+    @ExcelExport(value = "商品数量")
     private Integer productNumber;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    @ExcelExport(value = "金额合计")
     private BigDecimal totalPrice;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal collectionAmount;
+    @ExcelExport(value = "含税合计")
+    private BigDecimal taxRateTotalPrice;
 
-    @JsonSerialize(using = BigDecimalSerializerBO.class)
-    private BigDecimal backAmount;
+    @ExcelExport(value = "收取定金")
+    private BigDecimal deposit;
 
+    @ExcelExport(value = "状态", kv = "0-未审核;1-已审核;2-审核中;3-部分销售;4-完成销售;")
     private Integer status;
 }
