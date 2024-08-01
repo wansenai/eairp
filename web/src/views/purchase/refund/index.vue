@@ -118,7 +118,6 @@ export default defineComponent({
       }
       const result = await deletePurchaseRefund(data.map((item) => item.id));
       if (result.code === 'P0023') {
-        createMessage.success('删除成功');
         await reload();
       }
     }
@@ -134,7 +133,6 @@ export default defineComponent({
     async function handleDelete(record: Recordable) {
       const result = await deletePurchaseRefund([record.id]);
       if (result.code === 'P0023') {
-        createMessage.success('删除成功');
         await reload();
       }
     }
@@ -178,7 +176,6 @@ export default defineComponent({
       const ids = data.map((item) => item.id);
       const {code} = await updatePurchaseRefundStatus(ids, newStatus);
       if (code === 'P0022') {
-        createMessage.success('修改状态成功');
         await reload();
       }
     }
