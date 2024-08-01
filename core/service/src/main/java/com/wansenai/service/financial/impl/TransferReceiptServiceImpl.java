@@ -15,9 +15,11 @@ package com.wansenai.service.financial.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.IncomeExpenseDataExportBO;
 import com.wansenai.bo.TransferAccountBO;
-import com.wansenai.bo.TransferAccountDataExportBO;
+import com.wansenai.bo.financial.TransferAccountDataExportBO;
+import com.wansenai.bo.financial.TransferAccountDataExportEnBO;
+import com.wansenai.bo.financial.TransferExportBO;
+import com.wansenai.bo.financial.TransferExportEnBO;
 import com.wansenai.dto.financial.AddOrUpdateTransferDTO;
 import com.wansenai.dto.financial.QueryTransferDTO;
 import com.wansenai.entities.financial.FinancialMain;
@@ -139,7 +141,7 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
         return Response.responseData(result);
     }
 
-    private List<TransferVO> getTransferReceiptList(QueryTransferDTO queryTransferDTO) {
+    private List<TransferExportBO> getTransferReceiptList(QueryTransferDTO queryTransferDTO) {
         var financialMainList = lambdaQuery()
                 .eq(queryTransferDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryTransferDTO.getFinancialPersonId())
                 .eq(queryTransferDTO.getAccountId() != null, FinancialMain::getAccountId, queryTransferDTO.getAccountId())
@@ -151,9 +153,9 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
                 .eq(FinancialMain::getType, "转账")
                 .list();
 
-        var transferVOList = new ArrayList<TransferVO>(financialMainList.size() + 1);
+        var transferExportBOList = new ArrayList<TransferExportBO>(financialMainList.size() + 1);
         financialMainList.forEach(item -> {
-            var transferVO = TransferVO.builder()
+            var transferExportBO = TransferExportBO.builder()
                     .id(item.getId())
                     .receiptNumber(item.getReceiptNumber())
                     .receiptDate(item.getReceiptDate())
@@ -164,9 +166,39 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
                     .remark(item.getRemark())
                     .build();
 
-            transferVOList.add(transferVO);
+            transferExportBOList.add(transferExportBO);
         });
-        return transferVOList;
+        return transferExportBOList;
+    }
+
+    private List<TransferExportEnBO> getTransferReceiptEnList(QueryTransferDTO queryTransferDTO) {
+        var financialMainList = lambdaQuery()
+                .eq(queryTransferDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryTransferDTO.getFinancialPersonId())
+                .eq(queryTransferDTO.getAccountId() != null, FinancialMain::getAccountId, queryTransferDTO.getAccountId())
+                .eq(StringUtils.hasLength(queryTransferDTO.getReceiptNumber()), FinancialMain::getReceiptNumber, queryTransferDTO.getReceiptNumber())
+                .eq(queryTransferDTO.getStatus() != null, FinancialMain::getStatus, queryTransferDTO.getStatus())
+                .like(StringUtils.hasLength(queryTransferDTO.getRemark()), FinancialMain::getRemark, queryTransferDTO.getRemark())
+                .ge(StringUtils.hasLength(queryTransferDTO.getStartDate()), FinancialMain::getReceiptDate, queryTransferDTO.getStartDate())
+                .le(StringUtils.hasLength(queryTransferDTO.getEndDate()), FinancialMain::getReceiptDate, queryTransferDTO.getEndDate())
+                .eq(FinancialMain::getType, "转账")
+                .list();
+
+        var transferExportEnBOList = new ArrayList<TransferExportEnBO>(financialMainList.size() + 1);
+        financialMainList.forEach(item -> {
+            var transferExportEnBO = TransferExportEnBO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .receiptDate(item.getReceiptDate())
+                    .financialPerson(commonService.getOperatorName(item.getOperatorId()))
+                    .paymentAmount(item.getTotalAmount())
+                    .paymentAccountName(commonService.getAccountName(item.getAccountId()))
+                    .status(item.getStatus())
+                    .remark(item.getRemark())
+                    .build();
+
+            transferExportEnBOList.add(transferExportEnBO);
+        });
+        return transferExportEnBOList;
     }
 
     @Override
@@ -216,6 +248,7 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
     @Override
     public Response<String> addOrUpdateTransferReceipt(AddOrUpdateTransferDTO addOrUpdateTransferDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var fid = processFiles(addOrUpdateTransferDTO.getFiles(), addOrUpdateTransferDTO.getId());
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
         var isUpdate = addOrUpdateTransferDTO.getId() != null;
@@ -288,9 +321,16 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
             }
 
             if (!updateSubResult || !updateFinancialMain) {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_ERROR_EN);
+                }
                 return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_ERROR);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_SUCCESS_EN);
             }
-            return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_SUCCESS);
 
         } else {
             var id = SnowflakeIdUtil.nextId();
@@ -353,9 +393,16 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
             }
 
             if (!saveResult || !saveSubResult) {
-                return Response.responseMsg(TransferAccountCodeEnum.ADD_TRANSFER_ACCOUNT_RECEIPT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(TransferAccountCodeEnum.ADD_TRANSFER_ACCOUNT_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(TransferAccountCodeEnum.ADD_TRANSFER_ACCOUNT_RECEIPT_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(TransferAccountCodeEnum.ADD_TRANSFER_ACCOUNT_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(TransferAccountCodeEnum.ADD_TRANSFER_ACCOUNT_RECEIPT_SUCCESS_EN);
             }
-            return Response.responseMsg(TransferAccountCodeEnum.ADD_TRANSFER_ACCOUNT_RECEIPT_SUCCESS);
         }
     }
 
@@ -368,10 +415,18 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
                 .set(FinancialMain::getDeleteFlag, CommonConstants.DELETED)
                 .in(FinancialMain::getId, ids)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if(!deleteResult) {
-            return Response.responseMsg(TransferAccountCodeEnum.DELETE_TRANSFER_ACCOUNT_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(TransferAccountCodeEnum.DELETE_TRANSFER_ACCOUNT_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(TransferAccountCodeEnum.DELETE_TRANSFER_ACCOUNT_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(TransferAccountCodeEnum.DELETE_TRANSFER_ACCOUNT_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(TransferAccountCodeEnum.DELETE_TRANSFER_ACCOUNT_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(TransferAccountCodeEnum.DELETE_TRANSFER_ACCOUNT_RECEIPT_SUCCESS);
     }
 
     @Override
@@ -383,37 +438,72 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
                 .set(FinancialMain::getStatus, status)
                 .in(FinancialMain::getId, ids)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if(!updateResult) {
-            return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(TransferAccountCodeEnum.UPDATE_TRANSFER_ACCOUNT_RECEIPT_SUCCESS);
     }
 
     @Override
     public void exportTransferReceipt(QueryTransferDTO queryTransferDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
-        var mainData = getTransferReceiptList(queryTransferDTO);
-        if (!mainData.isEmpty()) {
-            exportMap.put("转账单", ExcelUtils.getSheetData(mainData));
-            if (queryTransferDTO.getIsExportDetail()) {
-                var subData = new ArrayList<TransferAccountDataExportBO>();
-                for (TransferVO transferVO : mainData) {
-                    var detail = getTransferReceiptDetail(transferVO.getId()).getData().getTableData();
-                    if (!detail.isEmpty()) {
-                        detail.forEach(item -> {
-                            var data = TransferAccountDataExportBO.builder()
-                                    .receiptNumber(transferVO.getReceiptNumber())
-                                    .accountName(item.getAccountName())
-                                    .transferAmount(item.getTransferAmount())
-                                    .remark(item.getRemark())
-                                    .build();
-                            subData.add(data);
-                        });
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            var mainData = getTransferReceiptList(queryTransferDTO);
+            if (!mainData.isEmpty()) {
+                exportMap.put("转账单", ExcelUtils.getSheetData(mainData));
+                if (queryTransferDTO.getIsExportDetail()) {
+                    var subData = new ArrayList<TransferAccountDataExportBO>();
+                    for (TransferExportBO transferExportBO : mainData) {
+                        var detail = getTransferReceiptDetail(transferExportBO.getId()).getData().getTableData();
+                        if (!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var data = TransferAccountDataExportBO.builder()
+                                        .receiptNumber(transferExportBO.getReceiptNumber())
+                                        .accountName(item.getAccountName())
+                                        .transferAmount(item.getTransferAmount())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subData.add(data);
+                            });
+                        }
                     }
+                    exportMap.put("转账单明细", ExcelUtils.getSheetData(subData));
                 }
-                exportMap.put("转账单明细", ExcelUtils.getSheetData(subData));
+                ExcelUtils.exportManySheet(response, "转账单", exportMap);
             }
-            ExcelUtils.exportManySheet(response, "转账单", exportMap);
+        } else {
+            var mainEnData = getTransferReceiptEnList(queryTransferDTO);
+            if (!mainEnData.isEmpty()) {
+                exportMap.put("Transfer Receipt", ExcelUtils.getSheetData(mainEnData));
+                if (queryTransferDTO.getIsExportDetail()) {
+                    var subEnData = new ArrayList<TransferAccountDataExportEnBO>();
+                    for (TransferExportEnBO transferExportEnBO : mainEnData) {
+                        var detail = getTransferReceiptDetail(transferExportEnBO.getId()).getData().getTableData();
+                        if (!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var data = TransferAccountDataExportEnBO.builder()
+                                        .receiptNumber(transferExportEnBO.getReceiptNumber())
+                                        .accountName(item.getAccountName())
+                                        .transferAmount(item.getTransferAmount())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subEnData.add(data);
+                            });
+                        }
+                    }
+                    exportMap.put("Transfer Receipt Details", ExcelUtils.getSheetData(subEnData));
+                }
+                ExcelUtils.exportManySheet(response, "Transfer Receipt", exportMap);
+            }
         }
     }
 
@@ -430,15 +520,28 @@ public class TransferReceiptServiceImpl extends ServiceImpl<FinancialMainMapper,
         if(detail.getData() != null) {
             var data = detail.getData();
             var tableData = data.getTableData();
-            var exportData = new ArrayList<TransferAccountDataExportBO>();
-            tableData.forEach(item -> {
-                var transferAccountBO = new TransferAccountDataExportBO();
-                transferAccountBO.setReceiptNumber(data.getReceiptNumber());
-                BeanUtils.copyProperties(item, transferAccountBO);
-                exportData.add(transferAccountBO);
-            });
-            var fileName = data.getReceiptNumber() + "-转账单明细";
-            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+            if ("zh_CN".equals(systemLanguage)) {
+                var exportData = new ArrayList<TransferAccountDataExportBO>();
+                tableData.forEach(item -> {
+                    var transferAccountBO = new TransferAccountDataExportBO();
+                    transferAccountBO.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, transferAccountBO);
+                    exportData.add(transferAccountBO);
+                });
+                var fileName = data.getReceiptNumber() + "-转账单明细";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            } else {
+                var exportEnData = new ArrayList<TransferAccountDataExportEnBO>();
+                tableData.forEach(item -> {
+                    var transferAccountEnBO = new TransferAccountDataExportEnBO();
+                    transferAccountEnBO.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, transferAccountEnBO);
+                    exportEnData.add(transferAccountEnBO);
+                });
+                var fileName = data.getReceiptNumber() + "- Transfer Receipt Details";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportEnData));
+            }
         }
     }
 }

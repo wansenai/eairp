@@ -34,29 +34,21 @@ public class IncomeVO {
     private Long id;
 
     // supplier or customer or member
-    @ExcelExport(value = "往来单位/人员")
     private String name;
 
-    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @ExcelExport(value = "单据日期")
     private LocalDateTime receiptDate;
 
-    @ExcelExport(value = "财务人员")
     private String financialPerson;
 
-    @ExcelExport(value = "收入账户")
     private String incomeAccountName;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "收入金额")
     private BigDecimal incomeAmount;
 
-    @ExcelExport(value = "备注")
     private String remark;
 
-    @ExcelExport(value = "状态", kv = "0-未审核;1-已审核")
     private Integer status;
 }

@@ -16,7 +16,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.IncomeExpenseBO;
-import com.wansenai.bo.IncomeExpenseDataExportBO;
+import com.wansenai.bo.financial.ExpenseExportBO;
+import com.wansenai.bo.financial.ExpenseExportEnBO;
+import com.wansenai.bo.financial.IncomeExpenseDataExportBO;
+import com.wansenai.bo.financial.IncomeExpenseDataExportEnBO;
 import com.wansenai.dto.financial.AddOrUpdateExpenseDTO;
 import com.wansenai.dto.financial.QueryExpenseDTO;
 import com.wansenai.entities.financial.FinancialMain;
@@ -144,7 +147,7 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
         return Response.responseData(result);
     }
 
-    public List<ExpenseVO> getExpenseReceiptList(QueryExpenseDTO queryExpenseDTO) {
+    private List<ExpenseExportBO> getExpenseReceiptList(QueryExpenseDTO queryExpenseDTO) {
         var financialMainList = lambdaQuery()
                 .eq(queryExpenseDTO.getRelatedPersonId() != null, FinancialMain::getRelatedPersonId, queryExpenseDTO.getRelatedPersonId())
                 .eq(queryExpenseDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryExpenseDTO.getFinancialPersonId())
@@ -157,9 +160,9 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 .eq(FinancialMain::getType, "支出")
                 .list();
 
-        var expenseVOList = new ArrayList<ExpenseVO>(financialMainList.size() + 1);
+        var expenseExportBOList = new ArrayList<ExpenseExportBO>(financialMainList.size() + 1);
         financialMainList.forEach(item -> {
-            var expenseVO = ExpenseVO.builder()
+            var expenseExportBO = ExpenseExportBO.builder()
                     .id(item.getId())
                     .receiptNumber(item.getReceiptNumber())
                     .name(commonService.getRelatedPersonName(item.getRelatedPersonId()))
@@ -171,9 +174,41 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                     .remark(item.getRemark())
                     .build();
 
-            expenseVOList.add(expenseVO);
+            expenseExportBOList.add(expenseExportBO);
         });
-        return expenseVOList;
+        return expenseExportBOList;
+    }
+
+    private List<ExpenseExportEnBO> getExpenseReceiptEnList(QueryExpenseDTO queryExpenseDTO) {
+        var financialMainList = lambdaQuery()
+                .eq(queryExpenseDTO.getRelatedPersonId() != null, FinancialMain::getRelatedPersonId, queryExpenseDTO.getRelatedPersonId())
+                .eq(queryExpenseDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryExpenseDTO.getFinancialPersonId())
+                .eq(queryExpenseDTO.getAccountId() != null, FinancialMain::getAccountId, queryExpenseDTO.getAccountId())
+                .eq(StringUtils.hasLength(queryExpenseDTO.getReceiptNumber()), FinancialMain::getReceiptNumber, queryExpenseDTO.getReceiptNumber())
+                .eq(queryExpenseDTO.getStatus() != null, FinancialMain::getStatus, queryExpenseDTO.getStatus())
+                .like(StringUtils.hasLength(queryExpenseDTO.getRemark()), FinancialMain::getRemark, queryExpenseDTO.getRemark())
+                .ge(StringUtils.hasLength(queryExpenseDTO.getStartDate()), FinancialMain::getReceiptDate, queryExpenseDTO.getStartDate())
+                .le(StringUtils.hasLength(queryExpenseDTO.getEndDate()), FinancialMain::getReceiptDate, queryExpenseDTO.getEndDate())
+                .eq(FinancialMain::getType, "支出")
+                .list();
+
+        var expenseExportEnBOList = new ArrayList<ExpenseExportEnBO>(financialMainList.size() + 1);
+        financialMainList.forEach(item -> {
+            var expenseExportEnBO = ExpenseExportEnBO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .name(commonService.getRelatedPersonName(item.getRelatedPersonId()))
+                    .receiptDate(item.getReceiptDate())
+                    .financialPerson(commonService.getOperatorName(item.getOperatorId()))
+                    .expenseAccountName(commonService.getAccountName(item.getAccountId()))
+                    .expenseAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .remark(item.getRemark())
+                    .build();
+
+            expenseExportEnBOList.add(expenseExportEnBO);
+        });
+        return expenseExportEnBOList;
     }
 
     @Override
@@ -226,6 +261,7 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
     @Override
     public Response<String> addOrUpdateExpenseReceipt(AddOrUpdateExpenseDTO addOrUpdateExpenseDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var fid = processFiles(addOrUpdateExpenseDTO.getFiles(), addOrUpdateExpenseDTO.getId());
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
         var isUpdate = addOrUpdateExpenseDTO.getId() != null;
@@ -284,9 +320,16 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
             }
 
             if (!updateSubResult || !updateFinancialMain) {
-                return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_SUCCESS_EN);
             }
-            return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_SUCCESS);
 
         } else {
             var id = SnowflakeIdUtil.nextId();
@@ -336,9 +379,16 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
             }
 
             if (!saveResult || !saveSubResult) {
-                return Response.responseMsg(IncomeExpenseCodeEnum.ADD_EXPENSE_RECEIPT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(IncomeExpenseCodeEnum.ADD_EXPENSE_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(IncomeExpenseCodeEnum.ADD_EXPENSE_RECEIPT_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(IncomeExpenseCodeEnum.ADD_EXPENSE_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(IncomeExpenseCodeEnum.ADD_EXPENSE_RECEIPT_SUCCESS_EN);
             }
-            return Response.responseMsg(IncomeExpenseCodeEnum.ADD_EXPENSE_RECEIPT_SUCCESS);
         }
     }
 
@@ -351,10 +401,18 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 .set(FinancialMain::getDeleteFlag, CommonConstants.DELETED)
                 .in(FinancialMain::getId, ids)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if(!deleteResult) {
-            return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_EXPENSE_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_EXPENSE_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_EXPENSE_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_EXPENSE_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_EXPENSE_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_EXPENSE_RECEIPT_SUCCESS);
     }
 
     @Override
@@ -366,27 +424,36 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 .set(FinancialMain::getStatus, status)
                 .in(FinancialMain::getId, ids)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if(!updateResult) {
-            return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_EXPENSE_RECEIPT_SUCCESS);
     }
 
     @Override
     public void exportExpenseReceipt(QueryExpenseDTO queryExpenseDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
-        var mainData = getExpenseReceiptList(queryExpenseDTO);
-        if (!mainData.isEmpty()) {
-            exportMap.put("支出单", ExcelUtils.getSheetData(mainData));
-            if (queryExpenseDTO.getIsExportDetail()) {
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            var mainData = getExpenseReceiptList(queryExpenseDTO);
+            if (!mainData.isEmpty()) {
+                exportMap.put("支出单", ExcelUtils.getSheetData(mainData));
                 var subData = new ArrayList<IncomeExpenseDataExportBO>();
-                for (ExpenseVO expenseVO : mainData) {
-                    var detail = getExpenseReceiptDetail(expenseVO.getId()).getData().getTableData();
+                for (ExpenseExportBO expenseExportBO : mainData) {
+                    var detail = getExpenseReceiptDetail(expenseExportBO.getId()).getData().getTableData();
                     if (!detail.isEmpty()) {
                         detail.forEach(item -> {
                             var data = IncomeExpenseDataExportBO.builder()
-                                    .receiptNumber(expenseVO.getReceiptNumber())
-                                    .relatedPerson(expenseVO.getName())
+                                    .receiptNumber(expenseExportBO.getReceiptNumber())
+                                    .relatedPerson(expenseExportBO.getName())
                                     .incomeExpenseName(item.getIncomeExpenseName())
                                     .incomeExpenseAmount(item.getIncomeExpenseAmount())
                                     .remark(item.getRemark())
@@ -398,6 +465,29 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 exportMap.put("支出单明细", ExcelUtils.getSheetData(subData));
             }
             ExcelUtils.exportManySheet(response, "支出单", exportMap);
+        } else {
+            var mainEnData = getExpenseReceiptEnList(queryExpenseDTO);
+            if (!mainEnData.isEmpty()) {
+                exportMap.put("Expense Document", ExcelUtils.getSheetData(mainEnData));
+                var subEnData = new ArrayList<IncomeExpenseDataExportEnBO>();
+                for (ExpenseExportEnBO expenseExportEnBO : mainEnData) {
+                    var detail = getExpenseReceiptDetail(expenseExportEnBO.getId()).getData().getTableData();
+                    if (!detail.isEmpty()) {
+                        detail.forEach(item -> {
+                            var data = IncomeExpenseDataExportEnBO.builder()
+                                    .receiptNumber(expenseExportEnBO.getReceiptNumber())
+                                    .relatedPerson(expenseExportEnBO.getName())
+                                    .incomeExpenseName(item.getIncomeExpenseName())
+                                    .incomeExpenseAmount(item.getIncomeExpenseAmount())
+                                    .remark(item.getRemark())
+                                    .build();
+                            subEnData.add(data);
+                        });
+                    }
+                }
+                exportMap.put("Expense Document Details", ExcelUtils.getSheetData(subEnData));
+            }
+            ExcelUtils.exportManySheet(response, "Expense Document", exportMap);
         }
     }
 
@@ -414,16 +504,30 @@ public class ExpenseReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
         if (detail.getData() != null) {
             var data = detail.getData();
             var tableData = data.getTableData();
-            var exportData = new ArrayList<IncomeExpenseDataExportBO>();
-            tableData.forEach(item -> {
-                var expenseDataBO = new IncomeExpenseDataExportBO();
-                expenseDataBO.setReceiptNumber(data.getReceiptNumber());
-                expenseDataBO.setRelatedPerson(data.getRelatedPersonName());
-                BeanUtils.copyProperties(item, expenseDataBO);
-                exportData.add(expenseDataBO);
-            });
-            var fileName = data.getReceiptNumber() + "-支出单明细";
-            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+            if ("zh_CN".equals(systemLanguage)) {
+                var exportData = new ArrayList<IncomeExpenseDataExportBO>();
+                tableData.forEach(item -> {
+                    var expenseDataBO = new IncomeExpenseDataExportBO();
+                    expenseDataBO.setReceiptNumber(data.getReceiptNumber());
+                    expenseDataBO.setRelatedPerson(data.getRelatedPersonName());
+                    BeanUtils.copyProperties(item, expenseDataBO);
+                    exportData.add(expenseDataBO);
+                });
+                var fileName = data.getReceiptNumber() + "-支出单明细";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            } else {
+                var exportEnData = new ArrayList<IncomeExpenseDataExportEnBO>();
+                tableData.forEach(item -> {
+                    var expenseDataEnBO = new IncomeExpenseDataExportEnBO();
+                    expenseDataEnBO.setReceiptNumber(data.getReceiptNumber());
+                    expenseDataEnBO.setRelatedPerson(data.getRelatedPersonName());
+                    BeanUtils.copyProperties(item, expenseDataEnBO);
+                    exportEnData.add(expenseDataEnBO);
+                });
+                var fileName = data.getReceiptNumber() + "- Expense Document Details";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportEnData));
+            }
         }
     }
 }

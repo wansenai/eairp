@@ -14,10 +14,12 @@ package com.wansenai.service.financial.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.wansenai.bo.CollectionDataExportBO;
 import com.wansenai.bo.FileDataBO;
 import com.wansenai.bo.PaymentBO;
-import com.wansenai.bo.PaymentDataExportBO;
+import com.wansenai.bo.financial.PaymentDataExportBO;
+import com.wansenai.bo.financial.PaymentDataExportEnBO;
+import com.wansenai.bo.financial.PaymentExportBO;
+import com.wansenai.bo.financial.PaymentExportEnBO;
 import com.wansenai.dto.financial.AddOrUpdatePaymentDTO;
 import com.wansenai.dto.financial.QueryPaymentDTO;
 import com.wansenai.entities.financial.FinancialMain;
@@ -27,7 +29,6 @@ import com.wansenai.mappers.financial.FinancialMainMapper;
 import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.service.common.CommonService;
 import com.wansenai.service.financial.FinancialSubService;
-import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.financial.PaymentReceiptService;
 import com.wansenai.service.user.ISysUserService;
 import com.wansenai.utils.SnowflakeIdUtil;
@@ -64,14 +65,11 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
 
     private final SysFileMapper fileMapper;
 
-    private final IFinancialAccountService accountService;
-
-    public PaymentReceiptServiceImpl(FinancialSubService financialSubService, CommonService commonService, ISysUserService userService, SysFileMapper fileMapper, IFinancialAccountService accountService) {
+    public PaymentReceiptServiceImpl(FinancialSubService financialSubService, CommonService commonService, ISysUserService userService, SysFileMapper fileMapper) {
         this.financialSubService = financialSubService;
         this.commonService = commonService;
         this.userService = userService;
         this.fileMapper = fileMapper;
-        this.accountService = accountService;
     }
 
     private ArrayList<Long> processFiles(List<FileDataBO> files, Long retailId) {
@@ -145,7 +143,7 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
         return Response.responseData(result);
     }
 
-    private List<PaymentVO> getPaymentReceiptList(QueryPaymentDTO queryPaymentDTO) {
+    private List<PaymentExportBO> getPaymentReceiptList(QueryPaymentDTO queryPaymentDTO) {
         var financialMainList = lambdaQuery()
                 .eq(queryPaymentDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryPaymentDTO.getFinancialPersonId())
                 .eq(queryPaymentDTO.getAccountId() != null, FinancialMain::getAccountId, queryPaymentDTO.getAccountId())
@@ -159,9 +157,9 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list();
 
-        var paymentVOList = new ArrayList<PaymentVO>(financialMainList.size() + 1);
+        var paymentExportBOList = new ArrayList<PaymentExportBO>(financialMainList.size() + 1);
         financialMainList.forEach(item -> {
-            var paymentVo = PaymentVO.builder()
+            var paymentExportBO = PaymentExportBO.builder()
                     .id(item.getId())
                     .receiptNumber(item.getReceiptNumber())
                     .supplierName(commonService.getSupplierName(item.getRelatedPersonId()))
@@ -175,9 +173,44 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                     .remark(item.getRemark())
                     .build();
 
-            paymentVOList.add(paymentVo);
+            paymentExportBOList.add(paymentExportBO);
         });
-        return paymentVOList;
+        return paymentExportBOList;
+    }
+
+    private List<PaymentExportEnBO> getPaymentReceiptEnList(QueryPaymentDTO queryPaymentDTO) {
+        var financialMainList = lambdaQuery()
+                .eq(queryPaymentDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryPaymentDTO.getFinancialPersonId())
+                .eq(queryPaymentDTO.getAccountId() != null, FinancialMain::getAccountId, queryPaymentDTO.getAccountId())
+                .eq(queryPaymentDTO.getStatus() != null, FinancialMain::getStatus, queryPaymentDTO.getStatus())
+                .eq(queryPaymentDTO.getSupplierId() != null, FinancialMain::getRelatedPersonId, queryPaymentDTO.getSupplierId())
+                .eq(StringUtils.hasLength(queryPaymentDTO.getReceiptNumber()), FinancialMain::getReceiptNumber, queryPaymentDTO.getReceiptNumber())
+                .like(StringUtils.hasLength(queryPaymentDTO.getRemark()), FinancialMain::getRemark, queryPaymentDTO.getRemark())
+                .ge(StringUtils.hasLength(queryPaymentDTO.getStartDate()), FinancialMain::getReceiptDate, queryPaymentDTO.getStartDate())
+                .le(StringUtils.hasLength(queryPaymentDTO.getEndDate()), FinancialMain::getReceiptDate, queryPaymentDTO.getEndDate())
+                .eq(FinancialMain::getType, "付款")
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var paymentExportEnBOList = new ArrayList<PaymentExportEnBO>(financialMainList.size() + 1);
+        financialMainList.forEach(item -> {
+            var paymentExportEnBO = PaymentExportEnBO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .supplierName(commonService.getSupplierName(item.getRelatedPersonId()))
+                    .receiptDate(item.getReceiptDate())
+                    .financialPerson(commonService.getOperatorName(item.getOperatorId()))
+                    .paymentAccountName(commonService.getAccountName(item.getAccountId()))
+                    .totalPaymentAmount(item.getTotalAmount())
+                    .discountAmount(item.getDiscountAmount())
+                    .actualPaymentAmount(item.getChangeAmount())
+                    .status(item.getStatus())
+                    .remark(item.getRemark())
+                    .build();
+
+            paymentExportEnBOList.add(paymentExportEnBO);
+        });
+        return paymentExportEnBOList;
     }
 
     @Override
@@ -234,14 +267,15 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
     @Override
     public Response<String> addOrUpdatePaymentReceipt(AddOrUpdatePaymentDTO addOrUpdatePaymentDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var fid = processFiles(addOrUpdatePaymentDTO.getFiles(), addOrUpdatePaymentDTO.getId());
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
         var isUpdate = addOrUpdatePaymentDTO.getId() != null;
 
         if (isUpdate) {
-            var beforeReceipt = financialSubService.lambdaQuery()
-                    .eq(FinancialSub::getFinancialMainId, addOrUpdatePaymentDTO.getId())
-                    .list();
+//            var beforeReceipt = financialSubService.lambdaQuery()
+//                    .eq(FinancialSub::getFinancialMainId, addOrUpdatePaymentDTO.getId())
+//                    .list();
 
             financialSubService.lambdaUpdate()
                     .eq(FinancialSub::getFinancialMainId, addOrUpdatePaymentDTO.getId())
@@ -279,6 +313,7 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                     .set(FinancialMain::getUpdateTime, LocalDateTime.now())
                     .update();
 
+            // 这段代码需要再次检查具体业务是要做什么 2024-08-01 (James Zow <Jameszow@163.com>)
 //            var account = accountService.getById(addOrUpdatePaymentDTO.getPaymentAccountId());
 //            if (account != null) {
 //                var accountBalance = account.getCurrentAmount();
@@ -295,9 +330,16 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
 //            }
 
             if (!updateSubResult || !updateFinancialMain) {
-                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_SUCCESS_EN);
             }
-            return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_SUCCESS);
 
         } else {
             var id = SnowflakeIdUtil.nextId();
@@ -352,9 +394,16 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
 //            }
 
             if (!saveResult || !saveSubResult) {
-                return Response.responseMsg(CollectionPaymentCodeEnum.ADD_PAYMENT_RECEIPT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(CollectionPaymentCodeEnum.ADD_PAYMENT_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(CollectionPaymentCodeEnum.ADD_PAYMENT_RECEIPT_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(CollectionPaymentCodeEnum.ADD_PAYMENT_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(CollectionPaymentCodeEnum.ADD_PAYMENT_RECEIPT_SUCCESS_EN);
             }
-            return Response.responseMsg(CollectionPaymentCodeEnum.ADD_PAYMENT_RECEIPT_SUCCESS);
         }
     }
 
@@ -372,11 +421,19 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 .set(FinancialSub::getDeleteFlag, CommonConstants.DELETED)
                 .in(FinancialSub::getFinancialMainId, ids)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
 
         if(!deleteResult) {
-            return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_PAYMENT_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_PAYMENT_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_PAYMENT_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_PAYMENT_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_PAYMENT_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_PAYMENT_RECEIPT_SUCCESS);
     }
 
     @Override
@@ -388,40 +445,78 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
                 .set(FinancialMain::getStatus, status)
                 .in(FinancialMain::getId, ids)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if(!updateResult) {
-            return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_PAYMENT_RECEIPT_SUCCESS);
     }
 
     @Override
     public void exportPaymentReceipt(QueryPaymentDTO queryPaymentDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
-        var mainData = getPaymentReceiptList(queryPaymentDTO);
-        if (!mainData.isEmpty()) {
-            exportMap.put("付款单", ExcelUtils.getSheetData(mainData));
-            if (queryPaymentDTO.getIsExportDetail()) {
-                var subData = new ArrayList<PaymentDataExportBO>();
-                for (PaymentVO paymentVO : mainData) {
-                    var detail = getPaymentReceiptDetail(paymentVO.getId()).getData().getTableData();
-                    if (!detail.isEmpty()) {
-                        detail.forEach(item -> {
-                            var data = PaymentDataExportBO.builder()
-                                    .supplierName(paymentVO.getSupplierName())
-                                    .receiptNumber(paymentVO.getReceiptNumber())
-                                    .purchaseReceiptNumber(item.getPurchaseReceiptNumber())
-                                    .paymentArrears(item.getPaymentArrears())
-                                    .prepaidArrears(item.getPrepaidArrears())
-                                    .thisPaymentAmount(item.getThisPaymentAmount())
-                                    .remark(item.getRemark())
-                                    .build();
-                            subData.add(data);
-                        });
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            var mainData = getPaymentReceiptList(queryPaymentDTO);
+            if (!mainData.isEmpty()) {
+                exportMap.put("付款单", ExcelUtils.getSheetData(mainData));
+                if (queryPaymentDTO.getIsExportDetail()) {
+                    var subData = new ArrayList<PaymentDataExportBO>();
+                    for (PaymentExportBO paymentExportBO : mainData) {
+                        var detail = getPaymentReceiptDetail(paymentExportBO.getId()).getData().getTableData();
+                        if (!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var data = PaymentDataExportBO.builder()
+                                        .supplierName(paymentExportBO.getSupplierName())
+                                        .receiptNumber(paymentExportBO.getReceiptNumber())
+                                        .purchaseReceiptNumber(item.getPurchaseReceiptNumber())
+                                        .paymentArrears(item.getPaymentArrears())
+                                        .prepaidArrears(item.getPrepaidArrears())
+                                        .thisPaymentAmount(item.getThisPaymentAmount())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subData.add(data);
+                            });
+                        }
                     }
+                    exportMap.put("付款单明细", ExcelUtils.getSheetData(subData));
                 }
-                exportMap.put("付款单明细", ExcelUtils.getSheetData(subData));
+                ExcelUtils.exportManySheet(response, "付款单", exportMap);
             }
-            ExcelUtils.exportManySheet(response, "付款单", exportMap);
+        } else {
+            var mainEnData = getPaymentReceiptEnList(queryPaymentDTO);
+            if (!mainEnData.isEmpty()) {
+                exportMap.put("Payment Document", ExcelUtils.getSheetData(mainEnData));
+                if (queryPaymentDTO.getIsExportDetail()) {
+                    var subEnData = new ArrayList<PaymentDataExportEnBO>();
+                    for (PaymentExportEnBO paymentExportEnBO : mainEnData) {
+                        var detail = getPaymentReceiptDetail(paymentExportEnBO.getId()).getData().getTableData();
+                        if (!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var data = PaymentDataExportEnBO.builder()
+                                        .supplierName(paymentExportEnBO.getSupplierName())
+                                        .receiptNumber(paymentExportEnBO.getReceiptNumber())
+                                        .purchaseReceiptNumber(item.getPurchaseReceiptNumber())
+                                        .paymentArrears(item.getPaymentArrears())
+                                        .prepaidArrears(item.getPrepaidArrears())
+                                        .thisPaymentAmount(item.getThisPaymentAmount())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subEnData.add(data);
+                            });
+                        }
+                    }
+                    exportMap.put("Payment Document Detail", ExcelUtils.getSheetData(subEnData));
+                }
+                ExcelUtils.exportManySheet(response, "Payment Document", exportMap);
+            }
         }
     }
 
@@ -438,16 +533,30 @@ public class PaymentReceiptServiceImpl extends ServiceImpl<FinancialMainMapper, 
         if (detail.getData() != null) {
             var data = detail.getData();
             var tableData = data.getTableData();
-            var exportData = new ArrayList<PaymentDataExportBO>();
-            tableData.forEach(item -> {
-                var paymentDataBO = new PaymentDataExportBO();
-                paymentDataBO.setSupplierName(data.getSupplierName());
-                paymentDataBO.setReceiptNumber(data.getReceiptNumber());
-                BeanUtils.copyProperties(item, paymentDataBO);
-                exportData.add(paymentDataBO);
-            });
-            var fileName = data.getReceiptNumber() + "-付款单明细";
-            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+            if ("zh_CN".equals(systemLanguage)) {
+                var exportData = new ArrayList<PaymentDataExportBO>();
+                tableData.forEach(item -> {
+                    var paymentDataBO = new PaymentDataExportBO();
+                    paymentDataBO.setSupplierName(data.getSupplierName());
+                    paymentDataBO.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, paymentDataBO);
+                    exportData.add(paymentDataBO);
+                });
+                var fileName = data.getReceiptNumber() + "-付款单明细";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            } else {
+                var exportEnData = new ArrayList<PaymentDataExportEnBO>();
+                tableData.forEach(item -> {
+                    var paymentDataEnBO = new PaymentDataExportEnBO();
+                    paymentDataEnBO.setSupplierName(data.getSupplierName());
+                    paymentDataEnBO.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, paymentDataEnBO);
+                    exportEnData.add(paymentDataEnBO);
+                });
+                var fileName = data.getReceiptNumber() + "- Payment Document Detail";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportEnData));
+            }
         }
     }
 }
