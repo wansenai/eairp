@@ -10,7 +10,7 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.bo;
+package com.wansenai.bo.warehouse;
 
 import com.wansenai.utils.excel.ExcelExport;
 import lombok.AllArgsConstructor;
@@ -20,48 +20,51 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * 组装单和拆卸单导出数据BO (AssembleStockDataExportBO) 共存在这一个类中
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AllotStockDataExportBO {
+public class AssembleStockDataExportBO {
 
-    @ExcelExport(value = "调拨单号")
+    @ExcelExport("单据编号")
     private String receiptNumber;
 
-    @ExcelExport(value = "调出方仓库")
+    @ExcelExport("商品类型")
+    private String type;
+
+    @ExcelExport("仓库")
     private String warehouseName;
 
-    @ExcelExport(value = "调入方仓库")
-    private String otherWarehouseName;
-
-    @ExcelExport(value = "条码")
+    @ExcelExport("条码")
     private String barCode;
 
-    @ExcelExport(value = "商品名称")
+    @ExcelExport("商品名称")
     private String productName;
 
-    @ExcelExport(value = "规格")
+    @ExcelExport("规格")
     private String productStandard;
 
-    @ExcelExport(value = "型号")
+    @ExcelExport("型号")
     private String productModel;
 
-    @ExcelExport(value = "单位")
+    @ExcelExport("单位")
     private String productUnit;
 
-    @ExcelExport(value = "库存")
+    @ExcelExport("库存")
     private Integer stock;
 
-    @ExcelExport(value = "数量")
+    @ExcelExport("商品数量")
     private Integer productNumber;
 
-    @ExcelExport(value = "单价")
+    @ExcelExport("单价")
     private BigDecimal unitPrice;
 
-    @ExcelExport(value = "金额")
+    @ExcelExport("金额")
     private BigDecimal amount;
 
-    @ExcelExport(value = "备注")
+    @ExcelExport("备注")
     private String remark;
 }
