@@ -1,4 +1,4 @@
-import {defHttp} from '/@/utils/http/axios';
+import {defHttp} from '@/utils/http/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     QueryPurchaseStorageReq,
@@ -27,7 +27,7 @@ export function getPurchaseStoragePageList(params: QueryPurchaseStorageReq) {
     );
 }
 
-export function addOrUpdatePurchaseStorage(params: AddOrUpdatePurchaseStorageReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
+export function addOrUpdatePurchaseStorage(params: AddOrUpdatePurchaseStorageReq, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseResp>(
         {
             url: API.AddOrUpdate,
@@ -47,7 +47,7 @@ export function getPurchaseStorageDetail(id: string) {
     );
 }
 
-export function updatePurchaseStorageStatus(ids: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
+export function updatePurchaseStorageStatus(ids: number[], status: number, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.UpdateStatus}/${ids}/${status}`,
@@ -58,7 +58,7 @@ export function updatePurchaseStorageStatus(ids: number[], status: number, succe
     );
 }
 
-export function deletePurchaseStorage(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'message') {
+export function deletePurchaseStorage(ids: number[], successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.put<BaseResp>(
         {
             url: `${API.Delete}/${ids}`,

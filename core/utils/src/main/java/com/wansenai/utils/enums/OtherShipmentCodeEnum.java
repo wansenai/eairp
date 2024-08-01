@@ -17,17 +17,29 @@ import lombok.Getter;
 @Getter
 public enum OtherShipmentCodeEnum {
 
-    ADD_OTHER_SHIPMENT_STOCK_SUCCESS("S0013", "添加其他出库单据成功"),
+    ADD_OTHER_SHIPMENT_STOCK_SUCCESS("S0013", "成功添加其他出库单据"),
 
-    ADD_OTHER_SHIPMENT_STOCK_ERROR("S0512", "添加其他出库单据失败"),
+    ADD_OTHER_SHIPMENT_STOCK_SUCCESS_EN("S0013", "Successfully add other outbound documents"),
 
-    UPDATE_OTHER_SHIPMENT_STOCK_SUCCESS("S0014", "修改其他出库单据成功"),
+    ADD_OTHER_SHIPMENT_STOCK_ERROR("S0512", "系统异常，添加其他出库单据失败"),
 
-    UPDATE_OTHER_SHIPMENT_STOCK_ERROR("S0513", "修改其他出库单据失败"),
+    ADD_OTHER_SHIPMENT_STOCK_ERROR_EN("S0512", "System exception, failed to add other outbound documents"),
 
-    DELETE_OTHER_SHIPMENT_STOCK_SUCCESS("S0015", "删除其他出库单据成功"),
+    UPDATE_OTHER_SHIPMENT_STOCK_SUCCESS("S0014", "成功修改其他出库单据"),
 
-    DELETE_OTHER_SHIPMENT_STOCK_ERROR("S0514", "删除其他出库单据失败");
+    UPDATE_OTHER_SHIPMENT_STOCK_SUCCESS_EN("S0014", "Successfully modify other outbound documents"),
+
+    UPDATE_OTHER_SHIPMENT_STOCK_ERROR("S0513", "系统异常，修改其他出库单据失败"),
+
+    UPDATE_OTHER_SHIPMENT_STOCK_ERROR_EN("S0513", "System exception, failed to modify other outbound documents"),
+
+    DELETE_OTHER_SHIPMENT_STOCK_SUCCESS("S0015", "成功删除其他出库单据"),
+
+    DELETE_OTHER_SHIPMENT_STOCK_SUCCESS_EN("S0015", "Successfully delete other outbound documents"),
+
+    DELETE_OTHER_SHIPMENT_STOCK_ERROR("S0514", "系统异常，删除其他出库单据失败"),
+
+    DELETE_OTHER_SHIPMENT_STOCK_ERROR_EN("S0514", "System exception, failed to delete other outbound documents");
 
     /**
      * 响应状态码

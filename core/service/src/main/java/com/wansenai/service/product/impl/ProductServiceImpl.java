@@ -14,7 +14,6 @@ package com.wansenai.service.product.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.service.BaseService;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.dto.product.*;
@@ -62,9 +61,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     private final BaseService baseService;
 
-    private final ProductStockMapper productStockMapper;
-
-    public ProductServiceImpl(ProductMapper productMapper, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, ProductImageService productImageService, ProductUnitService productUnitService, BaseService baseService, ProductStockMapper productStockMapper) {
+    public ProductServiceImpl(ProductMapper productMapper, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, ProductImageService productImageService, ProductUnitService productUnitService, BaseService baseService) {
         this.productMapper = productMapper;
         this.productStockKeepUnitService = productStockKeepUnitService;
         this.productStockService = productStockService;
@@ -72,7 +69,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         this.productImageService = productImageService;
         this.productUnitService = productUnitService;
         this.baseService = baseService;
-        this.productStockMapper = productStockMapper;
     }
 
     public String getStringValue(String str) {
@@ -102,6 +98,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
 
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if (!productDTO.getPriceList().isEmpty()) {
             var barCodeList = productDTO.getPriceList().stream()
                     .map(ProductStockKeepUnitDTO::getBarCode)
@@ -116,12 +113,22 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 boolean theSameBarCode = barCodeList.stream()
                         .distinct()
                         .count() != barCodeList.size();
-                if (theSameBarCode) {
-                    return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_EXIST.getCode(), "商品条码不能重复");
-                }
+                if ("zh_CN".equals(systemLanguage)) {
+                    if (theSameBarCode) {
+                        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_NOT_DUPLICATED);
+                    }
 
-                if (existBarCode) {
-                    return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_EXIST);
+                    if (existBarCode) {
+                        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_EXIST);
+                    }
+                } else {
+                    if (theSameBarCode) {
+                        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_NOT_DUPLICATED_EN);
+                    }
+
+                    if (existBarCode) {
+                        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BAR_CODE_EXIST_EN);
+                    }
                 }
             }
         }
@@ -257,15 +264,29 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         if (productDTO.getProductId() == null) {
             if (addOrUpdateResult && addPriceResult && addStockResult) {
-                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS);
+                }
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
+                }
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR_EN);
             }
-            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
         }
 
         if (addOrUpdateResult && addPriceResult && addStockResult) {
-            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UPDATE_SUCCESS);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UPDATE_SUCCESS);
+            }
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UPDATE_SUCCESS_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UPDATE_ERROR);
+            }
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UPDATE_ERROR_EN);
         }
-        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UPDATE_ERROR);
     }
 
     @Override
@@ -458,10 +479,18 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         // 物理删除商品信息
         var deleteProductResult = removeByIds(productIds);
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if (deleteProductResult) {
-            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_DELETE_SUCCESS);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_DELETE_SUCCESS);
+            }
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_DELETE_SUCCESS_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_DELETE_ERROR);
+            }
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_DELETE_ERROR_EN);
         }
-        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_DELETE_ERROR);
     }
 
     @Override
@@ -476,10 +505,18 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .in(Product::getId, productIds)
                 .eq(Product::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .update();
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if (updateResult) {
-            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_STATUS_UPDATE_SUCCESS);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_STATUS_UPDATE_SUCCESS);
+            }
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_STATUS_UPDATE_SUCCESS_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_STATUS_UPDATE_ERROR);
+            }
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_STATUS_UPDATE_ERROR_EN);
         }
-        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_STATUS_UPDATE_ERROR);
     }
 
     @Override
@@ -505,10 +542,18 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .in(Product::getId, productDTO.getProductIds())
                 .eq(Product::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .update();
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if (updateResult) {
-            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BATCH_UPDATE_SUCCESS);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BATCH_UPDATE_SUCCESS);
+            }
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BATCH_UPDATE_SUCCESS_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BATCH_UPDATE_ERROR);
+            }
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BATCH_UPDATE_ERROR_EN);
         }
-        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_BATCH_UPDATE_ERROR);
     }
 
     @Override

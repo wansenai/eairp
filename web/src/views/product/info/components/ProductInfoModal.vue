@@ -370,9 +370,9 @@ import {
   UploadChangeParam,
 } from "ant-design-vue";
 import {cloneDeep} from 'lodash-es';
-import {getUnitList} from "/@/api/product/productUnit";
-import {getCategoryList} from "/@/api/product/productCategory";
-import {ProductUnitQueryReq} from "/@/api/product/model/productUnitModel";
+import {getUnitList} from "@/api/product/productUnit";
+import {getCategoryList} from "@/api/product/productCategory";
+import {ProductUnitQueryReq} from "@/api/product/model/productUnitModel";
 import {DefaultOptionType} from "ant-design-vue/es/vc-tree-select/TreeSelect";
 import {getProductInfoDetail, addOrUpdateProduct} from "@/api/product/product";
 import {getAttributeById, getAttributeList} from "@/api/product/productAttribute";
@@ -385,7 +385,7 @@ import UnitModal from "@/views/product/units/components/UnitModal.vue";
 import {useModal} from "@/components/Modal";
 
 import {AddProductImageReq, AddProductReq} from "@/api/product/model/productModel";
-import {ProductCategoryResp} from '/@/api/product/model/productCategoryModel';
+import {ProductCategoryResp} from '@/api/product/model/productCategoryModel';
 import {ProductAttributeListReq} from "@/api/product/model/productAttributeModel";
 import {ProductAttributeModel, ProductStockModel, Unit} from "@/views/product/info/model/productInfoModel";
 import {meTable, stock, productInfo, formState} from "@/views/product/info/info.data";

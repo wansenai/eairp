@@ -1,5 +1,6 @@
 package com.wansenai.service;
 
+import com.wansenai.service.user.ISysUserService;
 import com.wansenai.utils.redis.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,8 +15,11 @@ public class BaseService {
 
     private final RedisUtil redisUtil;
 
-    public BaseService(RedisUtil redisUtil) {
+    private final ISysUserService userService;
+
+    public BaseService(RedisUtil redisUtil, ISysUserService userService) {
         this.redisUtil = redisUtil;
+        this.userService = userService;
     }
 
     public Long getCurrentUserId() {
@@ -36,6 +40,10 @@ public class BaseService {
     public String getCurrentUserAccount() {
         var token = httpServletRequestContextToken();
         return redisUtil.getString(token + ":userAccount");
+    }
+
+    public String getCurrentUserSystemLanguage() {
+        return userService.getUserSystemLanguage(getCurrentUserId());
     }
 
     private String httpServletRequestContextToken() {

@@ -1,4 +1,4 @@
-import {defHttp} from '/@/utils/http/axios';
+import {defHttp} from '@/utils/http/axios';
 import {BaseDataResp, BaseResp} from "@/api/model/baseModel";
 import {
     AddProductReq,

@@ -58,6 +58,7 @@ open class ProductCategoryServiceImpl(
     }
 
     override fun addOrUpdateProductCategory(productCategory: AddOrUpdateProductCategoryDTO): Response<String> {
+        val systemLanguage = userService.getUserSystemLanguage(userService.currentUserId)
         productCategory.let { dto ->
             val userId = userService.getCurrentTenantId().toLong()
             if (dto.id == null) {
@@ -75,10 +76,17 @@ open class ProductCategoryServiceImpl(
                         .createBy(userId)
                         .build()
                 )
-                if (!savaResult) {
-                    return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_CATEGORY_ERROR)
+                if (systemLanguage == "zh_CN") {
+                    if (!savaResult) {
+                        return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_CATEGORY_ERROR)
+                    }
+                    return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_CATEGORY_SUCCESS)
+                } else {
+                    if (!savaResult) {
+                        return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_CATEGORY_ERROR_EN)
+                    }
+                    return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_CATEGORY_SUCCESS_EN)
                 }
-                return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_CATEGORY_SUCCESS)
 
             } else {
                 val updateResult = lambdaUpdate()
@@ -94,10 +102,17 @@ open class ProductCategoryServiceImpl(
                     }
                     .update()
 
-                if (!updateResult) {
-                    return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_CATEGORY_ERROR)
+                if (systemLanguage == "zh_CN") {
+                    if (!updateResult) {
+                        return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_CATEGORY_ERROR)
+                    }
+                    return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_CATEGORY_SUCCESS)
+                } else {
+                    if (!updateResult) {
+                        return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_CATEGORY_ERROR_EN)
+                    }
+                    return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_CATEGORY_SUCCESS_EN)
                 }
-                return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_CATEGORY_SUCCESS)
             }
         }
     }
@@ -112,11 +127,18 @@ open class ProductCategoryServiceImpl(
             .set(ProductCategory::getDeleteFlag, CommonConstants.DELETED)
             .update()
 
-        if(!deleteResult){
-            return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_CATEGORY_ERROR)
+        val systemLanguage = userService.getUserSystemLanguage(userService.currentUserId)
+        if (systemLanguage == "zh_CN") {
+            if(!deleteResult){
+                return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_CATEGORY_ERROR)
+            }
+            return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_CATEGORY_SUCCESS)
+        } else {
+            if(!deleteResult){
+                return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_CATEGORY_ERROR_EN)
+            }
+            return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_CATEGORY_SUCCESS_EN)
         }
-
-        return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_CATEGORY_SUCCESS)
     }
 
     override fun getProductCategoryByName(name: String?): ProductCategory {

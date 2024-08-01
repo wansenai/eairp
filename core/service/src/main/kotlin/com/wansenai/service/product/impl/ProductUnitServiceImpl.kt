@@ -99,8 +99,12 @@ open class ProductUnitServiceImpl(
                 unit.id?.let { ne(ProductUnit::getId, it) }
             }
             val unitExists = productUnitMapper.exists(unitWrapper)
+            val systemLanguage = baseService.currentUserSystemLanguage
             if (unitExists) {
-                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_COMPUTE_UNIT_EXIST)
+                if (systemLanguage == "zh_CN") {
+                    return Response.responseMsg(ProdcutCodeEnum.PRODUCT_COMPUTE_UNIT_EXIST)
+                }
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_COMPUTE_UNIT_EXIST_EN)
             }
 
             val result = if (unit.id == null) {
@@ -111,15 +115,31 @@ open class ProductUnitServiceImpl(
 
             return if (result) {
                 if (unit.id == null) {
-                    Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_ADD_SUCCESS)
+                    if (systemLanguage == "zh_CN") {
+                        Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_ADD_SUCCESS)
+                    } else{
+                        Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_ADD_SUCCESS_EN)
+                    }
                 } else {
-                    Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_UPDATE_SUCCESS)
+                    if (systemLanguage == "zh_CN") {
+                        Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_UPDATE_SUCCESS)
+                    } else {
+                        Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_UPDATE_SUCCESS_EN)
+                    }
                 }
             } else {
                 if (unit.id == null) {
-                    Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_ADD_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_ADD_ERROR)
+                    } else {
+                        Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_ADD_ERROR_EN)
+                    }
                 } else {
-                    Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_UPDATE_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_UPDATE_ERROR)
+                    } else {
+                        Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_UPDATE_ERROR_EN)
+                    }
                 }
             }
         } ?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
@@ -160,10 +180,17 @@ open class ProductUnitServiceImpl(
     override fun deleteProductUnit(ids:  List<Long>?): Response<String> {
         ids?.let {
             val deleteResult = productUnitMapper.deleteBatchIds(ids)
+            val systemLanguage = baseService.currentUserSystemLanguage
             if(deleteResult == 0) {
-                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_DELETE_ERROR)
+                if (systemLanguage == "zh_CN") {
+                    return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_DELETE_ERROR)
+                }
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_DELETE_ERROR_EN)
             }
-            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_DELETE_SUCCESS)
+            if (systemLanguage == "zh_CN") {
+                return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_DELETE_SUCCESS)
+            }
+            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_UNIT_DELETE_SUCCESS_EN)
         }?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
     }
 
@@ -174,10 +201,19 @@ open class ProductUnitServiceImpl(
                 status = item.status
             }
             val updateResult = productUnitMapper.updateById(unit)
+            val systemLanguage = baseService.currentUserSystemLanguage
             if (updateResult == 0) {
-                Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_UNIT_STATUS_ERROR)
+                if (systemLanguage == "zh_CN") {
+                    Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_UNIT_STATUS_ERROR)
+                } else {
+                    Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_UNIT_STATUS_ERROR_EN)
+                }
             } else {
-                Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_UNIT_STATUS_SUCCESS)
+                if (systemLanguage == "zh_CN") {
+                    Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_UNIT_STATUS_SUCCESS)
+                } else {
+                    Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_UNIT_STATUS_SUCCESS_EN)
+                }
             }
         } ?: Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
     }

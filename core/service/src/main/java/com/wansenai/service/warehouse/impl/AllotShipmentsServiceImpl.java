@@ -16,9 +16,11 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.AllotStockBO;
-import com.wansenai.bo.AllotStockDataExportBO;
+import com.wansenai.bo.warehouse.AllotStockDataExportBO;
 import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.StorageShipmentStockBO;
+import com.wansenai.bo.warehouse.AllotReceiptExportBO;
+import com.wansenai.bo.warehouse.AllotReceiptExportEnBO;
+import com.wansenai.bo.warehouse.AllotStockDataExportEnBO;
 import com.wansenai.dto.warehouse.AllotReceiptDTO;
 import com.wansenai.dto.warehouse.QueryAllotReceiptDTO;
 import com.wansenai.entities.product.ProductStock;
@@ -39,7 +41,6 @@ import com.wansenai.utils.TimeUtil;
 import com.wansenai.utils.constants.CommonConstants;
 import com.wansenai.utils.enums.AllotShipmentCodeEnum;
 import com.wansenai.utils.enums.BaseCodeEnum;
-import com.wansenai.utils.enums.OtherShipmentCodeEnum;
 import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.warehouse.AllotReceiptDetailVO;
@@ -185,7 +186,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         return Response.responseData(result);
     }
 
-    private List<AllotReceiptVO> getAllotReceiptList(QueryAllotReceiptDTO queryAllotReceiptDTO) {
+    private List<AllotReceiptExportBO> getAllotReceiptList(QueryAllotReceiptDTO queryAllotReceiptDTO) {
         var wrapperMainMapper = lambdaQuery()
                 .eq(queryAllotReceiptDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryAllotReceiptDTO.getOperatorId())
                 .eq(queryAllotReceiptDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryAllotReceiptDTO.getStatus())
@@ -197,7 +198,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list();
 
-        var allotReceiptVOList = new ArrayList<AllotReceiptVO>(wrapperMainMapper.size() + 1);
+        var allotReceiptExportBOList = new ArrayList<AllotReceiptExportBO>(wrapperMainMapper.size() + 1);
         wrapperMainMapper.forEach(item -> {
 
             var product = productService.getById(item.getProductId());
@@ -207,7 +208,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
             }
 
             var operator = userService.getById(item.getCreateBy());
-            var allotReceiptVO = AllotReceiptVO.builder()
+            var allotReceiptExportBO = AllotReceiptExportBO.builder()
                     .id(item.getId())
                     .receiptNumber(item.getReceiptNumber())
                     .productInfo(productInfo)
@@ -218,9 +219,47 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                     .status(item.getStatus())
                     .build();
 
-            allotReceiptVOList.add(allotReceiptVO);
+            allotReceiptExportBOList.add(allotReceiptExportBO);
         });
-        return allotReceiptVOList;
+        return allotReceiptExportBOList;
+    }
+
+    private List<AllotReceiptExportEnBO> getAllotReceiptEnList(QueryAllotReceiptDTO queryAllotReceiptDTO) {
+        var wrapperMainMapper = lambdaQuery()
+                .eq(queryAllotReceiptDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryAllotReceiptDTO.getOperatorId())
+                .eq(queryAllotReceiptDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryAllotReceiptDTO.getStatus())
+                .eq(StringUtils.hasLength(queryAllotReceiptDTO.getReceiptNumber()), WarehouseReceiptMain::getReceiptNumber, queryAllotReceiptDTO.getReceiptNumber())
+                .like(StringUtils.hasLength(queryAllotReceiptDTO.getRemark()), WarehouseReceiptMain::getRemark, queryAllotReceiptDTO.getRemark())
+                .ge(StringUtils.hasLength(queryAllotReceiptDTO.getStartDate()), WarehouseReceiptMain::getCreateTime, queryAllotReceiptDTO.getStartDate())
+                .le(StringUtils.hasLength(queryAllotReceiptDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryAllotReceiptDTO.getEndDate())
+                .eq(WarehouseReceiptMain::getType, "调拨出库")
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var allotReceiptExportBOEnList = new ArrayList<AllotReceiptExportEnBO>(wrapperMainMapper.size() + 1);
+        wrapperMainMapper.forEach(item -> {
+
+            var product = productService.getById(item.getProductId());
+            var productInfo = "";
+            if(product != null) {
+                productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
+            }
+
+            var operator = userService.getById(item.getCreateBy());
+            var allotReceiptExportEnBO = AllotReceiptExportEnBO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(productInfo)
+                    .receiptDate(item.getReceiptDate())
+                    .operator(Optional.ofNullable(operator).map(SysUser::getName).orElse(""))
+                    .productNumber(item.getTotalProductNumber())
+                    .totalAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .build();
+
+            allotReceiptExportBOEnList.add(allotReceiptExportEnBO);
+        });
+        return allotReceiptExportBOEnList;
     }
 
     @Override
@@ -281,6 +320,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
     @Transactional
     public Response<String> addOrUpdateAllotReceipt(AllotReceiptDTO allotReceiptDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         var fid = processFiles(allotReceiptDTO.getFiles(), allotReceiptDTO.getId());
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
         var isUpdate = allotReceiptDTO.getId() != null;
@@ -369,9 +409,16 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
             }
 
             if (updateSubResult && warehouseReceiptMain) {
-                return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR_EN);
             }
-            return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
 
         } else {
             var receiptMainId = SnowflakeIdUtil.nextId();
@@ -424,9 +471,16 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 updateProductStock(otherSubtractWarehouseReceipts, 1);
             }
             if (saveSubResult && saveMainResult) {
-                return Response.responseMsg(AllotShipmentCodeEnum.ADD_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(AllotShipmentCodeEnum.ADD_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(AllotShipmentCodeEnum.ADD_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(AllotShipmentCodeEnum.ADD_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(AllotShipmentCodeEnum.ADD_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR_EN);
             }
-            return Response.responseMsg(AllotShipmentCodeEnum.ADD_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
         }
     }
 
@@ -445,10 +499,18 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 .in(WarehouseReceiptSub::getWarehouseReceiptMainId, ids)
                 .update();
 
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if(!deleteResult) {
-            return Response.responseMsg(AllotShipmentCodeEnum.DELETE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(AllotShipmentCodeEnum.DELETE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(AllotShipmentCodeEnum.DELETE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(AllotShipmentCodeEnum.DELETE_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(AllotShipmentCodeEnum.DELETE_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(AllotShipmentCodeEnum.DELETE_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS);
     }
 
     @Override
@@ -460,44 +522,86 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 .set(WarehouseReceiptMain::getStatus, status)
                 .in(WarehouseReceiptMain::getId, ids)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if(!updateResult) {
-            return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS);
     }
 
     @Override
     public void exportAllotReceipt(QueryAllotReceiptDTO queryAllotReceiptDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
-        var mainData = getAllotReceiptList(queryAllotReceiptDTO);
-        if (!mainData.isEmpty()) {
-            exportMap.put("调拨出库", ExcelUtils.getSheetData(mainData));
-            if (queryAllotReceiptDTO.getIsExportDetail()) {
-                var subData = new ArrayList<AllotStockDataExportBO>();
-                for (AllotReceiptVO allotReceiptVO : mainData) {
-                    var detail = getAllotReceiptDetail(allotReceiptVO.getId()).getData().getTableData();
-                    if (!detail.isEmpty()) {
-                        detail.forEach(item -> {
-                            var allotStockBo = AllotStockDataExportBO.builder()
-                                    .receiptNumber(allotReceiptVO.getReceiptNumber())
-                                    .warehouseName(item.getWarehouseName())
-                                    .otherWarehouseName(item.getOtherWarehouseName())
-                                    .barCode(item.getBarCode())
-                                    .productName(item.getProductName())
-                                    .productStandard(item.getProductStandard())
-                                    .productModel(item.getProductModel())
-                                    .productUnit(item.getProductUnit())
-                                    .stock(item.getStock())
-                                    .productNumber(item.getProductNumber())
-                                    .remark(item.getRemark())
-                                    .build();
-                            subData.add(allotStockBo);
-                        });
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            var mainData = getAllotReceiptList(queryAllotReceiptDTO);
+            if (!mainData.isEmpty()) {
+                exportMap.put("调拨出库", ExcelUtils.getSheetData(mainData));
+                if (queryAllotReceiptDTO.getIsExportDetail()) {
+                    var subData = new ArrayList<AllotStockDataExportBO>();
+                    for (AllotReceiptExportBO allotReceiptExportBO : mainData) {
+                        var detail = getAllotReceiptDetail(allotReceiptExportBO.getId()).getData().getTableData();
+                        if (!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var allotStockBo = AllotStockDataExportBO.builder()
+                                        .receiptNumber(allotReceiptExportBO.getReceiptNumber())
+                                        .warehouseName(item.getWarehouseName())
+                                        .otherWarehouseName(item.getOtherWarehouseName())
+                                        .barCode(item.getBarCode())
+                                        .productName(item.getProductName())
+                                        .productStandard(item.getProductStandard())
+                                        .productModel(item.getProductModel())
+                                        .productUnit(item.getProductUnit())
+                                        .stock(item.getStock())
+                                        .productNumber(item.getProductNumber())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subData.add(allotStockBo);
+                            });
+                        }
                     }
+                    exportMap.put("调拨出库明细", ExcelUtils.getSheetData(subData));
                 }
-                exportMap.put("调拨出库明细", ExcelUtils.getSheetData(subData));
+                ExcelUtils.exportManySheet(response, "调拨出库", exportMap);
             }
-            ExcelUtils.exportManySheet(response, "调拨出库", exportMap);
+        } else {
+            var mainEnData = getAllotReceiptEnList(queryAllotReceiptDTO);
+            if (!mainEnData.isEmpty()) {
+                exportMap.put("Transfer Outbound", ExcelUtils.getSheetData(mainEnData));
+                if (queryAllotReceiptDTO.getIsExportDetail()) {
+                    var subEnData = new ArrayList<AllotStockDataExportEnBO>();
+                    for (AllotReceiptExportEnBO allotReceiptExportEnBO : mainEnData) {
+                        var detail = getAllotReceiptDetail(allotReceiptExportEnBO.getId()).getData().getTableData();
+                        if (!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var allotStockEnBo = AllotStockDataExportEnBO.builder()
+                                        .receiptNumber(allotReceiptExportEnBO.getReceiptNumber())
+                                        .warehouseName(item.getWarehouseName())
+                                        .otherWarehouseName(item.getOtherWarehouseName())
+                                        .barCode(item.getBarCode())
+                                        .productName(item.getProductName())
+                                        .productStandard(item.getProductStandard())
+                                        .productModel(item.getProductModel())
+                                        .productUnit(item.getProductUnit())
+                                        .stock(item.getStock())
+                                        .productNumber(item.getProductNumber())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subEnData.add(allotStockEnBo);
+                            });
+                        }
+                    }
+                    exportMap.put("Transfer Outbound Details", ExcelUtils.getSheetData(subEnData));
+                }
+                ExcelUtils.exportManySheet(response, "Transfer Outbound", exportMap);
+            }
         }
     }
 
@@ -513,15 +617,28 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         if (detail != null) {
             var data = detail.getData();
             var tableData = data.getTableData();
-            var exportData = new ArrayList<AllotStockDataExportBO>();
-            tableData.forEach(item -> {
-               var allotStockBo = new AllotStockDataExportBO();
-                allotStockBo.setReceiptNumber(data.getReceiptNumber());
-                BeanUtils.copyProperties(item, allotStockBo);
-                exportData.add(allotStockBo);
-            });
-            var fileName = data.getReceiptNumber() + "-调拨出库明细";
-            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+            if ("zh_CN".equals(systemLanguage)) {
+                var exportData = new ArrayList<AllotStockDataExportBO>();
+                tableData.forEach(item -> {
+                    var allotStockBo = new AllotStockDataExportBO();
+                    allotStockBo.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, allotStockBo);
+                    exportData.add(allotStockBo);
+                });
+                var fileName = data.getReceiptNumber() + "-调拨出库明细";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            } else {
+                var exportEnData = new ArrayList<AllotStockDataExportEnBO>();
+                tableData.forEach(item -> {
+                    var allotStockEnBo = new AllotStockDataExportEnBO();
+                    allotStockEnBo.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, allotStockEnBo);
+                    exportEnData.add(allotStockEnBo);
+                });
+                var fileName = data.getReceiptNumber() + "- Transfer Outbound Details";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportEnData));
+            }
         }
     }
 }

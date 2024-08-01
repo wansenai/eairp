@@ -17,17 +17,29 @@ import lombok.Getter;
 @Getter
 public enum AssembleReceiptCodeEnum {
 
-    ADD_ASSEMBLE_RECEIPT_SUCCESS("A0020", "添加组装单据成功"),
+    ADD_ASSEMBLE_RECEIPT_SUCCESS("A0020", "成功添加组装单据"),
 
-    ADD_ASSEMBLE_RECEIPT_ERROR("A0520", "添加组装单据失败"),
+    ADD_ASSEMBLE_RECEIPT_SUCCESS_EN("A0020", "Successfully add assembly documents"),
 
-    UPDATE_ASSEMBLE_RECEIPT_SUCCESS("A0021", "修改组装单据成功"),
+    ADD_ASSEMBLE_RECEIPT_ERROR("A0520", "系统异常，添加组装单据失败"),
 
-    UPDATE_ASSEMBLE_RECEIPT_ERROR("A0521", "修改组装单据失败"),
+    ADD_ASSEMBLE_RECEIPT_ERROR_EN("A0520", "System exception, failed to add assembly documents"),
 
-    DELETE_ASSEMBLE_RECEIPT_SUCCESS("A0022", "删除组装单据成功"),
+    UPDATE_ASSEMBLE_RECEIPT_SUCCESS("A0021", "成功修改组装单据"),
 
-    DELETE_ASSEMBLE_RECEIPT_ERROR("A0522", "删除组装单据失败");
+    UPDATE_ASSEMBLE_RECEIPT_SUCCESS_EN("A0021", "Successfully modify assembly documents"),
+
+    UPDATE_ASSEMBLE_RECEIPT_ERROR("A0521", "系统异常，修改组装单据失败"),
+
+    UPDATE_ASSEMBLE_RECEIPT_ERROR_EN("A0521", "System exception, failed to modify assembly documents"),
+
+    DELETE_ASSEMBLE_RECEIPT_SUCCESS("A0022", "成功删除组装单据"),
+
+    DELETE_ASSEMBLE_RECEIPT_SUCCESS_EN("A0022", "Successfully delete assembly documents"),
+
+    DELETE_ASSEMBLE_RECEIPT_ERROR("A0522", "系统异常，删除组装单据失败"),
+
+    DELETE_ASSEMBLE_RECEIPT_ERROR_EN("A0522", "System exception, failed to delete assembly documents");
 
     /**
      * 响应状态码
