@@ -16,8 +16,11 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.AssembleStockBO;
-import com.wansenai.bo.AssembleStockDataExportBO;
+import com.wansenai.bo.warehouse.AssembleStockDataExportBO;
 import com.wansenai.bo.FileDataBO;
+import com.wansenai.bo.warehouse.AssembleStockDataExportEnBO;
+import com.wansenai.bo.warehouse.DisassembleReceiptExportBO;
+import com.wansenai.bo.warehouse.DisassembleReceiptExportEnBO;
 import com.wansenai.dto.warehouse.DisassembleReceiptDTO;
 import com.wansenai.dto.warehouse.QueryDisassembleReceiptDTO;
 import com.wansenai.entities.product.ProductStock;
@@ -36,13 +39,10 @@ import com.wansenai.service.warehouse.WarehouseReceiptSubService;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.utils.TimeUtil;
 import com.wansenai.utils.constants.CommonConstants;
-import com.wansenai.utils.enums.AssembleReceiptCodeEnum;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.utils.enums.DisassembleReceiptCodeEnum;
 import com.wansenai.utils.excel.ExcelUtils;
 import com.wansenai.utils.response.Response;
-import com.wansenai.vo.warehouse.AssembleReceiptDetailVO;
-import com.wansenai.vo.warehouse.AssembleReceiptVO;
 import com.wansenai.vo.warehouse.DisassembleReceiptDetailVO;
 import com.wansenai.vo.warehouse.DisassembleReceiptVO;
 import jakarta.servlet.http.HttpServletResponse;
@@ -186,7 +186,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
         return Response.responseData(result);
     }
 
-    public List<DisassembleReceiptVO> getDisassembleReceiptList(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO) {
+    private List<DisassembleReceiptExportBO> getDisassembleReceiptList(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO) {
         var wrapperMainMapper = lambdaQuery()
                 .eq(queryDisassembleReceiptDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryDisassembleReceiptDTO.getOperatorId())
                 .eq(queryDisassembleReceiptDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryDisassembleReceiptDTO.getStatus())
@@ -198,7 +198,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                 .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list();
 
-        var disAssembleReceiptVOList = new ArrayList<DisassembleReceiptVO>(wrapperMainMapper.size() + 1);
+        var disassembleReceiptExportBOList = new ArrayList<DisassembleReceiptExportBO>(wrapperMainMapper.size() + 1);
         wrapperMainMapper.forEach(item -> {
 
             var product = productService.getById(item.getProductId());
@@ -208,7 +208,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
             }
 
             var operator = userService.getById(item.getCreateBy());
-            var disAssembleReceiptVO = DisassembleReceiptVO.builder()
+            var disassembleReceiptExportBO = DisassembleReceiptExportBO.builder()
                     .id(item.getId())
                     .receiptNumber(item.getReceiptNumber())
                     .productInfo(productInfo)
@@ -219,9 +219,47 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                     .status(item.getStatus())
                     .build();
 
-            disAssembleReceiptVOList.add(disAssembleReceiptVO);
+            disassembleReceiptExportBOList.add(disassembleReceiptExportBO);
         });
-        return disAssembleReceiptVOList;
+        return disassembleReceiptExportBOList;
+    }
+
+    private List<DisassembleReceiptExportEnBO> getDisassembleReceiptEnList(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO) {
+        var wrapperMainMapper = lambdaQuery()
+                .eq(queryDisassembleReceiptDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryDisassembleReceiptDTO.getOperatorId())
+                .eq(queryDisassembleReceiptDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryDisassembleReceiptDTO.getStatus())
+                .eq(StringUtils.hasLength(queryDisassembleReceiptDTO.getReceiptNumber()), WarehouseReceiptMain::getReceiptNumber, queryDisassembleReceiptDTO.getReceiptNumber())
+                .like(StringUtils.hasLength(queryDisassembleReceiptDTO.getRemark()), WarehouseReceiptMain::getRemark, queryDisassembleReceiptDTO.getRemark())
+                .ge(StringUtils.hasLength(queryDisassembleReceiptDTO.getStartDate()), WarehouseReceiptMain::getCreateTime, queryDisassembleReceiptDTO.getStartDate())
+                .le(StringUtils.hasLength(queryDisassembleReceiptDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryDisassembleReceiptDTO.getEndDate())
+                .eq(WarehouseReceiptMain::getType, "拆卸单")
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var disassembleReceiptExportEnBOList = new ArrayList<DisassembleReceiptExportEnBO>(wrapperMainMapper.size() + 1);
+        wrapperMainMapper.forEach(item -> {
+
+            var product = productService.getById(item.getProductId());
+            var productInfo = "";
+            if (product != null) {
+                productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
+            }
+
+            var operator = userService.getById(item.getCreateBy());
+            var disassembleReceiptExportEnBO = DisassembleReceiptExportEnBO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(productInfo)
+                    .receiptDate(item.getReceiptDate())
+                    .operator(Optional.ofNullable(operator).map(SysUser::getName).orElse(""))
+                    .productNumber(item.getTotalProductNumber())
+                    .totalAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .build();
+
+            disassembleReceiptExportEnBOList.add(disassembleReceiptExportEnBO);
+        });
+        return disassembleReceiptExportEnBOList;
     }
 
     @Override
@@ -283,6 +321,7 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
     @Transactional
     public Response<String> addOrUpdateDisassembleReceipt(DisassembleReceiptDTO disassembleReceiptDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var fid = processFiles(disassembleReceiptDTO.getFiles(), disassembleReceiptDTO.getId());
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
         var isUpdate = disassembleReceiptDTO.getId() != null;
@@ -377,10 +416,16 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
             }
 
             if (updateSubResult && warehouseReceiptMain) {
-                return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_SUCCESS_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_ERROR_EN);
             }
-            return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_ERROR);
-
         } else {
             var receiptMainId = SnowflakeIdUtil.nextId();
             var mainStockList = disassembleReceiptDTO.getTableData();
@@ -434,9 +479,16 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                 updateProductStock(subStocks, 1);
             }
             if (saveSubResult && saveMainResult) {
-                return Response.responseMsg(DisassembleReceiptCodeEnum.ADD_DISASSEMBLE_RECEIPT_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(DisassembleReceiptCodeEnum.ADD_DISASSEMBLE_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(DisassembleReceiptCodeEnum.ADD_DISASSEMBLE_RECEIPT_SUCCESS_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(DisassembleReceiptCodeEnum.ADD_DISASSEMBLE_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(DisassembleReceiptCodeEnum.ADD_DISASSEMBLE_RECEIPT_ERROR_EN);
             }
-            return Response.responseMsg(DisassembleReceiptCodeEnum.ADD_DISASSEMBLE_RECEIPT_ERROR);
         }
     }
 
@@ -454,11 +506,19 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                 .set(WarehouseReceiptSub::getDeleteFlag, CommonConstants.DELETED)
                 .in(WarehouseReceiptSub::getWarehouseReceiptMainId, ids)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
 
         if (!deleteResult) {
-            return Response.responseMsg(DisassembleReceiptCodeEnum.DELETE_DISASSEMBLE_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(DisassembleReceiptCodeEnum.DELETE_DISASSEMBLE_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(DisassembleReceiptCodeEnum.DELETE_DISASSEMBLE_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(DisassembleReceiptCodeEnum.DELETE_DISASSEMBLE_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(DisassembleReceiptCodeEnum.DELETE_DISASSEMBLE_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(DisassembleReceiptCodeEnum.DELETE_DISASSEMBLE_RECEIPT_SUCCESS);
     }
 
     @Override
@@ -470,46 +530,91 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
                 .set(WarehouseReceiptMain::getStatus, status)
                 .in(WarehouseReceiptMain::getId, ids)
                 .update();
+
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if (!updateResult) {
-            return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(DisassembleReceiptCodeEnum.UPDATE_DISASSEMBLE_RECEIPT_SUCCESS);
     }
 
     @Override
     public void exportDisAssembleReceipt(QueryDisassembleReceiptDTO queryDisassembleReceiptDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
-        var mainData = getDisassembleReceiptList(queryDisassembleReceiptDTO);
-        if (!mainData.isEmpty()) {
-            exportMap.put("拆卸单", ExcelUtils.getSheetData(mainData));
-            if (queryDisassembleReceiptDTO.getIsExportDetail()) {
-                var subData = new ArrayList<AssembleStockDataExportBO>();
-                for (DisassembleReceiptVO disassembleReceiptVO : mainData) {
-                    var detail = getDisassembleReceiptDetail(disassembleReceiptVO.getId()).getData().getTableData();
-                    if(!detail.isEmpty()) {
-                        detail.forEach(item -> {
-                            var assembleStockBO = AssembleStockDataExportBO.builder()
-                                    .receiptNumber(disassembleReceiptVO.getReceiptNumber())
-                                    .type(item.getType())
-                                    .warehouseName(item.getWarehouseName())
-                                    .barCode(item.getBarCode())
-                                    .productName(item.getProductName())
-                                    .productModel(item.getProductModel())
-                                    .productUnit(item.getProductUnit())
-                                    .productStandard(item.getProductStandard())
-                                    .stock(item.getStock())
-                                    .productNumber(item.getProductNumber())
-                                    .unitPrice(item.getUnitPrice())
-                                    .amount(item.getAmount())
-                                    .remark(item.getRemark())
-                                    .build();
-                            subData.add(assembleStockBO);
-                        });
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            var mainData = getDisassembleReceiptList(queryDisassembleReceiptDTO);
+            if (!mainData.isEmpty()) {
+                exportMap.put("拆卸单", ExcelUtils.getSheetData(mainData));
+                if (queryDisassembleReceiptDTO.getIsExportDetail()) {
+                    var subData = new ArrayList<AssembleStockDataExportBO>();
+                    for (DisassembleReceiptExportBO disassembleReceiptExportBO : mainData) {
+                        var detail = getDisassembleReceiptDetail(disassembleReceiptExportBO.getId()).getData().getTableData();
+                        if(!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var assembleStockBO = AssembleStockDataExportBO.builder()
+                                        .receiptNumber(disassembleReceiptExportBO.getReceiptNumber())
+                                        .type(item.getType())
+                                        .warehouseName(item.getWarehouseName())
+                                        .barCode(item.getBarCode())
+                                        .productName(item.getProductName())
+                                        .productModel(item.getProductModel())
+                                        .productUnit(item.getProductUnit())
+                                        .productStandard(item.getProductStandard())
+                                        .stock(item.getStock())
+                                        .productNumber(item.getProductNumber())
+                                        .unitPrice(item.getUnitPrice())
+                                        .amount(item.getAmount())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subData.add(assembleStockBO);
+                            });
+                        }
                     }
+                    exportMap.put("拆卸单明细", ExcelUtils.getSheetData(subData));
                 }
-                exportMap.put("拆卸单明细", ExcelUtils.getSheetData(subData));
+                ExcelUtils.exportManySheet(response, "拆卸单", exportMap);
             }
-            ExcelUtils.exportManySheet(response, "拆卸单", exportMap);
+        } else {
+            var mainEnData = getDisassembleReceiptEnList(queryDisassembleReceiptDTO);
+            if (!mainEnData.isEmpty()) {
+                exportMap.put("Disassembly Documents", ExcelUtils.getSheetData(mainEnData));
+                if (queryDisassembleReceiptDTO.getIsExportDetail()) {
+                    var subEnData = new ArrayList<AssembleStockDataExportEnBO>();
+                    for (DisassembleReceiptExportEnBO disassembleReceiptExportEnBO : mainEnData) {
+                        var detail = getDisassembleReceiptDetail(disassembleReceiptExportEnBO.getId()).getData().getTableData();
+                        if(!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var assembleStockEnBO = AssembleStockDataExportEnBO.builder()
+                                        .receiptNumber(disassembleReceiptExportEnBO.getReceiptNumber())
+                                        .type(item.getType())
+                                        .warehouseName(item.getWarehouseName())
+                                        .barCode(item.getBarCode())
+                                        .productName(item.getProductName())
+                                        .productModel(item.getProductModel())
+                                        .productUnit(item.getProductUnit())
+                                        .productStandard(item.getProductStandard())
+                                        .stock(item.getStock())
+                                        .productNumber(item.getProductNumber())
+                                        .unitPrice(item.getUnitPrice())
+                                        .amount(item.getAmount())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subEnData.add(assembleStockEnBO);
+                            });
+                        }
+                    }
+                    exportMap.put("Disassembly Document Details", ExcelUtils.getSheetData(subEnData));
+                }
+                ExcelUtils.exportManySheet(response, "Disassembly Documents", exportMap);
+            }
         }
     }
 
@@ -525,15 +630,28 @@ public class DisassembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptM
         if (detail != null) {
             var data = detail.getData();
             var tableData = data.getTableData();
-            var exportData = new ArrayList<AssembleStockDataExportBO>();
-            tableData.forEach(item -> {
-                var assembleStockBO = new AssembleStockDataExportBO();
-                assembleStockBO.setReceiptNumber(data.getReceiptNumber());
-                BeanUtils.copyProperties(item, assembleStockBO);
-                exportData.add(assembleStockBO);
-            });
-            var fileName = data.getReceiptNumber() + "-拆卸单明细";
-            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+            if ("zh_CN".equals(systemLanguage)) {
+                var exportData = new ArrayList<AssembleStockDataExportBO>();
+                tableData.forEach(item -> {
+                    var assembleStockBO = new AssembleStockDataExportBO();
+                    assembleStockBO.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, assembleStockBO);
+                    exportData.add(assembleStockBO);
+                });
+                var fileName = data.getReceiptNumber() + "-拆卸单明细";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            } else {
+                var exportEnData = new ArrayList<AssembleStockDataExportEnBO>();
+                tableData.forEach(item -> {
+                    var assembleStockEnBO = new AssembleStockDataExportEnBO();
+                    assembleStockEnBO.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, assembleStockEnBO);
+                    exportEnData.add(assembleStockEnBO);
+                });
+                var fileName = data.getReceiptNumber() + "- Disassembly Document Details";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportEnData));
+            }
         }
     }
 }

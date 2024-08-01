@@ -19,6 +19,7 @@ import com.wansenai.dto.product.AddOrUpdateProductAttributeDTO
 import com.wansenai.dto.product.ProductAttributeQueryDTO
 import com.wansenai.entities.product.ProductAttribute
 import com.wansenai.mappers.product.ProductAttributeMapper
+import com.wansenai.service.BaseService
 import com.wansenai.service.product.ProductAttributeService
 import com.wansenai.service.user.ISysUserService
 import com.wansenai.utils.SnowflakeIdUtil
@@ -35,7 +36,8 @@ import java.time.LocalDateTime
 @Service
 open class ProductAttributeServiceImpl(
     private val productAttributeMapper: ProductAttributeMapper,
-    private val userService: ISysUserService
+    private val userService: ISysUserService,
+    private val baseService: BaseService,
 ):ServiceImpl<ProductAttributeMapper, ProductAttribute>(), ProductAttributeService {
 
     override fun productAttributeList(productAttributeQuery : ProductAttributeQueryDTO?): Response<Page<ProductAttributeVO>> {
@@ -69,36 +71,57 @@ open class ProductAttributeServiceImpl(
             val attribute = ProductAttribute().apply {
                 BeanUtils.copyProperties(this@run, this)
             }
+            val systemLanguage = baseService.currentUserSystemLanguage
             val userId = userService.currentUserId
             when (attribute.id) {
                 null -> {
                     val wrapper = createWrapper(attribute)
                     val count = getCount(wrapper)
                     if (count > 0) {
-                        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ATTRIBUTE_NAME_EXIST)
+                        if (systemLanguage == "zh_CN") {
+                            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ATTRIBUTE_NAME_EXIST)
+                        }
+                        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ATTRIBUTE_NAME_EXIST_EN)
                     }
                     attribute.id = SnowflakeIdUtil.nextId()
                     attribute.createTime = LocalDateTime.now()
                     attribute.createBy = userId
                     val saveResult = saveAttribute(attribute)
                     if (saveResult == 0) {
-                        return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_ATTRIBUTE_ERROR)
+                        if (systemLanguage == "zh_CN") {
+                            return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_ATTRIBUTE_ERROR)
+                        }
+                        return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_ATTRIBUTE_ERROR_EN)
+                    } else {
+                        if (systemLanguage == "zh_CN") {
+                            return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_ATTRIBUTE_SUCCESS)
+                        }
+                        return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_ATTRIBUTE_SUCCESS_EN)
                     }
-                    return Response.responseMsg(ProdcutCodeEnum.ADD_PRODUCT_ATTRIBUTE_SUCCESS)
                 }
                 else -> {
                     val wrapper = createWrapper(attribute).ne(ProductAttribute::getId, attribute.id)
                     val count = getCount(wrapper)
                     if (count > 0) {
-                        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ATTRIBUTE_NAME_EXIST)
+                        if (systemLanguage == "zh_CN") {
+                            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ATTRIBUTE_NAME_EXIST)
+                        }
+                        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ATTRIBUTE_NAME_EXIST_EN)
                     }
                     attribute.updateBy = userId
                     attribute.updateTime = LocalDateTime.now()
                     val updateResult = updateAttribute(attribute)
                     if (updateResult == 0) {
-                        return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_ATTRIBUTE_ERROR)
+                        if (systemLanguage == "zh_CN") {
+                            return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_ATTRIBUTE_ERROR)
+                        }
+                        return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_ATTRIBUTE_ERROR_EN)
+                    } else {
+                        if (systemLanguage == "zh_CN") {
+                            return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_ATTRIBUTE_SUCCESS)
+                        }
+                        return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_ATTRIBUTE_SUCCESS_EN)
                     }
-                    return Response.responseMsg(ProdcutCodeEnum.UPDATE_PRODUCT_ATTRIBUTE_SUCCESS)
                 }
             }
         } ?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
@@ -119,10 +142,17 @@ open class ProductAttributeServiceImpl(
         // Change the status from unmodified to physically deleted data
         ids?.let {
             val deleteResult = productAttributeMapper.deleteBatchIds(ids)
+            val systemLanguage = baseService.currentUserSystemLanguage
             if(deleteResult == 0) {
-                return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_ATTRIBUTE_ERROR)
+                if (systemLanguage == "zh_CN") {
+                    return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_ATTRIBUTE_ERROR)
+                }
+                return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_ATTRIBUTE_ERROR_EN)
             }
-            return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_ATTRIBUTE_SUCCESS)
+            if (systemLanguage == "zh_CN") {
+                return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_ATTRIBUTE_SUCCESS)
+            }
+            return Response.responseMsg(ProdcutCodeEnum.DELETE_PRODUCT_ATTRIBUTE_SUCCESS_EN)
         }?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
     }
 

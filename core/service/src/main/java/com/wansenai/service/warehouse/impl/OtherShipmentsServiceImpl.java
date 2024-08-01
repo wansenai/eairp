@@ -15,9 +15,11 @@ package com.wansenai.service.warehouse.impl;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.StorageShipmentStockBO;
-import com.wansenai.bo.StorageShipmentStockExportBO;
+import com.wansenai.bo.*;
+import com.wansenai.bo.warehouse.OtherShipmentExportBO;
+import com.wansenai.bo.warehouse.OtherShipmentExportEnBO;
+import com.wansenai.bo.warehouse.StorageShipmentStockExportBO;
+import com.wansenai.bo.warehouse.StorageShipmentStockExportEnBO;
 import com.wansenai.dto.warehouse.OtherShipmentDTO;
 import com.wansenai.dto.warehouse.QueryOtherShipmentDTO;
 import com.wansenai.entities.product.ProductStock;
@@ -184,7 +186,7 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         return Response.responseData(result);
     }
 
-    private List<OtherShipmentVO> getOtherShipmentsList(QueryOtherShipmentDTO queryOtherShipmentDTO) {
+    private List<OtherShipmentExportBO> getOtherShipmentsList(QueryOtherShipmentDTO queryOtherShipmentDTO) {
         var wrapperMainMapper = lambdaQuery()
                 .eq(queryOtherShipmentDTO.getCustomerId() != null, WarehouseReceiptMain::getRelatedPersonId, queryOtherShipmentDTO.getCustomerId())
                 .eq(queryOtherShipmentDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryOtherShipmentDTO.getOperatorId())
@@ -198,7 +200,7 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list();
 
-        var otherShipmentVOList = new ArrayList<OtherShipmentVO>(wrapperMainMapper.size() + 1);
+        var otherShipmentExportBOList = new ArrayList<OtherShipmentExportBO>(wrapperMainMapper.size() + 1);
         wrapperMainMapper.forEach(item -> {
 
             var product = productService.getById(item.getProductId());
@@ -208,7 +210,7 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
             }
 
             var operator = userService.getById(item.getCreateBy());
-            var otherShipmentVO = OtherShipmentVO.builder()
+            var otherShipmentExportBO = OtherShipmentExportBO.builder()
                     .id(item.getId())
                     .receiptNumber(item.getReceiptNumber())
                     .productInfo(productInfo)
@@ -220,9 +222,50 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                     .status(item.getStatus())
                     .build();
 
-            otherShipmentVOList.add(otherShipmentVO);
+            otherShipmentExportBOList.add(otherShipmentExportBO);
         });
-        return otherShipmentVOList;
+        return otherShipmentExportBOList;
+    }
+
+    private List<OtherShipmentExportEnBO> getOtherShipmentsEnList(QueryOtherShipmentDTO queryOtherShipmentDTO) {
+        var wrapperMainMapper = lambdaQuery()
+                .eq(queryOtherShipmentDTO.getCustomerId() != null, WarehouseReceiptMain::getRelatedPersonId, queryOtherShipmentDTO.getCustomerId())
+                .eq(queryOtherShipmentDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryOtherShipmentDTO.getOperatorId())
+                .eq(queryOtherShipmentDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryOtherShipmentDTO.getStatus())
+                .eq(StringUtils.hasLength(queryOtherShipmentDTO.getReceiptNumber()), WarehouseReceiptMain::getReceiptNumber, queryOtherShipmentDTO.getReceiptNumber())
+                .eq(StringUtils.hasLength(queryOtherShipmentDTO.getOtherReceipt()), WarehouseReceiptMain::getReceiptNumber, queryOtherShipmentDTO.getOtherReceipt())
+                .like(StringUtils.hasLength(queryOtherShipmentDTO.getRemark()), WarehouseReceiptMain::getRemark, queryOtherShipmentDTO.getRemark())
+                .ge(StringUtils.hasLength(queryOtherShipmentDTO.getStartDate()), WarehouseReceiptMain::getCreateTime, queryOtherShipmentDTO.getStartDate())
+                .le(StringUtils.hasLength(queryOtherShipmentDTO.getEndDate()), WarehouseReceiptMain::getCreateTime, queryOtherShipmentDTO.getEndDate())
+                .eq(WarehouseReceiptMain::getType, "其他出库")
+                .eq(WarehouseReceiptMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var otherShipmentExportBOEnList = new ArrayList<OtherShipmentExportEnBO>(wrapperMainMapper.size() + 1);
+        wrapperMainMapper.forEach(item -> {
+
+            var product = productService.getById(item.getProductId());
+            var productInfo = "";
+            if(product != null) {
+                productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
+            }
+
+            var operator = userService.getById(item.getCreateBy());
+            var otherShipmentExportEnBO = OtherShipmentExportEnBO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .productInfo(productInfo)
+                    .customerName(commonService.getCustomerName(item.getRelatedPersonId()))
+                    .receiptDate(item.getReceiptDate())
+                    .operator(Optional.ofNullable(operator).map(SysUser::getName).orElse(""))
+                    .productNumber(item.getTotalProductNumber())
+                    .totalAmount(item.getTotalAmount())
+                    .status(item.getStatus())
+                    .build();
+
+            otherShipmentExportBOEnList.add(otherShipmentExportEnBO);
+        });
+        return otherShipmentExportBOEnList;
     }
 
     @Override
@@ -285,6 +328,7 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
     @Override
     public Response<String> addOrUpdateOtherShipments(OtherShipmentDTO otherShipmentsDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var fid = processFiles(otherShipmentsDTO.getFiles(), otherShipmentsDTO.getId());
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
         var isUpdate = otherShipmentsDTO.getId() != null;
@@ -345,9 +389,16 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
             updateProductStock(shipmentStock, 2);
 
             if (updateSubResult && warehouseReceiptMain) {
-                return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_SUCCESS);
+                }
+                return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_SUCCESS_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_ERROR);
+                }
+                return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_ERROR_EN);
             }
-            return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_ERROR);
 
         } else {
             var receiptMainId = SnowflakeIdUtil.nextId();
@@ -388,14 +439,22 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
             var saveMainResult = save(warehouseReceiptMain);
             updateProductStock(shipmentStock, 2);
             if (saveSubResult && saveMainResult) {
-                return Response.responseMsg(OtherShipmentCodeEnum.ADD_OTHER_SHIPMENT_STOCK_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(OtherShipmentCodeEnum.ADD_OTHER_SHIPMENT_STOCK_SUCCESS);
+                }
+                return Response.responseMsg(OtherShipmentCodeEnum.ADD_OTHER_SHIPMENT_STOCK_SUCCESS_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(OtherShipmentCodeEnum.ADD_OTHER_SHIPMENT_STOCK_ERROR);
+                }
+                return Response.responseMsg(OtherShipmentCodeEnum.ADD_OTHER_SHIPMENT_STOCK_ERROR_EN);
             }
-            return Response.responseMsg(OtherShipmentCodeEnum.ADD_OTHER_SHIPMENT_STOCK_ERROR);
         }
     }
 
     @Override
     public Response<String> deleteBatchOtherShipments(List<Long> ids) {
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if (ids == null || ids.isEmpty()) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
@@ -410,9 +469,16 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 .update();
 
         if(!deleteResult) {
-            return Response.responseMsg(OtherShipmentCodeEnum.DELETE_OTHER_SHIPMENT_STOCK_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(OtherShipmentCodeEnum.DELETE_OTHER_SHIPMENT_STOCK_ERROR);
+            }
+            return Response.responseMsg(OtherShipmentCodeEnum.DELETE_OTHER_SHIPMENT_STOCK_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(OtherShipmentCodeEnum.DELETE_OTHER_SHIPMENT_STOCK_SUCCESS);
+            }
+            return Response.responseMsg(OtherShipmentCodeEnum.DELETE_OTHER_SHIPMENT_STOCK_SUCCESS_EN);
         }
-        return Response.responseMsg(OtherShipmentCodeEnum.DELETE_OTHER_SHIPMENT_STOCK_SUCCESS);
     }
 
     @Override
@@ -420,52 +486,98 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         if (ids == null || ids.isEmpty()) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         var updateResult = lambdaUpdate()
                 .set(WarehouseReceiptMain::getStatus, status)
                 .in(WarehouseReceiptMain::getId, ids)
                 .update();
         if(!updateResult) {
-            return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_ERROR);
+            }
+            return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_SUCCESS);
+            }
+            return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_SUCCESS_EN);
         }
-        return Response.responseMsg(OtherShipmentCodeEnum.UPDATE_OTHER_SHIPMENT_STOCK_SUCCESS);
     }
 
     @Override
     public void exportOtherShipments(QueryOtherShipmentDTO queryOtherShipmentDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
-        var mainData = getOtherShipmentsList(queryOtherShipmentDTO);
-        if (!mainData.isEmpty()) {
-            exportMap.put("其他出库", ExcelUtils.getSheetData(mainData));
-            if (queryOtherShipmentDTO.getIsExportDetail()) {
-                var subData = new ArrayList<StorageShipmentStockExportBO>();
-                for (OtherShipmentVO otherShipmentVO : mainData) {
-                    var detail = getOtherShipmentsDetail(otherShipmentVO.getId()).getData().getTableData();
-                    if(!detail.isEmpty()) {
-                        detail.forEach(item -> {
-                            var storageShipmentStockBO = StorageShipmentStockExportBO.builder()
-                                    .receiptNumber(otherShipmentVO.getReceiptNumber())
-                                    .relatedPersonType("客户")
-                                    .relatedPerson(otherShipmentVO.getCustomerName())
-                                    .warehouseName(item.getWarehouseName())
-                                    .barCode(item.getBarCode())
-                                    .productName(item.getProductName())
-                                    .productStandard(item.getProductStandard())
-                                    .productModel(item.getProductModel())
-                                    .productExtendInfo(item.getProductExtendInfo())
-                                    .stock(item.getStock())
-                                    .productUnit(item.getProductUnit())
-                                    .productNumber(item.getProductNumber())
-                                    .unitPrice(item.getUnitPrice())
-                                    .amount(item.getAmount())
-                                    .remark(item.getRemark())
-                                    .build();
-                            subData.add(storageShipmentStockBO);
-                        });
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            var mainData = getOtherShipmentsList(queryOtherShipmentDTO);
+            if (!mainData.isEmpty()) {
+                exportMap.put("其他出库", ExcelUtils.getSheetData(mainData));
+                if (queryOtherShipmentDTO.getIsExportDetail()) {
+                    var subData = new ArrayList<StorageShipmentStockExportBO>();
+                    for (OtherShipmentExportBO otherShipmentExportBO : mainData) {
+                        var detail = getOtherShipmentsDetail(otherShipmentExportBO.getId()).getData().getTableData();
+                        if(!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var storageShipmentStockBO = StorageShipmentStockExportBO.builder()
+                                        .receiptNumber(otherShipmentExportBO.getReceiptNumber())
+                                        .relatedPersonType("客户")
+                                        .relatedPerson(otherShipmentExportBO.getCustomerName())
+                                        .warehouseName(item.getWarehouseName())
+                                        .barCode(item.getBarCode())
+                                        .productName(item.getProductName())
+                                        .productStandard(item.getProductStandard())
+                                        .productModel(item.getProductModel())
+                                        .productExtendInfo(item.getProductExtendInfo())
+                                        .stock(item.getStock())
+                                        .productUnit(item.getProductUnit())
+                                        .productNumber(item.getProductNumber())
+                                        .unitPrice(item.getUnitPrice())
+                                        .amount(item.getAmount())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subData.add(storageShipmentStockBO);
+                            });
+                        }
                     }
+                    exportMap.put("其他出库明细", ExcelUtils.getSheetData(subData));
                 }
-                exportMap.put("其他出库明细", ExcelUtils.getSheetData(subData));
+                ExcelUtils.exportManySheet(response, "其他出库", exportMap);
             }
-            ExcelUtils.exportManySheet(response, "其他出库", exportMap);
+        } else {
+            var mainEnData = getOtherShipmentsEnList(queryOtherShipmentDTO);
+            if (!mainEnData.isEmpty()) {
+                exportMap.put("Other Outbound", ExcelUtils.getSheetData(mainEnData));
+                if (queryOtherShipmentDTO.getIsExportDetail()) {
+                    var subEnData = new ArrayList<StorageShipmentStockExportEnBO>();
+                    for (OtherShipmentExportEnBO otherShipmentExportEnBO : mainEnData) {
+                        var detail = getOtherShipmentsDetail(otherShipmentExportEnBO.getId()).getData().getTableData();
+                        if(!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var storageShipmentStockEnBO = StorageShipmentStockExportEnBO.builder()
+                                        .receiptNumber(otherShipmentExportEnBO.getReceiptNumber())
+                                        .relatedPersonType("Customer")
+                                        .relatedPerson(otherShipmentExportEnBO.getCustomerName())
+                                        .warehouseName(item.getWarehouseName())
+                                        .barCode(item.getBarCode())
+                                        .productName(item.getProductName())
+                                        .productStandard(item.getProductStandard())
+                                        .productModel(item.getProductModel())
+                                        .productExtendInfo(item.getProductExtendInfo())
+                                        .stock(item.getStock())
+                                        .productUnit(item.getProductUnit())
+                                        .productNumber(item.getProductNumber())
+                                        .unitPrice(item.getUnitPrice())
+                                        .amount(item.getAmount())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subEnData.add(storageShipmentStockEnBO);
+                            });
+                        }
+                    }
+                    exportMap.put("Other Outbound Detail", ExcelUtils.getSheetData(subEnData));
+                }
+                ExcelUtils.exportManySheet(response, "Other Outbound", exportMap);
+            }
         }
     }
 
@@ -481,17 +593,32 @@ public class OtherShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         if (detail != null) {
             var data = detail.getData();
             var tableData = data.getTableData();
-            var exportData = new ArrayList<StorageShipmentStockExportBO>();
-            tableData.forEach(item -> {
-                var storageShipmentStockBO = new StorageShipmentStockExportBO();
-                storageShipmentStockBO.setReceiptNumber(data.getReceiptNumber());
-                storageShipmentStockBO.setRelatedPersonType("客户");
-                storageShipmentStockBO.setRelatedPerson(data.getCustomerName());
-                BeanUtils.copyProperties(item, storageShipmentStockBO);
-                exportData.add(storageShipmentStockBO);
-            });
-            var fileName = data.getReceiptNumber() + "-其他出库单明细";
-            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+            if ("zh_CN".equals(systemLanguage)) {
+                var exportData = new ArrayList<StorageShipmentStockExportBO>();
+                tableData.forEach(item -> {
+                    var storageShipmentStockBO = new StorageShipmentStockExportBO();
+                    storageShipmentStockBO.setReceiptNumber(data.getReceiptNumber());
+                    storageShipmentStockBO.setRelatedPersonType("客户");
+                    storageShipmentStockBO.setRelatedPerson(data.getCustomerName());
+                    BeanUtils.copyProperties(item, storageShipmentStockBO);
+                    exportData.add(storageShipmentStockBO);
+                });
+                var fileName = data.getReceiptNumber() + "-其他出库单明细";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            } else {
+                var exportEnData = new ArrayList<StorageShipmentStockExportEnBO>();
+                tableData.forEach(item -> {
+                    var storageShipmentStockEnBO = new StorageShipmentStockExportEnBO();
+                    storageShipmentStockEnBO.setReceiptNumber(data.getReceiptNumber());
+                    storageShipmentStockEnBO.setRelatedPersonType("Customer");
+                    storageShipmentStockEnBO.setRelatedPerson(data.getCustomerName());
+                    BeanUtils.copyProperties(item, storageShipmentStockEnBO);
+                    exportEnData.add(storageShipmentStockEnBO);
+                });
+                var fileName = data.getReceiptNumber() + "- Other Outbound Detail";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportEnData));
+            }
         }
     }
 }
