@@ -10,7 +10,7 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.bo;
+package com.wansenai.bo.financial;
 
 import com.wansenai.utils.excel.ExcelExport;
 import lombok.AllArgsConstructor;
@@ -24,25 +24,19 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CollectionDataExportBO {
+public class IncomeExpenseDataExportBO {
 
-    @ExcelExport(value = "客户")
-    private String customerName;
-
-    @ExcelExport(value = "收款单号")
+    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
-    @ExcelExport(value = "销售单据编号")
-    private String saleReceiptNumber;
+    @ExcelExport(value = "往来单位/人员")
+    private String relatedPerson;
 
-    @ExcelExport(value = "应收欠款")
-    private BigDecimal receivableArrears;
+    @ExcelExport(value = "收入/支出项目")
+    private String incomeExpenseName;
 
-    @ExcelExport(value = "已收欠款")
-    private BigDecimal receivedArrears;
-
-    @ExcelExport(value = "本次收款")
-    private BigDecimal thisCollectionAmount;
+    @ExcelExport(value = "金额")
+    private BigDecimal incomeExpenseAmount;
 
     @ExcelExport(value = "备注")
     private String remark;
