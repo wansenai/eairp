@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2033 WanSen AI Team, Inc. All Rights Reserved.
+ * Copyright 2024-2033 WanSen AI Team, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
  * with the License. A copy of the License is located at
@@ -10,7 +10,7 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.bo;
+package com.wansenai.bo.financial;
 
 import com.wansenai.utils.excel.ExcelExport;
 import lombok.AllArgsConstructor;
@@ -24,20 +24,20 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class IncomeExpenseDataExportBO {
+public class IncomeExpenseDataExportEnBO {
 
-    @ExcelExport(value = "单据编号")
+    @ExcelExport(value = "Receipt Number")
     private String receiptNumber;
 
-    @ExcelExport(value = "往来单位/人员")
+    @ExcelExport(value = "Related Person")
     private String relatedPerson;
 
-    @ExcelExport(value = "收入/支出项目")
+    @ExcelExport(value = "Income Expense")
     private String incomeExpenseName;
 
-    @ExcelExport(value = "金额")
+    @ExcelExport(value = "Amount")
     private BigDecimal incomeExpenseAmount;
 
-    @ExcelExport(value = "备注")
+    @ExcelExport(value = "Remark")
     private String remark;
 }

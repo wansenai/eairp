@@ -15,7 +15,6 @@ package com.wansenai.vo.financial;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wansenai.bo.BigDecimalSerializerBO;
-import com.wansenai.utils.excel.ExcelExport;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,37 +32,27 @@ public class CollectionVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
-    @ExcelExport(value = "客户")
     private String customerName;
 
-    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @ExcelExport(value = "单据日期")
     private LocalDateTime receiptDate;
 
-    @ExcelExport(value = "财务人员")
     private String financialPerson;
 
-    @ExcelExport(value = "收款账户")
     private String collectionAccountName;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "合计收款")
     private BigDecimal totalCollectionAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "优惠金额")
     private BigDecimal discountAmount;
 
     @JsonSerialize(using = BigDecimalSerializerBO.class)
-    @ExcelExport(value = "实际收款")
     private BigDecimal actualCollectionAmount;
 
-    @ExcelExport(value = "备注")
     private String remark;
 
-    @ExcelExport(value = "状态", kv = "0:未审核;1:已审核")
     private Integer status;
 }

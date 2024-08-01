@@ -15,11 +15,9 @@ package com.wansenai.service.financial.impl
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
+import com.wansenai.bo.*
 import com.wansenai.entities.financial.FinancialMain
 import com.wansenai.entities.financial.FinancialSub
-import com.wansenai.bo.AdvanceChargeDataBO
-import com.wansenai.bo.AdvanceChargeDataExportBO
-import com.wansenai.bo.FileDataBO
 import com.wansenai.dto.financial.AddOrUpdateAdvanceChargeDTO
 import com.wansenai.dto.financial.QueryAdvanceChargeDTO
 import com.wansenai.entities.basic.Member
@@ -70,6 +68,7 @@ open class AdvanceChargeServiceImpl(
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
         }
         val userId = baseService.currentUserId
+        val systemLanguage = userService.getUserSystemLanguage(userId)
         val fileIdList = ArrayList<Long>()
         if (advanceChargeDTO.id != null) {
             val financialSubList = financialSubService.lambdaQuery()
@@ -81,7 +80,10 @@ open class AdvanceChargeServiceImpl(
                 val deleteFinancialSubResult = financialSubService.removeByIds(financialSubIdList)
 
                 if (!deleteFinancialSubResult) {
-                    return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_ERROR)
+                    }
+                    return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_ERROR_EN)
                 }
             }
 
@@ -144,9 +146,16 @@ open class AdvanceChargeServiceImpl(
             val isMemberUpdated = memberService.updateAdvanceChargeAmount(advanceChargeDTO.memberId, advanceChargeDTO.totalAmount)
 
             if (isFinancialMainAdded && areFinancialSubsAdded && isMemberUpdated) {
-                return Response.responseMsg(FinancialCodeEnum.ADD_ADVANCE_SUCCESS)
+                if (systemLanguage == "zh_CN") {
+                    return Response.responseMsg(FinancialCodeEnum.ADD_ADVANCE_SUCCESS)
+                }
+                return Response.responseMsg(FinancialCodeEnum.ADD_ADVANCE_SUCCESS_EN)
+            } else {
+                if (systemLanguage == "zh_CN") {
+                    return Response.responseMsg(FinancialCodeEnum.ADD_ADVANCE_ERROR)
+                }
+                return Response.responseMsg(FinancialCodeEnum.ADD_ADVANCE_ERROR_EN)
             }
-            return Response.responseMsg(FinancialCodeEnum.ADD_ADVANCE_ERROR)
         }
         return Response.responseMsg(BaseCodeEnum.QUERY_DATA_EMPTY)
     }
@@ -207,7 +216,37 @@ open class AdvanceChargeServiceImpl(
         )
     }
 
-    private fun getAdvanceChargeList(advanceChargeDTO: QueryAdvanceChargeDTO?): List<AdvanceChargeVO> {
+    private fun FinancialMain.toAdvanceChargeBO(member: Member?, operator: SysUser, financialPerson: Operator?): AdvanceChargeExportBO {
+        return AdvanceChargeExportBO(
+            id = this.id,
+            receiptNumber = this.receiptNumber,
+            receiptDate = this.receiptDate,
+            operator = operator.name,
+            financialPersonnel = financialPerson?.name ?: "",
+            memberName = member?.memberName ?: "",
+            totalAmount = this.totalAmount,
+            collectedAmount = this.changeAmount ?: BigDecimal.ZERO,
+            status = this.status,
+            remark = this.remark
+        )
+    }
+
+    private fun FinancialMain.toAdvanceChargeEnBO(member: Member?, operator: SysUser, financialPerson: Operator?): AdvanceChargeExportEnBO {
+        return AdvanceChargeExportEnBO(
+            id = this.id,
+            receiptNumber = this.receiptNumber,
+            receiptDate = this.receiptDate,
+            operator = operator.name,
+            financialPersonnel = financialPerson?.name ?: "",
+            memberName = member?.memberName ?: "",
+            totalAmount = this.totalAmount,
+            collectedAmount = this.changeAmount ?: BigDecimal.ZERO,
+            status = this.status,
+            remark = this.remark
+        )
+    }
+
+    private fun getAdvanceChargeList(advanceChargeDTO: QueryAdvanceChargeDTO?): List<AdvanceChargeExportBO> {
         val wrapper = LambdaQueryWrapper<FinancialMain>().apply {
             advanceChargeDTO?.financialPersonnelId?.let { eq(FinancialMain::getOperatorId, it) }
             advanceChargeDTO?.receiptNumber?.let { eq(FinancialMain::getReceiptNumber, it) }
@@ -226,7 +265,30 @@ open class AdvanceChargeServiceImpl(
             val operator = userService.getById(financialMain.createBy)
             val financialPerson = operatorService.getOperatorById(financialMain.operatorId)
 
-            financialMain.toAdvanceChargeVO(member, operator, financialPerson)
+            financialMain.toAdvanceChargeBO(member, operator, financialPerson)
+        }
+    }
+
+    private fun getAdvanceChargeEnList(advanceChargeDTO: QueryAdvanceChargeDTO?): List<AdvanceChargeExportEnBO> {
+        val wrapper = LambdaQueryWrapper<FinancialMain>().apply {
+            advanceChargeDTO?.financialPersonnelId?.let { eq(FinancialMain::getOperatorId, it) }
+            advanceChargeDTO?.receiptNumber?.let { eq(FinancialMain::getReceiptNumber, it) }
+            advanceChargeDTO?.status?.let { eq(FinancialMain::getStatus, it) }
+            advanceChargeDTO?.operatorId?.let { eq(FinancialMain::getCreateBy, it) }
+            advanceChargeDTO?.remark?.let { like(FinancialMain::getRemark, it) }
+            advanceChargeDTO?.startDate?.let { ge(FinancialMain::getCreateTime, it) }
+            advanceChargeDTO?.endDate?.let { le(FinancialMain::getCreateTime, it) }
+            eq(FinancialMain::getType, "收预付款")
+            eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+        }
+
+        val result = financialMainMapper.selectList(wrapper)
+        return result.map { financialMain ->
+            val member = memberService.getMemberById(financialMain.relatedPersonId)
+            val operator = userService.getById(financialMain.createBy)
+            val financialPerson = operatorService.getOperatorById(financialMain.operatorId)
+
+            financialMain.toAdvanceChargeEnBO(member, operator, financialPerson)
         }
     }
 
@@ -320,10 +382,18 @@ open class AdvanceChargeServiceImpl(
                 .deleteFlag(CommonConstants.DELETED)
                 .build()
         })
+        val systemLanguage = userService.getUserSystemLanguage(userService.currentUserId)
         if (isDeleted && isFinancialSubDeleted) {
-            return Response.responseMsg(FinancialCodeEnum.DELETE_ADVANCE_SUCCESS)
+            if (systemLanguage == "zh_CN") {
+                return Response.responseMsg(FinancialCodeEnum.DELETE_ADVANCE_SUCCESS)
+            }
+            return Response.responseMsg(FinancialCodeEnum.DELETE_ADVANCE_SUCCESS_EN)
+        } else {
+            if (systemLanguage == "zh_CN") {
+                return Response.responseMsg(FinancialCodeEnum.DELETE_ADVANCE_ERROR)
+            }
+            return Response.responseMsg(FinancialCodeEnum.DELETE_ADVANCE_ERROR_EN)
         }
-        return Response.responseMsg(FinancialCodeEnum.DELETE_ADVANCE_ERROR)
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -335,32 +405,63 @@ open class AdvanceChargeServiceImpl(
                 .build()
         }
         val isUpdated = updateBatchById(financialMainList)
+        val systemLanguage = userService.getUserSystemLanguage(userService.currentUserId)
         if (isUpdated) {
-            return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_SUCCESS)
+            if (systemLanguage == "zh_CN") {
+                return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_SUCCESS)
+            }
+            return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_SUCCESS_EN)
+        } else {
+            if (systemLanguage == "zh_CN") {
+                return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_ERROR)
+            }
+            return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_ERROR_EN)
         }
-        return Response.responseMsg(FinancialCodeEnum.UPDATE_ADVANCE_ERROR)
     }
 
     override fun exportAdvanceCharge(advanceChargeDTO: QueryAdvanceChargeDTO, response: HttpServletResponse) {
         val exportMap = ConcurrentHashMap<String, List<List<Any>>>()
-        val mainData = getAdvanceChargeList(advanceChargeDTO)
-        if (mainData.isNotEmpty()) {
-            exportMap["收预付款"] = ExcelUtils.getSheetData(mainData)
-            if (advanceChargeDTO.isExportDetail == true) {
-                val subData = mainData.flatMap { advanceChargeVO ->
-                    advanceChargeVO.id?.let { getAdvanceChargeDetailById(it) }?.data?.tableData?.map { item ->
-                        AdvanceChargeDataExportBO(
-                            memberName = advanceChargeVO.memberName,
-                            receiptNumber = advanceChargeVO.receiptNumber,
-                            accountName = item.accountName,
-                            amount = item.amount,
-                            remark = item.remark
-                        )
-                    } ?: emptyList()
+        val systemLanguage = baseService.currentUserSystemLanguage
+        if (systemLanguage == "zh_CN") {
+            val mainData = getAdvanceChargeList(advanceChargeDTO)
+            if (mainData.isNotEmpty()) {
+                exportMap["收预付款"] = ExcelUtils.getSheetData(mainData)
+                if (advanceChargeDTO.isExportDetail == true) {
+                    val subData = mainData.flatMap { advanceChargeBO ->
+                        advanceChargeBO.id?.let { getAdvanceChargeDetailById(it) }?.data?.tableData?.map { item ->
+                            AdvanceChargeDataExportBO(
+                                memberName = advanceChargeBO.memberName,
+                                receiptNumber = advanceChargeBO.receiptNumber,
+                                accountName = item.accountName,
+                                amount = item.amount,
+                                remark = item.remark
+                            )
+                        } ?: emptyList()
+                    }
+                    exportMap["收预付款单据明细"] = ExcelUtils.getSheetData(subData)
                 }
-                exportMap["收预付款单据明细"] = ExcelUtils.getSheetData(subData)
+                ExcelUtils.exportManySheet(response, "收预付款", exportMap)
             }
-            ExcelUtils.exportManySheet(response, "收预付款", exportMap)
+        } else {
+            val mainEnData = getAdvanceChargeEnList(advanceChargeDTO)
+            if (mainEnData.isNotEmpty()) {
+                exportMap["Advance Payment Receipt"] = ExcelUtils.getSheetData(mainEnData)
+                if (advanceChargeDTO.isExportDetail == true) {
+                    val subEnData = mainEnData.flatMap { advanceChargeEnBO ->
+                        advanceChargeEnBO.id?.let { getAdvanceChargeDetailById(it) }?.data?.tableData?.map { item ->
+                            AdvanceChargeDataExportEnBO(
+                                memberName = advanceChargeEnBO.memberName,
+                                receiptNumber = advanceChargeEnBO.receiptNumber,
+                                accountName = item.accountName,
+                                amount = item.amount,
+                                remark = item.remark
+                            )
+                        } ?: emptyList()
+                    }
+                    exportMap["Advance Payment Receipt Details"] = ExcelUtils.getSheetData(subEnData)
+                }
+                ExcelUtils.exportManySheet(response, "Advance Payment Receipt", exportMap)
+            }
         }
     }
 
@@ -371,22 +472,43 @@ open class AdvanceChargeServiceImpl(
             .eq(FinancialMain::getType, "收预付款")
             .one()
             .id
-        val detail = getAdvanceChargeDetailById(id)
-        if (detail.data != null) {
-            val exportData = ArrayList<AdvanceChargeDataExportBO>()
-            detail.data.tableData.map { item ->
-                detail.data?.let {
-                    val data = AdvanceChargeDataExportBO(
-                        memberName = detail.data.memberName,
-                        receiptNumber = detail.data.receiptNumber,
-                        accountName = item.accountName,
-                        amount = item.amount,
-                        remark = item.remark
-                    )
-                    exportData.add(data)
+        val systemLanguage = baseService.currentUserSystemLanguage
+        if (systemLanguage == "zh_CN") {
+            val detail = getAdvanceChargeDetailById(id)
+            if (detail.data != null) {
+                val exportData = ArrayList<AdvanceChargeDataExportBO>()
+                detail.data.tableData.map { item ->
+                    detail.data?.let {
+                        val data = AdvanceChargeDataExportBO(
+                            memberName = detail.data.memberName,
+                            receiptNumber = detail.data.receiptNumber,
+                            accountName = item.accountName,
+                            amount = item.amount,
+                            remark = item.remark
+                        )
+                        exportData.add(data)
+                    }
                 }
+                ExcelUtils.export(response, "收预付款单据明细", ExcelUtils.getSheetData(exportData))
             }
-            ExcelUtils.export(response, "收预付款单据明细", ExcelUtils.getSheetData(exportData))
+        } else {
+            val detail = getAdvanceChargeDetailById(id)
+            if (detail.data != null) {
+                val exportEnData = ArrayList<AdvanceChargeDataExportEnBO>()
+                detail.data.tableData.map { item ->
+                    detail.data?.let {
+                        val data = AdvanceChargeDataExportEnBO(
+                            memberName = detail.data.memberName,
+                            receiptNumber = detail.data.receiptNumber,
+                            accountName = item.accountName,
+                            amount = item.amount,
+                            remark = item.remark
+                        )
+                        exportEnData.add(data)
+                    }
+                }
+                ExcelUtils.export(response, "Advance Payment Receipt Details", ExcelUtils.getSheetData(exportEnData))
+            }
         }
     }
 }

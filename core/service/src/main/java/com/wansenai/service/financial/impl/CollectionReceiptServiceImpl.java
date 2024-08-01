@@ -15,9 +15,11 @@ package com.wansenai.service.financial.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.bo.CollectionBO;
-import com.wansenai.bo.CollectionDataExportBO;
+import com.wansenai.bo.financial.CollectionDataExportBO;
 import com.wansenai.bo.FileDataBO;
-import com.wansenai.bo.IncomeExpenseDataExportBO;
+import com.wansenai.bo.financial.CollectionDataExportEnBO;
+import com.wansenai.bo.financial.CollectionExportBO;
+import com.wansenai.bo.financial.CollectionExportEnBO;
 import com.wansenai.dto.financial.AddOrUpdateCollectionDTO;
 import com.wansenai.dto.financial.QueryCollectionDTO;
 import com.wansenai.entities.financial.FinancialMain;
@@ -145,7 +147,7 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
         return Response.responseData(result);
     }
 
-    private List<CollectionVO> getCollectionReceiptList(QueryCollectionDTO queryCollectionDTO) {
+    private List<CollectionExportBO> getCollectionReceiptList(QueryCollectionDTO queryCollectionDTO) {
         var financialMainList = lambdaQuery()
                 .eq(queryCollectionDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryCollectionDTO.getFinancialPersonId())
                 .eq(queryCollectionDTO.getAccountId() != null, FinancialMain::getAccountId, queryCollectionDTO.getAccountId())
@@ -159,9 +161,9 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
                 .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
                 .list();
 
-        var collectionVOList = new ArrayList<CollectionVO>(financialMainList.size() + 1);
+        var collectionExportBOList = new ArrayList<CollectionExportBO>(financialMainList.size() + 1);
         financialMainList.forEach(item -> {
-            var collectionVo = CollectionVO.builder()
+            var collectionExportBO = CollectionExportBO.builder()
                     .id(item.getId())
                     .receiptNumber(item.getReceiptNumber())
                     .customerName(commonService.getCustomerName(item.getRelatedPersonId()))
@@ -175,9 +177,44 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
                     .remark(item.getRemark())
                     .build();
 
-            collectionVOList.add(collectionVo);
+            collectionExportBOList.add(collectionExportBO);
         });
-        return collectionVOList;
+        return collectionExportBOList;
+    }
+
+    private List<CollectionExportEnBO> getCollectionReceiptEnList(QueryCollectionDTO queryCollectionDTO) {
+        var financialMainList = lambdaQuery()
+                .eq(queryCollectionDTO.getFinancialPersonId() != null, FinancialMain::getOperatorId, queryCollectionDTO.getFinancialPersonId())
+                .eq(queryCollectionDTO.getAccountId() != null, FinancialMain::getAccountId, queryCollectionDTO.getAccountId())
+                .eq(queryCollectionDTO.getStatus() != null, FinancialMain::getStatus, queryCollectionDTO.getStatus())
+                .eq(queryCollectionDTO.getCustomerId() != null, FinancialMain::getRelatedPersonId, queryCollectionDTO.getCustomerId())
+                .eq(StringUtils.hasLength(queryCollectionDTO.getReceiptNumber()), FinancialMain::getReceiptNumber, queryCollectionDTO.getReceiptNumber())
+                .like(StringUtils.hasLength(queryCollectionDTO.getRemark()), FinancialMain::getRemark, queryCollectionDTO.getRemark())
+                .ge(StringUtils.hasLength(queryCollectionDTO.getStartDate()), FinancialMain::getReceiptDate, queryCollectionDTO.getStartDate())
+                .le(StringUtils.hasLength(queryCollectionDTO.getEndDate()), FinancialMain::getReceiptDate, queryCollectionDTO.getEndDate())
+                .eq(FinancialMain::getType, "收款")
+                .eq(FinancialMain::getDeleteFlag, CommonConstants.NOT_DELETED)
+                .list();
+
+        var collectionExportEnBOList = new ArrayList<CollectionExportEnBO>(financialMainList.size() + 1);
+        financialMainList.forEach(item -> {
+            var collectionExportEnBO = CollectionExportEnBO.builder()
+                    .id(item.getId())
+                    .receiptNumber(item.getReceiptNumber())
+                    .customerName(commonService.getCustomerName(item.getRelatedPersonId()))
+                    .receiptDate(item.getReceiptDate())
+                    .financialPerson(commonService.getOperatorName(item.getOperatorId()))
+                    .collectionAccountName(commonService.getAccountName(item.getAccountId()))
+                    .totalCollectionAmount(item.getTotalAmount())
+                    .discountAmount(item.getDiscountAmount())
+                    .actualCollectionAmount(item.getChangeAmount())
+                    .status(item.getStatus())
+                    .remark(item.getRemark())
+                    .build();
+
+            collectionExportEnBOList.add(collectionExportEnBO);
+        });
+        return collectionExportEnBOList;
     }
 
     @Override
@@ -234,6 +271,7 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
     @Override
     public Response<String> addOrUpdateCollectionReceipt(AddOrUpdateCollectionDTO addOrUpdateCollectionDTO) {
         var userId = userService.getCurrentUserId();
+        var systemLanguage = userService.getUserSystemLanguage(userId);
         var fid = processFiles(addOrUpdateCollectionDTO.getFiles(), addOrUpdateCollectionDTO.getId());
         var fileIds = StringUtils.collectionToCommaDelimitedString(fid);
         var isUpdate = addOrUpdateCollectionDTO.getId() != null;
@@ -295,9 +333,16 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
             }
 
             if (!updateSubResult || !updateFinancialMain) {
-                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_SUCCESS_EN);
             }
-            return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_SUCCESS);
 
         } else {
             var id = SnowflakeIdUtil.nextId();
@@ -352,9 +397,16 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
             }
 
             if (!saveResult || !saveSubResult) {
-                return Response.responseMsg(CollectionPaymentCodeEnum.ADD_COLLECTION_RECEIPT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(CollectionPaymentCodeEnum.ADD_COLLECTION_RECEIPT_ERROR);
+                }
+                return Response.responseMsg(CollectionPaymentCodeEnum.ADD_COLLECTION_RECEIPT_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(CollectionPaymentCodeEnum.ADD_COLLECTION_RECEIPT_SUCCESS);
+                }
+                return Response.responseMsg(CollectionPaymentCodeEnum.ADD_COLLECTION_RECEIPT_SUCCESS_EN);
             }
-            return Response.responseMsg(CollectionPaymentCodeEnum.ADD_COLLECTION_RECEIPT_SUCCESS);
         }
     }
 
@@ -372,11 +424,19 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
                 .set(FinancialSub::getDeleteFlag, CommonConstants.DELETED)
                 .in(FinancialSub::getFinancialMainId, ids)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
 
         if(!deleteResult) {
-            return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_COLLECTION_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_COLLECTION_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_COLLECTION_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_COLLECTION_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_COLLECTION_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(CollectionPaymentCodeEnum.DELETE_COLLECTION_RECEIPT_SUCCESS);
     }
 
     @Override
@@ -388,40 +448,78 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
                 .set(FinancialMain::getStatus, status)
                 .in(FinancialMain::getId, ids)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if(!updateResult) {
-            return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_ERROR);
+            }
+            return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_SUCCESS);
+            }
+            return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_SUCCESS_EN);
         }
-        return Response.responseMsg(CollectionPaymentCodeEnum.UPDATE_COLLECTION_RECEIPT_SUCCESS);
     }
 
     @Override
     public void exportCollectionReceipt(QueryCollectionDTO queryCollectionDTO, HttpServletResponse response) {
         var exportMap = new ConcurrentHashMap<String, List<List<Object>>>();
-        var mainData = getCollectionReceiptList(queryCollectionDTO);
-        if (!mainData.isEmpty()) {
-            exportMap.put("收款单", ExcelUtils.getSheetData(mainData));
-            if (queryCollectionDTO.getIsExportDetail()) {
-                var subData = new ArrayList<CollectionDataExportBO>();
-                for (CollectionVO collectionVO : mainData) {
-                    var detail = getCollectionReceiptDetail(collectionVO.getId()).getData().getTableData();
-                    if (!detail.isEmpty()) {
-                        detail.forEach(item -> {
-                            var data = CollectionDataExportBO.builder()
-                                    .customerName(collectionVO.getCustomerName())
-                                    .receiptNumber(collectionVO.getReceiptNumber())
-                                    .saleReceiptNumber(item.getSaleReceiptNumber())
-                                    .receivableArrears(item.getReceivableArrears())
-                                    .receivedArrears(item.getReceivedArrears())
-                                    .thisCollectionAmount(item.getThisCollectionAmount())
-                                    .remark(item.getRemark())
-                                    .build();
-                            subData.add(data);
-                        });
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+        if ("zh_CN".equals(systemLanguage)) {
+            var mainData = getCollectionReceiptList(queryCollectionDTO);
+            if (!mainData.isEmpty()) {
+                exportMap.put("收款单", ExcelUtils.getSheetData(mainData));
+                if (queryCollectionDTO.getIsExportDetail()) {
+                    var subData = new ArrayList<CollectionDataExportBO>();
+                    for (CollectionExportBO collectionExportBO : mainData) {
+                        var detail = getCollectionReceiptDetail(collectionExportBO.getId()).getData().getTableData();
+                        if (!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var data = CollectionDataExportBO.builder()
+                                        .customerName(collectionExportBO.getCustomerName())
+                                        .receiptNumber(collectionExportBO.getReceiptNumber())
+                                        .saleReceiptNumber(item.getSaleReceiptNumber())
+                                        .receivableArrears(item.getReceivableArrears())
+                                        .receivedArrears(item.getReceivedArrears())
+                                        .thisCollectionAmount(item.getThisCollectionAmount())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subData.add(data);
+                            });
+                        }
                     }
+                    exportMap.put("收款单明细", ExcelUtils.getSheetData(subData));
                 }
-                exportMap.put("收款单明细", ExcelUtils.getSheetData(subData));
+                ExcelUtils.exportManySheet(response, "收款单", exportMap);
             }
-            ExcelUtils.exportManySheet(response, "收款单", exportMap);
+        } else {
+            var mainEnData = getCollectionReceiptEnList(queryCollectionDTO);
+            if (!mainEnData.isEmpty()) {
+                exportMap.put("Collection Document", ExcelUtils.getSheetData(mainEnData));
+                if (queryCollectionDTO.getIsExportDetail()) {
+                    var subEnData = new ArrayList<CollectionDataExportEnBO>();
+                    for (CollectionExportEnBO collectionExportEnBO : mainEnData) {
+                        var detail = getCollectionReceiptDetail(collectionExportEnBO.getId()).getData().getTableData();
+                        if (!detail.isEmpty()) {
+                            detail.forEach(item -> {
+                                var data = CollectionDataExportEnBO.builder()
+                                        .customerName(collectionExportEnBO.getCustomerName())
+                                        .receiptNumber(collectionExportEnBO.getReceiptNumber())
+                                        .saleReceiptNumber(item.getSaleReceiptNumber())
+                                        .receivableArrears(item.getReceivableArrears())
+                                        .receivedArrears(item.getReceivedArrears())
+                                        .thisCollectionAmount(item.getThisCollectionAmount())
+                                        .remark(item.getRemark())
+                                        .build();
+                                subEnData.add(data);
+                            });
+                        }
+                    }
+                    exportMap.put("Collection Document Details", ExcelUtils.getSheetData(subEnData));
+                }
+                ExcelUtils.exportManySheet(response, "Collection Document", exportMap);
+            }
         }
     }
 
@@ -438,16 +536,30 @@ public class CollectionReceiptServiceImpl extends ServiceImpl<FinancialMainMappe
         if (detail.getData() != null) {
             var data = detail.getData();
             var tableData = data.getTableData();
-            var exportData = new ArrayList<CollectionDataExportBO>();
-            tableData.forEach(item -> {
-                var collectionDataBO = new CollectionDataExportBO();
-                collectionDataBO.setCustomerName(data.getCustomerName());
-                collectionDataBO.setReceiptNumber(data.getReceiptNumber());
-                BeanUtils.copyProperties(item, collectionDataBO);
-                exportData.add(collectionDataBO);
-            });
-            var fileName = data.getReceiptNumber() + "-收款单明细";
-            ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
+            if ("zh_CN".equals(systemLanguage)) {
+                var exportData = new ArrayList<CollectionDataExportBO>();
+                tableData.forEach(item -> {
+                    var collectionDataBO = new CollectionDataExportBO();
+                    collectionDataBO.setCustomerName(data.getCustomerName());
+                    collectionDataBO.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, collectionDataBO);
+                    exportData.add(collectionDataBO);
+                });
+                var fileName = data.getReceiptNumber() + "-收款单明细";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportData));
+            } else {
+                var exportEnData = new ArrayList<CollectionDataExportEnBO>();
+                tableData.forEach(item -> {
+                    var collectionDataEnBO = new CollectionDataExportEnBO();
+                    collectionDataEnBO.setCustomerName(data.getCustomerName());
+                    collectionDataEnBO.setReceiptNumber(data.getReceiptNumber());
+                    BeanUtils.copyProperties(item, collectionDataEnBO);
+                    exportEnData.add(collectionDataEnBO);
+                });
+                var fileName = data.getReceiptNumber() + "- Collection Document Details";
+                ExcelUtils.export(response, fileName, ExcelUtils.getSheetData(exportEnData));
+            }
         }
     }
 }

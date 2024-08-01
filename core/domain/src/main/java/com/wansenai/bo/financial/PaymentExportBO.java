@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2033 WanSen AI Team, Inc. All Rights Reserved.
+ * Copyright 2024-2033 WanSen AI Team, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
  * with the License. A copy of the License is located at
@@ -10,40 +10,48 @@
  * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.wansenai.bo;
+package com.wansenai.bo.financial;
 
 import com.wansenai.utils.excel.ExcelExport;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PaymentDataExportBO {
+public class PaymentExportBO {
+
+    private Long id;
 
     @ExcelExport(value = "供应商")
     private String supplierName;
 
-    @ExcelExport(value = "付款单号")
+    @ExcelExport(value = "单据编号")
     private String receiptNumber;
 
-    @ExcelExport(value = "采购单据编号")
-    private String purchaseReceiptNumber;
+    @ExcelExport(value = "单据日期")
+    private LocalDateTime receiptDate;
 
-    @ExcelExport(value = "应付欠款")
-    private BigDecimal paymentArrears;
+    @ExcelExport(value = "财务人员")
+    private String financialPerson;
 
-    @ExcelExport(value = "已付欠款")
-    private BigDecimal  prepaidArrears;
+    @ExcelExport(value = "付款账户")
+    private String paymentAccountName;
 
-    @ExcelExport(value = "本次付款")
-    private BigDecimal thisPaymentAmount;
+    @ExcelExport(value = "合计付款")
+    private BigDecimal totalPaymentAmount;
+
+    @ExcelExport(value = "优惠金额")
+    private BigDecimal discountAmount;
+
+    @ExcelExport(value = "实际付款")
+    private BigDecimal actualPaymentAmount;
 
     @ExcelExport(value = "备注")
     private String remark;
+
+    @ExcelExport(value = "状态", kv = "0:未审核;1:已审核")
+    private Integer status;
 }
