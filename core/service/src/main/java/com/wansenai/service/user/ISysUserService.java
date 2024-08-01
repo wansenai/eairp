@@ -67,6 +67,8 @@ public interface ISysUserService extends IService<SysUser> {
 
     Response<String> updateUser(UpdateUserDTO updateUserDTO);
 
+    Response<String> updateStatus(UpdateUserDTO updateUserDTO);
+
     Response<String> uploadAvatar(MultipartFile file, Long userId, String name);
 
     Response<String> addOrUpdate(AddOrUpdateUserDTO addOrUpdateUserDTO);

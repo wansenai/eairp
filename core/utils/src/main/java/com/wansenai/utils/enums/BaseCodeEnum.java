@@ -51,6 +51,8 @@ public enum BaseCodeEnum {
 
     FILE_UPLOAD_ERROR("A0500", "文件上传失败"),
 
+    FILE_UPLOAD_ERROR_EN("A0500", "File upload failed"),
+
     FILE_UPLOAD_NO_FILENAME_MATCH("A0501", "文件上传失败，文件名不匹配"),
 
     OSS_KEY_NOT_EXIST("T0500", "腾讯云OSS对象存储key不存在"),

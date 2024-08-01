@@ -93,6 +93,7 @@ public class FinancialAccountServiceImpl extends ServiceImpl<FinancialAccountMap
     @Override
     public Response<String> addOrUpdateAccount(AddOrUpdateAccountDTO addOrUpdateAccountDTO) {
         var userId = baseService.getCurrentUserId();
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if (addOrUpdateAccountDTO.getId() == null) {
             // Add Account
             var account = new FinancialAccount();
@@ -107,12 +108,18 @@ public class FinancialAccountServiceImpl extends ServiceImpl<FinancialAccountMap
             }
             var saveResult = accountMapper.insert(account);
             if(saveResult == 0) {
-                return Response.responseMsg(FinancialCodeEnum.ADD_ACCOUNT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(FinancialCodeEnum.ADD_ACCOUNT_ERROR);
+                }
+                return Response.responseMsg(FinancialCodeEnum.ADD_ACCOUNT_ERROR_EN);
             }
             if(addOrUpdateAccountDTO.getIsDefault() == CommonConstants.IS_DEFAULT) {
                 updateDefaultAccount(account.getId());
             }
-            return Response.responseMsg(FinancialCodeEnum.ADD_ACCOUNT_SUCCESS);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(FinancialCodeEnum.ADD_ACCOUNT_SUCCESS);
+            }
+            return Response.responseMsg(FinancialCodeEnum.ADD_ACCOUNT_SUCCESS_EN);
         } else {
             // Update Account
             var account = new FinancialAccount();
@@ -121,12 +128,18 @@ public class FinancialAccountServiceImpl extends ServiceImpl<FinancialAccountMap
             account.setUpdateTime(LocalDateTime.now());
             var updateResult = accountMapper.updateById(account);
             if(updateResult == 0) {
-                return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_ERROR);
+                }
+                return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_ERROR_EN);
             }
             if(addOrUpdateAccountDTO.getIsDefault() == CommonConstants.IS_DEFAULT) {
                 updateDefaultAccount(account.getId());
             }
-            return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_SUCCESS);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_SUCCESS);
+            }
+            return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_SUCCESS_EN);
         }
     }
 
@@ -137,10 +150,18 @@ public class FinancialAccountServiceImpl extends ServiceImpl<FinancialAccountMap
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
         var deleteResult = removeBatchByIds(ids);
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if(!deleteResult) {
-            return Response.responseMsg(FinancialCodeEnum.DELETE_ACCOUNT_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(FinancialCodeEnum.DELETE_ACCOUNT_ERROR);
+            }
+            return Response.responseMsg(FinancialCodeEnum.DELETE_ACCOUNT_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(FinancialCodeEnum.DELETE_ACCOUNT_SUCCESS);
+            }
+            return Response.responseMsg(FinancialCodeEnum.DELETE_ACCOUNT_SUCCESS_EN);
         }
-        return Response.responseMsg(FinancialCodeEnum.DELETE_ACCOUNT_SUCCESS);
     }
 
     @Override
@@ -154,11 +175,18 @@ public class FinancialAccountServiceImpl extends ServiceImpl<FinancialAccountMap
                 .set(FinancialAccount::getStatus, status)
                 .update();
 
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if(!updateStatus) {
-            return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_STATUS_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_STATUS_ERROR);
+            }
+            return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_STATUS_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_STATUS_SUCCESS);
+            }
+            return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_STATUS_SUCCESS_EN);
         }
-
-        return Response.responseMsg(FinancialCodeEnum.UPDATE_ACCOUNT_STATUS_SUCCESS);
     }
 
     @Override

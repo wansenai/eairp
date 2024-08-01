@@ -171,7 +171,7 @@ export default defineComponent({
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       const timestamp = getTimestamp(new Date());
-      link.download = t('basic.supplier.export.exportData') + timestamp + ".xlsx";
+      link.download = t('basic.customer.export.exportData') + timestamp + ".xlsx";
       link.target = "_blank";
       link.click();
     }

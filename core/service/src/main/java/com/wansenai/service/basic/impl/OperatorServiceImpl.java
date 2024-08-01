@@ -77,6 +77,7 @@ public class OperatorServiceImpl extends ServiceImpl<OperatorMapper, Operator> i
     @Override
     public Response<String> addOrUpdateOperator(AddOrUpdateOperatorDTO addOrUpdateOperatorDTO) {
         var operateId = baseService.getCurrentUserId();
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if (addOrUpdateOperatorDTO.getId() == null) {
             var operator = new Operator();
             BeanUtils.copyProperties(addOrUpdateOperatorDTO, operator);
@@ -85,9 +86,16 @@ public class OperatorServiceImpl extends ServiceImpl<OperatorMapper, Operator> i
             operator.setCreateTime(LocalDateTime.now());
             var saveResult = operatorMapper.insert(operator);
             if(saveResult == 0) {
-                return Response.responseMsg(OperatorCodeEnum.ADD_OPERATOR_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(OperatorCodeEnum.ADD_OPERATOR_ERROR);
+                }
+                return Response.responseMsg(OperatorCodeEnum.ADD_OPERATOR_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(OperatorCodeEnum.ADD_OPERATOR_SUCCESS);
+                }
+                return Response.responseMsg(OperatorCodeEnum.ADD_OPERATOR_SUCCESS_EN);
             }
-            return Response.responseMsg(OperatorCodeEnum.ADD_OPERATOR_SUCCESS);
         } else {
             var operator = new Operator();
             BeanUtils.copyProperties(addOrUpdateOperatorDTO, operator);
@@ -95,9 +103,16 @@ public class OperatorServiceImpl extends ServiceImpl<OperatorMapper, Operator> i
             operator.setUpdateTime(LocalDateTime.now());
             var updateResult = operatorMapper.updateById(operator);
             if(updateResult == 0) {
-                return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_ERROR);
+                }
+                return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_SUCCESS);
+                }
+                return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_SUCCESS_EN);
             }
-            return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_SUCCESS);
         }
     }
 
@@ -108,10 +123,18 @@ public class OperatorServiceImpl extends ServiceImpl<OperatorMapper, Operator> i
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
         var deleteResult = removeBatchByIds(ids);
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if(!deleteResult) {
-            return Response.responseMsg(OperatorCodeEnum.DELETE_OPERATOR_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(OperatorCodeEnum.DELETE_OPERATOR_ERROR);
+            }
+            return Response.responseMsg(OperatorCodeEnum.DELETE_OPERATOR_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(OperatorCodeEnum.DELETE_OPERATOR_SUCCESS);
+            }
+            return Response.responseMsg(OperatorCodeEnum.DELETE_OPERATOR_SUCCESS_EN);
         }
-        return Response.responseMsg(OperatorCodeEnum.DELETE_OPERATOR_SUCCESS);
     }
 
     @Override
@@ -125,11 +148,18 @@ public class OperatorServiceImpl extends ServiceImpl<OperatorMapper, Operator> i
                 .set(Operator::getStatus, status)
                 .update();
 
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if(!updateStatus) {
-            return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_STATUS_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_STATUS_ERROR);
+            }
+            return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_STATUS_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_STATUS_SUCCESS);
+            }
+            return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_STATUS_SUCCESS_EN);
         }
-
-        return Response.responseMsg(OperatorCodeEnum.UPDATE_OPERATOR_STATUS_SUCCESS);
     }
 
     @Override

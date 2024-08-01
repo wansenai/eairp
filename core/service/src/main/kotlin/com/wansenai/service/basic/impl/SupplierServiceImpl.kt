@@ -15,12 +15,15 @@ package com.wansenai.service.basic.impl
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
+import com.wansenai.bo.SupplierExportBO
+import com.wansenai.bo.SupplierExportEnBO
 import com.wansenai.entities.basic.Supplier
 import com.wansenai.dto.basic.AddSupplierDTO
 import com.wansenai.dto.basic.QuerySupplierDTO
 import com.wansenai.dto.basic.UpdateSupplierDTO
 import com.wansenai.dto.basic.UpdateSupplierStatusDTO
 import com.wansenai.mappers.basic.SystemSupplierMapper
+import com.wansenai.service.BaseService
 import com.wansenai.service.basic.SupplierService
 import com.wansenai.utils.constants.CommonConstants
 import com.wansenai.utils.enums.BaseCodeEnum
@@ -38,7 +41,7 @@ import java.time.LocalDateTime
 
 @Service
 open class SupplierServiceImpl(
-    private val baseService: com.wansenai.service.BaseService,
+    private val baseService: BaseService,
     private val supplierMapper: SystemSupplierMapper
 ) : ServiceImpl<SystemSupplierMapper, Supplier>(), SupplierService {
 
@@ -98,6 +101,7 @@ open class SupplierServiceImpl(
     }
 
     override fun addSupplier(supplier: AddSupplierDTO?): Response<String> {
+        val systemLanguage = baseService.currentUserSystemLanguage
         val supplierEntity = supplier?.let {
             Supplier().apply {
                 BeanUtils.copyProperties(it, this)
@@ -123,9 +127,17 @@ open class SupplierServiceImpl(
         supplierEntity.createBy = baseService.currentUserId
 
         return if (save(supplierEntity)) {
-            Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS)
+            } else {
+                Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS_EN)
+            }
         } else {
-            Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR)
+            } else {
+                Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR_EN)
+            }
         }
     }
 
@@ -235,21 +247,40 @@ open class SupplierServiceImpl(
         supplierEntity.totalAccountPayment = totalAccountPayment
         supplierEntity.updateTime = LocalDateTime.now()
         supplierEntity.updateBy = baseService.currentUserId
+        val systemLanguage = baseService.currentUserSystemLanguage
 
         return if (updateById(supplierEntity)) {
-            Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_SUCCESS)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_SUCCESS)
+            } else {
+                Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_SUCCESS_EN)
+            }
         } else {
-            Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_ERROR)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_ERROR)
+            } else {
+                Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_ERROR_EN)
+            }
         }
     }
 
     override fun deleteSupplier(ids: List<Long>?): Response<String> {
         ids?.let {
             val deleteResult = supplierMapper.deleteBatchIds(ids)
+            val systemLanguage = baseService.currentUserSystemLanguage
             if (deleteResult == 0) {
-                return Response.responseMsg(SupplierCodeEnum.DELETE_SUPPLIER_ERROR)
+                if (systemLanguage == "zh_CN") {
+                    return Response.responseMsg(SupplierCodeEnum.DELETE_SUPPLIER_ERROR)
+                } else {
+                    return Response.responseMsg(SupplierCodeEnum.DELETE_SUPPLIER_ERROR_EN)
+                }
+            } else {
+                if (systemLanguage == "zh_CN") {
+                    return Response.responseMsg(SupplierCodeEnum.DELETE_SUPPLIER_SUCCESS)
+                } else {
+                    return Response.responseMsg(SupplierCodeEnum.DELETE_SUPPLIER_SUCCESS_EN)
+                }
             }
-            return Response.responseMsg(SupplierCodeEnum.DELETE_SUPPLIER_SUCCESS)
         } ?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
     }
 
@@ -262,44 +293,86 @@ open class SupplierServiceImpl(
             }
             val updateResult = supplierMapper.update(supplier, LambdaQueryWrapper<Supplier>().`in`(
                 Supplier::getId, it.ids))
+            val systemLanguage = baseService.currentUserSystemLanguage
             if (updateResult == 0) {
-                return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_STATUS_ERROR)
+                if (systemLanguage == "zh_CN") {
+                    return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_STATUS_ERROR)
+                } else {
+                    return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_STATUS_ERROR_EN)
+                }
+            } else {
+                if (systemLanguage == "zh_CN") {
+                    return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_STATUS_SUCCESS)
+                } else {
+                    return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_STATUS_SUCCESS_EN)
+                }
             }
-            return Response.responseMsg(SupplierCodeEnum.UPDATE_SUPPLIER_STATUS_SUCCESS)
         } ?: return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
     }
 
     override fun exportSupplierData(querySupplierDTO: QuerySupplierDTO, response: HttpServletResponse) {
         val suppliers = getSupplierList(querySupplierDTO)
+        val systemLanguage = baseService.currentUserSystemLanguage
         if(suppliers.data.isNotEmpty()) {
-            val exportData = ArrayList<SupplierVO>()
-            suppliers.data.forEach {supplier ->
-                val supplierVO =  SupplierVO(
-                    id = supplier.id,
-                    supplierName = supplier.supplierName,
-                    contact = supplier.contact,
-                    contactNumber = supplier.contactNumber,
-                    phoneNumber = supplier.phoneNumber,
-                    address = supplier.address,
-                    email = supplier.email,
-                    status = supplier.status,
-                    firstQuarterAccountPayment = supplier.firstQuarterAccountPayment,
-                    secondQuarterAccountPayment = supplier.secondQuarterAccountPayment,
-                    thirdQuarterAccountPayment = supplier.thirdQuarterAccountPayment,
-                    fourthQuarterAccountPayment = supplier.fourthQuarterAccountPayment,
-                    totalAccountPayment = supplier.totalAccountPayment,
-                    fax = supplier.fax,
-                    taxNumber = supplier.taxNumber,
-                    bankName = supplier.bankName,
-                    accountNumber = supplier.accountNumber,
-                    taxRate = supplier.taxRate,
-                    sort = supplier.sort,
-                    remark = supplier.remark,
-                    createTime = supplier.createTime
-                )
-                exportData.add(supplierVO)
+            if (systemLanguage == "zh_CN") {
+                val exportData = ArrayList<SupplierExportBO>()
+                suppliers.data.forEach {supplier ->
+                    val supplierExportBO =  SupplierExportBO(
+                        id = supplier.id,
+                        supplierName = supplier.supplierName,
+                        contact = supplier.contact,
+                        contactNumber = supplier.contactNumber,
+                        phoneNumber = supplier.phoneNumber,
+                        address = supplier.address,
+                        email = supplier.email,
+                        status = supplier.status,
+                        firstQuarterAccountPayment = supplier.firstQuarterAccountPayment,
+                        secondQuarterAccountPayment = supplier.secondQuarterAccountPayment,
+                        thirdQuarterAccountPayment = supplier.thirdQuarterAccountPayment,
+                        fourthQuarterAccountPayment = supplier.fourthQuarterAccountPayment,
+                        totalAccountPayment = supplier.totalAccountPayment,
+                        fax = supplier.fax,
+                        taxNumber = supplier.taxNumber,
+                        bankName = supplier.bankName,
+                        accountNumber = supplier.accountNumber,
+                        taxRate = supplier.taxRate,
+                        sort = supplier.sort,
+                        remark = supplier.remark,
+                        createTime = supplier.createTime
+                    )
+                    exportData.add(supplierExportBO)
+                }
+                ExcelUtils.export(response, "供应商信息", ExcelUtils.getSheetData(exportData))
+            } else {
+                val exportData = ArrayList<SupplierExportEnBO>()
+                suppliers.data.forEach {supplier ->
+                    val supplierExportEnBO =  SupplierExportEnBO(
+                        id = supplier.id,
+                        supplierName = supplier.supplierName,
+                        contact = supplier.contact,
+                        contactNumber = supplier.contactNumber,
+                        phoneNumber = supplier.phoneNumber,
+                        address = supplier.address,
+                        email = supplier.email,
+                        status = supplier.status,
+                        firstQuarterAccountPayment = supplier.firstQuarterAccountPayment,
+                        secondQuarterAccountPayment = supplier.secondQuarterAccountPayment,
+                        thirdQuarterAccountPayment = supplier.thirdQuarterAccountPayment,
+                        fourthQuarterAccountPayment = supplier.fourthQuarterAccountPayment,
+                        totalAccountPayment = supplier.totalAccountPayment,
+                        fax = supplier.fax,
+                        taxNumber = supplier.taxNumber,
+                        bankName = supplier.bankName,
+                        accountNumber = supplier.accountNumber,
+                        taxRate = supplier.taxRate,
+                        sort = supplier.sort,
+                        remark = supplier.remark,
+                        createTime = supplier.createTime
+                    )
+                    exportData.add(supplierExportEnBO)
+                }
+                ExcelUtils.export(response, "Supplier Info", ExcelUtils.getSheetData(exportData))
             }
-            ExcelUtils.export(response, "供应商数据", ExcelUtils.getSheetData(exportData))
         }
     }
 }

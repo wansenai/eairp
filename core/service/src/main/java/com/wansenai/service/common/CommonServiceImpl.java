@@ -316,6 +316,7 @@ public class CommonServiceImpl implements CommonService{
 
     @Override
     public Response<String> uploadExclsData(MultipartFile file) {
+        var systemLanguage = baseService.getCurrentUserSystemLanguage();
         if(!file.isEmpty()) {
             try {
                 String filename = file.getOriginalFilename();
@@ -325,10 +326,16 @@ public class CommonServiceImpl implements CommonService{
                  } else if (filename.contains("供应商") || filename.contains("supplier")) {
                     var result = readSuppliersFromExcel(file);
                     if(!result){
-                        return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR);
+                        if ("zh_CN".equals(systemLanguage)) {
+                            return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR);
+                        }
+                        return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_ERROR_EN);
+                    } else {
+                        if ("zh_CN".equals(systemLanguage)) {
+                            return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS);
+                        }
+                        return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS_EN);
                     }
-                     return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS);
-
                 } else if (filename.contains("客户") || filename.contains("customer") || filename.contains("Customer")) {
                      var result = readCustomerFromExcel(file);
                      if(!result){
