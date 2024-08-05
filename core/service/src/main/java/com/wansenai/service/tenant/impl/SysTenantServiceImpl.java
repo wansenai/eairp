@@ -140,14 +140,21 @@ public class SysTenantServiceImpl extends ServiceImpl<SysTenantMapper, SysTenant
     @Override
     @Transactional
     public Response<String> addOrUpdate(AddOrUpdateTenantDTO addOrUpdateTenantDTO) {
+        var systemLanguage = sysUserService.getUserSystemLanguage(sysUserService.getCurrentUserId());
         if (addOrUpdateTenantDTO.getId() == null) {
             // New add tenant
             if (sysUserServiceImpl.checkUserNameExist(addOrUpdateTenantDTO.getUsername())) {
-                return Response.responseMsg(UserCodeEnum.USER_NAME_EXISTS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(UserCodeEnum.USER_NAME_EXISTS);
+                }
+                return Response.responseMsg(UserCodeEnum.USER_NAME_EXISTS_EN);
             }
 
             if (sysUserServiceImpl.checkPhoneNumberExist(addOrUpdateTenantDTO.getPhoneNumber())) {
-                return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
+                }
+                return Response.responseMsg(UserCodeEnum.PHONE_EXISTS_EN);
             }
             var tenantId = SnowflakeIdUtil.nextId();
             var password = "";
@@ -242,9 +249,16 @@ public class SysTenantServiceImpl extends ServiceImpl<SysTenantMapper, SysTenant
                 tenant.setExpireTime(TimeUtil.parse(addOrUpdateTenantDTO.getExpireTime()));
                 var result = tenantMapper.insert(tenant);
                 if (result > 0) {
-                    return Response.responseMsg(TenantCodeEnum.TENANT_ADD_SUCCESS);
+                    if ("zh_CN".equals(systemLanguage)) {
+                        return Response.responseMsg(TenantCodeEnum.TENANT_ADD_SUCCESS);
+                    }
+                    return Response.responseMsg(TenantCodeEnum.TENANT_ADD_SUCCESS_EN);
+                } else {
+                    if ("zh_CN".equals(systemLanguage)) {
+                        return Response.responseMsg(TenantCodeEnum.TENANT_ADD_ERROR);
+                    }
+                    return Response.responseMsg(TenantCodeEnum.TENANT_ADD_ERROR_EN);
                 }
-                return Response.responseMsg(TenantCodeEnum.TENANT_ADD_ERROR);
             }
         } else {
             var updateUserResult = sysUserServiceImpl.lambdaUpdate()
@@ -267,9 +281,16 @@ public class SysTenantServiceImpl extends ServiceImpl<SysTenantMapper, SysTenant
                         .set(SysTenant::getUpdateTime, LocalDateTime.now())
                         .update();
                 if (updateTenantResult) {
-                    return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_SUCCESS);
+                    if ("zh_CN".equals(systemLanguage)) {
+                        return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_SUCCESS);
+                    }
+                    return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_SUCCESS_EN);
+                } else {
+                    if ("zh_CN".equals(systemLanguage)) {
+                        return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_ERROR);
+                    }
+                    return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_ERROR_EN);
                 }
-                return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_ERROR);
             }
         }
         return Response.success();
@@ -283,7 +304,11 @@ public class SysTenantServiceImpl extends ServiceImpl<SysTenantMapper, SysTenant
 
         var tenant = tenantMapper.selectById(sysUserService.getCurrentTenantId());
         if (tenant.getUserNumLimit() != 0 && userNum >= tenant.getUserNumLimit()) {
-            return Response.responseMsg(TenantCodeEnum.TENANT_USER_NUM_LIMIT);
+            var systemLanguage = sysUserService.getUserSystemLanguage(sysUserService.getCurrentUserId());
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(TenantCodeEnum.TENANT_USER_NUM_LIMIT);
+            }
+            return Response.responseMsg(TenantCodeEnum.TENANT_USER_NUM_LIMIT_EN);
         }
         return Response.success();
     }
@@ -325,11 +350,18 @@ public class SysTenantServiceImpl extends ServiceImpl<SysTenantMapper, SysTenant
                     .set(SysUser::getStatus, updateDTO.getStatus())
                     .update();
         }
-
+        var systemLanguage = sysUserService.getUserSystemLanguage(sysUserService.getCurrentUserId());
         if (updateResult) {
-            return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_SUCCESS);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_SUCCESS);
+            }
+            return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_SUCCESS_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_ERROR);
+            }
+            return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_ERROR_EN);
         }
-        return Response.responseMsg(TenantCodeEnum.TENANT_INFO_UPDATE_ERROR);
     }
 
     /**
@@ -352,9 +384,17 @@ public class SysTenantServiceImpl extends ServiceImpl<SysTenantMapper, SysTenant
                 .update();
 
         var deleteResult = tenantMapper.deleteById(tenantId);
+        var systemLanguage = sysUserService.getUserSystemLanguage(sysUserService.getCurrentUserId());
         if (deleteResult > 0) {
-            return Response.responseMsg(TenantCodeEnum.TENANT_DELETE_SUCCESS);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(TenantCodeEnum.TENANT_DELETE_SUCCESS);
+            }
+            return Response.responseMsg(TenantCodeEnum.TENANT_DELETE_SUCCESS_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(TenantCodeEnum.TENANT_DELETE_ERROR);
+            }
+            return Response.responseMsg(TenantCodeEnum.TENANT_DELETE_ERROR_EN);
         }
-        return Response.responseMsg(TenantCodeEnum.TENANT_DELETE_ERROR);
     }
 }

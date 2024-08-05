@@ -15,10 +15,13 @@ package com.wansenai.service.basic.impl
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
+import com.wansenai.bo.MemberExportBO
+import com.wansenai.bo.MemberExportEnBO
 import com.wansenai.entities.basic.Member
 import com.wansenai.dto.basic.AddOrUpdateMemberDTO
 import com.wansenai.dto.basic.QueryMemberDTO
 import com.wansenai.mappers.basic.MemberMapper
+import com.wansenai.service.BaseService
 import com.wansenai.service.basic.MemberService
 import com.wansenai.utils.constants.CommonConstants
 import com.wansenai.utils.enums.BaseCodeEnum
@@ -38,7 +41,7 @@ import java.time.LocalDateTime
 @Slf4j
 @Service
 open class MemberServiceImpl(
-    private val baseService: com.wansenai.service.BaseService,
+    private val baseService: BaseService,
     private val memberMapper: MemberMapper
 ) : ServiceImpl<MemberMapper, Member>(), MemberService {
 
@@ -84,6 +87,7 @@ open class MemberServiceImpl(
     override fun addOrUpdateMember(memberDTO: AddOrUpdateMemberDTO): Response<String> {
         val userId = baseService.getCurrentUserId()
         val isAdd = memberDTO.id == null
+        val systemLanguage = baseService.currentUserSystemLanguage
         val member = Member().apply {
             id = memberDTO.id
             memberNumber = memberDTO.memberNumber
@@ -103,10 +107,18 @@ open class MemberServiceImpl(
             }
         }
         val saveResult = saveOrUpdate(member)
-        return when {
-            saveResult && isAdd -> Response.responseMsg(MemberCodeEnum.ADD_MEMBER_SUCCESS)
-            saveResult && !isAdd -> Response.responseMsg(MemberCodeEnum.UPDATE_MEMBER_INFO_SUCCESS)
-            else -> Response.fail()
+        if (systemLanguage == "zh_CN") {
+            return when {
+                saveResult && isAdd -> Response.responseMsg(MemberCodeEnum.ADD_MEMBER_SUCCESS)
+                saveResult && !isAdd -> Response.responseMsg(MemberCodeEnum.UPDATE_MEMBER_INFO_SUCCESS)
+                else -> Response.fail()
+            }
+        } else {
+            return when {
+                saveResult && isAdd -> Response.responseMsg(MemberCodeEnum.ADD_MEMBER_SUCCESS_EN)
+                saveResult && !isAdd -> Response.responseMsg(MemberCodeEnum.UPDATE_MEMBER_INFO_SUCCESS_EN)
+                else -> Response.fail()
+            }
         }
     }
 
@@ -114,10 +126,17 @@ open class MemberServiceImpl(
         return ids.takeIf { it.isNotEmpty() }
             ?.let {
                 val updateResult = memberMapper.deleteBatchIds(it)
+                val systemLanguage = baseService.currentUserSystemLanguage
                 if (updateResult > 0) {
-                    Response.responseMsg(MemberCodeEnum.DELETE_MEMBER_SUCCESS)
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(MemberCodeEnum.DELETE_MEMBER_SUCCESS)
+                    }
+                    return Response.responseMsg(MemberCodeEnum.DELETE_MEMBER_SUCCESS_EN)
                 } else {
-                    Response.responseMsg(MemberCodeEnum.DELETE_MEMBER_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(MemberCodeEnum.DELETE_MEMBER_ERROR)
+                    }
+                    Response.responseMsg(MemberCodeEnum.DELETE_MEMBER_ERROR_EN)
                 }
             }
             ?: Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
@@ -132,11 +151,19 @@ open class MemberServiceImpl(
             .`in`(Member::getId, ids)
             .set(Member::getStatus, status)
             .update()
-
+        val systemLanguage = baseService.currentUserSystemLanguage
         return if (!updateResult) {
-            Response.responseMsg(MemberCodeEnum.UPDATE_MEMBER_STATUS_ERROR)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(MemberCodeEnum.UPDATE_MEMBER_STATUS_ERROR)
+            } else {
+                Response.responseMsg(MemberCodeEnum.UPDATE_MEMBER_STATUS_ERROR_EN)
+            }
         } else {
-            Response.responseMsg(MemberCodeEnum.UPDATE_MEMBER_STATUS_SUCCESS)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(MemberCodeEnum.UPDATE_MEMBER_STATUS_SUCCESS)
+            } else {
+                Response.responseMsg(MemberCodeEnum.UPDATE_MEMBER_STATUS_SUCCESS_EN)
+            }
         }
     }
 
@@ -224,23 +251,44 @@ open class MemberServiceImpl(
     override fun exportMemberData(memberDTO: QueryMemberDTO?, response: HttpServletResponse) {
         val members = getMemberList(memberDTO)
         if(members.data.isNotEmpty()) {
-            val exportData = ArrayList<MemberVO>()
-            members.data.forEach { member ->
-                val memberVO =  MemberVO(
-                    id = member.id,
-                    memberNumber = member.memberNumber,
-                    memberName = member.memberName,
-                    phoneNumber = member.phoneNumber,
-                    email = member.email,
-                    advancePayment = member.advancePayment,
-                    status = member.status,
-                    remark = member.remark,
-                    sort = member.sort,
-                    createTime = member.createTime
-                )
-                exportData.add(memberVO)
+            val systemLanguage = baseService.currentUserSystemLanguage
+            if (systemLanguage == "zh_CN") {
+                val exportData = ArrayList<MemberExportBO>()
+                members.data.forEach { member ->
+                    val memberExportBO =  MemberExportBO(
+                        id = member.id,
+                        memberNumber = member.memberNumber,
+                        memberName = member.memberName,
+                        phoneNumber = member.phoneNumber,
+                        email = member.email,
+                        advancePayment = member.advancePayment,
+                        status = member.status,
+                        remark = member.remark,
+                        sort = member.sort,
+                        createTime = member.createTime
+                    )
+                    exportData.add(memberExportBO)
+                }
+                ExcelUtils.export(response, "会员信息", ExcelUtils.getSheetData(exportData))
+            } else {
+                val exportEnData = ArrayList<MemberExportEnBO>()
+                members.data.forEach { member ->
+                    val memberExportEnBO =  MemberExportEnBO(
+                        id = member.id,
+                        memberNumber = member.memberNumber,
+                        memberName = member.memberName,
+                        phoneNumber = member.phoneNumber,
+                        email = member.email,
+                        advancePayment = member.advancePayment,
+                        status = member.status,
+                        remark = member.remark,
+                        sort = member.sort,
+                        createTime = member.createTime
+                    )
+                    exportEnData.add(memberExportEnBO)
+                }
+                ExcelUtils.export(response, "Member Info", ExcelUtils.getSheetData(exportEnData))
             }
-            ExcelUtils.export(response, "会员数据", ExcelUtils.getSheetData(exportData))
         }
     }
 }

@@ -15,11 +15,14 @@ package com.wansenai.service.basic.impl
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
+import com.wansenai.bo.CustomerExportBO
+import com.wansenai.bo.CustomerExportEnBO
 import com.wansenai.entities.basic.Customer
 import com.wansenai.dto.basic.AddOrUpdateCustomerDTO
 import com.wansenai.dto.basic.QueryCustomerDTO
 import com.wansenai.service.basic.CustomerService
 import com.wansenai.mappers.basic.CustomerMapper
+import com.wansenai.service.BaseService
 import com.wansenai.utils.SnowflakeIdUtil
 import com.wansenai.utils.constants.CommonConstants
 import com.wansenai.utils.enums.BaseCodeEnum
@@ -39,7 +42,7 @@ import java.time.LocalDateTime
 @Slf4j
 @Service
 open class CustomerServiceImpl(
-    private val baseService: com.wansenai.service.BaseService,
+    private val baseService: BaseService,
     private val customerMapper: CustomerMapper
 ) : ServiceImpl<CustomerMapper, Customer>(), CustomerService {
 
@@ -139,7 +142,7 @@ open class CustomerServiceImpl(
     override fun addOrUpdateCustomer(addOrUpdateCustomerDTO: AddOrUpdateCustomerDTO): Response<String> {
         val userId = baseService.getCurrentUserId()
         val isAdd = addOrUpdateCustomerDTO.id == null
-
+        val systemLanguage = baseService.currentUserSystemLanguage
         val customer = Customer().apply {
             id = if (isAdd) SnowflakeIdUtil.nextId() else addOrUpdateCustomerDTO.id
             customerName = addOrUpdateCustomerDTO.customerName.orEmpty()
@@ -177,10 +180,18 @@ open class CustomerServiceImpl(
         }
 
         val saveResult = saveOrUpdate(customer)
-        return when {
-            saveResult && isAdd -> Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_SUCCESS)
-            saveResult && !isAdd -> Response.responseMsg(CustomerCodeEnum.UPDATE_CUSTOMER_SUCCESS)
-            else -> Response.fail()
+        if (systemLanguage == "zh_CN") {
+            return when {
+                saveResult && isAdd -> Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_SUCCESS)
+                saveResult && !isAdd -> Response.responseMsg(CustomerCodeEnum.UPDATE_CUSTOMER_SUCCESS)
+                else -> Response.fail()
+            }
+        } else {
+            return when {
+                saveResult && isAdd -> Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_SUCCESS_EN)
+                saveResult && !isAdd -> Response.responseMsg(CustomerCodeEnum.UPDATE_CUSTOMER_SUCCESS_EN)
+                else -> Response.fail()
+            }
         }
     }
 
@@ -188,10 +199,19 @@ open class CustomerServiceImpl(
         return ids.takeIf { !it.isNullOrEmpty() }
             ?.let {
                 val updateResult = customerMapper.deleteBatchIds(it)
+                val systemLanguage = baseService.currentUserSystemLanguage
                 if (updateResult > 0) {
-                    Response.responseMsg(CustomerCodeEnum.DELETE_CUSTOMER_SUCCESS)
+                    if (systemLanguage == "zh_CN") {
+                        Response.responseMsg(CustomerCodeEnum.DELETE_CUSTOMER_SUCCESS)
+                    } else {
+                        Response.responseMsg(CustomerCodeEnum.DELETE_CUSTOMER_SUCCESS_EN)
+                    }
                 } else {
-                    Response.responseMsg(CustomerCodeEnum.DELETE_CUSTOMER_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        Response.responseMsg(CustomerCodeEnum.DELETE_CUSTOMER_ERROR)
+                    } else {
+                        Response.responseMsg(CustomerCodeEnum.DELETE_CUSTOMER_ERROR_EN)
+                    }
                 }
             }
             ?: Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
@@ -204,11 +224,19 @@ open class CustomerServiceImpl(
                     .`in`(Customer::getId, it)
                     .set(Customer::getStatus, s)
                     .update()
-
+                val systemLanguage = baseService.currentUserSystemLanguage
                 if (!updateResult) {
-                    Response.responseMsg(CustomerCodeEnum.UPDATE_CUSTOMER_STATUS_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        Response.responseMsg(CustomerCodeEnum.UPDATE_CUSTOMER_STATUS_ERROR)
+                    } else {
+                        Response.responseMsg(CustomerCodeEnum.UPDATE_CUSTOMER_STATUS_ERROR_EN)
+                    }
                 } else {
-                    Response.responseMsg(CustomerCodeEnum.UPDATE_CUSTOMER_STATUS_SUCCESS)
+                    if (systemLanguage == "zh_CN") {
+                        Response.responseMsg(CustomerCodeEnum.UPDATE_CUSTOMER_STATUS_SUCCESS)
+                    } else {
+                        Response.responseMsg(CustomerCodeEnum.UPDATE_CUSTOMER_STATUS_SUCCESS_EN)
+                    }
                 }
             }
         } ?: Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
@@ -256,34 +284,65 @@ open class CustomerServiceImpl(
 
     override fun exportCustomerData(queryCustomerDTO: QueryCustomerDTO?, response: HttpServletResponse) {
         val customers = getCustomerList(queryCustomerDTO)
+        val systemLanguage = baseService.currentUserSystemLanguage
         if(customers.data.isNotEmpty()) {
-            val exportData = ArrayList<CustomerVO>()
-            customers.data.forEach { customer ->
-                val customerVO = CustomerVO(
-                    id = customer.id,
-                    customerName = customer.customerName,
-                    contact = customer.contact,
-                    phoneNumber = customer.phoneNumber,
-                    email = customer.email,
-                    fax = customer.fax,
-                    firstQuarterAccountReceivable = customer.firstQuarterAccountReceivable,
-                    secondQuarterAccountReceivable = customer.secondQuarterAccountReceivable,
-                    thirdQuarterAccountReceivable = customer.thirdQuarterAccountReceivable,
-                    fourthQuarterAccountReceivable = customer.fourthQuarterAccountReceivable,
-                    totalAccountReceivable = customer.totalAccountReceivable,
-                    address = customer.address,
-                    taxNumber = customer.taxNumber,
-                    bankName = customer.bankName,
-                    accountNumber = customer.accountNumber,
-                    taxRate = customer.taxRate,
-                    status = customer.status,
-                    remark = customer.remark,
-                    sort = customer.sort,
-                    createTime = customer.createTime,
-                )
-                exportData.add(customerVO)
+            if (systemLanguage == "zh_CN") {
+                val exportData = ArrayList<CustomerExportBO>()
+                customers.data.forEach { customer ->
+                    val customerExportBO = CustomerExportBO(
+                        id = customer.id,
+                        customerName = customer.customerName,
+                        contact = customer.contact,
+                        phoneNumber = customer.phoneNumber,
+                        email = customer.email,
+                        fax = customer.fax,
+                        firstQuarterAccountReceivable = customer.firstQuarterAccountReceivable,
+                        secondQuarterAccountReceivable = customer.secondQuarterAccountReceivable,
+                        thirdQuarterAccountReceivable = customer.thirdQuarterAccountReceivable,
+                        fourthQuarterAccountReceivable = customer.fourthQuarterAccountReceivable,
+                        totalAccountReceivable = customer.totalAccountReceivable,
+                        address = customer.address,
+                        taxNumber = customer.taxNumber,
+                        bankName = customer.bankName,
+                        accountNumber = customer.accountNumber,
+                        taxRate = customer.taxRate,
+                        status = customer.status,
+                        remark = customer.remark,
+                        sort = customer.sort,
+                        createTime = customer.createTime,
+                    )
+                    exportData.add(customerExportBO)
+                }
+                ExcelUtils.export(response, "客户信息", ExcelUtils.getSheetData(exportData))
+            } else {
+                val exportData = ArrayList<CustomerExportEnBO>()
+                customers.data.forEach { customer ->
+                    val customerExportEnBO = CustomerExportEnBO(
+                        id = customer.id,
+                        customerName = customer.customerName,
+                        contact = customer.contact,
+                        phoneNumber = customer.phoneNumber,
+                        email = customer.email,
+                        fax = customer.fax,
+                        firstQuarterAccountReceivable = customer.firstQuarterAccountReceivable,
+                        secondQuarterAccountReceivable = customer.secondQuarterAccountReceivable,
+                        thirdQuarterAccountReceivable = customer.thirdQuarterAccountReceivable,
+                        fourthQuarterAccountReceivable = customer.fourthQuarterAccountReceivable,
+                        totalAccountReceivable = customer.totalAccountReceivable,
+                        address = customer.address,
+                        taxNumber = customer.taxNumber,
+                        bankName = customer.bankName,
+                        accountNumber = customer.accountNumber,
+                        taxRate = customer.taxRate,
+                        status = customer.status,
+                        remark = customer.remark,
+                        sort = customer.sort,
+                        createTime = customer.createTime,
+                    )
+                    exportData.add(customerExportEnBO)
+                }
+                ExcelUtils.export(response, "Customer Info", ExcelUtils.getSheetData(exportData))
             }
-            ExcelUtils.export(response, "客户数据", ExcelUtils.getSheetData(exportData))
         }
     }
 }

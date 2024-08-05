@@ -7,6 +7,8 @@ import com.wansenai.entities.warehouse.Warehouse
 import com.wansenai.dto.basic.AddOrUpdateWarehouseDTO
 import com.wansenai.dto.basic.QueryWarehouseDTO
 import com.wansenai.mappers.warehouse.WarehouseMapper
+import com.wansenai.service.BaseService
+import com.wansenai.service.user.ISysUserService
 import com.wansenai.utils.SnowflakeIdUtil
 import com.wansenai.utils.constants.CommonConstants
 import com.wansenai.utils.enums.BaseCodeEnum
@@ -25,8 +27,8 @@ import java.time.LocalDateTime
 @Slf4j
 open class WarehouseServiceImpl (
     private val warehouseMapper: WarehouseMapper,
-    private val baseService: com.wansenai.service.BaseService,
-    private val userService: com.wansenai.service.user.ISysUserService,
+    private val baseService: BaseService,
+    private val userService: ISysUserService,
 ) : ServiceImpl<WarehouseMapper, Warehouse>(), WarehouseService {
 
     override fun getWarehousePageList(warehouseDTO: QueryWarehouseDTO?): Response<Page<WarehouseVO>> {
@@ -90,7 +92,7 @@ open class WarehouseServiceImpl (
     override fun addOrUpdateWarehouse(warehouseDTO: AddOrUpdateWarehouseDTO): Response<String> {
         val userId = baseService.getCurrentUserId()
         val isAdd = warehouseDTO.id == null
-
+        val systemLanguage = baseService.currentUserSystemLanguage
         val warehouse = Warehouse().apply {
             id = warehouseDTO.id ?: SnowflakeIdUtil.nextId()
             warehouseName = warehouseDTO.warehouseName
@@ -115,10 +117,18 @@ open class WarehouseServiceImpl (
             updateDefaultAccount(warehouse.id)
         }
         val saveResult = saveOrUpdate(warehouse)
-        return when {
-            saveResult && isAdd -> Response.responseMsg(WarehouseCodeEnum.ADD_WAREHOUSE_SUCCESS)
-            saveResult && !isAdd -> Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_SUCCESS)
-            else -> Response.fail()
+        return if (systemLanguage == "zh_CN") {
+            when {
+                saveResult && isAdd -> Response.responseMsg(WarehouseCodeEnum.ADD_WAREHOUSE_SUCCESS)
+                saveResult && !isAdd -> Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_SUCCESS)
+                else -> Response.fail()
+            }
+        } else {
+            when {
+                saveResult && isAdd -> Response.responseMsg(WarehouseCodeEnum.ADD_WAREHOUSE_SUCCESS_EN)
+                saveResult && !isAdd -> Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_INFO_SUCCESS_EN)
+                else -> Response.fail()
+            }
         }
     }
 
@@ -126,10 +136,19 @@ open class WarehouseServiceImpl (
         return ids.takeIf { it?.isNotEmpty() ?: false }
             ?.let {
                 val updateResult = warehouseMapper.deleteBatchIds(it)
+                val systemLanguage = baseService.currentUserSystemLanguage
                 if (updateResult > 0) {
-                    Response.responseMsg(WarehouseCodeEnum.DELETE_WAREHOUSE_SUCCESS)
+                    if (systemLanguage == "zh_CN") {
+                        Response.responseMsg(WarehouseCodeEnum.DELETE_WAREHOUSE_SUCCESS)
+                    } else {
+                        Response.responseMsg(WarehouseCodeEnum.DELETE_WAREHOUSE_SUCCESS_EN)
+                    }
                 } else {
-                    Response.responseMsg(WarehouseCodeEnum.DELETE_WAREHOUSE_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        Response.responseMsg(WarehouseCodeEnum.DELETE_WAREHOUSE_ERROR)
+                    } else {
+                        Response.responseMsg(WarehouseCodeEnum.DELETE_WAREHOUSE_ERROR_EN)
+                    }
                 }
             }
             ?: Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
@@ -168,10 +187,19 @@ open class WarehouseServiceImpl (
             .set(Warehouse::getStatus, status)
             .update()
 
+        val systemLanguage = baseService.currentUserSystemLanguage
         return if (!updateResult) {
-            Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_ERROR)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_ERROR)
+            } else {
+                Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_ERROR_EN)
+            }
         } else {
-            Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_SUCCESS)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_SUCCESS)
+            } else {
+                Response.responseMsg(WarehouseCodeEnum.UPDATE_WAREHOUSE_STATUS_SUCCESS_EN)
+            }
         }
     }
 

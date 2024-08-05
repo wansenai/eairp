@@ -91,7 +91,7 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
         var operator = userService.getCurrentUserId();
-
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if (addOrUpdateIncomeExpenseDTO.getId() == null) {
             var incomeExpense = IncomeExpense.builder()
                     .name(addOrUpdateIncomeExpenseDTO.getName())
@@ -104,10 +104,16 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
                     .build();
             var saveResult = save(incomeExpense);
             if (!saveResult) {
-                return Response.responseMsg(IncomeExpenseCodeEnum.ADD_INCOME_EXPENSE_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(IncomeExpenseCodeEnum.ADD_INCOME_EXPENSE_ERROR);
+                }
+                return Response.responseMsg(IncomeExpenseCodeEnum.ADD_INCOME_EXPENSE_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(IncomeExpenseCodeEnum.ADD_INCOME_EXPENSE_SUCCESS);
+                }
+                return Response.responseMsg(IncomeExpenseCodeEnum.ADD_INCOME_EXPENSE_SUCCESS_EN);
             }
-            return Response.responseMsg(IncomeExpenseCodeEnum.ADD_INCOME_EXPENSE_SUCCESS);
-
         } else {
             var incomeExpense = IncomeExpense.builder()
                     .id(addOrUpdateIncomeExpenseDTO.getId())
@@ -121,9 +127,16 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
                     .build();
             var updateResult = updateById(incomeExpense);
             if (!updateResult) {
-                return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_ERROR);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_ERROR);
+                }
+                return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_ERROR_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_SUCCESS);
+                }
+                return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_SUCCESS_EN);
             }
-            return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_SUCCESS);
         }
     }
 
@@ -132,12 +145,19 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
         if (ids == null || ids.isEmpty()) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
-
         var deleteResult = incomeExpenseMapper.deleteBatchIds(ids);
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if (deleteResult <= 0) {
-            return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_INCOME_EXPENSE_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_INCOME_EXPENSE_ERROR);
+            }
+            return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_INCOME_EXPENSE_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_INCOME_EXPENSE_SUCCESS);
+            }
+            return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_INCOME_EXPENSE_SUCCESS_EN);
         }
-        return Response.responseMsg(IncomeExpenseCodeEnum.DELETE_INCOME_EXPENSE_SUCCESS);
     }
 
     @Override
@@ -149,10 +169,18 @@ public class IncomeExpenseServiceImpl extends ServiceImpl<IncomeExpenseMapper, I
                 .in(IncomeExpense::getId, ids)
                 .set(IncomeExpense::getStatus, status)
                 .update();
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         if (!updateResult) {
-            return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_ERROR);
+            }
+            return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_SUCCESS);
+            }
+            return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_SUCCESS_EN);
         }
-        return Response.responseMsg(IncomeExpenseCodeEnum.UPDATE_INCOME_EXPENSE_SUCCESS);
     }
 
     @Override

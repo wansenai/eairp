@@ -30,6 +30,7 @@ enum Api {
     List = '/user/list',
     ListAll = '/user/listAll',
     UpdateUser = '/user/update',
+    UpdateStatus = '/user/updateStatus',
     AddOrUpdateUser = '/user/addOrUpdate',
     DeleteUser = '/user/delete',
     ResetPassword = '/user/resetPassword',
@@ -178,7 +179,7 @@ export function updateUser(params: updateUserInfoReq, successMode: SuccessMessag
 
 export function updateStatus(params: { id: any; status: number }, successMode: SuccessMessageMode = 'notice', errorMode: ErrorMessageMode = 'notice') {
     return defHttp.post<BaseResp>(
-        {url: Api.UpdateUser, params},
+        {url: Api.UpdateStatus, params},
         {
             successMessageMode: successMode,
             errorMessageMode: errorMode,

@@ -735,6 +735,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (updateUserDTO == null) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
         }
+        var systemLanguage = getUserSystemLanguage(getCurrentUserId());
 
         var phoneExist = lambdaQuery()
                 .eq(SysUser::getId, updateUserDTO.getId())
@@ -742,7 +743,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .one();
         if (phoneExist == null) {
             if(checkPhoneNumberExist(updateUserDTO.getPhoneNumber())) {
-                return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
+                }
+                return Response.responseMsg(UserCodeEnum.PHONE_EXISTS_EN);
             }
         }
         var existEmail = lambdaQuery()
@@ -752,7 +756,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
         if (existEmail == null) {
             if(checkEmailExist(updateUserDTO.getEmail())) {
-                return Response.responseMsg(UserCodeEnum.EMAIL_EXISTS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(UserCodeEnum.EMAIL_EXISTS);
+                }
+                return Response.responseMsg(UserCodeEnum.EMAIL_EXISTS_EN);
             }
         }
 
@@ -768,10 +775,39 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .update();
 
         if (!updateResult) {
-            return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_ERROR);
+            }
+            return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS);
+            }
+            return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS_EN);
         }
+    }
 
-        return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS);
+    @Override
+    public Response<String> updateStatus(UpdateUserDTO updateUserDTO) {
+        if (updateUserDTO == null) {
+            return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL);
+        }
+        var updateResult = lambdaUpdate()
+                .eq(SysUser::getId, updateUserDTO.getId())
+                .set(SysUser::getStatus, updateUserDTO.getStatus())
+                .update();
+        var systemLanguage = getUserSystemLanguage(getCurrentUserId());
+        if (!updateResult) {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_ERROR);
+            }
+            return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS);
+            }
+            return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS_EN);
+        }
     }
 
     @Override
@@ -795,6 +831,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if(instance == null) {
             return Response.responseMsg(BaseCodeEnum.OSS_GET_INSTANCE_ERROR);
         }
+        var systemLanguage = getUserSystemLanguage(getCurrentUserId());
         try {
             var key = "temp" + "_" + SnowflakeIdUtil.nextId() + "_" + name;
             var result = instance.upload(FileUtil.convertMultipartFilesToFile(file), key);
@@ -807,10 +844,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             if (updateResult) {
                 return Response.responseData(result);
             }
-            return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+            } else {
+                return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR_EN);
+            }
         }catch (Exception e) {
             log.error("上传文件失败: " + e.getMessage());
-            return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
+            } else {
+                return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR_EN);
+            }
         }
     }
 
@@ -868,6 +913,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     @Transactional
     public Response<String> addOrUpdate(AddOrUpdateUserDTO addOrUpdateUserDTO) {
+        var systemLanguage = getUserSystemLanguage(getCurrentUserId());
         if (addOrUpdateUserDTO.getId() != null) {
             var userExist = lambdaQuery()
                     .eq(SysUser::getId, addOrUpdateUserDTO.getId())
@@ -905,17 +951,30 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                     .update();
 
             if(updateUserResult && saveUserRoleRealResult && saveUserDeptRealResult) {
-                return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS);
+                }
+                return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_SUCCESS_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_ERROR);
+                }
+                return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_ERROR_EN);
             }
-            return Response.responseMsg(UserCodeEnum.USER_INFO_UPDATE_ERROR);
         } else {
             // Add user info
             if (checkUserNameExist(addOrUpdateUserDTO.getUsername())) {
-                return Response.responseMsg(UserCodeEnum.USER_NAME_EXISTS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(UserCodeEnum.USER_NAME_EXISTS);
+                }
+                return Response.responseMsg(UserCodeEnum.USER_NAME_EXISTS_EN);
             }
 
             if (checkPhoneNumberExist(addOrUpdateUserDTO.getPhoneNumber())) {
-                return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(UserCodeEnum.PHONE_EXISTS);
+                }
+                return Response.responseMsg(UserCodeEnum.PHONE_EXISTS_EN);
             }
 
             var userId = SnowflakeIdUtil.nextId();
@@ -947,9 +1006,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             var saveUserDeptRealResult = addUserDeptRelations(userId, addOrUpdateUserDTO.getDeptId());
 
             if(saveUserResult && saveUserRoleRealResult && saveUserDeptRealResult) {
-                return Response.responseMsg(UserCodeEnum.USER_ADD_SUCCESS);
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(UserCodeEnum.USER_ADD_SUCCESS);
+                }
+                return Response.responseMsg(UserCodeEnum.USER_ADD_SUCCESS_EN);
+            } else {
+                if ("zh_CN".equals(systemLanguage)) {
+                    return Response.responseMsg(UserCodeEnum.USER_ADD_ERROR);
+                }
+                return Response.responseMsg(UserCodeEnum.USER_ADD_ERROR_EN);
             }
-            return Response.responseMsg(UserCodeEnum.USER_ADD_ERROR);
         }
     }
 
@@ -963,11 +1029,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .in(SysUser::getId, ids)
                 .set(SysUser::getDeleteFlag, CommonConstants.DELETED)
                 .update();
+        var systemLanguage = getUserSystemLanguage(getCurrentUserId());
         if(!deleteResult) {
-            return Response.responseMsg(UserCodeEnum.USER_DELETE_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(UserCodeEnum.USER_DELETE_ERROR);
+            }
+            return Response.responseMsg(UserCodeEnum.USER_DELETE_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(UserCodeEnum.USER_DELETE_SUCCESS);
+            }
+            return Response.responseMsg(UserCodeEnum.USER_DELETE_SUCCESS_EN);
         }
-
-        return Response.responseMsg(UserCodeEnum.USER_DELETE_SUCCESS);
     }
 
     @Override
@@ -980,12 +1053,19 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .eq(SysUser::getId, id)
                 .set(SysUser::getPassword, CommonTools.md5Encryp(UserConstants.DEFAULT_PASSWORD))
                 .update();
+        var systemLanguage = getUserSystemLanguage(getCurrentUserId());
 
         if(!resetResult) {
-            return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_ERROR);
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_ERROR);
+            }
+            return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_ERROR_EN);
+        } else {
+            if ("zh_CN".equals(systemLanguage)) {
+                return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_SUCCESS);
+            }
+            return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_SUCCESS_EN);
         }
-
-        return Response.responseMsg(UserCodeEnum.USER_RESET_PASSWORD_SUCCESS);
     }
 
     @Override

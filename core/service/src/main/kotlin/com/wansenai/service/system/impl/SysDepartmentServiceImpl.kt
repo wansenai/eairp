@@ -20,6 +20,7 @@ import com.wansenai.vo.DeptListVO
 import com.wansenai.dto.department.AddOrUpdateDeptDTO
 import com.wansenai.mappers.system.SysDepartmentMapper
 import com.wansenai.mappers.user.SysUserDeptRelMapper
+import com.wansenai.service.BaseService
 import com.wansenai.service.system.SysDepartmentService
 import com.wansenai.utils.SnowflakeIdUtil
 import com.wansenai.utils.constants.CommonConstants
@@ -33,6 +34,7 @@ import java.time.LocalDateTime
 
 @Service
 open class SysDepartmentServiceImpl(
+    private val baseService: BaseService,
     private val userService: com.wansenai.service.user.ISysUserService,
     private val userDeptRelMapper: SysUserDeptRelMapper
 ) : ServiceImpl<SysDepartmentMapper, SysDepartment>(), SysDepartmentService {
@@ -161,6 +163,7 @@ open class SysDepartmentServiceImpl(
     }
 
     override fun addOrSaveDept(addOrUpdateDeptDTO: AddOrUpdateDeptDTO?): Response<String> {
+        val systemLanguage = baseService.currentUserSystemLanguage
         addOrUpdateDeptDTO?.let { dto ->
             if (dto.id == null) {
                 val userId = userService.getCurrentTenantId().toLong()
@@ -187,9 +190,16 @@ open class SysDepartmentServiceImpl(
                     .build()
                 userDeptRelMapper.insert(userDeptRel)
                 if (!saveResult) {
-                    return Response.responseMsg(DeptCodeEnum.ADD_DEPARTMENT_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(DeptCodeEnum.ADD_DEPARTMENT_ERROR)
+                    }
+                    return Response.responseMsg(DeptCodeEnum.ADD_DEPARTMENT_ERROR_EN)
+                } else {
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(DeptCodeEnum.ADD_DEPARTMENT_SUCCESS)
+                    }
+                    return Response.responseMsg(DeptCodeEnum.ADD_DEPARTMENT_SUCCESS_EN)
                 }
-                return Response.responseMsg(DeptCodeEnum.ADD_DEPARTMENT_SUCCESS)
             } else {
                 val saveResult = lambdaUpdate()
                     .eq(SysDepartment::getId, dto.id)
@@ -206,9 +216,16 @@ open class SysDepartmentServiceImpl(
                     .update()
 
                 if (!saveResult) {
-                    return Response.responseMsg(DeptCodeEnum.UPDATE_DEPARTMENT_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(DeptCodeEnum.UPDATE_DEPARTMENT_ERROR)
+                    }
+                    return Response.responseMsg(DeptCodeEnum.UPDATE_DEPARTMENT_ERROR_EN)
+                } else {
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(DeptCodeEnum.UPDATE_DEPARTMENT_SUCCESS)
+                    }
+                    return Response.responseMsg(DeptCodeEnum.UPDATE_DEPARTMENT_SUCCESS_EN)
                 }
-                return Response.responseMsg(DeptCodeEnum.UPDATE_DEPARTMENT_SUCCESS)
             }
         }
         return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
@@ -223,10 +240,17 @@ open class SysDepartmentServiceImpl(
             .eq(SysDepartment::getId, id)
             .set(SysDepartment::getDeleteFlag, CommonConstants.DELETED)
             .update()
-
+        val systemLanguage = baseService.currentUserSystemLanguage
         if (!deleteResult) {
-            return Response.responseMsg(DeptCodeEnum.DELETE_DEPARTMENT_ERROR)
+            if (systemLanguage == "zh_CN") {
+                return Response.responseMsg(DeptCodeEnum.DELETE_DEPARTMENT_ERROR)
+            }
+            return Response.responseMsg(DeptCodeEnum.DELETE_DEPARTMENT_ERROR_EN)
+        } else {
+            if (systemLanguage == "zh_CN") {
+                return Response.responseMsg(DeptCodeEnum.DELETE_DEPARTMENT_SUCCESS)
+            }
+            return Response.responseMsg(DeptCodeEnum.DELETE_DEPARTMENT_SUCCESS_EN)
         }
-        return Response.responseMsg(DeptCodeEnum.DELETE_DEPARTMENT_SUCCESS)
     }
 }

@@ -26,9 +26,11 @@ import com.wansenai.entities.system.SysFile
 import com.wansenai.entities.user.SysUser
 import com.wansenai.mappers.financial.FinancialMainMapper
 import com.wansenai.mappers.system.SysFileMapper
+import com.wansenai.service.BaseService
 import com.wansenai.service.basic.IOperatorService
 import com.wansenai.service.basic.MemberService
 import com.wansenai.service.financial.AdvanceChargeService
+import com.wansenai.service.financial.FinancialSubService
 import com.wansenai.service.financial.IFinancialAccountService
 import com.wansenai.service.user.ISysUserService
 import com.wansenai.utils.SnowflakeIdUtil
@@ -52,8 +54,8 @@ import java.util.concurrent.ConcurrentHashMap
 @Service
 @Slf4j
 open class AdvanceChargeServiceImpl(
-    private val baseService: com.wansenai.service.BaseService,
-    private val financialSubService: com.wansenai.service.financial.FinancialSubService,
+    private val baseService: BaseService,
+    private val financialSubService: FinancialSubService,
     private val financialMainMapper: FinancialMainMapper,
     private val memberService: MemberService,
     private val operatorService: IOperatorService,

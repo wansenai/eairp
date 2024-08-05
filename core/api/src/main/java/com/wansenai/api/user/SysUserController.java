@@ -114,6 +114,11 @@ public class SysUserController {
         return userService.updateUser(updateUserDTO);
     }
 
+    @PostMapping(value = "updateStatus")
+    public Response<String> updateStatus(@RequestBody UpdateUserDTO updateUserDTO) {
+        return userService.updateStatus(updateUserDTO);
+    }
+
     @PostMapping("uploadAvatar")
     public Response<String> uploadAvatar(@RequestParam("file") MultipartFile file, @RequestParam("userId") Long userId, @RequestParam("name") String name) {
         return userService.uploadAvatar(file, userId, name);

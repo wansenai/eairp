@@ -23,6 +23,7 @@ import com.wansenai.dto.role.AddOrUpdateRoleDTO
 import com.wansenai.dto.role.RolePermissionDTO
 import com.wansenai.mappers.role.SysRoleMapper
 import com.wansenai.mappers.role.SysRoleMenuRelMapper
+import com.wansenai.service.BaseService
 import com.wansenai.service.role.SysRoleMenuRelService
 import com.wansenai.service.role.SysRoleService
 import com.wansenai.utils.SnowflakeIdUtil
@@ -36,6 +37,7 @@ import java.time.LocalDateTime
 
 @Service
 open class SysRoleServiceImpl(
+    private val baseService: BaseService,
     private val roleMapper: SysRoleMapper,
     private val roleMenuRelMapper: SysRoleMenuRelMapper,
     private val roleMenuRelService: SysRoleMenuRelService,
@@ -116,20 +118,28 @@ open class SysRoleServiceImpl(
         if (id.isNullOrBlank() || status == null) {
             return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
         }
-
         val updateResult = lambdaUpdate()
             .eq(SysRole::getId, id)
             .set(SysRole::getStatus, status)
             .update()
-
+        val systemLanguage = baseService.currentUserSystemLanguage
         return if (updateResult) {
-            Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_STATUS_SUCCESS)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_STATUS_SUCCESS)
+            } else {
+                Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_STATUS_SUCCESS_EN)
+            }
         } else {
-            Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_STATUS_ERROR)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_STATUS_ERROR)
+            } else {
+                Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_STATUS_ERROR_EN)
+            }
         }
     }
 
     override fun addOrUpdateRole(addOrUpdateRoleDTO: AddOrUpdateRoleDTO?): Response<String> {
+        val systemLanguage = baseService.currentUserSystemLanguage
         return addOrUpdateRoleDTO?.let { dto ->
             if (dto.id == null) {
                 // add
@@ -145,9 +155,17 @@ open class SysRoleServiceImpl(
 
                 val saveResult = save(sysRole)
                 if (!saveResult) {
-                    Response.responseMsg(RoleCodeEnum.ADD_ROLE_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(RoleCodeEnum.ADD_ROLE_ERROR)
+                    } else {
+                        return Response.responseMsg(RoleCodeEnum.ADD_ROLE_ERROR_EN)
+                    }
                 } else {
-                    Response.responseMsg(RoleCodeEnum.ADD_ROLE_SUCCESS)
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(RoleCodeEnum.ADD_ROLE_SUCCESS)
+                    } else {
+                        return Response.responseMsg(RoleCodeEnum.ADD_ROLE_SUCCESS_EN)
+                    }
                 }
             } else {
                 // update
@@ -162,9 +180,17 @@ open class SysRoleServiceImpl(
                 }.update()
 
                 if (!updateResult) {
-                    Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_ERROR)
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_ERROR)
+                    } else {
+                        return Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_ERROR_EN)
+                    }
                 } else {
-                    Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_SUCCESS)
+                    if (systemLanguage == "zh_CN") {
+                        return Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_SUCCESS)
+                    } else {
+                        return Response.responseMsg(RoleCodeEnum.UPDATE_ROLE_SUCCESS_EN)
+                    }
                 }
             }
         } ?: Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
@@ -180,10 +206,19 @@ open class SysRoleServiceImpl(
                 .set(SysRole::getDeleteFlag, CommonConstants.DELETED)
                 .update()
 
+            val systemLanguage = baseService.currentUserSystemLanguage
             return if (deleteResult) {
-                Response.responseMsg(RoleCodeEnum.DELETE_ROLE_SUCCESS)
+                if (systemLanguage == "zh_CN") {
+                    Response.responseMsg(RoleCodeEnum.DELETE_ROLE_SUCCESS)
+                } else {
+                    Response.responseMsg(RoleCodeEnum.DELETE_ROLE_SUCCESS_EN)
+                }
             } else {
-                Response.responseMsg(RoleCodeEnum.DELETE_ROLE_ERROR)
+                if (systemLanguage == "zh_CN") {
+                    Response.responseMsg(RoleCodeEnum.DELETE_ROLE_ERROR)
+                } else {
+                    Response.responseMsg(RoleCodeEnum.DELETE_ROLE_ERROR_EN)
+                }
             }
         }
         return Response.responseMsg(BaseCodeEnum.PARAMETER_NULL)
@@ -208,10 +243,19 @@ open class SysRoleServiceImpl(
         roleMenuRel.roleId = roleId
         // 进行saveOrUpdate操作
         val saveBatchResult = roleMenuRelService.saveOrUpdate(roleMenuRel);
+        val systemLanguage = baseService.currentUserSystemLanguage
         return if (saveBatchResult) {
-            Response.responseMsg(RoleCodeEnum.ROLE_PERMISSION_MENU_SUCCESS)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(RoleCodeEnum.ROLE_PERMISSION_MENU_SUCCESS)
+            } else {
+                Response.responseMsg(RoleCodeEnum.ROLE_PERMISSION_MENU_SUCCESS_EN)
+            }
         } else {
-            Response.responseMsg(RoleCodeEnum.ROLE_PERMISSION_MENU_ERROR)
+            if (systemLanguage == "zh_CN") {
+                Response.responseMsg(RoleCodeEnum.ROLE_PERMISSION_MENU_ERROR)
+            } else {
+                Response.responseMsg(RoleCodeEnum.ROLE_PERMISSION_MENU_ERROR_EN)
+            }
         }
     }
 }
