@@ -10,6 +10,7 @@ export default {
     apiRequestFailed: '请求出错，请稍候重试',
     networkException: '网络异常',
     networkExceptionMsg: '网络异常，请检查您的网络连接是否正常!',
+    refreshBrowser: '网络当前繁忙，请按F5刷新浏览器',
 
     errMsg401: '用户没有权限（令牌、用户名、密码错误）!',
     errMsg403: '用户得到授权，但是访问是被禁止的。!',
@@ -69,8 +70,8 @@ export default {
     signUpFormTitle: '注册租户',
     forgetFormTitle: '重置密码',
 
-    signInTitle: '为企业提供下一代智能ERP系统软件',
-    signInDesc: '© 2015-2030 Wan Sen ERP - All Right Reserved 版权所有',
+    signInTitle: 'HO-STAR MARINE ERP',
+    signInDesc: '© 2024-2030 HO-STAR MARINE SOLUTIONS CORPORATION - 版权所有',
     policy: '我同意，《万森ERP系统》隐私政策',
     scanSign: `扫码后点击"确认"，即可完成登录`,
 

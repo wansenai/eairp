@@ -203,6 +203,7 @@ export default {
             noticeSex: 'Input barcode product information and automatically bring it out ！',
             total: 'Total',
             inputRemark: 'Please enter remark',
+            inputSalePrice: 'Please enter price',
             annex: 'Attachment',
             uploadAnnex: 'Upload attachment',
             cancel: 'Cancel',
@@ -211,6 +212,7 @@ export default {
             table: {
                 outWarehouse: 'Transfer out warehouse',
                 barCode: 'BarCode',
+                inputBarCode: 'Please select the product barcode',
                 name: 'Name',
                 standard: 'Standard',
                 model: 'Model',
@@ -218,6 +220,7 @@ export default {
                 extendInfo: 'Extend info',
                 inWarehouse: 'Transfer in warehouse',
                 unit: 'Unit',
+                salePrice: 'Sale Price',
                 quantity: 'Quantity',
                 remark: 'Remark',
             }

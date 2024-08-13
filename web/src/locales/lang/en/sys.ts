@@ -11,6 +11,7 @@ export default {
     networkException: 'network anomaly',
     networkExceptionMsg:
       'Please check if your network connection is normal! The network is abnormal',
+    refreshBrowser: 'The network is busy now, please press F5 to refresh your browser',
 
     errMsg401: 'The user does not have permission (token, user name, password error)!',
     errMsg403: 'The user is authorized, but access is forbidden!',
@@ -75,8 +76,8 @@ export default {
     signUpFormTitle: 'Sign up',
     forgetFormTitle: 'Reset password',
 
-    signInTitle: 'Provide next-generation intelligent ERP system software for enterprises',
-    signInDesc: '© 2023-2033 Wan Sen ERP - All Right Reserved',
+    signInTitle: 'HO-STAR MARINE ERP',
+    signInDesc: '© 2024-2030 HO-STAR MARINE SOLUTIONS CORPORATION - All Right Reserved',
     policy: 'I agree, to the WanSer ERP System Privacy Policy',
     scanSign: `scanning the code to complete the login`,
 
