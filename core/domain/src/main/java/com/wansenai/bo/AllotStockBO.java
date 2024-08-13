@@ -41,6 +41,9 @@ public class AllotStockBO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long productId;
 
+    @JsonSerialize(using = BigDecimalSerializerBO.class)
+    private BigDecimal salePrice;
+
     private String productName;
 
     private String productStandard;
