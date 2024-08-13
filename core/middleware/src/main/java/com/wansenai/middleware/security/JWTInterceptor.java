@@ -65,8 +65,9 @@ public class JWTInterceptor implements HandlerInterceptor { //校验类
                 }
             }
         }
-        map.put("msg", "token无效");
-        map.put("code", "A0312");
+        // 这里先不做token的判断，不然首次前端加载会出现token无效给用户造成误解 2024-08-12
+        // map.put("msg", "token无效");
+        // map.put("code", "A0312");
 
         String value = new ObjectMapper().writeValueAsString(map);
         response.setContentType("application/json;charset=UTF-8");
