@@ -70,8 +70,8 @@ export default {
     signUpFormTitle: '注册租户',
     forgetFormTitle: '重置密码',
 
-    signInTitle: 'HO-STAR MARINE ERP',
-    signInDesc: '© 2024-2030 HO-STAR MARINE SOLUTIONS CORPORATION - 版权所有',
+    signInTitle: '为企业提供下一代智能ERP系统软件',
+    signInDesc: '© 2023-2033 Wan Sen ERP - All Right Reserved 版权所有',
     policy: '我同意，《万森ERP系统》隐私政策',
     scanSign: `扫码后点击"确认"，即可完成登录`,
 

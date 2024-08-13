@@ -76,8 +76,8 @@ export default {
     signUpFormTitle: 'Sign up',
     forgetFormTitle: 'Reset password',
 
-    signInTitle: 'HO-STAR MARINE ERP',
-    signInDesc: '© 2024-2030 HO-STAR MARINE SOLUTIONS CORPORATION - All Right Reserved',
+    signInTitle: 'Provide next-generation intelligent ERP system software for enterprises',
+    signInDesc: '© 2023-2033 Wan Sen ERP - All Right Reserved',
     policy: 'I agree, to the WanSer ERP System Privacy Policy',
     scanSign: `scanning the code to complete the login`,
 
