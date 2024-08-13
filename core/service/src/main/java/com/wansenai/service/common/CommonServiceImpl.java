@@ -77,8 +77,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -88,17 +91,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.Base64;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -354,7 +350,7 @@ public class CommonServiceImpl implements CommonService{
                      if (StringUtils.hasLength(message)) {
                          return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR.getCode(), message);
                      }
-                     var result = readProductFromExcel(file, 0);
+                     var result = readProductFromExcel(file, 0).join();
                      if(!result){
                          return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
                      }
@@ -374,16 +370,36 @@ public class CommonServiceImpl implements CommonService{
     @Override
     public Response<String> productCoverUpload(MultipartFile file, Integer type) {
         try {
-            var result = readProductFromExcel(file, type);
-            if(!result){
+            RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+
+            // 在CompletableFuture异步线程中设置RequestAttributes并处理异常
+            CompletableFuture<Boolean> resultFuture = CompletableFuture.supplyAsync(() -> {
+                RequestContextHolder.setRequestAttributes(requestAttributes, true);
+                try {
+                    var result = readProductFromExcel(file, type).join();
+                    log.info("Excel文件处理结果: " + result);
+                    return result;
+                } catch (Exception e) {
+                    log.error("处理Excel文件时出错: " + e.getMessage(), e);
+                    return false;
+                }
+            });
+
+            // 获取结果
+            Boolean result = resultFuture.join();
+            log.info("异步操作结果: " + result);
+
+            if (!result) {
                 return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
             }
+
             return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS);
         } catch (Exception e) {
-            log.error("上传Excel文件失败: " + e.getMessage());
+            log.error("上传Excel文件失败: " + e.getMessage(), e);
             return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
         }
     }
+
 
     private boolean readSuppliersFromExcel(MultipartFile file) throws IOException {
         List<Supplier> suppliers = new ArrayList<>();
@@ -527,20 +543,23 @@ public class CommonServiceImpl implements CommonService{
         return message;
     }
 
-    private boolean readProductFromExcel(MultipartFile file, int type) throws IOException, InvalidFormatException {
-        List<Product> products = new ArrayList<>();
-        List<ProductStockKeepUnit> productStockKeepUnits = new ArrayList<>();
-        List<ProductStock> productStocks = new ArrayList<>();
+    private CompletableFuture<Boolean> readProductFromExcel(MultipartFile file, int type) throws IOException, InvalidFormatException {
+        // 使用多线程执行批量数据库插入操作
+        Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        List<Product> products = Collections.synchronizedList(new ArrayList<>());
+        List<ProductStockKeepUnit> productStockKeepUnits = Collections.synchronizedList(new ArrayList<>());
+        List<ProductStock> productStocks = Collections.synchronizedList(new ArrayList<>());
 
         InputStream inputStream = file.getInputStream();
         Workbook workbook = WorkbookFactory.create(inputStream);
         Sheet sheet = workbook.getSheetAt(0);
-        DataFormatter dataFormatter = new DataFormatter();
+        DataFormatter dataFormatter = new DataFormatter(); // 移到循环外部
 
         var warehouseId = warehouseService.getDefaultWarehouse().getData().getId();
         var userId = baseService.getCurrentUserId();
 
-        // Read header row to create the mapping
+        // 读取表头以创建映射
         Row headerRow = sheet.getRow(1);
         Map<String, Integer> headerMap = new HashMap<>();
         for (Cell cell : headerRow) {
@@ -550,7 +569,6 @@ public class CommonServiceImpl implements CommonService{
             }
         }
 
-        // Helper method to get cell value by column name and row index
         BiFunction<String, Integer, String> getCellValueByName = (columnName, rowIndex) -> {
             Integer columnIndex = headerMap.get(columnName);
             if (columnIndex != null) {
@@ -559,33 +577,8 @@ public class CommonServiceImpl implements CommonService{
             return null;
         };
 
-        Map<String, String[]> fieldMappings = new HashMap<>();
-        fieldMappings.put("barCode", new String[]{"Bar code", "产品条码"});
-        fieldMappings.put("productName", new String[]{"Name of commodity", "产品名称"});
-        fieldMappings.put("productCategory", new String[]{"Category", "产品分类"});
-        fieldMappings.put("productStandard", new String[]{"Specifications", "产品规格"});
-        fieldMappings.put("productModel", new String[]{"Model", "产品型号"});
-        fieldMappings.put("productColor", new String[]{"Color", "产品颜色"});
-        fieldMappings.put("productWeight", new String[]{"Base weight", "产品重量"});
-        fieldMappings.put("guaranteePeriod", new String[]{"Guarantee period", "产品保质期"});
-        fieldMappings.put("productUnit", new String[]{"Commodity measurement unit", "产品单位"});
-        fieldMappings.put("serialNumber", new String[]{"Serial number", "启用序列号"});
-        fieldMappings.put("batchNumber", new String[]{"Batch number", "启用批号"});
-        fieldMappings.put("warehouseShelves", new String[]{"Position shelf", "仓库货架"});
-        fieldMappings.put("productManufacturer", new String[]{"Manufacturer", "产品制造商"});
-        fieldMappings.put("otherFieldOne", new String[]{"Extended field 1", "其他字段一"});
-        fieldMappings.put("otherFieldTwo", new String[]{"Extended field 2", "其他字段二"});
-        fieldMappings.put("otherFieldThree", new String[]{"Extended field 3", "其他字段三"});
-        fieldMappings.put("remark", new String[]{"Remark", "备注"});
-        fieldMappings.put("multiAttribute", new String[]{"Multiple attributes", "多属性"});
-        fieldMappings.put("retailPrice", new String[]{"Retail price", "零售价格"});
-        fieldMappings.put("purchasePrice", new String[]{"Purchase price", "采购价格"});
-        fieldMappings.put("salePrice", new String[]{"Market price", "销售价格"});
-        fieldMappings.put("lowPrice", new String[]{"Minimum selling price", "最低价格"});
-        fieldMappings.put("initStockQuantity", new String[]{"Initial inventory quantity", "初始库存数量"});
-        fieldMappings.put("currentStockQuantity", new String[]{"Current inventory quantity", "当前库存数量"});
+        Map<String, String[]> fieldMappings = createFieldMappings();
 
-        // Helper method to get the cell value for a field name (supports both English and Chinese)
         BiFunction<String, Integer, String> getFieldCellValue = (fieldName, rowIndex) -> {
             String[] possibleNames = fieldMappings.get(fieldName);
             if (possibleNames != null) {
@@ -614,116 +607,130 @@ public class CommonServiceImpl implements CommonService{
                 productCategoryId = productCategory.getId();
             }
 
-            var product = Product.builder()
-                    .id(productId)
-                    .productName(getFieldCellValue.apply("productName", i))
-                    .productStandard(getFieldCellValue.apply("productStandard", i))
-                    .productModel(getFieldCellValue.apply("productModel", i))
-                    .productColor(getFieldCellValue.apply("productColor", i))
-                    .productCategoryId(productCategoryId)
-                    .productWeight(getNumericCellValue(getFieldCellValue.apply("productWeight",i)))
-                    .productExpiryNum(getIntegerCellValue(getFieldCellValue.apply("guaranteePeriod",i)))
-                    .productUnit(getFieldCellValue.apply("productUnit", i))
-                    .enableSerialNumber(getIntegerCellValue(getFieldCellValue.apply("serialNumber", i)))
-                    .enableBatchNumber(getIntegerCellValue(getFieldCellValue.apply("batchNumber", i)))
-                    .warehouseShelves(getFieldCellValue.apply("warehouseShelves", i))
-                    .productManufacturer(getFieldCellValue.apply("productManufacturer", i))
-                    .otherFieldOne(getFieldCellValue.apply("otherFieldOne", i))
-                    .otherFieldTwo(getFieldCellValue.apply("otherFieldTwo", i))
-                    .otherFieldThree(getFieldCellValue.apply("otherFieldThree", i))
-                    .status(0)
-                    .remark(getFieldCellValue.apply("remark", i))
-                    .createBy(userId)
-                    .createTime(LocalDateTime.now())
-                    .build();
+            Product product = createProduct(getFieldCellValue, i, productId, productCategoryId, userId);
+            ProductStockKeepUnit productPrice = createProductStockKeepUnit(getFieldCellValue, i, productId, productCode, userId);
+            ProductStock productStock = createProductStock(getFieldCellValue, i, productPrice.getId(), warehouseId, userId);
+
             products.add(product);
-
-            var productPrice = ProductStockKeepUnit.builder()
-                    .id(SnowflakeIdUtil.nextId())
-                    .productId(productId)
-                    .productBarCode(productCode)
-                    .multiAttribute(getFieldCellValue.apply("multiAttribute", i))
-                    .purchasePrice(getNumericCellValue(getFieldCellValue.apply("purchasePrice", i)))
-                    .retailPrice(getNumericCellValue(getFieldCellValue.apply("retailPrice", i)))
-                    .salePrice(getNumericCellValue(getFieldCellValue.apply("salePrice", i)))
-                    .lowPrice(getNumericCellValue(getFieldCellValue.apply("lowPrice", i)))
-                    .createBy(userId)
-                    .createTime(LocalDateTime.now())
-                    .build();
             productStockKeepUnits.add(productPrice);
-
-            var productStock = ProductStock.builder()
-                    .id(SnowflakeIdUtil.nextId())
-                    .productSkuId(productPrice.getId())
-                    .warehouseId(warehouseId)
-                    .initStockQuantity(getNumericCellValue(getFieldCellValue.apply("initStockQuantity", i)))
-                    .currentStockQuantity(getNumericCellValue(getFieldCellValue.apply("currentStockQuantity", i)))
-                    .createBy(userId)
-                    .createTime(LocalDateTime.now())
-                    .build();
             productStocks.add(productStock);
         }
         workbook.close();
 
+        log.info("产品数量: " + products.size());
+        log.info("产品库存单元数量: " + productStockKeepUnits.size());
+        log.info("产品库存数量: " + productStocks.size());
+
+        // 根据type选择不同的处理逻辑
+        processProductsByType(type, products, productStockKeepUnits, productStocks);
+
+        // 异步处理数据库插入操作
+        CompletableFuture<Boolean> addProductResult = CompletableFuture.supplyAsync(() -> productService.batchAddProduct(products), executor);
+        CompletableFuture<Boolean> addProductPriceResult = CompletableFuture.supplyAsync(() -> productStockKeepUnitService.saveBatch(productStockKeepUnits), executor);
+        CompletableFuture<Boolean> addProductStockResult = CompletableFuture.supplyAsync(() -> productStockService.saveBatch(productStocks), executor);
+
+        return CompletableFuture.allOf(addProductResult, addProductPriceResult, addProductStockResult)
+                .thenApply(v -> addProductResult.join() && addProductPriceResult.join() && addProductStockResult.join());
+    }
+
+    private Map<String, String[]> createFieldMappings() {
+        Map<String, String[]> fieldMappings = new HashMap<>();
+        // Populate the mappings
+        fieldMappings.put("barCode", new String[]{"Bar code", "产品条码"});
+        fieldMappings.put("productName", new String[]{"Name of commodity", "产品名称"});
+        fieldMappings.put("productCategory", new String[]{"Category", "产品分类"});
+        fieldMappings.put("productStandard", new String[]{"Specifications", "产品规格"});
+        fieldMappings.put("productModel", new String[]{"Model", "产品型号"});
+        fieldMappings.put("productColor", new String[]{"Color", "产品颜色"});
+        fieldMappings.put("productWeight", new String[]{"Base weight", "产品重量"});
+        fieldMappings.put("guaranteePeriod", new String[]{"Guarantee period", "产品保质期"});
+        fieldMappings.put("productUnit", new String[]{"Commodity measurement unit", "产品单位"});
+        fieldMappings.put("serialNumber", new String[]{"Serial number", "启用序列号"});
+        fieldMappings.put("batchNumber", new String[]{"Batch number", "启用批号"});
+        fieldMappings.put("warehouseShelves", new String[]{"Position shelf", "仓库货架"});
+        fieldMappings.put("productManufacturer", new String[]{"Manufacturer", "产品制造商"});
+        fieldMappings.put("otherFieldOne", new String[]{"Extended field 1", "其他字段一"});
+        fieldMappings.put("otherFieldTwo", new String[]{"Extended field 2", "其他字段二"});
+        fieldMappings.put("otherFieldThree", new String[]{"Extended field 3", "其他字段三"});
+        fieldMappings.put("remark", new String[]{"Remark", "备注"});
+        fieldMappings.put("multiAttribute", new String[]{"Multiple attributes", "多属性"});
+        fieldMappings.put("retailPrice", new String[]{"Retail price", "零售价格"});
+        fieldMappings.put("purchasePrice", new String[]{"Purchase price", "采购价格"});
+        fieldMappings.put("salePrice", new String[]{"Market price", "销售价格"});
+        fieldMappings.put("lowPrice", new String[]{"Minimum selling price", "最低价格"});
+        fieldMappings.put("initStockQuantity", new String[]{"Initial inventory quantity", "初始库存数量"});
+        fieldMappings.put("currentStockQuantity", new String[]{"Current inventory quantity", "当前库存数量"});
+        return fieldMappings;
+    }
+
+    private Product createProduct(BiFunction<String, Integer, String> getFieldCellValue, int rowIndex, Long productId, Long productCategoryId, Long userId) {
+        return Product.builder()
+                .id(productId)
+                .productName(getFieldCellValue.apply("productName", rowIndex))
+                .productStandard(getFieldCellValue.apply("productStandard", rowIndex))
+                .productModel(getFieldCellValue.apply("productModel", rowIndex))
+                .productColor(getFieldCellValue.apply("productColor", rowIndex))
+                .productCategoryId(productCategoryId)
+                .productWeight(getNumericCellValue(getFieldCellValue.apply("productWeight", rowIndex)))
+                .productExpiryNum(getIntegerCellValue(getFieldCellValue.apply("guaranteePeriod", rowIndex)))
+                .productUnit(getFieldCellValue.apply("productUnit", rowIndex))
+                .enableSerialNumber(getIntegerCellValue(getFieldCellValue.apply("serialNumber", rowIndex)))
+                .enableBatchNumber(getIntegerCellValue(getFieldCellValue.apply("batchNumber", rowIndex)))
+                .warehouseShelves(getFieldCellValue.apply("warehouseShelves", rowIndex))
+                .productManufacturer(getFieldCellValue.apply("productManufacturer", rowIndex))
+                .otherFieldOne(getFieldCellValue.apply("otherFieldOne", rowIndex))
+                .otherFieldTwo(getFieldCellValue.apply("otherFieldTwo", rowIndex))
+                .otherFieldThree(getFieldCellValue.apply("otherFieldThree", rowIndex))
+                .status(0)
+                .remark(getFieldCellValue.apply("remark", rowIndex))
+                .createBy(userId)
+                .createTime(LocalDateTime.now())
+                .build();
+    }
+
+    private ProductStockKeepUnit createProductStockKeepUnit(BiFunction<String, Integer, String> getFieldCellValue, int rowIndex, Long productId, String productCode, Long userId) {
+        return ProductStockKeepUnit.builder()
+                .id(SnowflakeIdUtil.nextId())
+                .productId(productId)
+                .productBarCode(productCode)
+                .multiAttribute(getFieldCellValue.apply("multiAttribute", rowIndex))
+                .purchasePrice(getNumericCellValue(getFieldCellValue.apply("purchasePrice", rowIndex)))
+                .retailPrice(getNumericCellValue(getFieldCellValue.apply("retailPrice", rowIndex)))
+                .salePrice(getNumericCellValue(getFieldCellValue.apply("salePrice", rowIndex)))
+                .lowPrice(getNumericCellValue(getFieldCellValue.apply("lowPrice", rowIndex)))
+                .createBy(userId)
+                .createTime(LocalDateTime.now())
+                .build();
+    }
+
+    private ProductStock createProductStock(BiFunction<String, Integer, String> getFieldCellValue, int rowIndex, Long productSkuId, Long warehouseId, Long userId) {
+        return ProductStock.builder()
+                .id(SnowflakeIdUtil.nextId())
+                .productSkuId(productSkuId)
+                .warehouseId(warehouseId)
+                .initStockQuantity(getNumericCellValue(getFieldCellValue.apply("initStockQuantity", rowIndex)))
+                .currentStockQuantity(getNumericCellValue(getFieldCellValue.apply("currentStockQuantity", rowIndex)))
+                .createBy(userId)
+                .createTime(LocalDateTime.now())
+                .build();
+    }
+
+    private void processProductsByType(int type, List<Product> products, List<ProductStockKeepUnit> productStockKeepUnits, List<ProductStock> productStocks) {
         if (type == 1) {
             Set<String> existingBarcodes = new HashSet<>();
             Iterator<ProductStockKeepUnit> iterator = productStockKeepUnits.iterator();
             while (iterator.hasNext()) {
                 ProductStockKeepUnit productStockKeepUnit = iterator.next();
                 String barcode = productStockKeepUnit.getProductBarCode();
-                // 如果当前 barcode 已经存在于集合中，则移除相关数据
                 if (existingBarcodes.contains(barcode)) {
                     iterator.remove();
-                    // 从 products 中移除对应 productId 的数据
                     products.removeIf(product -> product.getId().equals(productStockKeepUnit.getProductId()));
-                    productStocks.removeIf(productStock ->
-                            productStock.getProductSkuId().equals(productStockKeepUnit.getId()));
+                    productStocks.removeIf(productStock -> productStock.getProductSkuId().equals(productStockKeepUnit.getId()));
                 } else {
                     existingBarcodes.add(barcode);
                 }
             }
-        } else if (type == 0) {
-            // 用于存储每个 barcode 的最后一条数据的索引
-            Map<String, Integer> lastBarcodeIndexes = new HashMap<>();
-
-            // 遍历 productStockKeepUnits 列表以确定每个 barcode 的最后一条数据的索引
-            for (int i = productStockKeepUnits.size() - 1; i >= 0; i--) {
-                ProductStockKeepUnit productStockKeepUnit = productStockKeepUnits.get(i);
-                String barcode = productStockKeepUnit.getProductBarCode();
-                // 如果当前 barcode 已经存在于集合中，则更新索引
-                if (!lastBarcodeIndexes.containsKey(barcode)) {
-                    lastBarcodeIndexes.put(barcode, i);
-                }
-            }
-
-            // 创建一个新的 productStockKeepUnits 列表来存储最后一条数据
-            List<ProductStockKeepUnit> updatedProductStockKeepUnits = new ArrayList<>();
-
-            // 遍历 productStockKeepUnits 列表以只保留每个 barcode 的最后一条数据
-            for (int i = 0; i < productStockKeepUnits.size(); i++) {
-                ProductStockKeepUnit productStockKeepUnit = productStockKeepUnits.get(i);
-                String barcode = productStockKeepUnit.getProductBarCode();
-                int lastIndex = lastBarcodeIndexes.get(barcode);
-                // 只添加最后一条数据
-                if (i == lastIndex) {
-                    updatedProductStockKeepUnits.add(productStockKeepUnit);
-                } else {
-                    // 如果不是最后一条数据，则从 products 和 productStocks 中移除对应的条目
-                    products.removeIf(product -> product.getId().equals(productStockKeepUnit.getProductId()));
-                    productStocks.removeIf(productStock ->
-                            productStock.getProductSkuId().equals(productStockKeepUnit.getId()));
-                }
-            }
-
-            // 更新 productStockKeepUnits 列表
-            productStockKeepUnits = updatedProductStockKeepUnits;
         }
-
-        boolean addProductResult = productService.batchAddProduct(products);
-        boolean addProductPriceResult = productStockKeepUnitService.saveBatch(productStockKeepUnits);
-        boolean addProductStockResult = productStockService.saveBatch(productStocks);
-
-        return addProductResult && addProductPriceResult && addProductStockResult;
     }
 
 
