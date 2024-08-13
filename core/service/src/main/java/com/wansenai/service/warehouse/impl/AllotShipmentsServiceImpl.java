@@ -12,6 +12,7 @@
  */
 package com.wansenai.service.warehouse.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,6 +25,7 @@ import com.wansenai.bo.warehouse.AllotStockDataExportEnBO;
 import com.wansenai.dto.warehouse.AllotReceiptDTO;
 import com.wansenai.dto.warehouse.QueryAllotReceiptDTO;
 import com.wansenai.entities.product.ProductStock;
+import com.wansenai.entities.product.ProductStockKeepUnit;
 import com.wansenai.entities.system.SysFile;
 import com.wansenai.entities.user.SysUser;
 import com.wansenai.entities.warehouse.WarehouseReceiptMain;
@@ -33,6 +35,8 @@ import com.wansenai.mappers.system.SysFileMapper;
 import com.wansenai.mappers.warehouse.WarehouseReceiptMainMapper;
 import com.wansenai.service.common.CommonService;
 import com.wansenai.service.product.ProductService;
+import com.wansenai.service.product.ProductStockKeepUnitService;
+import com.wansenai.service.product.ProductStockService;
 import com.wansenai.service.user.ISysUserService;
 import com.wansenai.service.warehouse.AllotShipmentsService;
 import com.wansenai.service.warehouse.WarehouseReceiptSubService;
@@ -53,10 +57,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -69,14 +70,18 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
     private final ISysUserService userService;
     private final SysFileMapper fileMapper;
     private final ProductStockMapper productStockMapper;
+    private final ProductStockKeepUnitService productStockKeepUnitService;
+    private final ProductStockService productStockService;
 
-    public AllotShipmentsServiceImpl(WarehouseReceiptSubService warehouseReceiptSubService, ProductService productService, CommonService commonService, ISysUserService userService, SysFileMapper fileMapper, ProductStockMapper productStockMapper) {
+    public AllotShipmentsServiceImpl(WarehouseReceiptSubService warehouseReceiptSubService, ProductService productService, CommonService commonService, ISysUserService userService, SysFileMapper fileMapper, ProductStockMapper productStockMapper, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService) {
         this.warehouseReceiptSubService = warehouseReceiptSubService;
         this.productService = productService;
         this.commonService = commonService;
         this.userService = userService;
         this.fileMapper = fileMapper;
         this.productStockMapper = productStockMapper;
+        this.productStockKeepUnitService = productStockKeepUnitService;
+        this.productStockService = productStockService;
     }
 
     private ArrayList<Long> processFiles(List<FileDataBO> files, Long retailId) {
@@ -161,17 +166,36 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         var allotReceiptVOList = new ArrayList<AllotReceiptVO>(wrapperMainMapper.getRecords().size() + 1);
         wrapperMainMapper.getRecords().forEach(item -> {
 
-            var product = productService.getById(item.getProductId());
-            var productInfo = "";
-            if(product != null) {
-                productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
+            var receiptSub = warehouseReceiptSubService.lambdaQuery()
+                    .eq(WarehouseReceiptSub::getWarehouseReceiptMainId, item.getId())
+                    .eq(WarehouseReceiptSub::getDeleteFlag, CommonConstants.NOT_DELETED)
+                    .list();
+
+            StringBuilder productInfo = new StringBuilder();
+            for (WarehouseReceiptSub warehouseReceiptSub : receiptSub) {
+                var product = productService.getById(warehouseReceiptSub.getProductId());
+                if (product != null) {
+                    // 如果product的某个值是null就不拼接该值
+                    if (product.getProductName() != null) {
+                        productInfo.append(product.getProductName()).append("|");
+                    }
+                    if (product.getProductStandard() != null) {
+                        productInfo.append(product.getProductStandard()).append("|");
+                    }
+                    if (product.getProductModel() != null) {
+                        productInfo.append(product.getProductModel()).append("|");
+                    }
+                    if (product.getProductUnit() != null) {
+                        productInfo.append(product.getProductUnit()).append("|");
+                        }
+                }
             }
 
             var operator = userService.getById(item.getCreateBy());
             var allotReceiptVO = AllotReceiptVO.builder()
                     .id(item.getId())
                     .receiptNumber(item.getReceiptNumber())
-                    .productInfo(productInfo)
+                    .productInfo(productInfo.toString())
                     .receiptDate(item.getReceiptDate())
                     .operator(Optional.ofNullable(operator).map(SysUser::getName).orElse(""))
                     .productNumber(item.getTotalProductNumber())
@@ -203,7 +227,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
 
             var product = productService.getById(item.getProductId());
             var productInfo = "";
-            if(product != null) {
+            if (product != null) {
                 productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
             }
 
@@ -241,7 +265,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
 
             var product = productService.getById(item.getProductId());
             var productInfo = "";
-            if(product != null) {
+            if (product != null) {
                 productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
             }
 
@@ -296,6 +320,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                             .otherWarehouseId(warehouseReceiptSub.getOtherWarehouseId())
                             .otherWarehouseName(commonService.getWarehouseName(warehouseReceiptSub.getOtherWarehouseId()))
                             .barCode(warehouseReceiptSub.getProductBarcode())
+                            .salePrice(warehouseReceiptSub.getUnitPrice())
                             .productId(warehouseReceiptSub.getProductId())
                             .productName(product.getProductName())
                             .productUnit(product.getProductUnit())
@@ -326,7 +351,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
         var isUpdate = allotReceiptDTO.getId() != null;
 
         var totalProductNumber = 0;
-        if(!allotReceiptDTO.getTableData().isEmpty()) {
+        if (!allotReceiptDTO.getTableData().isEmpty()) {
             for (AllotStockBO stockBO : allotReceiptDTO.getTableData()) {
                 totalProductNumber += stockBO.getProductNumber();
             }
@@ -343,7 +368,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 // 调入方仓库进行add操作 这一步是还原之前的库存 因为后面需要重新计算对方库存 这里不涉及到调出方的仓库库存
                 var otherWarehouseReceipts = new ArrayList<WarehouseReceiptSub>();
                 for (WarehouseReceiptSub warehouseReceiptSub : beforeReceipt) {
-                    if(warehouseReceiptSub.getOtherWarehouseId() != null) {
+                    if (warehouseReceiptSub.getOtherWarehouseId() != null) {
                         // 调入方的仓库id setting 到 warehouseId barCode并没有变化（同barCode不同仓库）
                         var otherWarehouseStock = WarehouseReceiptSub.builder()
                                 .warehouseId(warehouseReceiptSub.getOtherWarehouseId())
@@ -353,7 +378,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                         otherWarehouseReceipts.add(otherWarehouseStock);
                     }
                 }
-                if(!otherWarehouseReceipts.isEmpty()) {
+                if (!otherWarehouseReceipts.isEmpty()) {
                     updateProductStock(otherWarehouseReceipts, 2);
                 }
             }
@@ -395,7 +420,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
             // 重新计算调入方的仓库累加库存
             var otherSubtractWarehouseReceipts = new ArrayList<WarehouseReceiptSub>();
             for (WarehouseReceiptSub warehouseStock : shipmentStock) {
-                if(warehouseStock.getOtherWarehouseId() != null) {
+                if (warehouseStock.getOtherWarehouseId() != null) {
                     var otherWarehouseStock = WarehouseReceiptSub.builder()
                             .warehouseId(warehouseStock.getOtherWarehouseId())
                             .productBarcode(warehouseStock.getProductBarcode())
@@ -404,7 +429,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                     otherSubtractWarehouseReceipts.add(otherWarehouseStock);
                 }
             }
-            if(!otherSubtractWarehouseReceipts.isEmpty()) {
+            if (!otherSubtractWarehouseReceipts.isEmpty()) {
                 updateProductStock(otherSubtractWarehouseReceipts, 1);
             }
 
@@ -422,26 +447,9 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
 
         } else {
             var receiptMainId = SnowflakeIdUtil.nextId();
-            var shipmentStockList = allotReceiptDTO.getTableData();
-            var shipmentStock = shipmentStockList.stream()
-                    .map(item -> WarehouseReceiptSub.builder()
-                            .id(SnowflakeIdUtil.nextId())
-                            .warehouseReceiptMainId(receiptMainId)
-                            .productId(item.getProductId())
-                            .warehouseId(item.getWarehouseId())
-                            .otherWarehouseId(item.getOtherWarehouseId())
-                            .productBarcode(item.getBarCode())
-                            .productNumber(item.getProductNumber())
-                            .remark(item.getRemark())
-                            .createBy(userId)
-                            .createTime(LocalDateTime.now())
-                            .build())
-                    .collect(Collectors.toList());
-            var saveSubResult = warehouseReceiptSubService.saveBatch(shipmentStock);
-
+            // 单据主表
             var warehouseReceiptMain = WarehouseReceiptMain.builder()
                     .id(receiptMainId)
-                    .productId(allotReceiptDTO.getTableData().get(0).getProductId())
                     .receiptNumber(allotReceiptDTO.getReceiptNumber())
                     .type("调拨出库")
                     .initReceiptNumber(allotReceiptDTO.getReceiptNumber())
@@ -454,11 +462,96 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                     .createTime(LocalDateTime.now())
                     .build();
             var saveMainResult = save(warehouseReceiptMain);
-            updateProductStock(shipmentStock, 2);
+
+            // 单据子表
+            var shipmentStockList = allotReceiptDTO.getTableData();
+            var shipmentSubList = new ArrayList<WarehouseReceiptSub>();
+            var otherWarehouseStockList = new ArrayList<ProductStock>();
+            var otherWarehouseSkuList = new ArrayList<ProductStockKeepUnit>();
+            for (AllotStockBO allotStockBO : shipmentStockList) {
+                var shipmentStock = WarehouseReceiptSub.builder()
+                        .id(SnowflakeIdUtil.nextId())
+                        .warehouseReceiptMainId(receiptMainId)
+                        .productId(allotStockBO.getProductId())
+                        .warehouseId(allotStockBO.getWarehouseId())
+                        .unitPrice(allotStockBO.getSalePrice())
+                        .otherWarehouseId(allotStockBO.getOtherWarehouseId())
+                        .productBarcode(allotStockBO.getBarCode())
+                        .productNumber(allotStockBO.getProductNumber())
+                        .remark(allotStockBO.getRemark())
+                        .createBy(userId)
+                        .createTime(LocalDateTime.now())
+                        .build();
+
+                shipmentSubList.add(shipmentStock);
+
+                // 查询调入方仓库是否存在该Barcode商品，如果不存在需要新增数据到Stock和SKU表以及Report表
+                // 如果存在需要修改SkU表的价格和STOCK表的库存以及Report表的库存
+
+                var product = productService.getById(shipmentStock.getProductId());
+                if (allotStockBO.getBarCode().equals(shipmentStock.getProductBarcode())) {
+                    // 如果出现重复的productSku数据就不添加到List
+                    var productStock = productStockMapper.getProductSkuByBarCode(shipmentStock.getProductBarcode(), shipmentStock.getOtherWarehouseId());
+                    if (productStock != null) {
+                        var stockNumber = productStock.getStock();
+                        var productNumber = shipmentStock.getProductNumber();
+                        stockNumber += productNumber;
+                        var stock = ProductStock.builder()
+                                .id(productStock.getId())
+                                .currentStockQuantity(BigDecimal.valueOf(stockNumber))
+                                .build();
+                        productStockMapper.updateById(stock);
+                        // 修改价格
+                        var productSku = ProductStockKeepUnit.builder()
+                                .id(productStock.getId())
+                                .retailPrice(allotStockBO.getSalePrice())
+                                .salePrice(allotStockBO.getSalePrice())
+                                .lowPrice(allotStockBO.getSalePrice())
+                                .updateBy(userId)
+                                .updateTime(LocalDateTime.now())
+                                .build();
+                        productStockKeepUnitService.updateById(productSku);
+                    } else {
+                        var productSku = ProductStockKeepUnit.builder()
+                                .id(SnowflakeIdUtil.nextId())
+                                .productId(shipmentStock.getProductId())
+                                .productBarCode(shipmentStock.getProductBarcode())
+                                .productUnit(product.getProductUnit())
+                                .multiAttribute(product.getProductManufacturer())
+                                .purchasePrice(BigDecimal.ZERO)
+                                .retailPrice(allotStockBO.getSalePrice())
+                                .salePrice(allotStockBO.getSalePrice())
+                                .lowPrice(allotStockBO.getSalePrice())
+                                .deleteFlag(CommonConstants.NOT_DELETED)
+                                .createTime(LocalDateTime.now())
+                                .createBy(userId)
+                                .build();
+                        otherWarehouseSkuList.add(productSku);
+
+                        var productStock2 = ProductStock.builder()
+                                .id(SnowflakeIdUtil.nextId())
+                                .tenantId(userService.getCurrentTenantId())
+                                .productSkuId(productSku.getId())
+                                .warehouseId(shipmentStock.getOtherWarehouseId())
+                                .initStockQuantity(BigDecimal.ZERO)
+                                .lowStockQuantity(BigDecimal.ZERO)
+                                .highStockQuantity(BigDecimal.ZERO)
+                                .currentStockQuantity(BigDecimal.valueOf(shipmentStock.getProductNumber()))
+                                .createTime(LocalDateTime.now())
+                                .createBy(userId)
+                                .updateBy(userId)
+                                .deleteFlag(CommonConstants.NOT_DELETED)
+                                .build();
+                        otherWarehouseStockList.add(productStock2);
+                    }
+                }
+
+            }
+
             // 重新计算调入方的仓库累加库存
             var otherSubtractWarehouseReceipts = new ArrayList<WarehouseReceiptSub>();
-            for (WarehouseReceiptSub warehouseStock : shipmentStock) {
-                if(warehouseStock.getOtherWarehouseId() != null) {
+            for (WarehouseReceiptSub warehouseStock : shipmentSubList) {
+                if (warehouseStock.getOtherWarehouseId() != null) {
                     var otherWarehouseStock = WarehouseReceiptSub.builder()
                             .warehouseId(warehouseStock.getOtherWarehouseId())
                             .productBarcode(warehouseStock.getProductBarcode())
@@ -467,9 +560,20 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                     otherSubtractWarehouseReceipts.add(otherWarehouseStock);
                 }
             }
-            if(!otherSubtractWarehouseReceipts.isEmpty()) {
+
+            if (!otherSubtractWarehouseReceipts.isEmpty()) {
                 updateProductStock(otherSubtractWarehouseReceipts, 1);
             }
+
+            var saveSubResult = warehouseReceiptSubService.saveBatch(shipmentSubList);
+            if (!otherWarehouseSkuList.isEmpty()) {
+                productStockKeepUnitService.saveBatch(otherWarehouseSkuList);
+            }
+            if (!otherWarehouseStockList.isEmpty()) {
+                productStockService.saveBatch(otherWarehouseStockList);
+            }
+            updateProductStock(shipmentSubList, 2);
+
             if (saveSubResult && saveMainResult) {
                 if ("zh_CN".equals(systemLanguage)) {
                     return Response.responseMsg(AllotShipmentCodeEnum.ADD_ALLOT_SHIPMENT_STOCK_RECEIPT_SUCCESS);
@@ -500,7 +604,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 .update();
 
         var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
-        if(!deleteResult) {
+        if (!deleteResult) {
             if ("zh_CN".equals(systemLanguage)) {
                 return Response.responseMsg(AllotShipmentCodeEnum.DELETE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
             }
@@ -523,7 +627,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                 .in(WarehouseReceiptMain::getId, ids)
                 .update();
         var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
-        if(!updateResult) {
+        if (!updateResult) {
             if ("zh_CN".equals(systemLanguage)) {
                 return Response.responseMsg(AllotShipmentCodeEnum.UPDATE_ALLOT_SHIPMENT_STOCK_RECEIPT_ERROR);
             }
