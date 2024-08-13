@@ -1026,11 +1026,19 @@ export default defineComponent({
     });
 
     function onSearch() {
-      openLinkReceiptModal(true, {
-        type: '采购',
-        subType: '采购订单',
-        title: '选择采购订单'
-      });
+      if(localeStore === 'zh_CN') {
+        openLinkReceiptModal(true, {
+          type: '采购',
+          subType: '采购订单',
+          title: '选择采购订单'
+        });
+      } else if (localeStore === 'en') {
+        openLinkReceiptModal(true, {
+          type: '采购',
+          subType: '采购入库',
+          title: 'Select Purchase Order'
+        });
+      }
     }
 
 

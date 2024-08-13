@@ -790,11 +790,19 @@ export default defineComponent({
     }
 
     function onSearch() {
-      openLinkReceiptModal(true, {
-        type: '零售',
-        subType: '零售出库',
-        title: '选择零售出库订单'
-      });
+      if(localeStore === 'zh_CN') {
+        openLinkReceiptModal(true, {
+          type: '零售',
+          subType: '零售出库',
+          title: '选择零售出库订单'
+        });
+      } else if (localeStore === 'en') {
+        openLinkReceiptModal(true, {
+          type: '零售',
+          subType: '零售出库',
+          title: 'Select Retail Outbound Document'
+        });
+      }
     }
 
     const formatWarehouseId = (value: string) => {

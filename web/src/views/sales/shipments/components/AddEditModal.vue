@@ -1089,11 +1089,19 @@ export default defineComponent({
     }
 
     function onSearch() {
-      openLinkReceiptModal(true, {
-        type: '销售',
-        subType: '销售订单',
-        title: '选择销售订单'
-      });
+      if(localeStore === 'zh_CN') {
+        openLinkReceiptModal(true, {
+          type: '销售',
+          subType: '销售订单',
+          title: '选择销售订单'
+        });
+      } else if (localeStore === 'en') {
+        openLinkReceiptModal(true, {
+          type: '销售',
+          subType: '销售订单',
+          title: 'Select Sales Order'
+        });
+      }
     }
 
     function handleReceiptSuccess(data) {

@@ -19,6 +19,7 @@ export interface RowVO {
     productStandard: string,
     stock: number,
     productNumber: number,
+    salePrice: number,
     unitPrice: number,
     amount: number,
     remark: string,
@@ -89,7 +90,8 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             title:  t('warehouse.allotShipments.form.table.name'),
             width:140,
         },
-        { field: 'productStandard', title: t('warehouse.allotShipments.form.table.standard'), width: 110,  },
+        // { field: 'productStandard', title: t('warehouse.allotShipments.form.table.standard'), width: 110,  },
+
         { field: 'stock', title: t('warehouse.allotShipments.form.table.stock'),  width: 70},
         {   field: 'otherWarehouseId',
             width:150,
@@ -97,11 +99,14 @@ const gridOptions = reactive<VxeGridProps<RowVO>>({
             slots: { edit: 'otherWarehouse_edit',default: 'otherWarehouse_default' },
             editRender: {}
         },
-        { field: 'productUnit', title: t('warehouse.allotShipments.form.table.unit'),  width: 70},
-        { field: 'productNumber', title: t('warehouse.allotShipments.form.table.quantity'), width:80,
+        { field: 'salePrice', title: t('warehouse.allotShipments.form.table.salePrice'), width: 150,
+            slots: { edit: 'sale_price_edit',},
+            editRender: { name: '$input', props: { type: 'number'} } },
+        { field: 'productNumber', title: t('warehouse.allotShipments.form.table.quantity'), width:100,
             slots: { edit: 'product_number_edit' },
             editRender: { name: '$input', props: { type: 'number', min: 1, max: 9999 } }, },
-        { field: 'remark', title: t('warehouse.allotShipments.form.table.remark'), editRender: { name: 'input', attrs: { placeholder: '请输入备注' } }, width: 150},
+        { field: 'productUnit', title: t('warehouse.allotShipments.form.table.unit'),  width: 70},
+        { field: 'remark', title: t('warehouse.allotShipments.form.table.remark'), editRender: { name: 'input', attrs: { placeholder: t('warehouse.allotShipments.form.inputRemark') } }, width: 150},
     ],
     footerMethod ({ columns, data }) {
         return [
