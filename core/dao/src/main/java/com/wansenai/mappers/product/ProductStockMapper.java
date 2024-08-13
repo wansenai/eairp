@@ -39,4 +39,9 @@ public interface ProductStockMapper extends BaseMapper<ProductStock> {
     Page<ProductStockSkuVO> getProductStock(IPage<QueryProductStockDTO> pageObject, QueryProductStockDTO queryProductStockDTO);
 
     List<ProductStockSkuVO> getProductStockList(QueryProductStockDTO queryProductStockDTO);
+
+    // 检查商品是否存在
+    Boolean productStockExist(Long productSkuId, Long warehouseId);
+
+    Boolean saveBatch(List<ProductStock> productStockList);
 }
