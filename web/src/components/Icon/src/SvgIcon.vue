@@ -1,8 +1,8 @@
 <template>
   <svg
-    :class="[prefixCls, $attrs.class, spin && 'svg-icon-spin']"
-    :style="getStyle"
-    aria-hidden="true"
+      :class="[prefixCls, $attrs.class, spin && 'svg-icon-spin']"
+      :style="getStyle"
+      focusable="false"
   >
     <use :xlink:href="symbolId" />
   </svg>
@@ -10,7 +10,7 @@
 <script lang="ts">
   import type { CSSProperties } from 'vue';
   import { defineComponent, computed } from 'vue';
-  import { useDesign } from '/@/hooks/web/useDesign';
+  import { useDesign } from '@/hooks/web/useDesign';
 
   export default defineComponent({
     name: 'SvgIcon',
