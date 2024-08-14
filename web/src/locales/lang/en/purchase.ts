@@ -54,6 +54,7 @@ export default {
             noticeFour: 'The barcode cannot find product info',
             noticeFive: 'The product barcode cannot be empty',
             noticeSix: 'Enter the barcode product information automatically!',
+            noticeEight: 'The warehouse cannot be empty',
             noticeSeven: 'Support product name, product number, product specifications, and product model',
             cancel: 'Cancel',
             save: 'Save',

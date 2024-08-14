@@ -4,8 +4,12 @@
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'status'">
           <Tag :color="record.status === 1 ? 'green' : 'red'">
-            <v-if v-if="localeStore === 'zh_CN'">{{ record.status === 1 ? '已审核' : '未审核' }}</v-if>
-            <v-else-if v-if="localeStore === 'en'">{{ record.status === 1 ? 'Audited' : 'Unaudited' }}</v-else-if>
+            <template v-if="localeStore === 'zh_CN'">
+              {{ record.status === 1 ? '已审核' : '未审核' }}
+            </template>
+            <template v-if="localeStore === 'en'">
+              {{ record.status === 1 ? 'Audited' : 'Unaudited' }}
+            </template>
           </Tag>
         </template>
         <template v-else-if="column.key === 'receiptNumber'">
