@@ -31,4 +31,6 @@ public interface ProductStockKeepUnitService extends IService<ProductStockKeepUn
     Response<String> getProductCode();
 
     Boolean checkProductCode(List<String> barCodes);
+
+    ProductStockKeepUnit getByProductBarCode(String productBarCode);
 }

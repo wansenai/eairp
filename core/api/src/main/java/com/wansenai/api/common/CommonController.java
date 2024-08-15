@@ -15,17 +15,14 @@ package com.wansenai.api.common;
 import com.wansenai.api.RateLimitException;
 import com.wansenai.api.config.RateLimiter;
 import com.wansenai.service.common.CommonService;
-import com.wansenai.utils.ExcelUtil;
 import com.wansenai.utils.enums.LimitType;
 import com.wansenai.utils.response.Response;
 import com.wansenai.utils.constants.ApiVersionConstants;
 import com.wansenai.utils.enums.BaseCodeEnum;
 import com.wansenai.vo.CaptchaVO;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.File;
 import java.util.List;
 
 
@@ -74,30 +71,10 @@ public class CommonController {
         return commonService.uploadExclsData(file);
     }
 
+
     @PostMapping("upload/productCoverUpload")
     public Response<String> productCoverUpload(@RequestParam("file") MultipartFile file, @RequestParam("type") Integer type) {
         return commonService.productCoverUpload(file, type);
-    }
-
-    /**
-     * @deprecatedjavadoc
-     *
-     * At present, exporting requires filtering based on query conditions, and the exportExcel method exports all data.
-     * It is more of a universal export method, and the implementation class of the method needs to match the array
-     * index mapping of exported columns, which is very complex. Therefore, it will be removed in the next version
-     *
-     * @param type export type name
-     * @param response HttpServletResponse object file
-     */
-    @GetMapping("/export/excel")
-    @Deprecated(since = "2.1.0", forRemoval = true)
-    public void exportExcel(@RequestParam("type") String type, HttpServletResponse response) {
-        try {
-            File file = commonService.exportExcel(type);
-            ExcelUtil.downloadExcel(file, file.getName(), response);
-        }catch (Exception e) {
-            log.error("导出excel异常", e);
-        }
     }
 
     @PostMapping("uploadOss")

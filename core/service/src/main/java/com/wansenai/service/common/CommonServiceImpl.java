@@ -30,7 +30,6 @@ import com.wansenai.service.BaseService;
 import com.wansenai.service.basic.IOperatorService;
 import com.wansenai.service.financial.IFinancialAccountService;
 import com.wansenai.service.product.ProductStockKeepUnitService;
-import com.wansenai.utils.ExcelUtil;
 import com.wansenai.utils.FileUtil;
 import com.wansenai.utils.SnowflakeIdUtil;
 import com.wansenai.utils.constants.SecurityConstants;
@@ -61,10 +60,6 @@ import com.wansenai.service.product.ProductStockService;
 import com.wansenai.service.system.ISysPlatformConfigService;
 import com.wansenai.service.warehouse.WarehouseService;
 import com.wansenai.vo.CaptchaVO;
-import com.wansenai.vo.basic.CustomerVO;
-import com.wansenai.vo.basic.MemberVO;
-import com.wansenai.vo.basic.SupplierVO;
-import com.wansenai.vo.product.ExportProductVO;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -74,10 +69,9 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
@@ -86,15 +80,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -136,7 +127,9 @@ public class CommonServiceImpl implements CommonService{
 
     private final String NullString = "";
 
-    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService, IFinancialAccountService accountService, ProductService productService, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, WarehouseService warehouseService, BaseService baseService, IOperatorService operatorService, SysFileMapper fileMapper) {
+    private final TransactionTemplate transactionTemplate;
+
+    public CommonServiceImpl(RedisUtil redisUtil, Producer producer, SupplierService supplierService, CustomerService customerService, MemberService memberService, ISysPlatformConfigService platformConfigService, IFinancialAccountService accountService, ProductService productService, ProductStockKeepUnitService productStockKeepUnitService, ProductStockService productStockService, ProductCategoryService productCategoryService, WarehouseService warehouseService, BaseService baseService, IOperatorService operatorService, SysFileMapper fileMapper, PlatformTransactionManager transactionManager) {
         this.redisUtil = redisUtil;
         this.producer = producer;
         this.supplierService = supplierService;
@@ -152,6 +145,7 @@ public class CommonServiceImpl implements CommonService{
         this.baseService = baseService;
         this.operatorService = operatorService;
         this.fileMapper = fileMapper;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
     private SmsInfoBO getSmsInfo() {
@@ -316,10 +310,10 @@ public class CommonServiceImpl implements CommonService{
         if(!file.isEmpty()) {
             try {
                 String filename = file.getOriginalFilename();
-                 if(filename == null || filename.isEmpty()) {
+                if(filename == null || filename.isEmpty()) {
                     return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_NO_FILENAME_MATCH);
 
-                 } else if (filename.contains("供应商") || filename.contains("supplier")) {
+                } else if (filename.contains("供应商") || filename.contains("supplier")) {
                     var result = readSuppliersFromExcel(file);
                     if(!result){
                         if ("zh_CN".equals(systemLanguage)) {
@@ -333,29 +327,30 @@ public class CommonServiceImpl implements CommonService{
                         return Response.responseMsg(SupplierCodeEnum.ADD_SUPPLIER_SUCCESS_EN);
                     }
                 } else if (filename.contains("客户") || filename.contains("customer") || filename.contains("Customer")) {
-                     var result = readCustomerFromExcel(file);
-                     if(!result){
-                         return Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_ERROR);
-                     }
-                     return Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_SUCCESS);
+                    var result = readCustomerFromExcel(file);
+                    if(!result){
+                        return Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_ERROR);
+                    }
+                    return Response.responseMsg(CustomerCodeEnum.ADD_CUSTOMER_SUCCESS);
                 } else if (filename.contains("会员") || filename.contains("member") || filename.contains("Member")) {
-                     var result = readMemberFromExcel(file);
-                     if(!result){
-                         return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_ERROR);
-                     }
-                     return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_SUCCESS);
-                 } else if (filename.contains("商品") || filename.contains("product") || filename.contains("Product")
-                 || filename.contains("Commodity")) {
-                     var message = checkProductBarCodeExist(file);
-                     if (StringUtils.hasLength(message)) {
-                         return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR.getCode(), message);
-                     }
-                     var result = readProductFromExcel(file, 0).join();
-                     if(!result){
-                         return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
-                     }
-                     return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS);
-                 } else {
+                    var result = readMemberFromExcel(file);
+                    if(!result){
+                        return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_ERROR);
+                    }
+                    return Response.responseMsg(MemberCodeEnum.ADD_MEMBER_SUCCESS);
+                } else if (filename.contains("商品") || filename.contains("product") || filename.contains("Product")
+                        || filename.contains("Commodity")) {
+                    var message = checkProductBarCodeExist(file);
+                    if (StringUtils.hasLength(message)) {
+                        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR.getCode(), message);
+                    } else {
+                        var result = readProductFromExcel(file, 0);
+                        if(!result){
+                            return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_ERROR);
+                        }
+                        return Response.responseMsg(ProdcutCodeEnum.PRODUCT_ADD_SUCCESS);
+                    }
+                } else {
                     log.warn("上传Excel文件失败: 文件名不匹配");
                     return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_NO_FILENAME_MATCH);
                 }
@@ -372,20 +367,27 @@ public class CommonServiceImpl implements CommonService{
         try {
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
-            // 在CompletableFuture异步线程中设置RequestAttributes并处理异常
             CompletableFuture<Boolean> resultFuture = CompletableFuture.supplyAsync(() -> {
                 RequestContextHolder.setRequestAttributes(requestAttributes, true);
                 try {
-                    var result = readProductFromExcel(file, type).join();
-                    log.info("Excel文件处理结果: " + result);
-                    return result;
+                    // 这里启动新的事务
+                    return transactionTemplate.execute(status -> {
+                        try {
+                            var result = readProductFromExcel(file, type);
+                            log.info("Excel文件处理结果: " + result);
+                            return result;
+                        } catch (Exception e) {
+                            log.error("处理Excel文件时出错: " + e.getMessage(), e);
+                            status.setRollbackOnly();  // 回滚事务
+                            return false;
+                        }
+                    });
                 } catch (Exception e) {
-                    log.error("处理Excel文件时出错: " + e.getMessage(), e);
+                    log.error("异步操作时出错: " + e.getMessage(), e);
                     return false;
                 }
             });
 
-            // 获取结果
             Boolean result = resultFuture.join();
             log.info("异步操作结果: " + result);
 
@@ -399,7 +401,6 @@ public class CommonServiceImpl implements CommonService{
             return Response.responseMsg(BaseCodeEnum.FILE_UPLOAD_ERROR);
         }
     }
-
 
     private boolean readSuppliersFromExcel(MultipartFile file) throws IOException {
         List<Supplier> suppliers = new ArrayList<>();
@@ -515,15 +516,6 @@ public class CommonServiceImpl implements CommonService{
             }
         }
         var message = NullString;
-        // 获取codeListMap的productBarcode 检查DB里是否存在重复的barcode
-        var productCodes = codeListMap.stream()
-                .map(item -> item.get("productBarcode"))
-                .collect(Collectors.toList());
-        if (productStockKeepUnitService.checkProductCode(productCodes)) {
-            message += "existDataBase";
-            return message;
-        }
-
         JSONArray jsonArray = new JSONArray();
         for (var entry : codeMap.entrySet()) {
             if (entry.getValue() > 1) {
@@ -543,123 +535,144 @@ public class CommonServiceImpl implements CommonService{
         return message;
     }
 
-    private CompletableFuture<Boolean> readProductFromExcel(MultipartFile file, int type) throws IOException, InvalidFormatException {
-        // 使用多线程执行批量数据库插入操作
-        Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    public Boolean readProductFromExcel(MultipartFile file, int type) {
+        try {
+            // 处理文件和数据库操作
+            List<Product> products = new ArrayList<>();
+            List<ProductStockKeepUnit> productStockKeepUnits = new ArrayList<>();
+            List<ProductStock> productStocks = new ArrayList<>();
 
-        List<Product> products = Collections.synchronizedList(new ArrayList<>());
-        List<ProductStockKeepUnit> productStockKeepUnits = Collections.synchronizedList(new ArrayList<>());
-        List<ProductStock> productStocks = Collections.synchronizedList(new ArrayList<>());
+            InputStream inputStream = file.getInputStream();
+            Workbook workbook = WorkbookFactory.create(inputStream);
+            Sheet sheet = workbook.getSheetAt(0);
+            DataFormatter dataFormatter = new DataFormatter();
 
-        InputStream inputStream = file.getInputStream();
-        Workbook workbook = WorkbookFactory.create(inputStream);
-        Sheet sheet = workbook.getSheetAt(0);
-        DataFormatter dataFormatter = new DataFormatter(); // 移到循环外部
+            var warehouseId = warehouseService.getDefaultWarehouse().getData().getId();
+            var userId = baseService.getCurrentUserId();
 
-        var warehouseId = warehouseService.getDefaultWarehouse().getData().getId();
-        var userId = baseService.getCurrentUserId();
-
-        // 读取表头以创建映射
-        Row headerRow = sheet.getRow(1);
-        Map<String, Integer> headerMap = new HashMap<>();
-        for (Cell cell : headerRow) {
-            String cellValue = dataFormatter.formatCellValue(cell);
-            if (cellValue != null) {
-                headerMap.put(cellValue, cell.getColumnIndex());
-            }
-        }
-
-        BiFunction<String, Integer, String> getCellValueByName = (columnName, rowIndex) -> {
-            Integer columnIndex = headerMap.get(columnName);
-            if (columnIndex != null) {
-                return getCellValue(sheet.getRow(rowIndex).getCell(columnIndex), dataFormatter);
-            }
-            return null;
-        };
-
-        Map<String, String[]> fieldMappings = createFieldMappings();
-
-        BiFunction<String, Integer, String> getFieldCellValue = (fieldName, rowIndex) -> {
-            String[] possibleNames = fieldMappings.get(fieldName);
-            if (possibleNames != null) {
-                for (String name : possibleNames) {
-                    String value = getCellValueByName.apply(name, rowIndex);
-                    if (value != null) {
-                        return value;
-                    }
+            // 读取表头以创建映射
+            Row headerRow = sheet.getRow(1);
+            Map<String, Integer> headerMap = new HashMap<>();
+            for (Cell cell : headerRow) {
+                String cellValue = dataFormatter.formatCellValue(cell);
+                if (cellValue != null) {
+                    headerMap.put(cellValue, cell.getColumnIndex());
                 }
             }
-            return null;
-        };
 
-        for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
-            Row row = sheet.getRow(i);
-            if (row == null || isRowEmpty(row)) {
-                continue;
+            BiFunction<String, Integer, String> getCellValueByName = (columnName, rowIndex) -> {
+                Integer columnIndex = headerMap.get(columnName);
+                if (columnIndex != null) {
+                    return getCellValue(sheet.getRow(rowIndex).getCell(columnIndex), dataFormatter);
+                }
+                return null;
+            };
+
+            Map<String, String[]> fieldMappings = createFieldMappings();
+
+            BiFunction<String, Integer, String> getFieldCellValue = (fieldName, rowIndex) -> {
+                String[] possibleNames = fieldMappings.get(fieldName);
+                if (possibleNames != null) {
+                    for (String name : possibleNames) {
+                        String value = getCellValueByName.apply(name, rowIndex);
+                        if (value != null) {
+                            return value;
+                        }
+                    }
+                }
+                return null;
+            };
+            // 保存barCode 用于校验数据库进行覆盖
+            var barCodeList = new ArrayList<String>();
+
+            for (int i = 2; i <= sheet.getLastRowNum(); ++i) {
+                Row row = sheet.getRow(i);
+                if (row == null || isRowEmpty(row)) {
+                    continue;
+                }
+
+                var productCode = getFieldCellValue.apply("barCode", i);
+                barCodeList.add(productCode);
+                var productId = SnowflakeIdUtil.nextId();
+                Long productCategoryId = null;
+
+                if (getFieldCellValue.apply("productCategory", i) != null) {
+                    var productCategory = productCategoryService.getProductCategoryByName(getFieldCellValue.apply("productCategory", i));
+                    productCategoryId = productCategory.getId();
+                }
+
+                Product product = createProduct(getFieldCellValue, i, productId, productCategoryId, userId);
+                ProductStockKeepUnit productPrice = createProductStockKeepUnit(getFieldCellValue, i, productId, productCode, userId);
+                ProductStock productStock = createProductStock(getFieldCellValue, i, productPrice.getId(), warehouseId, userId);
+
+                products.add(product);
+                productStockKeepUnits.add(productPrice);
+                productStocks.add(productStock);
             }
+            workbook.close();
 
-            var productCode = getFieldCellValue.apply("barCode", i);
-            var productId = SnowflakeIdUtil.nextId();
-            Long productCategoryId = null;
+            log.info("产品数量: " + products.size());
+            log.info("产品库存单元数量: " + productStockKeepUnits.size());
+            log.info("产品库存数量: " + productStocks.size());
 
-            if (getFieldCellValue.apply("productCategory", i) != null) {
-                var productCategory = productCategoryService.getProductCategoryByName(getFieldCellValue.apply("productCategory", i));
-                productCategoryId = productCategory.getId();
-            }
+            // 根据type选择不同的处理逻辑 目前1就是覆盖excel的数据
+            processProductsByType(type, products, productStockKeepUnits, productStocks);
 
-            Product product = createProduct(getFieldCellValue, i, productId, productCategoryId, userId);
-            ProductStockKeepUnit productPrice = createProductStockKeepUnit(getFieldCellValue, i, productId, productCode, userId);
-            ProductStock productStock = createProductStock(getFieldCellValue, i, productPrice.getId(), warehouseId, userId);
+            removeCoverProductInDataBase(barCodeList);
 
-            products.add(product);
-            productStockKeepUnits.add(productPrice);
-            productStocks.add(productStock);
+            boolean addProductResult = productService.batchAddProduct(products);
+            boolean addProductPriceResult = productStockKeepUnitService.saveBatch(productStockKeepUnits);
+            boolean addProductStockResult = productStockService.saveBatch(productStocks);
+
+            return addProductResult && addProductPriceResult && addProductStockResult;
+        } catch (IOException e) {
+            log.error("处理 Excel 文件时出错", e);
+            return false;
         }
-        workbook.close();
-
-        log.info("产品数量: " + products.size());
-        log.info("产品库存单元数量: " + productStockKeepUnits.size());
-        log.info("产品库存数量: " + productStocks.size());
-
-        // 根据type选择不同的处理逻辑
-        processProductsByType(type, products, productStockKeepUnits, productStocks);
-
-        // 异步处理数据库插入操作
-        CompletableFuture<Boolean> addProductResult = CompletableFuture.supplyAsync(() -> productService.batchAddProduct(products), executor);
-        CompletableFuture<Boolean> addProductPriceResult = CompletableFuture.supplyAsync(() -> productStockKeepUnitService.saveBatch(productStockKeepUnits), executor);
-        CompletableFuture<Boolean> addProductStockResult = CompletableFuture.supplyAsync(() -> productStockService.saveBatch(productStocks), executor);
-
-        return CompletableFuture.allOf(addProductResult, addProductPriceResult, addProductStockResult)
-                .thenApply(v -> addProductResult.join() && addProductPriceResult.join() && addProductStockResult.join());
     }
+
+    private void removeCoverProductInDataBase(List<String> barCodeList) {
+        if (!barCodeList.isEmpty()) {
+            barCodeList.forEach(barCode -> {
+                var productSku = productStockKeepUnitService.getByProductBarCode(barCode);
+                if (productSku != null) {
+                    productStockKeepUnitService.removeById(productSku.getId());
+                    var productId = productSku.getProductId();
+                    productService.removeById(productId);
+                    productStockService.removeBySkuId(productSku.getId());
+                }
+            });
+        }
+    }
+
 
     private Map<String, String[]> createFieldMappings() {
         Map<String, String[]> fieldMappings = new HashMap<>();
         // Populate the mappings
-        fieldMappings.put("barCode", new String[]{"Bar code", "产品条码"});
-        fieldMappings.put("productName", new String[]{"Name of commodity", "产品名称"});
+        fieldMappings.put("barCode", new String[]{"Bar code", "条码"});
+        fieldMappings.put("productName", new String[]{"Name of commodity", "商品名称"});
         fieldMappings.put("productCategory", new String[]{"Category", "产品分类"});
-        fieldMappings.put("productStandard", new String[]{"Specifications", "产品规格"});
-        fieldMappings.put("productModel", new String[]{"Model", "产品型号"});
-        fieldMappings.put("productColor", new String[]{"Color", "产品颜色"});
-        fieldMappings.put("productWeight", new String[]{"Base weight", "产品重量"});
-        fieldMappings.put("guaranteePeriod", new String[]{"Guarantee period", "产品保质期"});
-        fieldMappings.put("productUnit", new String[]{"Commodity measurement unit", "产品单位"});
-        fieldMappings.put("serialNumber", new String[]{"Serial number", "启用序列号"});
-        fieldMappings.put("batchNumber", new String[]{"Batch number", "启用批号"});
+        fieldMappings.put("productStandard", new String[]{"Specifications", "规格"});
+        fieldMappings.put("productModel", new String[]{"Model", "型号"});
+        fieldMappings.put("productColor", new String[]{"Color", "颜色"});
+        fieldMappings.put("productWeight", new String[]{"Base weight", "商品重量"});
+        fieldMappings.put("guaranteePeriod", new String[]{"Guarantee period", "保质期"});
+        fieldMappings.put("productUnit", new String[]{"Commodity measurement unit", "商品单位"});
+        fieldMappings.put("serialNumber", new String[]{"Serial number", "序列号"});
+        fieldMappings.put("batchNumber", new String[]{"Batch number", "批次号"});
         fieldMappings.put("warehouseShelves", new String[]{"Position shelf", "仓库货架"});
-        fieldMappings.put("productManufacturer", new String[]{"Manufacturer", "产品制造商"});
-        fieldMappings.put("otherFieldOne", new String[]{"Extended field 1", "其他字段一"});
-        fieldMappings.put("otherFieldTwo", new String[]{"Extended field 2", "其他字段二"});
-        fieldMappings.put("otherFieldThree", new String[]{"Extended field 3", "其他字段三"});
+        fieldMappings.put("productManufacturer", new String[]{"Manufacturer", "制造商"});
+        fieldMappings.put("otherFieldOne", new String[]{"Extended field 1", "自定义1"});
+        fieldMappings.put("otherFieldTwo", new String[]{"Extended field 2", "自定义2"});
+        fieldMappings.put("otherFieldThree", new String[]{"Extended field 3", "自定义3"});
         fieldMappings.put("remark", new String[]{"Remark", "备注"});
         fieldMappings.put("multiAttribute", new String[]{"Multiple attributes", "多属性"});
         fieldMappings.put("retailPrice", new String[]{"Retail price", "零售价格"});
         fieldMappings.put("purchasePrice", new String[]{"Purchase price", "采购价格"});
         fieldMappings.put("salePrice", new String[]{"Market price", "销售价格"});
-        fieldMappings.put("lowPrice", new String[]{"Minimum selling price", "最低价格"});
+        fieldMappings.put("lowPrice", new String[]{"Minimum selling price", "最低销售价格"});
         fieldMappings.put("initStockQuantity", new String[]{"Initial inventory quantity", "初始库存数量"});
-        fieldMappings.put("currentStockQuantity", new String[]{"Current inventory quantity", "当前库存数量"});
+        fieldMappings.put("currentStockQuantity", new String[]{"Current inventory quantity", "库存"});
         return fieldMappings;
     }
 
@@ -734,208 +747,13 @@ public class CommonServiceImpl implements CommonService{
     }
 
 
-    public File exportExcel(String type) {
-        if (!StringUtils.hasLength(type)) {
-            return null;
-        }
-        File file = null;
-
-        if (type.contains("供应商")) {
-            List<Supplier> suppliersList = supplierService.list();
-            List<SupplierVO> supplierData = new ArrayList<>();
-
-            for (Supplier supplier : suppliersList) {
-                SupplierVO supplierVO = new SupplierVO();
-                BeanUtils.copyProperties(supplier, supplierVO);
-                supplierData.add(supplierVO);
-            }
-
-            String[] columnNames = {"供应商名称", "联系人", "手机号码", "联系电话", "电子邮箱", "传真",
-                    "第一季度应付账款", "第二季度应付账款", "第三季度应付账款", "第四季度应付账款",
-                    "纳税人识别号", "税率(%)", "开户行", "账号", "地址", "备注"};
-
-            List<String[]> data = new ArrayList<>();
-            String title = "信息内容";
-            for (SupplierVO item : supplierData) {
-                String[] supplier = new String[columnNames.length];
-                supplier[0] = StringUtils.hasText(item.getSupplierName()) ? item.getSupplierName() : "";
-                supplier[1] = StringUtils.hasText(item.getContact()) ? item.getContact() : "";
-                supplier[2] = StringUtils.hasText(item.getPhoneNumber()) ? item.getPhoneNumber() : "";
-                supplier[3] = StringUtils.hasText(item.getContactNumber()) ? item.getContactNumber() : "";
-                supplier[4] = StringUtils.hasText(item.getEmail()) ? item.getEmail() : "";
-                supplier[5] = StringUtils.hasText(item.getFax()) ? item.getFax() : "";
-                supplier[6] = item.getFirstQuarterAccountPayment() != null ? item.getFirstQuarterAccountPayment().toString() : "";
-                supplier[7] = item.getSecondQuarterAccountPayment() != null ? item.getSecondQuarterAccountPayment().toString() : "";
-                supplier[8] = item.getThirdQuarterAccountPayment() != null ? item.getThirdQuarterAccountPayment().toString() : "";
-                supplier[9] = item.getFourthQuarterAccountPayment() != null ? item.getFourthQuarterAccountPayment().toString() : "";
-                supplier[10] = StringUtils.hasText(item.getTaxNumber()) ? item.getTaxNumber() : "";
-                supplier[11] = item.getTaxRate() != null ? item.getTaxRate().toString() : "";
-                supplier[12] = StringUtils.hasText(item.getBankName()) ? item.getBankName() : "";
-                supplier[13] = item.getAccountNumber() != null ? item.getAccountNumber() : "";
-                supplier[14] = StringUtils.hasText(item.getAddress()) ? item.getAddress() : "";
-                supplier[15] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
-                data.add(supplier);
-            }
-            file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
-
-        } else if (type.contains("客户")) {
-            List<Customer> customerList = customerService.list();
-            List<CustomerVO> customerData = new ArrayList<>();
-
-            for (Customer customer : customerList) {
-                CustomerVO customerVO = new CustomerVO();
-                BeanUtils.copyProperties(customer, customerVO);
-                customerData.add(customerVO);
-            }
-
-            String[] columnNames = {"客户名称", "联系人", "手机号码", "电子邮箱",
-                    "第一季度应收账款", "第二季度应收账款", "第三季度应收账款", "第四季度应收账款",
-                    "纳税人识别号", "税率(%)", "开户行", "账号", "地址", "备注"};
-
-            List<String[]> data = new ArrayList<>();
-            String title = "信息内容";
-            for (CustomerVO item : customerData) {
-                String[] customer = new String[columnNames.length];
-                customer[0] = StringUtils.hasText(item.getCustomerName()) ? item.getCustomerName() : "";
-                customer[1] = StringUtils.hasText(item.getContact()) ? item.getContact() : "";
-                customer[2] = StringUtils.hasText(item.getPhoneNumber()) ? item.getPhoneNumber() : "";
-                customer[3] = StringUtils.hasText(item.getEmail()) ? item.getEmail() : "";
-                customer[4] = item.getFirstQuarterAccountReceivable() != null ? item.getFirstQuarterAccountReceivable().toString() : "";
-                customer[5] = item.getSecondQuarterAccountReceivable() != null ? item.getSecondQuarterAccountReceivable().toString() : "";
-                customer[6] = item.getThirdQuarterAccountReceivable() != null ? item.getThirdQuarterAccountReceivable().toString() : "";
-                customer[7] = item.getFirstQuarterAccountReceivable() != null ? item.getFirstQuarterAccountReceivable().toString() : "";
-                customer[8] = StringUtils.hasText(item.getTaxNumber()) ? item.getTaxNumber() : "";
-                customer[9] = item.getTaxRate() != null ? item.getTaxRate().toString() : "";
-                customer[10] = StringUtils.hasText(item.getBankName()) ? item.getBankName() : "";
-                customer[11] = item.getAccountNumber() != null ? item.getAccountNumber() : "";
-                customer[12] = StringUtils.hasText(item.getAddress()) ? item.getAddress() : "";
-                customer[13] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
-                data.add(customer);
-            }
-
-            file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
-
-        } else if (type.contains("会员")) {
-            List<Member> memberList = memberService.list();
-            List<MemberVO> memberData = new ArrayList<>();
-
-            for (Member member : memberList) {
-                MemberVO memberVO = new MemberVO();
-                BeanUtils.copyProperties(member, memberVO);
-                memberData.add(memberVO);
-            }
-
-            String[] columnNames = {"会员卡号", "会员名称", "手机号码", "电子邮箱", "预付款", "备注"};
-            List<String[]> data = new ArrayList<>();
-            String title = "信息内容";
-            for (MemberVO item : memberData) {
-                String[] member = new String[columnNames.length];
-                member[0] = StringUtils.hasText(item.getMemberNumber()) ? item.getMemberNumber() : "";
-                member[1] = StringUtils.hasText(item.getMemberName()) ? item.getMemberName() : "";
-                member[2] = StringUtils.hasText(item.getPhoneNumber()) ? item.getPhoneNumber() : "";
-                member[3] = StringUtils.hasText(item.getEmail()) ? item.getEmail() : "";
-                member[4] = item.getAdvancePayment() != null ? item.getAdvancePayment().toString() : "";
-                member[5] = StringUtils.hasText(item.getRemark()) ? item.getRemark() : "";
-                data.add(member);
-            }
-            file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
-        } else if (type.contains("商品")) {
-            List<Product> products = productService.list();
-            List<ExportProductVO> productVOS = new ArrayList<>(products.size() + 1);
-            List<ProductStockKeepUnit> productStockKeepUnits = productStockKeepUnitService.list();
-            List<ProductStock> productStocks = productStockService.list();
-
-            for (Product product : products) {
-
-                // 查询商品类别名称
-                var productCategory = productCategoryService.getById(product.getProductCategoryId());
-                String productCategoryName = "";
-                if(productCategory != null) {
-                    productCategoryName = productCategory.getCategoryName();
-                }
-
-                var productPrice = productStockKeepUnits.stream()
-                        .filter(item -> item.getProductId().equals(product.getId()))
-                        .findFirst()
-                        .orElse(null);
-
-                ExportProductVO productVO = ExportProductVO.builder()
-                        .productName(product.getProductName())
-                        .productStandard(product.getProductStandard())
-                        .productModel(product.getProductModel())
-                        .productColor(product.getProductColor())
-                        .productCategoryName(productCategoryName)
-                        .productWeight(product.getProductWeight())
-                        .productExpiryNum(product.getProductExpiryNum())
-                        .productUnit(product.getProductUnit())
-                        .build();
-                if(productPrice != null) {
-                    productVO.setProductBarcode(productPrice.getProductBarCode());
-                    productVO.setMultiAttribute(productPrice.getMultiAttribute());
-                    productVO.setPurchasePrice(productPrice.getPurchasePrice());
-                    productVO.setRetailPrice(productPrice.getRetailPrice());
-                    productVO.setSalesPrice(productPrice.getSalePrice());
-                    productVO.setLowSalesPrice(productPrice.getLowPrice());
-                    productVO.setEnableSerialNumber(String.valueOf(product.getEnableSerialNumber()));
-                    productVO.setEnableBatchNumber(String.valueOf(product.getEnableBatchNumber()));
-                    productVO.setWarehouseShelves(product.getWarehouseShelves());
-                    productVO.setProductManufacturer(product.getProductManufacturer());
-                    productVO.setOtherFieldOne(product.getOtherFieldOne());
-                    productVO.setOtherFieldTwo(product.getOtherFieldTwo());
-                    productVO.setOtherFieldThree(product.getOtherFieldThree());
-                }
-                productStocks.stream()
-                        .filter(item -> item.getProductSkuId().equals(productPrice.getId()))
-                        .findFirst().ifPresent(productStock -> productVO.setStock(productStock.getCurrentStockQuantity()));
-
-                productVOS.add(productVO);
-
-                String[] columnNames =
-                        {"名称*", "规格", "型号", "颜色", "类别", "基础重量(kg)", "保质期(天)", "基本单位*", "商品条码*",
-                        "多属性", "采购价", "零售价", "销售价", "最低售价", "序列号", "批次号", "仓库货架", "制造商",
-                        "其他字段1", "其他字段2", "其他字段3", "库存"};
-                List<String[]> data = new ArrayList<>();
-                String title = "信息内容";
-                for (ExportProductVO item : productVOS) {
-                    String[] productData = new String[columnNames.length];
-                    productData[0] = StringUtils.hasText(item.getProductName()) ? item.getProductName() : "";
-                    productData[1] = StringUtils.hasText(item.getProductStandard()) ? item.getProductStandard() : "";
-                    productData[2] = StringUtils.hasText(item.getProductModel()) ? item.getProductModel() : "";
-                    productData[3] = StringUtils.hasText(item.getProductColor()) ? item.getProductColor() : "";
-                    productData[4] = StringUtils.hasText(item.getProductCategoryName()) ? item.getProductCategoryName() : "";
-                    productData[5] = item.getProductWeight() != null ? item.getProductWeight().toString() : "";
-                    productData[6] = item.getProductExpiryNum() != null ? item.getProductExpiryNum().toString() : "";
-                    productData[7] = StringUtils.hasText(item.getProductUnit()) ? item.getProductUnit() : "";
-                    productData[8] = item.getProductBarcode() != null ? item.getProductBarcode() : "";
-                    productData[9] = StringUtils.hasText(item.getMultiAttribute()) ? item.getMultiAttribute() : "";
-                    productData[10] = item.getPurchasePrice() != null ? item.getPurchasePrice().toString() : "";
-                    productData[11] = item.getRetailPrice() != null ? item.getRetailPrice().toString() : "";
-                    productData[12] = item.getSalesPrice() != null ? item.getSalesPrice().toString() : "";
-                    productData[13] = item.getLowSalesPrice() != null ? item.getLowSalesPrice().toString() : "";
-                    productData[14] = StringUtils.hasText(item.getEnableSerialNumber()) ? item.getEnableSerialNumber() : "";
-                    productData[15] = StringUtils.hasText(item.getEnableBatchNumber()) ? item.getEnableBatchNumber() : "";
-                    productData[16] = StringUtils.hasText(item.getWarehouseShelves()) ? item.getWarehouseShelves() : "";
-                    productData[17] = StringUtils.hasText(item.getProductManufacturer()) ? item.getProductManufacturer() : "";
-                    productData[18] = StringUtils.hasText(item.getOtherFieldOne()) ? item.getOtherFieldOne() : "";
-                    productData[19] = StringUtils.hasText(item.getOtherFieldTwo()) ? item.getOtherFieldTwo() : "";
-                    productData[20] = StringUtils.hasText(item.getOtherFieldThree()) ? item.getOtherFieldThree() : "";
-                    productData[21] = item.getStock() != null ? item.getStock().toString() : "";
-                    data.add(productData);
-                }
-                file = ExcelUtil.exportObjectsWithoutTitle(type + ".xlsx", "*导入时本行内容请勿删除，切记！", columnNames, title, data);
-            }
-        }
-
-        return file;
-    }
-
     @Override
     public Response<List<String>> uploadOss(List<MultipartFile> files) {
         var platform = platformConfigService.list().stream().filter(item -> item.getPlatformKey().startsWith("tencent_oss")).toList();
         var ossInfoMap = platform.stream().collect(Collectors.toMap(SysPlatformConfig::getPlatformKey, SysPlatformConfig::getPlatformValue));
 
-       if (ossInfoMap.get("tencent_oss_secret_id") == null || ossInfoMap.get("tencent_oss_secret_key") == null
-               || ossInfoMap.get("tencent_oss_region") == null || ossInfoMap.get("tencent_oss_bucket") == null) {
+        if (ossInfoMap.get("tencent_oss_secret_id") == null || ossInfoMap.get("tencent_oss_secret_key") == null
+                || ossInfoMap.get("tencent_oss_region") == null || ossInfoMap.get("tencent_oss_bucket") == null) {
             return Response.responseMsg(BaseCodeEnum.OSS_KEY_NOT_EXIST);
         }
 

@@ -164,7 +164,7 @@ export default {
     confirmDelete: 'Are you sure to delete this data?',
     confirmExport: 'Confirm Export',
     confirmExportTextOne: 'Export',
-    confirmExportTextTwo: 'piece of data, please be patient.',
+    confirmExportTextTwo: 'Data loading, please be patient',
     confirmExportTextThree: 'If you need to export detailed data (which may take a long time), please check the box below.',
     confirmExportTextFour: 'Need to export detailed data',
     type: 'Type',

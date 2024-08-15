@@ -31,8 +31,6 @@ public interface CommonService {
 
     Response<String> productCoverUpload(MultipartFile file, Integer type);
 
-    File exportExcel(String type);
-
     Response<List<String>> uploadOss(List<MultipartFile> files);
 
     Response<String> generateSnowflakeId(String type);

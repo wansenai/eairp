@@ -66,4 +66,9 @@ public class ProductStockKeepUnitServiceImpl extends ServiceImpl<ProductStockKee
     public Boolean checkProductCode(List<String> barCodes) {
         return lambdaQuery().in(ProductStockKeepUnit::getProductBarCode, barCodes).exists();
     }
+
+    @Override
+    public ProductStockKeepUnit getByProductBarCode(String productBarCode) {
+        return lambdaQuery().eq(ProductStockKeepUnit::getProductBarCode, productBarCode).one();
+    }
 }

@@ -27,6 +27,7 @@ export default {
         batchDelete: 'Batch Delete',
         batchEnable: 'Batch Enable',
         batchDisable: 'Batch Disable',
+        selectFile: 'Select File',
         import: 'Import',
         export: 'Export',
         batchEdit: 'Batch Edit',
@@ -35,6 +36,7 @@ export default {
         checkBarCodeExist: 'Import Data - Detect duplicate products',
         dataBaseExist: 'There are duplicate product barcodes in the database, please check.',
         dataCover: 'Do you need overwrite the existing data?',
+        exportData: 'Commodity Information Data ',
         header: {
             categoryName: 'Product category',
             keyWord: 'Keyword',

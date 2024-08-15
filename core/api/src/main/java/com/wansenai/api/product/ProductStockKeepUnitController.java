@@ -57,7 +57,7 @@ public class ProductStockKeepUnitController {
     }
 
     @PostMapping("productStockSku")
-    public Response<List<ProductStockSkuVO>> getProductStockInfo(@RequestBody QueryProductStockDTO queryProductStockDTO) {
-        return productStockService.getProductStockSkuList(queryProductStockDTO);
+    public Response<List<ProductStockSkuVO>> getProductStockInfo() {
+        return productStockService.getProductStockSkuList();
     }
 }

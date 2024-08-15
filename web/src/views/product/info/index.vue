@@ -49,9 +49,8 @@ import {useMessage} from "@/hooks/web/useMessage";
 import {columns, searchFormSchema} from "@/views/product/info/info.data";
 import ProductInfoModal from "@/views/product/info/components/ProductInfoModal.vue";
 import BatchEditModal from "@/views/product/info/components/BatchEditModal.vue";
-import {getProductInfo, deleteProduct, updateProductStatus} from "@/api/product/product";
+import {getProductInfo, deleteProduct, updateProductStatus, exportProduct} from "@/api/product/product";
 import ImportFileModal from "@/components/Tools/ImportFileModal.vue";
-import {exportXlsx} from "@/api/basic/common";
 import {useI18n} from "vue-i18n";
 
 export default defineComponent({
@@ -63,7 +62,7 @@ export default defineComponent({
     const importModalRef = ref(null);
     const productModalRef = ref(null);
     const batchProductInfoModalRef = ref(null);
-    const [registerTable, { reload, getSelectRows }] = useTable({
+    const [registerTable, { reload, getSelectRows, getForm, getDataSource }] = useTable({
       title: t('product.info.title'),
       rowKey: 'id',
       columns: columns,
@@ -172,14 +171,21 @@ export default defineComponent({
     };
 
     async function handleExport() {
-      const file = await exportXlsx("商品信息列表")
-      const blob = new Blob([file]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = getTimestamp(new Date());
-      link.download = t('product.importInfo.infoData') + timestamp + ".xlsx";
-      link.target = "_blank";
-      link.click();
+      if (getDataSource().length === 0) {
+        createMessage.warn(t('purchase.order.export.noData'));
+        return;
+      }
+      const data: any = getForm().getFieldsValue();
+      const file: any = await exportProduct(data);
+      if (file.size > 0) {
+        const blob = new Blob([file]);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const timestamp = getTimestamp(new Date());
+        link.download = t('product.info.exportData') + timestamp + ".xlsx";
+        link.target = "_blank";
+        link.click();
+      }
     }
 
 

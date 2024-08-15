@@ -187,7 +187,7 @@ public class AllotShipmentsServiceImpl extends ServiceImpl<WarehouseReceiptMainM
                     }
                     if (product.getProductUnit() != null) {
                         productInfo.append(product.getProductUnit()).append("|");
-                        }
+                    }
                 }
             }
 

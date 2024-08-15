@@ -157,7 +157,7 @@ export default {
     confirmDelete: '是否确认删除数据？',
     confirmExport: '确认导出',
     confirmExportTextOne: '导出',
-    confirmExportTextTwo: '数据，请耐心等待。',
+    confirmExportTextTwo: '数据加载中，请耐心等待。',
     confirmExportTextThree: '如果您需要导出详细数据（可能需要很长时间），请勾选下面的框。',
     confirmExportTextFour: '需要导出详细数据',
     type: '类型',

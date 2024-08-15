@@ -21,6 +21,7 @@ import com.wansenai.service.product.ProductService;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.product.ProductDetailVO;
 import com.wansenai.vo.product.ProductVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -75,5 +76,10 @@ public class ProductController {
     @PutMapping("updateBatchProductInfo")
     public Response<String> updateBatchProductInfo(@RequestBody UpdateBatchProductDTO updateBatchProductDTO) {
         return productService.updateBatchProductInfo(updateBatchProductDTO);
+    }
+
+    @GetMapping("export")
+    public void exportProductExcel(@ModelAttribute QueryProductDTO queryProductDTO , HttpServletResponse response) throws Exception {
+        productService.exportProductExcel(queryProductDTO, response);
     }
 }

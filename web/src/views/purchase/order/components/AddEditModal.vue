@@ -76,7 +76,7 @@
                   <vxe-select v-model="row.warehouseId" :placeholder="t('sales.shipments.form.noticeEight')" @change="selectBarCode" :options="warehouseLabelList" clearable filterable></vxe-select>
                 </template>
                 <template #barCode_edit="{ row }">
-                  <vxe-select v-model="row.barCode" :placeholder="t('purchase.order.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable></vxe-select>
+                  <vxe-select v-model="row.barCode" :placeholder="t('purchase.order.form.table.inputBarCode')" @change="selectBarCode" :options="productLabelList" clearable filterable @click="loadProductSku"></vxe-select>
                 </template>
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" @change="productNumberChange"></vxe-input>
@@ -362,7 +362,6 @@ export default defineComponent({
       loadSupplierList();
       loadWarehouseList();
       loadAccountList();
-      loadProductSku();
       loadPurchasePersonalList();
       if (id) {
         title.value = t('purchase.order.editOrder')
@@ -439,14 +438,26 @@ export default defineComponent({
       })
     }
 
-    function loadProductSku() {
-      getProductStockSku().then(res => {
-        productList.value = res.data
-        productLabelList.value.push(...res.data.map(item => ({value: item.productBarcode, label: item.productBarcode})))
-        productLabelList.value = productLabelList.value.filter((item, index, arr) => {
-          return arr.findIndex(item1 => item1.value === item.value) === index
-        })
-      })
+    const productSkuLoading = ref(false);
+    const productSkuLoaded = ref(false); // 标志位，表示是否已经加载过
+
+    async function loadProductSku() {
+      if (productSkuLoaded.value) return; // 如果已经加载过，直接返回
+
+      try {
+        productSkuLoading.value = true;
+        createMessage.loading(t('sys.table.confirmExportTextTwo'));
+        await getProductStockSku().then(res => {
+          productList.value = res.data;
+          productLabelList.value.push(...res.data.map(item => ({ value: item.productBarcode, label: item.productBarcode })));
+          productLabelList.value = productLabelList.value.filter((item, index, arr) => {
+            return arr.findIndex(item1 => item1.value === item.value) === index;
+          });
+        });
+        productSkuLoaded.value = true; // 加载成功后设置标志位为 true
+      } finally {
+        productSkuLoading.value = false;
+      }
     }
 
     function selectBarCode() {
@@ -1052,7 +1063,8 @@ export default defineComponent({
       productLabelList,
       selectBarCode,
       handleSupplierModalSuccess,
-      purchasePersonalList
+      purchasePersonalList,
+      loadProductSku
     };
   },
 });

@@ -27,6 +27,7 @@ export default {
         batchDelete: '批量删除',
         batchEnable: '批量启用',
         batchDisable: '批量禁用',
+        selectFile: '选择文件',
         import: '导入',
         export: '导出',
         batchEdit: '批量编辑',
@@ -35,6 +36,7 @@ export default {
         checkBarCodeExist: '导入数据-检测商品出现重复',
         dataBaseExist: '数据库中存在重复的商品条码，请检查。',
         dataCover: '是否需要覆盖现有数据？',
+        exportData: '商品信息数据 ',
         header: {
             categoryName: '商品类别',
             keyWord: '关键词',
