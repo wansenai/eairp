@@ -4,14 +4,12 @@
         :title="title"
         :width="500"
         :confirm-loading="confirmLoading"
-        :maskStyle="{'top':'50px','left':'154px'}"
+        :maskStyle="{'top':'50px','left':'70px'}"
         :maskClosable="false"
         v-model:open="open"
-        @cancel="handleCancel"
+        :okText="t('product.info.import')"
+        @ok="uploadFile"
         style="top:20%;height: 55%;">
-      <template slot="footer">
-        <a-button key="back" @click="handleCancel">取消</a-button>
-      </template>
       <a-spin :spinning="confirmLoading">
         <a-row class="form-row" :gutter="24">
           <a-col :md="24" :sm="24">
@@ -24,22 +22,22 @@
         <a-row class="form-row" :gutter="24">
           <a-col :md="24" :sm="24">
             <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" :label="t('product.info.importInfo.setup2')">
-            <a-upload name="file" :showUploadList="false" :multiple="false" :customRequest="uploadFile">
-              <a-button type="primary">
-                <cloud-upload-outlined />
-                {{ t('product.info.import') }}
-              </a-button>
-            </a-upload>
-          </a-form-item>
+              <a-upload name="file" :file-list="fileList" :before-upload="beforeUpload" @remove="handleRemove" :multiple="false" :max-count="1">
+                <a-button type="primary">
+                  <cloud-upload-outlined />
+                  {{ t('product.info.selectFile') }}
+                </a-button>
+              </a-upload>
+            </a-form-item>
           </a-col>
         </a-row>
       </a-spin>
-      </a-modal>
-    </div>
+    </a-modal>
+  </div>
 </template>
 <script lang="ts">
 import {ref, h} from 'vue';
-import {Modal, Upload, Button, Spin, Row, Col, FormItem, UploadFile} from "ant-design-vue";
+import {Modal, Upload, Button, Spin, Row, Col, FormItem, UploadFile, UploadProps} from "ant-design-vue";
 import { CloudUploadOutlined  } from '@ant-design/icons-vue';
 import type { UploadChangeParam } from 'ant-design-vue';
 import {useMessage} from "@/hooks/web/useMessage";
@@ -79,6 +77,23 @@ export default {
     const templateUrl = ref('');
     const templateName = ref('');
     const downloadUrl = ref('');
+    const fileList = ref<UploadProps['fileList']>([]);
+    const uploading = ref<boolean>(false);
+
+    const handleRemove: UploadProps['onRemove'] = file => {
+      const index = fileList.value.indexOf(file);
+      const newFileList = fileList.value.slice();
+      newFileList.splice(index, 1);
+      fileList.value = newFileList;
+    };
+
+    const beforeUpload: UploadProps['beforeUpload'] = file => {
+      // 清空fileList
+      fileList.value = []
+      fileList.value = [...(fileList.value || []), file];
+      return false;
+    };
+
     const [registerTable, { reload }] = useTable()
 
     function initModal(path:string, name:string) {
@@ -97,74 +112,64 @@ export default {
     }
 
     const productBarcodeExistModal = (message: string, info: UploadFile) => {
-      if (message === 'existDataBase') {
-        // 显示数据库已存在的提示
-        Modal.info({
-          title: t('product.info.checkBarCodeExist'),
-          icon: h(ExclamationCircleOutlined),
-          content: h('div', { style: 'color:red;' }, t('product.info.dataBaseExist')),
-        });
-      } else {
-        // 解析并显示错误信息
-        const messageList = JSON.parse(message);
+      // 解析并显示错误信息
+      const messageList = JSON.parse(message);
+      // 生成内容消息
+      const contentMessage = messageList.map((item: { productCode: string; productName: string[]; }) =>
+          h('div', [
+            h('div', {}, `${t('product.info.table.productName')}:`),
+            item.productName.map(name => h('div', { style: 'color:red;' }, name)), // 处理换行
+            h('div', {}, `${t('product.info.table.barCode')}:`),
+            h('p', { style: 'color:red;' }, item.productCode),
+            h('p'),
+          ])
+      );
 
-        // 生成内容消息
-        const contentMessage = messageList.map((item: { productCode: string; productName: string[]; }) =>
-            h('div', [
-              h('div', {}, `${t('product.info.table.productName')}:`),
-              item.productName.map(name => h('div', { style: 'color:red;' }, name)), // 处理换行
-              h('div', {}, `${t('product.info.table.barCode')}:`),
-              h('p', { style: 'color:red;' }, item.productCode),
-              h('p'),
-            ])
-        );
+      // 添加覆盖提示
+      contentMessage.push(
+          h('strong', { style: 'color:black;' }, t('product.info.dataCover'))
+      );
 
-        // 添加覆盖提示
-        contentMessage.push(
-            h('strong', { style: 'color:black;' }, t('product.info.dataCover'))
-        );
-
-        // 显示确认对话框
-        Modal.confirm({
-          title: t('product.info.checkBarCodeExist'),
-          icon: h(ExclamationCircleOutlined),
-          content: contentMessage,
-          okText: t('sys.modal.cover'),
-          cancelText: t('sys.modal.cancel'),
-          async onOk() {
-            const fileObject: UploadCoverProductParams = {
-              file: info,
-              type: 0,
-            };
-            try {
-              await productCoverUpload(fileObject);
-            } catch (error) {
-              createMessage.info(t('sys.api.refreshBrowser'));
-              handleCancel();
-            } finally {
-              handleCancel(); // 确保在异步操作完成后执行
-            }
-          },
-          onCancel() {
+      // 显示确认对话框
+      Modal.confirm({
+        title: t('product.info.checkBarCodeExist'),
+        icon: h(ExclamationCircleOutlined),
+        content: contentMessage,
+        okText: t('sys.modal.cover'),
+        cancelText: t('sys.modal.cancel'),
+        async onOk() {
+          const fileObject: UploadCoverProductParams = {
+            file: info,
+            type: 1,
+          };
+          try {
+            await productCoverUpload(fileObject);
+          } catch (error) {
+            createMessage.info(t('sys.api.refreshBrowser'));
             handleCancel();
-          },
-          // 添加滚动条样式
-          bodyStyle: {
-            maxHeight: 'calc(100vh - 200px)',
-            overflowY: 'auto',
-          },
-        });
-      }
+          } finally {
+            handleCancel(); // 确保在异步操作完成后执行
+          }
+        },
+        onCancel() {
+          handleCancel();
+        },
+        // 添加滚动条样式
+        bodyStyle: {
+          maxHeight: 'calc(100vh - 200px)',
+          overflowY: 'auto',
+        },
+      });
     };
 
-    async function uploadFile(info: UploadChangeParam) {
+    async function uploadFile() {
       const fileObject: UploadFileParams = {
-        file: info.file,
+        file: fileList.value[0]
       }
       const result = await uploadXlsx(fileObject);
       if (result.code === 'P0512') {
         close();
-        productBarcodeExistModal(result.msg, info.file)
+        productBarcodeExistModal(result.msg, fileList.value[0])
       } else {
         handleCancel()
         await reload();
@@ -187,6 +192,9 @@ export default {
       open,
       CloudUploadOutlined,
       uploadFile,
+      handleRemove,
+      beforeUpload,
+      fileList,
       registerTable,
     };
   },

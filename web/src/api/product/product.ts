@@ -6,7 +6,7 @@ import {
     QueryProductReq,
     UpdateBatchProductInfoReq,
     ProductExtendPriceResp,
-    QueryProductExtendPriceReq, ProductStockSkuReq, ProductStockSkuResp,
+    QueryProductExtendPriceReq, ProductStockSkuResp,
 } from "@/api/product/model/productModel";
 import {ErrorMessageMode, SuccessMessageMode} from "#/axios";
 
@@ -20,7 +20,8 @@ enum Api {
     updateBatchProductInfo = '/product/updateBatchProductInfo',
     getProductSku = '/product/sku/pageList',
     getProductSkuByBarCode = '/product/sku/getProduct',
-    getProductListInfo = '/product/sku/productStockSku'
+    getProductListInfo = '/product/sku/productStockSku',
+    exportProductData = '/product/export'
 }
 
 export function getProductCode() {
@@ -115,11 +116,22 @@ export function getProductSkuByBarCode(barCode: number | string, warehouseId: nu
     );
 }
 
-export function getProductStockSku(params: ProductStockSkuReq) {
+export function getProductStockSku() {
     return defHttp.post<BaseDataResp<ProductStockSkuResp[]>>(
         {
             url: Api.getProductListInfo,
-            params
+            timeout: 100000,
+        }
+    );
+}
+
+export function exportProduct(params: QueryProductReq) {
+    return defHttp.get<BaseDataResp<Blob>>(
+        {
+            url: `${Api.exportProductData}`,
+            params,
+            responseType: "blob",
+            timeout: 100000,  // 设置超时时间为100秒
         }
     );
 }
