@@ -16,11 +16,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wansenai.dto.product.QueryProductStockKeepUnitDTO;
-import com.wansenai.dto.report.QueryProductStockDTO;
 import com.wansenai.entities.product.ProductStock;
 import com.wansenai.mappers.product.ProductStockMapper;
 import com.wansenai.service.product.ProductStockService;
+import com.wansenai.service.user.ISysUserService;
 import com.wansenai.service.warehouse.WarehouseService;
+import com.wansenai.utils.redis.RedisUtil;
 import com.wansenai.utils.response.Response;
 import com.wansenai.vo.product.ProductStockKeepUnitVO;
 import com.wansenai.vo.product.ProductStockVO;
@@ -38,9 +39,15 @@ public class ProductStockServiceImpl extends ServiceImpl<ProductStockMapper, Pro
 
     private final ProductStockMapper productStockMapper;
 
-    public ProductStockServiceImpl(WarehouseService warehouseService, ProductStockMapper productStockMapper) {
+    private final RedisUtil redisUtil;
+
+    private final ISysUserService userService;
+
+    public ProductStockServiceImpl(WarehouseService warehouseService, ProductStockMapper productStockMapper, RedisUtil redisUtil, ISysUserService userService) {
         this.warehouseService = warehouseService;
         this.productStockMapper = productStockMapper;
+        this.redisUtil = redisUtil;
+        this.userService = userService;
     }
 
     @Override
@@ -80,8 +87,23 @@ public class ProductStockServiceImpl extends ServiceImpl<ProductStockMapper, Pro
     }
 
     @Override
-    public Response<List<ProductStockSkuVO>> getProductStockSkuList(QueryProductStockDTO queryProductStockDTO) {
-        var data = productStockMapper.getProductStockList(queryProductStockDTO);
+    public Response<List<ProductStockSkuVO>> getProductStockSkuList() {
+        // 先查redis缓存，如果缓存里没有再去数据库中查询
+//        if (redisUtil.hasKey("productStockSkuList:" + userService.getCurrentTenantId())) {
+//            var data = redisUtil.get("productStockSkuList:" + userService.getCurrentTenantId());
+//            return Response.responseData((List<ProductStockSkuVO>) data);
+//        } else {
+//            var data = productStockMapper.getProductStockList();
+//            redisUtil.set("productStockSkuList:" + userService.getCurrentTenantId(), data);
+//            return Response.responseData(data);
+//        }
+        var data = productStockMapper.getProductStockList();
+        redisUtil.set("productStockSkuList:" + userService.getCurrentTenantId(), data);
         return Response.responseData(data);
+    }
+
+    @Override
+    public Boolean removeBySkuId(Long skuId) {
+        return lambdaUpdate().eq(ProductStock::getProductSkuId, skuId).remove();
     }
 }

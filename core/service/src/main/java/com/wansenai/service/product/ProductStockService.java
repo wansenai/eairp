@@ -37,5 +37,7 @@ public interface ProductStockService extends IService<ProductStock> {
 
    List<ProductStockVO> getProductStockList(Long productSukId);
 
-   Response<List<ProductStockSkuVO>> getProductStockSkuList(QueryProductStockDTO queryProductStockDTO);
+   Response<List<ProductStockSkuVO>> getProductStockSkuList();
+
+   Boolean removeBySkuId(Long skuId);
 }

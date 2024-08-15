@@ -21,6 +21,7 @@ import com.wansenai.dto.product.UpdateBatchProductDTO;
 import com.wansenai.entities.product.Product;
 import com.wansenai.vo.product.ProductDetailVO;
 import com.wansenai.vo.product.ProductVO;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -39,4 +40,6 @@ public interface ProductService extends IService<Product> {
     Response<String> updateBatchProductInfo(UpdateBatchProductDTO updateBatchProductDTO);
 
     boolean batchAddProduct(List<Product> products);
+
+    void exportProductExcel(QueryProductDTO queryProductDTO, HttpServletResponse response) throws Exception;
 }

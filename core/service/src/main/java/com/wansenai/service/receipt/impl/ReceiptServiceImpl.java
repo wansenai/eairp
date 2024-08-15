@@ -2286,7 +2286,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public void exportProductStockExcel(QueryProductStockDTO queryProductStockDTO, HttpServletResponse response) {
-        var queryData = productStockMapper.getProductStockList(queryProductStockDTO);
+        var queryData = productStockMapper.getProductStockListByTerms(queryProductStockDTO);
         if (!queryData.isEmpty()) {
             ExcelUtils.export(response, "商品库存报表", ExcelUtils.getSheetData(queryData));
         }
