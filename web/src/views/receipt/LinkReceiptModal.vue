@@ -4,7 +4,12 @@
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'status'">
           <Tag :color="record.status === 1 ? 'green' : 'red'">
-            {{ record.status === 1 ? '已审核' : '未审核' }}
+            <template v-if="localeStore === 'zh_CN'">
+              {{ record.status === 1 ? '已审核' : '未审核' }}
+            </template>
+            <template v-if="localeStore === 'en'">
+              {{ record.status === 1 ? 'Audited' : 'Unaudited' }}
+            </template>
           </Tag>
         </template>
         <template v-else-if="column.key === 'receiptNumber'">
@@ -26,19 +31,27 @@ import {getReceipt} from "@/api/receipt/receipt";
 import ReceiptDetailModal from "@/views/receipt/ReceiptDetailModal.vue";
 import {ReceiptColumn, searchSchema} from "@/views/receipt/receipt.data"
 import {useI18n} from "vue-i18n";
+import {useLocaleStore} from "@/store/modules/locale";
 export default defineComponent({
   name: 'LinkReceiptModal',
   components: {Tag, BasicModal, BasicTable, TableAction, ReceiptDetailModal},
   emits: ['handleReceiptSuccess', 'register'],
   setup(_, context) {
     const { t } = useI18n();
-    const getTitle = ref('操作');
+    const getTitle = ref('');
+    const title = ref('');
+    const localeStore = useLocaleStore().getLocale;
+    if(localeStore === 'zh_CN') {
+      title.value = '操作'
+    } else if (localeStore === 'en') {
+      title.value = 'Operate'
+    }
     const [receiptDetailModal, {openModal: openReceiptDetailModal}] = useModal();
     const { createMessage } = useMessage();
     const type = ref('');
     const subType = ref('');
     const [registerTable, { getSelectRows, reload}] = useTable({
-      title: '操作',
+      title: title.value,
       rowKey: 'id',
       columns: ReceiptColumn,
       api: getReceipt,
@@ -77,7 +90,11 @@ export default defineComponent({
     function handleSubmit() {
       const rows = getSelectRows();
       if (rows.length === 0) {
-        createMessage.error('请选择单据');
+        if(localeStore === 'zh_CN') {
+          createMessage.error('请选择单据');
+        } else if (localeStore === 'en') {
+          createMessage.error('Please select a receipt');
+        }
         return;
       }
       openReceiptDetailModal(true, {
@@ -98,6 +115,7 @@ export default defineComponent({
 
     return {
       t,
+      localeStore,
       registerTable,
       registerModal,
       getTitle,

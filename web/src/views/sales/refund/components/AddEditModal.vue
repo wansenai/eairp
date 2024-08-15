@@ -1076,11 +1076,19 @@ export default defineComponent({
     }
 
     function onSearch() {
-      openLinkReceiptModal(true, {
-        type: '销售',
-        subType: '销售出库',
-        title: '选择销售出库单'
-      });
+      if(localeStore === 'zh_CN') {
+        openLinkReceiptModal(true, {
+          type: '销售',
+          subType: '销售出库',
+          title: '选择销售出库单'
+        });
+      } else if (localeStore === 'en') {
+        openLinkReceiptModal(true, {
+          type: '销售',
+          subType: '销售出库',
+          title: 'Select Sales Outbound Document'
+        });
+      }
     }
 
     function handleReceiptSuccess(data) {

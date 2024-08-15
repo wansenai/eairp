@@ -72,6 +72,9 @@
                 <template #product_number_edit="{ row }">
                   <vxe-input v-model="row.productNumber" ></vxe-input>
                 </template>
+                <template #sale_price_edit="{ row }">
+                  <vxe-input v-model="row.salePrice" :placeholder="t('warehouse.allotShipments.form.inputSalePrice')"></vxe-input>
+                </template>
               </vxe-grid>
             </div>
             <a-row class="form-row" :gutter="24">
@@ -139,8 +142,8 @@ import {
   allotShipmentsFormState,
   xGrid,
   tableData,
-  gridOptions,
-} from '/src/views/warehouse/allot/components/addEditAllotShipments.data';
+  gridOptions, t,
+} from '@/views/warehouse/allot/components/addEditAllotShipments.data';
 import {useModal} from "@/components/Modal";
 import {generateId, uploadOss} from "@/api/basic/common";
 import {VXETable, VxeGrid, VxeInput, VxeButton, VxeSelect, VxeOption} from 'vxe-table'
@@ -172,6 +175,7 @@ dayjs.extend(localeData);
 dayjs.locale('zh-cn');
 export default defineComponent({
   name: 'AddEditAllotShipmentsModal',
+  methods: {t},
   emits: ['success', 'cancel', 'error'],
   components: {
     BasicModal,
@@ -308,6 +312,7 @@ export default defineComponent({
               selectRow.row.productUnit = product.productUnit
               selectRow.row.stock = product.currentStock
               selectRow.row.productNumber = 1
+              selectRow.row.salePrice = 0
             } else {
               createMessage.warn(t('sales.shipments.form.noticeFour'))
               selectRow.row.barCode = ''
@@ -317,6 +322,7 @@ export default defineComponent({
               selectRow.row.productUnit = ''
               selectRow.row.stock = 0
               selectRow.row.productNumber = 0
+              selectRow.row.salePrice = 0
             }
           }
         }
@@ -360,6 +366,7 @@ export default defineComponent({
               barCode: item.barCode,
               productName: item.productName,
               productStandard: item.productStandard,
+              salePrice: item.salePrice,
               stock: item.stock,
               productUnit: item.productUnit,
               productNumber: item.productNumber,
@@ -449,6 +456,7 @@ export default defineComponent({
           productName: item.productName,
           productStandard: item.productStandard,
           stock: item.stock,
+          salePrice: item.salePrice,
           productUnit: item.productUnit,
           productNumber: item.productNumber,
           remark: item.remark,

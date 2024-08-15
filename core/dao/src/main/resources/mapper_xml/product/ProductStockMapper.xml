@@ -144,4 +144,33 @@
             </if>
         </where>
     </select>
+
+    <select id="productStockExist" resultType="boolean" parameterType="map">
+        SELECT COUNT(1) > 0
+        FROM product_stock
+        WHERE product_sku_id = #{productSkuId}
+          AND warehouse_id = #{warehouseId}
+    </select>
+
+    <insert id="saveBatch" parameterType="java.util.List">
+        INSERT INTO product_stock (id, tenant_id, product_sku_id, warehouse_id,
+                                   init_stock_quantity, high_stock_quantity, current_stock_quantity, create_time, update_time, create_by, update_by, delete_flag)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id},
+            #{item.tenantId},
+            #{item.productSkuId},
+            #{item.warehouseId},
+            #{item.initStockQuantity},
+            #{item.highStockQuantity},
+            #{item.currentStockQuantity},
+            #{item.createTime},
+            #{item.updateTime},
+            #{item.createBy},
+            #{item.updateBy},
+            #{item.deleteFlag}
+            )
+        </foreach>
+    </insert>
 </mapper>

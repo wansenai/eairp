@@ -43,7 +43,6 @@ const numberStyle = {};
 const fetchMessages = () => {
   getMessageList().then((res) => {
     listData.value = res.data;
-    console.info(listData.value);
   });
 };
 

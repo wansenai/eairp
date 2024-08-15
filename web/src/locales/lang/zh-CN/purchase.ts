@@ -53,6 +53,7 @@ export default {
             noticeThree: '该文件超过2MB大小限制',
             noticeFour: '该条码查询不到商品信息',
             noticeFive: '商品条码不能为空',
+            noticeEight: '仓库不能为空',
             noticeSix: '输入条码商品信息自动带出！',
             noticeSeven: '支持商品名称、商品编号、商品规格、商品型号',
             cancel: '取消',

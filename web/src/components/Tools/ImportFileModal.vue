@@ -97,52 +97,58 @@ export default {
     }
 
     const productBarcodeExistModal = (message: string, info: UploadFile) => {
-      if(message === 'existDataBase') {
-        message = t('product.info.dataBaseExist')
+      if (message === 'existDataBase') {
+        // 显示数据库已存在的提示
         Modal.info({
           title: t('product.info.checkBarCodeExist'),
           icon: h(ExclamationCircleOutlined),
-          content: h('div', { style: 'color:red;' }, message),
+          content: h('div', { style: 'color:red;' }, t('product.info.dataBaseExist')),
         });
       } else {
-        const messageList = JSON.parse(message)
-        const contentMessage = messageList.map((item: { productCode: string; productName: string[]; }) => {
-          return h('div', [
-            h('div', {}, t('product.info.table.productName') + ': '),
-            item.productName.map(name => h('div', { style: 'color:red;' }, name)), // 使用map函数处理换行
-            h('div', {}, t('product.info.table.barCode') + ': '),
-            h('p', { style: 'color:red;' }, item.productCode),
-            h('p'),
-          ])
-        })
-        contentMessage.push(h('strong', {style: 'color:black;'}, t('product.info.dataCover')))
+        // 解析并显示错误信息
+        const messageList = JSON.parse(message);
+
+        // 生成内容消息
+        const contentMessage = messageList.map((item: { productCode: string; productName: string[]; }) =>
+            h('div', [
+              h('div', {}, `${t('product.info.table.productName')}:`),
+              item.productName.map(name => h('div', { style: 'color:red;' }, name)), // 处理换行
+              h('div', {}, `${t('product.info.table.barCode')}:`),
+              h('p', { style: 'color:red;' }, item.productCode),
+              h('p'),
+            ])
+        );
+
+        // 添加覆盖提示
+        contentMessage.push(
+            h('strong', { style: 'color:black;' }, t('product.info.dataCover'))
+        );
+
+        // 显示确认对话框
         Modal.confirm({
           title: t('product.info.checkBarCodeExist'),
           icon: h(ExclamationCircleOutlined),
           content: contentMessage,
-          okText() {
-            return t('sys.modal.cover');
-          },
-          cancelText() {
-            return t('sys.modal.cancel');
-          },
+          okText: t('sys.modal.cover'),
+          cancelText: t('sys.modal.cancel'),
           async onOk() {
             const fileObject: UploadCoverProductParams = {
               file: info,
               type: 0,
+            };
+            try {
+              await productCoverUpload(fileObject);
+            } catch (error) {
+              createMessage.info(t('sys.api.refreshBrowser'));
+              handleCancel();
+            } finally {
+              handleCancel(); // 确保在异步操作完成后执行
             }
-            await productCoverUpload(fileObject);
-            handleCancel()
           },
-          async onCancel() {
-            const fileObject: UploadCoverProductParams = {
-              file: info,
-              type: 1,
-            }
-            await productCoverUpload(fileObject);
-            handleCancel()
+          onCancel() {
+            handleCancel();
           },
-          // 添加bodyStyle以显示滚动条
+          // 添加滚动条样式
           bodyStyle: {
             maxHeight: 'calc(100vh - 200px)',
             overflowY: 'auto',

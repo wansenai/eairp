@@ -729,6 +729,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public Response<Page<StockFlowVO>> getStockFlow(QueryStockFlowDTO queryStockFlowDTO) {
+        var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
         var retailData = receiptRetailSubService.lambdaQuery()
                 .eq(ReceiptRetailSub::getWarehouseId, queryStockFlowDTO.getWarehouseId())
                 .eq(ReceiptRetailSub::getProductBarcode, queryStockFlowDTO.getProductBarcode())
@@ -762,12 +763,13 @@ public class ReceiptServiceImpl implements ReceiptService {
                 var stockFlowVO = StockFlowVO.builder()
                         .receiptNumber(receiptRetailMain.getReceiptNumber())
                         .receiptDate(receiptRetailMain.getReceiptDate())
-                        .type(receiptRetailMain.getSubType())
+                        .type(receiptRetailMain.getType())
                         .productNumber(item.getProductNumber())
                         .productBarcode(item.getProductBarcode())
                         .productName(commonService.getProductName(item.getProductId()))
                         .warehouseName(commonService.getWarehouseName(item.getWarehouseId()))
                         .build();
+
                 stockFlowVos.add(stockFlowVO);
             }
         });
@@ -781,12 +783,23 @@ public class ReceiptServiceImpl implements ReceiptService {
                 var stockFlowVO = StockFlowVO.builder()
                         .receiptNumber(receiptSaleMain.getReceiptNumber())
                         .receiptDate(receiptSaleMain.getReceiptDate())
-                        .type(receiptSaleMain.getSubType())
                         .productNumber(item.getProductNumber())
                         .productBarcode(item.getProductBarcode())
                         .productName(commonService.getProductName(item.getProductId()))
                         .warehouseName(commonService.getWarehouseName(item.getWarehouseId()))
                         .build();
+
+                if ("zh_CN".equals(systemLanguage)) {
+                    stockFlowVO.setType(receiptSaleMain.getSubType());
+                } else {
+                    if("销售订单".equals(receiptSaleMain.getSubType())) {
+                        stockFlowVO.setType("Sales Order");
+                    } else if("销售出库".equals(receiptSaleMain.getSubType())) {
+                        stockFlowVO.setType("Sales Outbound");
+                    } else {
+                        stockFlowVO.setType("Sales Return");
+                    }
+                }
                 stockFlowVos.add(stockFlowVO);
             }
         });
@@ -800,12 +813,22 @@ public class ReceiptServiceImpl implements ReceiptService {
                 var stockFlowVO = StockFlowVO.builder()
                         .receiptNumber(receiptPurchaseMain.getReceiptNumber())
                         .receiptDate(receiptPurchaseMain.getReceiptDate())
-                        .type(receiptPurchaseMain.getSubType())
                         .productNumber(item.getProductNumber())
                         .productBarcode(item.getProductBarcode())
                         .productName(commonService.getProductName(item.getProductId()))
                         .warehouseName(commonService.getWarehouseName(item.getWarehouseId()))
                         .build();
+                if ("zh_CN".equals(systemLanguage)) {
+                    stockFlowVO.setType(receiptPurchaseMain.getSubType());
+                } else {
+                    if("采购订单".equals(receiptPurchaseMain.getSubType())) {
+                        stockFlowVO.setType("Purchase Order");
+                    } else if("采购入库".equals(receiptPurchaseMain.getSubType())) {
+                        stockFlowVO.setType("Purchase Inbound");
+                    } else {
+                        stockFlowVO.setType("Purchase Return");
+                    }
+                }
                 stockFlowVos.add(stockFlowVO);
             }
         });

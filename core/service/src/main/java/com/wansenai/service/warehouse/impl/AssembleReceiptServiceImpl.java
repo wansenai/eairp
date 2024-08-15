@@ -140,11 +140,20 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
         this.productStockMapper = productStockMapper;
     }
 
+    /**
+     * Retrieves a paginated list of AssembleReceiptVO based on the provided query parameters.
+     *
+     * @param queryAssembleReceiptDTO the DTO containing the query parameters for filtering the assemble receipts
+     * @return a Response object containing a Page of AssembleReceiptVO
+     */
     @Override
     public Response<Page<AssembleReceiptVO>> getAssembleReceiptPageList(QueryAssembleReceiptDTO queryAssembleReceiptDTO) {
+        // Initialize the result page object
         var result = new Page<AssembleReceiptVO>();
+        // Create a new page object with the provided page number and page size
         var page = new Page<WarehouseReceiptMain>(queryAssembleReceiptDTO.getPage(), queryAssembleReceiptDTO.getPageSize());
 
+        // Build the query wrapper with the provided filters
         var wrapperMainMapper = lambdaQuery()
                 .eq(queryAssembleReceiptDTO.getOperatorId() != null, WarehouseReceiptMain::getCreateBy, queryAssembleReceiptDTO.getOperatorId())
                 .eq(queryAssembleReceiptDTO.getStatus() != null, WarehouseReceiptMain::getStatus, queryAssembleReceiptDTO.getStatus())
@@ -157,16 +166,21 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                 .orderByDesc(WarehouseReceiptMain::getCreateTime)
                 .page(page);
 
+        // Initialize the list to hold the result records
         var assembleReceiptVOList = new ArrayList<AssembleReceiptVO>(wrapperMainMapper.getRecords().size() + 1);
+        // Iterate through the records and map them to AssembleReceiptVO objects
         wrapperMainMapper.getRecords().forEach(item -> {
 
+            // Retrieve the product information
             var product = productService.getById(item.getProductId());
             var productInfo = "";
-            if(product != null) {
+            if (product != null) {
                 productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
             }
 
+            // Retrieve the operator information
             var operator = userService.getById(item.getCreateBy());
+            // Build the AssembleReceiptVO object
             var assembleReceiptVO = AssembleReceiptVO.builder()
                     .id(item.getId())
                     .receiptNumber(item.getReceiptNumber())
@@ -178,10 +192,13 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                     .status(item.getStatus())
                     .build();
 
+            // Add the AssembleReceiptVO object to the list
             assembleReceiptVOList.add(assembleReceiptVO);
         });
+        // Set the records and total count in the result page object
         result.setRecords(assembleReceiptVOList);
         result.setTotal(wrapperMainMapper.getTotal());
+        // Return the response with the result page object
         return Response.responseData(result);
     }
 
@@ -202,7 +219,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
 
             var product = productService.getById(item.getProductId());
             var productInfo = "";
-            if(product != null) {
+            if (product != null) {
                 productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
             }
 
@@ -240,7 +257,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
 
             var product = productService.getById(item.getProductId());
             var productInfo = "";
-            if(product != null) {
+            if (product != null) {
                 productInfo = product.getProductName() + "|" + product.getProductStandard() + "|" + product.getProductModel() + "|" + product.getProductUnit();
             }
 
@@ -329,7 +346,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
         var totalProductNumber = 0;
         var totalAmount = BigDecimal.ZERO;
 
-        if(!assembleReceiptDTO.getTableData().isEmpty()) {
+        if (!assembleReceiptDTO.getTableData().isEmpty()) {
             for (AssembleStockBO stockBO : assembleReceiptDTO.getTableData()) {
                 totalProductNumber += stockBO.getProductNumber();
                 totalAmount = totalAmount.add(stockBO.getAmount());
@@ -346,7 +363,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
 
                 var otherWarehouseReceipts = new ArrayList<WarehouseReceiptSub>();
                 for (WarehouseReceiptSub warehouseStock : beforeReceipt) {
-                    if("普通子件".equals(warehouseStock.getType())) {
+                    if ("普通子件".equals(warehouseStock.getType())) {
                         var otherWarehouseStock = WarehouseReceiptSub.builder()
                                 .warehouseId(warehouseStock.getWarehouseId())
                                 .productBarcode(warehouseStock.getProductBarcode())
@@ -356,7 +373,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                     }
                 }
                 // 普通子件add操作
-                if(!otherWarehouseReceipts.isEmpty()) {
+                if (!otherWarehouseReceipts.isEmpty()) {
                     updateProductStock(otherWarehouseReceipts, 1);
                 }
             }
@@ -401,7 +418,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
             // 重新普通子件subtract操作
             var subStockList = new ArrayList<WarehouseReceiptSub>();
             for (AssembleStockBO warehouseStock : mainStockList) {
-                if("普通子件".equals(warehouseStock.getType())) {
+                if ("普通子件".equals(warehouseStock.getType())) {
                     var otherWarehouseStock = WarehouseReceiptSub.builder()
                             .warehouseId(warehouseStock.getWarehouseId())
                             .productBarcode(warehouseStock.getBarCode())
@@ -410,7 +427,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                     subStockList.add(otherWarehouseStock);
                 }
             }
-            if(!subStockList.isEmpty()) {
+            if (!subStockList.isEmpty()) {
                 updateProductStock(subStockList, 2);
             }
 
@@ -465,7 +482,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
             updateProductStock(mainStock, 1);
             var subStocks = new ArrayList<WarehouseReceiptSub>();
             for (AssembleStockBO warehouseStock : mainStockList) {
-                if("普通子件".equals(warehouseStock.getType())) {
+                if ("普通子件".equals(warehouseStock.getType())) {
                     var otherWarehouseStock = WarehouseReceiptSub.builder()
                             .warehouseId(warehouseStock.getWarehouseId())
                             .productBarcode(warehouseStock.getBarCode())
@@ -474,7 +491,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                     subStocks.add(otherWarehouseStock);
                 }
             }
-            if(!subStocks.isEmpty()) {
+            if (!subStocks.isEmpty()) {
                 updateProductStock(subStocks, 2);
             }
             if (saveSubResult && saveMainResult) {
@@ -507,7 +524,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                 .update();
         var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
 
-        if(!deleteResult) {
+        if (!deleteResult) {
             if ("zh_CN".equals(systemLanguage)) {
                 return Response.responseMsg(AssembleReceiptCodeEnum.DELETE_ASSEMBLE_RECEIPT_ERROR);
             }
@@ -530,7 +547,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                 .in(WarehouseReceiptMain::getId, ids)
                 .update();
         var systemLanguage = userService.getUserSystemLanguage(userService.getCurrentUserId());
-        if(!updateResult) {
+        if (!updateResult) {
             if ("zh_CN".equals(systemLanguage)) {
                 return Response.responseMsg(AssembleReceiptCodeEnum.UPDATE_ASSEMBLE_RECEIPT_ERROR);
             }
@@ -555,7 +572,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                     var subData = new ArrayList<AssembleStockDataExportBO>();
                     for (AssembleReceiptExportBO assembleReceiptExportBO : mainData) {
                         var detail = getAssembleReceiptDetail(assembleReceiptExportBO.getId()).getData().getTableData();
-                        if(!detail.isEmpty()) {
+                        if (!detail.isEmpty()) {
                             detail.forEach(item -> {
                                 var assembleStockBO = AssembleStockDataExportBO.builder()
                                         .receiptNumber(assembleReceiptExportBO.getReceiptNumber())
@@ -589,7 +606,7 @@ public class AssembleReceiptServiceImpl extends ServiceImpl<WarehouseReceiptMain
                     var subEnData = new ArrayList<AssembleStockDataExportEnBO>();
                     for (AssembleReceiptExportEnBO assembleReceiptExportEnBO : mainEnData) {
                         var detail = getAssembleReceiptDetail(assembleReceiptExportEnBO.getId()).getData().getTableData();
-                        if(!detail.isEmpty()) {
+                        if (!detail.isEmpty()) {
                             detail.forEach(item -> {
                                 var assembleStockEnBO = AssembleStockDataExportEnBO.builder()
                                         .receiptNumber(assembleReceiptExportEnBO.getReceiptNumber())

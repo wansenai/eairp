@@ -41,6 +41,7 @@ export function productCoverUpload(params: UploadCoverProductParams) {
         {
             url: Api.productCoverUpload,
             params,
+            timeout: 100000,  // 设置超时时间为160秒
             headers: {
                 'Content-type': ContentTypeEnum.FORM_DATA,
                 // @ts-ignore

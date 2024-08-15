@@ -1023,11 +1023,19 @@ export default defineComponent({
     });
 
     function onSearch() {
-      openLinkReceiptModal(true, {
-        type: '采购',
-        subType: '采购入库',
-        title: '选择采购入库单'
-      });
+      if(localeStore === 'zh_CN') {
+        openLinkReceiptModal(true, {
+          type: '采购',
+          subType: '采购入库',
+          title: '选择采购入库单'
+        });
+      } else if (localeStore === 'en') {
+        openLinkReceiptModal(true, {
+          type: '采购',
+          subType: '采购入库',
+          title: 'Select Purchase Inbound Document'
+        });
+      }
     }
 
 
