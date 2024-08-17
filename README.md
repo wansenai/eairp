@@ -37,7 +37,8 @@ It's completely free, if this project is helpful to you, please click on Star. T
 [Enginsh](https://github.com/wansenai/eairp/blob/master/README.md) / [简体中文](https://github.com/wansenai/eairp/blob/master/README_ZH.md)
 
 ## Online preview
-- [eairp preview / 在线预览](https://eairp.cn/)
+- If you are in Chinese Mainland, please visit [eairp.cn](https://eairp.cn/)
+- Otherwise, please visit [erp.wansenai.com](https://erp.wansenai.com/)
 - test account (测试账号): admin
 - test password (测试密码): 123456
 
