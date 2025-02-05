@@ -68,7 +68,7 @@ Licensed under either of
 at your option.
 
 ## Community
-微信群: 请添加微信`wansenai`备注ERP开源.
+![](images/wechat-group-20250205.png)
 
 ## Contribution
 We welcome every contributor, both in terms of code and documentation.
