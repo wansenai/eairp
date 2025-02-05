@@ -68,7 +68,7 @@ Licensed under either of
 at your option.
 
 ## Community
-![](images/wechat-group-20250205.png)
+<img src="images/wechat-group-20250205.png" alt="WeChat Group" width="300" />
 
 ## Contribution
 We welcome every contributor, both in terms of code and documentation.
