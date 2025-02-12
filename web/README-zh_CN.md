@@ -1,114 +1,97 @@
-<p align="center">
-<!--   <a href="https://www.antdv.com/">
-    <img width="350" src="/images/wansenai-logo.png">
-  </a> -->
+<p style="display:flex; justify-content: center">
+
 </p>
-<h1 align="center">
-  <a href="#" target="_blank">Enterprise AI Resource Planning Web</a>
-</h1>
-<div align="center">
-  <!-- nodejs build status-->
-  <a href="https://github.com/wansenai/wansen-erp/blob/master/.github/workflows/node.js.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/wansenai/wansen-erp/node.js.yml"
-    alt="Crates.io version" />
+<p align="center">
+  <a href="https://tdesign.tencent.com/starter/react/#/dashboard/base" target="_blank">
+    <img alt="TDesign Logo" width="200" src="https://tdesign.gtimg.com/starter/brand-logo.svg">
   </a>
-  <a href="">
-    <img src="https://img.shields.io/github/repo-size/wansenai/wansen-erp"/>
+</p>
+
+<p align="center">
+  <a href="https://nodejs.org/en/about/releases/"><img src="https://img.shields.io/node/v/vite.svg" alt="node compatility"></a>
+  <a href="https://github.com/Tencent/tdesign-react-starter/blob/develop/LICENSE">
+    <img src="https://img.shields.io/npm/l/tdesign-react.svg?sanitize=true" alt="License">
   </a>
-  <a href="">
-    <img src="https://img.shields.io/github/last-commit/wansenai/wansen-erp"/>
-  </a>
+</p>
 
-</div>
+简体中文 | [English](./README.md) 
 
-<div align="center">
-   <strong>下一代人工智能ERP系统</strong>
-</div>
-<br />
+### 项目简介
 
-## Project
-[英语](README.md) | [简体中文](./README-zh_CN.md)
+TDesign React Starter 是一个基于 tdesign-react，使用 `React`、`Vite2`开发，可进行个性化主题配置，旨在提供项目开箱即用的、配置式的中后台项目。
 
-### 快速开始
+<img src="docs/docs-starter.png">
 
-您可以直接使用Docker pull镜像来快速启动。下面是拉取前端镜像的命令
+### 特性
 
-### 拉取镜像
-```shell
-docker pull wansenai/eairp-web:2.1.1
-```
+- 内置多种常用的中后台页面
+- 完善的目录结构
+- 完善的代码规范配置
+- 支持暗黑模式
+- 自定义主题颜色
+- 多种空间布局
+- 内置 Mock 数据方案
 
-### 运行服务
-请注意该 `API_BASE_URL`参数，这是后端接口映射的地址。如果你是在你的服务器
-上部署，请将此处的localhost地址修改为你的服务器IP地址。
-```shell
-docker run --name eairp-web -d -p 3000:80 -e API_BASE_URL=http://localhost:8080/erp-api wansenai/eairp-web:2.1.1
-```
-如果你想使用Docker部署API，也可以拉取API镜像
-```shell
-docker pull wansenai/eairp:2.1.1
-```
-并且运行API服务
-```shell
-docker run --name eairp -d -p 9998:8088 wansenai/eairp:2.1.1
-```
-
-### 在线预览
-- [eairp 在线预览](https://erp.wansen.cloud/)
-- 测试账号: wansen
-- 测试密码: 123456
-- 部分功能模块正在开发和完善中，请参考我们的[待办事项列表](https://github.com/wansenai/eairp-web/issues/41)。用爱发电并不容易。
-- 如果这个项目对您有帮助，请点击Star。谢谢。
-
-  一些功能模块正在开发和改进中, 请参阅我们的[开发计划](https://github.com/wansenai/eairp-web/issues/42), 用爱发电很不容易, 如果这个项目对你有帮助, 请点击Star非常感谢.
-
-### 代码存储库
-- [wansen-erp](https://github.com/wansenai/wansen-erp) - **ERP Web 模板**
-
-## 浏览器支持
-
-`Chrome 80+` 本地开发推荐使用浏览器
-
-支持现代浏览器，不支持 IE
-
-| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt=" Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>IE | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt=" Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Safari |
-| :-: | :-: | :-: | :-: | :-: |
-| 不支持 | 最新的 2 个版本 | 最新的 2 个版本 | 最新的 2 个版本 | 最新的 2 个版本 |
-
-## 系统截图（仅部分）
-![](images/login-page-en.png)
-![](images/home-page-zh.png)
-![](images/user-manage-zh.png)
-![](images/add-menu-zh.png)
-![](images/role-permission-zh.png)
-
-## 安装与使用
-
-- 获取项目代码
+### 开发
 
 ```bash
-git clone https://github.com/wansenai/eairp.git
+## 安装依赖
+npm install
 
-cd eairp
+## 启动项目
+npm run dev
+
+## mock方式启动项目
+npm run dev:mock
 ```
 
-如果您尚未安装pnpm工具，请使用以下命令首先安装pnpm
+### 构建
+
 ```bash
-npm install -g pnpm
+## 构建正式环境
+npm run build
+
+## 构建测试环境
+npm run build:test
 ```
 
-- 安装依赖
+### 其他
 
 ```bash
-pnpm install
+## 预览构建产物
+npm run preview
+
+## 代码格式检查
+npm run lint
+
+## 代码格式检查与自动修复
+npm run lint:fix
+
 ```
 
-- 运行服务
-```bash
-pnpm serve
-```
+### 如何贡献
 
-- 构建服务
-```bash
-pnpm build
-```
+非常欢迎您的贡献！提交您的 [Issue](https://github.com/tencent/tdesign-react-starter/issues/new/choose) 或者提交 [Pull Request](https://github.com/Tencent/tdesign-react-starter/pulls)。
+
+#### Pull Request
+
+1. Fork 代码!
+2. 创建自己的分支: `git checkout -b feat/xxxx`
+3. 提交你的修改: `git commit -a 'feat(project): describe'`
+4. 推送您的分支: `git push origin feat/xxxx`
+5. 提交 `pull request`
+
+#### 贡献提交规范
+
+- [Angular Convention](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular)
+
+### 兼容性
+
+| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br> IE / Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Safari |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Edge >=84                                                                                                                                                                                                        | Firefox >=83                                                                                                                                                                                                      | Chrome >=84                                                                                                                                                                                                   | Safari >=14.1                                                                                                                                                                                                 |
+
+### 开源协议
+
+TDesign 遵循 [MIT 协议](https://github.com/Tencent/tdesign-react-starter/LICENSE)。
+

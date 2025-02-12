@@ -1,42 +1,55 @@
-import type { RouteRecordRaw } from 'vue-router';
-import type { App } from 'vue';
+import React, { lazy } from 'react';
+import { BrowserRouterProps } from 'react-router-dom';
+import dashboard from './modules/dashboard';
+import list from './modules/list';
+import form from './modules/form';
+import detail from './modules/detail';
+import result from './modules/result';
+import user from './modules/user';
+import login from './modules/login';
+import otherRoutes from './modules/others';
 
-import { createRouter, createWebHashHistory } from 'vue-router';
-import { basicRoutes } from './routes';
-
-// 白名单应该包含基本静态路由
-const WHITE_NAME_LIST: string[] = [];
-const getRouteNames = (array: any[]) =>
-  array.forEach((item) => {
-    WHITE_NAME_LIST.push(item.name);
-    getRouteNames(item.children || []);
-  });
-getRouteNames(basicRoutes);
-
-// app router
-// 创建一个可以被 Vue 应用程序使用的路由实例
-export const router = createRouter({
-  // 创建一个 hash 历史记录。
-  history: createWebHashHistory(import.meta.env.VITE_PUBLIC_PATH),
-  // 应该添加到路由的初始路由列表。
-  routes: basicRoutes as unknown as RouteRecordRaw[],
-  // 是否应该禁止尾部斜杠。默认为假
-  strict: true,
-  scrollBehavior: () => ({ left: 0, top: 0 }),
-});
-
-// reset router
-export function resetRouter() {
-  router.getRoutes().forEach((route) => {
-    const { name } = route;
-    if (name && !WHITE_NAME_LIST.includes(name as string)) {
-      router.hasRoute(name) && router.removeRoute(name);
-    }
-  });
+export interface IRouter {
+  path: string;
+  redirect?: string;
+  Component?: React.FC<BrowserRouterProps> | (() => any);
+  /**
+   * 当前路由是否全屏显示
+   */
+  isFullPage?: boolean;
+  /**
+   * meta未赋值 路由不显示到菜单中
+   */
+  meta?: {
+    title?: string;
+    Icon?: React.FC;
+    /**
+     * 侧边栏隐藏该路由
+     */
+    hidden?: boolean;
+    /**
+     * 单层路由
+     */
+    single?: boolean;
+  };
+  children?: IRouter[];
 }
 
-// config router
-// 配置路由器
-export function setupRouter(app: App<Element>) {
-  app.use(router);
-}
+const routes: IRouter[] = [
+  {
+    path: '/login',
+    Component: lazy(() => import('pages/Login')),
+    isFullPage: true,
+    meta: {
+      hidden: true,
+    },
+  },
+  {
+    path: '/',
+    redirect: '/dashboard/base',
+  },
+];
+
+const allRoutes = [...routes, ...dashboard, ...list, ...form, ...detail, ...result, ...user, ...login, ...otherRoutes];
+
+export default allRoutes;

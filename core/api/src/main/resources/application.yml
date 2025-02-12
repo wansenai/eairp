@@ -1,7 +1,7 @@
 server:
   port: 8088
   servlet:
-    context-path: /erp-api
+    context-path: /api
 
 spring:
   profiles:

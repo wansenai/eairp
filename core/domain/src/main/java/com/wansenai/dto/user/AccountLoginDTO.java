@@ -21,7 +21,5 @@ public class AccountLoginDTO {
 
     String password;
 
-    String captchaId;
-
-    String captcha;
+    Boolean captcha;
 }
