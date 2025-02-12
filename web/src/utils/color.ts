@@ -1,151 +1,99 @@
-/**
- * 判断是否 十六进制颜色值.
- * 输入形式可为 #fff000 #f00
- *
- * @param   String  color   十六进制颜色值
- * @return  Boolean
- */
-export function isHexColor(color: string) {
-  const reg = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
-  return reg.test(color);
-}
+import { Color } from 'tvision-color';
+import { defaultColor, darkColor, CHART_COLORS } from 'configs/color';
+import { ETheme } from 'types/index.d';
 
 /**
- * RGB 颜色值转换为 十六进制颜色值.
- * r, g, 和 b 需要在 [0, 255] 范围内
- *
- * @return  String          类似#ff00ff
- * @param r
- * @param g
- * @param b
+ * 依据主题颜色获取 ColorList
+ * @param theme
+ * @param themeColor
  */
-export function rgbToHex(r: number, g: number, b: number) {
-  // tslint:disable-next-line:no-bitwise
-  const hex = ((r << 16) | (g << 8) | b).toString(16);
-  return '#' + new Array(Math.abs(hex.length - 7)).join('0') + hex;
-}
+function getColorFromThemeColor(theme: string, themeColor: string): Array<string> {
+  let themeColorList = [];
+  const isDarkMode = theme === ETheme.dark;
+  const colorLowerCase = themeColor.toLocaleLowerCase();
 
-/**
- * Transform a HEX color to its RGB representation
- * @param {string} hex The color to transform
- * @returns The RGB representation of the passed color
- */
-export function hexToRGB(hex: string) {
-  let sHex = hex.toLowerCase();
-  if (isHexColor(hex)) {
-    if (sHex.length === 4) {
-      let sColorNew = '#';
-      for (let i = 1; i < 4; i += 1) {
-        sColorNew += sHex.slice(i, i + 1).concat(sHex.slice(i, i + 1));
-      }
-      sHex = sColorNew;
-    }
-    const sColorChange: number[] = [];
-    for (let i = 1; i < 7; i += 2) {
-      sColorChange.push(parseInt('0x' + sHex.slice(i, i + 2)));
-    }
-    return 'RGB(' + sColorChange.join(',') + ')';
+  if (defaultColor.includes(colorLowerCase)) {
+    const colorIdx = defaultColor.indexOf(colorLowerCase);
+    const defaultGradients = !isDarkMode ? defaultColor : darkColor;
+    const spliceThemeList = defaultGradients.slice(0, colorIdx);
+    themeColorList = defaultGradients.slice(colorIdx, defaultGradients.length).concat(spliceThemeList);
+  } else {
+    themeColorList = Color.getRandomPalette({
+      color: themeColor,
+      colorGamut: 'bright',
+      number: 8,
+    });
   }
-  return sHex;
-}
 
-export function colorIsDark(color: string) {
-  if (!isHexColor(color)) return;
-  const [r, g, b] = hexToRGB(color)
-    .replace(/(?:\(|\)|rgb|RGB)*/g, '')
-    .split(',')
-    .map((item) => Number(item));
-  return r * 0.299 + g * 0.578 + b * 0.114 < 192;
+  return themeColorList;
 }
 
 /**
- * Darkens a HEX color given the passed percentage
- * @param {string} color The color to process
- * @param {number} amount The amount to change the color by
- * @returns {string} The HEX representation of the processed color
+ *
+ * @param theme 当前主题
+ * @param themeColor 当前主题色
  */
-export function darken(color: string, amount: number) {
-  color = color.indexOf('#') >= 0 ? color.substring(1, color.length) : color;
-  amount = Math.trunc((255 * amount) / 100);
-  return `#${subtractLight(color.substring(0, 2), amount)}${subtractLight(
-    color.substring(2, 4),
-    amount,
-  )}${subtractLight(color.substring(4, 6), amount)}`;
+export function getChartColor(theme: ETheme, themeColor: string) {
+  const colorList = getColorFromThemeColor(theme, themeColor);
+  // 图表颜色
+  const chartColors = CHART_COLORS[theme];
+  return { ...chartColors, colorList };
 }
 
-/**
- * Lightens a 6 char HEX color according to the passed percentage
- * @param {string} color The color to change
- * @param {number} amount The amount to change the color by
- * @returns {string} The processed color represented as HEX
- */
-export function lighten(color: string, amount: number) {
-  color = color.indexOf('#') >= 0 ? color.substring(1, color.length) : color;
-  amount = Math.trunc((255 * amount) / 100);
-  return `#${addLight(color.substring(0, 2), amount)}${addLight(
-    color.substring(2, 4),
-    amount,
-  )}${addLight(color.substring(4, 6), amount)}`;
+export function generateColorMap(
+  theme: string,
+  colorPalette: Array<string>,
+  mode: 'light' | 'dark',
+  brandColorIdx: number,
+) {
+  const isDarkMode = mode === 'dark';
+
+  if (isDarkMode) {
+    // eslint-disable-next-line no-use-before-define
+    colorPalette.reverse().map((color) => {
+      const [h, s, l] = Color.colorTransform(color, 'hex', 'hsl');
+      return Color.colorTransform([h, Number(s) - 4, l], 'hsl', 'hex');
+    });
+    // eslint-disable-next-line no-param-reassign
+    brandColorIdx = 10 - brandColorIdx;
+    colorPalette[0] = `${colorPalette[brandColorIdx]}20`;
+  }
+
+  const colorMap = {
+    '--td-brand-color': colorPalette[brandColorIdx], // 主题色
+    '--td-brand-color-1': colorPalette[0], // light
+    '--td-brand-color-2': colorPalette[1], // focus
+    '--td-brand-color-3': colorPalette[2], // disabled
+    '--td-brand-color-4': colorPalette[3],
+    '--td-brand-color-5': colorPalette[4],
+    '--td-brand-color-6': colorPalette[5],
+    '--td-brand-color-7': brandColorIdx > 0 ? colorPalette[brandColorIdx - 1] : theme, // hover
+    '--td-brand-color-8': colorPalette[brandColorIdx], // 主题色
+    '--td-brand-color-9': brandColorIdx > 8 ? theme : colorPalette[brandColorIdx + 1], // click
+    '--td-brand-color-10': colorPalette[9],
+  };
+  return colorMap;
 }
 
-/* Suma el porcentaje indicado a un color (RR, GG o BB) hexadecimal para aclararlo */
-/**
- * Sums the passed percentage to the R, G or B of a HEX color
- * @param {string} color The color to change
- * @param {number} amount The amount to change the color by
- * @returns {string} The processed part of the color
- */
-function addLight(color: string, amount: number) {
-  const cc = parseInt(color, 16) + amount;
-  const c = cc > 255 ? 255 : cc;
-  return c.toString(16).length > 1 ? c.toString(16) : `0${c.toString(16)}`;
-}
+export function insertThemeStylesheet(theme: string, colorMap: Record<string, string>, mode: 'light' | 'dark') {
+  const isDarkMode = mode === 'dark';
+  const root = !isDarkMode ? `:root[theme-color='${theme}']` : `:root[theme-color='${theme}'][theme-mode='dark']`;
 
-/**
- * Calculates luminance of an rgb color
- * @param {number} r red
- * @param {number} g green
- * @param {number} b blue
- */
-function luminanace(r: number, g: number, b: number) {
-  const a = [r, g, b].map((v) => {
-    v /= 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
-  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-}
+  const styleSheet = document.createElement('style');
+  styleSheet.type = 'text/css';
+  styleSheet.innerText = `${root}{
+    --td-brand-color: ${colorMap['--td-brand-color']};
+    --td-brand-color-1: ${colorMap['--td-brand-color-1']};
+    --td-brand-color-2: ${colorMap['--td-brand-color-2']};
+    --td-brand-color-3: ${colorMap['--td-brand-color-3']};
+    --td-brand-color-4: ${colorMap['--td-brand-color-4']};
+    --td-brand-color-5: ${colorMap['--td-brand-color-5']};
+    --td-brand-color-6: ${colorMap['--td-brand-color-6']};
+    --td-brand-color-7: ${colorMap['--td-brand-color-7']};
+    --td-brand-color-8: ${colorMap['--td-brand-color-8']};
+    --td-brand-color-9: ${colorMap['--td-brand-color-9']};
+    --td-brand-color-10: ${colorMap['--td-brand-color-10']};
+  }`;
 
-/**
- * Calculates contrast between two rgb colors
- * @param {string} rgb1 rgb color 1
- * @param {string} rgb2 rgb color 2
- */
-function contrast(rgb1: string[], rgb2: number[]) {
-  return (
-    (luminanace(~~rgb1[0], ~~rgb1[1], ~~rgb1[2]) + 0.05) /
-    (luminanace(rgb2[0], rgb2[1], rgb2[2]) + 0.05)
-  );
-}
-
-/**
- * Determines what the best text color is (black or white) based con the contrast with the background
- * @param hexColor - Last selected color by the user
- */
-export function calculateBestTextColor(hexColor: string) {
-  const rgbColor = hexToRGB(hexColor.substring(1));
-  const contrastWithBlack = contrast(rgbColor.split(','), [0, 0, 0]);
-
-  return contrastWithBlack >= 12 ? '#000000' : '#FFFFFF';
-}
-
-/**
- * Subtracts the indicated percentage to the R, G or B of a HEX color
- * @param {string} color The color to change
- * @param {number} amount The amount to change the color by
- * @returns {string} The processed part of the color
- */
-function subtractLight(color: string, amount: number) {
-  const cc = parseInt(color, 16) - amount;
-  const c = cc < 0 ? 0 : cc;
-  return c.toString(16).length > 1 ? c.toString(16) : `0${c.toString(16)}`;
+  document.head.appendChild(styleSheet);
 }

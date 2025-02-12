@@ -250,13 +250,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public Response<UserInfoVO> accountLogin(AccountLoginDTO accountLoginDto){
-
-        var verifyCode = redisUtil.get(SecurityConstants.EMAIL_VERIFY_CODE_CACHE_PREFIX + accountLoginDto.getCaptchaId());
-        if (ObjectUtils.isEmpty(verifyCode)) {
-            return Response.responseMsg(BaseCodeEnum.VERIFY_CODE_EXPIRE);
-        }
-
-        if (!String.valueOf(verifyCode).equals(accountLoginDto.getCaptcha())) {
+        if (!accountLoginDto.getCaptcha()) {
             return Response.responseMsg(BaseCodeEnum.VERIFY_CODE_ERROR);
         }
         var password = "";

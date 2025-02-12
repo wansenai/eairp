@@ -31,7 +31,7 @@ public enum BaseCodeEnum {
 
     PARAMETER_NULL("A0410","请求必填参数为空"),
 
-    VERIFY_CODE_ERROR("A0240", "验证码错误"),
+    VERIFY_CODE_ERROR("A0240", "验证未通过"),
 
     VERIFY_CODE_EXPIRE("A0242", "验证码已过期"),
 
